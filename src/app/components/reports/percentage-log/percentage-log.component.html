@@ -1,0 +1,562 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-4 md:p-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header Section -->
+    <div class="mb-8 text-center md:text-left">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-900 mb-3 tracking-tight">Percentage Analytics</h1>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center">
+              <div class="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 mr-2 animate-pulse"></div>
+              <p class="text-gray-600 font-light">Track and analyze percentage changes across entities</p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 md:mt-0">
+          <div class="inline-flex items-center px-4 py-2 rounded-full bg-white backdrop-blur-sm border border-blue-100 shadow-sm">
+            <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            <span class="text-sm text-gray-700 font-medium">Real-time Reports</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 mb-8">
+      <div class="flex items-center mb-6">
+        <div class="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg mr-3">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-gray-900">Advanced Filters</h2>
+          <p class="text-gray-600 text-sm">Refine your search with specific parameters</p>
+        </div>
+      </div>
+
+      <form [formGroup]="filterForm" (ngSubmit)="onSearch()">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                From Date
+              </div>
+            </label>
+            <input type="date" id="fromDate" formControlName="fromDate"
+              class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+              aria-label="From Date" />
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-indigo-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                To Date
+              </div>
+            </label>
+            <input type="date" id="toDate" formControlName="toDate"
+              class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300"
+              aria-label="To Date" />
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+                Entity Type
+              </div>
+            </label>
+            <div class="relative">
+              <select id="entityType" formControlName="entityType"
+                class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 appearance-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300">
+                <option value="" class="bg-white">Select Entity Type</option>
+                <option *ngFor="let key of entityTypeKeys" [value]="key" class="bg-white">
+                  {{ entityTypes[key] }}
+                </option>
+              </select>
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="filterForm.hasError('dateRangeInvalid')" 
+          class="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-red-600 text-sm">From Date must be before or equal to To Date</p>
+          </div>
+        </div>
+
+        <div class="flex gap-4 pt-4 border-t border-gray-200">
+          <button type="submit" [disabled]="loading"
+            class="group relative flex-1 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl">
+            <div class="flex items-center justify-center">
+              <span *ngIf="!loading">Search Analytics</span>
+              <span *ngIf="loading" class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </span>
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </button>
+          
+          <button type="button" (click)="onReset()"
+            class="group px-8 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-300 transform hover:-translate-y-0.5 shadow-sm hover:shadow-md">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 mr-2 text-gray-500 group-hover:text-gray-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              Reset Filters
+            </div>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="mb-8 p-6 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl">
+      <div class="flex items-start">
+        <div class="p-2 bg-red-100 rounded-lg mr-4">
+          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-red-700 mb-1">Connection Error</h3>
+          <p class="text-red-600">{{ error }}</p>
+        </div>
+        <button (click)="error = null" class="text-red-500 hover:text-red-700 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="groupedResults.length === 0 && !loading && !error" 
+      class="text-center py-16 px-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
+      <div class="max-w-md mx-auto">
+        <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center">
+          <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-3">No Data Available</h3>
+        <p class="text-gray-600 mb-8">Apply filters to see percentage analytics. Try adjusting date range or entity type.</p>
+        <button (click)="onReset()" 
+          class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-sm hover:shadow-md">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Reset & Try Again
+        </button>
+      </div>
+    </div>
+
+    <!-- Groups Container -->
+    <div *ngIf="groupedResults.length > 0" class="space-y-6">
+      <!-- Group Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Entity Groups</h2>
+          <p class="text-gray-600">Showing {{ groupedResults.length }} grouped results</p>
+        </div>
+        <div class="text-right">
+          <div class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+            <span class="text-sm text-blue-700 font-medium">Sorted by: Entity Type</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Groups -->
+      <div *ngFor="let group of groupedResults" 
+        class="group bg-white rounded-2xl border border-gray-200 hover:border-blue-300 transition-all duration-300 overflow-hidden shadow-lg hover:shadow-xl">
+        
+        <!-- Group Header -->
+        <div class="p-6 cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50"
+          (click)="toggleGroup(group)" role="button">
+          <div class="flex items-center justify-between">
+            <div class="flex-1">
+              <div class="flex items-start gap-4">
+                <!-- Entity Icon -->
+                <div class="p-3 rounded-xl bg-gradient-to-r from-purple-100 to-pink-100">
+                  <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                  </svg>
+                </div>
+                
+                <!-- Entity Info -->
+                <div class="flex-1">
+                  <div class="flex items-center flex-wrap gap-3 mb-2">
+                    <h3 class="text-xl font-bold text-gray-900">{{ entityTypes[group.entity.type] || group.entity.type }}</h3>
+                    <div class="flex items-center gap-2">
+                      <span class="px-3 py-1 bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700 text-xs font-medium rounded-full border border-blue-200">
+                        ID: {{ group.entity.id }}
+                      </span>
+                      <span class="px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs font-medium rounded-full border border-purple-200">
+                        {{ group.entity.type }}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <!-- Stats Row -->
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Records</span>
+                        <span class="text-lg font-bold text-gray-900">{{ group.summary.count }}</span>
+                      </div>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Avg topup</span>
+                        <span class="text-lg font-bold text-green-600">{{ group.summary.avgtopup }}%</span>
+                      </div>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Avg payout</span>
+                        <span class="text-lg font-bold text-blue-600">{{ group.summary.avgpayout }}%</span>
+                      </div>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Range</span>
+                        <span class="text-sm font-medium text-amber-600">
+                          {{ group.summary.mintopup }}%-{{ group.summary.maxtopup }}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Expand/Collapse Icon -->
+            <div class="ml-4">
+              <div class="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 group-hover:from-blue-200 group-hover:to-indigo-200 transition-all duration-300">
+                <svg class="w-5 h-5 text-blue-600 transition-transform duration-300 transform" 
+                  [class.rotate-180]="group.expanded" 
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expanded Content -->
+        <div *ngIf="group.expanded" class="border-t border-gray-200">
+          <div class="p-6">
+            <!-- Website Groups Toggle -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+              <div class="flex items-center justify-between cursor-pointer" (click)="toggleWebsiteGroups(group)">
+                <div class="flex items-center">
+                  <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                  </svg>
+                  <div>
+                    <h4 class="text-lg font-semibold text-gray-900">Website Categorization</h4>
+                    <p class="text-sm text-gray-600">Grouped by {{ group.websiteGroups.length }} websites</p>
+                  </div>
+                </div>
+                <svg class="w-5 h-5 text-blue-600 transition-transform duration-300 transform" 
+                  [class.rotate-180]="group.websiteGroupsExpanded" 
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Website Groups -->
+            <div *ngIf="group.websiteGroupsExpanded" class="space-y-4 mb-6">
+              <div *ngFor="let websiteGroup of group.websiteGroups" 
+                class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                
+                <!-- Website Group Header -->
+                <div class="p-4 cursor-pointer transition-colors hover:bg-blue-50"
+                  (click)="toggleWebsiteGroup(websiteGroup)" role="button">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <svg class="w-5 h-5 text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                      </svg>
+                      <div>
+                        <h5 class="font-semibold text-gray-900">{{ websiteGroup.websiteName }}</h5>
+                        <p class="text-sm text-gray-600">Website ID: {{ websiteGroup.websiteId }}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                      <div class="text-right">
+                        <span class="text-sm text-gray-600">{{ websiteGroup.logs.length }} records</span>
+                      </div>
+                      <svg class="w-5 h-5 text-gray-500 transition-transform duration-300 transform" 
+                        [class.rotate-180]="websiteGroup.expanded" 
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Website Group Content -->
+                <div *ngIf="websiteGroup.expanded" class="border-t border-gray-200">
+                  <div class="p-4">
+                    <!-- Website Stats -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                      <div class="p-3 bg-white rounded-lg border border-gray-200">
+                        <div class="flex items-center justify-between">
+                          <span class="text-sm text-gray-600">Avg topup</span>
+                          <span class="font-semibold text-green-600">{{ getWebsiteStats(websiteGroup).avgTopup }}%</span>
+                        </div>
+                      </div>
+                      <div class="p-3 bg-white rounded-lg border border-gray-200">
+                        <div class="flex items-center justify-between">
+                          <span class="text-sm text-gray-600">Avg payout</span>
+                          <span class="font-semibold text-blue-600">{{ getWebsiteStats(websiteGroup).avgPayout }}%</span>
+                        </div>
+                      </div>
+                      <div class="p-3 bg-white rounded-lg border border-gray-200">
+                        <div class="flex items-center justify-between">
+                          <span class="text-sm text-gray-600">Min topup</span>
+                          <span class="font-semibold text-amber-600">{{ getWebsiteStats(websiteGroup).minTopup }}%</span>
+                        </div>
+                      </div>
+                      <div class="p-3 bg-white rounded-lg border border-gray-200">
+                        <div class="flex items-center justify-between">
+                          <span class="text-sm text-gray-600">Max topup</span>
+                          <span class="font-semibold text-amber-600">{{ getWebsiteStats(websiteGroup).maxTopup }}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Website Records Table -->
+                    <div class="overflow-hidden rounded-lg border border-gray-200">
+                      <table class="w-full">
+                        <thead>
+                          <tr class="bg-gray-100">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Created At</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">topup %</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">payout %</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Created By</th>
+                          </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                          <tr *ngFor="let log of websiteGroup.logs; let i = index" 
+                            class="transition-colors hover:bg-blue-50"
+                            [class.bg-white]="i % 2 === 0">
+                            <td class="px-4 py-3 whitespace-nowrap">
+                              <div class="text-sm text-gray-900">{{ log.createdAt | date:'medium' }}</div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                              <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                                  <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full" 
+                                    [style.width]="log.topupPercentage + '%'"></div>
+                                </div>
+                                <span class="text-sm font-semibold text-green-600">{{ log.topupPercentage }}%</span>
+                              </div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                              <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                                  <div class="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full" 
+                                    [style.width]="log.payoutPercentage + '%'"></div>
+                                </div>
+                                <span class="text-sm font-semibold text-blue-600">{{ log.payoutPercentage }}%</span>
+                              </div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                              <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold mr-3">
+                                  {{ log.createdBy?.charAt(0) || 'U' }}
+                                </div>
+                                <span class="text-sm text-gray-900">{{ log.createdBy || 'Unknown' }}</span>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Transaction History Table -->
+            <div class="mb-4">
+              <h4 class="text-lg font-semibold text-gray-900">All Transaction History</h4>
+              <p class="text-sm text-gray-600">Showing {{ group.logs.length }} total records</p>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-hidden rounded-xl border border-gray-200">
+              <table class="w-full">
+                <thead>
+                  <tr class="bg-gradient-to-r from-gray-50 to-gray-100">
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Created At
+                      </div>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Website
+                      </div>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        topup %
+                      </div>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        payout %
+                      </div>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        Created By
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr *ngFor="let log of group.logs; let i = index" 
+                    class="transition-colors hover:bg-blue-50"
+                    [class.bg-white]="i % 2 === 0">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm text-gray-900">{{ log.createdAt | date:'medium' }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 flex items-center justify-center mr-3">
+                          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                          </svg>
+                        </div>
+                        <div>
+                          <div class="text-sm font-medium text-gray-900">{{ log.websiteName || 'Unknown Website' }}</div>
+                          <div class="text-xs text-gray-500">ID: {{ log.websiteId || 'N/A' }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                          <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full" 
+                            [style.width]="log.topupPercentage + '%'"></div>
+                        </div>
+                        <span class="text-sm font-semibold text-green-600">{{ log.topupPercentage }}%</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                          <div class="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full" 
+                            [style.width]="log.payoutPercentage + '%'"></div>
+                        </div>
+                        <span class="text-sm font-semibold text-blue-600">{{ log.payoutPercentage }}%</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold mr-3">
+                          {{ log.createdBy?.charAt(0) || 'U' }}
+                        </div>
+                        <span class="text-sm text-gray-900">{{ log.createdBy || 'Unknown' }}</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalElements > 0" class="mt-8 p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="text-gray-600">
+          Showing <span class="font-semibold text-gray-900">{{ (currentPage * pageSize) + 1 }}</span> to 
+          <span class="font-semibold text-gray-900">{{ Math.min((currentPage + 1) * pageSize, totalElements) }}</span> of 
+          <span class="font-semibold text-gray-900">{{ totalElements }}</span> records
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <button (click)="prevPage()" [disabled]="currentPage === 0"
+            class="group px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 hover:text-gray-900 hover:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center shadow-sm hover:shadow-md">
+            <svg class="w-4 h-4 mr-2 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Previous
+          </button>
+          
+          <div class="flex items-center gap-2">
+            <div class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg shadow-sm">
+              {{ currentPage + 1 }}
+            </div>
+            <span class="text-gray-600">of</span>
+            <span class="text-gray-900 font-medium">{{ totalPages }}</span>
+          </div>
+          
+          <button (click)="nextPage()" [disabled]="currentPage + 1 >= totalPages"
+            class="group px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 hover:text-gray-900 hover:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center shadow-sm hover:shadow-md">
+            Next
+            <svg class="w-4 h-4 ml-2 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-600">Rows per page:</span>
+          <select [(ngModel)]="pageSize" (change)="onPageSizeChange(pageSize)"
+            class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

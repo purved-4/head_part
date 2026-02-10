@@ -1,0 +1,1387 @@
+<!-- head-user-chat.component.html -->
+<div
+  class="flex h-screen bg-gradient-to-br from-gray-50 to-blue-50 font-sans chat-container"
+>
+  <!-- Enhanced Notifications Sidebar with Tabs and Filters -->
+  <div
+    class="bg-white/90 backdrop-blur-xl border-r border-gray-200/60 flex flex-col flex-shrink-0 shadow-2xl rounded-r-3xl m-4 mr-3 relative"
+    [style.width.px]="sidebarWidth"
+    appResizable
+    (widthChange)="onSidebarWidthChange($event)"
+  >
+    <!-- Header -->
+    <div
+      class="flex justify-between items-center p-6 border-b border-gray-200/60 bg-gradient-to-r from-blue-50 to-purple-50/50 rounded-t-3xl"
+    >
+      <div>
+        <h2
+          class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+        >
+          Messages
+        </h2>
+        <p class="text-sm text-gray-500 mt-1">Manage all your conversations</p>
+      </div>
+      <div class="relative" [class.animate-pulse]="loadingThreads">
+        <div
+          class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-lg"
+        >
+          {{ filteredNotifications.length }}
+        </div>
+        <div
+          *ngIf="loadingThreads"
+          class="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="border-b border-gray-200/60 bg-white/30">
+      <div class="flex px-4 pt-4">
+        <button
+          *ngFor="
+            let tab of [
+              {
+                id: 'unresolved',
+                label: 'Active',
+                count: unresolvedNotifications.length
+              },
+              {
+                id: 'resolved',
+                label: 'Resolved',
+                count: resolvedNotifications.length
+              },
+              { id: 'all', label: 'All', count: allNotifications.length }
+            ]
+          "
+          [class]="
+            activeTab === tab.id
+              ? 'flex-1 py-3 text-sm font-semibold text-blue-600 border-b-2 border-blue-500 transition-all duration-300'
+              : 'flex-1 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 transition-all duration-300'
+          "
+          (click)="switchTab(tab.id)"
+        >
+          <div class="flex items-center justify-center gap-2">
+            <span>{{ tab.label }}</span>
+            <span
+              [class]="
+                activeTab === tab.id
+                  ? 'bg-blue-100 text-blue-600'
+                  : 'bg-gray-100 text-gray-600'
+              "
+              class="px-2 py-1 rounded-full text-xs font-medium min-w-6 flex justify-center"
+            >
+              {{ tab.count }}
+            </span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="p-4">
+        <!-- Search -->
+        <div class="relative mb-4">
+          <svg
+            class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search conversations..."
+            [(ngModel)]="searchTerm"
+            (input)="applyFilters()"
+            class="w-full pl-10 pr-10 py-3 border border-gray-300/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white/70 backdrop-blur-sm transition-all duration-300"
+          />
+          <button
+            *ngIf="searchTerm"
+            (click)="clearSearch()"
+            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- Fund Type Filters -->
+        <div class="flex gap-2 overflow-x-auto p-2">
+          <button
+            *ngFor="
+              let type of [
+                {
+                  id: 'all',
+                  label: 'All Types',
+                  color: 'bg-gray-100 text-gray-700'
+                },
+                {
+                  id: 'upi',
+                  label: 'UPI',
+                  color: 'bg-purple-100 text-purple-700'
+                },
+                {
+                  id: 'bank',
+                  label: 'Bank',
+                  color: 'bg-blue-100 text-blue-700'
+                },
+                {
+                  id: 'payout',
+                  label: 'Payout',
+                  color: 'bg-green-100 text-green-700'
+                }
+              ]
+            "
+            [class]="
+              fundTypeFilter === type.id
+                ? type.color + ' ring-2 ring-offset-1 ring-opacity-50'
+                : type.color + ' opacity-80 hover:opacity-100'
+            "
+            [class.ring-blue-300]="
+              fundTypeFilter === type.id && type.id === 'all'
+            "
+            [class.ring-purple-300]="
+              fundTypeFilter === type.id && type.id === 'upi'
+            "
+            [class.ring-blue-300]="
+              fundTypeFilter === type.id && type.id === 'bank'
+            "
+            [class.ring-green-300]="
+              fundTypeFilter === type.id && type.id === 'payout'
+            "
+            (click)="changeFundTypeFilter(type.id)"
+            class="px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-300 hover:scale-105"
+          >
+            {{ type.label }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversations List -->
+    <div class="flex-1 overflow-y-auto messages-container p-2">
+      <!-- Loading State -->
+      <div *ngIf="loadingThreads" class="p-8 flex flex-col items-center">
+        <div class="loading-dots">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+        <p class="mt-4 text-sm text-gray-500">Loading conversations...</p>
+      </div>
+
+      <!-- Conversations -->
+      <div
+        *ngFor="let notification of filteredNotifications"
+        class="flex gap-3 p-4 cursor-pointer transition-all duration-300 border border-gray-100 hover:border-blue-200 hover:bg-white/80 rounded-2xl mx-2 my-1.5 group"
+        [class.bg-gradient-to-r]="selectedNotification?.id === notification.id"
+        [class.from-blue-50]="selectedNotification?.id === notification.id"
+        [class.to-purple-50]="selectedNotification?.id === notification.id"
+        [class.border-blue-300]="selectedNotification?.id === notification.id"
+        [class.shadow-md]="selectedNotification?.id === notification.id"
+        (click)="selectNotification(notification)"
+      >
+        <div class="flex-shrink-0 relative">
+          <div
+            class="w-12 h-12 rounded-2xl text-white flex items-center justify-center font-bold text-base shadow-lg transition-transform duration-300 group-hover:scale-105"
+            [ngStyle]="
+              getAvatarStyle(
+                notification.role || notification._raw?.role || 'sub_agent'
+              )
+            "
+          >
+            {{ notification.avatar }}
+          </div>
+          <div
+            *ngIf="notification.unread > 0"
+            class="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg"
+          >
+            {{ notification.unread > 9 ? "9+" : notification.unread }}
+          </div>
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <div class="flex justify-between items-start mb-1">
+            <h3
+              class="text-sm font-bold text-gray-900 truncate flex items-center gap-2"
+            >
+              {{ notification.groupName }}
+              <!-- Fund Type Badge -->
+              <span
+                *ngIf="notification.fundType"
+                [class]="
+                  getFundTypeBadgeClass(notification.fundType) +
+                  ' px-2 py-0.5 rounded-full text-xs border'
+                "
+              >
+                {{ notification.fundType | uppercase }}
+              </span>
+            </h3>
+            <div class="flex items-center gap-1">
+              <span class="text-xs text-gray-500">
+                {{ notification.time }}
+              </span>
+              <!-- Resolved Status -->
+            </div>
+          </div>
+
+          <!-- Last Message Preview -->
+          <p class="text-sm text-gray-600 truncate mb-2">
+            <span class="font-semibold text-gray-800">
+              {{ notification.lastSender }}:
+            </span>
+            <span class="ml-1">{{
+              notification.lastMessage || "No messages yet"
+            }}</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div
+        *ngIf="!loadingThreads && filteredNotifications.length === 0"
+        class="text-center py-12 px-6"
+      >
+        <div
+          class="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <svg
+            class="w-12 h-12 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            ></path>
+          </svg>
+        </div>
+        <p class="text-lg font-semibold text-gray-600">
+          No conversations found
+        </p>
+        <p class="text-sm text-gray-500 mt-1">
+          {{
+            searchTerm || fundTypeFilter !== "all"
+              ? "Try changing your search or filters"
+              : "Start a new conversation to begin messaging"
+          }}
+        </p>
+        <button
+          *ngIf="searchTerm || fundTypeFilter !== 'all'"
+          (click)="searchTerm = ''; fundTypeFilter = 'all'; applyFilters()"
+          class="mt-4 px-4 py-2 bg-blue-100 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors"
+        >
+          Clear Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Chat Area -->
+  <div
+    class="flex-1 flex flex-col bg-white/90 backdrop-blur-xl shadow-2xl rounded-3xl m-3 ml-0"
+    *ngIf="selectedNotification"
+  >
+    <!-- Chat Header -->
+    <div
+      class="flex justify-between items-center p-6 border-b border-gray-200/60 bg-gradient-to-r from-blue-50 to-purple-50/50 rounded-t-3xl"
+    >
+      <div class="flex items-center gap-4">
+        <div
+          class="w-14 h-14 rounded-2xl text-white flex items-center justify-center font-bold text-lg shadow-lg transition-transform duration-300 hover:scale-105"
+          [ngStyle]="
+            getAvatarStyle(
+              selectedNotification.role ||
+                selectedNotification._raw?.role ||
+                'sub_agent'
+            )
+          "
+        >
+          {{ selectedNotification.avatar }}
+        </div>
+        <div>
+          <div class="flex items-center gap-3">
+            <h3 class="text-xl font-bold text-gray-900">
+              {{ selectedNotification.name }}
+            </h3>
+           
+          </div>
+          <div class="flex items-center gap-3 mt-2">
+         
+
+            <!-- Fund Type Badge in Header -->
+            <span
+              *ngIf="selectedNotification.fundType"
+              [class]="
+                getFundTypeBadgeClass(selectedNotification.fundType) +
+                ' px-3 py-1.5 rounded-full text-xs font-medium border flex items-center gap-2'
+              "
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  [attr.d]="getFundTypeIcon(selectedNotification.fundType)"
+                />
+              </svg>
+              {{ selectedNotification.fundType | uppercase }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button
+          class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100 text-gray-700 hover:from-blue-200 hover:to-purple-200 hover:text-blue-700 transition-all duration-300 hover:scale-110 shadow-md border border-gray-200/60 ml-2 group"
+          (click)="openFundPopup()"
+          title="View Fund Details"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            class="group-hover:scale-110 transition-transform"
+          >
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+        <button
+          class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100 text-gray-700 hover:from-blue-200 hover:to-purple-200 hover:text-blue-700 transition-all duration-300 hover:scale-110 shadow-md border border-gray-200/60 group"
+          (click)="toggleParticipants()"
+          title="View Members"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            class="group-hover:scale-110 transition-transform"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages Area -->
+    <div
+      class="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-50/50 to-blue-50/30 messages-container"
+      #messagesContainer
+      (scroll)="onMessagesScroll($event)"
+    >
+      <!-- Loading indicator for older messages -->
+      <div *ngIf="loadingMessages" class="flex justify-center py-4">
+        <div class="flex flex-col items-center gap-3">
+          <div class="loading-dots">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+          <p class="text-sm text-gray-500">Loading more messages...</p>
+        </div>
+      </div>
+
+      <div
+        *ngFor="let message of selectedNotification.messages"
+        class="mb-6 transition-all duration-300"
+        [class.flex]="message.isCurrentUser"
+        [class.justify-end]="message.isCurrentUser"
+      >
+        <div class="max-w-[75%]" [class.ml-auto]="message.isCurrentUser">
+          <div
+            class="flex items-center gap-3 mb-2"
+            [class.flex-row-reverse]="message.isCurrentUser"
+          >
+            <div
+              class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shadow-lg transition-transform duration-300 hover:scale-110"
+              [ngStyle]="
+                getAvatarStyle(
+                  message.senderRole ||
+                    selectedNotification.role ||
+                    selectedNotification._raw?.role ||
+                    'sub_agent'
+                )
+              "
+            >
+              {{ message.senderAvatar }}
+            </div>
+            <div
+              class="flex items-center gap-3"
+              [class.flex-row-reverse]="message.isCurrentUser"
+            >
+              <span class="text-sm font-bold text-gray-800">{{
+                message.senderName
+              }}</span>
+              <span
+                class="text-xs text-gray-500 bg-white/70 backdrop-blur-sm px-3 py-1 rounded-full"
+                >{{ message.time }}</span
+              >
+              <span
+                *ngIf="message.isCurrentUser"
+                class="message-status message-read"
+              ></span>
+            </div>
+          </div>
+
+          <div
+            class="rounded-2xl p-4 shadow-lg ml-12 chat-bubble transition-all duration-300 hover:shadow-xl"
+            [class.ml-0]="message.isCurrentUser"
+            [class.mr-12]="message.isCurrentUser"
+            [class.current-user]="message.isCurrentUser"
+            [ngStyle]="
+              getBubbleStyle(
+                message.senderRole ||
+                  selectedNotification.role ||
+                  selectedNotification._raw?.role ||
+                  'sub_agent',
+                message.isCurrentUser
+              )
+            "
+          >
+            <!-- TEXT MESSAGE -->
+            <div
+              *ngIf="message.type === 'text'"
+              class="text-sm leading-relaxed whitespace-pre-wrap"
+            >
+              {{ message.text }}
+            </div>
+
+            <!-- MEDIA / FILE MESSAGE -->
+            <div
+              *ngIf="
+                message.type === 'image' ||
+                message.type === 'video' ||
+                message.type === 'audio' ||
+                message.type === 'file'
+              "
+            >
+              <div
+                class="media-card rounded-xl p-4 border border-gray-200/50 bg-white/50 backdrop-blur-sm hover:bg-white/80 transition-all duration-300 cursor-pointer"
+                (click)="
+                  openMediaViewer(message.mediaUrl, message.text, message.type)
+                "
+                tabindex="0"
+                role="button"
+              >
+                <div class="flex items-center gap-4">
+                  <div class="media-icon flex-shrink-0">
+                    <ng-container *ngIf="message.type === 'image'">
+                      <div
+                        class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white"
+                      >
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <path d="M21 15l-5-5L5 21" />
+                        </svg>
+                      </div>
+                    </ng-container>
+                    <ng-container *ngIf="message.type === 'video'">
+                      <div
+                        class="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center text-white"
+                      >
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <rect x="2" y="5" width="15" height="14" rx="2" />
+                          <polygon points="23 7 16 12 23 17 23 7" />
+                        </svg>
+                      </div>
+                    </ng-container>
+                    <ng-container *ngIf="message.type === 'audio'">
+                      <div
+                        class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center text-white"
+                      >
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <path d="M9 18V5l12-2v13" />
+                        </svg>
+                      </div>
+                    </ng-container>
+                    <ng-container *ngIf="message.type === 'file'">
+                      <div
+                        class="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center text-white"
+                      >
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <path
+                            d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"
+                          />
+                          <polyline points="13 2 13 9 20 9" />
+                        </svg>
+                      </div>
+                    </ng-container>
+                  </div>
+
+                  <div class="media-meta flex-1 min-w-0">
+                    <div class="media-name font-medium text-gray-900 truncate">
+                      {{ message.text || (message.mediaUrl | slice : 0 : 50) }}
+                    </div>
+                    <div class="media-type text-xs text-gray-600 mt-1">
+                      {{
+                        message.type === "image"
+                          ? "Image File"
+                          : message.type === "video"
+                          ? "Video File"
+                          : message.type === "audio"
+                          ? "Audio File"
+                          : "Document"
+                      }}
+                    </div>
+                  </div>
+
+                  <div class="media-actions flex-shrink-0">
+                    <button
+                      class="text-sm font-medium bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105"
+                      (click)="
+                        downloadFile(message.mediaUrl, message.text);
+                        $event.stopPropagation()
+                      "
+                    >
+                      Download
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        *ngIf="
+          !selectedNotification.messages ||
+          selectedNotification.messages.length === 0
+        "
+        class="flex flex-col items-center justify-center h-full text-gray-500 text-center py-12"
+      >
+        <div
+          class="w-32 h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-6 shadow-inner"
+        >
+          <svg
+            class="w-16 h-16 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            ></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">
+          No messages yet
+        </h3>
+        <p class="text-gray-500 max-w-md">
+          Start the conversation by sending the first message!
+        </p>
+      </div>
+    </div>
+
+   <!-- INPUT AREA: show question-picker only for head role, plain input for others -->
+<div
+  class="flex items-center gap-3 p-6 border-t border-gray-200/60 bg-gradient-to-r from-blue-50/50 to-purple-50/50 rounded-b-3xl"
+  *ngIf="selectedNotification.resolved === false"
+>
+  <!-- If role is HEAD -> show question dropdown + emoji picker (existing flow) -->
+  <ng-container *ngIf="isHeadRole(); else normalInput">
+    <div class="relative emoji-picker-container">
+      <button
+        class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100 text-gray-600 hover:from-blue-200 hover:to-purple-200 hover:text-blue-600 transition-all duration-300 hover:scale-110 shadow-sm border border-gray-200/60"
+        title="Emoji"
+        (click)="toggleEmojiPicker()"
+      >
+        <!-- emoji icon -->
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+          <line x1="9" y1="9" x2="9.01" y2="9"></line>
+          <line x1="15" y1="9" x2="15.01" y2="9"></line>
+        </svg>
+      </button>
+
+      <!-- Emoji Picker Dropdown (unchanged) -->
+      <div class="emoji-picker" *ngIf="showEmojiPicker">
+        <div class="emoji-picker-header">
+          <button
+            *ngFor="let category of emojiCategories"
+            [class.active]="activeEmojiCategory === category.name"
+            (click)="switchEmojiCategory(category.name)"
+            class="emoji-category-btn"
+          >
+            {{ category.name }}
+          </button>
+        </div>
+
+        <div class="emoji-grid">
+          <button
+            *ngFor="let emoji of emojis"
+            (click)="insertEmoji(emoji)"
+            class="emoji-btn"
+            [title]="getEmojiDescription(emoji)"
+          >
+            {{ emoji }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button
+      class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100 text-gray-600 hover:from-blue-200 hover:to-purple-200 hover:text-blue-600 transition-all duration-300 hover:scale-110 shadow-sm border border-gray-200/60"
+      (click)="triggerFileUpload()"
+      title="Attach File"
+    >
+      <!-- attach icon -->
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+      </svg>
+    </button>
+
+    <div class="relative flex-1">
+      <div class="border-2 border-gray-300 rounded-xl bg-white/80 backdrop-blur-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200/30 transition-all">
+        <input
+          type="text"
+          class="w-full px-4 py-3 text-sm bg-transparent focus:outline-none"
+          placeholder="Search and pick a question..."
+          [(ngModel)]="questionSearchTerm"
+          (input)="filterQuestion()"
+          (focus)="showQuestionDropDown = true; filterQuestion()"
+          (keydown.enter)="onQuestionEnter($event)"
+          aria-label="Search questions"
+        />
+      </div>
+
+      <!-- dropdown -->
+      <div
+        *ngIf="showQuestionDropDown"
+        class="absolute z-50 left-0 right-0 bg-white border-2 border-blue-400 rounded-xl shadow-2xl max-h-60 overflow-y-auto"
+        style="bottom: calc(100% + 8px)"
+      >
+        <div class="absolute left-1/2 transform -translate-x-1/2 bottom-0 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-white" style="bottom: -8px"></div>
+
+        <div *ngIf="filteredQuestions && filteredQuestions.length > 0; else noQuestions">
+          <div *ngFor="let q of filteredQuestions.slice(0, 4)" (click)="selectQuestion(q)" class="p-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 border-b border-gray-100 last:border-b-0 cursor-pointer transition-colors group">
+            <label class="flex items-center cursor-pointer gap-3">
+              <div class="w-8 h-8 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg flex items-center justify-center group-hover:from-blue-200 group-hover:to-purple-200">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <span class="text-sm text-gray-700 font-medium">{{ q.messageText }}</span>
+            </label>
+          </div>
+        </div>
+
+        <ng-template #noQuestions>
+          <div class="p-3 text-sm text-gray-500 text-center">No Questions Found</div>
+        </ng-template>
+      </div>
+    </div>
+
+    <button
+      class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white transition-all duration-300 hover:scale-110 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-sm shadow-md"
+      (click)="sendMessage()"
+      [disabled]="!selectedQuestion || !selectedNotification"
+      title="Send Message"
+    >
+      <!-- paper-plane icon -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </ng-container>
+
+  <!-- NON-HEAD -> simple free-text input + attach -->
+  <ng-template #normalInput>
+     <div class="relative emoji-picker-container">
+      <button
+        class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100 text-gray-600 hover:from-blue-200 hover:to-purple-200 hover:text-blue-600 transition-all duration-300 hover:scale-110 shadow-sm border border-gray-200/60"
+        title="Emoji"
+        (click)="toggleEmojiPicker()"
+      >
+        <!-- emoji icon -->
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+          <line x1="9" y1="9" x2="9.01" y2="9"></line>
+          <line x1="15" y1="9" x2="15.01" y2="9"></line>
+        </svg>
+      </button>
+
+      <!-- Emoji Picker Dropdown (unchanged) -->
+      <div class="emoji-picker" *ngIf="showEmojiPicker">
+        <div class="emoji-picker-header">
+          <button
+            *ngFor="let category of emojiCategories"
+            [class.active]="activeEmojiCategory === category.name"
+            (click)="switchEmojiCategory(category.name)"
+            class="emoji-category-btn"
+          >
+            {{ category.name }}
+          </button>
+        </div>
+
+        <div class="emoji-grid">
+          <button
+            *ngFor="let emoji of emojis"
+            (click)="insertEmoji(emoji)"
+            class="emoji-btn"
+            [title]="getEmojiDescription(emoji)"
+          >
+            {{ emoji }}
+          </button>
+        </div>
+      </div>
+    </div>
+    <button
+      class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100 text-gray-600 hover:from-blue-200 hover:to-purple-200 hover:text-blue-600 transition-all duration-300 hover:scale-110 shadow-sm border border-gray-200/60"
+      (click)="triggerFileUpload()"
+      title="Attach File"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+      </svg>
+    </button>
+
+    <div class="relative flex-1">
+      <div class="border-2 border-gray-300 rounded-xl bg-white/80 backdrop-blur-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200/30 transition-all">
+        <input
+          type="text"
+          class="w-full px-4 py-3 text-sm bg-transparent focus:outline-none"
+          placeholder="Type your message..."
+          [(ngModel)]="newMessage"
+          (keydown.enter)="sendSimpleMessage($event)"
+          aria-label="Type message"
+        />
+      </div>
+    </div>
+
+    <button
+      class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white transition-all duration-300 hover:scale-110 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+      (click)="sendSimpleMessage()"
+      [disabled]="!(newMessage && newMessage.trim())"
+      title="Send Message"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </ng-template>
+</div>
+
+
+    <!-- Resolved Thread State -->
+    <div
+      *ngIf="selectedNotification.resolved === true"
+      class="flex items-center gap-3 p-6 border-t border-green-200 bg-gradient-to-r from-green-50 to-emerald-50/50 rounded-b-3xl"
+    >
+      <div class="flex items-center gap-4">
+        <div
+          class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold shadow-lg"
+        >
+          <svg
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            ></path>
+          </svg>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-green-800">
+            This thread has been resolved
+          </div>
+          <div class="text-xs text-green-600">
+            Conversation closed — no further replies allowed.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty Chat State -->
+  <div
+    class="flex-1 flex flex-col bg-white/90 backdrop-blur-xl shadow-2xl rounded-3xl m-3 ml-0"
+    *ngIf="!selectedNotification"
+  >
+    <div
+      class="flex flex-col items-center justify-center h-full text-gray-500 p-12"
+    >
+      <div
+        class="w-48 h-48 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-8 shadow-inner"
+      >
+        <svg
+          class="w-24 h-24 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1"
+            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+          ></path>
+        </svg>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-600 mb-3">
+        Select a conversation
+      </h3>
+      <p class="text-gray-500 text-lg text-center max-w-md">
+        Choose a conversation from the sidebar to start messaging with your team
+        members
+      </p>
+      <div class="mt-6 flex gap-3">
+        <button
+          (click)="switchTab('unresolved')"
+          class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:shadow-lg transition-all"
+        >
+          View Active Threads
+        </button>
+        <button
+          (click)="switchTab('all')"
+          class="px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-lg font-medium hover:shadow transition-all"
+        >
+          View All Threads
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Members Panel -->
+  <div
+    class="w-96 bg-white/95 backdrop-blur-xl border-l border-gray-200/60 flex flex-col absolute right-0 h-full transition-all duration-500 z-40 shadow-2xl rounded-l-3xl"
+    *ngIf="showParticipants"
+    [class.translate-x-0]="showParticipants"
+    [class.translate-x-full]="!showParticipants"
+    style="animation: slideInRight 0.5s ease-out"
+  >
+    <div
+      class="flex justify-between items-center p-6 border-b border-gray-200/60 bg-gradient-to-r from-blue-50 to-purple-50/50 rounded-tl-3xl"
+    >
+      <h3
+        class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+          />
+        </svg>
+        Members ({{ selectedNotification?.participantCount || 0 }})
+      </h3>
+      <button
+        class="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-r from-red-100 to-pink-100 text-red-600 hover:from-red-200 hover:to-pink-200 hover:text-red-700 transition-all duration-300 hover:scale-110"
+        (click)="toggleParticipants()"
+        title="Close"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto py-6 messages-container">
+      <div
+        *ngFor="let participant of selectedNotification?.participants"
+        class="flex items-center gap-4 px-6 py-4 transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/50 cursor-pointer mx-4 rounded-2xl group"
+      >
+        <div class="relative">
+          <div
+            class="w-14 h-14 rounded-2xl text-white flex items-center justify-center font-bold text-lg shadow-lg transition-transform duration-300 group-hover:scale-110"
+            [ngStyle]="
+              getAvatarStyle(
+                participant.role ||
+                  selectedNotification?.role ||
+                  selectedNotification?._raw?.role ||
+                  'sub_agent'
+              )
+            "
+          >
+            {{ participant.avatar }}
+          </div>
+          <div
+            *ngIf="participant.online"
+            class="absolute bottom-0 right-0 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-white"
+          ></div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h4 class="text-base font-bold text-gray-900 truncate">
+            {{ participant.userName }}
+          </h4>
+          <div class="flex items-center gap-2 mt-1">
+            <span
+              class="text-xs bg-gradient-to-r from-blue-100 to-purple-100 text-gray-700 px-3 py-1 rounded-full font-medium"
+            >
+              {{ participant.role || "Member" }}
+            </span>
+            <span
+              *ngIf="participant.online"
+              class="text-xs bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 px-2 py-1 rounded-full flex items-center gap-1"
+            >
+              <span
+                class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"
+              ></span>
+              Online
+            </span>
+            <span
+              *ngIf="!participant.online"
+              class="text-xs bg-gradient-to-r from-gray-100 to-gray-200 text-gray-600 px-2 py-1 rounded-full"
+            >
+              Offline
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        *ngIf="
+          !selectedNotification?.participants ||
+          selectedNotification?.participants?.length === 0
+        "
+        class="text-center py-12 text-gray-500"
+      >
+        <div
+          class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <svg
+            class="w-10 h-10 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+            ></path>
+          </svg>
+        </div>
+        <p class="text-lg font-semibold text-gray-600">No members</p>
+        <p class="text-sm text-gray-500 mt-1">
+          No members in this conversation
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced MEDIA VIEWER -->
+  <div
+    *ngIf="showMediaViewer"
+    class="media-viewer"
+    (click)="closeMediaViewer()"
+  >
+    <div class="inner" (click)="$event.stopPropagation()">
+      <div class="viewer-header w-full flex justify-between items-center mb-6">
+        <div
+          class="text-lg font-semibold text-white truncate bg-black/30 px-4 py-3 rounded-xl backdrop-blur-sm max-w-xl"
+        >
+          {{ currentMediaName || currentMediaUrl }}
+        </div>
+        <div class="flex gap-3">
+          <button
+            class="px-5 py-2.5 rounded-xl bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 font-medium flex items-center gap-2 hover:scale-105"
+            (click)="downloadFile(currentMediaUrl, currentMediaName)"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Download
+          </button>
+          <button
+            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all duration-300 font-medium flex items-center gap-2 hover:scale-105"
+            (click)="closeMediaViewer()"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            Close
+          </button>
+        </div>
+      </div>
+
+      <div class="viewer-body w-full flex items-center justify-center p-4">
+        <ng-container *ngIf="currentMediaType === 'image'">
+          <img
+            [src]="currentMediaUrl"
+            alt="media"
+            class="rounded-2xl shadow-2xl max-h-[70vh] max-w-full object-contain"
+          />
+        </ng-container>
+
+        <ng-container *ngIf="currentMediaType === 'video'">
+          <video
+            controls
+            [src]="currentMediaUrl"
+            class="rounded-2xl shadow-2xl max-h-[70vh] max-w-full"
+            controlsList="nodownload"
+          ></video>
+        </ng-container>
+
+        <ng-container *ngIf="currentMediaType === 'audio'">
+          <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl">
+            <div class="text-center mb-6">
+              <div
+                class="w-20 h-20 bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              >
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 18V5l12-2v13" />
+                </svg>
+              </div>
+              <h4 class="text-xl font-bold text-white mb-2">
+                {{ currentMediaName || "Audio File" }}
+              </h4>
+            </div>
+            <audio controls [src]="currentMediaUrl" class="w-96"></audio>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="currentMediaType === 'file'">
+          <div
+            class="file-only text-white text-center bg-white/10 backdrop-blur-lg rounded-2xl p-12 shadow-2xl"
+          >
+            <div
+              class="w-20 h-20 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-6"
+            >
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"
+                />
+                <polyline points="13 2 13 9 20 9" />
+              </svg>
+            </div>
+            <div class="text-2xl font-bold mb-2">
+              {{ currentMediaName || currentMediaUrl }}
+            </div>
+            <div class="text-gray-300 mb-6">File preview not available</div>
+            <button
+              class="px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-xl font-medium hover:from-orange-600 hover:to-yellow-600 transition-all duration-300"
+              (click)="downloadFile(currentMediaUrl, currentMediaName)"
+            >
+              Download File
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- FUND INFO POPUP -->
+  <div
+    *ngIf="showFundPopup"
+    class="fixed inset-0 z-50 flex items-center justify-center p-6"
+    role="dialog"
+    aria-modal="true"
+  >
+    <!-- Backdrop -->
+    <div
+      class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+      (click)="closeFundPopup()"
+    ></div>
+
+    <!-- Popup Container -->
+    <div
+      class="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-gray-200/60 h-[500px] z-60 flex flex-col"
+    >
+      <!-- HEADER (FIXED) -->
+      <div
+        class="flex justify-between items-start p-8 pb-4 border-b border-gray-200"
+      >
+        <div>
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+            <div
+              class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <span>Fund / Topup Details</span>
+          </h3>
+
+          <p class="text-sm text-gray-500 mt-2">
+            Thread:
+            <span class="font-medium">
+              {{ selectedNotification?.groupName || selectedNotification?.id }}
+            </span>
+
+            <span
+              *ngIf="selectedNotification?.fundType"
+              class="ml-2 px-2 py-1 rounded-full text-xs font-medium"
+              [class]="getFundTypeBadgeClass(selectedNotification?.fundType)"
+            >
+              <!-- {{ selectedNotification?.fundType | uppercase }} -->
+              {{ selectedNotification?.fundType }}
+            </span>
+          </p>
+        </div>
+
+        <button
+          (click)="closeFundPopup()"
+          class="w-10 h-10 rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center text-gray-600 hover:scale-110 transition-all"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- BODY (SCROLLABLE) -->
+      <div class="flex-1 overflow-y-auto p-8 pt-4 pr-6">
+        <!-- Loading -->
+        <div *ngIf="loadingFund" class="py-12 text-center">
+          <div class="loading-dots mx-auto">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+          <p class="mt-4 text-gray-600 font-medium">
+            Loading fund information...
+          </p>
+        </div>
+
+        <!-- Empty -->
+        <div
+          *ngIf="!loadingFund && !fundData"
+          class="py-12 text-center text-gray-500"
+        >
+          <div
+            class="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4"
+          >
+            <svg
+              class="w-10 h-10 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <p class="text-lg font-semibold text-gray-600">
+            No fund information available
+          </p>
+          <p class="text-sm text-gray-500 mt-1">
+            No fund details found for this conversation
+          </p>
+        </div>
+
+        <!-- DATA -->
+        <div *ngIf="fundData && !loadingFund" class="space-y-6">
+          <!-- Summary -->
+          <div
+            class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100"
+          >
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div
+                *ngFor="let key of ['amount', 'status', 'type', 'date']"
+                class="text-center"
+              >
+                <div class="text-xs text-gray-500 uppercase mb-1">
+                  {{ key }}
+                </div>
+                <div class="text-lg font-bold text-gray-900">
+                  {{ fundData[key] || "N/A" }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Details -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              *ngFor="let kv of fundData | keyvalue"
+              class="bg-gray-50 rounded-xl p-4 border border-gray-100"
+            >
+              <div class="text-xs text-gray-500 uppercase mb-2">
+                {{ kv.key }}
+              </div>
+              <div class="text-sm font-medium text-gray-900 break-words">
+                {{ kv.value || "N/A" }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Raw JSON -->
+          <div class="border border-gray-200 rounded-2xl overflow-hidden">
+            <button
+              class="w-full px-4 py-3 bg-gray-50 flex justify-between items-center"
+              (click)="fundData.showRaw = !fundData.showRaw"
+            >
+              <span class="text-sm font-medium text-gray-700"
+                >View Raw Data</span
+              >
+              <svg
+                class="w-5 h-5 transition-transform"
+                [class.rotate-180]="fundData.showRaw"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+
+            <div *ngIf="fundData.showRaw" class="p-4 bg-gray-900">
+              <pre class="text-xs text-gray-300 max-h-60 overflow-auto">
+<!-- {{ fundData | json }} -->
+                {{ fundData}}
+            </pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER (FIXED)
+            <div class="px-8 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                (click)="closeFundPopup()"
+                class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-medium"
+              >
+                Close
+              </button>
+
+              <button
+                *ngIf="fundData"
+                (click)="downloadFile(JSON.stringify(fundData, null, 2), 'fund-details.json')"
+                class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium"
+              >
+                Export Data
+              </button>
+            </div> -->
+    </div>
+  </div>
+</div>

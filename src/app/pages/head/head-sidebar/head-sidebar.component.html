@@ -1,0 +1,701 @@
+<div
+  class="sidebar fixed left-0 top-0 h-screen bg-gradient-to-br from-[#E67A00] via-[#FF8A1A] to-[#CC6A00] text-white transition-all duration-300 z-50 flex flex-col border-r border-[#CC6A00] shadow-2xl shadow-[#E67A00]/50"
+  [class]="collapsed ? 'w-20' : 'w-64'"
+>
+  <!-- Sidebar Header -->
+  <div
+    class="sidebar-header flex items-center justify-between p-6 border-b border-[#CC6A00] min-h-[80px] bg-gradient-to-r from-[#E67A00] to-[#FF8A1A]"
+  >
+    <div class="logo flex items-center space-x-3">
+      <!-- Building SVG Logo -->
+      <!-- <div
+        *ngIf="!collapsed"
+        class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30 shadow-lg"
+      >
+        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-4v-4h4v4zm2-10V5h4v2h-4zM9 5v2H5V5h4zm-4 8h4v4H5v-4zm0-6h4v2H5V7zm10 6v4h4v-4h-4zm4-6h-4V5h4v2z"/>
+        </svg>
+      </div> -->
+      <span
+        *ngIf="!collapsed"
+        class="logo-text text-xl font-bold text-white tracking-tight drop-shadow-lg"
+      >
+        Head Panel</span
+      >
+    </div>
+    <button
+      class="toggle-btn w-9 h-9 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-110 shadow-lg border border-white/20"
+      (click)="toggleSidebarCollapsed()"
+      aria-label="Toggle sidebar"
+    >
+      <svg
+        class="w-5 h-5 text-white transition-transform duration-300"
+        [class.rotate-180]="!collapsed"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+        />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav
+    class="sidebar-nav flex-1 overflow-y-auto py-4 bg-gradient-to-b from-[#E67A00]/50 to-transparent"
+  >
+    <ul class="nav-list space-y-2 px-3">
+      <!-- Dashboard -->
+      <li class="nav-item">
+        <a
+          class="nav-link flex items-center px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-300 group hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:pl-5"
+          [class]="
+            isActive('/head')
+              ? 'bg-gradient-to-r from-white/20 to-white/10 text-white border-l-4 border-white shadow-lg pl-5 shadow-[#E67A00]/50'
+              : 'text-white/80 hover:text-white'
+          "
+          (click)="navigate('/head')"
+        >
+          <div
+            class="icon-wrapper w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 group-hover:bg-white/10"
+            [class]="
+              isActive('/head')
+                ? 'bg-white/20 text-white'
+                : 'text-white/70 group-hover:text-white'
+            "
+          >
+            <!-- Dashboard SVG -->
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M4 13h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1zm-1 7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v4zm10 0a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v7zm1-10h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1z"
+              />
+            </svg>
+          </div>
+          <span
+            *ngIf="!collapsed"
+            class="nav-text flex-1 text-sm font-medium transition-all duration-300 group-hover:translate-x-1"
+          >
+            Dashboard
+          </span>
+        </a>
+      </li>
+
+      <!-- UPI Management -->
+      <li class="nav-item">
+        <a
+          class="nav-link flex items-center px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-300 group hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:pl-5"
+          [class]="
+            isActive('/head/upi')
+              ? 'bg-gradient-to-r from-white/20 to-white/10 text-white border-l-4 border-white shadow-lg pl-5 shadow-[#E67A00]/50'
+              : 'text-white/80 hover:text-white'
+          "
+          (click)="navigate('/head/upi')"
+        >
+          <div
+            class="icon-wrapper w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 group-hover:bg-white/10"
+            [class]="
+              isActive('/head/upi')
+                ? 'bg-white/20 text-white'
+                : 'text-white/70 group-hover:text-white'
+            "
+          >
+            <!-- QR Code SVG -->
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M2 2h6v6H2V2zm4 4v2H4V6h2zm10-4h6v6h-6V2zm4 4v2h-2V6h2zM2 16h6v6H2v-6zm4 4v2H4v-2h2zm7-10h2v2h-2v-2zm2 2h2v2h-2v-2zm-2 2h2v2h-2v-2zm2 2h2v2h-2v-2zm-2 2h2v2h-2v-2zm2 2h2v2h-2v-2zm2-6h2v2h-2v-2zm0 4h2v2h-2v-2zm2-8h2v2h-2V8zm2 4h2v2h-2v-2z"
+              />
+            </svg>
+          </div>
+          <span
+            *ngIf="!collapsed"
+            class="nav-text flex-1 text-sm font-medium transition-all duration-300 group-hover:translate-x-1"
+          >
+            UPI Management
+          </span>
+        </a>
+      </li>
+
+      <!-- Bank Management -->
+      <li class="nav-item">
+        <a
+          class="nav-link flex items-center px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-300 group hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:pl-5"
+          [class]="
+            isActive('/head/bank')
+              ? 'bg-gradient-to-r from-white/20 to-white/10 text-white border-l-4 border-white shadow-lg pl-5 shadow-[#E67A00]/50'
+              : 'text-white/80 hover:text-white'
+          "
+          (click)="navigate('/head/bank')"
+        >
+          <div
+            class="icon-wrapper w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 group-hover:bg-white/10"
+            [class]="
+              isActive('/head/bank')
+                ? 'bg-white/20 text-white'
+                : 'text-white/70 group-hover:text-white'
+            "
+          >
+            <!-- Bank SVG -->
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M12 2L1 8v2h22V8L12 2zm-2 14v-4h4v4h-4zm6 0v-4h4v4h-4zm-12 0v-4h4v4H4zm18 0H2v2h20v-2z"
+              />
+            </svg>
+          </div>
+          <span
+            *ngIf="!collapsed"
+            class="nav-text flex-1 text-sm font-medium transition-all duration-300 group-hover:translate-x-1"
+          >
+            Bank Management
+          </span>
+        </a>
+      </li>
+
+         <!-- capacity Management -->
+      <li class="nav-item">
+        <a
+          class="nav-link flex items-center px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-300 group hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:pl-5"
+          [class]="
+            isActive('/head/capacity')
+              ? 'bg-gradient-to-r from-white/20 to-white/10 text-white border-l-4 border-white shadow-lg pl-5 shadow-[#E67A00]/50'
+              : 'text-white/80 hover:text-white'
+          "
+          (click)="navigate('/head/capacity')"
+        >
+          <div
+            class="icon-wrapper w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 group-hover:bg-white/10"
+            [class]="
+              isActive('/head/capacity')
+                ? 'bg-white/20 text-white'
+                : 'text-white/70 group-hover:text-white'
+            "
+          >
+            <!-- Bank SVG -->
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <!-- Bars representing capacity/volume -->
+        <path d="M6 18H4V8H6V18ZM10 18H8V13H10V18ZM14 18H12V5H14V18ZM18 18H16V11H18V18ZM22 20H2V22H22V20Z" />
+        <!-- Wave/flow indicator -->
+        <path d="M2 6C2 4.9 2.9 4 4 4C5.1 4 6 4.9 6 6C6 7.1 5.1 8 4 8C2.9 8 2 7.1 2 6ZM22 6C22 4.9 21.1 4 20 4C18.9 4 18 4.9 18 6C18 7.1 18.9 8 20 8C21.1 8 22 7.1 22 6Z" 
+              opacity="0.7" />
+        <!-- Settings/gear for management aspect -->
+        <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" 
+              fill="currentColor" stroke="currentColor" stroke-width="0.5"/>
+            </svg>
+          </div>
+          <span
+            *ngIf="!collapsed"
+            class="nav-text flex-1 text-sm font-medium transition-all duration-300 group-hover:translate-x-1"
+          >
+            Capacity Management
+          </span>
+        </a>
+      </li>
+
+      <!-- Chat -->
+      <li class="nav-item">
+        <a
+          class="nav-link flex items-center px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-300 group hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:pl-5"
+          [class]="
+            isActive('/head/head-chat')
+              ? 'bg-gradient-to-r from-white/20 to-white/10 text-white border-l-4 border-white shadow-lg pl-5 shadow-[#E67A00]/50'
+              : 'text-white/80 hover:text-white'
+          "
+          (click)="navigate('/head/head-chat')"
+        >
+          <div
+            class="icon-wrapper w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 group-hover:bg-white/10"
+            [class]="
+              isActive('/head/head-chat')
+                ? 'bg-white/20 text-white'
+                : 'text-white/70 group-hover:text-white'
+            "
+          >
+            <!-- Chat SVG -->
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"
+              />
+            </svg>
+          </div>
+          <span
+            *ngIf="!collapsed"
+            class="nav-text flex-1 text-sm font-medium transition-all duration-300 group-hover:translate-x-1"
+          >
+            Head Chat
+          </span>
+        </a>
+      </li>
+
+      <!-- Branch Chat -->
+      <li class="nav-item">
+        <a
+          class="nav-link flex items-center px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-300 group hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:pl-5"
+          [class]="
+            isActive('/head/branch-chat')
+              ? 'bg-gradient-to-r from-white/20 to-white/10 text-white border-l-4 border-white shadow-lg pl-5 shadow-[#E67A00]/50'
+              : 'text-white/80 hover:text-white'
+          "
+          (click)="navigate('/head/branch-chat')"
+        >
+          <div
+            class="icon-wrapper w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 group-hover:bg-white/10"
+            [class]="
+              isActive('/head/branch-chat')
+                ? 'bg-white/20 text-white'
+                : 'text-white/70 group-hover:text-white'
+            "
+          >
+            <!-- Chat with Branch SVG -->
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4v3.08L13.08 18H20c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-6 9H6v-2h8v2zm4-4H6V5h12v2z"
+              />
+            </svg>
+          </div>
+          <span
+            *ngIf="!collapsed"
+            class="nav-text flex-1 text-sm font-medium transition-all duration-300 group-hover:translate-x-1"
+          >
+            Branch Chat
+          </span>
+        </a>
+      </li>
+
+      <!-- Limits -->
+      <li class="nav-item">
+        <a
+          class="nav-link flex items-center px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-300 group hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:pl-5"
+          [class]="
+            isActive('/head/limit')
+              ? 'bg-gradient-to-r from-white/20 to-white/10 text-white border-l-4 border-white shadow-lg pl-5 shadow-[#E67A00]/50'
+              : 'text-white/80 hover:text-white'
+          "
+          (click)="navigate('/head/limit')"
+        >
+          <div
+            class="icon-wrapper w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 group-hover:bg-white/10"
+            [class]="
+              isActive('/head/limit')
+                ? 'bg-white/20 text-white'
+                : 'text-white/70 group-hover:text-white'
+            "
+          >
+            <!-- Credit Card SVG -->
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"
+              />
+            </svg>
+          </div>
+          <span
+            *ngIf="!collapsed"
+            class="nav-text flex-1 text-sm font-medium transition-all duration-300 group-hover:translate-x-1"
+          >
+            Limits
+          </span>
+        </a>
+      </li>
+
+      <!-- Branch Management -->
+      <li class="nav-item">
+        <a
+          class="nav-link flex items-center px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-300 group hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:pl-5"
+          [class]="
+            isParentActive(userManagementItem)
+              ? 'bg-gradient-to-r from-white/20 to-white/10 text-white border-l-4 border-white shadow-lg pl-5 shadow-[#E67A00]/50'
+              : 'text-white/80 hover:text-white'
+          "
+          (click)="toggleSubmenu(userManagementItem)"
+        >
+          <div
+            class="icon-wrapper w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 group-hover:bg-white/10"
+            [class]="
+              isParentActive(userManagementItem)
+                ? 'bg-white/20 text-white'
+                : 'text-white/70 group-hover:text-white'
+            "
+          >
+            <!-- Business SVG -->
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-4v2h4v-2zm0 4h-4v2h4v-2z"
+              />
+            </svg>
+          </div>
+          <span
+            *ngIf="!collapsed"
+            class="nav-text flex-1 text-sm font-medium transition-all duration-300 group-hover:translate-x-1"
+          >
+            Branch Management
+          </span>
+          <svg
+            *ngIf="!collapsed"
+            class="submenu-arrow w-4 h-4 ml-2 transition-transform duration-300 text-white/50"
+            [class.rotate-180]="userManagementItem.expanded"
+            [class.text-white]="userManagementItem.expanded"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </a>
+
+        <!-- Branch Management Submenu -->
+        <ul
+          *ngIf="userManagementItem.expanded && !collapsed"
+          class="submenu ml-12 mt-2 space-y-1.5"
+        >
+          <li class="submenu-item">
+            <a
+              class="submenu-link flex items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-300 group hover:bg-white/10 hover:pl-4"
+              [class]="
+                isActive('/head/branch/add')
+                  ? 'bg-white/10 text-white pl-4'
+                  : 'text-white/70 hover:text-white'
+              "
+              (click)="navigate('/head/branch/add')"
+            >
+              <svg
+                class="w-4 h-4 mr-2 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+              </svg>
+              <span class="submenu-text">Add Branch</span>
+            </a>
+          </li>
+          <li class="submenu-item">
+            <a
+              class="submenu-link flex items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-300 group hover:bg-white/10 hover:pl-4"
+              [class]="
+                isActive('/head/branch/manage')
+                  ? 'bg-white/10 text-white pl-4'
+                  : 'text-white/70 hover:text-white'
+              "
+              (click)="navigate('/head/branch/manage')"
+            >
+              <svg
+                class="w-4 h-4 mr-2 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                />
+              </svg>
+              <span class="submenu-text">Manage Branches</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <!-- Reports -->
+      <li class="nav-item">
+        <a
+          class="nav-link flex items-center px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-300 group hover:bg-gradient-to-r hover:from-white/10 hover:to-white/5 hover:pl-5"
+          [class]="
+            isParentActive(ReportItem)
+              ? 'bg-gradient-to-r from-white/20 to-white/10 text-white border-l-4 border-white shadow-lg pl-5 shadow-[#E67A00]/50'
+              : 'text-white/80 hover:text-white'
+          "
+          (click)="toggleSubmenu(ReportItem)"
+        >
+          <div
+            class="icon-wrapper w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 rounded-lg transition-all duration-300 group-hover:bg-white/10"
+            [class]="
+              isParentActive(ReportItem)
+                ? 'bg-white/20 text-white'
+                : 'text-white/70 group-hover:text-white'
+            "
+          >
+            <!-- Assessment SVG -->
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"
+              />
+            </svg>
+          </div>
+          <span
+            *ngIf="!collapsed"
+            class="nav-text flex-1 text-sm font-medium transition-all duration-300 group-hover:translate-x-1"
+          >
+            Reports
+          </span>
+          <svg
+            *ngIf="!collapsed"
+            class="submenu-arrow w-4 h-4 ml-2 transition-transform duration-300 text-white/50"
+            [class.rotate-180]="ReportItem.expanded"
+            [class.text-white]="ReportItem.expanded"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </a>
+
+        <!-- Reports Submenu -->
+        <ul
+          *ngIf="ReportItem.expanded && !collapsed"
+          class="submenu ml-12 mt-2 space-y-1.5"
+        >
+          <li class="submenu-item">
+            <a
+              class="submenu-link flex items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-300 group hover:bg-white/10 hover:pl-4"
+              [class]="
+                isActive('/head/reports/transaction-history')
+                  ? 'bg-white/10 text-white pl-4'
+                  : 'text-white/70 hover:text-white'
+              "
+              (click)="navigate('/head/reports/transaction-history')"
+            >
+              <svg
+                class="w-4 h-4 mr-2 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"
+                />
+              </svg>
+              <span class="submenu-text">Transaction History</span>
+            </a>
+          </li>
+
+          <li class="submenu-item">
+            <a
+              class="submenu-link flex items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-300 group hover:bg-white/10 hover:pl-4"
+              [class]="
+                isActive('/head/reports/entity-report')
+                  ? 'bg-white/10 text-white pl-4'
+                  : 'text-white/70 hover:text-white'
+              "
+              (click)="navigate('/head/reports/entity-report')"
+            >
+              <svg
+                class="w-4 h-4 mr-2 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+                />
+              </svg>
+              <span class="submenu-text">Entity Report</span>
+            </a>
+          </li>
+
+          <li class="submenu-item">
+            <a
+              class="submenu-link flex items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-300 group hover:bg-white/10 hover:pl-4"
+              [class]="
+                isActive('/head/reports/funds-report')
+                  ? 'bg-white/10 text-white pl-4'
+                  : 'text-white/70 hover:text-white'
+              "
+              (click)="navigate('/head/reports/funds-report')"
+            >
+              <svg
+                class="w-4 h-4 mr-2 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"
+                />
+              </svg>
+              <span class="submenu-text">Funds Report</span>
+            </a>
+          </li>
+
+          <li class="submenu-item">
+            <a
+              class="submenu-link flex items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-300 group hover:bg-white/10 hover:pl-4"
+              [class]="
+                isActive('/head/reports/work-time')
+                  ? 'bg-white/10 text-white pl-4'
+                  : 'text-white/70 hover:text-white'
+              "
+              (click)="navigate('/head/reports/work-time')"
+            >
+              <svg
+                class="w-4 h-4 mr-2 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"
+                />
+              </svg>
+              <span class="submenu-text">Work Time Report</span>
+            </a>
+          </li>
+
+          <li class="submenu-item">
+            <a
+              class="submenu-link flex items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-300 group hover:bg-white/10 hover:pl-4"
+              [class]="
+                isActive('/head/reports/funds/accepted')
+                  ? 'bg-white/10 text-white pl-4'
+                  : 'text-white/70 hover:text-white'
+              "
+              (click)="navigate('/head/reports/funds/accepted')"
+            >
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg>
+              <span class="submenu-text">Approved Funds</span>
+            </a>
+          </li>
+
+          <li class="submenu-item">
+            <a
+              class="submenu-link flex items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-300 group hover:bg-white/10 hover:pl-4"
+              [class]="
+                isActive('/head/reports/funds/rejected')
+                  ? 'bg-white/10 text-white pl-4'
+                  : 'text-white/70 hover:text-white'
+              "
+              (click)="navigate('/head/reports/funds/rejected')"
+            >
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                />
+              </svg>
+              <span class="submenu-text">Rejected Funds</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- User Info Footer -->
+  <div
+    class="sidebar-footer border-t border-[#CC6A00] p-4 bg-gradient-to-r from-[#E67A00] to-[#FF8A1A]"
+  >
+    <div
+      *ngIf="!collapsed"
+      class="user-info flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-white/10 to-white/5 border border-white/20"
+    >
+      <!-- User Avatar -->
+      <div
+        class="user-avatar w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg bg-gradient-to-br from-[#FFB366] to-[#E67A00] ring-2 ring-white/30"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+          />
+        </svg>
+      </div>
+      <div class="user-details flex-1 min-w-0">
+        <div class="user-name text-sm font-semibold text-white truncate">
+          {{ currentUser }}
+        </div>
+        <div class="user-role text-xs text-white/80 capitalize">
+          <span
+            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/20 text-white border border-white/30"
+          >
+            Head
+          </span>
+        </div>
+      </div>
+      <button
+        class="logout-btn w-8 h-8 flex items-center justify-center rounded-lg bg-white/30 hover:bg-white/40 transition-all duration-300 hover:scale-110 border border-white/30 group"
+        title="Settings"
+        (click)="openSettings()"
+      >
+        <svg
+          class="w-4 h-4 text-white group-hover:text-whites"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Collapsed User View -->
+    <div *ngIf="collapsed" class="user-info-collapsed flex justify-center">
+      <div
+        class="user-avatar w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg bg-gradient-to-br from-[#E67A00] to-[#E67A00] ring-2 ring-white/30 cursor-pointer hover:scale-105 transition-transform duration-300"
+        [title]="currentUser"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+          />
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Overlay -->
+<div
+  class="sidebar-overlay fixed inset-0 bg-black/70 backdrop-blur-sm z-40 transition-all duration-300 lg:hidden"
+  [class]="!collapsed ? 'opacity-100 visible' : 'opacity-0 invisible'"
+  (click)="toggleSidebarCollapsed()"
+  *ngIf="isMobileView"
+></div>
+
+<div
+  *ngIf="settingPopup"
+  class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50"
+>
+  <div
+    class="bg-white rounded-2xl shadow-2xl w-full max-w-[95%] sm:max-w-[90%] md:max-w-4xl lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[90rem] border border-[#CC6A00] overflow-hidden"
+  >
+    <!-- Modal Header -->
+    <div
+      class="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-[#CC6A00] bg-gradient-to-r from-[#E67A00] to-[#FF8A1A]"
+    >
+      <h3 class="text-lg sm:text-xl font-semibold text-white">
+        User Profile Settings
+      </h3>
+
+      <button
+        (click)="closeSettings()"
+        class="text-gray-700 hover:text-gray-900 transition duration-300 hover:scale-110 bg-white/30 hover:bg-white/40 p-2 rounded-lg"
+      >
+        <svg
+          class="w-5 h-5 sm:w-6 sm:h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Content -->
+    <div class="max-h-[75vh] sm:max-h-[80vh] w-full overflow-y-auto p-4 sm:p-6">
+      <!-- <app-user-profile></app-user-profile> -->
+    </div>
+  </div>
+</div>

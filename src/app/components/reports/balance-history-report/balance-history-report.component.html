@@ -1,0 +1,727 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6">
+  <div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+      <div
+        class="flex flex-col md:flex-row md:items-center justify-between gap-4"
+      >
+        <div>
+          <h1
+            class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent"
+          >
+            Balance History & Settlement
+          </h1>
+          <p class="text-gray-600 mt-2">
+            Track, settle, and analyze entity balances across websites
+          </p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <div class="px-4 py-2 bg-blue-50 rounded-lg">
+            <div class="text-xs text-blue-600 font-medium">Current Role</div>
+            <div class="text-sm font-semibold text-blue-800">
+              {{ currentRole }}
+            </div>
+          </div>
+          <button
+            (click)="clearForm()"
+            class="px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-200 flex items-center space-x-2 shadow-sm"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+            <span>Clear All</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages Alert -->
+    <div
+      *ngIf="successMessage || errorMessage || infoMessage"
+      class="transition-all duration-300 animate-fadeIn"
+    >
+      <div
+        *ngIf="successMessage"
+        class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg shadow-sm"
+      >
+        <div class="flex items-center">
+          <svg
+            class="w-5 h-5 text-green-500 mr-3"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <div class="text-sm text-green-700 font-medium">
+            {{ successMessage }}
+          </div>
+        </div>
+      </div>
+
+      <div
+        *ngIf="errorMessage"
+        class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm"
+      >
+        <div class="flex items-center">
+          <svg
+            class="w-5 h-5 text-red-500 mr-3"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <div class="text-sm text-red-700 font-medium">{{ errorMessage }}</div>
+        </div>
+      </div>
+
+      <div
+        *ngIf="infoMessage"
+        class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg shadow-sm"
+      >
+        <div class="flex items-center">
+          <svg
+            class="w-5 h-5 text-blue-500 mr-3"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <div class="text-sm text-blue-700 font-medium">{{ infoMessage }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="flex flex-col lg:grid-cols-3 gap-6">
+      <!-- Left Column - Filters & Snapshot -->
+
+      <!-- Filter Form -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900">Filter Criteria</h2>
+            <p class="text-gray-500 text-sm mt-1">
+              Configure parameters for balance snapshot and settlements
+            </p>
+          </div>
+          <div
+            class="text-xs px-3 py-1 bg-gray-100 rounded-full text-gray-600 font-medium"
+          >
+            Required fields *
+          </div>
+        </div>
+
+        <form
+          [formGroup]="reportForm"
+          (ngSubmit)="fetchSettleHistory()"
+          class="space-y-6"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Entity Type -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-gray-800">
+                Entity Type <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <select
+                  formControlName="entityType"
+                  (change)="onRoleChange(reportForm.get('entityType')?.value)"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm appearance-none"
+                  [class.border-red-400]="
+                    reportForm.get('entityType')?.invalid &&
+                    reportForm.get('entityType')?.touched
+                  "
+                >
+                  <option value="" disabled class="text-gray-400">
+                    Select Entity Type
+                  </option>
+                  <option
+                    *ngFor="let type of entityTypes"
+                    [value]="type.id"
+                    class="py-2"
+                  >
+                    {{ type.name }}
+                  </option>
+                </select>
+                <div
+                  class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3"
+                >
+                  <svg
+                    class="w-5 h-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Entity ID -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-gray-800">
+                Entity <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <select
+                  (change)="onEntityChange()"
+                  formControlName="entityId"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm appearance-none"
+                  [class.border-red-400]="
+                    reportForm.get('entityId')?.invalid &&
+                    reportForm.get('entityId')?.touched
+                  "
+                  [disabled]="loadingEntities"
+                >
+                  <option value="" disabled class="text-gray-400">
+                    {{ loadingEntities ? "Loading..." : "Select Entity" }}
+                  </option>
+                  <option
+                    *ngFor="let entity of entities"
+                    [value]="entity"
+                    class="py-2"
+                  >
+                    {{ entity }}
+                  </option>
+                </select>
+                <div *ngIf="loadingEntities" class="absolute right-3 top-3">
+                  <div
+                    class="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"
+                  ></div>
+                </div>
+              </div>
+              <div
+                *ngIf="
+                  entities.length === 0 && reportForm.get('entityType')?.value
+                "
+                class="text-xs text-amber-600 mt-1"
+              >
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                No entities found for this role
+              </div>
+            </div>
+
+            <!-- Website -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-gray-800">
+                Website <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <select
+                  formControlName="websiteId"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm appearance-none"
+                  [class.border-red-400]="
+                    reportForm.get('websiteId')?.invalid &&
+                    reportForm.get('websiteId')?.touched
+                  "
+                  [disabled]="loadingWebsites"
+                >
+                  <option value="" disabled class="text-gray-400">
+                    {{ loadingWebsites ? "Loading..." : "Select Website" }}
+                  </option>
+                  <option
+                    *ngFor="let website of websites"
+                    [value]="website.id"
+                    class="py-2"
+                  >
+                    {{ website.name }}
+                  </option>
+                </select>
+                <div *ngIf="loadingWebsites" class="absolute right-3 top-3">
+                  <div
+                    class="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"
+                  ></div>
+                </div>
+              </div>
+              <div
+                *ngIf="
+                  websites?.length === 0 && reportForm.get('entityType')?.value
+                "
+                class="text-xs text-amber-600 mt-1"
+              >
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                No websites found for this entity
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Snapshot Date -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-gray-800">
+                From Date <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <input
+                  type="date"
+                  formControlName="fromDate"
+                  [max]="getTodayDate()"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-gray-800">
+                To Date <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <input
+                  type="date"
+                  formControlName="toDate"
+                  [max]="getTodayDate()"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm"
+                />
+              </div>
+            </div>
+
+            <!-- Generate Button -->
+            <div class="md:col-span-2 flex items-end">
+              <button
+                type="submit"
+                [disabled]="loading || reportForm.get('entityType')?.invalid"
+                class="w-full md:w-auto px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
+              >
+                <span *ngIf="loading">
+                  <svg
+                    class="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    ></path>
+                  </svg>
+                </span>
+                <span>{{
+                  loading ? "Generating Report..." : "Generate Report"
+                }}</span>
+                <svg
+                  *ngIf="!loading"
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Settle History Section -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+      <div
+        class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4"
+      >
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900">Settle History</h2>
+          <p class="text-gray-500 text-sm mt-1">
+            Track all settlement transactions with detailed balance changes
+          </p>
+        </div>
+
+        <!-- History Filters -->
+        <div class="flex flex-wrap gap-3">
+          <div class="relative">
+            <input
+              type="text"
+              [(ngModel)]="selectedWebsite"
+              (ngModelChange)="getFilteredHistory()"
+              placeholder="Filter by website..."
+              class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <svg
+              class="w-5 h-5 text-gray-400 absolute left-3 top-2.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Table -->
+      <div
+        *ngIf="getFilteredHistory().length > 0"
+        class="overflow-x-auto rounded-xl border border-gray-200"
+      >
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+              >
+                Date & Time
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+              >
+                Website Details
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+              >
+                Transaction
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+              >
+                Entity Balance
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+              >
+                Website Balance
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+              >
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr
+              *ngFor="let item of getFilteredHistory()"
+              class="hover:bg-gray-50 transition-colors group"
+            >
+              <!-- Date Time Column -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">
+                  {{ item.dateTime | date: "medium" }}
+                </div>
+                <div class="text-xs text-gray-500">ID: {{ item.id }}</div>
+              </td>
+
+              <!-- Website Details Column -->
+              <td class="px-6 py-4">
+                <div class="flex items-center">
+                  <div
+                    class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-6 h-6 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                      />
+                    </svg>
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">
+                      {{ item.websiteDomain }}
+                    </div>
+                    <div class="text-xs text-gray-500">
+                      ID: {{ item.websiteId }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Transaction Column -->
+              <td class="px-6 py-4">
+                <div class="space-y-1">
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ item.type === "topup" ? "Top-up" : "Withdrawal" }}
+                  </div>
+                  <div
+                    class="text-lg font-bold"
+                    [ngClass]="
+                      item.type === 'topup' ? 'text-green-600' : 'text-red-600'
+                    "
+                  >
+                    {{ item.amount | currency: "INR" : "symbol" : "1.2-2" }}
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    Entity: {{ item.entityType }} ({{ item.entityId }})
+                  </div>
+                </div>
+              </td>
+
+              <!-- Entity Balance Column -->
+              <td class="px-6 py-4">
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500">Before:</span>
+                    <span class="text-sm font-medium text-gray-900">
+                      {{
+                        item.balanceBefore
+                          | currency: "INR" : "symbol" : "1.2-2"
+                      }}
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500">After:</span>
+                    <span class="text-sm font-medium text-gray-900">
+                      {{
+                        item.balanceAfter | currency: "INR" : "symbol" : "1.2-2"
+                      }}
+                    </span>
+                  </div>
+                  <div class="mt-2 pt-2 border-t border-gray-100">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs text-gray-500">Change:</span>
+                      <span
+                        class="text-xs font-semibold"
+                        [ngClass]="
+                          item.balanceAfter > item.balanceBefore
+                            ? 'text-green-600'
+                            : item.balanceAfter < item.balanceBefore
+                              ? 'text-red-600'
+                              : 'text-gray-600'
+                        "
+                      >
+                        {{
+                          item.balanceAfter - item.balanceBefore
+                            | currency: "INR" : "symbol" : "1.2-2"
+                        }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Website Balance Column -->
+              <td class="px-6 py-4">
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500">Before:</span>
+                    <span class="text-sm font-medium text-gray-900">
+                      {{
+                        item.websiteBefore
+                          | currency: "INR" : "symbol" : "1.2-2"
+                      }}
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500">After:</span>
+                    <span class="text-sm font-medium text-gray-900">
+                      {{
+                        item.websiteAfter | currency: "INR" : "symbol" : "1.2-2"
+                      }}
+                    </span>
+                  </div>
+                  <div class="mt-2 pt-2 border-t border-gray-100">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs text-gray-500">Change:</span>
+                      <span
+                        class="text-xs font-semibold"
+                        [ngClass]="
+                          item.websiteAfter > item.websiteBefore
+                            ? 'text-green-600'
+                            : item.websiteAfter < item.websiteBefore
+                              ? 'text-red-600'
+                              : 'text-gray-600'
+                        "
+                      >
+                        {{
+                          item.websiteAfter - item.websiteBefore
+                            | currency: "INR" : "symbol" : "1.2-2"
+                        }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Status Column -->
+              <td class="px-6 py-4">
+                <div class="flex flex-col space-y-2">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    [ngClass]="
+                      item.status === 'completed'
+                        ? 'bg-green-100 text-green-800'
+                        : item.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                    "
+                  >
+                    {{ item.status | titlecase }}
+                  </span>
+                
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div
+        *ngIf="!settleHistoryLoading && getFilteredHistory().length === 0"
+        class="text-center py-12 bg-gray-50 rounded-xl border border-gray-200"
+      >
+        <div class="mx-auto w-16 h-16 text-gray-300 mb-4">
+          <svg
+            class="w-full h-full"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+            />
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          No settlement history found
+        </h3>
+
+        <button
+          (click)="clearForm(); fetchSettleHistory()"
+          class="px-4 py-2 text-sm text-blue-600 bg-blue-50 font-medium rounded-lg hover:bg-blue-100 transition-colors"
+        >
+          Reset Filters
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="settleHistoryLoading" class="text-center py-12">
+        <div class="inline-flex flex-col items-center justify-center">
+          <div
+            class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"
+          ></div>
+          <span class="text-gray-600">Loading settlement history...</span>
+          <p class="text-sm text-gray-500 mt-2">
+            Fetching detailed balance information
+          </p>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div
+        *ngIf="getFilteredHistory().length > 0"
+        class="mt-6 flex items-center justify-between"
+      >
+        <div class="text-sm text-gray-700">
+          Showing
+          <span class="font-medium">{{
+            (currentPage - 1) * itemsPerPage + 1
+          }}</span>
+          to
+          <span class="font-medium">{{
+            Math.min(currentPage * itemsPerPage, totalItems)
+          }}</span>
+          of <span class="font-medium">{{ totalItems }}</span> results
+        </div>
+        <div class="flex space-x-2">
+          <button
+            (click)="prevPage()"
+            [disabled]="currentPage === 1"
+            class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <button
+            *ngFor="let page of getPageNumbers()"
+            (click)="currentPage = page; fetchSettleHistory()"
+            [class.bg-indigo-600]="page === currentPage"
+            [class.text-white]="page === currentPage"
+            [class.text-gray-700]="page !== currentPage"
+            class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50"
+          >
+            {{ page }}
+          </button>
+          <button
+            (click)="nextPage()"
+            [disabled]="currentPage * itemsPerPage >= totalItems"
+            class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

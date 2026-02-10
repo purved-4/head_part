@@ -1,0 +1,43 @@
+<div style="font-family: Arial, Helvetica, sans-serif; padding: 1rem; max-width: 800px;">
+  <h3>Webhook Data (polled every 5s)</h3>
+
+  <button (click)="refreshNow()" style="padding: 6px 10px; margin-bottom: 10px;">
+    Refresh now
+  </button>
+
+  <div *ngIf="isLoading">Loading...</div>
+
+  <div *ngIf="errorMessage" style="color: red; margin-bottom: 10px;">
+    Error: {{ errorMessage }}
+  </div>
+
+  <div *ngIf="latestPayload; else noPayload">
+    <h4>Payload (parsed)</h4>
+    <table style="border-collapse: collapse; width: 100%;">
+      <tr *ngFor="let k of objectKeys(latestPayload)">
+        <td style="border: 1px solid #ddd; padding: 6px; width: 30%;"><strong>{{ k }}</strong></td>
+        <td style="border: 1px solid #ddd; padding: 6px;">
+          {{ latestPayload[k] }}
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <ng-template #noPayload>
+    <p>No payload to display</p>
+  </ng-template>
+
+  <div style="margin-top: 16px;">
+    <h4>Other data (JSON)</h4>
+    <pre style="background:#f6f6f6; padding:10px; border-radius:4px; overflow:auto;">
+{{ latestOther ? (latestOther | json) : 'No other data' }}
+    </pre>
+  </div>
+
+  <div style="margin-top: 16px;">
+    <h4>All items (raw)</h4>
+    <pre style="background:#fafafa; padding:10px; border-radius:4px; overflow:auto;">
+{{ items.length ? (items | json) : 'No items returned' }}
+    </pre>
+  </div>
+</div>

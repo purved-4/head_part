@@ -1,0 +1,387 @@
+<div class="min-h-screen bg-[#F0F7FF] py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    
+    <!-- Header -->
+    <div class="mb-10 flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Create New Branch</h1>
+        <p class="text-gray-600 mt-2">Add a new Branch with website permissions and commission rates</p>
+      </div>
+      <button
+        [routerLink]="'/chief/branch/manage'"
+        class="px-6 py-3 bg-gradient-to-r from-[#1A56DB] to-[#4F83E8] text-white rounded-xl text-sm font-medium hover:from-[#1E4BBB] hover:to-[#1A56DB] transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group"
+      >
+        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        View All Branchs
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="chiefForm" (ngSubmit)="onSubmit()">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Left Column - Chief Details -->
+        <div class="lg:col-span-2 space-y-8">
+          
+          <!-- Personal Information Card -->
+          <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+            <div class="flex items-center gap-3 mb-8">
+              <div class="p-3 rounded-xl bg-gradient-to-br from-[#F0F7FF] to-white">
+                <svg class="w-6 h-6 text-[#1A56DB]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <h2 class="text-xl font-bold text-gray-900">Branch Information</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <!-- Name -->
+              <div class="space-y-2">
+                <label class="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                  Full Name
+                  <span class="text-red-500">*</span>
+                </label>
+                <input
+                  formControlName="name"
+                  type="text"
+                  [class.border-red-400]="isFieldInvalid('name')"
+                  [class.border-[#1A56DB]!]="chiefForm.get('name')?.valid && chiefForm.get('name')?.touched"
+                  class="w-full px-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1A56DB] focus:ring-opacity-30 focus:border-transparent transition-all duration-200"
+                  placeholder="Enter Branch's full name"
+                />
+                <div *ngIf="isFieldInvalid('name')" class="text-red-500 text-sm mt-1">
+                  Name is required
+                </div>
+              </div>
+
+              <!-- Mobile -->
+              <div class="space-y-2">
+                <label class="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                  Mobile Number
+                  <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <div class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    +91
+                  </div>
+                  <input
+                    formControlName="mobile"
+                    type="text"
+                    [class.border-red-400]="isFieldInvalid('mobile')"
+                    [class.border-[#1A56DB]!]="chiefForm.get('mobile')?.valid && chiefForm.get('mobile')?.touched"
+                    class="w-full pl-14 pr-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1A56DB] focus:ring-opacity-30 focus:border-transparent transition-all duration-200"
+                    placeholder="98765 43210"
+                  />
+                </div>
+                <div *ngIf="isFieldInvalid('mobile')" class="text-red-500 text-sm mt-1">
+                  Valid 10-digit mobile number is required
+                </div>
+              </div>
+
+              <!-- Email -->
+              <div class="space-y-2">
+                <label class="text-sm font-semibold text-gray-700 flex items-center gap-1">
+                  Email Address
+                  <span class="text-red-500">*</span>
+                </label>
+                <input
+                  formControlName="email"
+                  type="email"
+                  [class.border-red-400]="isFieldInvalid('email')"
+                  [class.border-[#1A56DB]!]="chiefForm.get('email')?.valid && chiefForm.get('email')?.touched"
+                  class="w-full px-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1A56DB] focus:ring-opacity-30 focus:border-transparent transition-all duration-200"
+                  placeholder="branch@example.com"
+                />
+                <div *ngIf="isFieldInvalid('email')" class="text-red-500 text-sm mt-1">
+                  Valid email is required
+                </div>
+              </div>
+
+              <!-- Active Status -->
+              <div class="space-y-2">
+                <label class="text-sm font-semibold text-gray-700">Account Status</label>
+                <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <div class="relative">
+                    <input
+                      type="checkbox"
+                      id="active"
+                      formControlName="isActive"
+                      class="sr-only"
+                    />
+                    <label
+                      for="active"
+                      [class.bg-[#1A56DB]!]="chiefForm.get('isActive')?.value"
+                      class="block w-12 h-6 rounded-full cursor-pointer transition-all duration-300 border-2 border-transparent bg-gray-300"
+                    >
+                      <span
+                        [class.translate-x-6!]="chiefForm.get('isActive')?.value"
+                        class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-md transition-transform duration-300"
+                      ></span>
+                    </label>
+                  </div>
+                  <div>
+                    <span class="font-medium text-gray-900">
+                      {{ chiefForm.get('isActive')?.value ? 'Active Account' : 'Inactive Account' }}
+                    </span>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                      {{ chiefForm.get('isActive')?.value ? 'Branch can access the system' : 'Branch access is disabled' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+              <!-- Additional Info -->
+            <div class="mt-8 space-y-2">
+              <label class="text-sm font-semibold text-gray-700">Additional Information</label>
+              <textarea
+                formControlName="info"
+                rows="3"
+                class="w-full px-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1A56DB] focus:ring-opacity-30 focus:border-transparent transition-all duration-200 resize-none"
+                placeholder="Add any additional notes or information about this chief..."
+              ></textarea>
+            </div>
+
+            <!-- Business Type removed -->
+
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <div class="flex gap-4">
+              <button
+                type="button"
+                (click)="clearForm()"
+                [disabled]="loading"
+                class="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Clear All
+              </button>
+              <button
+                type="submit"
+                [disabled]="loading"
+                class="flex-1 px-6 py-4 bg-gradient-to-r from-[#1A56DB] to-[#4F83E8] text-white font-medium rounded-xl hover:from-[#1E4BBB] hover:to-[#1A56DB] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              >
+                <span *ngIf="!loading" class="flex items-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                  </svg>
+                  Create Branch
+                </span>
+                <span *ngIf="loading" class="flex items-center gap-2">
+                  <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  Creating Branch...
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Website Assignment -->
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 sticky top-8">
+            
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-8">
+              <div>
+                <h2 class="text-xl font-bold text-gray-900">Website Assignment</h2>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="px-3 py-1 bg-gradient-to-r from-[#1A56DB] to-[#4F83E8] text-white text-xs font-medium rounded-full">
+                    {{ getSelectedWebsites().length }} Selected
+                  </span>
+                  <span class="text-sm text-gray-500">
+                    of {{ websites.length }} total
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-1 p-1 bg-gray-100 rounded-xl mb-6">
+              <button
+                type="button"
+                (click)="setActiveTab('available')"
+                [class.bg-white]="activeTab === 'available'"
+                [class.text-[#1A56DB]]="activeTab === 'available'"
+                [class.shadow-sm]="activeTab === 'available'"
+                class="flex-1 py-3 text-sm font-medium rounded-lg transition-all duration-200"
+              >
+                Available Websites
+              </button>
+              <button
+                type="button"
+                (click)="setActiveTab('selected')"
+                [class.bg-white]="activeTab === 'selected'"
+                [class.text-[#1A56DB]]="activeTab === 'selected'"
+                [class.shadow-sm]="activeTab === 'selected'"
+                class="flex-1 py-3 text-sm font-medium rounded-lg transition-all duration-200"
+              >
+                Selected Websites
+              </button>
+            </div>
+
+            <!-- Website List -->
+            <div class="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+              <!-- Available Websites Tab -->
+              <div *ngIf="activeTab === 'available' && getAvailableWebsites().length > 0" class="space-y-3">
+                <div *ngFor="let website of getAvailableWebsites()" 
+                     class="group p-4 border border-gray-200 rounded-xl hover:border-[#1A56DB] hover:bg-[#F0F7FF] transition-all duration-200">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="relative">
+                        <input
+                          type="checkbox"
+                          [checked]="isWebsiteSelected(website.websiteId)"
+                          (change)="onWebsiteSelectionChange($event, website.websiteId)"
+                          class="sr-only peer"
+                          id="website_{{website.websiteId}}"
+                        />
+                        <label 
+                          for="website_{{website.websiteId}}"
+                          class="w-5 h-5 border-2 border-gray-300 rounded-md peer-checked:border-[#1A56DB] peer-checked:bg-[#1A56DB] flex items-center justify-center cursor-pointer transition-all duration-200"
+                        >
+                          <svg *ngIf="isWebsiteSelected(website.websiteId)" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                        </label>
+                      </div>
+                      <div>
+                        <label for="website_{{website.websiteId}}" class="font-medium text-gray-900 cursor-pointer">
+                          {{ website.websiteDomain }}
+                        </label>
+                        <p class="text-xs text-gray-500 mt-0.5">{{ website.websiteDomain || 'Website' }}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      (click)="onWebsiteSelectionChange({target: {checked: true}}, website.websiteId)"
+                      class="p-2 rounded-lg bg-gray-100 hover:bg-[#1A56DB] hover:text-white transition-all duration-200 opacity-0 group-hover:opacity-100"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selected Websites Tab -->
+              <div *ngIf="activeTab === 'selected' && getSelectedWebsites().length > 0" class="space-y-3">
+                <div *ngFor="let website of getSelectedWebsites()" class="p-4 border border-[#4F83E8] rounded-xl bg-gradient-to-br from-[#F0F7FF] to-white">
+                  
+                  <!-- Website Header -->
+                  <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[#1A56DB] to-[#4F83E8] flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 class="font-semibold text-gray-900">{{ website.websiteDomain }}</h3>
+                        <p class="text-xs text-gray-500">Assigned to Branch</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      (click)="removeWebsite(website.websiteId)"
+                      class="p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Percentage Controls -->
+                  <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                      <label class="text-xs font-medium text-gray-600">Topup %</label>
+                      <div class="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          [formControlName]="'topup_' + website.websiteId"
+                          [class.border-red-300]="chiefForm.get('topup_' + website.websiteId)?.invalid && chiefForm.get('topup_' + website.websiteId)?.touched"
+                          class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A56DB] focus:border-transparent transition-all duration-200"
+                          placeholder="0-100"
+                        />
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">%</span>
+                      </div>
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="text-xs font-medium text-gray-600">Payout %</label>
+                      <div class="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          [formControlName]="'payout_' + website.websiteId"
+                          [class.border-red-300]="chiefForm.get('payout_' + website.websiteId)?.invalid && chiefForm.get('payout_' + website.websiteId)?.touched"
+                          class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A56DB] focus:border-transparent transition-all duration-200"
+                          placeholder="0-100"
+                        />
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Apply All Buttons -->
+                  <div class="flex gap-2 mt-3">
+                    <button
+                      type="button"
+                      (click)="applyToAll('topup')"
+                      class="flex-1 py-1.5 text-xs font-medium bg-gray-100 hover:bg-[#1A56DB] hover:text-white rounded-lg transition-all duration-200"
+                    >
+                      Apply Topup
+                    </button>
+                    <button
+                      type="button"
+                      (click)="applyToAll('payout')"
+                      class="flex-1 py-1.5 text-xs font-medium bg-gray-100 hover:bg-[#1A56DB] hover:text-white rounded-lg transition-all duration-200"
+                    >
+                      Apply Payout
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty States -->
+              <div *ngIf="(activeTab === 'available' && getAvailableWebsites().length === 0) || 
+                         (activeTab === 'selected' && getSelectedWebsites().length === 0)"
+                   class="text-center py-12">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <p class="text-gray-500 font-medium">
+                  {{ activeTab === 'available' ? 'No websites available' : 'No websites selected' }}
+                </p>
+                <p class="text-sm text-gray-400 mt-1">
+                  {{ activeTab === 'available' ? 'All websites have been assigned' : 'Select websites from the available tab' }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+              <p class="text-xs text-gray-500">
+                <span class="font-medium text-[#1A56DB]">Note:</span> Select websites and set commission percentages for each. Use "Apply All" to quickly set same percentages for all selected websites.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

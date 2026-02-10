@@ -1,0 +1,59 @@
+@import url(https://fonts.googleapis.com/css2?family=Lato&display=swap);
+@import url(https://fonts.googleapis.com/css2?family=Open+Sans&display=swap);
+@import url(https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined);
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap");
+
+:host {
+  display: block;
+}
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
+:root {
+  --color-primary: #6d28d9;
+  --color-bg: #ede9fe;
+  --color-surface: #ffffff;
+  --color-font: #0f172a;
+}
+
+
+
+:root[data-role="manager"] {
+  --color-primary: #1d4ed8;
+  --color-primary-light: #60a5fa;
+  --color-primary-dark: #1e3a8a;
+
+  --color-secondary: #93c5fd;
+  --color-accent: #2563eb;
+
+  --color-bg: #eff6ff;
+  --color-surface: #ffffff;
+
+  --color-font: #0f172a;
+  --color-muted: #475569;
+
+  --color-border: #bfdbfe;
+  --color-hover: #dbeafe;
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #0ea5e9;
+
+  --shadow-sm: 0 2px 6px rgba(29, 78, 216, 0.12);
+  --shadow-md: 0 8px 18px rgba(29, 78, 216, 0.2);
+
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+}
+

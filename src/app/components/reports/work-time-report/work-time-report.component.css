@@ -1,0 +1,59 @@
+/* Custom animations */
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Smooth transitions */
+.user-group {
+  transition: all 0.3s ease;
+}
+
+/* Hover effects */
+tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Status badges animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.bg-green-100 {
+  animation: pulse 2s infinite;
+}
+
+/* Print styles */
+@media print {
+  .bg-gray-50, .bg-white {
+    background-color: white !important;
+  }
+  
+  .shadow-lg, .shadow-sm {
+    box-shadow: none !important;
+  }
+}

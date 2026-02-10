@@ -1,0 +1,25 @@
+<div class="flex min-h-screen bg-neutral-50">
+  <!-- Sidebar -->
+ <head-sidebar 
+    [collapsed]="sidebarCollapsed"
+    (toggleSidebar)="onSidebarToggle($event)">
+  </head-sidebar>
+  <!-- Main Content -->
+  <div
+    class="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out"
+    [class]="sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'"
+  >
+    <!-- Header -->
+    <head-header 
+      [sidebarCollapsed]="sidebarCollapsed"
+      (toggleSidebar)="onSidebarToggle($event)">
+    </head-header>
+
+    <!-- Content Area -->
+    <main class="flex-1 p-2 md:p-6 mt-10">
+      <div class="max-w-10xl mx-auto w-full">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+</div>

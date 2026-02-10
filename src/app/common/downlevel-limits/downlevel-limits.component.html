@@ -1,0 +1,1854 @@
+<!-- downlevel-limits.component.html -->
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Entity Management</h1>
+          <p class="text-gray-600 mt-2">
+            Manage limits and allocations for
+            <span class="font-semibold text-blue-600">{{ role }}</span> role
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="text-xs text-gray-500">Logged in as</div>
+            <div class="text-sm font-medium text-gray-800">{{ role }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- Current User Limits Section -->
+    <div class="mb-8">
+      <div
+        class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+      >
+        <div
+          class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-semibold text-gray-800">
+                Your Current Limits
+              </h2>
+              <p class="text-sm text-gray-600">
+                Real-time balance and limit information for your account
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                (click)="viewAdminLimits()"
+                class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 group"
+              >
+                <svg
+                  class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  ></path>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  ></path>
+                </svg>
+                View My Limits
+              </button>
+
+              <button
+                *ngIf="role === 'OWNER'"
+                (click)="openAdminSelfAmountModal()"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 transition-all"
+              >
+                <svg
+                  class="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  ></path>
+                </svg>
+                Add Amount
+              </button>
+
+              <button
+                (click)="loadCurrentUserLimits()"
+                [disabled]="loadingCurrentUserLimits"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-blue-700 bg-blue-100 hover:bg-blue-200 disabled:opacity-50 transition-colors"
+              >
+                <svg
+                  class="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  *ngIf="!loadingCurrentUserLimits"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  ></path>
+                </svg>
+                <svg
+                  *ngIf="loadingCurrentUserLimits"
+                  class="animate-spin h-4 w-4 mr-1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="loadingCurrentUserLimits" class="p-6">
+          <div class="flex items-center justify-center">
+            <div
+              class="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500 mr-3"
+            ></div>
+            <span class="text-gray-600">Loading your limit information...</span>
+          </div>
+        </div>
+
+        <!-- No Limits Data -->
+        <div
+          *ngIf="!loadingCurrentUserLimits && !currentUserLimits"
+          class="p-6"
+        >
+          <div class="text-center py-4">
+            <svg
+              class="w-12 h-12 mx-auto text-gray-400 mb-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+            <h4 class="text-lg font-medium text-gray-900 mb-2">
+              No Limit Information Found
+            </h4>
+            <p class="text-gray-600 mb-4">
+              You don't have any limit records yet.
+            </p>
+            <button
+              *ngIf="role === 'OWNER'"
+              (click)="openAdminSelfAmountModal()"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 transition-all"
+            >
+              Add Your First Amount
+            </button>
+          </div>
+        </div>
+
+        <!-- Limits Display -->
+        <div *ngIf="!loadingCurrentUserLimits && currentUserLimits" class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Running Balance Card -->
+            <div
+              class="bg-gradient-to-br from-purple-50 to-indigo-100 rounded-xl p-5 border border-purple-200"
+            >
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center mr-3"
+                  >
+                    <svg
+                      class="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-medium text-purple-800">
+                      Total Balance
+                    </h3>
+                    <p class="text-xs text-purple-600">Current total balance</p>
+                  </div>
+                </div>
+                <span
+                  class="text-xs font-medium px-2 py-1 rounded-full bg-purple-200 text-purple-800"
+                >
+                  Live
+                </span>
+              </div>
+              <div class="text-2xl font-bold text-gray-900 mb-1">
+                ₹{{ currentUserLimits.runningBalance | number : "1.2-2" }}
+              </div>
+              <div class="flex items-center text-sm text-purple-700">
+                <svg
+                  class="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                  ></path>
+                </svg>
+                <span
+                  *ngIf="
+                    currentUserLimits.runningBalance >
+                    (currentUserLimits.previousBalance || 0)
+                  "
+                  class="text-green-600"
+                >
+                  ↑ Increased from ₹{{
+                    currentUserLimits.previousBalance | number : "1.2-2"
+                  }}
+                </span>
+                <span
+                  *ngIf="
+                    currentUserLimits.runningBalance <
+                    (currentUserLimits.previousBalance || 0)
+                  "
+                  class="text-red-600"
+                >
+                  ↓ Decreased from ₹{{
+                    currentUserLimits.previousBalance | number : "1.2-2"
+                  }}
+                </span>
+                <span
+                  *ngIf="
+                    currentUserLimits.runningBalance ===
+                    (currentUserLimits.previousBalance || 0)
+                  "
+                  class="text-gray-600"
+                >
+                  No change from previous
+                </span>
+              </div>
+            </div>
+
+            <!-- Given Amount Card -->
+            <div
+              class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200"
+            >
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center mr-3"
+                  >
+                    <svg
+                      class="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-medium text-blue-800">
+                      Given Amount
+                    </h3>
+                    <p class="text-xs text-blue-600">Total amount allocated</p>
+                  </div>
+                </div>
+                <span
+                  class="text-xs font-medium px-2 py-1 rounded-full bg-blue-200 text-blue-800"
+                >
+                  {{ role }}
+                </span>
+              </div>
+              <div class="text-2xl font-bold text-gray-900 mb-1">
+                ₹{{ (currentUserLimits.givenAmount  || currentUserLimits.runningBalance - currentUserLimits.remainingAmount )| number : "1.2-2" }}
+              </div>
+              <div class="flex items-center text-sm text-blue-700">
+                <svg
+                  class="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                Last updated:
+                {{ currentUserLimits.updatedAt | date : "shortDate" }}
+              </div>
+            </div>
+
+            <!-- Remaining Amount Card -->
+            <div
+              class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-5 border border-green-200"
+            >
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center mr-3"
+                  >
+                    <svg
+                      class="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-medium text-green-800">
+                      Remaining Amount
+                    </h3>
+                    <p class="text-xs text-green-600">Available balance</p>
+                  </div>
+                </div>
+                <span
+                  [ngClass]="{
+                    'px-2 py-1 text-xs font-medium rounded-full': true,
+                    'bg-green-200 text-green-800':
+                      currentUserLimits.remainingAmount > 0,
+                    'bg-red-200 text-red-800':
+                      currentUserLimits.remainingAmount <= 0,
+                    'bg-yellow-200 text-yellow-800':
+                      currentUserLimits.remainingAmount > 0 &&
+                      currentUserLimits.remainingAmount <
+                        currentUserLimits.amount
+                  }"
+                >
+                  {{
+                    currentUserLimits.remainingAmount > 0
+                      ? "Active"
+                      : "Exhausted"
+                  }}
+                </span>
+              </div>
+              <div class="text-2xl font-bold text-gray-900 mb-1">
+                ₹{{ currentUserLimits.remainingAmount | number : "1.2-2" }}
+              </div>
+              <div class="flex items-center">
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div
+                    [ngClass]="{
+                      'h-2.5 rounded-full': true,
+                      'bg-green-500': currentUserLimits.remainingAmount > 0,
+                      'bg-red-500': currentUserLimits.remainingAmount <= 0
+                    }"
+                    [style.width.%]="
+                      (currentUserLimits.remainingAmount /
+                        (currentUserLimits.runningBalance )) *
+                      100
+                    "
+                  ></div>
+                </div>
+                <span class="ml-3 text-sm font-medium text-gray-700">
+                  {{
+                    (
+                      (currentUserLimits.remainingAmount /
+                        currentUserLimits.runningBalance) *
+                      100
+                    ).toFixed(1)
+                  }}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Additional Info -->
+          <div class="mt-6 pt-6 border-t border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex items-center text-sm text-gray-600">
+                <svg
+                  class="w-5 h-5 mr-2 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                <span
+                  >Created:
+                  {{ currentUserLimits.createdAt | date : "medium" }}</span
+                >
+              </div>
+              <div class="flex items-center text-sm text-gray-600">
+                <svg
+                  class="w-5 h-5 mr-2 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <span
+                  >Last Transaction:
+                  {{ currentUserLimits.updatedAt | date : "medium" }}</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center py-20">
+      <div class="text-center">
+        <div
+          class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"
+        ></div>
+        <p class="text-gray-600">Loading entities...</p>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div
+      *ngIf="error"
+      class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg"
+    >
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg
+            class="h-5 w-5 text-red-400"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-red-700">{{ error }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHIEF Role with Tabs -->
+    <div *ngIf="role === 'CHIEF' && !loading && downlevelData.length > 0">
+      <!-- Tabs Navigation for CHIEF -->
+      <div class="mb-6">
+        <div class="border-b border-gray-200">
+          <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <button
+              (click)="activeTab = 'manager'"
+              [ngClass]="{
+                'border-blue-500 text-blue-600': activeTab === 'manager',
+                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'manager'
+              }"
+              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200"
+            >
+              <div class="flex items-center">
+                <div class="w-5 h-5 mr-2 flex items-center justify-center">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    ></path>
+                  </svg>
+                </div>
+                Managers
+                <span class="ml-2 bg-blue-100 text-blue-600 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                  {{ managersData.length }}
+                </span>
+              </div>
+            </button>
+            <button
+              (click)="activeTab = 'branch'"
+              [ngClass]="{
+                'border-blue-500 text-blue-600': activeTab === 'branch',
+                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'branch'
+              }"
+              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200"
+            >
+              <div class="flex items-center">
+                <div class="w-5 h-5 mr-2 flex items-center justify-center">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                    ></path>
+                  </svg>
+                </div>
+                Branches
+                <span class="ml-2 bg-green-100 text-green-600 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                  {{ branchesData.length }}
+                </span>
+              </div>
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Managers Table for CHIEF -->
+      <div *ngIf="activeTab === 'manager'" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-semibold text-gray-800">Managers</h2>
+              <p class="text-sm text-gray-600">All managers under your jurisdiction</p>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-sm text-gray-500">
+                {{ managersData.length }} manager{{ managersData.length !== 1 ? 's' : '' }}
+              </div>
+              <button
+                (click)="exportManagers()"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  ></path>
+                </svg>
+                Export
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Manager Details
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Contact Information
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let manager of managersData" class="hover:bg-gray-50 transition-colors duration-150">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
+                        {{ manager.name?.charAt(0) || 'M' }}
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">{{ manager.name || 'Unnamed Manager' }}</div>
+                      <div class="text-sm text-gray-500">ID: {{ manager.id }}</div>
+                      <div class="mt-1">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                          </svg>
+                          Manager
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex flex-col space-y-1">
+                    <div class="flex items-center text-sm text-gray-900">
+                      <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                      </svg>
+                      {{ manager.email || 'No email' }}
+                    </div>
+                    <div class="flex items-center text-sm text-gray-500">
+                      <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                      </svg>
+                      {{ manager.mobile || 'No mobile' }}
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex flex-col space-y-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                      [ngClass]="{
+                        'bg-green-100 text-green-800': manager.status === 'active',
+                        'bg-red-100 text-red-800': manager.status === 'inactive',
+                        'bg-yellow-100 text-yellow-800': !manager.status || manager.status === 'pending'
+                      }">
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <circle cx="10" cy="10" r="5" />
+                      </svg>
+                      {{ (manager.status || 'pending') | titlecase }}
+                    </span>
+                    <div class="text-xs text-gray-500">
+                      <div class="flex items-center">
+                        <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Created: {{ manager.createdAt | date:'shortDate' }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex space-x-2">
+                    <button
+                      (click)="openAddAmountModal(manager)"
+                      class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200"
+                    >
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      Add Amount
+                    </button>
+                    <button
+                      (click)="viewLimits(manager)"
+                      class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                    >
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                      View Limits
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State for Managers -->
+        <div *ngIf="managersData.length === 0" class="text-center py-12">
+          <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0c-.66 0-1.293-.106-1.879-.304m-8.121-7.193a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No Managers Found</h3>
+          <p class="text-gray-600 mb-6">There are no managers assigned to your account.</p>
+        </div>
+      </div>
+
+      <!-- Branches Table for CHIEF -->
+      <div *ngIf="activeTab === 'branch'" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-green-50 to-emerald-50">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-semibold text-gray-800">Branches</h2>
+              <p class="text-sm text-gray-600">All branches under your jurisdiction</p>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-sm text-gray-500">
+                {{ branchesData.length }} branch{{ branchesData.length !== 1 ? 'es' : '' }}
+              </div>
+              <button
+                (click)="exportBranches()"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  ></path>
+                </svg>
+                Export
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Branch Details
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Contact Information
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Location
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let branch of branchesData" class="hover:bg-gray-50 transition-colors duration-150">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <div class="h-10 w-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm">
+                        {{ branch.name?.charAt(0) || 'B' }}
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">{{ branch.name || 'Unnamed Branch' }}</div>
+                      <div class="text-sm text-gray-500">ID: {{ branch.id }}</div>
+                      <div class="mt-1">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"></path>
+                          </svg>
+                          Branch
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex flex-col space-y-1">
+                    <div class="flex items-center text-sm text-gray-900">
+                      <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                      </svg>
+                      {{ branch.email || 'No email' }}
+                    </div>
+                    <div class="flex items-center text-sm text-gray-500">
+                      <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                      </svg>
+                      {{ branch.mobile || 'No mobile' }}
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex flex-col space-y-1">
+                    <div class="flex items-start text-sm text-gray-900">
+                      <svg class="w-4 h-4 mr-2 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      </svg>
+                      <span class="truncate max-w-xs">{{ branch.address || 'Location not specified' }}</span>
+                    </div>
+                    <div class="text-sm text-gray-500 ml-6">
+                      {{ branch.city || '' }}{{ branch.city && branch.state ? ', ' : '' }}{{ branch.state || '' }}
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex flex-col space-y-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                      [ngClass]="{
+                        'bg-green-100 text-green-800': branch.status === 'active',
+                        'bg-red-100 text-red-800': branch.status === 'inactive',
+                        'bg-yellow-100 text-yellow-800': !branch.status || branch.status === 'pending'
+                      }">
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <circle cx="10" cy="10" r="5" />
+                      </svg>
+                      {{ (branch.status || 'pending') | titlecase }}
+                    </span>
+                    <div class="text-xs text-gray-500">
+                      <div class="flex items-center">
+                        <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Created: {{ branch.createdAt | date:'shortDate' }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex space-x-2">
+                    <button
+                      (click)="openAddAmountModal(branch)"
+                      class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200"
+                    >
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      Add Amount
+                    </button>
+                    <button
+                      (click)="viewLimits(branch)"
+                      class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                    >
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                      View Limits
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State for Branches -->
+        <div *ngIf="branchesData.length === 0" class="text-center py-12">
+          <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No Branches Found</h3>
+          <p class="text-gray-600 mb-6">There are no branches assigned to your account.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table for Other Roles (Non-CHIEF) -->
+    <div *ngIf="role !== 'CHIEF' && !loading && downlevelData.length > 0" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-gray-800">
+              {{ getRoleDisplayName() }} Entities
+            </h2>
+            <p class="text-sm text-gray-600">
+              All {{ getRoleDisplayName().toLowerCase() }} entities under your management
+            </p>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="text-sm text-gray-500">
+              {{ downlevelData.length }} entity{{ downlevelData.length !== 1 ? 's' : '' }}
+            </div>
+            <button
+              (click)="exportEntities()"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                ></path>
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Entity Details
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Contact Information
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Entity Type
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let entity of downlevelData" class="hover:bg-gray-50 transition-colors duration-150">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10">
+                    <div 
+                      [ngClass]="getEntityAvatarClass(entity)"
+                      class="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                    >
+                      {{ entity.name?.charAt(0) || 'E' }}
+                    </div>
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">{{ entity.name || 'Unnamed Entity' }}</div>
+                    <div class="text-sm text-gray-500">ID: {{ entity.id }}</div>
+                    <div class="mt-1">
+                      <span [ngClass]="getEntityTypeBadgeClass(entity)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                        {{ getEntityTypeDisplay(entity) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex flex-col space-y-1">
+                  <div class="flex items-center text-sm text-gray-900">
+                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    {{ entity.email || 'No email' }}
+                  </div>
+                  <div class="flex items-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    {{ entity.mobile || 'No mobile' }}
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ getEntityTypeDisplay(entity) }}</div>
+                <div *ngIf="entity.entityType" class="text-xs text-gray-500">
+                  {{ entity.entityType }}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex flex-col space-y-2">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': entity.status === 'active',
+                      'bg-red-100 text-red-800': entity.status === 'inactive',
+                      'bg-yellow-100 text-yellow-800': !entity.status || entity.status === 'pending'
+                    }">
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <circle cx="10" cy="10" r="5" />
+                    </svg>
+                    {{ (entity.status || 'active') | titlecase }}
+                  </span>
+                  <div class="text-xs text-gray-500">
+                    <div class="flex items-center">
+                      <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                      Created: {{ entity.createdAt | date:'shortDate' }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex space-x-2">
+                  <button
+                    (click)="openAddAmountModal(entity)"
+                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200"
+                  >
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add Amount
+                  </button>
+                  <button
+                    (click)="viewLimits(entity)"
+                    class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                  >
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    View Limits
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State for Non-CHIEF roles -->
+      <div *ngIf="downlevelData.length === 0" class="text-center py-12">
+        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No Entities Found</h3>
+        <p class="text-gray-600 mb-6">There are no entities available for your current role.</p>
+      </div>
+    </div>
+
+    <!-- Empty State (when no data for any role) -->
+    <div
+      *ngIf="!loading && ((role === 'CHIEF' && managersData.length === 0 && branchesData.length === 0) || (role !== 'CHIEF' && downlevelData.length === 0))"
+      class="text-center py-16 px-4 bg-white rounded-2xl shadow-sm border border-gray-200"
+    >
+      <div class="max-w-md mx-auto">
+        <div
+          class="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center"
+        >
+          <svg
+            class="w-10 h-10 text-blue-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+            ></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">
+          No Entities Found
+        </h3>
+        <p class="text-gray-600 mb-6">
+          There are no downlevel entities available for your current role.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Amount Modal -->
+  <div
+    *ngIf="showAddAmountModal"
+    class="fixed inset-0 z-50 overflow-y-auto"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div
+      class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+    >
+      <!-- Background overlay -->
+      <div
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        aria-hidden="true"
+        (click)="closeAddAmountModal()"
+      ></div>
+
+      <!-- Modal panel -->
+      <div
+        class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+      >
+        <div class="bg-white px-6 pt-6 pb-4">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h3 class="text-xl font-bold text-gray-900" id="modal-title">
+                Add Amount to {{ selectedEntity?.name }}
+              </h3>
+              <p class="text-sm text-gray-500 mt-1">
+                Enter the amount to allocate to this entity
+              </p>
+            </div>
+            <button
+              type="button"
+              (click)="closeAddAmountModal()"
+              class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+            >
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="mt-6">
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+              <div class="flex items-center">
+                <svg
+                  class="w-5 h-5 text-blue-500 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <div>
+                  <p class="text-sm text-blue-700">Entity Details</p>
+                  <p class="text-xs text-blue-600 mt-1">
+                    ID: {{ selectedEntity?.id }} | Type:
+                    {{
+                      selectedEntity?.entityType ||
+                        getType(selectedEntity?.role || role)
+                    }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <label
+                  for="amount"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Amount to Add
+                </label>
+                <div class="relative rounded-lg shadow-sm">
+                  <div
+                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                  >
+                    <span class="text-gray-500 sm:text-sm">₹</span>
+                  </div>
+                  <input
+                    type="number"
+                    id="amount"
+                    [(ngModel)]="amountToAdd"
+                    placeholder="0.00"
+                    class="block w-full pl-10 pr-12 py-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    aria-describedby="amount-currency"
+                  />
+                  <div
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+                  >
+                    <span class="text-gray-500 sm:text-sm" id="amount-currency"
+                      >INR</span
+                    >
+                  </div>
+                </div>
+                <p
+                  *ngIf="amountToAdd <= 0 && amountToAdd !== null"
+                  class="mt-2 text-sm text-red-600"
+                >
+                  Please enter a valid amount greater than 0
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row-reverse gap-3"
+        >
+          <button
+            type="button"
+            (click)="submitAddAmount()"
+            [disabled]="amountToAdd <= 0 || addingAmount"
+            class="inline-flex justify-center w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium rounded-lg hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+          >
+            <span *ngIf="!addingAmount">Add Amount</span>
+            <span *ngIf="addingAmount" class="flex items-center">
+              <svg
+                class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Processing...
+            </span>
+          </button>
+          <button
+            type="button"
+            (click)="closeAddAmountModal()"
+            class="inline-flex justify-center w-full sm:w-auto px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-300"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Limits Modal -->
+  <div
+    *ngIf="showViewLimitsModal"
+    class="fixed inset-0 z-40 overflow-y-auto"
+    aria-labelledby="limits-modal-title"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div
+      class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+    >
+      <!-- Background overlay -->
+      <div
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        aria-hidden="true"
+        (click)="closeViewLimitsModal()"
+      ></div>
+
+      <!-- Modal panel -->
+      <div
+        class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
+      >
+        <div class="bg-white px-6 pt-6 pb-4">
+          <div class="flex items-start justify-between mb-6">
+            <div>
+              <h3
+                class="text-xl font-bold text-gray-900"
+                id="limits-modal-title"
+              >
+                Limits History for {{ selectedEntity?.name }}
+              </h3>
+              <p class="text-sm text-gray-500 mt-1">
+                Complete transaction and balance history
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                (click)="closeViewLimitsModal()"
+                class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+              >
+                <svg
+                  class="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Entity Summary -->
+          <div
+            class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100"
+          >
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="p-3 bg-white rounded-lg border border-blue-100">
+                <div class="text-xs text-blue-600 font-medium mb-1">
+                  Entity ID
+                </div>
+                <div class="font-mono text-sm text-gray-900">
+                  {{ selectedEntity?.id }}
+                </div>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-blue-100">
+                <div class="text-xs text-blue-600 font-medium mb-1">
+                  Entity Type
+                </div>
+                <div class="text-sm font-semibold text-gray-900">
+                  {{
+                    selectedEntity?.entityType ||
+                      getType(selectedEntity?.role || role)
+                  }}
+                </div>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-blue-100">
+                <div class="text-xs text-blue-600 font-medium mb-1">
+                  Last Updated
+                </div>
+                <div class="text-sm text-gray-900">
+                  {{ limitsData[0]?.updatedAt | date : "medium" }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Limits Data Table -->
+          <div
+            *ngIf="limitsData.length > 0"
+            class="overflow-hidden rounded-lg border border-gray-200"
+          >
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Date & Time
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Amount Details
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Balance
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr
+                  *ngFor="let limit of limitsData"
+                  class="hover:bg-gray-50 transition-colors"
+                >
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">
+                      {{ limit.createdAt | date : "shortDate" }}
+                    </div>
+                    <div class="text-xs text-gray-500">
+                      {{ limit.createdAt | date : "shortTime" }}
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="space-y-2">
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Amount Added:</span>
+                        <span class="text-sm font-semibold text-green-600"
+                          >₹{{ limit.amount | number : "1.2-2" }}</span
+                        >
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Given Amount:</span>
+                        <span class="text-sm font-semibold text-blue-600"
+                          >₹{{ limit.givenAmount || limit.runningBalance- limit.remainingAmount | number:   "1.2-2"}}</span
+                        >
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Remaining:</span>
+                        <span class="text-sm font-semibold text-amber-600"
+                          >₹{{ limit.remainingAmount | number : "1.2-2" }}</span
+                        >
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="space-y-2">
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Previous:</span>
+                        <span class="text-sm text-gray-700"
+                          >₹{{ limit.previousBalance | number : "1.2-2" }}</span
+                        >
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Running:</span>
+                        <span class="text-sm font-bold text-gray-900"
+                          >₹{{ limit.runningBalance | number : "1.2-2" }}</span
+                        >
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty Limits State -->
+          <div
+            *ngIf="limitsData.length === 0 && !loadingLimits"
+            class="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg"
+          >
+            <svg
+              class="w-12 h-12 mx-auto text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+            <h4 class="mt-4 text-lg font-medium text-gray-900">
+              No Limit Records Found
+            </h4>
+            <p class="mt-2 text-sm text-gray-600">
+              This entity doesn't have any limit history yet.
+            </p>
+          </div>
+
+          <!-- Loading Limits -->
+          <div *ngIf="loadingLimits" class="text-center py-12">
+            <div
+              class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-4"
+            ></div>
+            <p class="text-gray-600">Loading limit data...</p>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 px-6 py-4 flex justify-end">
+          <button
+            type="button"
+            (click)="closeViewLimitsModal()"
+            class="inline-flex justify-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-300"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Self Amount Modal -->
+  <div
+    *ngIf="showAdminSelfAmountModal"
+    class="fixed inset-0 z-50 overflow-y-auto"
+    aria-labelledby="admin-modal-title"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div
+      class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+    >
+      <!-- Background overlay -->
+      <div
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        aria-hidden="true"
+        (click)="closeAdminSelfAmountModal()"
+      ></div>
+
+      <!-- Modal panel -->
+      <div
+        class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full "
+      >
+        <div class="bg-white px-6 pt-6 pb-4">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h3 class="text-xl font-bold text-gray-900" id="admin-modal-title">
+                Add Amount to Your Admin Account
+              </h3>
+              <p class="text-sm text-gray-500 mt-1">
+                Set amount for your own OWNER account
+              </p>
+            </div>
+            <button
+              type="button"
+              (click)="closeAdminSelfAmountModal()"
+              class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+            >
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="mt-6">
+            <div
+              class="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-100"
+            >
+              <div class="flex items-center">
+                <svg
+                  class="w-5 h-5 text-purple-500 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  ></path>
+              </svg>
+                <div>
+                  <p class="text-sm text-purple-700">Admin Account Details</p>
+                  <p class="text-xs text-purple-600 mt-1">
+                    Role: {{ role }} | ID: {{ currentRoleId }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <label
+                  for="adminAmount"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Amount to Add to Your Account
+                </label>
+                <div class="relative rounded-lg shadow-sm">
+                  <div
+                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                  >
+                    <span class="text-gray-500 sm:text-sm">₹</span>
+                  </div>
+                  <input
+                    type="number"
+                    id="adminAmount"
+                    [(ngModel)]="adminAmountToAdd"
+                    placeholder="0.00"
+                    class="block w-full pl-10 pr-12 py-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    aria-describedby="admin-amount-currency"
+                  />
+                  <div
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+                  >
+                    <span
+                      class="text-gray-500 sm:text-sm"
+                      id="admin-amount-currency"
+                      >INR</span
+                    >
+                  </div>
+                </div>
+                <p
+                  *ngIf="adminAmountToAdd <= 0 && adminAmountToAdd !== null"
+                  class="mt-2 text-sm text-red-600"
+                >
+                  Please enter a valid amount greater than 0
+                </p>
+              </div>
+
+              <div class="mt-6">
+                <div class="p-3 bg-purple-50 rounded-lg">
+                  <p class="text-sm text-purple-700 mb-2">
+                    <svg
+                      class="w-4 h-4 inline mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
+                    </svg>
+                    This amount will be added directly to your OWNER account
+                    balance.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row-reverse gap-3">
+          <button
+            type="button"
+            (click)="submitAdminSelfAmount()"
+            [disabled]="adminAmountToAdd <= 0 || addingAdminAmount"
+            class="inline-flex justify-center w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-medium rounded-lg hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+          >
+            <span *ngIf="!addingAdminAmount">Add to My Account</span>
+            <span *ngIf="addingAdminAmount" class="flex items-center">
+              <svg
+                class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Processing...
+            </span>
+          </button>
+          <button
+            type="button"
+            (click)="closeAdminSelfAmountModal()"
+            class="inline-flex justify-center w-full sm:w-auto px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-300"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin View Limits Modal -->
+  <div
+    *ngIf="showAdminLimitsModal"
+    class="fixed inset-0 z-40 overflow-y-auto"
+    aria-labelledby="admin-limits-modal-title"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div
+      class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+    >
+      <!-- Background overlay -->
+      <div
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        aria-hidden="true"
+        (click)="closeAdminLimitsModal()"
+      ></div>
+
+      <!-- Modal panel -->
+      <div
+        class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
+      >
+        <div class="bg-white px-6 pt-6 pb-4">
+          <div class="flex items-start justify-between mb-6">
+            <div>
+              <h3
+                class="text-xl font-bold text-gray-900"
+                id="admin-limits-modal-title"
+              >
+                Your Account Limits
+              </h3>
+              <p class="text-sm text-gray-500 mt-1">
+                Your personal transaction and balance history
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                (click)="closeAdminLimitsModal()"
+                class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+              >
+                <svg
+                  class="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Admin Summary -->
+          <div
+            class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100"
+          >
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="p-3 bg-white rounded-lg border border-purple-100">
+                <div class="text-xs text-purple-600 font-medium mb-1">Role</div>
+                <div class="text-sm font-semibold text-gray-900">{{ role }}</div>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-purple-100">
+                <div class="text-xs text-purple-600 font-medium mb-1">
+                  User ID
+                </div>
+                <div class="text-sm text-gray-900">{{ currentUserId }}</div>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-purple-100">
+                <div class="text-xs text-purple-600 font-medium mb-1">
+                  Account Balance
+                </div>
+                <div class="text-sm font-bold text-gray-900">
+                  ₹{{ currentUserLimits?.runningBalance | number : "1.2-2" }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Admin Limits Data Table -->
+          <div
+            *ngIf="adminLimitsData.length > 0"
+            class="overflow-hidden rounded-lg border border-gray-200"
+          >
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Date & Time
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Amount Details
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Balance
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr
+                  *ngFor="let limit of adminLimitsData"
+                  class="hover:bg-gray-50 transition-colors"
+                >
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">
+                      {{ limit.createdAt | date : "shortDate" }}
+                    </div>
+                    <div class="text-xs text-gray-500">
+                      {{ limit.createdAt | date : "shortTime" }}
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="space-y-2">
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Amount Added:</span>
+                        <span class="text-sm font-semibold text-green-600"
+                          >₹{{ limit.amount | number : "1.2-2" }}</span
+                        >
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Given Amount:</span>
+                        <span class="text-sm font-semibold text-blue-600"
+                          >₹{{ limit.givenAmount | number : "1.2-2" }}</span
+                        >
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Remaining:</span>
+                        <span class="text-sm font-semibold text-amber-600"
+                          >₹{{ limit.remainingAmount | number : "1.2-2" }}</span
+                        >
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="space-y-2">
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Previous:</span>
+                        <span class="text-sm text-gray-700"
+                          >₹{{ limit.previousBalance | number : "1.2-2" }}</span
+                        >
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Running:</span>
+                        <span class="text-sm font-bold text-gray-900"
+                          >₹{{ limit.runningBalance | number : "1.2-2" }}</span
+                        >
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty Admin Limits State -->
+          <div
+            *ngIf="adminLimitsData.length === 0 && !loadingAdminLimits"
+            class="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg"
+          >
+            <svg
+              class="w-12 h-12 mx-auto text-purple-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+            <h4 class="mt-4 text-lg font-medium text-gray-900">
+              No Limit Records Found
+            </h4>
+            <p class="mt-2 text-sm text-gray-600">
+              You don't have any limit transactions yet.
+            </p>
+            <button
+              (click)="openAdminSelfAmountModal()"
+              class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 transition-all"
+            >
+              Add Your First Amount
+            </button>
+          </div>
+
+          <!-- Loading Admin Limits -->
+          <div *ngIf="loadingAdminLimits" class="text-center py-12">
+            <div
+              class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mb-4"
+            ></div>
+            <p class="text-gray-600">Loading your limit data...</p>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+          <button
+            *ngIf="role === 'OWNER'"
+            (click)="openAdminSelfAmountModal()"
+            class="inline-flex justify-center px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-medium rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-300"
+          >
+            Add Amount
+          </button>
+          <button
+            type="button"
+            (click)="closeAdminLimitsModal()"
+            class="inline-flex justify-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-300"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

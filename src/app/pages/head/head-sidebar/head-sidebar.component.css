@@ -1,0 +1,187 @@
+/* Smooth transitions for all interactive elements */
+* {
+  transition: background-color 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+}
+
+/* Custom scrollbar matching head theme */
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #FFB366, #E67A00);
+  border-radius: 10px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #E67A00, #FFB366);
+}
+
+/* Animation for submenu */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.submenu {
+  animation: slideDown 0.2s ease-out;
+}
+
+/* Hover effect for icons */
+.icon-wrapper:hover svg {
+  transform: scale(1.1);
+}
+
+/* Active state glow effect using head.glow */
+.nav-link.active {
+  box-shadow: 0 0 20px rgba(230, 122, 0, 0.5);
+}
+
+/* Ensure text doesn't wrap in collapsed mode */
+.nav-text, .submenu-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Collapsed sidebar hover effects */
+.sidebar.collapsed:hover {
+  box-shadow: 0 0 30px rgba(230, 122, 0, 0.5);
+}
+
+/* Enhanced hover effects for nav items */
+.nav-link:hover .icon-wrapper {
+  transform: translateY(-2px);
+}
+
+.nav-link:hover .nav-text {
+  transform: translateX(2px);
+}
+
+/* Active parent menu indicator */
+.nav-link.parent-active {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link.parent-active::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: #FFB366;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 179, 102, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(255, 179, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 179, 102, 0);
+  }
+}
+
+/* Head orange gradient backgrounds */
+.bg-head-gradient {
+  background: linear-gradient(135deg, #E67A00 0%, #FF8A1A 50%, #CC6A00 100%);
+}
+
+.bg-head-secondary-gradient {
+  background: linear-gradient(135deg, #FFB366 0%, #E67A00 100%);
+}
+
+/* Orange border effects */
+.border-orange {
+  border: 1px solid rgba(204, 106, 0, 0.3);
+}
+
+.border-orange:hover {
+  border: 1px solid rgba(204, 106, 0, 0.6);
+}
+
+/* Subtle shine effect on active items */
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #FFB366, transparent);
+}
+
+/* Smooth icon transitions */
+.icon-wrapper svg {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* User avatar shine effect */
+.user-avatar {
+  position: relative;
+  overflow: hidden;
+}
+
+.user-avatar::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  transition: transform 0.6s;
+}
+
+.user-avatar:hover::after {
+  transform: rotate(30deg) translate(10%, 10%);
+}
+
+/* Glow effect for active states */
+.glow-effect {
+  box-shadow: 0 0 15px rgba(230, 122, 0, 0.3);
+}
+
+.glow-effect:hover {
+  box-shadow: 0 0 20px rgba(230, 122, 0, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar:not(.collapsed) {
+    box-shadow: 0 0 40px rgba(230, 122, 0, 0.4);
+  }
+}
+
+/* Hover scale animation */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
