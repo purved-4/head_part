@@ -1,201 +1,556 @@
-<div id="webcrumbs" class="max-w-7xl mt-10 mx-auto p-6 bg-white rounded-2xl shadow-xl border border-[#CC6A00]/30 animate-fade-in">
+<div
+  id="webcrumbs"
+  class="max-w-7xl mx-auto p-6 bg-[var(--color-surface)] rounded-xl shadow-sm border border-[var(--color-border)]"
+>
   <!-- Header Section -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-    <div class="flex items-center gap-4">
-      <div class="w-12 h-12 bg-gradient-to-r from-[#E67A00] to-[#FFB366] rounded-xl flex items-center justify-center shadow-lg" style="box-shadow: 0 4px 14px rgba(230,122,0,0.25)">
-        <svg class="w-6 h-6 text-[#1F2937]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4c1.339 0 2.582.419 3.607 1.135l-1.607 1.607a5 5 0 10-4 0L8.393 5.135A5.982 5.982 0 0112 4zm-7 8a5 5 0 1110 0 5 5 0 01-10 0zm14 0a5 5 0 1110 0 5 5 0 01-10 0z"></path>
-        </svg>
+  <div
+    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+  >
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 bg-[var(--color-primary)] rounded-lg flex items-center justify-center"
+      >
+        <span class="material-icons text-white text-xl">
+          account_balance_wallet
+        </span>
       </div>
       <div>
-        <h1 class="text-2xl font-bold text-[#1F2937]">Manage UPIs</h1>
-        <p class="text-[#1F2937]/60 mt-1">Manage your UPI QR codes and their status</p>
+        <h1 class="text-xl font-bold text-[var(--color-font)]">Manage UPIs</h1>
+        <p class="text-[var(--color-muted)] text-sm">
+          Manage UPI QR codes and their status
+        </p>
       </div>
     </div>
-    <button 
+    <button
       (click)="openAddModal()"
-      class="inline-flex items-center px-5 py-3 bg-gradient-to-r from-[#E67A00] to-[#FFB366] text-[#1F2937] font-bold rounded-xl hover:from-[#FF8A1A] hover:to-[#E67A00] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-      style="box-shadow: 0 4px 14px rgba(230,122,0,0.25)"
+      class="inline-flex items-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors duration-200"
     >
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-      </svg>
+      <span class="material-icons mr-2">add</span>
       Add New UPI
     </button>
   </div>
 
-  <!-- Search and Filters Section -->
-  <div class="bg-gradient-to-r from-[#FFB366]/30 to-[#FFB366]/20 rounded-xl p-6 mb-8 border border-[#CC6A00]/30" style="background-color: #FFF9F2">
-    <h3 class="text-lg font-semibold text-[#1F2937] mb-4 flex items-center">
-      <svg class="w-5 h-5 mr-2 text-[#E67A00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-      </svg>
+  <div
+    class="bg-[var(--color-bg)] rounded-lg p-4 mb-6 border border-[var(--color-border)]"
+  >
+    <h3
+      class="text-base font-semibold text-[var(--color-font)] mb-3 flex items-center"
+    >
+      <span class="material-icons mr-2 text-[var(--color-primary)]">
+        filter_list
+      </span>
       Filter UPIs
     </h3>
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+
+    <!-- Main Filters Row -->
+    <div
+      class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4"
+    >
+      <!-- Search Input -->
       <div class="relative flex-1 max-w-md">
-        <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#1F2937]/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-        <input 
-          type="text" 
-          [(ngModel)]="searchTerm" 
+        <span
+          class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+        >
+          search
+        </span>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
           (ngModelChange)="onSearch()"
-          placeholder="Search by QR ID, Website, or UPI ID..."
-          class="pl-12 pr-4 py-3 w-full border-2 border-[#CC6A00]/30 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#E67A00]/50"
+          placeholder="Search by Website or UPI ID..."
+          class="pl-10 pr-4 py-2.5 w-full border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)]"
         />
       </div>
-      
-      <select 
-        [(ngModel)]="filterStatus" 
-        (change)="onSearch()"
-        class="px-4 py-3 border-2 border-[#CC6A00]/30 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] bg-white transition-all duration-200 hover:border-[#E67A00]/50 font-medium text-[#1F2937]"
-      >
-        <option value="" class="text-[#1F2937]">All Status</option>
-        <option value="active" class="text-[#1F2937]">Active</option>
-        <option value="inactive" class="text-[#1F2937]">Inactive</option>
-      </select>
-      
-      <div class="flex gap-3">
-        <button 
-          (click)="onSearch()" 
-          class="inline-flex items-center px-5 py-3 bg-gradient-to-r from-[#E67A00] to-[#FFB366] text-[#1F2937] font-bold rounded-xl hover:from-[#FF8A1A] hover:to-[#E67A00] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-          style="box-shadow: 0 4px 14px rgba(230,122,0,0.25)"
+
+      <!-- Website Filter with Searchable Dropdown -->
+      <div class="relative flex-1 max-w-md website-filter-container">
+        <span
+          class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
         >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-          </svg>
+          language
+        </span>
+        <input
+          type="text"
+          [(ngModel)]="websiteSearchTerm"
+          (ngModelChange)="filterWebsites()"
+          (focus)="showWebsiteDropdown = true"
+          (blur)="onWebsiteInputBlur()"
+          placeholder="Search or select website..."
+          class="pl-10 pr-4 py-2.5 w-full border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)]"
+        />
+        <!-- Website Dropdown -->
+        <div
+          *ngIf="showWebsiteDropdown && filteredWebsites.length > 0"
+          class="absolute z-50 w-full mt-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg max-h-60 overflow-y-auto"
+        >
+          <div
+            *ngFor="let website of filteredWebsites"
+            (mousedown)="selectWebsite(website)"
+            class="px-4 py-2 hover:bg-[var(--color-hover)] cursor-pointer transition-colors duration-200 border-b border-[var(--color-border)] last:border-b-0"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="font-medium text-[var(--color-font)]">
+                  {{ website.domain }}
+                </div>
+                <div
+                  class="text-xs text-[var(--color-muted)] flex items-center mt-1"
+                >
+                  <span class="material-icons mr-1 text-xs"
+                    >currency_exchange</span
+                  >
+                  {{ website.currency }}
+                </div>
+              </div>
+              <span
+                *ngIf="selectedWebsite?.id === website.id"
+                class="material-icons text-[var(--color-primary)] text-sm ml-2"
+              >
+                check
+              </span>
+            </div>
+          </div>
+          <div
+            *ngIf="filteredWebsites.length === 0"
+            class="px-4 py-3 text-center text-[var(--color-muted)] text-sm"
+          >
+            No websites found
+          </div>
+        </div>
+        <!-- Clear selection button -->
+        <button
+          *ngIf="selectedWebsite"
+          (mousedown)="clearWebsiteFilter()"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-[var(--color-hover)] rounded-full transition-colors"
+          title="Clear website filter"
+        >
+          <span class="material-icons text-[var(--color-danger)] text-sm">
+            close
+          </span>
+        </button>
+      </div>
+
+      <!-- Status Filter -->
+      <select
+        [(ngModel)]="filterStatus"
+        (change)="onSearch()"
+        class="px-3 py-2.5 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] transition-colors duration-200 font-medium text-[var(--color-font)] text-sm min-w-[140px]"
+      >
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+
+    <!-- Amount Filter Dropdown Button -->
+    <div class="mb-4">
+      <button
+        type="button"
+        (click)="showAmountFilter = !showAmountFilter"
+        class="inline-flex items-center px-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-hover)] transition-colors duration-200 font-medium text-[var(--color-font)]"
+      >
+        <span class="material-icons mr-2 text-[var(--color-primary)]">
+          filter_alt
+        </span>
+        Amount Filter
+        <span class="material-icons ml-2">
+          {{ showAmountFilter ? "expand_less" : "expand_more" }}
+        </span>
+      </button>
+
+      <!-- TWO Amount Filters Content -->
+      <div
+        *ngIf="showAmountFilter"
+        class="mt-3 p-4 border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)]"
+      >
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- 1. Limit Amount Filter -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+            >
+              Limit Amount (₹)
+            </label>
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2">
+                <input
+                  type="number"
+                  [(ngModel)]="limitMinAmount"
+                  (ngModelChange)="onAmountFilterChange()"
+                  placeholder="Min ₹"
+                  min="0"
+                  step="1"
+                  class="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-bg)] transition-colors duration-200 text-sm"
+                />
+                <span class="text-[var(--color-muted)]">to</span>
+                <input
+                  type="number"
+                  [(ngModel)]="limitMaxAmount"
+                  (ngModelChange)="onAmountFilterChange()"
+                  placeholder="Max ₹"
+                  min="0"
+                  step="1"
+                  class="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-bg)] transition-colors duration-200 text-sm"
+                />
+              </div>
+              <div
+                *ngIf="limitFilterActive"
+                class="text-xs text-[var(--color-muted)]"
+              >
+                Filtering Limit: {{ limitMinAmount || 0 }} -
+                {{ limitMaxAmount || "∞" }} ₹
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Transaction Range Filter -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+            >
+              Transaction Range (₹)
+              <span class="text-xs text-[var(--color-muted)] ml-1">
+                (Applies to Min & Max amounts)
+              </span>
+            </label>
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2">
+                <input
+                  type="number"
+                  [(ngModel)]="transactionMinAmount"
+                  (ngModelChange)="onAmountFilterChange()"
+                  placeholder="Min ₹"
+                  min="0"
+                  step="1"
+                  class="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-bg)] transition-colors duration-200 text-sm"
+                />
+                <span class="text-[var(--color-muted)]">to</span>
+                <input
+                  type="number"
+                  [(ngModel)]="transactionMaxAmount"
+                  (ngModelChange)="onAmountFilterChange()"
+                  placeholder="Max ₹"
+                  min="0"
+                  step="1"
+                  class="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-bg)] transition-colors duration-200 text-sm"
+                />
+              </div>
+              <div
+                *ngIf="transactionFilterActive"
+                class="text-xs text-[var(--color-muted)]"
+              >
+                Filtering Min/Max: {{ transactionMinAmount || 0 }} -
+                {{ transactionMaxAmount || "∞" }} ₹
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div
+      class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[var(--color-border)]"
+    >
+      <div
+        class="text-sm text-[var(--color-muted)] flex flex-wrap items-center gap-2"
+      >
+        <!-- Active Filters Display -->
+        <div
+          *ngIf="selectedWebsite"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
+        >
+          <span class="material-icons mr-1 text-sm">language</span>
+          {{ selectedWebsite.domain }}
+          <button
+            (click)="clearWebsiteFilter()"
+            class="ml-2 hover:text-[var(--color-danger)] transition-colors"
+          >
+            <span class="material-icons text-sm">close</span>
+          </button>
+        </div>
+
+        <!-- Status Filter Badge -->
+        <div
+          *ngIf="filterStatus"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
+        >
+          <span class="material-icons mr-1 text-sm">toggle_on</span>
+          {{ filterStatus === "active" ? "Active" : "Inactive" }}
+          <button
+            (click)="filterStatus = ''; onSearch()"
+            class="ml-2 hover:text-[var(--color-danger)] transition-colors"
+          >
+            <span class="material-icons text-sm">close</span>
+          </button>
+        </div>
+
+        <!-- Search Term Badge -->
+        <div
+          *ngIf="searchTerm"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
+        >
+          <span class="material-icons mr-1 text-sm">search</span>
+          "{{ searchTerm }}"
+          <button
+            (click)="searchTerm = ''; onSearch()"
+            class="ml-2 hover:text-[var(--color-danger)] transition-colors"
+          >
+            <span class="material-icons text-sm">close</span>
+          </button>
+        </div>
+
+        <!-- Limit Amount Filter Badge -->
+        <div
+          *ngIf="limitFilterActive"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
+        >
+          <span class="material-icons mr-1 text-sm">currency_rupee</span>
+          Limit: {{ limitMinAmount || "0" }} - {{ limitMaxAmount || "∞" }} ₹
+          <button
+            (click)="clearLimitFilter()"
+            class="ml-2 hover:text-[var(--color-danger)] transition-colors"
+          >
+            <span class="material-icons text-sm">close</span>
+          </button>
+        </div>
+
+        <!-- Transaction Range Filter Badge -->
+        <div
+          *ngIf="transactionFilterActive"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
+        >
+          <span class="material-icons mr-1 text-sm">currency_rupee</span>
+          Transaction: {{ transactionMinAmount || "0" }} -
+          {{ transactionMaxAmount || "∞" }} ₹
+          <button
+            (click)="clearTransactionFilter()"
+            class="ml-2 hover:text-[var(--color-danger)] transition-colors"
+          >
+            <span class="material-icons text-sm">close</span>
+          </button>
+        </div>
+
+        <span
+          *ngIf="activeFilters > 0"
+          class="text-[var(--color-primary)] font-medium"
+        >
+          {{ activeFilters }} active filter(s)
+        </span>
+        <span *ngIf="activeFilters === 0" class="text-[var(--color-muted)]">
+          No filters applied
+        </span>
+      </div>
+
+      <div class="flex gap-2">
+        <button
+          (click)="applyAllFilters()"
+          class="inline-flex items-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors duration-200 shadow-sm"
+        >
+          <span class="material-icons mr-2">filter_alt</span>
           Apply Filters
         </button>
-        <button 
-          (click)="resetFilters()" 
-          class="inline-flex items-center px-5 py-3 bg-[#FFB366]/30 text-[#1F2937] rounded-xl hover:bg-[#FFB366]/50 transition-all duration-200 font-semibold border border-[#CC6A00]/30"
+        <button
+          (click)="resetFilters()"
+          class="inline-flex items-center px-4 py-2.5 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] transition-colors duration-200 font-medium border border-[var(--color-border)] shadow-sm"
         >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-          </svg>
-          Reset
+          <span class="material-icons mr-2">refresh</span>
+          Reset All
         </button>
       </div>
     </div>
   </div>
 
+  <!-- Rest of your HTML template (UPI table, modals, etc.) remains the same -->
+
   <!-- Table Section -->
-  <div class="overflow-x-auto bg-white rounded-xl border border-[#CC6A00]/30 shadow-lg">
-    <table class="min-w-full divide-y divide-[#CC6A00]/20">
-      <thead class="bg-gradient-to-r from-[#FFB366]/30 to-[#FFB366]/20">
+  <div
+    class="overflow-x-auto bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]"
+  >
+    <table class="min-w-full divide-y divide-[var(--color-border)]">
+      <thead class="bg-[var(--color-bg)]">
         <tr>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider">S. No.</th>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider">Website</th>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider">UPI ID</th>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider">UPI Limit</th>
-           <th class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider">Min Amount</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider">Max Amount</th>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider">QR Image</th>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider">Status</th>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider">Actions</th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            #
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            Website
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            UPI ID
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            Limit
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            Min
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            Max
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            QR
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            Status
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            Actions
+          </th>
         </tr>
       </thead>
-      <tbody class="bg-white divide-y divide-[#CC6A00]/20">
-        <tr 
-          *ngFor="let upi of filteredUpis; let i = index" 
-          class="hover:bg-[#FFF9F2] transition-all duration-200 group"
+      <tbody
+        class="bg-[var(--color-surface)] divide-y divide-[var(--color-border)]"
+      >
+        <tr
+          *ngFor="let upi of pagedUpis(); let i = index"
+          class="hover:bg-[var(--color-hover)] transition-colors duration-150"
         >
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center">
-              <div class="w-8 h-8 bg-[#FFB366]/30 rounded-lg flex items-center justify-center group-hover:bg-[#FFB366]/50 transition-colors">
-                <span class="text-sm font-semibold text-[#1F2937]">{{ i + 1 }}</span>
+              <div
+                class="w-7 h-7 bg-[var(--color-bg)] rounded flex items-center justify-center"
+              >
+                <span class="text-sm font-semibold text-[var(--color-font)]">{{
+                  (currentPage - 1) * pageSize + i + 1
+                }}</span>
               </div>
             </div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center">
-              <svg class="w-4 h-4 mr-3 text-[#E67A00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
-              </svg>
-              <span class="text-sm font-medium text-[#1F2937]">{{ upi.websiteDomain || '-' }}</span>
+              <span class="material-icons mr-2 text-[var(--color-primary)]">
+                language
+              </span>
+              <span class="text-sm text-[var(--color-font)]">{{
+                upi.websiteDomain || "-"
+              }}</span>
             </div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center">
-              <svg class="w-4 h-4 mr-3 text-[#1F2937]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"></path>
-              </svg>
-              <span class="text-sm text-[#1F2937] font-mono bg-[#FFB366]/10 px-3 py-1 rounded-lg border border-[#CC6A00]/20">{{ upi.vpa || '-' }}</span>
+              <span class="material-icons mr-2 text-[var(--color-muted)]">
+                credit_card
+              </span>
+              <span
+                class="text-sm text-[var(--color-font)] font-mono bg-[var(--color-bg)] px-2 py-1 rounded border border-[var(--color-border)]"
+                >{{ upi.vpa || "-" }}</span
+              >
             </div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-              <svg class="w-4 h-4 mr-3 text-[#1F2937]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"></path>
-              </svg>
-              <span class="text-sm text-[#1F2937] font-semibold">₹{{ upi.limitAmount || '0' }}</span>
-            </div>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <span class="text-sm text-[var(--color-font)] font-semibold"
+              >₹{{ upi.limitAmount || "0" }}</span
+            >
           </td>
-           <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-              <svg class="w-4 h-4 mr-3 text-[#1F2937]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"></path>
-              </svg>
-              <span class="text-sm text-[#1F2937] font-semibold">₹{{ upi.minAmount || '0' }}</span>
-            </div>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <span class="text-sm text-[var(--color-font)] font-semibold"
+              >₹{{ upi.minAmount || "0" }}</span
+            >
           </td>
-           <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-              <svg class="w-4 h-4 mr-3 text-[#1F2937]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"></path>
-              </svg>
-              <span class="text-sm text-[#1F2937] font-semibold">₹{{ upi.maxAmount || '0' }}</span>
-            </div>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <span class="text-sm text-[var(--color-font)] font-semibold"
+              >₹{{ upi.maxAmount || "0" }}</span
+            >
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center">
-              <div 
-                *ngIf="upi.qrImagePath" 
-                class="relative group cursor-pointer transform transition-transform duration-200 hover:scale-105"
+              <div
+                *ngIf="upi.qrImagePath"
+                class="relative cursor-pointer"
                 (click)="openImageModal(upi.qrImagePath)"
               >
-                <img 
-                  [src]="upi.qrImagePath" 
-                  alt="QR Code" 
-                  class="h-14 w-14 object-cover rounded-xl border-2 border-[#CC6A00]/30 group-hover:border-[#E67A00] transition-all duration-200 shadow-sm group-hover:shadow-md"
-                />
-                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-xl transition-all duration-200 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3-3H7"></path>
-                  </svg>
+                <div
+                  class="w-12 h-12 bg-[var(--color-bg)] rounded border border-[var(--color-border)] flex items-center justify-center overflow-hidden"
+                >
+                  <img
+                    [src]="upi.qrImagePath"
+                    alt="QR Code"
+                    class="w-10 h-10 object-contain"
+                  />
                 </div>
               </div>
-              <div *ngIf="!upi.qrImagePath" class="flex items-center text-[#1F2937]/40 text-sm">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-                No Image
+              <div
+                *ngIf="!upi.qrImagePath"
+                class="flex items-center text-[var(--color-muted)] text-sm"
+              >
+                <span class="material-icons mr-1"> image_not_supported </span>
+                No QR
               </div>
             </div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <span 
-              [ngClass]="getStatusClass(upi.status)" 
-              class="inline-flex items-center px-3 py-2 rounded-full text-xs font-semibold capitalize border transition-all duration-200"
-            >
-              <svg class="w-2 h-2 mr-2" fill="currentColor" viewBox="0 0 8 8">
-                <circle cx="4" cy="4" r="4"></circle>
-              </svg>
-              {{ upi.status || '-' }}
-            </span>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center gap-2">
-              <button 
-                (click)="openUpdateModal(upi)"
-                class="inline-flex items-center px-3 py-2 bg-[#E67A00] text-[#1F2937] font-semibold rounded-lg hover:bg-[#FF8A1A] transition-all duration-200 shadow hover:shadow-md transform hover:scale-105 border border-[#CC6A00]/30"
+          <!-- Status Column -->
+          <td class="px-4 py-3 whitespace-nowrap">
+            <div class="flex items-center">
+              <div
+                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                [class.bg-green-100]="upi.status === 'active'"
+                [class.text-green-800]="upi.status === 'active'"
+                [class.bg-red-100]="upi.status === 'inactive'"
+                [class.text-red-800]="upi.status === 'inactive'"
               >
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                </svg>
-                Edit
+                <span class="material-icons text-xs mr-1">
+                  {{ upi.status === "active" ? "check_circle" : "cancel" }}
+                </span>
+                {{ upi.status === "active" ? "Active" : "Inactive" }}
+              </div>
+            </div>
+          </td>
+          <!-- Actions Column - CORRECTED VERSION -->
+          <!-- Actions Column - DROPDOWN VERSION -->
+          <td class="px-4 py-3 whitespace-nowrap">
+            <!-- Actions Dropdown -->
+            <div class="relative">
+              <!-- Three dots button -->
+              <button
+                (click)="toggleActionsDropdown(upi.id)"
+                class="p-2 text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-hover)] rounded-lg transition-colors"
+                title="Actions"
+              >
+                <span class="material-icons">more_vert</span>
               </button>
+
+              <!-- Dropdown menu -->
+              <div
+                *ngIf="activeDropdownUpiId === upi.id"
+                class="absolute right-0 mt-2 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg z-50"
+              >
+                <!-- Toggle Status -->
+                <button
+                  (click)="toggleUpiStatus(upi); activeDropdownUpiId = null"
+                  class="w-full px-4 py-3 text-left text-sm text-[var(--color-font)] hover:bg-[var(--color-hover)] flex items-center gap-3 border-b border-[var(--color-border)]"
+                >
+                  <span class="material-icons">toggle_on</span>
+                  <span>Toggle Status</span>
+                </button>
+
+                <!-- Edit Model -->
+                <button
+                  (click)="openUpdateModal(upi); activeDropdownUpiId = null"
+                  class="w-full px-4 py-3 text-left text-sm text-[var(--color-font)] hover:bg-[var(--color-hover)] flex items-center gap-3"
+                >
+                  <span class="material-icons">edit</span>
+                  <span>Edit Model</span>
+                </button>
+              </div>
             </div>
           </td>
         </tr>
@@ -203,297 +558,368 @@
     </table>
 
     <!-- Empty State -->
-    <div *ngIf="filteredUpis.length === 0" class="text-center py-16">
+    <div *ngIf="filteredUpis.length === 0" class="text-center py-12">
       <div class="flex flex-col items-center justify-center">
-        <div class="w-20 h-20 bg-gradient-to-r from-[#FFB366]/30 to-[#FFB366]/10 rounded-2xl flex items-center justify-center mb-6 shadow-lg border border-[#CC6A00]/20" style="background-color: #FFF9F2">
-          <svg class="w-10 h-10 text-[#E67A00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
+        <div
+          class="w-16 h-16 bg-[var(--color-bg)] rounded-full flex items-center justify-center mb-4 border border-[var(--color-border)]"
+        >
+          <span class="material-icons text-[var(--color-muted)] text-3xl">
+            search_off
+          </span>
         </div>
-        <h3 class="text-xl font-semibold text-[#1F2937] mb-2">No UPIs found</h3>
-        <p class="text-[#1F2937]/60 max-w-md mb-6">
-          {{ searchTerm || filterStatus ? 'Try adjusting your search or filters' : 'Get started by adding your first UPI' }}
+        <h3 class="text-lg font-semibold text-[var(--color-font)] mb-2">
+          No UPIs found
+        </h3>
+        <p class="text-[var(--color-muted)] max-w-md mb-6 text-sm">
+          {{
+            searchTerm || filterStatus
+              ? "Try adjusting your search or filters"
+              : "Get started by adding your first UPI"
+          }}
         </p>
         <div class="flex gap-3">
-          <button 
+          <button
             *ngIf="!searchTerm && !filterStatus"
             (click)="openAddModal()"
-            class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-[#E67A00] to-[#FFB366] text-[#1F2937] font-bold rounded-lg hover:from-[#FF8A1A] hover:to-[#E67A00] transition-all duration-200 shadow-lg hover:shadow-xl"
-            style="box-shadow: 0 4px 14px rgba(230,122,0,0.25)"
+            class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors duration-200"
           >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
+            <span class="material-icons mr-2">add</span>
             Add Your First UPI
           </button>
-          <button 
+          <button
             *ngIf="searchTerm || filterStatus"
-            (click)="resetFilters()" 
-            class="inline-flex items-center px-5 py-2.5 bg-[#FFB366]/30 text-[#1F2937] rounded-lg hover:bg-[#FFB366]/50 transition-all duration-200 font-semibold border border-[#CC6A00]/30"
+            (click)="resetFilters()"
+            class="inline-flex items-center px-4 py-2 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] transition-colors duration-200 font-medium border border-[var(--color-border)]"
           >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
+            <span class="material-icons mr-2">refresh</span>
             Clear Filters
           </button>
         </div>
       </div>
     </div>
+
+    <!-- Pagination -->
+    <div
+      *ngIf="filteredUpis.length > 0"
+      class="px-4 py-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
+    >
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="text-sm text-[var(--color-muted)]">
+          Showing {{ (currentPage - 1) * pageSize + 1 }} to
+          {{ Math.min(currentPage * pageSize, filteredUpis.length) }} of
+          {{ filteredUpis.length }} entries
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-[var(--color-muted)]"
+              >Rows per page:</span
+            >
+            <select
+              [(ngModel)]="pageSize"
+              (change)="onPageSizeChange()"
+              class="text-sm border border-[var(--color-border)] rounded px-2 py-1 bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-primary)]"
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-1">
+            <button
+              (click)="prevPage()"
+              [disabled]="currentPage === 1"
+              class="p-2 rounded border border-[var(--color-border)] hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <span class="material-icons text-[var(--color-font)]">
+                chevron_left
+              </span>
+            </button>
+
+            <div class="flex items-center gap-1">
+              <button
+                *ngFor="let page of getPageNumbers()"
+                (click)="goToPage(page)"
+                [class.bg-[var(--color-primary)]!]="currentPage === page"
+                [class.text-white!]="currentPage === page"
+                [class.bg-[var(--color-surface)]!]="currentPage !== page"
+                [class.text-[var(--color-font)]!]="currentPage !== page"
+                class="w-8 h-8 rounded border border-[var(--color-border)] flex items-center justify-center text-sm font-medium hover:bg-[var(--color-hover)] transition-colors"
+              >
+                {{ page }}
+              </button>
+            </div>
+
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage >= totalPages()"
+              class="p-2 rounded border border-[var(--color-border)] hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <span class="material-icons text-[var(--color-font)]">
+                chevron_right
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Add UPI Modal (500px height) -->
-  <div 
-    *ngIf="showAddModal" 
-    class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-fade-in"
+  <!-- Add UPI Modal -->
+  <div
+    *ngIf="showAddModal"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
     (click)="closeAddModal()"
   >
-    <div 
-      class="bg-white rounded-2xl max-w-2xl w-full max-h-[500px] overflow-hidden shadow-2xl transform transition-all duration-300 border border-[#CC6A00]/30"
+    <div
+      class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg border border-[var(--color-border)]"
       (click)="$event.stopPropagation()"
     >
       <!-- Modal Header -->
-      <div class="flex items-center justify-between p-6 border-b border-[#CC6A00]/20 bg-gradient-to-r from-[#FFB366]/30 to-[#FFB366]/10" style="background-color: #FFF9F2">
-        <h3 class="text-xl font-semibold text-[#1F2937] flex items-center">
-          <svg class="w-6 h-6 mr-2 text-[#E67A00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-          </svg>
+      <div
+        class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+      >
+        <h3
+          class="text-lg font-semibold text-[var(--color-font)] flex items-center"
+        >
+          <span class="material-icons mr-2 text-[var(--color-primary)]">
+            add_circle
+          </span>
           Add New UPI
         </h3>
-        <button 
+        <button
           (click)="closeAddModal()"
-          class="p-2 hover:bg-[#FFB366]/30 rounded-xl transition-colors duration-200"
+          class="p-1 hover:bg-[var(--color-hover)] rounded transition-colors"
         >
-          <svg class="w-6 h-6 text-[#1F2937]/70 hover:text-[#E67A00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
+          <span class="material-icons text-[var(--color-muted)]"> close </span>
         </button>
       </div>
-      
-      <!-- Modal Body (Scrollable) -->
-      <div class="p-6 overflow-y-auto" style="max-height: calc(500px - 80px);">
-        <form [formGroup]="addUpiForm" (ngSubmit)="submitAddUpi()" class="space-y-6">
+
+      <!-- Modal Body -->
+      <div class="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <form
+          [formGroup]="addUpiForm"
+          (ngSubmit)="submitAddUpi()"
+          class="space-y-4"
+        >
           <!-- Website Selection -->
-          <div class="space-y-3">
-            <label class="block text-sm font-semibold text-[#1F2937]">
-              Website
-              <span class="text-red-500 ml-1">*</span>
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-1"
+            >
+              Website <span class="text-[var(--color-danger)]">*</span>
             </label>
             <select
               formControlName="websiteId"
-              class="w-full px-4 py-3 border border-[#CC6A00]/30 rounded-lg focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white"
-              [class.border-red-500]="addUpiForm.get('websiteId')?.touched && addUpiForm.get('websiteId')?.invalid"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+              [class.border-[var(--color-danger)]]="
+                addUpiForm.get('websiteId')?.touched &&
+                addUpiForm.get('websiteId')?.invalid
+              "
             >
-              <option value="" disabled class="text-[#1F2937]/40">Select Website</option>
-              <option *ngFor="let site of websites" [value]="site.id" class="text-[#1F2937]">
-                {{ site.domain }} - {{site.currency}}
+              <option value="" disabled>Select Website</option>
+              <option *ngFor="let site of websites" [value]="site.id">
+                {{ site.domain }} ({{ site.currency }})
               </option>
             </select>
-            <div *ngIf="addUpiForm.get('websiteId')?.touched && addUpiForm.get('websiteId')?.invalid" 
-                 class="text-sm text-red-600 flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
+            <div
+              *ngIf="
+                addUpiForm.get('websiteId')?.touched &&
+                addUpiForm.get('websiteId')?.invalid
+              "
+              class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
+            >
+              <span class="material-icons mr-1 text-sm">error</span>
               Please select a website
             </div>
           </div>
 
           <!-- UPI ID -->
-          <div class="space-y-3">
-            <label class="block text-sm font-semibold text-[#1F2937]">
-              UPI ID (VPA)
-              <span class="text-red-500 ml-1">*</span>
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-1"
+            >
+              UPI ID (VPA) <span class="text-[var(--color-danger)]">*</span>
             </label>
-            <div class="flex gap-3">
+            <div class="flex gap-2">
               <input
                 formControlName="vpa"
                 type="text"
-                placeholder="Enter UPI ID (e.g., username@paytm)"
-                class="flex-1 px-4 py-3 border border-[#CC6A00]/30 rounded-lg focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200"
-                [class.border-red-500]="addUpiForm.get('vpa')?.touched && addUpiForm.get('vpa')?.invalid"
-                [class.border-[#E67A00]]="addUpiForm.get('vpa')?.valid && addUpiForm.get('vpa')?.touched"
+                placeholder="username@paytm"
+                class="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+                [class.border-[var(--color-danger)]]="
+                  addUpiForm.get('vpa')?.touched &&
+                  addUpiForm.get('vpa')?.invalid
+                "
               />
               <button
                 type="button"
                 (click)="generateQrFromVpa()"
                 [disabled]="addUpiForm.get('vpa')?.invalid || generatingQr"
-                class="px-5 py-3 bg-[#E67A00] text-[#1F2937] font-semibold rounded-lg hover:bg-[#FF8A1A] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                class="px-3 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span *ngIf="!generatingQr">Generate QR</span>
+                <span *ngIf="!generatingQr" class="flex items-center">
+                  <span class="material-icons mr-1">qr_code</span>
+                  QR
+                </span>
                 <span *ngIf="generatingQr" class="flex items-center">
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-[#1F2937]" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Generating...
+                  <span class="material-icons animate-spin mr-1"
+                    >autorenew</span
+                  >
                 </span>
               </button>
             </div>
-            <div *ngIf="addUpiForm.get('vpa')?.touched && addUpiForm.get('vpa')?.invalid" 
-                 class="text-sm text-red-600 flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <span *ngIf="addUpiForm.get('vpa')?.errors?.['required']">UPI ID is required</span>
-              <span *ngIf="addUpiForm.get('vpa')?.errors?.['pattern']">Enter valid UPI ID </span>
-            </div>
-            <div *ngIf="addUpiForm.get('vpa')?.valid && addUpiForm.get('vpa')?.touched" 
-                 class="text-sm text-green-600 flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Valid UPI ID format
+            <div
+              *ngIf="
+                addUpiForm.get('vpa')?.touched && addUpiForm.get('vpa')?.invalid
+              "
+              class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
+            >
+              <span class="material-icons mr-1 text-sm">error</span>
+              Valid UPI ID required
             </div>
           </div>
 
           <!-- QR Display -->
-          <div *ngIf="qrData" class="space-y-3 border border-[#FFB366] rounded-lg p-4 bg-[#FFF9F2]">
-            <div class="flex justify-between items-center">
-              <label class="block text-sm font-semibold text-[#1F2937]">
+          <div
+            *ngIf="qrData"
+            class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)]"
+          >
+            <div class="flex justify-between items-center mb-2">
+              <label class="text-sm font-medium text-[var(--color-font)]">
                 Generated QR Code
               </label>
-              <div class="flex gap-2">
+              <div class="flex gap-1">
                 <button
                   type="button"
                   (click)="downloadQr()"
-                  class="px-3 py-1 text-sm bg-[#E67A00] text-[#1F2937] rounded hover:bg-[#FF8A1A] transition-all duration-200 flex items-center"
+                  class="px-2 py-1 text-xs bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-primary-dark)] flex items-center"
                 >
-                  Download
+                  <span class="material-icons mr-1 text-sm">download</span>
+                  Save
                 </button>
                 <button
                   type="button"
                   (click)="removeGeneratedQr()"
-                  class="px-3 py-1 text-sm bg-white text-[#1F2937] border border-[#CC6A00] rounded hover:bg-[#FFF9F2] transition-all duration-200"
+                  class="px-2 py-1 text-xs bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] rounded hover:bg-[var(--color-hover)]"
                 >
                   Remove
                 </button>
               </div>
             </div>
-            <div class="flex items-center justify-center">
-              <div class="p-3 bg-white rounded-lg border border-[#CC6A00]/20">
+            <div class="flex justify-center">
+              <div
+                class="p-2 bg-white rounded border border-[var(--color-border)]"
+              >
                 <qrcode
                   #qrcodeElem
                   [qrdata]="qrData"
-                  [width]="150"
+                  [width]="120"
                   [errorCorrectionLevel]="'H'"
                   [margin]="1"
-                  [colorDark]="'#1F2937'"
+                  [colorDark]="'#000000'"
                   [colorLight]="'#ffffff'"
                 ></qrcode>
               </div>
             </div>
           </div>
 
-          <!-- Limit Amount -->
-          <div class="space-y-3">
-            <label class="block text-sm font-semibold text-[#1F2937]">
-              Limit Amount (₹)
-              <span class="text-red-500 ml-1">*</span>
-            </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="text-[#1F2937]/70 font-medium">₹</span>
+          <!-- Amount Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label
+                class="block text-sm font-medium text-[var(--color-font)] mb-1"
+              >
+                Limit Amount (₹)
+                <span class="text-[var(--color-danger)]">*</span>
+              </label>
+              <div class="relative">
+                <span
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+                  >₹</span
+                >
+                <input
+                  formControlName="limitAmount"
+                  type="number"
+                  min="1"
+                  step="1"
+                  class="pl-8 w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+                  placeholder="Limit"
+                />
               </div>
-              <input
-                formControlName="limitAmount"
-                type="number"
-                min="1"
-                step="1"
-                class="pl-10 w-full px-4 py-3 border border-[#CC6A00]/30 rounded-lg focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200"
-                placeholder="Enter limit amount"
-                [class.border-red-500]="addUpiForm.get('limitAmount')?.touched && addUpiForm.get('limitAmount')?.invalid"
-                [class.border-[#E67A00]]="addUpiForm.get('limitAmount')?.valid && addUpiForm.get('limitAmount')?.touched"
-              />
             </div>
-            <div *ngIf="addUpiForm.get('limitAmount')?.touched && addUpiForm.get('limitAmount')?.invalid" 
-                 class="text-sm text-red-600 flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              Please enter a valid amount (minimum ₹1)
-            </div>
-          </div>
 
-           <!-- Min Amount -->
-          <div class="space-y-3">
-            <label class="block text-sm font-semibold text-[#1F2937]">
-              Min Amount (₹)
-              <span class="text-red-500 ml-1">*</span>
-            </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="text-[#1F2937]/70 font-medium">₹</span>
+            <div>
+              <label
+                class="block text-sm font-medium text-[var(--color-font)] mb-1"
+              >
+                Min Amount (₹) <span class="text-[var(--color-danger)]">*</span>
+              </label>
+              <div class="relative">
+                <span
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+                  >₹</span
+                >
+                <input
+                  formControlName="minAmount"
+                  type="number"
+                  min="1"
+                  step="1"
+                  class="pl-8 w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+                  placeholder="Min"
+                />
               </div>
-              <input
-                formControlName="minAmount"
-                type="number"
-                min="1"
-                step="1"
-                class="pl-10 w-full px-4 py-3 border border-[#CC6A00]/30 rounded-lg focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200"
-                placeholder="Enter min amount"
-                [class.border-red-500]="addUpiForm.get('minAmount')?.touched && addUpiForm.get('minAmount')?.invalid"
-                [class.border-[#E67A00]]="addUpiForm.get('minAmount')?.valid && addUpiForm.get('minAmount')?.touched"
-              />
             </div>
-            <div *ngIf="addUpiForm.get('minAmount')?.touched && addUpiForm.get('minAmount')?.invalid" 
-                 class="text-sm text-red-600 flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              Please enter a valid amount (minimum ₹1)
-            </div>
-          </div>
 
-           <!-- Max Amount -->
-          <div class="space-y-3">
-            <label class="block text-sm font-semibold text-[#1F2937]">
-              Max Amount (₹)
-              <span class="text-red-500 ml-1">*</span>
-            </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="text-[#1F2937]/70 font-medium">₹</span>
+            <div>
+              <label
+                class="block text-sm font-medium text-[var(--color-font)] mb-1"
+              >
+                Max Amount (₹) <span class="text-[var(--color-danger)]">*</span>
+              </label>
+              <div class="relative">
+                <span
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+                  >₹</span
+                >
+                <input
+                  formControlName="maxAmount"
+                  type="number"
+                  min="1"
+                  step="1"
+                  class="pl-8 w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+                  placeholder="Max"
+                />
               </div>
-              <input
-                formControlName="maxAmount"
-                type="number"
-                min="1"
-                step="1"
-                class="pl-10 w-full px-4 py-3 border border-[#CC6A00]/30 rounded-lg focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200"
-                placeholder="Enter max amount"
-                [class.border-red-500]="addUpiForm.get('maxAmount')?.touched && addUpiForm.get('maxAmount')?.invalid"
-                [class.border-[#E67A00]]="addUpiForm.get('maxAmount')?.valid && addUpiForm.get('maxAmount')?.touched"
-              />
-            </div>
-            <div *ngIf="addUpiForm.get('maxAmount')?.touched && addUpiForm.get('maxAmount')?.invalid" 
-                 class="text-sm text-red-600 flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              Please enter a valid amount (minimum ₹1)
             </div>
           </div>
 
           <!-- Action Buttons -->
-          <div class="pt-4 border-t border-[#CC6A00]/20">
-            <div class="flex gap-4">
+          <div class="pt-3 border-t border-[var(--color-border)]">
+            <div class="flex gap-3">
               <button
                 type="submit"
                 [disabled]="isAddingUpi || addUpiForm.invalid || !generatedFile"
-                class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-[#E67A00] to-[#FFB366] text-[#1F2937] font-bold rounded-lg hover:from-[#FF8A1A] hover:to-[#E67A00] transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                style="box-shadow: 0 4px 14px rgba(230,122,0,0.25)"
+                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <svg *ngIf="isAddingUpi" class="animate-spin -ml-1 mr-3 h-5 w-5 text-[#1F2937]" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                {{ isAddingUpi ? 'Adding...' : 'Add UPI' }}
+                <span
+                  *ngIf="isAddingUpi"
+                  class="material-icons animate-spin mr-2"
+                >
+                  autorenew
+                </span>
+                <span *ngIf="!isAddingUpi" class="material-icons mr-2">
+                  add_circle
+                </span>
+                {{ isAddingUpi ? "Adding..." : "Add UPI" }}
               </button>
               <button
                 type="button"
                 (click)="closeAddModal()"
                 [disabled]="isAddingUpi"
-                class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-[#FFB366]/30 text-[#1F2937] rounded-lg hover:bg-[#FFB366]/50 transition-all duration-200 font-semibold border border-[#CC6A00]/30 disabled:opacity-50"
+                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] disabled:opacity-50 border border-[var(--color-border)]"
               >
+                <span class="material-icons mr-2">cancel</span>
                 Cancel
               </button>
             </div>
@@ -503,292 +929,272 @@
     </div>
   </div>
 
- <!-- Update UPI Modal -->
-<div 
-  *ngIf="showUpdateModal" 
-  class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-fade-in"
-  (click)="closeUpdateModal()"
->
-  <div 
-    class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300 border border-[#CC6A00]/30"
-    (click)="$event.stopPropagation()"
+  <!-- Update UPI Modal -->
+  <div
+    *ngIf="showUpdateModal"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+    (click)="closeUpdateModal()"
   >
-    <!-- Modal Header -->
-    <div class="flex items-center justify-between p-6 border-b border-[#CC6A00]/20 bg-gradient-to-r from-[#FFB366]/30 to-[#FFB366]/10" style="background-color: #FFF9F2">
-      <h3 class="text-xl font-semibold text-[#1F2937] flex items-center">
-        <svg class="w-6 h-6 mr-2 text-[#E67A00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-        </svg>
-        Update UPI Details
-      </h3>
-      <button 
-        (click)="closeUpdateModal()"
-        class="p-2 hover:bg-[#FFB366]/30 rounded-xl transition-colors duration-200"
+    <div
+      class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg border border-[var(--color-border)]"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Modal Header -->
+      <div
+        class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
       >
-        <svg class="w-6 h-6 text-[#1F2937]/70 hover:text-[#E67A00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-    </div>
-    
-    <!-- Modal Body -->
-    <div class="p-6">
-      <form (ngSubmit)="submitUpdate()" class="space-y-6">
-        <!-- UPI ID -->
-        <div class="space-y-3">
-          <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-            UPI ID (VPA)
-            <span class="text-red-500 ml-1">*</span>
-          </label>
-          <div class="flex gap-3">
+        <h3
+          class="text-lg font-semibold text-[var(--color-font)] flex items-center"
+        >
+          <span class="material-icons mr-2 text-[var(--color-primary)]">
+            edit
+          </span>
+          Edit UPI Details
+        </h3>
+        <button
+          (click)="closeUpdateModal()"
+          class="p-1 hover:bg-[var(--color-hover)] rounded transition-colors"
+        >
+          <span class="material-icons text-[var(--color-muted)]"> close </span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <form (ngSubmit)="submitUpdate()" class="space-y-4">
+          <!-- Current QR Display -->
+          <div
+            *ngIf="editingUpi?.qrImagePath"
+            class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)]"
+          >
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+            >
+              Current QR Code
+            </label>
+            <div class="flex items-center justify-between">
+              <div
+                class="w-20 h-20 bg-white rounded border border-[var(--color-border)] flex items-center justify-center overflow-hidden"
+              >
+                <img
+                  [src]="editingUpi.qrImagePath"
+                  alt="Current QR"
+                  class="w-16 h-16 object-contain"
+                />
+              </div>
+              <button
+                type="button"
+                (click)="generateQrForUpdate()"
+                [disabled]="!updateForm.vpa || isGeneratingUpdateQr"
+                class="px-3 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50"
+              >
+                <span *ngIf="!isGeneratingUpdateQr" class="flex items-center">
+                  <span class="material-icons mr-1">qr_code</span>
+                  New QR
+                </span>
+                <span *ngIf="isGeneratingUpdateQr" class="flex items-center">
+                  <span class="material-icons animate-spin">autorenew</span>
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- UPI ID -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-1"
+            >
+              UPI ID (VPA) <span class="text-[var(--color-danger)]">*</span>
+            </label>
             <input
               type="text"
               [(ngModel)]="updateForm.vpa"
               name="vpa"
               required
-              class="flex-1 px-4 py-3 border border-[#CC6A00]/30 rounded-lg focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white"
-              placeholder="Enter UPI ID (e.g., username@paytm)"
-              (input)="onUpdateVpaChange()"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+              placeholder="username@paytm"
             />
-            <button
-              type="button"
-              (click)="generateQrForUpdate()"
-              [disabled]="!updateForm.vpa || isGeneratingUpdateQr"
-              class="px-5 py-3 bg-[#E67A00] text-[#1F2937] font-semibold rounded-lg hover:bg-[#FF8A1A] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-            >
-              <span *ngIf="!isGeneratingUpdateQr">Generate QR</span>
-              <span *ngIf="isGeneratingUpdateQr" class="flex items-center">
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-[#1F2937]" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Generating...
-              </span>
-            </button>
           </div>
-          <div *ngIf="updateForm.vpa && !isValidUpiId(updateForm.vpa)" class="text-sm text-red-600 flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            Enter a valid UPI ID
-          </div>
-        </div>
 
-        <!-- Current QR Display -->
-        <div *ngIf="editingUpi?.qrImagePath && !updateQrData" class="space-y-3">
-          <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-            Current QR Code
-          </label>
-          <div class="flex items-center gap-4">
-            <img 
-              [src]="editingUpi.qrImagePath" 
-              alt="Current QR" 
-              class="h-24 w-24 object-cover rounded-lg border-2 border-[#CC6A00]/30"
-            />
-            <div class="flex-1">
-              <p class="text-sm text-[#1F2937]/70">This is the current QR code. Generate a new one above if you need to update it.</p>
+          <!-- Amount Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label
+                class="block text-sm font-medium text-[var(--color-font)] mb-1"
+              >
+                Limit Amount (₹)
+              </label>
+              <div class="relative">
+                <span
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+                  >₹</span
+                >
+                <input
+                  type="number"
+                  [(ngModel)]="updateForm.limitAmount"
+                  name="limitAmount"
+                  min="1"
+                  step="1"
+                  class="pl-8 w-full px-3 py-2 border border-[var(--color-border)] rounded-lg"
+                  placeholder="Limit"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                class="block text-sm font-medium text-[var(--color-font)] mb-1"
+              >
+                Min Amount (₹)
+              </label>
+              <div class="relative">
+                <span
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+                  >₹</span
+                >
+                <input
+                  type="number"
+                  [(ngModel)]="updateForm.minAmount"
+                  name="minAmount"
+                  min="1"
+                  step="1"
+                  class="pl-8 w-full px-3 py-2 border border-[var(--color-border)] rounded-lg"
+                  placeholder="Min"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                class="block text-sm font-medium text-[var(--color-font)] mb-1"
+              >
+                Max Amount (₹)
+              </label>
+              <div class="relative">
+                <span
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+                  >₹</span
+                >
+                <input
+                  type="number"
+                  [(ngModel)]="updateForm.maxAmount"
+                  name="maxAmount"
+                  min="1"
+                  step="1"
+                  class="pl-8 w-full px-3 py-2 border border-[var(--color-border)] rounded-lg"
+                  placeholder="Max"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Generated QR Display -->
-        <div *ngIf="updateQrData" class="space-y-3 border border-[#FFB366] rounded-lg p-4 bg-[#FFF9F2]">
-          <div class="flex justify-between items-center">
-            <label class="block text-sm font-semibold text-[#1F2937]">
-              New QR Code
+          <!-- Status -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-1"
+            >
+              Status
             </label>
-            <div class="flex gap-2">
+            <select
+              [(ngModel)]="updateForm.status"
+              name="status"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] font-medium text-[var(--color-font)]"
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="pt-3 border-t border-[var(--color-border)]">
+            <div class="flex gap-3">
+              <button
+                type="submit"
+                [disabled]="isSubmitting"
+                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50"
+              >
+                <span
+                  *ngIf="isSubmitting"
+                  class="material-icons animate-spin mr-2"
+                >
+                  autorenew
+                </span>
+                <span *ngIf="!isSubmitting" class="material-icons mr-2">
+                  save
+                </span>
+                {{ isSubmitting ? "Saving..." : "Save Changes" }}
+              </button>
               <button
                 type="button"
-                (click)="removeGeneratedUpdateQr()"
-                class="px-3 py-1 text-sm bg-white text-[#1F2937] border border-[#CC6A00] rounded hover:bg-[#FFF9F2] transition-all duration-200"
+                (click)="closeUpdateModal()"
+                [disabled]="isSubmitting"
+                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] disabled:opacity-50 border border-[var(--color-border)]"
               >
-                Remove New QR
+                <span class="material-icons mr-2">cancel</span>
+                Cancel
               </button>
             </div>
           </div>
-          <div class="flex flex-col items-center">
-            <div class="p-3 bg-white rounded-lg border border-[#CC6A00]/20 mb-3">
-              <qrcode
-                #updateQrcodeElem
-                [qrdata]="updateQrData"
-                [width]="150"
-                [errorCorrectionLevel]="'H'"
-                [margin]="1"
-                [colorDark]="'#1F2937'"
-                [colorLight]="'#ffffff'"
-              ></qrcode>
-            </div>
-            <div *ngIf="generatedUpdateFile" class="text-sm text-[#1F2937]/70">
-              New QR will replace the current one on save
-            </div>
-          </div>
-        </div>
-
-        <!-- Limit Amount -->
-        <div>
-          <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-            Limit Amount (₹)
-            <span class="text-red-500 ml-1">*</span>
-          </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span class="text-[#1F2937]/70 font-medium">₹</span>
-            </div>
-            <input
-              type="number"
-              [(ngModel)]="updateForm.limitAmount"
-              name="limitAmount"
-              required
-              min="1"
-              step="1"
-              class="pl-10 w-full px-4 py-3 border border-[#CC6A00]/30 rounded-lg focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white"
-              placeholder="Enter limit amount"
-            />
-          </div>
-        </div>
-
-          <!-- Min Amount -->
-        <div>
-          <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-            Min Amount (₹)
-            <span class="text-red-500 ml-1">*</span>
-          </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span class="text-[#1F2937]/70 font-medium">₹</span>
-            </div>
-            <input
-              type="number"
-              [(ngModel)]="updateForm.minAmount"
-              name="minAmount"
-              required
-              min="1"
-              step="1"
-              class="pl-10 w-full px-4 py-3 border border-[#CC6A00]/30 rounded-lg focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white"
-              placeholder="Enter min amount"
-            />
-          </div>
-        </div>
-
-          <!-- Max Amount -->
-        <div>
-          <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-            Max Amount (₹)
-            <span class="text-red-500 ml-1">*</span>
-          </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span class="text-[#1F2937]/70 font-medium">₹</span>
-            </div>
-            <input
-              type="number"
-              [(ngModel)]="updateForm.maxAmount"
-              name="maxAmount"
-              required
-              min="1"
-              step="1"
-              class="pl-10 w-full px-4 py-3 border border-[#CC6A00]/30 rounded-lg focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white"
-              placeholder="Enter max amount"
-            />
-          </div>
-        </div>
-
-        <!-- Status -->
-        <div>
-          <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-            Status
-          </label>
-          <select
-            [(ngModel)]="updateForm.status"
-            name="status"
-            class="w-full px-4 py-3 border border-[#CC6A00]/30 rounded-lg focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] bg-white transition-all duration-200 font-medium text-[#1F2937]"
-          >
-            <option value="active" class="text-[#1F2937]">Active</option>
-            <option value="inactive" class="text-[#1F2937]">Inactive</option>
-          </select>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex gap-4 pt-4">
-          <button
-            type="submit"
-            [disabled]="isSubmitting"
-            class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-[#E67A00] to-[#FFB366] text-[#1F2937] font-bold rounded-lg hover:from-[#FF8A1A] hover:to-[#E67A00] transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <svg *ngIf="isSubmitting" class="animate-spin -ml-1 mr-3 h-5 w-5 text-[#1F2937]" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            {{ isSubmitting ? 'Updating...' : 'Update UPI' }}
-          </button>
-          <button
-            type="button"
-            (click)="closeUpdateModal()"
-            [disabled]="isSubmitting"
-            class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-[#FFB366]/30 text-[#1F2937] rounded-lg hover:bg-[#FFB366]/50 transition-all duration-200 font-semibold border border-[#CC6A00]/30 disabled:opacity-50"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 
   <!-- Image Modal -->
-  <div 
-    *ngIf="selectedImage" 
-    class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-fade-in"
+  <div
+    *ngIf="selectedImage"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
     (click)="closeImageModal()"
   >
-    <div 
-      class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl transform transition-all duration-300 border border-[#CC6A00]/30"
+    <div
+      class="bg-[var(--color-surface)] rounded-xl max-w-sm w-full shadow-lg border border-[var(--color-border)]"
       (click)="$event.stopPropagation()"
     >
       <!-- Modal Header -->
-      <div class="flex items-center justify-between p-6 border-b border-[#CC6A00]/20 bg-gradient-to-r from-[#FFB366]/30 to-[#FFB366]/10" style="background-color: #FFF9F2">
-        <h3 class="text-xl font-semibold text-[#1F2937] flex items-center">
-          <svg class="w-6 h-6 mr-2 text-[#E67A00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-          </svg>
-          QR Code Preview
-        </h3>
-        <button 
-          (click)="closeImageModal()"
-          class="p-2 hover:bg-[#FFB366]/30 rounded-xl transition-colors duration-200"
+      <div
+        class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+      >
+        <h3
+          class="text-lg font-semibold text-[var(--color-font)] flex items-center"
         >
-          <svg class="w-6 h-6 text-[#1F2937]/70 hover:text-[#E67A00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
+          <span class="material-icons mr-2 text-[var(--color-primary)]">
+            qr_code_scanner
+          </span>
+          QR Code
+        </h3>
+        <button
+          (click)="closeImageModal()"
+          class="p-1 hover:bg-[var(--color-hover)] rounded transition-colors"
+        >
+          <span class="material-icons text-[var(--color-muted)]"> close </span>
         </button>
       </div>
-      
+
       <!-- Modal Body -->
-      <div class="p-8 flex flex-col items-center">
-        <img 
-          [src]="selectedImage" 
-          alt="QR Code Full Size" 
-          class="max-w-full max-h-[500px] object-contain rounded-xl border-2 border-[#CC6A00]/30 shadow-lg"
-        />
-        <div class="mt-8 flex gap-4">
-          <button 
+      <div class="p-6 flex flex-col items-center">
+        <div
+          class="mb-4 p-3 bg-white rounded border border-[var(--color-border)]"
+        >
+          <img
+            [src]="selectedImage"
+            alt="QR Code"
+            class="w-48 h-48 object-contain"
+          />
+        </div>
+        <div class="flex gap-3">
+          <button
             (click)="downloadImage()"
-            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#E67A00] to-[#FFB366] text-[#1F2937] font-bold rounded-lg hover:from-[#FF8A1A] hover:to-[#E67A00] transition-all duration-200 shadow-lg hover:shadow-xl"
+            class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)]"
           >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-            </svg>
-            Download QR Code
+            <span class="material-icons mr-2">download</span>
+            Download
           </button>
-          <button 
+          <button
             (click)="closeImageModal()"
-            class="inline-flex items-center px-6 py-3 bg-[#FFB366]/30 text-[#1F2937] rounded-lg hover:bg-[#FFB366]/50 transition-all duration-200 font-semibold border border-[#CC6A00]/30"
+            class="inline-flex items-center px-4 py-2 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] border border-[var(--color-border)]"
           >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-            Close Preview
+            <span class="material-icons mr-2">close</span>
+            Close
           </button>
         </div>
       </div>

@@ -1,6 +1,12 @@
-import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  HostListener,
+} from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import baseUrl from "../../../services/helper";
+import baseUrl, { fileBaseUrl } from "../../../services/helper";
 import { UpiService } from "../../../services/upi.service";
 import { ActivatedRoute } from "@angular/router";
 import { of } from "rxjs";
@@ -13,7 +19,7 @@ import { HeadService } from "../../../services/head.service";
 @Component({
   selector: "app-head-upi",
   templateUrl: "./head-upi.component.html",
-  styleUrl: "./head-upi.component.css",
+  styleUrls: ["./head-upi.component.css"],
 })
 export class HeadUpiComponent implements OnInit {
   upis: any[] = [];
@@ -40,8 +46,8 @@ export class HeadUpiComponent implements OnInit {
     vpa: "",
     limitAmount: "",
     status: "active",
-    minAmount:'',
-    maxAmount:''
+    minAmount: "",
+    maxAmount: "",
   };
   isSubmitting = false;
   isGeneratingUpdateQr = false;
@@ -52,6 +58,28 @@ export class HeadUpiComponent implements OnInit {
   currentUserId: any;
   role: any;
 
+  // Filter properties
+  websiteSearchTerm: string = "";
+  selectedWebsite: any = null;
+  showWebsiteDropdown: boolean = false;
+  filteredWebsites: any[] = [];
+
+  // TWO filter sets:
+  // 1. Separate for Limit Amount
+  limitMinAmount: number | null = null;
+  limitMaxAmount: number | null = null;
+
+  // 2. Combined for Transaction Range (applies to minAmount AND maxAmount)
+  transactionMinAmount: number | null = null;
+  transactionMaxAmount: number | null = null;
+
+  // New property for amount filter dropdown
+  showAmountFilter: boolean = false;
+
+  // Pagination properties
+  currentPage: number = 1;
+  pageSize: number = 5;
+
   @ViewChild("qrcodeElem", { static: false, read: ElementRef })
   qrcodeElem!: ElementRef;
   @ViewChild("updateQrcodeElem", { static: false, read: ElementRef })
@@ -59,14 +87,37 @@ export class HeadUpiComponent implements OnInit {
 
   private vpaPattern = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
 
+  // Make Math available in template
+  Math = Math;
+
+  // Computed properties for filter states
+  get limitFilterActive(): boolean {
+    return !!(this.limitMinAmount || this.limitMaxAmount);
+  }
+
+  get transactionFilterActive(): boolean {
+    return !!(this.transactionMinAmount || this.transactionMaxAmount);
+  }
+
+  // Computed property for active filters count
+  get activeFilters(): number {
+    let count = 0;
+    if (this.searchTerm.trim()) count++;
+    if (this.filterStatus) count++;
+    if (this.selectedWebsite) count++;
+    if (this.limitFilterActive) count++;
+    if (this.transactionFilterActive) count++;
+    return count;
+  }
+
   constructor(
     private upiService: UpiService,
-    private BranchService: BranchService,
+    private branchService: BranchService,
     private route: ActivatedRoute,
     private formBuilder: FormBuilder,
     private userStateService: UserStateService,
     private userService: UserService,
-    private headService: HeadService
+    private headService: HeadService,
   ) {}
 
   ngOnInit() {
@@ -75,31 +126,302 @@ export class HeadUpiComponent implements OnInit {
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
 
+    // Load UPIs and websites
     this.loadUpis(this.currentRoleId);
-
-    // this.route.paramMap.subscribe((paramMap) => {
-    //   this.currentRoleId = paramMap.get("branchId");
-    //   this.userId = paramMap.get("userId");
-
-    //   if (this.currentRoleId) {
-
-    //   }
-    // });
+    this.loadWebsites(this.currentRoleId);
   }
 
-  // Check if UPI ID is valid
-  isValidUpiId(vpa: string): boolean {
-    return this.vpaPattern.test(vpa);
+  // ==================== PAGINATION METHODS ====================
+  pagedUpis() {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    return this.filteredUpis.slice(startIndex, endIndex);
   }
 
-  // Handle VPA change in update form
-  onUpdateVpaChange() {
-    // Clear generated QR if VPA changes from original
-    if (this.updateForm.vpa !== this.originalVpa) {
-      this.removeGeneratedUpdateQr();
+  totalPages() {
+    return Math.ceil(this.filteredUpis.length / this.pageSize);
+  }
+
+  getPageNumbers() {
+    const total = this.totalPages();
+    const current = this.currentPage;
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+    let l;
+
+    for (let i = 1; i <= total; i++) {
+      if (
+        i === 1 ||
+        i === total ||
+        (i >= current - delta && i <= current + delta)
+      ) {
+        range.push(i);
+      }
+    }
+
+    for (let i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push("...");
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    return rangeWithDots;
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
     }
   }
 
+  nextPage() {
+    if (this.currentPage < this.totalPages()) {
+      this.currentPage++;
+    }
+  }
+
+  goToPage(page: number | string) {
+    if (typeof page === "number") {
+      this.currentPage = page;
+    }
+  }
+
+  onPageSizeChange() {
+    this.currentPage = 1;
+  }
+
+  // ==================== UPI STATUS TOGGLE ====================
+  toggleUpiStatus(upi: any) {
+    console.log(upi);
+
+    const newStatus = upi.status === "active" ? "inactive" : "active";
+    upi.status = newStatus;
+
+    this.upiService.toogleUpiStatus(upi.id).subscribe((res) => {
+      alert(res);
+    });
+  }
+
+  // ==================== WEBSITE FILTER METHODS ====================
+  onWebsiteInputBlur() {
+    // Small delay to allow click events to register
+    setTimeout(() => {
+      this.showWebsiteDropdown = false;
+    }, 200);
+  }
+
+  filterWebsites() {
+    const searchTerm = this.websiteSearchTerm.trim().toLowerCase();
+
+    if (!searchTerm) {
+      this.filteredWebsites = [...this.websites];
+      this.showWebsiteDropdown = this.websites.length > 0;
+      return;
+    }
+
+    this.filteredWebsites = this.websites.filter(
+      (website) =>
+        website.domain.toLowerCase().includes(searchTerm) ||
+        (website.currency &&
+          website.currency.toLowerCase().includes(searchTerm)),
+    );
+
+    this.showWebsiteDropdown = this.filteredWebsites.length > 0;
+  }
+
+  openWebsiteDropdown() {
+    if (this.websites.length > 0) {
+      this.filteredWebsites = [...this.websites];
+      this.showWebsiteDropdown = true;
+    }
+  }
+
+  selectWebsite(website: any) {
+    this.selectedWebsite = website;
+    this.websiteSearchTerm = website.domain;
+    this.showWebsiteDropdown = false;
+
+    // Apply filters immediately when website is selected
+    setTimeout(() => {
+      this.applyAllFilters();
+    }, 100);
+  }
+
+  clearWebsiteFilter() {
+    this.selectedWebsite = null;
+    this.websiteSearchTerm = "";
+    this.filteredWebsites = [...this.websites];
+    this.showWebsiteDropdown = false;
+
+    // Re-apply filters after clearing
+    setTimeout(() => {
+      this.applyAllFilters();
+    }, 100);
+  }
+
+  // ==================== FILTERING METHODS ====================
+  // Helper method for number range checking
+  private checkNumberRange(
+    value: number,
+    min: number | null,
+    max: number | null,
+  ): boolean {
+    if (value === null || value === undefined) return false;
+    if (min !== null && value < min) return false;
+    if (max !== null && value > max) return false;
+    return true;
+  }
+
+  // Parse number input safely
+  private parseNumberInput(value: any): number | null {
+    if (value === null || value === undefined || value === "") return null;
+    const num = parseFloat(value);
+    return isNaN(num) ? null : num;
+  }
+
+  // Main filter application method
+  applyAllFilters() {
+    const searchTerm = this.searchTerm.trim().toLowerCase();
+    const statusFilter = this.filterStatus.trim().toLowerCase();
+
+    // Parse all number filters
+    const limitMinNum = this.parseNumberInput(this.limitMinAmount);
+    const limitMaxNum = this.parseNumberInput(this.limitMaxAmount);
+    const transMinNum = this.parseNumberInput(this.transactionMinAmount);
+    const transMaxNum = this.parseNumberInput(this.transactionMaxAmount);
+
+    this.filteredUpis = this.upis.filter((upi) => {
+      // 1. Basic search filter
+      const matchesSearch =
+        !searchTerm ||
+        (upi.websiteDomain || "").toLowerCase().includes(searchTerm) ||
+        (upi.vpa || "").toLowerCase().includes(searchTerm) ||
+        (upi.qrId || "").toString().toLowerCase().includes(searchTerm);
+
+      // 2. Status filter
+      const matchesStatus =
+        !statusFilter || (upi.status || "").toLowerCase() === statusFilter;
+
+      // 3. Website filter
+      let matchesWebsite = true;
+      if (this.selectedWebsite) {
+        // Try to match by website ID first
+        if (upi.websiteId && this.selectedWebsite.websiteId) {
+          matchesWebsite = upi.websiteId === this.selectedWebsite.websiteId;
+        }
+        // Fallback to domain name matching
+        else if (upi.websiteDomain && this.selectedWebsite.domain) {
+          matchesWebsite = upi.websiteDomain
+            .toLowerCase()
+            .includes(this.selectedWebsite.domain.toLowerCase());
+        } else {
+          matchesWebsite = false;
+        }
+      }
+
+      // 4. Limit Amount filter (separate for limitAmount field)
+      let matchesLimit = true;
+      if (limitMinNum !== null || limitMaxNum !== null) {
+        const limitAmount = parseFloat(upi.limitAmount) || 0;
+        matchesLimit = this.checkNumberRange(
+          limitAmount,
+          limitMinNum,
+          limitMaxNum,
+        );
+      }
+
+      // 5. Transaction Range filter (applies to BOTH minAmount AND maxAmount)
+      let matchesTransaction = true;
+      if (transMinNum !== null || transMaxNum !== null) {
+        const minAmount = parseFloat(upi.minAmount) || 0;
+        const maxAmount = parseFloat(upi.maxAmount) || 0;
+
+        // Check if EITHER minAmount OR maxAmount falls within the range
+        const matchesMin = this.checkNumberRange(
+          minAmount,
+          transMinNum,
+          transMaxNum,
+        );
+        const matchesMax = this.checkNumberRange(
+          maxAmount,
+          transMinNum,
+          transMaxNum,
+        );
+
+        // Show item if ANY of the transaction fields match
+        matchesTransaction = matchesMin || matchesMax;
+      }
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesWebsite &&
+        matchesLimit &&
+        matchesTransaction
+      );
+    });
+
+    // Reset to first page after filtering
+    this.currentPage = 1;
+  }
+
+  onSearch() {
+    // Apply all filters when search term changes
+    this.applyAllFilters();
+  }
+
+  onNumberFilterChange() {
+    // Apply all filters when number inputs change
+    this.applyAllFilters();
+  }
+
+  onAmountFilterChange() {
+    // This method can be used as an alias for onNumberFilterChange
+    this.applyAllFilters();
+  }
+
+  // Clear filter methods
+  clearLimitFilter(): void {
+    this.limitMinAmount = null;
+    this.limitMaxAmount = null;
+    this.applyAllFilters();
+  }
+
+  clearTransactionFilter(): void {
+    this.transactionMinAmount = null;
+    this.transactionMaxAmount = null;
+    this.applyAllFilters();
+  }
+
+  resetFilters() {
+    this.searchTerm = "";
+    this.filterStatus = "";
+    this.websiteSearchTerm = "";
+    this.selectedWebsite = null;
+    this.showWebsiteDropdown = false;
+    this.filteredWebsites = [...this.websites];
+    this.limitMinAmount = null;
+    this.limitMaxAmount = null;
+    this.transactionMinAmount = null;
+    this.transactionMaxAmount = null;
+    this.showAmountFilter = false; // Close the dropdown
+    this.filteredUpis = [...this.upis];
+    this.currentPage = 1;
+  }
+
+  // For backward compatibility
+  resetAllFilters() {
+    this.resetFilters();
+  }
+
+  // ==================== FORM INITIALIZATION ====================
   private initAddUpiForm() {
     this.addUpiForm = this.formBuilder.group({
       websiteId: ["", Validators.required],
@@ -126,7 +448,7 @@ export class HeadUpiComponent implements OnInit {
     });
   }
 
-  // Open add modal
+  // ==================== MODAL METHODS ====================
   openAddModal() {
     if (this.websites === null || this.websites.length === 0) {
       this.loadWebsites(this.currentRoleId);
@@ -136,7 +458,6 @@ export class HeadUpiComponent implements OnInit {
     document.body.style.overflow = "hidden";
   }
 
-  // Close add modal
   closeAddModal() {
     this.showAddModal = false;
     this.addUpiForm.reset();
@@ -146,40 +467,51 @@ export class HeadUpiComponent implements OnInit {
     document.body.style.overflow = "auto";
   }
 
-  // Load websites
- loadWebsites(agentId: string) {
-    if (!agentId) return;
+  openUpdateModal(upi: any) {
+    this.editingUpi = upi;
+    this.updateForm = {
+      vpa: upi.vpa || "",
+      limitAmount: upi.limitAmount || "",
+      status: upi.status || "active",
+      maxAmount: upi.maxAmount || "",
+      minAmount: upi.minAmount || "",
+    };
+    this.originalVpa = upi.vpa || "";
+    this.updateQrData = null;
+    this.generatedUpdateFile = null;
+    this.showUpdateModal = true;
+    document.body.style.overflow = "hidden";
+  }
 
-    this.headService
-      .getAllHeadsWithWebsitesById(agentId,"UPI")
-      .pipe(
-        catchError((err) => {
-          console.error("Error loading websites:", err);
-          return of([]);
-        })
-      )
-      .subscribe((res: any) => {
-        let websitesList: any[] = [];
+  closeUpdateModal() {
+    this.showUpdateModal = false;
+    this.editingUpi = null;
+    this.updateForm = {
+      vpa: "",
+      limitAmount: "",
+      status: "active",
+      minAmount: "",
+      maxAmount: "",
+    };
+    this.originalVpa = "";
+    this.updateQrData = null;
+    this.generatedUpdateFile = null;
+    this.isSubmitting = false;
+    this.isGeneratingUpdateQr = false;
+    document.body.style.overflow = "auto";
+  }
 
-        if (Array.isArray(res)) {
-          websitesList = res;
-        } else if (res && Array.isArray(res.data)) {
-          websitesList = res.data;
-        } else if (res) {
-          websitesList = [res];
-        }
+  // ==================== QR CODE METHODS ====================
+  // Check if UPI ID is valid
+  isValidUpiId(vpa: string): boolean {
+    return this.vpaPattern.test(vpa);
+  }
 
-        this.websites = websitesList.map((item) => ({
-          id: item.id || item._id || "",
-          websiteId: item.websiteId || item.websiteID || item.website_id || "",
-          domain:
-            item.websiteDomain ||
-            item.domain ||
-            item.domainName ||
-            "Untitled Website",
-          currency: item.currency || "INR",
-        }));
-      });
+  // Handle VPA change in update form
+  onUpdateVpaChange() {
+    if (this.updateForm.vpa !== this.originalVpa) {
+      this.removeGeneratedUpdateQr();
+    }
   }
 
   // Generate QR from VPA (for add modal)
@@ -250,7 +582,7 @@ export class HeadUpiComponent implements OnInit {
           (blob: Blob | null) => {
             if (blob) {
               const filename = `upi_qr_${this.sanitizeFilename(
-                vpa
+                vpa,
               )}_${Date.now()}.png`;
               if (isForUpdate) {
                 this.generatedUpdateFile = new File([blob], filename, {
@@ -270,7 +602,7 @@ export class HeadUpiComponent implements OnInit {
             }
           },
           "image/png",
-          1.0
+          1.0,
         );
       }, 100);
     } catch (error) {
@@ -313,82 +645,45 @@ export class HeadUpiComponent implements OnInit {
     this.generatedUpdateFile = null;
   }
 
-  // Submit add UPI form
-  submitAddUpi() {
-    Object.keys(this.addUpiForm.controls).forEach((key) => {
-      const control = this.addUpiForm.get(key);
-      control?.markAsTouched();
-    });
+  // ==================== DATA LOADING METHODS ====================
+  loadWebsites(agentId: string) {
+    if (!agentId) return;
 
-    if (this.addUpiForm.invalid) {
-      alert("Please fill all required fields correctly.");
-      return;
-    }
+    this.headService
+      .getAllHeadsWithWebsitesById(agentId, "UPI")
+      .pipe(
+        catchError((err: any) => {
+          console.error("Error loading websites:", err);
+          return of([]);
+        }),
+      )
+      .subscribe((res: any) => {
+        let websitesList: any[] = [];
 
-    if (!this.generatedFile) {
-      alert("Please generate QR code first.");
-      return;
-    }
-
-    const selectedWebsite = this.websites.find(
-      (site) => String(site.id) === String(this.addUpiForm.value.websiteId)
-    );
-
-    if (!selectedWebsite) {
-      alert("Selected website not found.");
-      return;
-    }
-
-    const payload = {
-      website: selectedWebsite.websiteId,
-      websiteId: selectedWebsite.id,
-      vpa: this.addUpiForm.value.vpa,
-      limitAmount: this.addUpiForm.value.limitAmount,
-      agent_id: this.currentRoleId,
-      entityId: this.currentRoleId,
-      entityType: this.role,
-      userId: this.userId,
-      active: true,
-      createdAt: new Date().toISOString(),
-      minAmount:this.addUpiForm.value.minAmount,
-      maxAmount:this.addUpiForm.value.maxAmount
-    };
-
-    const formData = new FormData();
-    const dtoBlob = new Blob([JSON.stringify(payload)], {
-      type: "application/json",
-    });
-    formData.append("dto", dtoBlob);
-
-    formData.append("file", this.generatedFile, this.generatedFile.name);
-
-    if (this.currentRoleId) formData.append("agent_id", this.currentRoleId);
-    if (this.currentRoleId) formData.append("branchId", this.currentRoleId);
-    if (this.userId) formData.append("userId", this.userId);
-
-    this.isAddingUpi = true;
-
-    this.upiService.add(formData).subscribe({
-      next: (response: any) => {
-        this.isAddingUpi = false;
-
-        if (response.success || response.id || response._id) {
-          alert("UPI added successfully!");
-          this.closeAddModal();
-          this.loadUpis(this.currentRoleId);
-        } else {
-          alert(response.message || "Failed to add UPI. Please try again.");
+        if (Array.isArray(res)) {
+          websitesList = res;
+        } else if (res && Array.isArray(res.data)) {
+          websitesList = res.data;
+        } else if (res) {
+          websitesList = [res];
         }
-      },
-      error: (error) => {
-        console.error("Error adding UPI:", error);
-        this.isAddingUpi = false;
-        alert("Failed to add UPI. Please check your connection and try again.");
-      },
-    });
+
+        this.websites = websitesList.map((item) => ({
+          id: item.id || item._id || "",
+          websiteId: item.websiteId || item.websiteID || item.website_id || "",
+          domain:
+            item.websiteDomain ||
+            item.domain ||
+            item.domainName ||
+            "Untitled Website",
+          currency: item.currency || "INR",
+        }));
+
+        // Initialize filtered websites
+        this.filteredWebsites = [...this.websites];
+      });
   }
 
-  // Existing methods
   private normalizeStatus(item: any): string {
     if (typeof item.status === "string" && item.status.trim() !== "") {
       return item.status.toLowerCase();
@@ -422,18 +717,21 @@ export class HeadUpiComponent implements OnInit {
             upiRange: r.range || r.upiRange || r.bankRange || "",
             qrId: r.qrId || r.qr_id || r.id || "",
             qrImagePath: r.qrImagePath
-              ? `${baseUrl}${r.qrImagePath}`
+              ? `${fileBaseUrl}/${r.qrImagePath}`
               : r.qrImageUrl
-              ? `${baseUrl}${r.qrImageUrl}`
-              : null,
+                ? `${fileBaseUrl}/${r.qrImageUrl}`
+                : null,
             limitAmount: r.limitAmount,
             vpa: r.vpa || r.upiId || "",
+            minAmount: r.minAmount || 0,
+            maxAmount: r.maxAmount || 0,
           };
         });
 
         this.filteredUpis = [...this.upis];
+        this.currentPage = 1; // Reset to first page when data loads
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error("Error loading UPIs:", err);
         this.upis = [];
         this.filteredUpis = [];
@@ -441,98 +739,80 @@ export class HeadUpiComponent implements OnInit {
     });
   }
 
-  onSearch() {
-    const q = (this.searchTerm || "").trim().toLowerCase();
-    const statusFilter = (this.filterStatus || "").trim().toLowerCase();
-
-    this.filteredUpis = this.upis.filter((upi) => {
-      const qrId = (upi.qrId || "").toString().toLowerCase();
-      const website = (upi.websiteDomain || "").toString().toLowerCase();
-      const range = (upi.upiRange || "").toString().toLowerCase();
-      const upiStatus = (upi.status || "").toString().toLowerCase();
-      const vpa = (upi.vpa || "").toString().toLowerCase();
-
-      const matchesSearch =
-        !q ||
-        qrId.includes(q) ||
-        website.includes(q) ||
-        range.includes(q) ||
-        vpa.includes(q);
-
-      const matchesStatus = !statusFilter || upiStatus === statusFilter;
-
-      return matchesSearch && matchesStatus;
+  // ==================== FORM SUBMISSION METHODS ====================
+  // Submit add UPI form
+  submitAddUpi() {
+    Object.keys(this.addUpiForm.controls).forEach((key) => {
+      const control = this.addUpiForm.get(key);
+      control?.markAsTouched();
     });
-  }
 
-  resetFilters() {
-    this.searchTerm = "";
-    this.filterStatus = "";
-    this.filteredUpis = [...this.upis];
-  }
-
-  getStatusClass(status: string): string {
-    switch ((status || "").toString().toLowerCase()) {
-      case "active":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "inactive":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+    if (this.addUpiForm.invalid) {
+      alert("Please fill all required fields correctly.");
+      return;
     }
-  }
 
-  openImageModal(imageUrl: string | null) {
-    if (!imageUrl) return;
-    this.selectedImage = imageUrl;
-    document.body.style.overflow = "hidden";
-  }
+    if (!this.generatedFile) {
+      alert("Please generate QR code first.");
+      return;
+    }
 
-  closeImageModal() {
-    this.selectedImage = null;
-    document.body.style.overflow = "auto";
-  }
+    const selectedWebsite = this.websites.find(
+      (site) => String(site.id) === String(this.addUpiForm.value.websiteId),
+    );
 
-  downloadImage() {
-    if (!this.selectedImage) return;
-    const link = document.createElement("a");
-    link.href = this.selectedImage;
-    link.download = `qr-code-${Date.now()}.png`;
-    link.click();
-  }
+    if (!selectedWebsite) {
+      alert("Selected website not found.");
+      return;
+    }
 
-  // Open update modal
-  openUpdateModal(upi: any) {
-    this.editingUpi = upi;
-    this.updateForm = {
-      vpa: upi.vpa || "",
-      limitAmount: upi.limitAmount || "",
-      status: upi.status || "active",
-      maxAmount:upi.maxAmount,
-      minAmount:upi.minAmount
+    const payload = {
+      website: selectedWebsite.websiteId,
+      websiteId: selectedWebsite.id,
+      vpa: this.addUpiForm.value.vpa,
+      limitAmount: this.addUpiForm.value.limitAmount,
+      agent_id: this.currentRoleId,
+      entityId: this.currentRoleId,
+      entityType: this.role,
+      userId: this.userId,
+      active: true,
+      createdAt: new Date().toISOString(),
+      minAmount: this.addUpiForm.value.minAmount,
+      maxAmount: this.addUpiForm.value.maxAmount,
     };
-    this.originalVpa = upi.vpa || "";
-    this.updateQrData = null;
-    this.generatedUpdateFile = null;
-    this.showUpdateModal = true;
-    document.body.style.overflow = "hidden";
-  }
 
-  // Close update modal
-  closeUpdateModal() {
-    this.showUpdateModal = false;
-    this.editingUpi = null;
-    this.updateForm = {
-      vpa: "",
-      limitAmount: "",
-      status: "active",
-    };
-    this.originalVpa = "";
-    this.updateQrData = null;
-    this.generatedUpdateFile = null;
-    this.isSubmitting = false;
-    this.isGeneratingUpdateQr = false;
-    document.body.style.overflow = "auto";
+    const formData = new FormData();
+    const dtoBlob = new Blob([JSON.stringify(payload)], {
+      type: "application/json",
+    });
+    formData.append("dto", dtoBlob);
+
+    formData.append("file", this.generatedFile, this.generatedFile.name);
+
+    if (this.currentRoleId) formData.append("agent_id", this.currentRoleId);
+    if (this.currentRoleId) formData.append("branchId", this.currentRoleId);
+    if (this.userId) formData.append("userId", this.userId);
+
+    this.isAddingUpi = true;
+
+    this.upiService.add(formData).subscribe({
+      next: (response: any) => {
+        this.isAddingUpi = false;
+
+        if (response.success || response.id || response._id) {
+          alert("UPI added successfully!");
+          this.closeAddModal();
+          this.loadUpis(this.currentRoleId);
+        } else {
+          alert(response.message || "Failed to add UPI. Please try again.");
+        }
+      },
+      error: (error: any) => {
+        console.error("Error adding UPI:", error);
+        this.isAddingUpi = false;
+        alert("Failed to add UPI. Please check your connection and try again.");
+      },
+    });
   }
 
   // Submit update form
@@ -571,8 +851,8 @@ export class HeadUpiComponent implements OnInit {
       vpa: vpa,
       limitAmount: limit.toString(),
       active: statusBool,
-       minAmount:this.editingUpi.minAmount,
-      maxAmount:this.editingUpi.maxAmount
+      minAmount: this.updateForm.minAmount || this.editingUpi.minAmount,
+      maxAmount: this.updateForm.maxAmount || this.editingUpi.maxAmount,
     };
 
     if (this.currentRoleId) dtoPayload.branchId = this.currentRoleId;
@@ -589,11 +869,9 @@ export class HeadUpiComponent implements OnInit {
       formData.append(
         "file",
         this.generatedUpdateFile,
-        this.generatedUpdateFile.name
+        this.generatedUpdateFile.name,
       );
     }
-    console.log(dtoPayload);
-    
 
     this.upiService.updateUpi(formData).subscribe({
       next: (res: any) => {
@@ -602,7 +880,7 @@ export class HeadUpiComponent implements OnInit {
         this.loadUpis(this.currentRoleId);
         alert("UPI updated successfully!");
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error("Error updating UPI:", err);
         this.isSubmitting = false;
         alert("Error updating UPI. Please try again.");
@@ -610,18 +888,67 @@ export class HeadUpiComponent implements OnInit {
     });
   }
 
-  deleteUpi(upi: any) {
-    if (
-      confirm(
-        `Are you sure you want to delete UPI "${upi.qrId}"? This action cannot be undone.`
-      )
-    ) {
-      // Add delete logic here
+  // ==================== IMAGE MODAL METHODS ====================
+  openImageModal(imageUrl: string | null) {
+    if (!imageUrl) return;
+    this.selectedImage = imageUrl;
+    document.body.style.overflow = "hidden";
+  }
+
+  closeImageModal() {
+    this.selectedImage = null;
+    document.body.style.overflow = "auto";
+  }
+
+  downloadImage() {
+    if (!this.selectedImage) return;
+    const link = document.createElement("a");
+    link.href = this.selectedImage;
+    link.download = `qr-code-${Date.now()}.png`;
+    link.click();
+  }
+
+  // ==================== UTILITY METHODS ====================
+  getStatusClass(status: string): string {
+    switch ((status || "").toString().toLowerCase()) {
+      case "active":
+        return "bg-[var(--color-success)]/20 text-[var(--color-success)] border-[var(--color-success)]/50";
+      case "inactive":
+        return "bg-[var(--color-danger)]/20 text-[var(--color-danger)] border-[var(--color-danger)]/50";
+      default:
+        return "bg-[var(--color-muted)]/20 text-[var(--color-muted)] border-[var(--color-muted)]/50";
     }
   }
+
+  // ==================== EVENT HANDLERS ====================
+  // Close website dropdown when clicking outside
+  @HostListener("document:click", ["$event"])
+  onDocumentClick(event: MouseEvent) {
+    if (this.showWebsiteDropdown) {
+      const target = event.target as HTMLElement;
+      const websiteFilterContainer = target.closest(
+        ".website-filter-container",
+      );
+
+      if (!websiteFilterContainer) {
+        this.showWebsiteDropdown = false;
+      }
+    }
+  }
+
+  // Handle window resize for dropdown positioning
+  @HostListener("window:resize")
+  onWindowResize() {
+    if (this.showWebsiteDropdown) {
+      // Close dropdown on resize to avoid positioning issues
+      this.showWebsiteDropdown = false;
+    }
+  }
+
+  activeDropdownUpiId: string | null = null;
+
+  toggleActionsDropdown(upiId: string) {
+    this.activeDropdownUpiId =
+      this.activeDropdownUpiId === upiId ? null : upiId;
+  }
 }
-
-
-
-
-

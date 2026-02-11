@@ -2,7 +2,7 @@
 @import url(https://fonts.googleapis.com/css2?family=Open+Sans&display=swap);
 @import url(https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined);
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap");
-
+@import url(https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined);
 :host {
   display: block;
 }
@@ -26,15 +26,13 @@ canvas {
   --color-font: #0f172a;
 }
 
-
-
-:root[data-role="manager"] {
-  --color-primary: #1d4ed8;
+:root[data-role="head"] {
+  --color-primary: #154474;
   --color-primary-light: #60a5fa;
-  --color-primary-dark: #1e3a8a;
+  --color-primary-dark: #0b183d;
 
-  --color-secondary: #93c5fd;
-  --color-accent: #2563eb;
+  --color-secondary: #067791;
+  --color-accent: #00d4cd;
 
   --color-bg: #eff6ff;
   --color-surface: #ffffff;
@@ -56,4 +54,3 @@ canvas {
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
 }
-

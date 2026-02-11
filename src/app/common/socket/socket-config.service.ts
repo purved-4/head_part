@@ -18,7 +18,6 @@ export class SocketConfigService {
   public newMessage$ = new BehaviorSubject<any>(null);
   public latestBalance$ = new BehaviorSubject<any>(null);
 
-
   private subscriptions = new Map<string, StompSubscription | null>();
   private pendingSubscribeTasks: (() => void)[] = [];
 
@@ -45,17 +44,17 @@ export class SocketConfigService {
       return;
     }
 
-    this.stompClient = new Client({
-      webSocketFactory: () =>
-        new SockJS(baseUrl + "/socket-process", undefined, {
-          // @ts-ignore
-          withCredentials: true,
-        }),
-      reconnectDelay: 5000,
-      heartbeatIncoming: 10000,
-      heartbeatOutgoing: 10000,
-      debug: (msg: string) => {},
-    });
+    // this.stompClient = new Client({
+    //   webSocketFactory: () =>
+    //     new SockJS(baseUrl + "/socket-process", undefined, {
+    //       // @ts-ignore
+    //       withCredentials: true,
+    //     }),
+    //   reconnectDelay: 5000,
+    //   heartbeatIncoming: 10000,
+    //   heartbeatOutgoing: 10000,
+    //   debug: (msg: string) => {},
+    // });
 
     this.stompClient.onConnect = () => {
       this.connected = true;
@@ -110,7 +109,7 @@ export class SocketConfigService {
   private subscribeTopic(
     key: string,
     destination: string,
-    handler: (msg: IMessage) => void
+    handler: (msg: IMessage) => void,
   ): void {
     const doSubscribe = () => {
       const existing = this.subscriptions.get(key);
@@ -125,7 +124,7 @@ export class SocketConfigService {
             } catch (e) {
               console.error("handler error", e);
             }
-          }
+          },
         );
         this.subscriptions.set(key, sub);
       } catch (e) {
@@ -279,7 +278,7 @@ export class SocketConfigService {
   loadMessagePage(threadId: string, page = 0, size = 15) {
     if (!this.stompClient || !this.stompClient.active) {
       this.pendingSubscribeTasks.push(() =>
-        this.loadMessagePage(threadId, page, size)
+        this.loadMessagePage(threadId, page, size),
       );
       this.ensureConnected();
       return;
@@ -294,7 +293,7 @@ export class SocketConfigService {
   sendMessage(threadId: string, message: any) {
     if (!this.stompClient || !this.stompClient.active) {
       this.pendingSubscribeTasks.push(() =>
-        this.sendMessage(threadId, message)
+        this.sendMessage(threadId, message),
       );
       this.ensureConnected();
       return;
@@ -307,37 +306,32 @@ export class SocketConfigService {
   }
 
   subscribeLatestBalance(entityId?: string) {
-  if (entityId) this.entityId = entityId;
-  if (!this.entityId)
-    throw new Error("entityId required for latest balance topic");
+    if (entityId) this.entityId = entityId;
+    if (!this.entityId)
+      throw new Error("entityId required for latest balance topic");
 
-  const key = `latestBalance:${this.entityId}`;
-  const dest = `/topic/entity/latest-balance/${this.entityId}`;
+    const key = `latestBalance:${this.entityId}`;
+    const dest = `/topic/entity/latest-balance/${this.entityId}`;
 
-  this.subscribeTopic(key, dest, (msg) => {
-    try {
-      const data = JSON.parse(msg.body);
-      this.latestBalance$.next(data);
-    } catch (e) {
-      console.error("Error parsing latest balance", e);
-    }
-  });
-}
+    this.subscribeTopic(key, dest, (msg) => {
+      try {
+        const data = JSON.parse(msg.body);
+        this.latestBalance$.next(data);
+      } catch (e) {
+        console.error("Error parsing latest balance", e);
+      }
+    });
+  }
 
-getLatestBalance(): Observable<any> {
-  return this.latestBalance$
-    .asObservable()
-    .pipe(filter((x) => x !== null));
-}
+  getLatestBalance(): Observable<any> {
+    return this.latestBalance$.asObservable().pipe(filter((x) => x !== null));
+  }
 
+  unsubscribeLatestBalance(entityId?: string) {
+    const id = entityId ?? this.entityId;
+    if (!id) return;
 
-unsubscribeLatestBalance(entityId?: string) {
-  const id = entityId ?? this.entityId;
-  if (!id) return;
-
-  const key = `latestBalance:${id}`;
-  this.unsubscribeTopic(key);
-}
-
-
+    const key = `latestBalance:${id}`;
+    this.unsubscribeTopic(key);
+  }
 }

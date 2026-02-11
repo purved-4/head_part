@@ -41,18 +41,31 @@ export class BankService {
     id: any,
     websiteId: any,
   ): Observable<any> {
-    return this.http.get<any>(
-      `${baseUrl}/banks/getAllByEntityIdAndWebsiteId/${id}/${websiteId}`,
-    ).pipe(
-          map((response: any) => response.data),
-          catchError((error) => throwError(() => error))
-        );;
+    return this.http
+      .get<any>(
+        `${baseUrl}/banks/getAllByEntityIdAndWebsiteId/${id}/${websiteId}`,
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
   }
 
-   getAllByWebsiteId(websiteId:any): Observable<any[]> {
-    return this.http.get<any[]>(`${baseUrl}/banks/getAllByWebsiteId/${websiteId}`) .pipe(
-          map((response: any) => response.data),
-          catchError((error) => throwError(() => error))
-        );;
+  getAllByWebsiteId(websiteId: any): Observable<any[]> {
+    return this.http
+      .get<any[]>(`${baseUrl}/banks/getAllByWebsiteId/${websiteId}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+  toogleBankStatus(bankId: any): Observable<any[]> {
+    return this.http
+      .patch<any[]>(`${baseUrl}/banks/toggleStatus/${bankId}`, {})
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
   }
 }

@@ -1,18 +1,16 @@
 <div id="webcrumbs">
-  <div
-    class="bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 min-h-screen p-4 md:p-3 lg:p-6"
-  >
+  <div class="bg-[var(--color-bg)] min-h-screen p-4 md:p-3 lg:p-6">
     <!-- Header -->
     <div
       class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 md:mb-8 gap-4"
     >
       <div class="flex-1">
         <h1
-          class="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-800 tracking-tight"
+          class="text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--color-font)] tracking-tight"
         >
           Financial Dashboard
         </h1>
-        <p class="text-slate-600 mt-2 text-sm md:text-base">
+        <p class="text-[var(--color-muted)] mt-2 text-sm md:text-base">
           Monitor topups, payouts and transaction analytics in real-time
         </p>
       </div>
@@ -28,30 +26,30 @@
         role="button"
         tabindex="0"
         (click)="toggletopup()"
-        class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/60 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
+        class="bg-[var(--color-surface)] rounded-2xl p-5 shadow-[var(--shadow-sm)] border border-[var(--color-border)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
         title="Click to activate/deactivate topups"
       >
         <div class="flex items-start justify-between">
           <div class="flex-1">
             <p
-              class="text-slate-500 text-xs font-semibold uppercase tracking-wide mb-2"
+              class="text-[var(--color-muted)] text-xs font-semibold uppercase tracking-wide mb-2"
             >
               Total topups
             </p>
-            <h4 class="text-2xl font-bold text-slate-800 mb-1">
+            <h4 class="text-2xl font-bold text-[var(--color-font)] mb-1">
               {{ formatCurrency(acceptedDep) }}
             </h4>
             <div class="flex items-center text-xs font-medium mt-1">
               <span
                 class="material-symbols-outlined text-sm mr-1 transition-colors"
-                [class.text-emerald-600]="topupActive"
-                [class.text-slate-400]="!topupActive"
+                [class.text-[var(--color-success)]]="topupActive"
+                [class.text-[var(--color-muted)]]="!topupActive"
                 >trending_up</span
               >
               <span
                 class="transition-colors"
-                [class.text-emerald-600]="topupActive"
-                [class.text-slate-400]="!topupActive"
+                [class.text-[var(--color-success)]]="topupActive"
+                [class.text-[var(--color-muted)]]="!topupActive"
               >
                 {{ topupActive ? "Active" : "Inactive" }}
               </span>
@@ -59,13 +57,13 @@
 
             <!-- Hover helper message -->
             <div
-              class="mt-2 text-xs text-slate-400 opacity-0 group-hover:opacity-100 transition"
+              class="mt-2 text-xs text-[var(--color-muted)] opacity-0 group-hover:opacity-100 transition"
             >
               Click to {{ topupActive ? "deactivate" : "activate" }} topups
             </div>
           </div>
           <div
-            class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform"
+            class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-success)] to-[var(--color-success)]/90 flex items-center justify-center shadow-lg shadow-[var(--color-success)]/30 group-hover:scale-110 transition-transform"
           >
             <span class="material-symbols-outlined text-white text-2xl"
               >download</span
@@ -79,30 +77,30 @@
         role="button"
         tabindex="0"
         (click)="togglepayout()"
-        class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/60 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
+        class="bg-[var(--color-surface)] rounded-2xl p-5 shadow-[var(--shadow-sm)] border border-[var(--color-border)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
         title="Click to activate/deactivate payouts"
       >
         <div class="flex items-start justify-between">
           <div class="flex-1">
             <p
-              class="text-slate-500 text-xs font-semibold uppercase tracking-wide mb-2"
+              class="text-[var(--color-muted)] text-xs font-semibold uppercase tracking-wide mb-2"
             >
               Total payouts
             </p>
-            <h4 class="text-2xl font-bold text-slate-800 mb-1">
+            <h4 class="text-2xl font-bold text-[var(--color-font)] mb-1">
               {{ formatCurrency(acceptedWid) }}
             </h4>
             <div class="flex items-center text-xs font-medium mt-1">
               <span
                 class="material-symbols-outlined text-sm mr-1 transition-colors"
-                [class.text-rose-600]="payoutActive"
-                [class.text-slate-400]="!payoutActive"
+                [class.text-[var(--color-danger)]]="payoutActive"
+                [class.text-[var(--color-muted)]]="!payoutActive"
                 >trending_down</span
               >
               <span
                 class="transition-colors"
-                [class.text-rose-600]="payoutActive"
-                [class.text-slate-400]="!payoutActive"
+                [class.text-[var(--color-danger)]]="payoutActive"
+                [class.text-[var(--color-muted)]]="!payoutActive"
               >
                 {{ payoutActive ? "Active" : "Inactive" }}
               </span>
@@ -110,14 +108,14 @@
 
             <!-- Hover helper message -->
             <div
-              class="mt-2 text-xs text-slate-400 opacity-0 group-hover:opacity-100 transition"
+              class="mt-2 text-xs text-[var(--color-muted)] opacity-0 group-hover:opacity-100 transition"
             >
               Click to
               {{ payoutActive ? "deactivate" : "activate" }} payouts
             </div>
           </div>
           <div
-            class="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:scale-110 transition-transform"
+            class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-danger)] to-[var(--color-danger)]/90 flex items-center justify-center shadow-lg shadow-[var(--color-danger)]/30 group-hover:scale-110 transition-transform"
           >
             <span class="material-symbols-outlined text-white text-2xl"
               >upload</span
@@ -128,22 +126,21 @@
 
       <!-- Total Commission -->
       <div
-        class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/60 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group"
+        class="bg-[var(--color-surface)] rounded-2xl p-5 shadow-[var(--shadow-sm)] border border-[var(--color-border)] hover:shadow-[var(--shadow-md)] hover:scale-[1.02] transition-all duration-300 group"
       >
         <div class="flex items-start justify-between">
           <div class="flex-1">
             <p
-              class="text-slate-500 text-xs font-semibold uppercase tracking-wide mb-2"
+              class="text-[var(--color-muted)] text-xs font-semibold uppercase tracking-wide mb-2"
             >
               Total Reward
             </p>
-            <h4 class="text-2xl font-bold text-slate-800 mb-1">
+            <h4 class="text-2xl font-bold text-[var(--color-font)] mb-1">
               {{ branchCom }}
             </h4>
-            
           </div>
           <div
-            class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform"
+            class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark)] flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/30 group-hover:scale-110 transition-transform"
           >
             <span class="material-symbols-outlined text-white text-2xl"
               >account_balance</span
@@ -158,22 +155,24 @@
       <!-- Pending Actions (UPI topups) -->
       <div class="lg:col-span-1 space-y-6">
         <div
-          class="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-200/60"
+          class="bg-[var(--color-surface)] rounded-2xl overflow-hidden shadow-[var(--shadow-md)] border border-[var(--color-border)]"
         >
           <div
-            class="bg-gradient-to-r from-violet-50 to-purple-50 p-5 border-b border-slate-200"
+            class="bg-gradient-to-r from-[var(--color-primary-light)]/20 to-[var(--color-accent)]/20 p-5 border-b border-[var(--color-border)]"
           >
             <div class="flex justify-between items-start mb-3">
               <div>
-                <h3 class="font-bold text-slate-800 text-lg flex items-center">
+                <h3
+                  class="font-bold text-[var(--color-font)] text-lg flex items-center"
+                >
                   Pending UPI topups
                   <span
-                    class="ml-2 text-xs font-bold px-2.5 py-1 rounded-full bg-violet-100 text-violet-700 border border-violet-200"
+                    class="ml-2 text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--color-primary-light)]/20 text-[var(--color-primary)] border border-[var(--color-primary-light)]"
                   >
                     {{ filteredPendingUpi().length }}
                   </span>
                 </h3>
-                <p class="text-sm text-slate-600 mt-1">
+                <p class="text-sm text-[var(--color-muted)] mt-1">
                   Awaiting approval for UPI transactions
                 </p>
               </div>
@@ -182,24 +181,24 @@
 
           <!-- FIXED HEIGHT container with scroll -->
           <div
-            class="overflow-y-auto h-[480px] md:h-[600px] scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100"
+            class="overflow-y-auto h-[480px] md:h-[600px] scrollbar-thin scrollbar-thumb-[var(--color-muted)]/30 scrollbar-track-[var(--color-bg)]"
           >
-            <div class="divide-y divide-slate-100">
+            <div class="divide-y divide-[var(--color-border)]/50">
               <div
                 *ngFor="let transaction of pagedPendingUpi()"
-                class="p-4 hover:bg-slate-50 transition relative group"
+                class="p-4 hover:bg-[var(--color-hover)] transition relative group"
               >
-                <!-- Violet left border for UPI -->
+                <!-- Primary left border for UPI -->
                 <div
-                  class="absolute left-0 top-0 w-1 h-full transition-all group-hover:w-1.5 bg-gradient-to-b from-violet-400 to-violet-600"
+                  class="absolute left-0 top-0 w-1 h-full transition-all group-hover:w-1.5 bg-gradient-to-b from-[var(--color-primary-light)] to-[var(--color-primary)]"
                 ></div>
 
                 <div class="flex items-start gap-3 pl-2">
                   <div
-                    class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-gradient-to-br from-violet-100 to-violet-200"
+                    class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-gradient-to-br from-[var(--color-primary-light)]/20 to-[var(--color-primary-light)]/10"
                   >
                     <span
-                      class="material-symbols-outlined text-xl text-violet-700"
+                      class="material-symbols-outlined text-xl text-[var(--color-primary)]"
                     >
                       account_balance_wallet
                     </span>
@@ -208,10 +207,14 @@
                   <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start gap-2">
                       <div class="flex-1 min-w-0">
-                        <p class="text-sm font-bold text-slate-800 truncate">
+                        <p
+                          class="text-sm font-bold text-[var(--color-font)] truncate"
+                        >
                           UPI topup
                         </p>
-                        <p class="text-xs text-slate-600 truncate mt-0.5">
+                        <p
+                          class="text-xs text-[var(--color-muted)] truncate mt-0.5"
+                        >
                           {{
                             transaction.upiId || transaction.holderName || "—"
                           }}
@@ -219,57 +222,55 @@
                       </div>
 
                       <span
-                        class="text-base font-bold whitespace-nowrap text-violet-600"
+                        class="text-base font-bold whitespace-nowrap text-[var(--color-primary)]"
                       >
                         +{{ formatCurrency(transaction.amount) }}
                       </span>
                     </div>
 
                     <div
-                      class="flex items-center gap-2 mt-2 text-xs text-slate-500"
+                      class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]"
                     >
-                      <span>{{ transaction.date | date : "short" }}</span>
-                      <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                      <span>{{ transaction.date | date: "short" }}</span>
                       <span
-                        class="px-2 py-0.5 rounded-md font-medium bg-violet-100 text-violet-700"
+                        class="w-1 h-1 rounded-full bg-[var(--color-border)]"
+                      ></span>
+                      <span
+                        class="px-2 py-0.5 rounded-md font-medium bg-[var(--color-primary-light)]/20 text-[var(--color-primary)]"
                       >
                         UPI
                       </span>
                     </div>
 
                     <div class="flex items-center justify-between mt-3 gap-2">
-                      <!-- <span
-                        class="px-2.5 py-1 text-xs rounded-lg bg-amber-100 text-amber-800 font-bold border border-amber-200"
-                        >Pending</span
-                      > -->
                       <div class="flex gap-1.5">
                         <button
                           (click)="viewTransactionDetails(transaction)"
-                          class="p-1.5 rounded-lg hover:bg-slate-200 transition"
+                          class="p-1.5 rounded-lg hover:bg-[var(--color-border)] transition"
                           title="View Details"
                         >
                           <span
-                            class="material-symbols-outlined text-slate-600 text-lg"
+                            class="material-symbols-outlined text-[var(--color-muted)] text-lg"
                             >visibility</span
                           >
                         </button>
                         <button
                           (click)="openApproveConfirm(transaction)"
-                          class="p-1.5 rounded-lg hover:bg-emerald-100 transition"
+                          class="p-1.5 rounded-lg hover:bg-[var(--color-success)]/20 transition"
                           title="Approve"
                         >
                           <span
-                            class="material-symbols-outlined text-emerald-600 text-lg"
+                            class="material-symbols-outlined text-[var(--color-success)] text-lg"
                             >check_circle</span
                           >
                         </button>
                         <button
                           (click)="openRejectConfirm(transaction)"
-                          class="p-1.5 rounded-lg hover:bg-rose-100 transition"
+                          class="p-1.5 rounded-lg hover:bg-[var(--color-danger)]/20 transition"
                           title="Reject"
                         >
                           <span
-                            class="material-symbols-outlined text-rose-600 text-lg"
+                            class="material-symbols-outlined text-[var(--color-danger)] text-lg"
                             >cancel</span
                           >
                         </button>
@@ -284,17 +285,17 @@
                 class="p-8 text-center"
               >
                 <div
-                  class="w-16 h-16 mx-auto mb-3 rounded-full bg-slate-100 flex items-center justify-center"
+                  class="w-16 h-16 mx-auto mb-3 rounded-full bg-[var(--color-bg)] flex items-center justify-center"
                 >
                   <span
-                    class="material-symbols-outlined text-slate-400 text-3xl"
+                    class="material-symbols-outlined text-[var(--color-muted)] text-3xl"
                     >check_circle</span
                   >
                 </div>
-                <p class="text-sm text-slate-500 font-medium">
+                <p class="text-sm text-[var(--color-muted)] font-medium">
                   No pending UPI topups
                 </p>
-                <p class="text-xs text-slate-400 mt-1">
+                <p class="text-xs text-[var(--color-muted)]/70 mt-1">
                   All UPI transactions are up to date
                 </p>
               </div>
@@ -303,14 +304,16 @@
 
           <!-- Pagination for Pending UPI -->
           <div
-            class="p-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 bg-slate-50"
+            class="p-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
           >
             <div class="flex items-center gap-2">
-              <label class="text-xs text-slate-600 font-medium">Show</label>
+              <label class="text-xs text-[var(--color-muted)] font-medium"
+                >Show</label
+              >
               <select
                 [(ngModel)]="pendingPageSize"
                 (change)="onChangePendingPageSize(pendingPageSize)"
-                class="text-xs border border-slate-300 rounded-lg px-2 py-1 bg-white focus:ring-2 focus:ring-violet-500"
+                class="text-xs border border-[var(--color-border)] rounded-lg px-2 py-1 bg-[var(--color-surface)] focus:ring-2 focus:ring-[var(--color-primary)]"
               >
                 <option *ngFor="let s of pendingPageSizes" [value]="s">
                   {{ s }}
@@ -321,17 +324,17 @@
               <button
                 (click)="setPendingPage(pendingPage - 1)"
                 [disabled]="pendingPage === 1"
-                class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-medium hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Prev
               </button>
-              <span class="text-xs text-slate-600 font-medium px-2"
+              <span class="text-xs text-[var(--color-muted)] font-medium px-2"
                 >{{ pendingPage }} / {{ pendingTotalPages() }}</span
               >
               <button
                 (click)="setPendingPage(pendingPage + 1)"
                 [disabled]="pendingPage >= pendingTotalPages()"
-                class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-medium hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
@@ -343,22 +346,24 @@
       <!-- Pending Actions (Bank topups) -->
       <div class="lg:col-span-1 space-y-6">
         <div
-          class="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-200/60"
+          class="bg-[var(--color-surface)] rounded-2xl overflow-hidden shadow-[var(--shadow-md)] border border-[var(--color-border)]"
         >
           <div
-            class="bg-gradient-to-r from-blue-50 to-cyan-50 p-5 border-b border-slate-200"
+            class="bg-gradient-to-r from-[var(--color-secondary)]/20 to-[var(--color-info)]/20 p-5 border-b border-[var(--color-border)]"
           >
             <div class="flex justify-between items-start mb-3">
               <div>
-                <h3 class="font-bold text-slate-800 text-lg flex items-center">
+                <h3
+                  class="font-bold text-[var(--color-font)] text-lg flex items-center"
+                >
                   Pending Bank topups
                   <span
-                    class="ml-2 text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200"
+                    class="ml-2 text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--color-info)]/20 text-[var(--color-secondary)] border border-[var(--color-info)]/50"
                   >
                     {{ filteredPendingBank().length }}
                   </span>
                 </h3>
-                <p class="text-sm text-slate-600 mt-1">
+                <p class="text-sm text-[var(--color-muted)] mt-1">
                   Awaiting approval for bank transfers
                 </p>
               </div>
@@ -367,24 +372,24 @@
 
           <!-- FIXED HEIGHT container with scroll -->
           <div
-            class="overflow-y-auto h-[480px] md:h-[600px] scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100"
+            class="overflow-y-auto h-[480px] md:h-[600px] scrollbar-thin scrollbar-thumb-[var(--color-muted)]/30 scrollbar-track-[var(--color-bg)]"
           >
-            <div class="divide-y divide-slate-100">
+            <div class="divide-y divide-[var(--color-border)]/50">
               <div
                 *ngFor="let transaction of pagedPendingBank()"
-                class="p-4 hover:bg-slate-50 transition relative group"
+                class="p-4 hover:bg-[var(--color-hover)] transition relative group"
               >
-                <!-- Blue left border for Bank -->
+                <!-- Secondary left border for Bank -->
                 <div
-                  class="absolute left-0 top-0 w-1 h-full transition-all group-hover:w-1.5 bg-gradient-to-b from-blue-400 to-blue-600"
+                  class="absolute left-0 top-0 w-1 h-full transition-all group-hover:w-1.5 bg-gradient-to-b from-[var(--color-info)] to-[var(--color-secondary)]"
                 ></div>
 
                 <div class="flex items-start gap-3 pl-2">
                   <div
-                    class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-gradient-to-br from-blue-100 to-blue-200"
+                    class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-gradient-to-br from-[var(--color-info)]/20 to-[var(--color-secondary)]/10"
                   >
                     <span
-                      class="material-symbols-outlined text-xl text-blue-700"
+                      class="material-symbols-outlined text-xl text-[var(--color-secondary)]"
                     >
                       account_balance
                     </span>
@@ -393,10 +398,14 @@
                   <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start gap-2">
                       <div class="flex-1 min-w-0">
-                        <p class="text-sm font-bold text-slate-800 truncate">
+                        <p
+                          class="text-sm font-bold text-[var(--color-font)] truncate"
+                        >
                           Bank topup
                         </p>
-                        <p class="text-xs text-slate-600 truncate mt-0.5">
+                        <p
+                          class="text-xs text-[var(--color-muted)] truncate mt-0.5"
+                        >
                           {{
                             transaction.accountNo ||
                               transaction.holderName ||
@@ -406,57 +415,55 @@
                       </div>
 
                       <span
-                        class="text-base font-bold whitespace-nowrap text-blue-600"
+                        class="text-base font-bold whitespace-nowrap text-[var(--color-secondary)]"
                       >
                         +{{ formatCurrency(transaction.amount) }}
                       </span>
                     </div>
 
                     <div
-                      class="flex items-center gap-2 mt-2 text-xs text-slate-500"
+                      class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]"
                     >
-                      <span>{{ transaction.date | date : "short" }}</span>
-                      <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                      <span>{{ transaction.date | date: "short" }}</span>
                       <span
-                        class="px-2 py-0.5 rounded-md font-medium bg-blue-100 text-blue-700"
+                        class="w-1 h-1 rounded-full bg-[var(--color-border)]"
+                      ></span>
+                      <span
+                        class="px-2 py-0.5 rounded-md font-medium bg-[var(--color-info)]/20 text-[var(--color-secondary)]"
                       >
                         Bank
                       </span>
                     </div>
 
                     <div class="flex items-center justify-between mt-3 gap-2">
-                      <!-- <span
-                        class="px-2.5 py-1 text-xs rounded-lg bg-amber-100 text-amber-800 font-bold border border-amber-200"
-                        >Pending</span
-                      > -->
                       <div class="flex gap-1.5">
                         <button
                           (click)="viewTransactionDetails(transaction)"
-                          class="p-1.5 rounded-lg hover:bg-slate-200 transition"
+                          class="p-1.5 rounded-lg hover:bg-[var(--color-border)] transition"
                           title="View Details"
                         >
                           <span
-                            class="material-symbols-outlined text-slate-600 text-lg"
+                            class="material-symbols-outlined text-[var(--color-muted)] text-lg"
                             >visibility</span
                           >
                         </button>
                         <button
                           (click)="openApproveConfirm(transaction)"
-                          class="p-1.5 rounded-lg hover:bg-emerald-100 transition"
+                          class="p-1.5 rounded-lg hover:bg-[var(--color-success)]/20 transition"
                           title="Approve"
                         >
                           <span
-                            class="material-symbols-outlined text-emerald-600 text-lg"
+                            class="material-symbols-outlined text-[var(--color-success)] text-lg"
                             >check_circle</span
                           >
                         </button>
                         <button
                           (click)="openRejectConfirm(transaction)"
-                          class="p-1.5 rounded-lg hover:bg-rose-100 transition"
+                          class="p-1.5 rounded-lg hover:bg-[var(--color-danger)]/20 transition"
                           title="Reject"
                         >
                           <span
-                            class="material-symbols-outlined text-rose-600 text-lg"
+                            class="material-symbols-outlined text-[var(--color-danger)] text-lg"
                             >cancel</span
                           >
                         </button>
@@ -471,17 +478,17 @@
                 class="p-8 text-center"
               >
                 <div
-                  class="w-16 h-16 mx-auto mb-3 rounded-full bg-slate-100 flex items-center justify-center"
+                  class="w-16 h-16 mx-auto mb-3 rounded-full bg-[var(--color-bg)] flex items-center justify-center"
                 >
                   <span
-                    class="material-symbols-outlined text-slate-400 text-3xl"
+                    class="material-symbols-outlined text-[var(--color-muted)] text-3xl"
                     >check_circle</span
                   >
                 </div>
-                <p class="text-sm text-slate-500 font-medium">
+                <p class="text-sm text-[var(--color-muted)] font-medium">
                   No pending bank topups
                 </p>
-                <p class="text-xs text-slate-400 mt-1">
+                <p class="text-xs text-[var(--color-muted)]/70 mt-1">
                   All bank transactions are up to date
                 </p>
               </div>
@@ -490,14 +497,16 @@
 
           <!-- Pagination for Pending Bank -->
           <div
-            class="p-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 bg-slate-50"
+            class="p-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
           >
             <div class="flex items-center gap-2">
-              <label class="text-xs text-slate-600 font-medium">Show</label>
+              <label class="text-xs text-[var(--color-muted)] font-medium"
+                >Show</label
+              >
               <select
                 [(ngModel)]="pendingPageSize"
                 (change)="onChangePendingPageSize(pendingPageSize)"
-                class="text-xs border border-slate-300 rounded-lg px-2 py-1 bg-white focus:ring-2 focus:ring-blue-500"
+                class="text-xs border border-[var(--color-border)] rounded-lg px-2 py-1 bg-[var(--color-surface)] focus:ring-2 focus:ring-[var(--color-secondary)]"
               >
                 <option *ngFor="let s of pendingPageSizes" [value]="s">
                   {{ s }}
@@ -508,17 +517,17 @@
               <button
                 (click)="setPendingPage(pendingPage - 1)"
                 [disabled]="pendingPage === 1"
-                class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-medium hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Prev
               </button>
-              <span class="text-xs text-slate-600 font-medium px-2"
+              <span class="text-xs text-[var(--color-muted)] font-medium px-2"
                 >{{ pendingPage }} / {{ pendingTotalPages() }}</span
               >
               <button
                 (click)="setPendingPage(pendingPage + 1)"
                 [disabled]="pendingPage >= pendingTotalPages()"
-                class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-medium hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
@@ -530,22 +539,24 @@
       <!-- Pending Actions (payouts) -->
       <div class="lg:col-span-1 space-y-6">
         <div
-          class="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-200/60"
+          class="bg-[var(--color-surface)] rounded-2xl overflow-hidden shadow-[var(--shadow-md)] border border-[var(--color-border)]"
         >
           <div
-            class="bg-gradient-to-r from-rose-50 to-pink-50 p-5 border-b border-slate-200"
+            class="bg-gradient-to-r from-[var(--color-danger)]/20 to-[var(--color-warning)]/20 p-5 border-b border-[var(--color-border)]"
           >
             <div class="flex justify-between items-start mb-3">
               <div>
-                <h3 class="font-bold text-slate-800 text-lg flex items-center">
+                <h3
+                  class="font-bold text-[var(--color-font)] text-lg flex items-center"
+                >
                   Pending payouts
                   <span
-                    class="ml-2 text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 border border-rose-200"
+                    class="ml-2 text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--color-danger)]/20 text-[var(--color-danger)] border border-[var(--color-danger)]/50"
                   >
                     {{ filteredPendingpayouts().length }}
                   </span>
                 </h3>
-                <p class="text-sm text-slate-600 mt-1">
+                <p class="text-sm text-[var(--color-muted)] mt-1">
                   Awaiting approval for payout requests
                 </p>
               </div>
@@ -554,24 +565,24 @@
 
           <!-- FIXED HEIGHT container with scroll -->
           <div
-            class="overflow-y-auto h-[480px] md:h-[600px] scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100"
+            class="overflow-y-auto h-[480px] md:h-[600px] scrollbar-thin scrollbar-thumb-[var(--color-muted)]/30 scrollbar-track-[var(--color-bg)]"
           >
-            <div class="divide-y divide-slate-100">
+            <div class="divide-y divide-[var(--color-border)]/50">
               <div
                 *ngFor="let transaction of pagedPendingpayouts()"
-                class="p-4 hover:bg-slate-50 transition relative group"
+                class="p-4 hover:bg-[var(--color-hover)] transition relative group"
               >
-                <!-- Rose left border for payouts -->
+                <!-- Danger left border for payouts -->
                 <div
-                  class="absolute left-0 top-0 w-1 h-full transition-all group-hover:w-1.5 bg-gradient-to-b from-rose-400 to-rose-600"
+                  class="absolute left-0 top-0 w-1 h-full transition-all group-hover:w-1.5 bg-gradient-to-b from-[var(--color-danger)] to-[var(--color-warning)]"
                 ></div>
 
                 <div class="flex items-start gap-3 pl-2">
                   <div
-                    class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-gradient-to-br from-rose-100 to-rose-200"
+                    class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-gradient-to-br from-[var(--color-danger)]/20 to-[var(--color-warning)]/10"
                   >
                     <span
-                      class="material-symbols-outlined text-xl text-rose-700"
+                      class="material-symbols-outlined text-xl text-[var(--color-danger)]"
                     >
                       payments
                     </span>
@@ -580,10 +591,14 @@
                   <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start gap-2">
                       <div class="flex-1 min-w-0">
-                        <p class="text-sm font-bold text-slate-800 truncate">
+                        <p
+                          class="text-sm font-bold text-[var(--color-font)] truncate"
+                        >
                           payout
                         </p>
-                        <p class="text-xs text-slate-600 truncate mt-0.5">
+                        <p
+                          class="text-xs text-[var(--color-muted)] truncate mt-0.5"
+                        >
                           {{
                             transaction.website || transaction.holderName || "—"
                           }}
@@ -591,19 +606,21 @@
                       </div>
 
                       <span
-                        class="text-base font-bold whitespace-nowrap text-rose-600"
+                        class="text-base font-bold whitespace-nowrap text-[var(--color-danger)]"
                       >
                         -{{ formatCurrency(transaction.amount) }}
                       </span>
                     </div>
 
                     <div
-                      class="flex items-center gap-2 mt-2 text-xs text-slate-500"
+                      class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]"
                     >
-                      <span>{{ transaction.date | date : "short" }}</span>
-                      <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                      <span>{{ transaction.date | date: "short" }}</span>
                       <span
-                        class="px-2 py-0.5 rounded-md font-medium bg-rose-100 text-rose-700"
+                        class="w-1 h-1 rounded-full bg-[var(--color-border)]"
+                      ></span>
+                      <span
+                        class="px-2 py-0.5 rounded-md font-medium bg-[var(--color-danger)]/20 text-[var(--color-danger)]"
                       >
                         payout
                       </span>
@@ -614,10 +631,10 @@
                         [disabled]="transaction.processing"
                         (click)="onProcessingClick(transaction)"
                         [ngClass]="{
-                          'bg-amber-100 text-amber-800 border border-amber-200':
+                          'bg-[var(--color-warning)]/20 text-[var(--color-warning)] border border-[var(--color-warning)]/50':
                             transaction.processing,
-                          'bg-blue-100 text-blue-800 border border-blue-200':
-                            !transaction.processing
+                          'bg-[var(--color-info)]/20 text-[var(--color-info)] border border-[var(--color-info)]/50':
+                            !transaction.processing,
                         }"
                         class="px-2.5 py-1 text-xs rounded-lg font-bold"
                       >
@@ -633,33 +650,33 @@
                       <div class="flex gap-1.5">
                         <button
                           (click)="viewTransactionDetails(transaction)"
-                          class="p-1.5 rounded-lg hover:bg-slate-200 transition"
+                          class="p-1.5 rounded-lg hover:bg-[var(--color-border)] transition"
                           title="View Details"
                         >
                           <span
-                            class="material-symbols-outlined text-slate-600 text-lg"
+                            class="material-symbols-outlined text-[var(--color-muted)] text-lg"
                             >visibility</span
                           >
                         </button>
                         <button
                           (click)="openApproveConfirm(transaction)"
                           [disabled]="!transaction.processing"
-                          class="p-1.5 rounded-lg hover:bg-emerald-100 transition"
+                          class="p-1.5 rounded-lg hover:bg-[var(--color-success)]/20 transition"
                           title="Approve"
                         >
                           <span
-                            class="material-symbols-outlined text-emerald-600 text-lg"
+                            class="material-symbols-outlined text-[var(--color-success)] text-lg"
                             >check_circle</span
                           >
                         </button>
                         <button
                           (click)="openRejectConfirm(transaction)"
-                          class="p-1.5 rounded-lg hover:bg-rose-100 transition"
+                          class="p-1.5 rounded-lg hover:bg-[var(--color-danger)]/20 transition"
                           title="Reject"
                           [disabled]="!transaction.processing"
                         >
                           <span
-                            class="material-symbols-outlined text-rose-600 text-lg"
+                            class="material-symbols-outlined text-[var(--color-danger)] text-lg"
                             >cancel</span
                           >
                         </button>
@@ -674,17 +691,17 @@
                 class="p-8 text-center"
               >
                 <div
-                  class="w-16 h-16 mx-auto mb-3 rounded-full bg-slate-100 flex items-center justify-center"
+                  class="w-16 h-16 mx-auto mb-3 rounded-full bg-[var(--color-bg)] flex items-center justify-center"
                 >
                   <span
-                    class="material-symbols-outlined text-slate-400 text-3xl"
+                    class="material-symbols-outlined text-[var(--color-muted)] text-3xl"
                     >check_circle</span
                   >
                 </div>
-                <p class="text-sm text-slate-500 font-medium">
+                <p class="text-sm text-[var(--color-muted)] font-medium">
                   No pending payouts
                 </p>
-                <p class="text-xs text-slate-400 mt-1">
+                <p class="text-xs text-[var(--color-muted)]/70 mt-1">
                   All payout requests are processed
                 </p>
               </div>
@@ -693,14 +710,16 @@
 
           <!-- Pagination for Pending payouts -->
           <div
-            class="p-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 bg-slate-50"
+            class="p-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
           >
             <div class="flex items-center gap-2">
-              <label class="text-xs text-slate-600 font-medium">Show</label>
+              <label class="text-xs text-[var(--color-muted)] font-medium"
+                >Show</label
+              >
               <select
                 [(ngModel)]="pendingPageSize"
                 (change)="onChangePendingPageSize(pendingPageSize)"
-                class="text-xs border border-slate-300 rounded-lg px-2 py-1 bg-white focus:ring-2 focus:ring-rose-500"
+                class="text-xs border border-[var(--color-border)] rounded-lg px-2 py-1 bg-[var(--color-surface)] focus:ring-2 focus:ring-[var(--color-danger)]"
               >
                 <option *ngFor="let s of pendingPageSizes" [value]="s">
                   {{ s }}
@@ -711,422 +730,21 @@
               <button
                 (click)="setPendingPage(pendingPage - 1)"
                 [disabled]="pendingPage === 1"
-                class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-medium hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Prev
               </button>
-              <span class="text-xs text-slate-600 font-medium px-2"
+              <span class="text-xs text-[var(--color-muted)] font-medium px-2"
                 >{{ pendingPage }} / {{ pendingTotalPages() }}</span
               >
               <button
                 (click)="setPendingPage(pendingPage + 1)"
                 [disabled]="pendingPage >= pendingTotalPages()"
-                class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-medium hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FULL WIDTH CHARTS SECTION -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 mb-6">
-      <div
-        class="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-200/60"
-      >
-        <div
-          class="bg-gradient-to-r from-violet-50 to-purple-50 p-5 border-b border-slate-200"
-        >
-          <h3 class="font-bold text-slate-800 text-lg">
-            topup Methods Distribution
-          </h3>
-          <p class="text-sm text-slate-600 mt-1">Breakdown by payment method</p>
-        </div>
-        <div class="p-6 h-[280px] md:h-[340px]">
-          <canvas #topupMethodChart></canvas>
-        </div>
-      </div>
-
-      <div
-        class="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-200/60"
-      >
-        <div
-          class="bg-gradient-to-r from-rose-50 to-pink-50 p-5 border-b border-slate-200"
-        >
-          <h3 class="font-bold text-slate-800 text-lg">Top payout Banks</h3>
-          <p class="text-sm text-slate-600 mt-1">Top 10 banks by volume</p>
-        </div>
-        <div class="p-6 h-[280px] md:h-[340px]">
-          <canvas #payoutBankChart></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- Transaction Trends full width -->
-    <div
-      class="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-200/60 mb-6"
-    >
-      <div
-        class="bg-gradient-to-r from-slate-50 to-blue-50 p-5 border-b border-slate-200"
-      >
-        <div
-          class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
-        >
-          <div>
-            <h3 class="font-bold text-slate-800 text-lg">Transaction Trends</h3>
-            <p class="text-sm text-slate-600 mt-1">
-              Historical transaction volume
-            </p>
-          </div>
-          <div class="flex gap-2 text-sm items-center">
-            <button
-              *ngFor="let period of timePeriods"
-              [class]="getTimePeriodClass(period.active)"
-              (click)="setActiveTimePeriod(period)"
-            >
-              {{ period.label }}
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="p-6 h-[300px] md:h-[380px]">
-        <canvas #trendChart></canvas>
-      </div>
-    </div>
-
-    <!-- Transaction Details Modal -->
-    <div
-      *ngIf="selectedTransaction"
-      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
-    >
-      <div
-        class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl animate-slideUp"
-      >
-        <!-- Dynamic header based on transaction type -->
-        <div
-          class="p-6 border-b border-slate-200"
-          [ngClass]="{
-            'bg-gradient-to-r from-emerald-50 to-green-50':
-              selectedTransaction.type === 'topup' &&
-              selectedTransaction.mode === 'upi',
-            'bg-gradient-to-r from-blue-50 to-cyan-50':
-              selectedTransaction.type === 'topup' &&
-              selectedTransaction.mode === 'bank',
-            'bg-gradient-to-r from-rose-50 to-pink-50':
-              selectedTransaction.type === 'payout'
-          }"
-        >
-          <div class="flex justify-between items-center">
-            <div>
-              <h3 class="text-xl font-bold text-slate-800">
-                Transaction Details
-              </h3>
-              <p class="text-sm text-slate-600 mt-1">
-                Complete transaction information
-              </p>
-            </div>
-            <button
-              (click)="selectedTransaction = null"
-              class="p-2 rounded-xl hover:bg-white/80 transition"
-            >
-              <span class="material-symbols-outlined text-slate-600"
-                >close</span
-              >
-            </button>
-          </div>
-        </div>
-
-        <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div *ngIf="selectedTransaction.type === 'topup'">
-            <div class="mb-6">
-              <div
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-bold"
-                [ngClass]="{
-                  'bg-violet-100 text-violet-700 border border-violet-200':
-                    selectedTransaction.mode === 'upi',
-                  'bg-blue-100 text-blue-700 border border-blue-200':
-                    selectedTransaction.mode === 'bank'
-                }"
-              >
-                <span
-                  class="material-symbols-outlined"
-                  [ngClass]="{
-                    'text-violet-600': selectedTransaction.mode === 'upi',
-                    'text-blue-600': selectedTransaction.mode === 'bank'
-                  }"
-                  >download</span
-                >
-                <span>
-                  {{
-                    selectedTransaction.mode === "upi"
-                      ? "UPI topup"
-                      : "Bank topup"
-                  }}
-                </span>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-5 mb-6">
-              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <p
-                  class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-                >
-                  UTR Number
-                </p>
-                <p class="font-bold text-slate-800">
-                  {{ selectedTransaction.utrNumber || "N/A" }}
-                </p>
-              </div>
-
-              <!-- Amount Display with Edit Button -->
-              <div
-                class="p-4 rounded-xl font-bold text-lg"
-                [ngClass]="{
-                  'bg-violet-50 text-violet-600 border border-violet-200':
-                    selectedTransaction.mode === 'upi',
-                  'bg-blue-50 text-blue-600 border border-blue-200':
-                    selectedTransaction.mode === 'bank'
-                }"
-              >
-                <div class="flex items-center justify-between">
-                  <div>
-                    <p
-                      class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-                    >
-                      Amount
-                    </p>
-                    <p>+{{ formatCurrency(selectedTransaction.amount) }}</p>
-                  </div>
-                  <button
-                    *ngIf="
-                      selectedTransaction.mode === 'upi' ||
-                      selectedTransaction.mode === 'bank'
-                    "
-                    (click)="openEditAmountPopup()"
-                    class="p-2 rounded-lg hover:bg-white/50 transition"
-                    [ngClass]="{
-                      'hover:bg-violet-100': selectedTransaction.mode === 'upi',
-                      'hover:bg-blue-100': selectedTransaction.mode === 'bank'
-                    }"
-                  >
-                    <span class="material-symbols-outlined text-sm">
-                      edit
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <p
-                  class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-                >
-                  Mode
-                </p>
-                <p class="font-bold text-slate-800">
-                  {{
-                    selectedTransaction.mode === "upi" ? "UPI" : "Bank Transfer"
-                  }}
-                </p>
-              </div>
-              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <p
-                  class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-                >
-                  Date & Time
-                </p>
-                <p class="font-bold text-slate-800 text-sm">
-                  {{ selectedTransaction.date | date : "medium" }}
-                </p>
-              </div>
-            </div>
-
-            <!-- UPI Specific Details -->
-            <div
-              *ngIf="selectedTransaction.mode === 'upi'"
-              class="mb-6 p-4 rounded-xl bg-violet-50 border border-violet-200"
-            >
-              <p
-                class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-              >
-                UPI ID
-              </p>
-              <p class="font-bold text-violet-700">
-                {{ selectedTransaction.upiId }}
-              </p>
-            </div>
-
-            <!-- Bank Specific Details -->
-            <div
-              *ngIf="selectedTransaction.mode === 'bank'"
-              class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200"
-            >
-              <p
-                class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-              >
-                Account Number
-              </p>
-              <p class="font-bold text-blue-700">
-                {{ selectedTransaction.accountNo }}
-              </p>
-            </div>
-
-            <div
-              class="mb-6"
-              *ngIf="selectedTransaction.remarks || selectedTransaction.message"
-            >
-              <p
-                class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-              >
-                Remarks
-              </p>
-              <p
-                class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700"
-              >
-                {{ selectedTransaction.remarks || selectedTransaction.message }}
-              </p>
-            </div>
-
-            <div
-              *ngIf="
-                selectedTransaction.filePath || selectedTransaction.qrImage
-              "
-              class="mb-6"
-            >
-              <p
-                class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3"
-              >
-                Transaction Snapshot
-              </p>
-              <img
-                [src]="
-                  selectedTransaction.filePath || selectedTransaction.qrImage
-                "
-                alt="Snapshot"
-                class="w-48 h-48 object-cover border-2 border-slate-200 rounded-xl shadow-md"
-              />
-            </div>
-          </div>
-
-          <!-- payout Transaction Details -->
-          <div *ngIf="selectedTransaction.type === 'payout'">
-            <div class="mb-6">
-              <div
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-100 border border-rose-200"
-              >
-                <span class="material-symbols-outlined text-rose-600"
-                  >upload</span
-                >
-                <span class="font-bold text-rose-700"
-                  >payout Transaction</span
-                >
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-5 mb-6">
-              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <p
-                  class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-                >
-                  Account Number
-                </p>
-                <p class="font-bold text-slate-800">
-                  {{
-                    selectedTransaction.accountNumber ||
-                      selectedTransaction.accountNo
-                  }}
-                </p>
-              </div>
-              <div class="p-4 rounded-xl bg-rose-50 border border-rose-200">
-                <p
-                  class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-                >
-                  Amount
-                </p>
-                <p class="font-bold text-rose-600 text-lg">
-                  -{{ formatCurrency(selectedTransaction.amount) }}
-                </p>
-              </div>
-              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <p
-                  class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-                >
-                  IFSC Code
-                </p>
-                <p class="font-bold text-slate-800">
-                  {{
-                    selectedTransaction.ifscCode ||
-                      selectedTransaction.raw?.ifsc
-                  }}
-                </p>
-              </div>
-              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <p
-                  class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-                >
-                  Date & Time
-                </p>
-                <p class="font-bold text-slate-800 text-sm">
-                  {{ selectedTransaction.date | date : "medium" }}
-                </p>
-              </div>
-            </div>
-
-            <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200">
-              <p
-                class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-              >
-                Account Holder Name
-              </p>
-              <p class="font-bold text-rose-700">
-                {{ selectedTransaction.holderName }}
-              </p>
-            </div>
-
-            <div
-              class="mb-6"
-              *ngIf="selectedTransaction.remarks || selectedTransaction.message"
-            >
-              <p
-                class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-              >
-                Remarks
-              </p>
-              <p
-                class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700"
-              >
-                {{ selectedTransaction.remarks || selectedTransaction.message }}
-              </p>
-            </div>
-
-            <div
-              class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200"
-            >
-              <p
-                class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-              >
-                Bank Name
-              </p>
-              <p class="font-bold text-slate-800">
-                {{ selectedTransaction.bankName }}
-              </p>
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-3 pt-6 border-t border-slate-200">
-            <button
-              (click)="openRejectConfirm(selectedTransaction)"
-              class="px-6 py-2.5 border-2 border-rose-500 text-rose-600 rounded-xl hover:bg-rose-50 transition font-bold"
-            >
-              Reject
-            </button>
-            <button
-              (click)="openApproveConfirm(selectedTransaction)"
-              class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition font-bold shadow-lg shadow-emerald-500/30"
-            >
-              Approve
-            </button>
           </div>
         </div>
       </div>
@@ -1138,53 +756,55 @@
       class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-fadeIn"
     >
       <div
-        class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl animate-slideUp"
+        class="bg-[var(--color-surface)] rounded-2xl max-w-md w-full p-6 shadow-2xl animate-slideUp"
       >
         <div class="text-center mb-6">
           <div
-            class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-100 to-cyan-200 flex items-center justify-center"
+            class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[var(--color-info)]/20 to-[var(--color-accent)]/20 flex items-center justify-center"
           >
-            <span class="material-symbols-outlined text-blue-600 text-4xl"
+            <span
+              class="material-symbols-outlined text-[var(--color-info)] text-4xl"
               >edit</span
             >
           </div>
-          <h4 class="text-xl font-bold text-slate-800 mb-2">
+          <h4 class="text-xl font-bold text-[var(--color-font)] mb-2">
             Edit Transaction Amount
           </h4>
-          <p class="text-sm text-slate-600">
+          <p class="text-sm text-[var(--color-muted)]">
             Update the transaction amount and add optional notes or attachments
           </p>
         </div>
 
         <!-- Current Transaction Info -->
         <div
-          class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3"
+          class="mb-6 p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] space-y-3"
         >
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500 font-semibold uppercase"
+            <span
+              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
               >Type</span
             >
-            <span class="font-bold text-slate-800">
+            <span class="font-bold text-[var(--color-font)]">
               {{
-                selectedTransaction.mode === "upi"
-                  ? "UPI topup"
-                  : "Bank topup"
+                selectedTransaction.mode === "upi" ? "UPI topup" : "Bank topup"
               }}
             </span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500 font-semibold uppercase"
+            <span
+              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
               >Current Amount</span
             >
-            <span class="font-bold text-slate-700">
+            <span class="font-bold text-[var(--color-font)]">
               {{ formatCurrency(selectedTransaction.amount) }}
             </span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500 font-semibold uppercase"
+            <span
+              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
               >UTR Number</span
             >
-            <span class="font-medium text-slate-700 text-sm">
+            <span class="font-medium text-[var(--color-muted)] text-sm">
               {{ selectedTransaction.utrNumber || "N/A" }}
             </span>
           </div>
@@ -1193,7 +813,7 @@
         <!-- New Amount Input -->
         <div class="mb-6">
           <label
-            class="block text-xs text-slate-500 font-semibold uppercase mb-2"
+            class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
           >
             New Amount *
           </label>
@@ -1205,14 +825,14 @@
             <input
               type="number"
               [(ngModel)]="editAmountData.newAmount"
-              class="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+              class="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-[var(--color-info)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)] outline-none transition"
               placeholder="Enter new amount"
               min="0"
               step="0.01"
               autofocus
             />
           </div>
-          <p class="text-xs mt-2 text-slate-500">
+          <p class="text-xs mt-2 text-[var(--color-muted)]">
             Enter the correct transaction amount. This will update the
             transaction record.
           </p>
@@ -1221,17 +841,17 @@
         <!-- Optional Message -->
         <div class="mb-6">
           <label
-            class="block text-xs text-slate-500 font-semibold uppercase mb-2"
+            class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
           >
             Message (Optional)
           </label>
           <textarea
             [(ngModel)]="editAmountData.message"
-            class="w-full p-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 outline-none transition"
+            class="w-full p-3 rounded-xl border border-[var(--color-border)] focus:ring-2 focus:ring-[var(--color-primary-light)] focus:border-[var(--color-primary)] outline-none transition"
             rows="3"
             placeholder="Add a note about why the amount is being updated..."
           ></textarea>
-          <p class="text-xs mt-2 text-slate-500">
+          <p class="text-xs mt-2 text-[var(--color-muted)]">
             Add a note explaining the reason for updating the amount
           </p>
         </div>
@@ -1239,15 +859,17 @@
         <!-- Optional File Attachment -->
         <div class="mb-6">
           <div class="flex items-center justify-between mb-2">
-            <label class="block text-xs text-slate-500 font-semibold uppercase">
+            <label
+              class="block text-xs text-[var(--color-muted)] font-semibold uppercase"
+            >
               Attachment (Optional)
             </label>
-            <span class="text-xs text-slate-400">Max 5MB</span>
+            <span class="text-xs text-[var(--color-muted)]">Max 5MB</span>
           </div>
 
           <div
-            class="relative border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:border-blue-400 transition-colors duration-200"
-            [class.border-blue-400]="editAmountData.isDragging"
+            class="relative border-2 border-dashed border-[var(--color-border)] rounded-xl p-4 text-center hover:border-[var(--color-primary)] transition-colors duration-200"
+            [class.border-[var(--color-primary)]]="editAmountData.isDragging"
             (dragover)="onEditDragOver($event)"
             (dragleave)="onEditDragLeave($event)"
             (drop)="onEditFileDrop($event)"
@@ -1265,16 +887,18 @@
             <div class="pointer-events-none">
               <div *ngIf="!editAmountData.file" class="space-y-2">
                 <div
-                  class="w-10 h-10 mx-auto mb-2 rounded-full bg-slate-100 flex items-center justify-center"
+                  class="w-10 h-10 mx-auto mb-2 rounded-full bg-[var(--color-bg)] flex items-center justify-center"
                 >
-                  <span class="material-symbols-outlined text-slate-500">
+                  <span
+                    class="material-symbols-outlined text-[var(--color-muted)]"
+                  >
                     attach_file
                   </span>
                 </div>
-                <p class="text-sm font-medium text-slate-700">
+                <p class="text-sm font-medium text-[var(--color-font)]">
                   Drop file here or click to upload
                 </p>
-                <p class="text-xs text-slate-500">
+                <p class="text-xs text-[var(--color-muted)]">
                   Supports PDF, JPG, PNG, DOC (Max 5MB)
                 </p>
               </div>
@@ -1283,17 +907,21 @@
               <div *ngIf="editAmountData.file" class="space-y-3">
                 <div class="flex items-center justify-center gap-3">
                   <div
-                    class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center"
+                    class="w-10 h-10 rounded-lg bg-[var(--color-primary-light)]/20 flex items-center justify-center"
                   >
-                    <span class="material-symbols-outlined text-blue-600">
+                    <span
+                      class="material-symbols-outlined text-[var(--color-primary)]"
+                    >
                       description
                     </span>
                   </div>
                   <div class="text-left flex-1">
-                    <p class="text-sm font-medium text-slate-800 truncate">
+                    <p
+                      class="text-sm font-medium text-[var(--color-font)] truncate"
+                    >
                       {{ editAmountData.file.name }}
                     </p>
-                    <p class="text-xs text-slate-500">
+                    <p class="text-xs text-[var(--color-muted)]">
                       {{ (editAmountData.file.size / 1024 / 1024).toFixed(2) }}
                       MB
                     </p>
@@ -1301,7 +929,7 @@
                   <button
                     type="button"
                     (click)="removeEditFile(); $event.stopPropagation()"
-                    class="text-slate-400 hover:text-rose-600 transition-colors pointer-events-auto"
+                    class="text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors pointer-events-auto"
                     aria-label="Remove file"
                   >
                     <span class="material-symbols-outlined text-lg">
@@ -1313,7 +941,7 @@
             </div>
           </div>
 
-          <p class="text-xs mt-2 text-slate-500">
+          <p class="text-xs mt-2 text-[var(--color-muted)]">
             Add supporting documents like updated payment proof or screenshot
           </p>
         </div>
@@ -1322,7 +950,7 @@
         <div class="flex gap-3">
           <button
             (click)="closeEditAmountPopup()"
-            class="flex-1 px-4 py-2.5 border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition font-bold"
+            class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-muted)] rounded-xl hover:bg-[var(--color-bg)] transition font-bold"
           >
             Cancel
           </button>
@@ -1337,7 +965,7 @@
             [class.cursor-not-allowed]="
               !editAmountData.newAmount || editAmountData.newAmount <= 0
             "
-            class="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl hover:from-blue-600 hover:to-cyan-700 transition font-bold shadow-lg shadow-blue-500/30"
+            class="flex-1 px-4 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white rounded-xl hover:from-[var(--color-primary-dark)] hover:to-[var(--color-secondary)] transition font-bold shadow-lg shadow-[var(--color-primary)]/30"
           >
             Save Changes
           </button>
@@ -1351,53 +979,59 @@
       class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
     >
       <div
-        class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl animate-slideUp"
+        class="bg-[var(--color-surface)] rounded-2xl max-w-md w-full p-6 shadow-2xl animate-slideUp"
       >
         <div class="text-center mb-6">
           <div
-            class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center"
+            class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[var(--color-success)]/20 to-[var(--color-success)]/10 flex items-center justify-center"
           >
-            <span class="material-symbols-outlined text-emerald-600 text-4xl"
+            <span
+              class="material-symbols-outlined text-[var(--color-success)] text-4xl"
               >task_alt</span
             >
           </div>
-          <h4 class="text-xl font-bold text-slate-800 mb-2">
+          <h4 class="text-xl font-bold text-[var(--color-font)] mb-2">
             Confirm Transaction Approval
           </h4>
-          <p class="text-sm text-slate-600">
+          <p class="text-sm text-[var(--color-muted)]">
             Please review the transaction details before approving
           </p>
         </div>
 
         <div
           *ngIf="confirmTransaction"
-          class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3"
+          class="mb-6 p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] space-y-3"
         >
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500 font-semibold uppercase"
+            <span
+              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
               >Type</span
             >
-            <span class="font-bold text-slate-800">{{
+            <span class="font-bold text-[var(--color-font)]">{{
               confirmTransaction.type === "topup" ? "topup" : "payout"
             }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500 font-semibold uppercase"
+            <span
+              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
               >Website/Holder</span
             >
-            <span class="font-bold text-slate-800">{{
+            <span class="font-bold text-[var(--color-font)]">{{
               confirmTransaction.website || confirmTransaction.holderName
             }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500 font-semibold uppercase"
+            <span
+              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
               >Amount</span
             >
             <span
               class="font-bold"
               [ngClass]="{
-                'text-emerald-600': confirmTransaction.type === 'topup',
-                'text-rose-600': confirmTransaction.type === 'payout'
+                'text-[var(--color-success)]':
+                  confirmTransaction.type === 'topup',
+                'text-[var(--color-danger)]':
+                  confirmTransaction.type === 'payout',
               }"
               >{{ formatCurrency(confirmTransaction.amount) }}</span
             >
@@ -1406,10 +1040,11 @@
             *ngIf="confirmTransaction.mode === 'upi'"
             class="flex justify-between items-center"
           >
-            <span class="text-xs text-slate-500 font-semibold uppercase"
+            <span
+              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
               >UPI ID</span
             >
-            <span class="font-medium text-slate-700 text-sm">{{
+            <span class="font-medium text-[var(--color-muted)] text-sm">{{
               confirmTransaction.upiId
             }}</span>
           </div>
@@ -1417,10 +1052,11 @@
             *ngIf="confirmTransaction.mode === 'bank'"
             class="flex justify-between items-center"
           >
-            <span class="text-xs text-slate-500 font-semibold uppercase"
+            <span
+              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
               >Account</span
             >
-            <span class="font-medium text-slate-700 text-sm">{{
+            <span class="font-medium text-[var(--color-muted)] text-sm">{{
               confirmTransaction.accountNo
             }}</span>
           </div>
@@ -1428,10 +1064,11 @@
             *ngIf="confirmTransaction.utrNumber"
             class="flex justify-between items-center"
           >
-            <span class="text-xs text-slate-500 font-semibold uppercase"
+            <span
+              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
               >UTR</span
             >
-            <span class="font-medium text-slate-700 text-sm">{{
+            <span class="font-medium text-[var(--color-muted)] text-sm">{{
               confirmTransaction.utrNumber
             }}</span>
           </div>
@@ -1440,7 +1077,7 @@
         <!-- payout Options Switch -->
         <div class="mb-6" *ngIf="confirmTransaction.type === 'payout'">
           <label
-            class="block text-xs text-slate-500 font-semibold uppercase mb-2"
+            class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
           >
             Select Payout Method (Optional)
           </label>
@@ -1448,16 +1085,16 @@
           <!-- Toggle Switch -->
           <div class="flex items-center justify-center mb-4">
             <div class="relative inline-block w-64">
-              <div class="flex bg-slate-100 rounded-xl p-1">
+              <div class="flex bg-[var(--color-bg)] rounded-xl p-1">
                 <button
                   type="button"
                   (click)="selectedPayoutMethod = 'upi'"
                   class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200"
                   [ngClass]="{
-                    'bg-white text-emerald-700 shadow-sm':
+                    'bg-[var(--color-surface)] text-[var(--color-success)] shadow-sm':
                       selectedPayoutMethod === 'upi',
-                    'text-slate-500 hover:text-slate-700':
-                      selectedPayoutMethod !== 'upi'
+                    'text-[var(--color-muted)] hover:text-[var(--color-font)]':
+                      selectedPayoutMethod !== 'upi',
                   }"
                 >
                   UPI
@@ -1467,10 +1104,10 @@
                   (click)="selectedPayoutMethod = 'bank'"
                   class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200"
                   [ngClass]="{
-                    'bg-white text-emerald-700 shadow-sm':
+                    'bg-[var(--color-surface)] text-[var(--color-success)] shadow-sm':
                       selectedPayoutMethod === 'bank',
-                    'text-slate-500 hover:text-slate-700':
-                      selectedPayoutMethod !== 'bank'
+                    'text-[var(--color-muted)] hover:text-[var(--color-font)]':
+                      selectedPayoutMethod !== 'bank',
                   }"
                 >
                   Bank Transfer
@@ -1482,13 +1119,13 @@
           <!-- UPI Dropdown (shown when UPI is selected) -->
           <div *ngIf="selectedPayoutMethod === 'upi'" class="animate-fadeIn">
             <label
-              class="block text-xs text-slate-500 font-semibold uppercase mb-2"
+              class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
             >
               Select UPI
             </label>
             <select
               [(ngModel)]="selectedUpi"
-              class="w-full p-3 rounded-xl border-2 border-emerald-300 bg-emerald-50 text-emerald-700 font-semibold focus:outline-none focus:border-emerald-500"
+              class="w-full p-3 rounded-xl border-2 border-[var(--color-success)] bg-[var(--color-success)]/10 text-[var(--color-success)] font-semibold focus:outline-none focus:border-[var(--color-success)]"
             >
               <option [value]="null">Select UPI</option>
               <option *ngFor="let upi of upis" [value]="upi.id">
@@ -1500,13 +1137,13 @@
           <!-- Bank Dropdown (shown when Bank is selected) -->
           <div *ngIf="selectedPayoutMethod === 'bank'" class="animate-fadeIn">
             <label
-              class="block text-xs text-slate-500 font-semibold uppercase mb-2"
+              class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
             >
               Select Bank
             </label>
             <select
               [(ngModel)]="selectedBank"
-              class="w-full p-3 rounded-xl border-2 border-emerald-300 bg-emerald-50 text-emerald-700 font-semibold focus:outline-none focus:border-emerald-500"
+              class="w-full p-3 rounded-xl border-2 border-[var(--color-success)] bg-[var(--color-success)]/10 text-[var(--color-success)] font-semibold focus:outline-none focus:border-[var(--color-success)]"
             >
               <option [value]="null">Select Bank</option>
               <option *ngFor="let bank of banks" [value]="bank.id">
@@ -1519,13 +1156,13 @@
         <div class="flex gap-3">
           <button
             (click)="cancelApprove()"
-            class="flex-1 px-4 py-2.5 border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition font-bold"
+            class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-muted)] rounded-xl hover:bg-[var(--color-bg)] transition font-bold"
           >
             Cancel
           </button>
           <button
             (click)="confirmApprove()"
-            class="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition font-bold shadow-lg shadow-emerald-500/30"
+            class="flex-1 px-4 py-2.5 bg-gradient-to-r from-[var(--color-success)] to-[var(--color-success)]/90 text-white rounded-xl hover:from-[var(--color-success)] hover:to-[var(--color-success)] transition font-bold shadow-lg shadow-[var(--color-success)]/30"
           >
             Approve
           </button>
@@ -1539,20 +1176,21 @@
       class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
     >
       <div
-        class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl animate-slideUp"
+        class="bg-[var(--color-surface)] rounded-2xl max-w-md w-full p-6 shadow-2xl animate-slideUp"
       >
         <div class="text-center mb-6">
           <div
-            class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-rose-100 to-rose-200 flex items-center justify-center"
+            class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[var(--color-danger)]/20 to-[var(--color-danger)]/10 flex items-center justify-center"
           >
-            <span class="material-symbols-outlined text-rose-600 text-4xl"
+            <span
+              class="material-symbols-outlined text-[var(--color-danger)] text-4xl"
               >warning</span
             >
           </div>
-          <h4 class="text-xl font-bold text-slate-800 mb-2">
+          <h4 class="text-xl font-bold text-[var(--color-font)] mb-2">
             Confirm Transaction Rejection
           </h4>
-          <p class="text-sm text-slate-600">
+          <p class="text-sm text-[var(--color-muted)]">
             Please provide a reason for rejecting this transaction
           </p>
         </div>
@@ -1560,26 +1198,28 @@
         <!-- Transaction preview -->
         <div
           *ngIf="confirmTransaction"
-          class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3"
+          class="mb-6 p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] space-y-3"
         >
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500 font-semibold uppercase"
+            <span
+              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
               >Type</span
             >
-            <span class="font-bold text-slate-800">
+            <span class="font-bold text-[var(--color-font)]">
               {{
                 confirmTransaction.type === "payout"
                   ? "payout"
                   : confirmTransaction.type === "upi"
-                  ? "UPI"
-                  : confirmTransaction.type === "bank"
-                  ? "Bank"
-                  : "None"
+                    ? "UPI"
+                    : confirmTransaction.type === "bank"
+                      ? "Bank"
+                      : "None"
               }}
             </span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500 font-semibold uppercase"
+            <span
+              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
               >Amount</span
             >
             <span class="font-bold">
@@ -1587,11 +1227,12 @@
             </span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500 font-semibold uppercase"
+            <span
+              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
               >Date</span
             >
-            <span class="font-medium text-slate-700 text-sm">{{
-              confirmTransaction.date | date : "short"
+            <span class="font-medium text-[var(--color-muted)] text-sm">{{
+              confirmTransaction.date | date: "short"
             }}</span>
           </div>
         </div>
@@ -1599,14 +1240,14 @@
         <!-- Reject reason dropdown + custom input -->
         <div class="mb-6">
           <label
-            class="block text-xs text-slate-500 font-semibold uppercase mb-2"
+            class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
           >
             Reason for rejection
           </label>
 
           <select
             [(ngModel)]="reason"
-            class="w-full p-3 rounded-xl border-2 border-rose-300 bg-rose-50 text-rose-700 font-semibold focus:outline-none focus:border-rose-500"
+            class="w-full p-3 rounded-xl border-2 border-[var(--color-danger)] bg-[var(--color-danger)]/10 text-[var(--color-danger)] font-semibold focus:outline-none focus:border-[var(--color-danger)]"
             aria-label="Reason for rejection"
           >
             <option value="" disabled [selected]="!reason">
@@ -1621,10 +1262,10 @@
             [(ngModel)]="customReason"
             type="text"
             placeholder="Enter custom reason"
-            class="mt-3 w-full p-3 rounded-xl border border-rose-200 bg-white text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+            class="mt-3 w-full p-3 rounded-xl border border-[var(--color-danger)]/50 bg-white text-sm focus:ring-2 focus:ring-[var(--color-danger)] focus:border-[var(--color-danger)]"
           />
 
-          <p class="text-xs mt-2 text-rose-600/90">
+          <p class="text-xs mt-2 text-[var(--color-danger)]/90">
             Pick a reason or enter a custom one. This will be saved as the
             rejection reason.
           </p>
@@ -1633,16 +1274,18 @@
         <!-- Optional File Attachment -->
         <div class="mb-6">
           <div class="flex items-center justify-between mb-2">
-            <label class="block text-xs text-slate-500 font-semibold uppercase">
+            <label
+              class="block text-xs text-[var(--color-muted)] font-semibold uppercase"
+            >
               Attachment (Optional)
             </label>
-            <span class="text-xs text-slate-400">Max 5MB</span>
+            <span class="text-xs text-[var(--color-muted)]">Max 5MB</span>
           </div>
 
           <!-- File upload area -->
           <div
-            class="relative border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:border-rose-400 transition-colors duration-200"
-            [class.border-rose-400]="isDragging"
+            class="relative border-2 border-dashed border-[var(--color-border)] rounded-xl p-4 text-center hover:border-[var(--color-danger)] transition-colors duration-200"
+            [class.border-[var(--color-danger)]]="isDragging"
             (dragover)="onDragOver($event)"
             (dragleave)="onDragLeave($event)"
             (drop)="onFileDrop($event)"
@@ -1659,18 +1302,20 @@
 
             <div class="pointer-events-none">
               <div
-                class="w-10 h-10 mx-auto mb-3 rounded-full bg-slate-100 flex items-center justify-center"
+                class="w-10 h-10 mx-auto mb-3 rounded-full bg-[var(--color-bg)] flex items-center justify-center"
               >
-                <span class="material-symbols-outlined text-slate-500">
+                <span
+                  class="material-symbols-outlined text-[var(--color-muted)]"
+                >
                   attach_file
                 </span>
               </div>
 
               <div *ngIf="!selectedFile" class="space-y-2">
-                <p class="text-sm font-medium text-slate-700">
+                <p class="text-sm font-medium text-[var(--color-font)]">
                   Drop file here or click to upload
                 </p>
-                <p class="text-xs text-slate-500">
+                <p class="text-xs text-[var(--color-muted)]">
                   Supports PDF, JPG, PNG, DOC (Max 5MB)
                 </p>
               </div>
@@ -1679,24 +1324,28 @@
               <div *ngIf="selectedFile" class="space-y-3">
                 <div class="flex items-center justify-center gap-3">
                   <div
-                    class="w-10 h-10 rounded-lg bg-rose-50 flex items-center justify-center"
+                    class="w-10 h-10 rounded-lg bg-[var(--color-danger)]/10 flex items-center justify-center"
                   >
-                    <span class="material-symbols-outlined text-rose-600">
+                    <span
+                      class="material-symbols-outlined text-[var(--color-danger)]"
+                    >
                       description
                     </span>
                   </div>
                   <div class="text-left flex-1">
-                    <p class="text-sm font-medium text-slate-800 truncate">
+                    <p
+                      class="text-sm font-medium text-[var(--color-font)] truncate"
+                    >
                       {{ selectedFile.name }}
                     </p>
-                    <p class="text-xs text-slate-500">
+                    <p class="text-xs text-[var(--color-muted)]">
                       {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
                     </p>
                   </div>
                   <button
                     type="button"
                     (click)="removeFile(); $event.stopPropagation()"
-                    class="text-slate-400 hover:text-rose-600 transition-colors"
+                    class="text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors"
                     aria-label="Remove file"
                   >
                     <span class="material-symbols-outlined text-lg">
@@ -1707,17 +1356,21 @@
 
                 <div class="flex items-center gap-2 text-xs">
                   <div
-                    class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden"
+                    class="flex-1 h-2 bg-[var(--color-border)] rounded-full overflow-hidden"
                   >
-                    <div class="h-full bg-rose-500 rounded-full w-full"></div>
+                    <div
+                      class="h-full bg-[var(--color-danger)] rounded-full w-full"
+                    ></div>
                   </div>
-                  <span class="text-slate-600 font-medium">Uploaded</span>
+                  <span class="text-[var(--color-muted)] font-medium"
+                    >Uploaded</span
+                  >
                 </div>
               </div>
             </div>
           </div>
 
-          <p class="text-xs mt-2 text-slate-500">
+          <p class="text-xs mt-2 text-[var(--color-muted)]">
             Add supporting documents if needed. This is optional but recommended
             for audit trails.
           </p>
@@ -1727,7 +1380,7 @@
         <div class="flex gap-3">
           <button
             (click)="cancelApprove()"
-            class="flex-1 px-4 py-2.5 border-2 border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition font-bold"
+            class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-muted)] rounded-xl hover:bg-[var(--color-bg)] transition font-bold"
           >
             Cancel
           </button>
@@ -1740,7 +1393,7 @@
             [class.cursor-not-allowed]="
               !reason || (reason === 'Other' && !customReason)
             "
-            class="flex-1 px-4 py-2.5 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl hover:from-rose-600 hover:to-rose-700 transition font-bold shadow-lg shadow-rose-500/30 disabled:shadow-none"
+            class="flex-1 px-4 py-2.5 bg-gradient-to-r from-[var(--color-danger)] to-[var(--color-danger)]/90 text-white rounded-xl hover:from-[var(--color-danger)] hover:to-[var(--color-danger)] transition font-bold shadow-lg shadow-[var(--color-danger)]/30 disabled:shadow-none"
           >
             Reject
           </button>
