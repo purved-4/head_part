@@ -1,724 +1,1254 @@
 <div
   [ngClass]="{
-    'bg-gradient-to-br from-orange-50 to-orange-25': role?.toLowerCase() === 'head',
-    'bg-gradient-to-br from-yellow-50 to-yellow-25': role?.toLowerCase() === 'branch'
+    'bg-gradient-to-br from-orange-50 to-orange-25':
+      role?.toLowerCase() === 'head',
+    'bg-gradient-to-br from-yellow-50 to-yellow-25':
+      role?.toLowerCase() === 'branch',
   }"
   class="min-h-screen p-4 md:p-8 transition-all duration-300"
   [ngStyle]="{ background: 'var(--color-bg)' }"
 >
-  <!-- Main Container with Border -->
+  <!-- Main Container -->
   <div class="max-w-7xl mx-auto">
     <!-- Glassmorphism Card Container -->
-    <div class="rounded-2xl border shadow-soft overflow-hidden" style="background-color: var(--color-surface); border-color: var(--color-border); backdrop-filter: blur(8px);">
-      
-      <!-- Header with gradient border bottom -->
-      <div class="px-8 py-6 border-b" style="border-color: var(--color-border); background: linear-gradient(to right, var(--color-surface), var(--color-surface)/30%);">
+    <div
+      class="rounded-2xl border shadow-soft overflow-hidden"
+      style="
+        background-color: var(--color-surface);
+        border-color: var(--color-border);
+        backdrop-filter: blur(8px);
+      "
+    >
+      <!-- Header -->
+      <div
+        class="px-8 py-6 border-b"
+        style="
+          border-color: var(--color-border);
+          background: linear-gradient(
+            to right,
+            var(--color-surface),
+            var(--color-surface) / 30%
+          );
+        "
+      >
         <div class="flex items-center justify-between">
           <div>
-            <h1
-              class="text-3xl font-bold mb-1 bg-clip-text text-transparent"
-              style="background: linear-gradient(to right, var(--color-primary-light), var(--color-primary-light)); color: var(--color-font);"
-            >
+            <h1 class="text-3xl font-bold mb-1 text-[var(--color-font)]">
               Capacity Management
             </h1>
-            <p class="text-sm font-medium" style="color: var(--color-muted);">Configure transaction capacities for websites</p>
+            <p class="text-sm font-medium text-[var(--color-muted)]">
+              Configure transaction capacities for websites
+            </p>
           </div>
-          
-          <!-- Role Indicator Badge -->
-          <div 
+          <!-- Role Badge -->
+          <div
             class="px-4 py-2 rounded-full text-sm font-semibold border shadow-sm"
-            [ngStyle]="{
-              background: 'var(--color-surface)',
-              color: 'var(--color-font)',
-              borderColor: 'var(--color-border)'
-            }"
+            style="
+              background: var(--color-surface);
+              color: var(--color-font);
+              border-color: var(--color-border);
+            "
           >
-            {{ role?.toUpperCase() || 'ADMIN' }}
+            {{ role?.toUpperCase() || "ADMIN" }}
           </div>
         </div>
       </div>
 
       <!-- Content Area -->
       <div class="p-8">
-        <!-- Success/Error Messages -->
+        <!-- Messages -->
         <div
           *ngIf="successMessage"
-          class="mb-8 p-4 rounded-xl border flex items-center justify-between animate-fade-in shadow-sm"
-          style="background: linear-gradient(to right, var(--color-success)/10%, var(--color-success)/5%); border-color: var(--color-success); color: var(--color-success);"
+          class="mb-6 p-4 rounded-lg border flex items-center justify-between bg-[var(--color-success)/10%] border-[var(--color-success)]"
         >
           <div class="flex items-center">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center mr-3" style="background-color: var(--color-success)/10%;">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" style="color: var(--color-success);">
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            <div>
-              <p class="font-semibold">Success</p>
-              <p class="text-sm" style="color: var(--color-success);">{{ successMessage }}</p>
-            </div>
+            <span class="material-icons text-[var(--color-success)] mr-2"
+              >check_circle</span
+            >
+            <span class="text-sm text-[var(--color-success)]">{{
+              successMessage
+            }}</span>
           </div>
           <button
             (click)="successMessage = ''"
-            class="transition-colors p-1 rounded-lg"
-            style="color: var(--color-success);"
+            class="text-[var(--color-success)]"
           >
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              />
-            </svg>
+            <span class="material-icons">close</span>
           </button>
         </div>
 
         <div
           *ngIf="errorMessage"
-          class="mb-8 p-4 rounded-xl border flex items-center justify-between animate-fade-in shadow-sm"
-          style="background: linear-gradient(to right, var(--color-danger)/10%, var(--color-danger)/5%); border-color: var(--color-danger); color: var(--color-danger);"
+          class="mb-6 p-4 rounded-lg border flex items-center justify-between bg-[var(--color-danger)/10%] border-[var(--color-danger)]"
         >
           <div class="flex items-center">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center mr-3" style="background-color: var(--color-danger)/10%;">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" style="color: var(--color-danger);">
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            <div>
-              <p class="font-semibold">Error</p>
-              <p class="text-sm" style="color: var(--color-danger);">{{ errorMessage }}</p>
-            </div>
+            <span class="material-icons text-[var(--color-danger)] mr-2"
+              >error</span
+            >
+            <span class="text-sm text-[var(--color-danger)]">{{
+              errorMessage
+            }}</span>
           </div>
           <button
             (click)="errorMessage = ''"
-            class="transition-colors p-1 rounded-lg"
-            style="color: var(--color-danger);"
+            class="text-[var(--color-danger)]"
           >
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              />
-            </svg>
+            <span class="material-icons">close</span>
           </button>
         </div>
 
         <!-- Loading State -->
         <div
           *ngIf="isLoading"
-          class="mb-8 p-12 rounded-2xl border-2 border-dashed text-center backdrop-blur-sm"
-          style="border-color: var(--color-border); background: linear-gradient(to bottom right, var(--color-surface), var(--color-surface));"
+          class="py-16 text-center bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]"
         >
-          <div class="flex flex-col items-center justify-center">
-            <div class="relative mb-6">
-              <div class="w-20 h-20 rounded-full animate-pulse" style="background: linear-gradient(to right, var(--color-surface), var(--color-surface)/50%);"></div>
-              <svg class="absolute inset-0 m-auto animate-spin h-20 w-20" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="color: var(--color-muted);">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-            </div>
-            <p class="font-medium" style="color: var(--color-muted);">Loading configuration...</p>
-            <p class="text-sm mt-2" style="color: var(--color-muted);">Please wait while we fetch the data</p>
+          <div class="flex flex-col items-center">
+            <span
+              class="material-icons animate-spin text-[var(--color-primary)] text-4xl mb-3"
+              >refresh</span
+            >
+            <p class="text-sm text-[var(--color-muted)]">
+              Loading configuration...
+            </p>
           </div>
         </div>
 
         <!-- Main Form -->
-        <form [formGroup]="capacityForm" (ngSubmit)="onSubmit()" class="space-y-10" *ngIf="!isLoading">
-          
-          <!-- Main Card for Transaction Type & Mode -->
-          <div class="rounded-2xl border p-6 shadow-soft" style="background: linear-gradient(to bottom right, var(--color-surface)/50%, var(--color-surface)); border-color: var(--color-border);">
-            <h3 class="text-lg font-semibold mb-6 flex items-center" style="color: var(--color-font);">
-              <span class="w-2 h-2 rounded-full mr-3" style="background: linear-gradient(to right, var(--color-primary), var(--color-primary-light));"></span>
-              Transaction Settings
-            </h3>
-            
-            <!-- Transaction Type & Mode Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <!-- Transaction Type Card -->
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <label class="block text-sm font-medium" style="color: var(--color-font);">
-                    Transaction Type *
-                  </label>
-                  <span class="text-xs font-medium px-3 py-1 rounded-full" style="background-color: var(--color-surface); color: var(--color-muted);">Required</span>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    *ngFor="let type of transactionTypes"
-                    (click)="
-                      capacityForm.get('type')?.setValue(type.value); onTypeChange()
-                    "
-                    class="group relative p-4 text-center rounded-xl font-medium transition-all duration-300 transform hover:-translate-y-0.5"
-                    [ngClass]="
-                      capacityForm.get('type')?.value === type.value
-                        ? 'shadow-md border-2'
-                        : 'border hover:bg-white'
-                    "
-                    [ngStyle]="{
-                      'border-color':
-                        capacityForm.get('type')?.value === type.value
-                          ? 'var(--color-primary)'
-                          : 'var(--color-border)',
-                      'background':
-                        capacityForm.get('type')?.value === type.value
-                          ? 'var(--color-primary)/10'
-                          : 'var(--color-surface)',
-                      'color':
-                        capacityForm.get('type')?.value === type.value
-                          ? 'var(--color-primary)'
-                          : 'var(--color-font)'
-                    }"
-                  >
-                    <span class="relative z-10">{{ type.label }}</span>
-                    <div *ngIf="capacityForm.get('type')?.value === type.value" 
-                         class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/3 h-1 rounded-full"
-                         [ngStyle]="{ 'background': 'var(--color-primary)' }"></div>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Transaction Mode Card -->
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <label class="block text-sm font-medium" style="color: var(--color-font);">
-                    Transaction Mode
-                    {{ capacityForm.get("type")?.value === "TOPUP" ? "*" : "" }}
-                  </label>
-                  <span *ngIf="capacityForm.get('type')?.value === 'TOPUP'" 
-                        class="text-xs font-medium px-3 py-1 rounded-full" style="background-color: var(--color-surface); color: var(--color-muted);">Required</span>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    *ngFor="let mode of transactionModes"
-                    (click)="capacityForm.get('mode')?.setValue(mode.value)"
-                    [disabled]="capacityForm.get('type')?.value === 'PAYOUT'"
-                    class="group relative p-4 text-center rounded-xl font-medium transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-                    [ngClass]="
-                      capacityForm.get('mode')?.value === mode.value && capacityForm.get('type')?.value === 'TOPUP'
-                        ? 'shadow-md border-2'
-                        : 'border hover:bg-white'
-                    "
-                    [ngStyle]="{
-                      'border-color':
-                        capacityForm.get('mode')?.value === mode.value &&
-                        capacityForm.get('type')?.value === 'TOPUP'
-                          ? 'var(--color-primary)'
-                          : 'var(--color-border)',
-                      'background':
-                        capacityForm.get('mode')?.value === mode.value &&
-                        capacityForm.get('type')?.value === 'TOPUP'
-                          ? 'var(--color-primary)/10'
-                          : 'var(--color-surface)',
-                      'color':
-                        capacityForm.get('mode')?.value === mode.value &&
-                        capacityForm.get('type')?.value === 'TOPUP'
-                          ? 'var(--color-primary)'
-                          : 'var(--color-font)'
-                    }"
-                  >
-                    <span class="relative z-10">{{ mode.label }}</span>
-                    <div *ngIf="capacityForm.get('mode')?.value === mode.value && capacityForm.get('type')?.value === 'TOPUP'" 
-                         class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/3 h-1 rounded-full"
-                         [ngStyle]="{ 'background': 'var(--color-primary)' }"></div>
-                  </button>
-                </div>
-                <p *ngIf="capacityForm.get('type')?.value === 'PAYOUT'" 
-                   class="text-sm p-3 rounded-lg border"
-                   style="color: var(--color-muted); background-color: var(--color-surface)/50%; border-color: var(--color-border);">
-                  Mode selection is not required for Payout transactions
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Website Selection Card -->
-          <div class="rounded-2xl border p-6 shadow-soft" style="background: linear-gradient(to bottom right, var(--color-surface)/50%, var(--color-surface)); border-color: var(--color-border);">
-            <h3 class="text-lg font-semibold mb-6 flex items-center" style="color: var(--color-font);">
-              <span class="w-2 h-2 rounded-full mr-3" style="background: linear-gradient(to right, var(--color-success), var(--color-success)/80%);"></span>
-              Website Selection
-            </h3>
-            
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <label class="block text-sm font-medium" style="color: var(--color-font);">
-                  Select Website *
-                </label>
-                <span class="text-xs font-medium px-3 py-1 rounded-full" style="background-color: var(--color-surface); color: var(--color-muted);">Required</span>
-              </div>
-              
-              <div class="relative">
-                <div class="flex items-center border-2 rounded-xl focus-within:ring-4 transition-all duration-300 hover:bg-white"
-                     [ngStyle]="{
-                       'border-color': capacityForm.get('websiteId')?.invalid && capacityForm.get('websiteId')?.touched ? 'var(--color-danger)' : 'var(--color-border)',
-                       'background-color': 'var(--color-surface)'
-                     }">
-                  <div class="flex-shrink-0 pl-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--color-muted);">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
-                    </svg>
-                  </div>
-                  <input
-                    type="text"
-                    (input)="onWebsiteSearch($event)"
-                    (focus)="showWebsiteDropdown = true"
-                    (blur)="onWebsiteBlur()"
-                    [value]="selectedWebsiteDomain || ''"
-                    placeholder="Search websites by domain or ID..."
-                    class="w-full px-4 py-4 focus:outline-none bg-transparent placeholder-gray-400"
-                    style="color: var(--color-font);"
-                  />
-                  <div class="flex-shrink-0 pr-4">
-                    <div class="w-6 h-6 flex items-center justify-center rounded-full" style="background-color: var(--color-surface);">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--color-muted);">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Enhanced Website Dropdown -->
-                <div *ngIf="showWebsiteDropdown && filteredWebsites.length > 0"
-                     class="absolute z-50 w-full mt-2 border-2 rounded-xl shadow-lg max-h-80 overflow-y-auto backdrop-blur-sm"
-                     style="background-color: var(--color-surface); border-color: var(--color-border);">
-                  <div class="p-3 border-b" style="border-color: var(--color-border); background: linear-gradient(to right, var(--color-surface), var(--color-surface));">
-                    <div class="text-xs font-semibold uppercase tracking-wider" style="color: var(--color-muted);">Available Websites</div>
-                  </div>
-                  <div *ngFor="let website of filteredWebsites; let last = last"
-                       (mousedown)="selectWebsite(website)"
-                       class="px-4 py-3 cursor-pointer transition-all duration-200 border-b last:border-b-0 flex items-center group hover:pl-5"
-                       style="border-color: var(--color-border); color: var(--color-font);">
-                    <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-3" style="background: linear-gradient(to right, var(--color-primary)/20%, var(--color-primary)/10%);">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--color-primary);">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
-                      </svg>
-                    </div>
-                    <div class="flex-1">
-                      <div class="font-medium transition-colors" style="color: var(--color-font);">
-                        {{ website.websiteDomain || website.domain }}
-                      </div>
-                    </div>
-                    <div *ngIf="capacityForm.get('websiteId')?.value === website.websiteId"
-                         class="ml-2 p-1 rounded-full" style="background: linear-gradient(to right, var(--color-primary), var(--color-primary-light));">
-                      <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                
-                <div *ngIf="showWebsiteDropdown && filteredWebsites.length === 0"
-                     class="absolute z-50 w-full mt-2 border-2 rounded-xl shadow-lg p-6 text-center"
-                     style="background-color: var(--color-surface); border-color: var(--color-border);">
-                  <div class="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style="background-color: var(--color-surface);">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--color-muted);">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                  </div>
-                  <p class="font-medium" style="color: var(--color-muted);">No websites found</p>
-                  <p class="text-sm mt-1" style="color: var(--color-muted);">Try a different search term</p>
-                </div>
-              </div>
-              
-              <div *ngIf="selectedWebsiteDomain" 
-                   class="mt-3 p-3 rounded-lg border"
-                   style="background: linear-gradient(to right, var(--color-success)/10%, var(--color-success)/5%); border-color: var(--color-success);">
-                <div class="flex items-center">
-                  <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" style="color: var(--color-success);">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
-                  <span class="font-medium" style="color: var(--color-success);">Selected:</span>
-                  <span class="ml-2" style="color: var(--color-success);">{{ selectedWebsiteDomain }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Capacity Ranges Card -->
-          <div class="rounded-2xl border p-6 shadow-soft" style="background: linear-gradient(to bottom right, var(--color-surface)/50%, var(--color-surface)); border-color: var(--color-border);">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
-              <div class="mb-4 lg:mb-0">
-                <h3 class="text-lg font-semibold flex items-center" style="color: var(--color-font);">
-                  <span class="w-2 h-2 rounded-full mr-3" style="background: linear-gradient(to right, var(--color-primary), var(--color-primary-light));"></span>
-                  Capacity Ranges Configuration
-                </h3>
-                <p class="text-sm mt-2" style="color: var(--color-muted);">
-                  Define transaction capacity ranges. At least one range must be marked as "upto" (infinite).
-                </p>
-              </div>
-              <button
-                type="button"
-                (click)="addCapacityRange()"
-                [disabled]="hasUptoRange"
-                class="inline-flex items-center px-5 py-2.5 rounded-xl font-medium transition-all duration-300 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 border"
-                [ngStyle]="{
-                  background: !hasUptoRange ? 'var(--color-primary)' : 'var(--color-surface)/50%',
-                  color: 'var(--color-font)',
-                  'border-color': 'var(--color-border)'
-                }"
+        <form
+          [formGroup]="capacityForm"
+          (ngSubmit)="onSubmit()"
+          *ngIf="!isLoading"
+        >
+          <!-- 4-COLUMN LAYOUT -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- ========== COLUMN 1: Transaction Settings + Website Search (3 cols) ========== -->
+            <div class="lg:col-span-3 space-y-6">
+              <!-- Transaction Settings Card -->
+              <div
+                class="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-5 shadow-sm"
               >
-                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fill-rule="evenodd"
-                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-                Add Range
-                <span *ngIf="hasUptoRange" class="ml-2 text-xs opacity-75">(Upto range added)</span>
-              </button>
-            </div>
+                <h3
+                  class="text-sm font-semibold text-[var(--color-font)] mb-4 flex items-center"
+                >
+                  <span
+                    class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] mr-2"
+                  ></span>
+                  Transaction Settings
+                </h3>
 
-            <!-- Upto Requirement Warning -->
-            <div *ngIf="!hasUptoRange && capacityRanges.length > 0" 
-                 class="mb-6 p-4 rounded-xl border-2 animate-pulse"
-                 style="background: linear-gradient(to right, var(--color-warning)/10%, var(--color-warning)/5%); border-color: var(--color-warning);">
-              <div class="flex items-start">
-                <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-3" style="background-color: var(--color-warning)/10%;">
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" style="color: var(--color-warning);">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                  </svg>
+                <!-- Transaction Type -->
+                <div class="mb-5">
+                  <div class="flex items-center justify-between mb-3">
+                    <label class="text-xs font-medium text-[var(--color-font)]"
+                      >Transaction Type *</label
+                    >
+                    <span
+                      class="text-[10px] px-2 py-1 rounded-full bg-[var(--color-surface)] text-[var(--color-muted)] border border-[var(--color-border)]"
+                      >Required</span
+                    >
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      *ngFor="let type of transactionTypes"
+                      (click)="
+                        capacityForm.get('type')?.setValue(type.value);
+                        onTypeChange()
+                      "
+                      class="py-2.5 px-3 rounded-lg text-xs font-medium transition-all border"
+                      [ngClass]="{
+                        'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)]':
+                          capacityForm.get('type')?.value === type.value,
+                        'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)]':
+                          capacityForm.get('type')?.value !== type.value,
+                      }"
+                    >
+                      {{ type.label }}
+                    </button>
+                  </div>
                 </div>
+
+                <!-- Transaction Mode -->
                 <div>
-                  <p class="font-medium" style="color: var(--color-warning);">Important Requirement</p>
-                  <p class="text-sm mt-1" style="color: var(--color-warning);">
-                    At least one range must be marked as "upto" to indicate infinite capacity. This ensures the system can handle transactions beyond defined limits.
+                  <div class="flex items-center justify-between mb-3">
+                    <label class="text-xs font-medium text-[var(--color-font)]">
+                      Transaction Mode
+                      <span
+                        *ngIf="capacityForm.get('type')?.value === 'TOPUP'"
+                        class="text-[var(--color-danger)]"
+                        >*</span
+                      >
+                    </label>
+                    <span
+                      *ngIf="capacityForm.get('type')?.value === 'TOPUP'"
+                      class="text-[10px] px-2 py-1 rounded-full bg-[var(--color-surface)] text-[var(--color-muted)] border border-[var(--color-border)]"
+                      >Required</span
+                    >
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      *ngFor="let mode of transactionModes"
+                      (click)="capacityForm.get('mode')?.setValue(mode.value)"
+                      [disabled]="capacityForm.get('type')?.value === 'PAYOUT'"
+                      class="py-2.5 px-3 rounded-lg text-xs font-medium transition-all border disabled:opacity-50 disabled:cursor-not-allowed"
+                      [ngClass]="{
+                        'bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary)]':
+                          capacityForm.get('mode')?.value === mode.value &&
+                          capacityForm.get('type')?.value === 'TOPUP',
+                        'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)]':
+                          capacityForm.get('mode')?.value !== mode.value ||
+                          capacityForm.get('type')?.value !== 'TOPUP',
+                      }"
+                    >
+                      {{ mode.label }}
+                    </button>
+                  </div>
+                  <p
+                    *ngIf="capacityForm.get('type')?.value === 'PAYOUT'"
+                    class="text-xs text-[var(--color-muted)] mt-3 p-2 bg-[var(--color-surface)]/50 rounded-lg border border-[var(--color-border)]"
+                  >
+                    Mode not required for Payout
+                  </p>
+                </div>
+              </div>
+
+              <!-- Website Selection Card - SEARCH BASED -->
+              <div
+                class="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-5 shadow-sm"
+              >
+                <div class="flex items-center justify-between mb-4">
+                  <h3
+                    class="text-sm font-semibold text-[var(--color-font)] flex items-center"
+                  >
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-[var(--color-success)] mr-2"
+                    ></span>
+                    Website Selection
+                  </h3>
+                  <span
+                    class="text-[10px] px-2 py-1 rounded-full bg-[var(--color-surface)] text-[var(--color-muted)] border border-[var(--color-border)]"
+                  >
+                    Required
+                  </span>
+                </div>
+
+                <!-- SEARCH BASED INPUT -->
+                <div class="relative">
+                  <div
+                    class="flex items-center border rounded-lg bg-[var(--color-surface)] transition-all focus-within:ring-2 focus-within:ring-[var(--color-primary)]/20"
+                    [ngClass]="{
+                      'border-[var(--color-danger)]':
+                        capacityForm.get('websiteId')?.invalid &&
+                        capacityForm.get('websiteId')?.touched,
+                      'border-[var(--color-border)]': !(
+                        capacityForm.get('websiteId')?.invalid &&
+                        capacityForm.get('websiteId')?.touched
+                      ),
+                    }"
+                  >
+                    <span
+                      class="material-icons text-[var(--color-muted)] ml-3 text-sm"
+                      >search</span
+                    >
+                    <input
+                      type="text"
+                      (input)="onWebsiteSearch($event)"
+                      (focus)="showWebsiteDropdown = true"
+                      [value]="selectedWebsiteDomain || ''"
+                      placeholder="Search websites by domain or ID..."
+                      class="w-full px-3 py-3 text-sm focus:outline-none bg-transparent text-[var(--color-font)] placeholder-[var(--color-muted)]"
+                      autocomplete="off"
+                    />
+                    <button
+                      *ngIf="selectedWebsiteDomain"
+                      type="button"
+                      (click)="clearWebsiteSelection()"
+                      class="mr-2 text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors"
+                    >
+                      <span class="material-icons text-sm">close</span>
+                    </button>
+                  </div>
+
+                  <!-- SEARCH RESULTS -->
+                  <div
+                    *ngIf="showWebsiteDropdown && filteredWebsites.length > 0"
+                    class="absolute z-50 w-full mt-1 border rounded-lg shadow-lg bg-[var(--color-surface)] border-[var(--color-border)] max-h-60 overflow-y-auto"
+                  >
+                    <div
+                      class="p-2 border-b border-[var(--color-border)] bg-[var(--color-bg)]/50"
+                    >
+                      <span
+                        class="text-xs font-medium text-[var(--color-muted)]"
+                        >Available Websites</span
+                      >
+                    </div>
+                    <div
+                      *ngFor="let website of filteredWebsites"
+                      (mousedown)="selectWebsite(website)"
+                      class="px-3 py-2.5 cursor-pointer hover:bg-[var(--color-hover)] flex items-center justify-between border-b last:border-b-0 border-[var(--color-border)] transition-colors"
+                    >
+                      <div class="flex items-center">
+                        <span
+                          class="material-icons text-[var(--color-primary)] mr-2 text-sm"
+                          >public</span
+                        >
+                        <span class="text-sm text-[var(--color-font)]">{{
+                          website.websiteDomain || website.domain
+                        }}</span>
+                        <span class="text-xs text-[var(--color-muted)] ml-2"
+                          >({{ website.currency || "INR" }})</span
+                        >
+                      </div>
+                      <span
+                        *ngIf="
+                          capacityForm.get('websiteId')?.value ===
+                          website.websiteId
+                        "
+                        class="material-icons text-[var(--color-success)] text-sm"
+                        >check_circle</span
+                      >
+                    </div>
+                  </div>
+
+                  <!-- NO RESULTS -->
+                  <div
+                    *ngIf="
+                      showWebsiteDropdown &&
+                      filteredWebsites.length === 0 &&
+                      selectedWebsiteDomain
+                    "
+                    class="absolute z-50 w-full mt-1 border rounded-lg shadow-lg bg-[var(--color-surface)] border-[var(--color-border)] p-4 text-center"
+                  >
+                    <span
+                      class="material-icons text-[var(--color-muted)] text-3xl mb-1"
+                      >search_off</span
+                    >
+                    <p class="text-sm text-[var(--color-muted)]">
+                      No websites found
+                    </p>
+                    <p class="text-xs text-[var(--color-muted)] mt-1">
+                      Try a different search term
+                    </p>
+                  </div>
+                </div>
+
+                <!-- SELECTED WEBSITE DISPLAY -->
+                <div
+                  *ngIf="selectedWebsiteDomain"
+                  class="mt-3 p-2.5 bg-[var(--color-success)]/10 rounded-lg border border-[var(--color-success)] flex items-center"
+                >
+                  <span
+                    class="material-icons text-[var(--color-success)] mr-2 text-sm"
+                    >check_circle</span
+                  >
+                  <span class="text-xs font-medium text-[var(--color-success)]"
+                    >Selected:</span
+                  >
+                  <span class="text-xs text-[var(--color-success)] ml-1">{{
+                    selectedWebsiteDomain
+                  }}</span>
+                </div>
+
+                <!-- VALIDATION -->
+                <div
+                  *ngIf="
+                    capacityForm.get('websiteId')?.invalid &&
+                    capacityForm.get('websiteId')?.touched
+                  "
+                  class="text-xs text-[var(--color-danger)] mt-2 flex items-center"
+                >
+                  <span class="material-icons mr-1 text-sm">error</span>
+                  Please select a website
+                </div>
+              </div>
+
+              <!-- Upto Requirement Warning -->
+              <div
+                *ngIf="!hasUptoRange && capacityRanges.length > 0"
+                class="bg-[var(--color-warning)]/10 border border-[var(--color-warning)] rounded-lg p-3 flex items-start"
+              >
+                <span
+                  class="material-icons text-[var(--color-warning)] mr-2 text-sm mt-0.5"
+                  >warning</span
+                >
+                <div>
+                  <p class="text-xs font-medium text-[var(--color-warning)]">
+                    Important Requirement
+                  </p>
+                  <p class="text-xs text-[var(--color-warning)]/90 mt-0.5">
+                    At least one range must be marked as "upto"
                   </p>
                 </div>
               </div>
             </div>
 
-            <div formArrayName="capacityRanges" class="space-y-6">
+            <!-- ========== COLUMN 2: Primary Range + Add Range Button (3 cols) ========== -->
+            <div class="lg:col-span-3">
               <div
-                *ngFor="let range of capacityRanges.controls; let i = index; let last = last"
-                [formGroupName]="i"
-                class="relative group"
+                class="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-5 shadow-sm h-full flex flex-col"
               >
-                <!-- Range Container with Gradient Border -->
-                <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" style="background: linear-gradient(to right, transparent, var(--color-surface)/30%, transparent);"></div>
-                
-                <div class="relative p-6 rounded-2xl border-2 transition-all duration-300 hover:shadow-lg backdrop-blur-sm"
-                     [ngStyle]="{
-                       'border-color': range.get('upto')?.value 
-                         ? 'var(--color-primary)/40%'
-                         : 'var(--color-border)',
-                       'background': range.get('upto')?.value 
-                         ? 'var(--color-primary)/5%'
-                         : 'var(--color-surface)/80%'
-                     }">
-                  
-                  <!-- Upto Range Badge -->
-                  <div *ngIf="range.get('upto')?.value" 
-                       class="absolute -top-3 right-4 px-4 py-1.5 rounded-full text-xs font-bold shadow-md border"
-                       [ngStyle]="{
-                         'background': 'linear-gradient(135deg, var(--color-primary), var(--color-primary-light))',
-                         'color': 'var(--color-font)',
-                         'border-color': 'var(--color-primary)/60%'
-                       }">
-                    <div class="flex items-center">
-                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"/>
-                      </svg>
+                <div class="flex items-center justify-between mb-4">
+                  <h3
+                    class="text-sm font-semibold text-[var(--color-font)] flex items-center"
+                  >
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] mr-2"
+                    ></span>
+                    Primary Range
+                  </h3>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="text-xs text-[var(--color-muted)] bg-[var(--color-bg)]/50 px-2 py-1 rounded-full border border-[var(--color-border)]"
+                    >
+                      Range 1
+                    </span>
+                    <button
+                      type="button"
+                      (click)="addCapacityRange()"
+                      [disabled]="hasUptoRange"
+                      class="inline-flex items-center px-2.5 py-1.5 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-lg text-xs font-medium hover:bg-[var(--color-primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                    >
+                      <span class="material-icons mr-1 text-sm">add</span>
+                      Add
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Range 1 Card -->
+                <div formArrayName="capacityRanges">
+                  <div
+                    *ngIf="
+                      capacityRanges &&
+                      capacityRanges.controls &&
+                      capacityRanges.controls.length > 0
+                    "
+                    [formGroupName]="0"
+                    class="relative rounded-lg p-4 transition-all"
+                    [ngClass]="{
+                      'bg-[var(--color-primary)]/5 border-2 border-[var(--color-primary)]/30':
+                        capacityRanges.at(0).get('upto')?.value,
+                      'bg-[var(--color-surface)] border border-[var(--color-border)]':
+                        !capacityRanges.at(0).get('upto')?.value,
+                    }"
+                  >
+                    <!-- INFINITE RANGE Badge -->
+                    <div
+                      *ngIf="capacityRanges.at(0).get('upto')?.value"
+                      class="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] border border-[var(--color-primary)]/50 shadow-sm"
+                    >
                       INFINITE RANGE
                     </div>
-                  </div>
-                  
-                  <div class="flex justify-between items-start mb-6">
-                    <div>
-                      <h4 class="text-md font-semibold flex items-center" style="color: var(--color-font);">
-                        <span class="w-2 h-2 rounded-full mr-3"
-                              [ngStyle]="{
-                                'background': range.get('upto')?.value 
-                                  ? 'var(--color-primary)'
-                                  : 'var(--color-muted)'
-                              }"></span>
-                        Range {{ i + 1 }}
-                        <span *ngIf="range.get('upto')?.value" class="ml-2 text-sm font-normal" style="color: var(--color-muted);">
-                          (Final Range)
-                        </span>
-                      </h4>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                      <button
-                        *ngIf="capacityRanges.length > 1 && !range.get('upto')?.value"
-                        type="button"
-                        (click)="removeCapacityRange(i)"
-                        class="p-2 transition-colors rounded-lg transform hover:scale-110"
-                        style="color: var(--color-muted);"
-                      >
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path
-                            fill-rule="evenodd"
-                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
 
-                  <!-- Upto Option -->
-                  <div class="mb-6 p-4 rounded-xl border" style="background: linear-gradient(to right, var(--color-surface)/50%, var(--color-surface)); border-color: var(--color-border);">
-                    <label class="inline-flex items-center cursor-pointer">
-                      <div class="relative">
-                        <input
-                          type="checkbox"
-                          formControlName="upto"
-                          (change)="onUptoChange(i)"
-                          class="sr-only"
-                          [disabled]="hasUptoRange && !range.get('upto')?.value"
-                        />
-                        <div class="block w-14 h-7 rounded-full transition-colors duration-300 shadow-inner"
-                             [ngStyle]="{
-                               'background-color': range.get('upto')?.value 
-                                 ? 'var(--color-primary)/80%'
-                                 : 'var(--color-border)'
-                             }">
+                    <!-- Range Header -->
+                    <div class="flex items-center justify-between mb-3">
+                      <div class="flex items-center">
+                        <span
+                          class="w-2 h-2 rounded-full mr-2"
+                          [ngClass]="{
+                            'bg-[var(--color-primary)]': capacityRanges
+                              .at(0)
+                              .get('upto')?.value,
+                            'bg-[var(--color-muted)]': !capacityRanges
+                              .at(0)
+                              .get('upto')?.value,
+                          }"
+                        ></span>
+                        <span
+                          class="text-sm font-medium text-[var(--color-font)]"
+                          >Range 1</span
+                        >
+                        <span
+                          *ngIf="capacityRanges.at(0).get('upto')?.value"
+                          class="text-[10px] text-[var(--color-muted)] ml-2 px-1.5 py-0.5 bg-[var(--color-surface)]/80 rounded-full border border-[var(--color-border)]"
+                          >Final</span
+                        >
+                      </div>
+                    </div>
+
+                    <!-- Upto Checkbox -->
+                    <div class="mb-4">
+                      <label class="flex items-center cursor-pointer">
+                        <div class="relative">
+                          <input
+                            type="checkbox"
+                            formControlName="upto"
+                            (change)="onUptoChange(0)"
+                            class="sr-only"
+                            [disabled]="
+                              hasUptoRange &&
+                              !capacityRanges.at(0).get('upto')?.value
+                            "
+                          />
+                          <div
+                            class="block w-10 h-5 rounded-full transition-colors duration-200"
+                            [ngClass]="{
+                              'bg-[var(--color-primary)]': capacityRanges
+                                .at(0)
+                                .get('upto')?.value,
+                              'bg-[var(--color-border)]': !capacityRanges
+                                .at(0)
+                                .get('upto')?.value,
+                            }"
+                          ></div>
+                          <div
+                            class="dot absolute left-0.5 top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200 shadow-sm"
+                            [ngStyle]="{
+                              transform: capacityRanges.at(0).get('upto')?.value
+                                ? 'translateX(20px)'
+                                : 'translateX(0)',
+                            }"
+                          ></div>
                         </div>
-                        <div class="dot absolute left-1 top-1 w-5 h-5 rounded-full transition-all duration-300 shadow-md"
-                             [ngStyle]="{
-                               'background': 'var(--color-surface)',
-                               'transform': range.get('upto')?.value ? 'translateX(28px)' : 'translateX(0)'
-                             }">
+                        <span
+                          class="ml-2 text-xs font-medium text-[var(--color-font)]"
+                          >Upto (Infinite)</span
+                        >
+                      </label>
+                    </div>
+
+                    <!-- Input Grid - 2x2 -->
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                      <!-- Min -->
+                      <div>
+                        <label
+                          class="text-[10px] text-[var(--color-muted)] block mb-1"
+                          >Min Range</label
+                        >
+                        <div class="relative">
+                          <input
+                            type="number"
+                            formControlName="minRange"
+                            readonly
+                            class="w-full px-2 py-2 text-xs border rounded-lg bg-[var(--color-surface)]/50 text-[var(--color-muted)] border-[var(--color-border)]"
+                          />
+                          <span
+                            class="absolute right-2 top-2 text-[10px] text-[var(--color-muted)]"
+                            >₹</span
+                          >
                         </div>
                       </div>
-                      <span class="ml-4 font-medium" style="color: var(--color-font);">
-                        Mark as "Upto" (Infinite) Range
-                        <span class="block text-sm font-normal mt-1" style="color: var(--color-muted);">
-                          This range will handle all transactions from 0 to the specified limit and beyond
-                        </span>
-                        <span *ngIf="hasUptoRange && !range.get('upto')?.value" class="text-sm" style="color: var(--color-muted);">
-                          (Only one upto range allowed per configuration)
-                        </span>
-                      </span>
-                    </label>
-                  </div>
-
-                  <!-- Range Inputs Grid -->
-                  <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-                    <!-- Min Range -->
-                    <div>
-                      <label class="block text-sm font-medium mb-3" style="color: var(--color-font);">
-                        Min Range
-                      </label>
-                      <div class="relative">
+                      <!-- Max -->
+                      <div>
+                        <label
+                          class="text-[10px] text-[var(--color-muted)] block mb-1"
+                        >
+                          Max Range
+                          <span
+                            *ngIf="!capacityRanges.at(0).get('upto')?.value"
+                            class="text-[var(--color-danger)]"
+                            >*</span
+                          >
+                        </label>
+                        <div class="relative">
+                          <input
+                            type="number"
+                            formControlName="maxRange"
+                            (change)="onMaxRangeChange(0)"
+                            class="w-full px-2 py-2 text-xs border rounded-lg bg-[var(--color-surface)] text-[var(--color-font)] transition-colors"
+                            [ngClass]="{
+                              'border-[var(--color-danger)] focus:ring-1 focus:ring-[var(--color-danger)]/30':
+                                capacityRanges.at(0).get('maxRange')?.invalid &&
+                                capacityRanges.at(0).get('maxRange')?.touched,
+                              'border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]/30':
+                                !(
+                                  capacityRanges.at(0).get('maxRange')
+                                    ?.invalid &&
+                                  capacityRanges.at(0).get('maxRange')?.touched
+                                ),
+                            }"
+                            placeholder="0"
+                          />
+                          <span
+                            class="absolute right-2 top-2 text-[10px] text-[var(--color-muted)]"
+                            >₹</span
+                          >
+                        </div>
+                      </div>
+                      <!-- Qty -->
+                      <div>
+                        <label
+                          class="text-[10px] text-[var(--color-muted)] block mb-1"
+                        >
+                          Quantity
+                          <span class="text-[var(--color-danger)]">*</span>
+                        </label>
                         <input
                           type="number"
-                          formControlName="minRange"
-                          [readonly]="true"
-                          class="w-full px-4 py-3 rounded-xl border-2 text-gray-500"
-                          style="border-color: var(--color-border); background-color: var(--color-surface)/50%;"
+                          formControlName="quantity"
+                          class="w-full px-2 py-2 text-xs border rounded-lg bg-[var(--color-surface)] text-[var(--color-font)] border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]/30 transition-colors"
+                          placeholder="0"
                         />
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                          <span class="font-medium" style="color: var(--color-muted);">₹</span>
-                        </div>
                       </div>
-                      <div class="mt-2 text-xs" style="color: var(--color-muted);">
-                        {{ range.get('upto')?.value ? 'Automatically set to 0' : 'Calculated from previous range' }}
+                      <!-- Time -->
+                      <div>
+                        <label
+                          class="text-[10px] text-[var(--color-muted)] block mb-1"
+                        >
+                          Time (min)
+                          <span class="text-[var(--color-danger)]">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          formControlName="time"
+                          class="w-full px-2 py-2 text-xs border rounded-lg bg-[var(--color-surface)] text-[var(--color-font)] border-[var(--color-border)] focus:ring-1 focus:ring-[var(--color-primary)]/30 transition-colors"
+                          placeholder="Min"
+                        />
                       </div>
                     </div>
 
-                    <!-- Max Range -->
-                    <div>
-                      <label class="block text-sm font-medium mb-3" style="color: var(--color-font);">
-                        Max Range *
-                        <span *ngIf="range.get('upto')?.value" class="text-sm font-normal" style="color: var(--color-muted);">
-                          (Upper limit)
-                        </span>
+                    <!-- Validation Errors -->
+                    <div
+                      class="text-[10px] text-[var(--color-danger)] mb-2 space-y-0.5"
+                    >
+                      <div
+                        *ngIf="
+                          capacityRanges.at(0).get('maxRange')?.invalid &&
+                          capacityRanges.at(0).get('maxRange')?.touched &&
+                          !capacityRanges.at(0).get('upto')?.value
+                        "
+                      >
+                        <span
+                          *ngIf="
+                            capacityRanges.at(0).get('maxRange')?.errors?.[
+                              'required'
+                            ]
+                          "
+                          >Max range is required</span
+                        >
+                        <span
+                          *ngIf="
+                            capacityRanges.at(0).get('maxRange')?.errors?.[
+                              'min'
+                            ]
+                          "
+                          >Must be greater than 0</span
+                        >
+                      </div>
+                      <div
+                        *ngIf="
+                          capacityRanges.at(0).get('quantity')?.invalid &&
+                          capacityRanges.at(0).get('quantity')?.touched
+                        "
+                      >
+                        <span
+                          *ngIf="
+                            capacityRanges.at(0).get('quantity')?.errors?.[
+                              'required'
+                            ]
+                          "
+                          >Quantity required</span
+                        >
+                        <span
+                          *ngIf="
+                            capacityRanges.at(0).get('quantity')?.errors?.[
+                              'min'
+                            ]
+                          "
+                          >Min 1</span
+                        >
+                      </div>
+                      <div
+                        *ngIf="
+                          capacityRanges.at(0).get('time')?.invalid &&
+                          capacityRanges.at(0).get('time')?.touched
+                        "
+                      >
+                        <span
+                          *ngIf="
+                            capacityRanges.at(0).get('time')?.errors?.[
+                              'required'
+                            ]
+                          "
+                          >Time required</span
+                        >
+                        <span
+                          *ngIf="
+                            capacityRanges.at(0).get('time')?.errors?.['min']
+                          "
+                          >Min 1 min</span
+                        >
+                      </div>
+                    </div>
+
+                    <!-- Preview -->
+                    <div
+                      class="pt-3 mt-1 border-t border-[var(--color-border)]"
+                    >
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <span
+                            class="text-[10px] text-[var(--color-muted)] block mb-1"
+                            >Preview</span
+                          >
+                          <span
+                            class="text-xs font-semibold text-[var(--color-font)]"
+                          >
+                            {{
+                              capacityRanges.at(0).get("upto")?.value
+                                ? "0 → ∞"
+                                : "0 → " +
+                                  (capacityRanges.at(0).get("maxRange")
+                                    ?.value || "—")
+                            }}
+                          </span>
+                        </div>
+                        <div class="text-right">
+                          <span
+                            class="text-[10px] text-[var(--color-muted)] block mb-1"
+                            >Capacity</span
+                          >
+                          <span
+                            class="text-xs font-medium text-[var(--color-primary)]"
+                          >
+                            {{
+                              capacityRanges.at(0).get("quantity")?.value || "0"
+                            }}
+                            txns
+                          </span>
+                          <span
+                            class="text-[10px] text-[var(--color-muted)] ml-1"
+                          >
+                            /
+                            {{ capacityRanges.at(0).get("time")?.value || "0" }}
+                            min
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Add Range Disabled Message -->
+                <div
+                  *ngIf="hasUptoRange"
+                  class="mt-4 p-2 bg-[var(--color-warning)]/10 rounded-lg border border-[var(--color-warning)]"
+                >
+                  <p
+                    class="text-xs text-[var(--color-warning)] flex items-center"
+                  >
+                    <span class="material-icons mr-1 text-sm">info</span>
+                    Cannot add new range after an "upto" range
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========== COLUMN 3: Intermediate Ranges (3 cols) ========== -->
+            <div class="lg:col-span-3">
+              <div
+                class="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-5 shadow-sm h-full flex flex-col"
+              >
+                <div class="flex items-center justify-between mb-4">
+                  <h3
+                    class="text-sm font-semibold text-[var(--color-font)] flex items-center"
+                  >
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] mr-2"
+                    ></span>
+                    Intermediate Ranges
+                  </h3>
+                  <span
+                    class="text-xs text-[var(--color-muted)] bg-[var(--color-bg)]/50 px-2 py-1 rounded-full border border-[var(--color-border)]"
+                  >
+                    {{ getIntermediateRangesCount() }} range(s)
+                  </span>
+                </div>
+
+                <!-- SCROLLABLE CONTAINER for INTERMEDIATE RANGES (non-upto ranges except the last one if it's upto) -->
+                <div
+                  *ngIf="getIntermediateRanges().length > 0"
+                  class="flex-1 overflow-y-auto pr-1 space-y-3"
+                  style="
+                    max-height: 500px;
+                    scrollbar-width: thin;
+                    scrollbar-color: var(--color-border) transparent;
+                  "
+                >
+                  <div
+                    formArrayName="capacityRanges"
+                    *ngFor="let range of getIntermediateRanges(); let i = index"
+                    [formGroupName]="getIntermediateRangeIndex(i)"
+                    class="relative border rounded-lg p-3 bg-[var(--color-surface)] transition-all hover:shadow-md"
+                    [ngClass]="{
+                      'border-[var(--color-primary)]/40 bg-[var(--color-primary)]/5':
+                        range.get('upto')?.value,
+                      'border-[var(--color-border)] hover:border-[var(--color-primary)]/20':
+                        !range.get('upto')?.value,
+                    }"
+                  >
+                    <!-- INFINITE RANGE Badge - Compact -->
+                    <div
+                      *ngIf="range.get('upto')?.value"
+                      class="absolute -top-2 right-2 px-1.5 py-0.5 rounded-full text-[8px] font-bold bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] border border-[var(--color-primary)]/50 shadow-sm"
+                    >
+                      INFINITE
+                    </div>
+
+                    <!-- Header with Delete -->
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center">
+                        <span
+                          class="w-1.5 h-1.5 rounded-full mr-1.5"
+                          [ngClass]="{
+                            'bg-[var(--color-primary)]':
+                              range.get('upto')?.value,
+                            'bg-[var(--color-muted)]':
+                              !range.get('upto')?.value,
+                          }"
+                        ></span>
+                        <span
+                          class="text-xs font-medium text-[var(--color-font)]"
+                          >Range {{ getIntermediateRangeIndex(i) + 1 }}</span
+                        >
+                        <span
+                          *ngIf="range.get('upto')?.value"
+                          class="text-[9px] text-[var(--color-muted)] ml-1.5 px-1 py-0.5 bg-[var(--color-surface)]/80 rounded-full border border-[var(--color-border)]"
+                          >Final</span
+                        >
+                      </div>
+                      <button
+                        *ngIf="!range.get('upto')?.value"
+                        type="button"
+                        (click)="
+                          removeCapacityRange(getIntermediateRangeIndex(i))
+                        "
+                        class="text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors p-0.5 rounded-full hover:bg-[var(--color-danger)]/10"
+                      >
+                        <span class="material-icons text-sm"
+                          >delete_outline</span
+                        >
+                      </button>
+                    </div>
+
+                    <!-- Upto Checkbox - Compact -->
+                    <div class="mb-2">
+                      <label class="flex items-center cursor-pointer">
+                        <div class="relative">
+                          <input
+                            type="checkbox"
+                            formControlName="upto"
+                            (change)="
+                              onUptoChange(getIntermediateRangeIndex(i))
+                            "
+                            class="sr-only"
+                            [disabled]="
+                              hasUptoRange && !range.get('upto')?.value
+                            "
+                          />
+                          <div
+                            class="block w-8 h-4 rounded-full transition-colors duration-200"
+                            [ngClass]="{
+                              'bg-[var(--color-primary)]':
+                                range.get('upto')?.value,
+                              'bg-[var(--color-border)]':
+                                !range.get('upto')?.value,
+                            }"
+                          ></div>
+                          <div
+                            class="dot absolute left-0.5 top-0.5 w-3 h-3 rounded-full bg-white transition-transform duration-200 shadow-sm"
+                            [ngStyle]="{
+                              transform: range.get('upto')?.value
+                                ? 'translateX(14px)'
+                                : 'translateX(0)',
+                            }"
+                          ></div>
+                        </div>
+                        <span
+                          class="ml-2 text-[10px] font-medium text-[var(--color-font)]"
+                          >Upto</span
+                        >
                       </label>
+                    </div>
+
+                    <!-- Compact Input Grid - 2x2 -->
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                      <div>
+                        <div class="relative">
+                          <input
+                            type="number"
+                            formControlName="minRange"
+                            readonly
+                            class="w-full px-1.5 py-1.5 text-[10px] border rounded bg-[var(--color-surface)]/50 text-[var(--color-muted)] border-[var(--color-border)]"
+                          />
+                          <span
+                            class="absolute right-1.5 top-1.5 text-[8px] text-[var(--color-muted)]"
+                            >₹</span
+                          >
+                        </div>
+                      </div>
                       <div class="relative">
                         <input
                           type="number"
                           formControlName="maxRange"
-                          (change)="onMaxRangeChange(i)"
-                          [readonly]="range.get('upto')?.value && last"
-                          class="w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 placeholder-gray-400"
-                          placeholder="Enter amount"
-                          [ngStyle]="{
-                            'border-color': !range.get('maxRange')?.invalid ? 'var(--color-border)' : 'var(--color-danger)',
-                            'background-color': range.get('upto')?.value && last ? 'var(--color-surface)' : 'var(--color-surface)'
+                          (change)="
+                            onMaxRangeChange(getIntermediateRangeIndex(i))
+                          "
+                          class="w-full px-1.5 py-1.5 text-[10px] border rounded bg-[var(--color-surface)] text-[var(--color-font)] transition-colors"
+                          [ngClass]="{
+                            'border-[var(--color-danger)]':
+                              range.get('maxRange')?.invalid &&
+                              range.get('maxRange')?.touched,
+                            'border-[var(--color-border)]': !(
+                              range.get('maxRange')?.invalid &&
+                              range.get('maxRange')?.touched
+                            ),
                           }"
+                          [value]="range.get('maxRange')?.value"
+                          placeholder="Max"
                         />
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                          <span class="font-medium" style="color: var(--color-muted);">₹</span>
-                        </div>
+                        <span
+                          class="absolute right-1.5 top-1.5 text-[8px] text-[var(--color-muted)]"
+                          >₹</span
+                        >
                       </div>
-                      <div *ngIf="range.get('maxRange')?.invalid && range.get('maxRange')?.touched"
-                           class="mt-2 p-2 rounded-lg border"
-                           style="background-color: var(--color-danger)/10%; border-color: var(--color-danger);">
-                        <div class="text-sm flex items-center" style="color: var(--color-danger);">
-                          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                          </svg>
-                          <span *ngIf="range.get('maxRange')?.errors?.['required']">Max range is required</span>
-                          <span *ngIf="range.get('maxRange')?.errors?.['min']">Must be greater than 0</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Quantity -->
-                    <div>
-                      <label class="block text-sm font-medium mb-3" style="color: var(--color-font);">
-                        Quantity *
-                      </label>
-                      <input
-                        type="number"
-                        formControlName="quantity"
-                        class="w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 placeholder-gray-400"
-                        style="border-color: var(--color-border); background-color: var(--color-surface);"
-                        placeholder="Number of transactions"
-                      />
-                      <div *ngIf="range.get('quantity')?.invalid && range.get('quantity')?.touched"
-                           class="mt-2 p-2 rounded-lg border"
-                           style="background-color: var(--color-danger)/10%; border-color: var(--color-danger);">
-                        <div class="text-sm flex items-center" style="color: var(--color-danger);">
-                          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                          </svg>
-                          <span *ngIf="range.get('quantity')?.errors?.['required']">Quantity is required</span>
-                          <span *ngIf="range.get('quantity')?.errors?.['min']">Must be at least 1</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Time -->
-                    <div>
-                      <label class="block text-sm font-medium mb-3" style="color: var(--color-font);">
-                        Time (minutes) *
-                      </label>
-                      <input
-                        type="number"
-                        formControlName="time"
-                        class="w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 placeholder-gray-400"
-                        style="border-color: var(--color-border); background-color: var(--color-surface);"
-                        placeholder="Time in minutes"
-                      />
-                      <div *ngIf="range.get('time')?.invalid && range.get('time')?.touched"
-                           class="mt-2 p-2 rounded-lg border"
-                           style="background-color: var(--color-danger)/10%; border-color: var(--color-danger);">
-                        <div class="text-sm flex items-center" style="color: var(--color-danger);">
-                          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                          </svg>
-                          <span *ngIf="range.get('time')?.errors?.['required']">Time is required</span>
-                          <span *ngIf="range.get('time')?.errors?.['min']">Must be at least 1 minute</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Range Preview -->
-                  <div class="mt-6 p-4 rounded-xl border-2" style="background: linear-gradient(to right, var(--color-surface)/80%, var(--color-surface)); border-color: var(--color-border);">
-                    <div class="flex items-center justify-between">
                       <div>
-                        <div class="text-sm font-medium mb-1" style="color: var(--color-font);">Range Preview</div>
-                        <div class="text-lg font-semibold" style="color: var(--color-font);">
-                          {{ range.get("upto")?.value ? "From 0 to " : "From " }}
-                          <span style="color: var(--color-primary);">₹{{ range.get("minRange")?.value }}</span>
-                          {{ range.get("upto")?.value ? "upto " : " to " }}
-                          <span *ngIf="!range.get('upto')?.value" style="color: var(--color-primary);">
-                            ₹{{ range.get("maxRange")?.value || "___" }}
-                          </span>
-                          <span *ngIf="range.get('upto')?.value" style="color: var(--color-primary-light);">
-                            ₹{{ range.get("maxRange")?.value || "___" }} (and beyond)
+                        <input
+                          type="number"
+                          formControlName="quantity"
+                          class="w-full px-1.5 py-1.5 text-[10px] border rounded bg-[var(--color-surface)] text-[var(--color-font)] border-[var(--color-border)]"
+                          [value]="range.get('quantity')?.value"
+                          placeholder="Qty"
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="number"
+                          formControlName="time"
+                          class="w-full px-1.5 py-1.5 text-[10px] border rounded bg-[var(--color-surface)] text-[var(--color-font)] border-[var(--color-border)]"
+                          [value]="range.get('time')?.value"
+                          placeholder="Min"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Compact Preview -->
+                    <div
+                      class="pt-1.5 mt-1 border-t border-[var(--color-border)]"
+                    >
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                          <span
+                            class="text-[9px] text-[var(--color-muted)] mr-1"
+                            >→</span
+                          >
+                          <span
+                            class="text-[10px] font-medium text-[var(--color-font)]"
+                          >
+                            {{
+                              range.get("upto")?.value
+                                ? "∞"
+                                : range.get("maxRange")?.value || "—"
+                            }}
                           </span>
                         </div>
-                        <div class="text-sm mt-2 flex items-center" style="color: var(--color-muted);">
-                          <span class="px-3 py-1 rounded-full mr-2" style="background-color: var(--color-surface);">
-                            {{ range.get("quantity")?.value || "___" }} transactions
-                          </span>
-                          <span class="px-3 py-1 rounded-full" style="background-color: var(--color-surface);">
-                            {{ range.get("time")?.value || "___" }} minutes
-                          </span>
+                        <span class="text-[8px] text-[var(--color-muted)]">
+                          {{ range.get("quantity")?.value || 0 }} /
+                          {{ range.get("time")?.value || 0 }}min
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Validation Errors - Compact -->
+                    <div class="text-[8px] text-[var(--color-danger)] mt-1">
+                      <div
+                        *ngIf="
+                          range.get('maxRange')?.invalid &&
+                          range.get('maxRange')?.touched &&
+                          !range.get('upto')?.value
+                        "
+                      >
+                        <span
+                          *ngIf="range.get('maxRange')?.errors?.['required']"
+                          >Required</span
+                        >
+                        <span *ngIf="range.get('maxRange')?.errors?.['min']"
+                          >Min ₹1</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Empty State for Intermediate Ranges -->
+                <div
+                  *ngIf="getIntermediateRanges().length === 0"
+                  class="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-[var(--color-border)] rounded-lg p-6 bg-[var(--color-surface)]/50"
+                >
+                  <span
+                    class="material-icons text-[var(--color-muted)] text-3xl mb-2"
+                    >add_circle_outline</span
+                  >
+                  <p class="text-sm font-medium text-[var(--color-muted)]">
+                    No intermediate ranges
+                  </p>
+                  <p class="text-xs text-[var(--color-muted)] mt-1 text-center">
+                    Click "Add" button in Primary Range to create more ranges
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========== COLUMN 4: Final/Infinite Range (3 cols) ========== -->
+            <div class="lg:col-span-3">
+              <div
+                class="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-5 shadow-sm h-full"
+                [ngClass]="{
+                  'border-2 border-[var(--color-primary)]/50 bg-[var(--color-primary)]/5':
+                    getFinalRange(),
+                }"
+              >
+                <div class="flex items-center justify-between mb-4">
+                  <h3
+                    class="text-sm font-semibold text-[var(--color-font)] flex items-center"
+                  >
+                    <span
+                      class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] mr-2"
+                    ></span>
+                    Final Range
+                    <span
+                      *ngIf="getFinalRange()"
+                      class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] border border-[var(--color-primary)]/50 shadow-sm"
+                    >
+                      INFINITE
+                    </span>
+                  </h3>
+                  <span
+                    *ngIf="getFinalRange()"
+                    class="text-xs text-[var(--color-muted)] bg-[var(--color-bg)]/50 px-2 py-1 rounded-full border border-[var(--color-border)]"
+                  >
+                    Range {{ getFinalRangeIndex() + 1 }}
+                  </span>
+                  <span
+                    *ngIf="!getFinalRange()"
+                    class="text-xs text-[var(--color-muted)] bg-[var(--color-bg)]/50 px-2 py-1 rounded-full border border-[var(--color-border)]"
+                  >
+                    Not Set
+                  </span>
+                </div>
+
+                <!-- Final Range Card -->
+                <div
+                  *ngIf="getFinalRange()"
+                  formArrayName="capacityRanges"
+                  [formGroupName]="getFinalRangeIndex()"
+                >
+                  <div class="relative rounded-lg p-4 transition-all">
+                    <!-- Range Header -->
+                    <div class="flex items-center justify-between mb-3">
+                      <div class="flex items-center">
+                        <span
+                          class="w-2 h-2 rounded-full mr-2 bg-[var(--color-primary)]"
+                        ></span>
+                        <span
+                          class="text-sm font-medium text-[var(--color-font)]"
+                          >Range {{ getFinalRangeIndex() + 1 }}</span
+                        >
+                        <span
+                          class="text-[10px] text-[var(--color-muted)] ml-2 px-1.5 py-0.5 bg-[var(--color-surface)]/80 rounded-full border border-[var(--color-border)]"
+                          >Final</span
+                        >
+                      </div>
+                      <button
+                        *ngIf="getFinalRange()"
+                        type="button"
+                        (click)="removeFinalRange()"
+                        class="text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors p-1 rounded-full hover:bg-[var(--color-danger)]/10"
+                      >
+                        <span class="material-icons text-sm"
+                          >delete_outline</span
+                        >
+                      </button>
+                    </div>
+
+                    <!-- Upto Checkbox - Disabled and Checked -->
+                    <div class="mb-4">
+                      <label class="flex items-center cursor-not-allowed">
+                        <div class="relative">
+                          <input
+                            type="checkbox"
+                            formControlName="upto"
+                            class="sr-only"
+                            checked
+                          />
+                          <div
+                            class="block w-10 h-5 rounded-full bg-[var(--color-primary)]"
+                          ></div>
+                          <div
+                            class="dot absolute left-0.5 top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
+                            style="transform: translateX(20px)"
+                          ></div>
+                        </div>
+                        <span
+                          class="ml-2 text-xs font-medium text-[var(--color-font)]"
+                          >Upto (Infinite)</span
+                        >
+                      </label>
+                    </div>
+
+                    <!-- Input Grid - 2x2 (Readonly) -->
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                      <!-- Min -->
+                      <div>
+                        <label
+                          class="text-[10px] text-[var(--color-muted)] block mb-1"
+                          >Min Range</label
+                        >
+                        <div class="relative">
+                          <input
+                            type="number"
+                            formControlName="minRange"
+                            readonly
+                            class="w-full px-2 py-2 text-xs border rounded-lg bg-[var(--color-surface)]/50 text-[var(--color-muted)] border-[var(--color-border)]"
+                          />
+                          <span
+                            class="absolute right-2 top-2 text-[10px] text-[var(--color-muted)]"
+                            >₹</span
+                          >
                         </div>
                       </div>
-                      <div class="text-right">
-                        <div class="text-xs font-medium mb-1" style="color: var(--color-muted);">CAPACITY</div>
-                        <div class="text-2xl font-bold" style="color: var(--color-font);">
-                          {{ range.get("quantity")?.value || "0" }}<span class="text-lg font-normal">/{{ range.get("time")?.value || "0" }}min</span>
+                      <!-- Max -->
+                      <div>
+                        <label
+                          class="text-[10px] text-[var(--color-muted)] block mb-1"
+                        >
+                          Max Range
+                        </label>
+                        <div class="relative">
+                          <input
+                            type="text"
+                            formControlName="maxRange"
+                            readonly
+                            value="∞"
+                            class="w-full px-2 py-2 text-xs border rounded-lg bg-[var(--color-surface)]/50 text-[var(--color-primary)] font-bold border-[var(--color-border)]"
+                          />
+                        </div>
+                      </div>
+                      <!-- Qty -->
+                      <div>
+                        <label
+                          class="text-[10px] text-[var(--color-muted)] block mb-1"
+                        >
+                          Quantity
+                        </label>
+                        <input
+                          type="number"
+                          formControlName="quantity"
+                          readonly
+                          class="w-full px-2 py-2 text-xs border rounded-lg bg-[var(--color-surface)]/50 text-[var(--color-font)] border-[var(--color-border)]"
+                        />
+                      </div>
+                      <!-- Time -->
+                      <div>
+                        <label
+                          class="text-[10px] text-[var(--color-muted)] block mb-1"
+                        >
+                          Time (min)
+                        </label>
+                        <input
+                          type="number"
+                          formControlName="time"
+                          readonly
+                          class="w-full px-2 py-2 text-xs border rounded-lg bg-[var(--color-surface)]/50 text-[var(--color-font)] border-[var(--color-border)]"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Preview -->
+                    <div
+                      class="pt-3 mt-1 border-t border-[var(--color-border)]"
+                    >
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <span
+                            class="text-[10px] text-[var(--color-muted)] block mb-1"
+                            >Preview</span
+                          >
+                          <span
+                            class="text-xs font-semibold text-[var(--color-primary)]"
+                          >
+                            {{ getFinalRange()?.get("minRange")?.value || 0 }} →
+                            ∞
+                          </span>
+                        </div>
+                        <div class="text-right">
+                          <span
+                            class="text-[10px] text-[var(--color-muted)] block mb-1"
+                            >Capacity</span
+                          >
+                          <span
+                            class="text-xs font-medium text-[var(--color-primary)]"
+                          >
+                            {{ getFinalRange()?.get("quantity")?.value || 0 }}
+                            txns
+                          </span>
+                          <span
+                            class="text-[10px] text-[var(--color-muted)] ml-1"
+                          >
+                            / {{ getFinalRange()?.get("time")?.value || 0 }} min
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
+
+                <!-- Empty State for Final Range -->
+                <div
+                  *ngIf="!getFinalRange()"
+                  class="flex flex-col items-center justify-center border-2 border-dashed border-[var(--color-border)] rounded-lg p-6 bg-[var(--color-surface)]/50 h-64"
+                >
+                  <span
+                    class="material-icons text-[var(--color-muted)] text-3xl mb-2"
+                    >infinite</span
+                  >
+                  <p class="text-sm font-medium text-[var(--color-muted)]">
+                    No final range set
+                  </p>
+                  <p class="text-xs text-[var(--color-muted)] mt-1 text-center">
+                    Mark any range as "upto" to set it as the final infinite
+                    range
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Submit Section -->
-          <div class="pt-8 border-t" style="border-color: var(--color-border);">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div class="text-sm" style="color: var(--color-muted);">
+          <!-- ========== BOTTOM: Submit Section (Full Width) ========== -->
+          <div class="mt-8 pt-6 border-t border-[var(--color-border)]">
+            <div
+              class="flex flex-col md:flex-row items-center justify-between gap-4"
+            >
+              <div class="text-xs text-[var(--color-muted)]">
                 <div class="flex items-center">
-                  <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                  </svg>
-                  All fields marked with asterisk (*) are required
+                  <span class="material-icons mr-1 text-sm">info</span>
+                  All fields marked with
+                  <span class="text-[var(--color-danger)]">*</span> are required
                 </div>
-                <div class="mt-2 text-xs" style="color: var(--color-muted);">
-                  Ensure at least one range is marked as "upto" before submitting
+                <div class="flex items-center mt-1 text-[10px]">
+                  <span
+                    class="material-icons mr-1 text-[10px] text-[var(--color-warning)]"
+                    >warning</span
+                  >
+                  At least one range must be marked as "upto" before submitting
                 </div>
               </div>
-              
               <button
                 type="submit"
-                [disabled]="isSubmitting || capacityForm.invalid || !hasUptoRange"
-                class="relative px-10 py-4 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 group overflow-hidden"
-                [ngStyle]="{
-                  background: !isSubmitting && capacityForm.valid && hasUptoRange
-                    ? 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))'
-                    : 'linear-gradient(135deg, var(--color-muted), var(--color-muted)/80%)',
-                  color: 'var(--color-font)'
-                }"
+                [disabled]="
+                  isSubmitting || capacityForm.invalid || !hasUptoRange
+                "
+                class="px-6 py-3 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] text-[var(--color-surface)] rounded-lg text-sm font-medium hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-all transform hover:scale-[1.02]"
               >
-                <!-- Glow effect -->
-                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                
-                <span *ngIf="!isSubmitting" class="relative flex items-center justify-center">
-                  <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                  Save Capacity Configuration
+                <span *ngIf="!isSubmitting" class="flex items-center">
+                  <span class="material-icons mr-1.5 text-sm">save</span>
+                  Save Configuration
                 </span>
-                <span *ngIf="isSubmitting" class="relative flex items-center justify-center">
-                  <svg
-                    class="animate-spin -ml-1 mr-3 h-5 w-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
+                <span *ngIf="isSubmitting" class="flex items-center">
+                  <span class="material-icons animate-spin mr-1.5 text-sm"
+                    >refresh</span
                   >
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Saving Configuration...
+                  Saving...
                 </span>
               </button>
             </div>

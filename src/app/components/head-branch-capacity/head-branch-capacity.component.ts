@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectorRef } from "@angular/core";
 import {
   FormArray,
   FormBuilder,
@@ -12,6 +12,13 @@ import { HeadService } from "../../pages/services/head.service";
 import { BranchService } from "../../pages/services/branch.service";
 import { CapacityService } from "../../pages/services/capacity.service";
 
+interface Website {
+  websiteId: string;
+  websiteDomain?: string;
+  domain?: string;
+  currency?: string;
+}
+
 @Component({
   selector: "app-head-branch-capacity",
   templateUrl: "./head-branch-capacity.component.html",
@@ -21,7 +28,7 @@ export class HeadBranchCapacityComponent implements OnInit {
   capacityForm: FormGroup;
   currentUserId: any;
   role: any;
-  websites: any;
+  websites: Website[] = [];
   isLoading = false;
   isSubmitting = false;
   successMessage = "";
@@ -61,9 +68,12 @@ export class HeadBranchCapacityComponent implements OnInit {
     { value: "UPI", label: "UPI" },
     { value: "BANK", label: "Bank Transfer" },
   ];
+
+  // Website search properties
   showWebsiteDropdown = false;
-  filteredWebsites: any[] = [];
+  filteredWebsites: Website[] = [];
   selectedWebsiteDomain: string = "";
+  websiteSearchTimeout: any;
 
   get currentColors() {
     return (
@@ -83,6 +93,7 @@ export class HeadBranchCapacityComponent implements OnInit {
     private branchService: BranchService,
     private capacityService: CapacityService,
     private fb: FormBuilder,
+    private cdr: ChangeDetectorRef,
   ) {
     this.capacityForm = this.createForm();
 
@@ -95,7 +106,6 @@ export class HeadBranchCapacityComponent implements OnInit {
     this.currentUserId = this.userStateService.getCurrentRoleId();
     this.role = this.userStateService.getRole();
     this.loadWebsites();
-    this.loadExistingCapacities();
 
     // when website is selected -> enable type
     this.capacityForm.get("websiteId")?.valueChanges.subscribe((val) => {
@@ -106,11 +116,11 @@ export class HeadBranchCapacityComponent implements OnInit {
 
         // Update selected website domain
         const selectedWebsite = this.websites?.find(
-          (w: any) => w.websiteId === val,
+          (w: Website) => w.websiteId === val,
         );
         if (selectedWebsite) {
           this.selectedWebsiteDomain =
-            selectedWebsite.websiteDomain || selectedWebsite.domain;
+            selectedWebsite.websiteDomain || selectedWebsite.domain || "";
         }
 
         // if type is already selected and is TOPUP and mode selected -> fetch config
@@ -138,24 +148,19 @@ export class HeadBranchCapacityComponent implements OnInit {
 
     // when type changes -> handle mode validators + possibly load config
     this.capacityForm.get("type")?.valueChanges.subscribe((type) => {
-      this.onTypeChange(); // will set validators for mode
+      this.onTypeChange();
 
-      // if type is PAYOUT -> don't need to fetch TOPUP config
       if (type === "PAYOUT") {
-        // ensure mode is disabled
         this.capacityForm.get("mode")?.reset();
         this.capacityForm.get("mode")?.disable({ emitEvent: false });
-
-        // Reset ranges to a single editable row (backend probably has separate config for PAYOUT)
         this.capacityRanges.clear();
         this.capacityRanges.push(this.createCapacityRange());
         this.hasUptoRange = false;
+        this.updateMinRanges();
       } else if (type === "TOPUP") {
-        // enable mode (if website already selected)
         if (this.capacityForm.get("websiteId")?.value) {
           this.capacityForm.get("mode")?.enable({ emitEvent: false });
         }
-        // if mode already selected, fetch config
         const mode = this.capacityForm.get("mode")?.value;
         if (mode) {
           this.loadCapacitiesForWebsite();
@@ -171,9 +176,6 @@ export class HeadBranchCapacityComponent implements OnInit {
         this.loadCapacitiesForWebsite();
       }
     });
-
-    // Make sure initial validators & state correct
-    this.checkForUptoRange();
   }
 
   private createForm(): FormGroup {
@@ -189,7 +191,7 @@ export class HeadBranchCapacityComponent implements OnInit {
     const group = this.fb.group(
       {
         minRange: [{ value: 0, disabled: true }, Validators.required],
-        maxRange: ["", [Validators.min(1)]], // required rule applied dynamically
+        maxRange: ["", [Validators.min(1)]],
         quantity: ["", [Validators.required, Validators.min(1)]],
         time: ["", [Validators.required, Validators.min(1)]],
         upto: [false],
@@ -199,16 +201,13 @@ export class HeadBranchCapacityComponent implements OnInit {
       },
     );
 
-    // Ensure max validators are set according to upto initial state
     this.setMaxValidators(group);
 
-    // When maxRange changes we should update next range's min and revalidate group
     group.get("maxRange")?.valueChanges.subscribe(() => {
       this.updateMinRanges();
       group.updateValueAndValidity({ onlySelf: true, emitEvent: false });
     });
 
-    // When upto toggles set/clear validators and move range if needed
     group.get("upto")?.valueChanges.subscribe(() => {
       this.setMaxValidators(group);
       group.updateValueAndValidity({ onlySelf: true });
@@ -217,10 +216,6 @@ export class HeadBranchCapacityComponent implements OnInit {
     return group;
   }
 
-  /** Group-level validator:
-   * - If upto === true -> maxRange is not required (treated separately in payload)
-   * - If upto === false -> maxRange is required and must be > minRange
-   */
   private rangeGroupValidator(group: AbstractControl): ValidationErrors | null {
     const g = group as FormGroup;
     const upto = !!g.get("upto")?.value;
@@ -230,10 +225,8 @@ export class HeadBranchCapacityComponent implements OnInit {
     const maxVal =
       maxValRaw === "" || maxValRaw === null ? NaN : Number(maxValRaw);
 
-    // Clear previously set errors that are not relevant
     if (upto) {
       if (maxControl?.errors) {
-        // remove max-related errors
         const errors = { ...maxControl.errors };
         delete errors["required"];
         delete errors["minGreater"];
@@ -246,19 +239,16 @@ export class HeadBranchCapacityComponent implements OnInit {
       return null;
     }
 
-    // Not upto -> maxRange required
     if (isNaN(maxValRaw) || maxValRaw === "" || maxValRaw === null) {
       maxControl?.setErrors({ ...(maxControl.errors || {}), required: true });
       return { maxInvalid: true };
     }
 
-    // must be a number > minVal
     if (isNaN(maxVal) || maxVal <= minVal) {
       maxControl?.setErrors({ ...(maxControl.errors || {}), minGreater: true });
       return { maxInvalid: true };
     }
 
-    // If passed, clear errors
     if (maxControl?.errors) {
       const cleaned = { ...maxControl.errors };
       delete cleaned["required"];
@@ -292,7 +282,6 @@ export class HeadBranchCapacityComponent implements OnInit {
       (range) => range.get("upto")?.value === true,
     );
 
-    // If upto range exists and is not the last range, move it to the end
     const uptoIndex = ranges.findIndex(
       (range) => range.get("upto")?.value === true,
     );
@@ -300,7 +289,6 @@ export class HeadBranchCapacityComponent implements OnInit {
       this.moveUptoToEnd(uptoIndex);
     }
 
-    // ensure validators for all groups reflect upto presence
     this.capacityRanges.controls.forEach((g) => {
       this.setMaxValidators(g as FormGroup);
       (g as FormGroup).updateValueAndValidity({
@@ -312,7 +300,6 @@ export class HeadBranchCapacityComponent implements OnInit {
 
   moveUptoToEnd(uptoIndex: number) {
     const rangeToMove = this.capacityRanges.at(uptoIndex);
-    // Remove at index and push the same AbstractControl to end
     this.capacityRanges.removeAt(uptoIndex);
     this.capacityRanges.push(rangeToMove);
     this.updateMinRanges();
@@ -321,41 +308,60 @@ export class HeadBranchCapacityComponent implements OnInit {
   private async loadWebsites() {
     this.isLoading = true;
     try {
-      if (this.role.toString().toLowerCase() === "head") {
-        this.websites = await this.headService
+      let response: any;
+
+      if (this.role?.toString().toLowerCase() === "head") {
+        response = await this.headService
           .getAllHeadsWithWebsitesById(this.currentUserId)
           .toPromise();
-      } else if (this.role.toString().toLowerCase() === "branch") {
-        this.websites = await this.branchService
+      } else if (this.role?.toString().toLowerCase() === "branch") {
+        response = await this.branchService
           .getWebsiteByBranchId(this.currentUserId)
           .toPromise();
       }
+
+      let websitesData: Website[] = [];
+
+      if (Array.isArray(response)) {
+        websitesData = response.map((item: any) => ({
+          websiteId: item.websiteId || item.id || "",
+          websiteDomain: item.websiteDomain || item.domain || "",
+          domain: item.domain || item.websiteDomain || "",
+          currency: item.currency || "INR",
+        }));
+      } else if (response?.data && Array.isArray(response.data)) {
+        websitesData = response.data.map((item: any) => ({
+          websiteId: item.websiteId || item.id || "",
+          websiteDomain: item.websiteDomain || item.domain || "",
+          domain: item.domain || item.websiteDomain || "",
+          currency: item.currency || "INR",
+        }));
+      } else if (response?.websites && Array.isArray(response.websites)) {
+        websitesData = response.websites.map((item: any) => ({
+          websiteId: item.websiteId || item.id || "",
+          websiteDomain: item.websiteDomain || item.domain || "",
+          domain: item.domain || item.websiteDomain || "",
+          currency: item.currency || "INR",
+        }));
+      }
+
+      this.websites = websitesData || [];
       this.filteredWebsites = [...this.websites];
     } catch (error) {
       console.error("Error loading websites:", error);
       this.errorMessage = "Failed to load websites. Please try again.";
+      this.websites = [];
+      this.filteredWebsites = [];
     } finally {
       this.isLoading = false;
     }
   }
 
-  private async loadExistingCapacities() {
-    // Implement if you want to load existing capacities for editing
-  }
-
-  /**
-   * Load capacities from backend for the selected website + entity + type + mode
-   * Expects response to contain a `capacities` array of { maxRange, quantity, time, upto }
-   */
-  // Update the loadCapacitiesForWebsite method to handle loading states
-  // Call backend for both TOPUP and PAYOUT. For non-TOPUP (e.g. PAYOUT) send mode: null.
   private async loadCapacitiesForWebsite() {
     const websiteId = this.capacityForm.get("websiteId")?.value;
     const type = this.capacityForm.get("type")?.value;
-    // For TOPUP include the selected mode; for PAYOUT (or other types) send null
     const mode = type === "TOPUP" ? this.capacityForm.get("mode")?.value : null;
 
-    // require both website and type to query
     if (!websiteId || !type) {
       return;
     }
@@ -380,12 +386,11 @@ export class HeadBranchCapacityComponent implements OnInit {
         this.capacityRanges.clear();
 
         capacities.forEach((c: any, idx: number) => {
-          const g = this.createCapacityRange();
+          const group = this.createCapacityRange();
 
-          // compute minRange from previous capacity's maxRange
-          let min = 0;
+          let minValue = 0;
           if (idx === 0) {
-            min = 0;
+            minValue = 0;
           } else {
             const prev = capacities[idx - 1];
             const prevMaxRaw = prev?.maxRange;
@@ -393,42 +398,62 @@ export class HeadBranchCapacityComponent implements OnInit {
               prevMaxRaw === "" || prevMaxRaw === null
                 ? NaN
                 : Number(prevMaxRaw);
-            min = !isNaN(prevMax) && prevMax >= 0 ? prevMax + 1 : 0;
+            minValue = !isNaN(prevMax) && prevMax >= 0 ? prevMax + 1 : 0;
           }
 
           const isUpto = !!c.upto;
-          g.get("upto")?.setValue(isUpto);
+
+          group.patchValue(
+            {
+              minRange: minValue,
+              maxRange: isUpto
+                ? c.maxRange === 0
+                  ? ""
+                  : c.maxRange
+                : c.maxRange || "",
+              quantity: c.quantity || "",
+              time: c.time || "",
+              upto: isUpto,
+            },
+            { emitEvent: false },
+          );
 
           if (isUpto) {
-            // backend may send maxRange = 0 to indicate upto -> show blank
-            g.get("maxRange")?.setValue(c.maxRange === 0 ? "" : c.maxRange);
-            g.get("minRange")?.setValue(min);
-            g.get("minRange")?.disable({ emitEvent: false });
+            group.get("minRange")?.disable({ emitEvent: false });
+            group.get("maxRange")?.clearValidators();
+            group.get("maxRange")?.setValue("", { emitEvent: false });
+            group
+              .get("maxRange")
+              ?.updateValueAndValidity({ emitEvent: false, onlySelf: true });
           } else {
-            g.get("maxRange")?.setValue(
-              c.maxRange != null && c.maxRange !== 0 ? c.maxRange : "",
-            );
-            g.get("minRange")?.setValue(c.minRange != null ? c.minRange : min);
-            g.get("minRange")?.enable({ emitEvent: false });
+            group.get("minRange")?.enable({ emitEvent: false });
+            group
+              .get("maxRange")
+              ?.setValidators([Validators.required, Validators.min(1)]);
+            group
+              .get("maxRange")
+              ?.updateValueAndValidity({ emitEvent: false, onlySelf: true });
           }
 
-          g.get("quantity")?.setValue(c.quantity != null ? c.quantity : "");
-          g.get("time")?.setValue(c.time != null ? c.time : "");
+          group
+            .get("quantity")
+            ?.updateValueAndValidity({ emitEvent: false, onlySelf: true });
+          group
+            .get("time")
+            ?.updateValueAndValidity({ emitEvent: false, onlySelf: true });
+          group.updateValueAndValidity({ emitEvent: false, onlySelf: true });
 
-          this.setMaxValidators(g);
-          (g as FormGroup).updateValueAndValidity({
-            onlySelf: true,
-            emitEvent: false,
-          });
-
-          this.capacityRanges.push(g);
+          this.capacityRanges.push(group);
         });
 
-        // Recalculate mins and upto flags after pushing
-        this.updateMinRanges();
-        this.checkForUptoRange();
+        this.capacityForm.updateValueAndValidity({ emitEvent: true });
+
+        setTimeout(() => {
+          this.updateMinRanges();
+          this.checkForUptoRange();
+          this.cdr.detectChanges();
+        });
       } else {
-        // no capacities returned - keep a single empty row
         this.capacityRanges.clear();
         this.capacityRanges.push(this.createCapacityRange());
         this.hasUptoRange = false;
@@ -453,7 +478,9 @@ export class HeadBranchCapacityComponent implements OnInit {
       const newRange = this.createCapacityRange();
       newRange
         .get("minRange")
-        ?.setValue(lastMax ? parseInt(lastMax, 10) + 1 : 0);
+        ?.setValue(lastMax ? parseInt(lastMax, 10) + 1 : 0, {
+          emitEvent: false,
+        });
       this.setMaxValidators(newRange);
       this.capacityRanges.push(newRange);
       this.errorMessage = "";
@@ -474,29 +501,38 @@ export class HeadBranchCapacityComponent implements OnInit {
 
   updateMinRanges() {
     this.capacityRanges.controls.forEach((control, index) => {
-      // compute min based on previous maxRange
       if (index === 0) {
-        control.get("minRange")?.setValue(0);
+        control.get("minRange")?.setValue(0, { emitEvent: false });
       } else {
         const prevMaxRaw = this.capacityRanges
           .at(index - 1)
           .get("maxRange")?.value;
         const prevMax =
           prevMaxRaw === "" || prevMaxRaw === null ? NaN : Number(prevMaxRaw);
-
         const min = !isNaN(prevMax) && prevMax >= 0 ? prevMax + 1 : 0;
-        control.get("minRange")?.setValue(min);
+        control.get("minRange")?.setValue(min, { emitEvent: false });
       }
 
-      // If this range is marked upto -> keep the computed min but disable the control
       if (control.get("upto")?.value) {
         control.get("minRange")?.disable({ emitEvent: false });
+        control.get("maxRange")?.clearValidators();
+        control.get("maxRange")?.setValue("", { emitEvent: false });
       } else {
-        // ensure minRange is enabled for non-upto ranges
         control.get("minRange")?.enable({ emitEvent: false });
+        control
+          .get("maxRange")
+          ?.setValidators([Validators.required, Validators.min(1)]);
       }
 
-      // update validity after min update
+      control
+        .get("maxRange")
+        ?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+      control
+        .get("quantity")
+        ?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+      control
+        .get("time")
+        ?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
       (control as FormGroup).updateValueAndValidity({
         onlySelf: true,
         emitEvent: false,
@@ -513,7 +549,6 @@ export class HeadBranchCapacityComponent implements OnInit {
       this.loadCapacitiesForWebsite();
     } else {
       this.capacityForm.get("mode")?.setValidators(Validators.required);
-      // enable mode only if website is selected
       if (this.capacityForm.get("websiteId")?.value) {
         this.capacityForm.get("mode")?.enable({ emitEvent: false });
       }
@@ -525,18 +560,18 @@ export class HeadBranchCapacityComponent implements OnInit {
     const currentRange = this.capacityRanges.at(index);
     const maxRange = currentRange.get("maxRange")?.value;
 
-    // Update next range's min if exists and current range is not upto
     if (
       index < this.capacityRanges.length - 1 &&
       !currentRange.get("upto")?.value
     ) {
       const nextRange = this.capacityRanges.at(index + 1);
-      nextRange.get("minRange")?.setValue(parseInt(maxRange, 10) + 1 || 0);
-      (nextRange as FormGroup).updateValueAndValidity({ onlySelf: true });
+      nextRange
+        .get("minRange")
+        ?.setValue(parseInt(maxRange, 10) + 1 || 0, { emitEvent: false });
+      nextRange.updateValueAndValidity({ onlySelf: true, emitEvent: false });
     }
 
-    // Re-validate this group
-    (currentRange as FormGroup).updateValueAndValidity({ onlySelf: true });
+    currentRange.updateValueAndValidity({ onlySelf: true, emitEvent: false });
   }
 
   onUptoChange(index: number) {
@@ -544,7 +579,6 @@ export class HeadBranchCapacityComponent implements OnInit {
     const isUpto = currentRange.get("upto")?.value;
 
     if (isUpto) {
-      // compute min from previous range (or 0 if first)
       let min = 0;
       if (index === 0) {
         min = 0;
@@ -557,52 +591,52 @@ export class HeadBranchCapacityComponent implements OnInit {
         min = !isNaN(prevMax) && prevMax >= 0 ? prevMax + 1 : 0;
       }
 
-      // For upto range: set min to computed value and disable it
-      currentRange.get("minRange")?.setValue(min);
+      currentRange.get("minRange")?.setValue(min, { emitEvent: false });
       currentRange.get("minRange")?.disable({ emitEvent: false });
+      currentRange.get("maxRange")?.setValue("", { emitEvent: false });
+      currentRange.get("maxRange")?.clearValidators();
+      currentRange
+        .get("maxRange")
+        ?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
 
-      // maxRange is not required for UI; keep blank for clarity
-      currentRange.get("maxRange")?.setValue("");
-      this.setMaxValidators(currentRange);
-      currentRange.get("maxRange")?.updateValueAndValidity({ onlySelf: true });
-
-      // Move this range to the end if it's not already
       const idx = index;
       if (idx !== this.capacityRanges.length - 1) {
         this.moveUptoToEnd(idx);
       }
 
-      // Disable adding new ranges
       this.hasUptoRange = true;
     } else {
-      // Not upto, enable minRange and set appropriate value
       currentRange.get("minRange")?.enable({ emitEvent: false });
       if (index === 0) {
-        currentRange.get("minRange")?.setValue(0);
+        currentRange.get("minRange")?.setValue(0, { emitEvent: false });
       } else {
         const previousMax = this.capacityRanges
           .at(index - 1)
           .get("maxRange")?.value;
         currentRange
           .get("minRange")
-          ?.setValue(previousMax ? parseInt(previousMax, 10) + 1 : 0);
+          ?.setValue(previousMax ? parseInt(previousMax, 10) + 1 : 0, {
+            emitEvent: false,
+          });
       }
 
-      // Restore validators for maxRange
-      this.setMaxValidators(currentRange);
-      currentRange.get("maxRange")?.updateValueAndValidity({ onlySelf: true });
-
-      // Check if any other range has upto
+      currentRange
+        .get("maxRange")
+        ?.setValidators([Validators.required, Validators.min(1)]);
+      currentRange
+        .get("maxRange")
+        ?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
       this.checkForUptoRange();
     }
 
-    // update validity for all ranges after change
     this.capacityRanges.controls.forEach((g) =>
       (g as FormGroup).updateValueAndValidity({
         onlySelf: true,
         emitEvent: false,
       }),
     );
+
+    this.capacityForm.updateValueAndValidity({ emitEvent: true });
   }
 
   async onSubmit() {
@@ -612,7 +646,6 @@ export class HeadBranchCapacityComponent implements OnInit {
       return;
     }
 
-    // Check if there's at least one upto range
     const hasUpto = this.capacityRanges.controls.some(
       (range) => range.get("upto")?.value === true,
     );
@@ -627,7 +660,6 @@ export class HeadBranchCapacityComponent implements OnInit {
 
     const formValue = this.capacityForm.getRawValue();
 
-    // Prepare capacities array: only send maxRange, quantity, time, upto
     const capacities = formValue.capacityRanges.map((range: any) => {
       const isUpto = !!range.upto;
       const payloadRange: any = {
@@ -640,7 +672,7 @@ export class HeadBranchCapacityComponent implements OnInit {
     });
 
     const capacityData = {
-      entityType: this.role.toUpperCase(),
+      entityType: this.role?.toUpperCase(),
       entityId: this.currentUserId,
       type: formValue.type,
       websiteId: formValue.websiteId,
@@ -649,26 +681,25 @@ export class HeadBranchCapacityComponent implements OnInit {
     };
 
     try {
-      // Use same addCapacity API for creating/updating per your instruction
-      const response = await this.capacityService
-        .addCapacity(capacityData)
-        .toPromise();
+      await this.capacityService.addCapacity(capacityData).toPromise();
       this.successMessage = "Capacity added successfully!";
 
-      // Reset form to initial state but keep website selected so user can continue
       const websiteId = this.capacityForm.get("websiteId")?.value;
       const type = this.capacityForm.get("type")?.value;
       const mode = this.capacityForm.get("mode")?.value;
 
-      this.capacityForm.reset();
-      this.capacityForm.get("websiteId")?.setValue(websiteId);
-      this.capacityForm.get("type")?.setValue(type);
-      this.capacityForm.get("mode")?.setValue(mode);
+      this.capacityForm.reset({ emitEvent: false });
+      this.capacityForm
+        .get("websiteId")
+        ?.setValue(websiteId, { emitEvent: false });
+      this.capacityForm.get("type")?.setValue(type, { emitEvent: false });
+      this.capacityForm.get("mode")?.setValue(mode, { emitEvent: false });
 
-      // keep ranges as a fresh single row
       this.capacityRanges.clear();
       this.capacityRanges.push(this.createCapacityRange());
       this.hasUptoRange = false;
+      this.updateMinRanges();
+      this.capacityForm.updateValueAndValidity({ emitEvent: true });
     } catch (error: any) {
       console.error("Error adding capacity:", error);
       this.errorMessage =
@@ -678,39 +709,76 @@ export class HeadBranchCapacityComponent implements OnInit {
     }
   }
 
+  // ============ WEBSITE SEARCH METHODS ============
+
   onWebsiteSearch(event: any) {
     const searchTerm = event.target.value.toLowerCase();
     this.showWebsiteDropdown = true;
 
-    if (searchTerm.trim() === "") {
-      this.filteredWebsites = [...this.websites];
-    } else {
-      this.filteredWebsites = this.websites.filter((website: any) => {
-        const domain = (
-          website.websiteDomain ||
-          website.domain ||
-          ""
-        ).toLowerCase();
-        const id = (website.websiteId || "").toString().toLowerCase();
-        return domain.includes(searchTerm) || id.includes(searchTerm);
+    if (this.websiteSearchTimeout) {
+      clearTimeout(this.websiteSearchTimeout);
+    }
+
+    this.websiteSearchTimeout = setTimeout(() => {
+      if (searchTerm.trim() === "") {
+        this.filteredWebsites = [...this.websites];
+      } else {
+        this.filteredWebsites = this.websites.filter((website: Website) => {
+          const domain = (
+            website.websiteDomain ||
+            website.domain ||
+            ""
+          ).toLowerCase();
+          const id = (website.websiteId || "").toString().toLowerCase();
+          const currency = (website.currency || "").toLowerCase();
+          return (
+            domain.includes(searchTerm) ||
+            id.includes(searchTerm) ||
+            currency.includes(searchTerm)
+          );
+        });
+      }
+    }, 300);
+  }
+
+  selectWebsite(website: Website) {
+    this.capacityForm
+      .get("websiteId")
+      ?.setValue(website.websiteId, { emitEvent: true });
+    this.selectedWebsiteDomain = website.websiteDomain || website.domain || "";
+    this.showWebsiteDropdown = false;
+    this.errorMessage = "";
+
+    const currentType = this.capacityForm.get("type")?.value;
+    if (currentType) {
+      setTimeout(() => {
+        this.loadCapacitiesForWebsite();
       });
     }
   }
 
-  selectWebsite(website: any) {
-    this.capacityForm.get("websiteId")?.setValue(website.websiteId);
-    this.selectedWebsiteDomain = website.websiteDomain || website.domain;
+  clearWebsiteSelection() {
+    this.capacityForm.get("websiteId")?.setValue("", { emitEvent: true });
+    this.selectedWebsiteDomain = "";
     this.showWebsiteDropdown = false;
+    this.filteredWebsites = [...this.websites];
 
-    // Trigger the type change to load capacities
-    const currentType = this.capacityForm.get("type")?.value;
-    if (currentType) {
-      this.loadCapacitiesForWebsite();
+    const searchInput = document.querySelector(
+      'input[placeholder*="Search websites"]',
+    ) as HTMLInputElement;
+    if (searchInput) {
+      searchInput.value = "";
     }
+
+    this.errorMessage = "";
+
+    this.capacityRanges.clear();
+    this.capacityRanges.push(this.createCapacityRange());
+    this.hasUptoRange = false;
+    this.updateMinRanges();
   }
 
   onWebsiteBlur() {
-    // Delay hiding dropdown to allow click selection
     setTimeout(() => {
       this.showWebsiteDropdown = false;
     }, 200);
@@ -723,5 +791,274 @@ export class HeadBranchCapacityComponent implements OnInit {
         this.markFormGroupTouched(control);
       }
     });
+  }
+
+  // ============ 4-COLUMN LAYOUT HELPER METHODS ============
+
+  /**
+   * Get all intermediate ranges (all non-upto ranges)
+   * This excludes the final/upto range completely
+   */
+  getIntermediateRanges(): AbstractControl[] {
+    const allRanges = this.capacityRanges.controls;
+    // Return only ranges that are NOT upto
+    return allRanges.filter((range) => !range.get("upto")?.value);
+  }
+
+  /**
+   * Get the actual form array index for an intermediate range
+   * @param displayIndex The index in the filtered intermediate ranges array
+   * @returns The actual index in the capacityRanges FormArray
+   */
+  getIntermediateRangeIndex(displayIndex: number): number {
+    const allRanges = this.capacityRanges.controls;
+    let foundCount = 0;
+
+    for (let i = 0; i < allRanges.length; i++) {
+      if (!allRanges[i].get("upto")?.value) {
+        if (foundCount === displayIndex) {
+          return i;
+        }
+        foundCount++;
+      }
+    }
+    return displayIndex;
+  }
+
+  /**
+   * Get the count of intermediate ranges (non-upto ranges)
+   */
+  getIntermediateRangesCount(): number {
+    return this.getIntermediateRanges().length;
+  }
+
+  /**
+   * Get the final range (the upto/infinite range)
+   * Returns null if no upto range exists
+   */
+  getFinalRange(): AbstractControl | null {
+    const allRanges = this.capacityRanges.controls;
+    const uptoIndex = allRanges.findIndex((r) => r.get("upto")?.value === true);
+
+    if (uptoIndex !== -1) {
+      return allRanges[uptoIndex];
+    }
+    return null;
+  }
+
+  /**
+   * Get the index of the final range in the form array
+   * Returns -1 if no upto range exists
+   */
+  getFinalRangeIndex(): number {
+    return this.capacityRanges.controls.findIndex(
+      (r) => r.get("upto")?.value === true,
+    );
+  }
+
+  /**
+   * Remove the final/upto range
+   */
+  removeFinalRange() {
+    const uptoIndex = this.getFinalRangeIndex();
+    if (uptoIndex !== -1) {
+      this.removeCapacityRange(uptoIndex);
+    }
+  }
+
+  /**
+   * Check if a specific range is the final/upto range
+   * @param index The index in the form array
+   */
+  isFinalRange(index: number): boolean {
+    return this.capacityRanges.at(index).get("upto")?.value === true;
+  }
+
+  /**
+   * Get all ranges except the first range (for backward compatibility)
+   */
+  getAdditionalRanges(): AbstractControl[] {
+    return this.capacityRanges.controls.slice(1);
+  }
+
+  /**
+   * Check if there are any additional ranges beyond Range 1
+   */
+  hasAdditionalRanges(): boolean {
+    return this.capacityRanges.length > 1;
+  }
+
+  /**
+   * Get the total number of ranges
+   */
+  getTotalRangesCount(): number {
+    return this.capacityRanges.length;
+  }
+
+  /**
+   * Get the range number for display (1-based index)
+   * @param index The actual form array index
+   */
+  getRangeNumber(index: number): number {
+    return index + 1;
+  }
+
+  /**
+   * Format the max range for display
+   * @param range The range form group
+   */
+  getMaxRangeDisplay(range: AbstractControl): string {
+    if (range.get("upto")?.value) {
+      return "∞";
+    }
+    return range.get("maxRange")?.value || "—";
+  }
+
+  /**
+   * Format the preview text for a range
+   * @param range The range form group
+   */
+  getRangePreview(range: AbstractControl): string {
+    const minRange = range.get("minRange")?.value || 0;
+    if (range.get("upto")?.value) {
+      return `${minRange} → ∞`;
+    }
+    const maxRange = range.get("maxRange")?.value || "—";
+    return `${minRange} → ${maxRange}`;
+  }
+
+  /**
+   * Format the capacity text for a range
+   * @param range The range form group
+   */
+  getCapacityDisplay(range: AbstractControl): string {
+    const quantity = range.get("quantity")?.value || 0;
+    const time = range.get("time")?.value || 0;
+    return `${quantity} txns / ${time} min`;
+  }
+
+  /**
+   * Check if a range is valid and complete
+   * @param index The form array index
+   */
+  isRangeValid(index: number): boolean {
+    const range = this.capacityRanges.at(index);
+    return range.valid;
+  }
+
+  /**
+   * Get validation error message for a specific field
+   * @param range The range form group
+   * @param field The field name
+   */
+  getRangeFieldError(range: AbstractControl, field: string): string {
+    const control = range.get(field);
+    if (control?.errors && control.touched) {
+      if (control.errors["required"]) return `${field} is required`;
+      if (control.errors["min"])
+        return `Min ${field === "maxRange" ? "₹1" : "1"}`;
+      if (control.errors["minGreater"]) return `Must be > min range`;
+    }
+    return "";
+  }
+
+  /**
+   * Check if any range has validation errors
+   */
+  hasAnyRangeErrors(): boolean {
+    for (let i = 0; i < this.capacityRanges.length; i++) {
+      const range = this.capacityRanges.at(i);
+      if (range.invalid && range.touched) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Get all ranges that are not the final/upto range
+   * (for use in intermediate ranges column)
+   */
+  getNonFinalRanges(): AbstractControl[] {
+    return this.capacityRanges.controls.filter(
+      (range) => !range.get("upto")?.value,
+    );
+  }
+
+  /**
+   * Get all ranges that are the final/upto range
+   * (should only be one or none)
+   */
+  getFinalRanges(): AbstractControl[] {
+    return this.capacityRanges.controls.filter(
+      (range) => range.get("upto")?.value === true,
+    );
+  }
+
+  /**
+   * Move a range up in order (if not first)
+   * @param index The current index
+   */
+  moveRangeUp(index: number) {
+    if (index > 0) {
+      const rangeToMove = this.capacityRanges.at(index);
+      this.capacityRanges.removeAt(index);
+      this.capacityRanges.insert(index - 1, rangeToMove);
+      this.updateMinRanges();
+      this.checkForUptoRange();
+    }
+  }
+
+  /**
+   * Move a range down in order (if not last)
+   * @param index The current index
+   */
+  moveRangeDown(index: number) {
+    if (index < this.capacityRanges.length - 1) {
+      const rangeToMove = this.capacityRanges.at(index);
+      this.capacityRanges.removeAt(index);
+      this.capacityRanges.insert(index + 1, rangeToMove);
+      this.updateMinRanges();
+      this.checkForUptoRange();
+    }
+  }
+
+  /**
+   * Duplicate a range
+   * @param index The index to duplicate
+   */
+  duplicateRange(index: number) {
+    if (
+      !this.hasUptoRange ||
+      this.capacityRanges.at(index).get("upto")?.value
+    ) {
+      const sourceRange = this.capacityRanges.at(index);
+      const newRange = this.createCapacityRange();
+
+      // Copy values from source range
+      newRange.patchValue(
+        {
+          maxRange: sourceRange.get("maxRange")?.value,
+          quantity: sourceRange.get("quantity")?.value,
+          time: sourceRange.get("time")?.value,
+          upto: false, // Don't duplicate upto status
+        },
+        { emitEvent: false },
+      );
+
+      // Set minRange based on last range
+      const lastRange = this.capacityRanges.at(this.capacityRanges.length - 1);
+      const lastMax = lastRange.get("maxRange")?.value;
+      newRange
+        .get("minRange")
+        ?.setValue(lastMax ? parseInt(lastMax, 10) + 1 : 0, {
+          emitEvent: false,
+        });
+
+      this.setMaxValidators(newRange);
+      this.capacityRanges.push(newRange);
+      this.updateMinRanges();
+      this.errorMessage = "";
+    }
   }
 }
