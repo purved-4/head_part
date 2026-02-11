@@ -39,6 +39,12 @@ export class HeadUpiComponent implements OnInit {
   qrData: string | null = null;
   generatedFile: File | null = null;
 
+  // Add modal website search properties
+  showUpiWebsiteDropdown = false;
+  upiWebsiteSearch = "";
+  upiFilteredWebsites: any[] = [];
+  selectedUpiWebsite: any = null;
+
   // Update modal properties
   showUpdateModal = false;
   editingUpi: any = null;
@@ -266,6 +272,38 @@ export class HeadUpiComponent implements OnInit {
     }, 100);
   }
 
+  // ==================== ADD MODAL WEBSITE SEARCH METHODS ====================
+  toggleUpiWebsiteDropdown() {
+    this.showUpiWebsiteDropdown = !this.showUpiWebsiteDropdown;
+    if (this.showUpiWebsiteDropdown) {
+      this.upiFilteredWebsites = [...this.websites];
+    }
+  }
+
+  onUpiWebsiteSearch() {
+    const searchTerm = this.upiWebsiteSearch.toLowerCase();
+    if (searchTerm) {
+      this.upiFilteredWebsites = this.websites.filter(
+        (site) =>
+          site.domain.toLowerCase().includes(searchTerm) ||
+          (site.currency && site.currency.toLowerCase().includes(searchTerm)),
+      );
+    } else {
+      this.upiFilteredWebsites = [...this.websites];
+    }
+  }
+
+  selectUpiWebsite(site: any) {
+    this.selectedUpiWebsite = site;
+    this.addUpiForm.patchValue({
+      websiteId: site.id,
+    });
+    this.addUpiForm.get("websiteId")?.markAsTouched();
+    this.showUpiWebsiteDropdown = false;
+    this.upiWebsiteSearch = "";
+    this.upiFilteredWebsites = [...this.websites];
+  }
+
   // ==================== FILTERING METHODS ====================
   // Helper method for number range checking
   private checkNumberRange(
@@ -454,6 +492,12 @@ export class HeadUpiComponent implements OnInit {
       this.loadWebsites(this.currentRoleId);
     }
 
+    // Reset add modal website search properties
+    this.selectedUpiWebsite = null;
+    this.showUpiWebsiteDropdown = false;
+    this.upiWebsiteSearch = "";
+    this.upiFilteredWebsites = [...this.websites];
+
     this.showAddModal = true;
     document.body.style.overflow = "hidden";
   }
@@ -464,6 +508,13 @@ export class HeadUpiComponent implements OnInit {
     this.qrData = null;
     this.generatedFile = null;
     this.isAddingUpi = false;
+
+    // Reset add modal website search properties
+    this.selectedUpiWebsite = null;
+    this.showUpiWebsiteDropdown = false;
+    this.upiWebsiteSearch = "";
+    this.upiFilteredWebsites = [];
+
     document.body.style.overflow = "auto";
   }
 
@@ -681,6 +732,7 @@ export class HeadUpiComponent implements OnInit {
 
         // Initialize filtered websites
         this.filteredWebsites = [...this.websites];
+        this.upiFilteredWebsites = [...this.websites];
       });
   }
 
@@ -924,15 +976,18 @@ export class HeadUpiComponent implements OnInit {
   // Close website dropdown when clicking outside
   @HostListener("document:click", ["$event"])
   onDocumentClick(event: MouseEvent) {
-    if (this.showWebsiteDropdown) {
-      const target = event.target as HTMLElement;
-      const websiteFilterContainer = target.closest(
-        ".website-filter-container",
-      );
+    const target = event.target as HTMLElement;
 
-      if (!websiteFilterContainer) {
-        this.showWebsiteDropdown = false;
-      }
+    // Close filter website dropdown
+    const websiteFilterContainer = target.closest(".website-filter-container");
+    if (!websiteFilterContainer && this.showWebsiteDropdown) {
+      this.showWebsiteDropdown = false;
+    }
+
+    // Close add modal website dropdown
+    const addModalWebsiteContainer = target.closest(".relative");
+    if (!addModalWebsiteContainer && this.showUpiWebsiteDropdown) {
+      this.showUpiWebsiteDropdown = false;
     }
   }
 
@@ -943,6 +998,9 @@ export class HeadUpiComponent implements OnInit {
       // Close dropdown on resize to avoid positioning issues
       this.showWebsiteDropdown = false;
     }
+    if (this.showUpiWebsiteDropdown) {
+      this.showUpiWebsiteDropdown = false;
+    }
   }
 
   activeDropdownUpiId: string | null = null;
@@ -950,5 +1008,15 @@ export class HeadUpiComponent implements OnInit {
   toggleActionsDropdown(upiId: string) {
     this.activeDropdownUpiId =
       this.activeDropdownUpiId === upiId ? null : upiId;
+  }
+
+  clearUpiWebsiteSelection() {
+    this.selectedUpiWebsite = null;
+    this.upiWebsiteSearch = "";
+    this.upiFilteredWebsites = [];
+    this.addUpiForm.patchValue({
+      websiteId: "",
+    });
+    this.addUpiForm.get("websiteId")?.markAsTouched();
   }
 }

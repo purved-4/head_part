@@ -1,340 +1,680 @@
 <div
-  class="max-w-7xl mx-auto mt-10 bg-white rounded-2xl border border-gray-100 p-6 shadow-xl"
+  class="max-w-7xl mx-auto bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-2 shadow-lg"
 >
   <!-- Header -->
   <div
-    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"
+    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6"
   >
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-3">
       <div
-        class="w-12 h-12 bg-gradient-to-r from-[#E67A00] to-[#FFB366] rounded-xl flex items-center justify-center shadow-lg"
-        style="box-shadow: 0 4px 14px rgba(230, 122, 0, 0.25)"
+        class="w-10 h-10 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] rounded-lg flex items-center justify-center shadow-md"
       >
-        <span class="material-symbols-outlined text-[#1F2937] text-xl">
+        <span
+          class="material-symbols-outlined text-[var(--color-surface)] text-lg"
+        >
           account_balance
         </span>
       </div>
       <div>
-        <h2 class="text-2xl font-bold text-[#1F2937]">
+        <h2 class="text-xl font-bold text-[var(--color-font)]">
           Bank Account Management
         </h2>
-        <p class="text-gray-600 mt-1">
+        <p class="text-[var(--color-muted)] text-sm mt-0.5">
           Manage all bank accounts and their status
         </p>
       </div>
     </div>
     <button
       (click)="openAddBankModal()"
-      class="inline-flex items-center px-5 py-3 bg-gradient-to-r from-[#E67A00] to-[#FFB366] text-[#1F2937] rounded-xl hover:from-[#FF8A1A] hover:to-[#E67A00] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] font-semibold border border-[#CC6A00]"
-      style="box-shadow: 0 4px 14px rgba(230, 122, 0, 0.25)"
+      class="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] font-medium text-sm"
     >
-      <span class="material-symbols-outlined text-[#1F2937] mr-2"> add </span>
+      <span
+        class="material-symbols-outlined text-[var(--color-surface)] mr-1.5 text-lg"
+      >
+        add
+      </span>
       Add New Account
     </button>
   </div>
 
-  <!-- Rest of your existing component remains the same -->
-  <!-- Search & Filter Section -->
+  <!-- Advanced Filter Section -->
   <div
-    class="bg-[#FFF9F2] rounded-xl p-6 mb-8 border border-[#CC6A00]"
-    style="box-shadow: 0 4px 20px rgba(230, 122, 0, 0.15)"
+    class="bg-[var(--color-bg)] rounded-lg p-4 mb-6 border border-[var(--color-border)] shadow-sm"
   >
-    <h3 class="text-lg font-semibold text-[#1F2937] mb-4 flex items-center">
-      <span class="material-symbols-outlined text-[#E67A00] mr-2">
-        filter_list
-      </span>
-      Filter Accounts
-    </h3>
-    <form
-      (submit)="$event.preventDefault(); onSearch()"
-      class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm"
+    <div
+      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4"
     >
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-[#1F2937]"
-          >Account Number</label
+      <h3
+        class="text-base font-semibold text-[var(--color-font)] flex items-center"
+      >
+        <span
+          class="material-symbols-outlined text-[var(--color-primary)] mr-2"
         >
-        <input
-          type="text"
-          [(ngModel)]="searchAccountNo"
-          name="searchAccountNo"
-          placeholder="Enter account number"
-          (input)="onSearch()"
-          class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
-        />
-      </div>
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-[#1F2937]"
-          >Account Holder</label
-        >
-        <input
-          type="text"
-          [(ngModel)]="searchHolder"
-          name="searchHolder"
-          (input)="onSearch()"
-          placeholder="Holder name"
-          class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
-        />
-      </div>
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-[#1F2937]">Website</label>
-        <select
-          [(ngModel)]="searchWebsite"
-          name="searchWebsite"
-          (change)="onSearch()"
-          class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
-        >
-          <option value="">All Websites</option>
-          <option
-            *ngFor="let wb of bankAccounts; let i = index"
-            [value]="wb.websiteDomain || wb.website"
-          >
-            {{ wb.websiteDomain || wb.website }}
-          </option>
-        </select>
-      </div>
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-[#1F2937]">Status</label>
-        <select
-          [(ngModel)]="searchStatus"
-          name="searchStatus"
-          (change)="onSearch()"
-          class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
-        >
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="frozen">Frozen</option>
-        </select>
-      </div>
+          filter_alt
+        </span>
+        Filter Accounts
+      </h3>
 
-      <!-- Buttons -->
-      <div class="col-span-full flex gap-3 pt-2">
-        <button
-          type="button"
-          (click)="onSearch()"
-          class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#E67A00] to-[#FFB366] text-[#1F2937] rounded-xl hover:from-[#FF8A1A] hover:to-[#E67A00] transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] border border-[#CC6A00]"
-          style="box-shadow: 0 4px 14px rgba(230, 122, 0, 0.25)"
-        >
-          <span class="material-symbols-outlined text-[#1F2937] mr-2">
-            search
-          </span>
-          Search
-        </button>
-        <button
-          type="button"
-          (click)="
-            searchAccountNo = '';
-            searchHolder = '';
-            searchWebsite = '';
-            searchStatus = '';
-            onSearch()
-          "
-          class="inline-flex items-center px-6 py-3 bg-gray-200 text-[#1F2937] rounded-xl hover:bg-gray-300 transition-all duration-200 font-semibold border border-gray-300"
-        >
-          <span class="material-symbols-outlined text-[#1F2937] mr-2">
-            restart_alt
-          </span>
-          Reset
-        </button>
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Status Filter (Outside dropdown) -->
+        <div class="flex items-center gap-2">
+          <label
+            class="text-xs font-medium text-[var(--color-font)] whitespace-nowrap"
+            >Status:</label
+          >
+          <select
+            [(ngModel)]="searchStatus"
+            name="searchStatus"
+            (change)="onSearch()"
+            class="border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-xs bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] min-w-[120px]"
+          >
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="frozen">Frozen</option>
+          </select>
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            type="button"
+            (click)="onSearch()"
+            class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 font-medium text-xs"
+          >
+            <span
+              class="material-symbols-outlined text-[var(--color-surface)] mr-1.5 text-sm"
+            >
+              search
+            </span>
+            Search
+          </button>
+          <button
+            type="button"
+            (click)="resetFilters()"
+            class="inline-flex items-center px-3 py-1.5 bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] transition-all duration-200 font-medium text-xs border border-[var(--color-border)]"
+          >
+            <span
+              class="material-symbols-outlined text-[var(--color-font)] mr-1.5 text-sm"
+            >
+              restart_alt
+            </span>
+            Reset
+          </button>
+        </div>
       </div>
-    </form>
+    </div>
+
+    <!-- Basic Filters Dropdown -->
+    <div class="mb-4">
+      <details class="group">
+        <summary
+          class="flex items-center justify-between p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] cursor-pointer hover:bg-[var(--color-hover)] transition-colors"
+        >
+          <div class="flex items-center">
+            <span
+              class="material-symbols-outlined text-[var(--color-primary)] mr-2"
+            >
+              expand_more
+            </span>
+            <span class="font-medium text-sm text-[var(--color-font)]"
+              >Account Information Filters</span
+            >
+            <span
+              class="ml-2 text-xs bg-[var(--color-primary)] text-[var(--color-surface)] px-2 py-0.5 rounded-full"
+            >
+              Basic
+            </span>
+          </div>
+          <span
+            class="material-symbols-outlined text-[var(--color-muted)] group-open:rotate-180 transition-transform text-sm"
+          >
+            expand_more
+          </span>
+        </summary>
+        <div
+          class="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]"
+        >
+          <!-- Account Number -->
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-[var(--color-font)]">
+              <span
+                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+              >
+                credit_card
+              </span>
+              Account Number
+            </label>
+            <input
+              type="text"
+              [(ngModel)]="searchAccountNo"
+              name="searchAccountNo"
+              placeholder="Acc number"
+              (input)="onSearch()"
+              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)]"
+            />
+          </div>
+
+          <!-- Account Holder -->
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-[var(--color-font)]">
+              <span
+                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+              >
+                person
+              </span>
+              Account Holder
+            </label>
+            <input
+              type="text"
+              [(ngModel)]="searchHolder"
+              name="searchHolder"
+              placeholder="Holder name"
+              (input)="onSearch()"
+              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)]"
+            />
+          </div>
+
+          <!-- IFSC Code -->
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-[var(--color-font)]">
+              <span
+                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+              >
+                password
+              </span>
+              IFSC Code
+            </label>
+            <input
+              type="text"
+              [(ngModel)]="searchIFSC"
+              name="searchIFSC"
+              placeholder="IFSC code"
+              (input)="onSearch()"
+              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] uppercase"
+            />
+          </div>
+
+          <!-- Website -->
+          <div class="space-y-1 relative">
+            <label class="block text-xs font-medium text-[var(--color-font)]">
+              <span
+                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+              >
+                public
+              </span>
+              Website
+            </label>
+            <div class="relative">
+              <input
+                type="text"
+                [(ngModel)]="searchWebsite"
+                (input)="onWebsiteSearch()"
+                placeholder="Search website"
+                class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] pr-8"
+              />
+              <span
+                class="material-symbols-outlined absolute right-2 top-2 text-[var(--color-muted)] text-sm"
+              >
+                search
+              </span>
+            </div>
+            <div
+              *ngIf="filteredWebsites.length > 0 && searchWebsite"
+              class="absolute z-50 mt-1 max-h-32 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg w-full left-0 right-0"
+            >
+              <div
+                *ngFor="let website of filteredWebsites"
+                class="px-2 py-1.5 hover:bg-[var(--color-hover)] cursor-pointer text-xs text-[var(--color-font)] truncate"
+                (click)="selectWebsite(website)"
+              >
+                {{ website }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- Advanced Filters Dropdown -->
+    <div>
+      <details class="group">
+        <summary
+          class="flex items-center justify-between p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] cursor-pointer hover:bg-[var(--color-hover)] transition-colors"
+        >
+          <div class="flex items-center">
+            <span
+              class="material-symbols-outlined text-[var(--color-primary)] mr-2"
+            >
+              tune
+            </span>
+            <span class="font-medium text-sm text-[var(--color-font)]"
+              >Financial & Type Filters</span
+            >
+            <span
+              class="ml-2 text-xs bg-[var(--color-secondary)] text-[var(--color-surface)] px-2 py-0.5 rounded-full"
+            >
+              Advanced
+            </span>
+          </div>
+          <span
+            class="material-symbols-outlined text-[var(--color-muted)] group-open:rotate-180 transition-transform text-sm"
+          >
+            expand_more
+          </span>
+        </summary>
+        <div
+          class="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]"
+        >
+          <!-- Account Type -->
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-[var(--color-font)]">
+              <span
+                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+              >
+                category
+              </span>
+              Account Type
+            </label>
+            <select
+              [(ngModel)]="searchAccountType"
+              name="searchAccountType"
+              (change)="onSearch()"
+              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)]"
+            >
+              <option value="">All Types</option>
+              <option value="saving">Saving Account</option>
+              <option value="current">Current Account</option>
+              <option value="salary">Salary Account</option>
+            </select>
+          </div>
+
+          <!-- Account Limit -->
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-[var(--color-font)]">
+              <span
+                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+              >
+                monetization_on
+              </span>
+              Account Limit
+            </label>
+            <input
+              type="number"
+              [(ngModel)]="searchLimit"
+              name="searchLimit"
+              placeholder="Limit amount"
+              (input)="onSearch()"
+              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)]"
+            />
+          </div>
+
+          <!-- Min Amount -->
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-[var(--color-font)]">
+              <span
+                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+              >
+                trending_down
+              </span>
+              Min Amount
+            </label>
+            <input
+              type="number"
+              [(ngModel)]="searchMinAmount"
+              name="searchMinAmount"
+              placeholder="Min amount"
+              (input)="onSearch()"
+              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)]"
+            />
+          </div>
+
+          <!-- Max Amount -->
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-[var(--color-font)]">
+              <span
+                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+              >
+                trending_up
+              </span>
+              Max Amount
+            </label>
+            <input
+              type="number"
+              [(ngModel)]="searchMaxAmount"
+              name="searchMaxAmount"
+              placeholder="Max amount"
+              (input)="onSearch()"
+              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)]"
+            />
+          </div>
+        </div>
+      </details>
+    </div>
   </div>
 
-  <!-- Table Section (rest remains the same) -->
-  <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-    <table class="min-w-full divide-y divide-gray-200 text-sm">
-      <thead class="bg-[#FFF9F2]">
+  <!-- Table Section -->
+  <div
+    class="overflow-x-auto rounded-lg border border-[var(--color-border)] shadow-sm mb-4"
+  >
+    <table class="min-w-full divide-y divide-[var(--color-border)] text-sm">
+      <thead class="bg-[var(--color-bg)]">
         <tr>
           <th
-            class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider"
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
-            S No.
+            #
           </th>
           <th
-            class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider"
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
             Website
           </th>
           <th
-            class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider"
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
-            Account Number
+            Account No
           </th>
           <th
-            class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider"
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
-            Account Holder
+            Holder
           </th>
           <th
-            class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider"
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
-            IFSC Code
+            IFSC
           </th>
           <th
-            class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider"
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
-            Account Limit
-          </th>
-           <th
-            class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider"
-          >
-            Min Amount
-          </th>
-           <th
-            class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider"
-          >
-            Max Amount
+            Limit
           </th>
           <th
-            class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider"
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
-            Account Type
+            Min
           </th>
           <th
-            class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider"
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            Max
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            Type
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
             Status
           </th>
           <th
-            class="px-6 py-4 text-left text-xs font-semibold text-[#1F2937] uppercase tracking-wider"
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
             Actions
           </th>
         </tr>
       </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
+      <tbody
+        class="bg-[var(--color-surface)] divide-y divide-[var(--color-border)]"
+      >
         <tr
-          *ngFor="let account of filteredBankAccounts; let i = index"
-          class="hover:bg-[#FFF9F2] transition-all duration-200 group"
+          *ngFor="let account of paginatedAccounts; let i = index"
+          class="hover:bg-[var(--color-hover)] transition-colors duration-150"
         >
-          <td
-            class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#1F2937]"
-          >
+          <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center">
               <div
-                class="w-8 h-8 bg-[#FFB366] rounded-lg flex items-center justify-center group-hover:bg-[#FF8A1A] transition-colors border border-[#CC6A00]"
+                class="w-7 h-7 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-md flex items-center justify-center text-xs font-medium"
               >
-                {{ i + 1 }}
+                {{ (currentPage - 1) * itemsPerPage + i + 1 }}
               </div>
             </div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center">
-              <span class="material-symbols-outlined text-[#E67A00] mr-2">
+              <span
+                class="material-symbols-outlined text-[var(--color-primary)] mr-1.5 text-sm"
+              >
                 public
               </span>
-              <span class="text-sm font-medium text-[#E67A00]">{{
-                account.websiteDomain || account.website || "-"
-              }}</span>
+              <span
+                class="text-xs font-medium text-[var(--color-primary)] truncate max-w-[120px]"
+                title="{{ account.websiteDomain || account.website || '-' }}"
+              >
+                {{ account.websiteDomain || account.website || "-" }}
+              </span>
             </div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center">
-              <span class="material-symbols-outlined text-gray-400 mr-2">
+              <span
+                class="material-symbols-outlined text-[var(--color-muted)] mr-1.5 text-sm"
+              >
                 credit_card
               </span>
               <span
-                class="text-sm text-[#1F2937] font-mono bg-gray-50 px-2 py-1 rounded-lg border border-gray-200"
+                class="text-xs text-[var(--color-font)] font-mono bg-[var(--color-bg)] px-2 py-1 rounded border border-[var(--color-border)]"
+                title="{{ account.accountNo || '-' }}"
               >
                 {{ maskAccountNumber(account.accountNo) || "-" }}
               </span>
             </div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center">
-              <span class="material-symbols-outlined text-gray-400 mr-2">
+              <span
+                class="material-symbols-outlined text-[var(--color-muted)] mr-1.5 text-sm"
+              >
                 person
               </span>
-              <span class="text-sm text-[#1F2937]">{{
-                account.accountHolderName || "-"
-              }}</span>
+              <span
+                class="text-xs text-[var(--color-font)] truncate max-w-[120px]"
+                title="{{ account.accountHolderName || '-' }}"
+              >
+                {{ account.accountHolderName || "-" }}
+              </span>
             </div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center">
-              <span class="material-symbols-outlined text-gray-400 mr-2">
+              <span
+                class="material-symbols-outlined text-[var(--color-muted)] mr-1.5 text-sm"
+              >
                 password
               </span>
               <span
-                class="text-sm text-[#1F2937] font-mono bg-gray-50 px-2 py-1 rounded-lg border border-gray-200"
-                >{{ account.ifsc || "-" }}</span
+                class="text-xs text-[var(--color-font)] font-mono bg-[var(--color-bg)] px-2 py-1 rounded border border-[var(--color-border)]"
+                title="{{ account.ifsc || '-' }}"
               >
-            </div>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-              <span class="material-symbols-outlined text-gray-400 mr-2">
-                monetization_on
+                {{ account.ifsc || "-" }}
               </span>
-              <span
-                class="text-sm text-[#1F2937] font-mono bg-gray-50 px-2 py-1 rounded-lg border border-gray-200"
-                >{{ account.limitAmount || "-" }}</span
-              >
             </div>
           </td>
-           <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-              <span class="material-symbols-outlined text-gray-400 mr-2">
-                monetization_on
-              </span>
-              <span
-                class="text-sm text-[#1F2937] font-mono bg-gray-50 px-2 py-1 rounded-lg border border-gray-200"
-                >{{ account.minAmount || "-" }}</span
+          <td class="px-4 py-3 whitespace-nowrap">
+            <div class="relative group">
+              <div class="flex items-center">
+                <span
+                  class="material-symbols-outlined text-[var(--color-muted)] mr-1.5 text-sm"
+                >
+                  monetization_on
+                </span>
+                <span class="text-xs text-[var(--color-font)] font-mono">
+                  {{ formatCurrencyShort(account.limitAmount) }}
+                </span>
+              </div>
+              <div
+                class="absolute z-10 left-0 bottom-full mb-1 px-2 py-1 text-xs bg-gray-900 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
               >
+                {{ formatCurrency(account.limitAmount) }}
+              </div>
             </div>
           </td>
-           <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-              <span class="material-symbols-outlined text-gray-400 mr-2">
-                monetization_on
-              </span>
-              <span
-                class="text-sm text-[#1F2937] font-mono bg-gray-50 px-2 py-1 rounded-lg border border-gray-200"
-                >{{ account.maxAmount || "-" }}</span
+          <td class="px-4 py-3 whitespace-nowrap">
+            <div class="relative group">
+              <div class="flex items-center">
+                <span
+                  class="material-symbols-outlined text-[var(--color-muted)] mr-1.5 text-sm"
+                >
+                  trending_down
+                </span>
+                <span class="text-xs text-[var(--color-font)] font-mono">
+                  {{ formatCurrencyShort(account.minAmount) }}
+                </span>
+              </div>
+              <div
+                class="absolute z-10 left-0 bottom-full mb-1 px-2 py-1 text-xs bg-gray-900 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
               >
+                {{ formatCurrency(account.minAmount) }}
+              </div>
             </div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-4 py-3 whitespace-nowrap">
+            <div class="relative group">
+              <div class="flex items-center">
+                <span
+                  class="material-symbols-outlined text-[var(--color-muted)] mr-1.5 text-sm"
+                >
+                  trending_up
+                </span>
+                <span class="text-xs text-[var(--color-font)] font-mono">
+                  {{ formatCurrencyShort(account.maxAmount) }}
+                </span>
+              </div>
+              <div
+                class="absolute z-10 left-0 bottom-full mb-1 px-2 py-1 text-xs bg-gray-900 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
+              >
+                {{ formatCurrency(account.maxAmount) }}
+              </div>
+            </div>
+          </td>
+          <td class="px-4 py-3 whitespace-nowrap">
             <span
-              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#FFB366] text-[#1F2937] capitalize border border-[#CC6A00]"
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--color-bg)] text-[var(--color-font)] capitalize border border-[var(--color-border)]"
             >
               <span
-                class="material-symbols-outlined text-[#1F2937] mr-1 text-sm"
+                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
               >
                 category
               </span>
-              {{ account.accountType }}
+              {{ getAccountTypeLabel(account.accountType) }}
             </span>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-4 py-3 whitespace-nowrap">
             <span
               [ngClass]="getStatusClass(account.status)"
-              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold capitalize border"
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize"
             >
               <span
-                class="w-2 h-2 rounded-full mr-1"
+                class="w-1.5 h-1.5 rounded-full mr-1"
                 [ngClass]="{
-                  'bg-green-500': account.status === 'active',
-                  'bg-red-500': account.status === 'inactive',
-                  'bg-yellow-500': account.status === 'frozen',
-                  'bg-gray-500': !account.status
+                  'bg-[var(--color-success)]': account.status === 'active',
+                  'bg-[var(--color-danger)]': account.status === 'inactive',
+                  'bg-[var(--color-warning)]': account.status === 'frozen',
+                  'bg-[var(--color-muted)]': !account.status,
                 }"
               ></span>
-              {{ account.status }}
+              {{ account.status || "-" }}
             </span>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center gap-2">
-              <button
-                (click)="openUpdateModal(account)"
-                class="inline-flex items-center px-3 py-2 bg-gradient-to-r from-[#E67A00] to-[#FFB366] text-[#1F2937] rounded-lg hover:from-[#FF8A1A] hover:to-[#E67A00] transition-all duration-200 shadow hover:shadow-md transform hover:scale-105 border border-[#CC6A00]"
-                style="box-shadow: 0 2px 8px rgba(230, 122, 0, 0.25)"
-              >
-                <span class="material-symbols-outlined text-[#1F2937] mr-1">
-                  edit
-                </span>
-                Edit
-              </button>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <div class="flex items-center gap-1">
+              <div class="relative" #actionDropdown>
+                <button
+                  (click)="toggleActionDropdown(account.id, $event)"
+                  class="inline-flex items-center px-2 py-1 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 text-xs"
+                >
+                  <span
+                    class="material-symbols-outlined text-[var(--color-surface)] mr-1 text-sm"
+                  >
+                    more_vert
+                  </span>
+                  Actions
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div
+                  *ngIf="activeActionDropdown === account.id"
+                  class="absolute right-0 mt-1 w-40 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] shadow-lg z-50"
+                >
+                  <div class="py-1">
+                    <!-- Edit Option -->
+                    <button
+                      (click)="
+                        openUpdateModal(account); activeActionDropdown = null
+                      "
+                      class="w-full flex items-center px-3 py-2 text-xs text-[var(--color-font)] hover:bg-[var(--color-hover)] transition-colors"
+                    >
+                      <span
+                        class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-sm"
+                      >
+                        edit
+                      </span>
+                      Edit Account
+                    </button>
+
+                    <!-- Status Toggle Options -->
+                    <div
+                      class="border-t border-[var(--color-border)] mt-1 pt-1"
+                    >
+                      <div
+                        class="px-3 py-1 text-[10px] font-semibold text-[var(--color-muted)] uppercase tracking-wider"
+                      >
+                        Change Status
+                      </div>
+                      <button
+                        (click)="
+                          updateAccountStatus(account.id, 'active');
+                          activeActionDropdown = null
+                        "
+                        [class]="
+                          account.status === 'active'
+                            ? 'w-full flex items-center px-3 py-2 text-xs bg-[var(--color-success)]/10 text-[var(--color-success)] hover:bg-[var(--color-success)]/20'
+                            : 'w-full flex items-center px-3 py-2 text-xs text-[var(--color-font)] hover:bg-[var(--color-hover)]'
+                        "
+                      >
+                        <span
+                          class="w-1.5 h-1.5 rounded-full bg-[var(--color-success)] mr-2"
+                        ></span>
+                        Active
+                      </button>
+                      <button
+                        (click)="
+                          updateAccountStatus(account.id, 'inactive');
+                          activeActionDropdown = null
+                        "
+                        [class]="
+                          account.status === 'inactive'
+                            ? 'w-full flex items-center px-3 py-2 text-xs bg-[var(--color-danger)]/10 text-[var(--color-danger)] hover:bg-[var(--color-danger)]/20'
+                            : 'w-full flex items-center px-3 py-2 text-xs text-[var(--color-font)] hover:bg-[var(--color-hover)]'
+                        "
+                      >
+                        <span
+                          class="w-1.5 h-1.5 rounded-full bg-[var(--color-danger)] mr-2"
+                        ></span>
+                        Inactive
+                      </button>
+                      <button
+                        (click)="
+                          updateAccountStatus(account.id, 'frozen');
+                          activeActionDropdown = null
+                        "
+                        [class]="
+                          account.status === 'frozen'
+                            ? 'w-full flex items-center px-3 py-2 text-xs bg-[var(--color-warning)]/10 text-[var(--color-warning)] hover:bg-[var(--color-warning)]/20'
+                            : 'w-full flex items-center px-3 py-2 text-xs text-[var(--color-font)] hover:bg-[var(--color-hover)]'
+                        "
+                      >
+                        <span
+                          class="w-1.5 h-1.5 rounded-full bg-[var(--color-warning)] mr-2"
+                        ></span>
+                        Frozen
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </td>
         </tr>
@@ -342,58 +682,111 @@
     </table>
   </div>
 
+  <!-- Pagination Controls -->
+  <div
+    class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-[var(--color-border)]"
+  >
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-[var(--color-muted)]">Show:</span>
+        <select
+          [(ngModel)]="itemsPerPage"
+          (change)="onItemsPerPageChange()"
+          class="border border-[var(--color-border)] rounded px-2 py-1 text-xs bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+        <span class="text-xs text-[var(--color-muted)]">entries</span>
+      </div>
+      <div class="text-xs text-[var(--color-muted)]">
+        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
+        {{ Math.min(currentPage * itemsPerPage, filteredBankAccounts.length) }}
+        of {{ filteredBankAccounts.length }}
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1">
+      <button
+        (click)="goToPage(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="p-1.5 rounded border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      >
+        <span class="material-symbols-outlined text-sm">chevron_left</span>
+      </button>
+
+      <div class="flex gap-1 mx-1">
+        <button
+          *ngFor="let page of getPageNumbers()"
+          (click)="goToPage(page)"
+          [class]="
+            page === currentPage
+              ? 'px-2 py-1 rounded text-xs bg-[var(--color-primary)] text-[var(--color-surface)] font-medium'
+              : 'px-2 py-1 rounded text-xs border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)]'
+          "
+        >
+          {{ page }}
+        </button>
+      </div>
+
+      <button
+        (click)="goToPage(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        class="p-1.5 rounded border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      >
+        <span class="material-symbols-outlined text-sm">chevron_right</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Empty State -->
   <div
     *ngIf="!loading && filteredBankAccounts.length === 0"
-    class="text-center py-16"
+    class="text-center py-12"
   >
     <div class="flex flex-col items-center justify-center">
       <div
-        class="w-20 h-20 bg-gradient-to-r from-[#FFB366] to-[#FF8A1A] rounded-2xl flex items-center justify-center mb-6 shadow-lg border border-[#CC6A00]"
-        style="box-shadow: 0 8px 25px rgba(230, 122, 0, 0.2)"
+        class="w-16 h-16 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] rounded-xl flex items-center justify-center mb-4 shadow-md"
       >
-        <span class="material-symbols-outlined text-[#1F2937] text-3xl">
+        <span
+          class="material-symbols-outlined text-[var(--color-surface)] text-2xl"
+        >
           account_balance
         </span>
       </div>
-      <h3 class="text-xl font-semibold text-[#1F2937] mb-2">
+      <h3 class="text-lg font-semibold text-[var(--color-font)] mb-2">
         No bank accounts found
       </h3>
-      <p class="text-gray-500 max-w-md mb-6">
+      <p class="text-[var(--color-muted)] text-sm max-w-md mb-4">
         {{
-          searchAccountNo || searchHolder || searchWebsite || searchStatus
+          hasActiveFilters()
             ? "Try adjusting your search criteria"
             : "Get started by adding your first bank account"
         }}
       </p>
-      <div class="flex gap-3">
+      <div class="flex gap-2">
         <button
-          *ngIf="
-            searchAccountNo || searchHolder || searchWebsite || searchStatus
-          "
-          (click)="
-            searchAccountNo = '';
-            searchHolder = '';
-            searchWebsite = '';
-            searchStatus = '';
-            onSearch()
-          "
-          class="inline-flex items-center px-5 py-2.5 bg-gray-200 text-[#1F2937] rounded-lg hover:bg-gray-300 transition-colors font-medium border border-gray-300"
+          *ngIf="hasActiveFilters()"
+          (click)="resetFilters()"
+          class="inline-flex items-center px-3 py-1.5 bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] transition-colors font-medium text-sm border border-[var(--color-border)]"
         >
-          <span class="material-symbols-outlined text-[#1F2937] mr-2">
+          <span
+            class="material-symbols-outlined text-[var(--color-font)] mr-1.5"
+          >
             restart_alt
           </span>
           Clear Filters
         </button>
         <button
-          *ngIf="
-            !searchAccountNo && !searchHolder && !searchWebsite && !searchStatus
-          "
+          *ngIf="!hasActiveFilters()"
           (click)="openAddBankModal()"
-          class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-[#E67A00] to-[#FFB366] text-[#1F2937] rounded-lg hover:from-[#FF8A1A] hover:to-[#E67A00] transition-colors font-medium shadow-lg hover:shadow-xl border border-[#CC6A00]"
-          style="box-shadow: 0 4px 14px rgba(230, 122, 0, 0.25)"
+          class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-colors font-medium text-sm shadow-sm"
         >
-          <span class="material-symbols-outlined text-[#1F2937] mr-2">
+          <span
+            class="material-symbols-outlined text-[var(--color-surface)] mr-1.5"
+          >
             add
           </span>
           Add New Account
@@ -403,54 +796,53 @@
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="loading" class="text-center py-16">
+  <div *ngIf="loading" class="text-center py-12">
     <div class="flex flex-col items-center justify-center">
       <div
-        class="w-16 h-16 bg-[#FFB366] rounded-2xl flex items-center justify-center mb-4 border border-[#CC6A00]"
+        class="w-12 h-12 bg-[var(--color-primary)] rounded-xl flex items-center justify-center mb-3"
       >
         <span
-          class="material-symbols-outlined animate-spin text-[#E67A00] text-3xl"
+          class="material-symbols-outlined animate-spin text-[var(--color-surface)] text-2xl"
         >
           refresh
         </span>
       </div>
-      <h3 class="text-lg font-medium text-[#1F2937] mb-2">
+      <h3 class="text-base font-medium text-[var(--color-font)] mb-1">
         Loading bank accounts
       </h3>
-      <p class="text-gray-500">Please wait while we fetch your data...</p>
+      <p class="text-[var(--color-muted)] text-sm">Please wait...</p>
     </div>
   </div>
 
   <!-- Add Bank Account Modal -->
   <div
     *ngIf="showAddModal"
-    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in"
-    (click)="closeAddBankModal()"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in"
   >
     <div
-      class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300 border border-[#CC6A00]"
+      class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[85vh] overflow-y-auto shadow-xl border border-[var(--color-border)]"
       (click)="$event.stopPropagation()"
-      style="
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
-          0 0 25px rgba(230, 122, 0, 0.15);
-      "
     >
       <!-- Modal Header -->
       <div
-        class="flex items-center justify-between p-6 border-b border-[#CC6A00] bg-[#FFF9F2]"
+        class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
       >
-        <h3 class="text-xl font-semibold text-[#1F2937] flex items-center">
-          <span class="material-symbols-outlined text-[#E67A00] mr-2">
+        <h3
+          class="text-lg font-semibold text-[var(--color-font)] flex items-center"
+        >
+          <span
+            class="material-symbols-outlined text-[var(--color-primary)] mr-2"
+          >
             add_circle
           </span>
-          Add New Bank Account
+          Add Bank Account
         </h3>
         <button
           (click)="closeAddBankModal()"
-          class="p-2 hover:bg-[#FFB366] rounded-xl transition-colors duration-200"
+          class="p-1 hover:bg-[var(--color-hover)] rounded transition-colors"
         >
           <span
-            class="material-symbols-outlined text-[#1F2937] hover:text-[#E67A00]"
+            class="material-symbols-outlined text-[var(--color-font)] hover:text-[var(--color-primary)]"
           >
             close
           </span>
@@ -458,99 +850,146 @@
       </div>
 
       <!-- Modal Body -->
-      <div class="p-6">
+      <div class="p-4">
         <form
           [formGroup]="addBankForm"
           (ngSubmit)="submitAddBankForm()"
-          class="space-y-6"
+          class="space-y-4"
         >
-          <!-- Website List -->
-          <div class="space-y-2">
-            <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-              <span class="flex items-center">
-                <span class="material-symbols-outlined text-[#E67A00] mr-2">
-                  public
-                </span>
-                Website List
-              </span>
-              <span class="text-red-500 ml-1">*</span>
-            </label>
-            <select
-              formControlName="websiteList"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
-              [class.border-red-400]="
-                addBankForm.get('websiteList')?.touched &&
-                addBankForm.get('websiteList')?.errors
-              "
-              [class.border-green-400]="
-                addBankForm.get('websiteList')?.valid &&
-                addBankForm.get('websiteList')?.touched
-              "
+          <!-- Website - SEARCH BASED INPUT -->
+          <div class="space-y-1">
+            <label
+              class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
             >
-              <option value="" class="text-[#1F2937]/60">Select Website</option>
-              <option
-                *ngFor="let w of websites"
-                [value]="w.websiteId"
-                class="text-[#1F2937]"
+              <span
+                class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
               >
-                {{ w.websiteDomain }} - {{ w.currency }}
-              </option>
-            </select>
+                public
+              </span>
+              Website
+              <span class="text-[var(--color-danger)] ml-1">*</span>
+            </label>
+
+            <!-- Search Input with Results -->
+            <div class="relative">
+              <div class="relative">
+                <span
+                  class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+                >
+                  search
+                </span>
+                <input
+                  type="text"
+                  [(ngModel)]="modalWebsiteSearch"
+                  (ngModelChange)="onModalWebsiteSearch()"
+                  (focus)="onModalWebsiteSearch()"
+                  placeholder="Search and select website..."
+                  class="w-full pl-10 pr-10 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+                  [class.border-[var(--color-danger)]]="
+                    addBankForm.get('website')?.touched &&
+                    addBankForm.get('website')?.invalid
+                  "
+                  [ngModelOptions]="{ standalone: true }"
+                />
+                <button
+                  *ngIf="selectedModalWebsite"
+                  type="button"
+                  (click)="clearWebsiteSelection()"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-danger)]"
+                >
+                  <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+
+              <!-- Search Results Dropdown -->
+              <div
+                *ngIf="modalWebsiteSearch && modalFilteredWebsites.length > 0"
+                class="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
+              >
+                <div
+                  *ngFor="let website of modalFilteredWebsites"
+                  class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-sm text-[var(--color-font)] border-b border-[var(--color-border)] last:border-b-0 flex justify-between items-center"
+                  (click)="selectWebsiteForForm(website)"
+                >
+                  <span>{{ website.websiteDomain }}</span>
+                  <span class="text-xs text-[var(--color-muted)]">{{
+                    website.currency
+                  }}</span>
+                </div>
+              </div>
+
+              <!-- No Results Message -->
+              <div
+                *ngIf="modalWebsiteSearch && modalFilteredWebsites.length === 0"
+                class="absolute z-50 mt-1 w-full border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
+              >
+                <div class="px-3 py-2 text-sm text-[var(--color-muted)] italic">
+                  No websites found
+                </div>
+              </div>
+            </div>
+
+            <!-- Selected Website Display -->
+            <div
+              *ngIf="selectedModalWebsite"
+              class="mt-2 p-2 bg-[var(--color-primary)]/10 rounded-lg border border-[var(--color-primary)]/20 flex items-center justify-between"
+            >
+              <div class="flex items-center">
+                <span
+                  class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-sm"
+                >
+                  check_circle
+                </span>
+                <span class="text-sm font-medium text-[var(--color-font)]">
+                  {{ selectedModalWebsite.websiteDomain }}
+                </span>
+                <span class="text-xs text-[var(--color-muted)] ml-2">
+                  ({{ selectedModalWebsite.currency }})
+                </span>
+              </div>
+            </div>
+
+            <!-- Validation Message -->
             <div
               *ngIf="
-                addBankForm.get('websiteList')?.touched &&
-                addBankForm.get('websiteList')?.errors
+                addBankForm.get('website')?.invalid &&
+                addBankForm.get('website')?.touched
               "
-              class="flex items-center mt-2 text-sm text-red-600"
+              class="text-[var(--color-danger)] text-xs mt-1 flex items-center"
             >
-              <span class="material-symbols-outlined text-red-600 mr-1 text-sm">
-                error
-              </span>
-              <span *ngIf="addBankForm.get('websiteList')?.errors?.['required']"
-                >Website selection is required</span
-              >
+              <span class="material-symbols-outlined mr-1 text-sm">error</span>
+              Please select a website
             </div>
           </div>
 
-          <!-- Account Number & Confirm Account Number in Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Account Number -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-                <span class="flex items-center">
-                  <span class="material-symbols-outlined text-[#E67A00] mr-2">
-                    credit_card
-                  </span>
-                  Account Number
+          <!-- Account Number & Confirm Account Number -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label
+                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+              >
+                <span
+                  class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                >
+                  credit_card
                 </span>
-                <span class="text-red-500 ml-1">*</span>
+                Account Number
+                <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
               <input
                 type="text"
                 formControlName="accountNumber"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366] font-mono"
-                [class.border-red-400]="
-                  addBankForm.get('accountNumber')?.touched &&
-                  addBankForm.get('accountNumber')?.errors
-                "
-                [class.border-green-400]="
-                  addBankForm.get('accountNumber')?.valid &&
-                  addBankForm.get('accountNumber')?.touched
-                "
+                (input)="onAccountNumberChange()"
+                class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] font-mono text-sm"
                 placeholder="1234567890"
               />
               <div
                 *ngIf="
-                  addBankForm.get('accountNumber')?.touched &&
-                  addBankForm.get('accountNumber')?.errors
+                  addBankForm.get('accountNumber')?.invalid &&
+                  addBankForm.get('accountNumber')?.touched
                 "
-                class="flex items-center mt-2 text-sm text-red-600"
+                class="text-[var(--color-danger)] text-xs"
               >
-                <span
-                  class="material-symbols-outlined text-red-600 mr-1 text-sm"
-                >
-                  error
-                </span>
                 <span
                   *ngIf="addBankForm.get('accountNumber')?.errors?.['required']"
                   >Account number is required</span
@@ -562,368 +1001,310 @@
               </div>
             </div>
 
-            <!-- Confirm Account Number -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-                <span class="flex items-center">
-                  <span class="material-symbols-outlined text-[#E67A00] mr-2">
-                    verified
-                  </span>
-                  Confirm Account Number
+            <div class="space-y-1">
+              <label
+                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+              >
+                <span
+                  class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                >
+                  verified
                 </span>
-                <span class="text-red-500 ml-1">*</span>
+                Confirm Account Number
+                <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
               <input
                 type="text"
                 formControlName="confirmAccountNumber"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366] font-mono"
-                [class.border-red-400]="addBankForm.get('confirmAccountNumber')?.touched && (addBankForm.get('confirmAccountNumber')?.errors || addBankForm.errors?.['mismatch'])"
-                [class.border-green-400]="addBankForm.get('confirmAccountNumber')?.valid && addBankForm.get('confirmAccountNumber')?.touched && !addBankForm.errors?.['mismatch']"
+                class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] font-mono text-sm"
                 placeholder="Re-enter account number"
               />
               <div
-                *ngIf="addBankForm.get('confirmAccountNumber')?.touched && (addBankForm.get('confirmAccountNumber')?.errors || addBankForm.errors?.['mismatch'])"
-                class="flex items-center mt-2 text-sm text-red-600"
+                *ngIf="
+                  addBankForm.get('confirmAccountNumber')?.invalid &&
+                  addBankForm.get('confirmAccountNumber')?.touched
+                "
+                class="text-[var(--color-danger)] text-xs"
               >
                 <span
-                  class="material-symbols-outlined text-red-600 mr-1 text-sm"
-                >
-                  error
-                </span>
-                <span
-                  *ngIf="addBankForm.get('confirmAccountNumber')?.errors?.['required']"
+                  *ngIf="
+                    addBankForm.get('confirmAccountNumber')?.errors?.[
+                      'required'
+                    ]
+                  "
                   >Please confirm account number</span
                 >
-                <span *ngIf="addBankForm.errors?.['mismatch']"
-                  >Account numbers do not match</span
-                >
+              </div>
+              <div
+                *ngIf="
+                  addBankForm.errors?.['mismatch'] &&
+                  (addBankForm.get('confirmAccountNumber')?.touched ||
+                    addBankForm.get('accountNumber')?.touched)
+                "
+                class="text-[var(--color-danger)] text-xs"
+              >
+                Account numbers do not match
               </div>
             </div>
           </div>
 
-          <!-- Account Holder Name & IFSC Code in Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Account Holder Name -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-                <span class="flex items-center">
-                  <span class="material-symbols-outlined text-[#E67A00] mr-2">
-                    person
-                  </span>
-                  Account Holder Name
+          <!-- Account Holder Name & IFSC Code -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label
+                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+              >
+                <span
+                  class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                >
+                  person
                 </span>
-                <span class="text-red-500 ml-1">*</span>
+                Account Holder Name
+                <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
               <input
                 type="text"
                 formControlName="accountHolderName"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
-                [class.border-red-400]="
-                  addBankForm.get('accountHolderName')?.touched &&
-                  addBankForm.get('accountHolderName')?.errors
-                "
-                [class.border-green-400]="
-                  addBankForm.get('accountHolderName')?.valid &&
-                  addBankForm.get('accountHolderName')?.touched
-                "
+                class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
                 placeholder="Enter full name as in bank"
               />
               <div
                 *ngIf="
-                  addBankForm.get('accountHolderName')?.touched &&
-                  addBankForm.get('accountHolderName')?.errors
+                  addBankForm.get('accountHolderName')?.invalid &&
+                  addBankForm.get('accountHolderName')?.touched
                 "
-                class="flex items-center mt-2 text-sm text-red-600"
+                class="text-[var(--color-danger)] text-xs"
               >
                 <span
-                  class="material-symbols-outlined text-red-600 mr-1 text-sm"
-                >
-                  error
-                </span>
-                <span
-                  *ngIf="addBankForm.get('accountHolderName')?.errors?.['required']"
-                  >Account holder name is required</span
+                  *ngIf="
+                    addBankForm.get('accountHolderName')?.errors?.['required']
+                  "
+                  >Name is required</span
                 >
                 <span
-                  *ngIf="addBankForm.get('accountHolderName')?.errors?.['minlength']"
-                  >Name must be at least 3 characters</span
+                  *ngIf="
+                    addBankForm.get('accountHolderName')?.errors?.['minlength']
+                  "
+                  >Minimum 3 characters required</span
                 >
               </div>
             </div>
 
-            <!-- IFSC Code -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-                <span class="flex items-center">
-                  <span class="material-symbols-outlined text-[#E67A00] mr-2">
-                    password
-                  </span>
-                  IFSC Code
+            <div class="space-y-1">
+              <label
+                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+              >
+                <span
+                  class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                >
+                  password
                 </span>
-                <span class="text-red-500 ml-1">*</span>
+                IFSC Code
+                <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
               <input
                 type="text"
                 formControlName="ifscCode"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366] font-mono uppercase"
-                [class.border-red-400]="
-                  addBankForm.get('ifscCode')?.touched &&
-                  addBankForm.get('ifscCode')?.errors
-                "
-                [class.border-green-400]="
-                  addBankForm.get('ifscCode')?.valid &&
-                  addBankForm.get('ifscCode')?.touched
-                "
+                class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] font-mono uppercase text-sm"
                 placeholder="SBIN0000123"
               />
               <div
                 *ngIf="
-                  addBankForm.get('ifscCode')?.touched &&
-                  addBankForm.get('ifscCode')?.errors
+                  addBankForm.get('ifscCode')?.invalid &&
+                  addBankForm.get('ifscCode')?.touched
                 "
-                class="flex items-center mt-2 text-sm text-red-600"
+                class="text-[var(--color-danger)] text-xs"
               >
-                <span
-                  class="material-symbols-outlined text-red-600 mr-1 text-sm"
-                >
-                  error
-                </span>
                 <span *ngIf="addBankForm.get('ifscCode')?.errors?.['required']"
                   >IFSC code is required</span
                 >
                 <span *ngIf="addBankForm.get('ifscCode')?.errors?.['pattern']"
-                  >Please enter a valid IFSC code</span
+                  >Invalid IFSC format (e.g., SBIN0000123)</span
                 >
               </div>
             </div>
           </div>
 
-          <!-- Account Type & Bank Limit in Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Account Type -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-                <span class="flex items-center">
-                  <span class="material-symbols-outlined text-[#E67A00] mr-2">
-                    category
-                  </span>
-                  Account Type
+          <!-- Account Type & Bank Limit -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label
+                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+              >
+                <span
+                  class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                >
+                  category
                 </span>
-                <span class="text-red-500 ml-1">*</span>
+                Account Type
+                <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
               <select
                 formControlName="accountType"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
-                [class.border-red-400]="
-                  addBankForm.get('accountType')?.touched &&
-                  addBankForm.get('accountType')?.errors
-                "
-                [class.border-green-400]="
-                  addBankForm.get('accountType')?.valid &&
-                  addBankForm.get('accountType')?.touched
-                "
+                class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
               >
-                <option value="" class="text-[#1F2937]/60">
+                <option value="" class="text-[var(--color-muted)]">
                   Select Account Type
                 </option>
-                <option value="savings" class="text-[#1F2937]">
-                  Savings Account
+                <option value="saving" class="text-[var(--color-font)]">
+                  Saving Account
                 </option>
-                <option value="current" class="text-[#1F2937]">
+                <option value="current" class="text-[var(--color-font)]">
                   Current Account
                 </option>
-                <option value="salary" class="text-[#1F2937]">
+                <option value="salary" class="text-[var(--color-font)]">
                   Salary Account
                 </option>
               </select>
               <div
                 *ngIf="
-                  addBankForm.get('accountType')?.touched &&
-                  addBankForm.get('accountType')?.errors
+                  addBankForm.get('accountType')?.invalid &&
+                  addBankForm.get('accountType')?.touched
                 "
-                class="flex items-center mt-2 text-sm text-red-600"
+                class="text-[var(--color-danger)] text-xs"
               >
-                <span
-                  class="material-symbols-outlined text-red-600 mr-1 text-sm"
-                >
-                  error
-                </span>
-                <span
-                  *ngIf="addBankForm.get('accountType')?.errors?.['required']"
-                  >Account type is required</span
-                >
+                Please select account type
               </div>
             </div>
 
-            <!-- Bank Limit -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-                <span class="flex items-center">
-                  <span class="material-symbols-outlined text-[#E67A00] mr-2">
-                    monetization_on
-                  </span>
-                  Bank Limit
+            <div class="space-y-1">
+              <label
+                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+              >
+                <span
+                  class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                >
+                  monetization_on
                 </span>
-                <span class="text-red-500 ml-1">*</span>
+                Bank Limit
+                <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
               <input
-                type="text"
+                type="number"
                 formControlName="limitAmount"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366] font-mono"
-                [class.border-red-400]="
-                  addBankForm.get('limitAmount')?.touched &&
-                  addBankForm.get('limitAmount')?.errors
-                "
-                [class.border-green-400]="
-                  addBankForm.get('limitAmount')?.valid &&
-                  addBankForm.get('limitAmount')?.touched
-                "
+                class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
                 placeholder="e.g., 50000"
               />
               <div
                 *ngIf="
-                  addBankForm.get('limitAmount')?.touched &&
-                  addBankForm.get('limitAmount')?.errors
+                  addBankForm.get('limitAmount')?.invalid &&
+                  addBankForm.get('limitAmount')?.touched
                 "
-                class="flex items-center mt-2 text-sm text-red-600"
+                class="text-[var(--color-danger)] text-xs"
               >
                 <span
-                  class="material-symbols-outlined text-red-600 mr-1 text-sm"
-                >
-                  error
-                </span>
-                <span
                   *ngIf="addBankForm.get('limitAmount')?.errors?.['required']"
-                  >Bank limit is required</span
+                  >Limit amount is required</span
                 >
                 <span
                   *ngIf="addBankForm.get('limitAmount')?.errors?.['pattern']"
-                  >Please enter a valid amount</span
+                  >Enter a valid amount (e.g., 50000)</span
                 >
               </div>
             </div>
           </div>
 
-          <!-- Account Holder Name & IFSC Code in Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Account Holder Name -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-                <span class="flex items-center">
-                  <span class="material-symbols-outlined text-[#E67A00] mr-2">
-                    person
-                  </span>
-                  Min Amount
+          <!-- Min Amount & Max Amount -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label
+                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+              >
+                <span
+                  class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                >
+                  trending_down
                 </span>
-                <span class="text-red-500 ml-1">*</span>
+                Min Amount
+                <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
               <input
-                type="text"
+                type="number"
                 formControlName="minAmount"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
-                [class.border-red-400]="
-                  addBankForm.get('minAmount')?.touched &&
-                  addBankForm.get('minAmount')?.errors
-                "
-                [class.border-green-400]="
-                  addBankForm.get('minAmount')?.valid &&
-                  addBankForm.get('minAmount')?.touched
-                "
+                class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
                 placeholder="Enter min amount"
               />
               <div
                 *ngIf="
-                  addBankForm.get('minAmount')?.touched &&
-                  addBankForm.get('minAmount')?.errors
+                  addBankForm.get('minAmount')?.invalid &&
+                  addBankForm.get('minAmount')?.touched
                 "
-                class="flex items-center mt-2 text-sm text-red-600"
+                class="text-[var(--color-danger)] text-xs"
               >
-                <span
-                  class="material-symbols-outlined text-red-600 mr-1 text-sm"
-                >
-                  error
-                </span>
-                <span
-                  *ngIf="addBankForm.get('accountHolderName')?.errors?.['required']"
+                <span *ngIf="addBankForm.get('minAmount')?.errors?.['required']"
                   >Min amount is required</span
+                >
+                <span *ngIf="addBankForm.get('minAmount')?.errors?.['pattern']"
+                  >Enter a valid amount</span
                 >
               </div>
             </div>
 
-            <!-- IFSC Code -->
-            <div class="space-y-2">
-              <label class="block text-sm font-semibold text-[#1F2937] mb-2">
-                <span class="flex items-center">
-                  <span class="material-symbols-outlined text-[#E67A00] mr-2">
-                    password
-                  </span>
-                 Max Amount
+            <div class="space-y-1">
+              <label
+                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+              >
+                <span
+                  class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                >
+                  trending_up
                 </span>
-                <span class="text-red-500 ml-1">*</span>
+                Max Amount
+                <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
               <input
-                type="text"
+                type="number"
                 formControlName="maxAmount"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366] font-mono uppercase"
-                [class.border-red-400]="
-                  addBankForm.get('maxAmount')?.touched &&
-                  addBankForm.get('maxAmount')?.errors
-                "
-                [class.border-green-400]="
-                  addBankForm.get('maxAmount')?.valid &&
-                  addBankForm.get('maxAmount')?.touched
-                "
+                class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
                 placeholder="Enter max amount"
               />
               <div
                 *ngIf="
-                  addBankForm.get('maxAmount')?.touched &&
-                  addBankForm.get('maxAmount')?.errors
+                  addBankForm.get('maxAmount')?.invalid &&
+                  addBankForm.get('maxAmount')?.touched
                 "
-                class="flex items-center mt-2 text-sm text-red-600"
+                class="text-[var(--color-danger)] text-xs"
               >
-                <span
-                  class="material-symbols-outlined text-red-600 mr-1 text-sm"
-                >
-                  error
-                </span>
-                <span *ngIf="addBankForm.get('ifscCode')?.errors?.['required']"
+                <span *ngIf="addBankForm.get('maxAmount')?.errors?.['required']"
                   >Max amount is required</span
                 >
-               
+                <span *ngIf="addBankForm.get('maxAmount')?.errors?.['pattern']"
+                  >Enter a valid amount</span
+                >
               </div>
             </div>
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex gap-4 pt-4">
+          <div class="flex gap-2 pt-3">
             <button
               type="submit"
-              [disabled]="addBankForm.invalid || isAdding"
-              class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-[#E67A00] to-[#FFB366] text-[#1F2937] rounded-xl hover:from-[#FF8A1A] hover:to-[#E67A00] transition-all duration-200 shadow-lg hover:shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed border border-[#CC6A00]"
-              style="box-shadow: 0 4px 14px rgba(230, 122, 0, 0.25)"
+              [disabled]="!addBankForm.valid || isAdding"
+              class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 font-medium shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             >
               <span
                 *ngIf="isAdding"
-                class="material-symbols-outlined animate-spin text-[#1F2937] mr-2"
+                class="material-symbols-outlined animate-spin text-[var(--color-surface)] mr-1.5"
               >
                 refresh
               </span>
               <span
                 *ngIf="!isAdding"
-                class="material-symbols-outlined text-[#1F2937] mr-2"
+                class="material-symbols-outlined text-[var(--color-surface)] mr-1.5"
               >
                 add
               </span>
-              {{ isAdding ? "Adding..." : "Add Bank Account" }}
+              {{ isAdding ? "Adding..." : "Add Account" }}
             </button>
             <button
               type="button"
               (click)="closeAddBankModal()"
               [disabled]="isAdding"
-              class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gray-200 text-[#1F2937] rounded-xl hover:bg-gray-300 transition-all duration-200 font-semibold disabled:opacity-50 border border-gray-300"
+              class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] transition-all duration-200 font-medium border border-[var(--color-border)] disabled:opacity-50 text-sm"
             >
-              <span class="material-symbols-outlined text-[#1F2937] mr-2">
+              <span
+                class="material-symbols-outlined text-[var(--color-font)] mr-1.5"
+              >
                 close
               </span>
               Cancel
@@ -937,63 +1318,46 @@
   <!-- Update Bank Account Modal -->
   <div
     *ngIf="showUpdateModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in"
-    (click)="closeUpdateModal()"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in"
   >
     <div
-      class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300 border border-[#CC6A00]"
+      class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[85vh] overflow-y-auto shadow-xl border border-[var(--color-border)]"
       (click)="$event.stopPropagation()"
-      style="
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
-          0 0 25px rgba(230, 122, 0, 0.15);
-      "
     >
       <!-- Modal Header -->
       <div
-        class="flex items-center justify-between p-6 border-b border-[#CC6A00] bg-[#FFF9F2]"
+        class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
       >
-        <h3 class="text-xl font-semibold text-[#1F2937] flex items-center">
-          <svg
-            class="w-6 h-6 mr-2 text-[#E67A00]"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <h3
+          class="text-lg font-semibold text-[var(--color-font)] flex items-center"
+        >
+          <span
+            class="material-symbols-outlined text-[var(--color-primary)] mr-2"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-            ></path>
-          </svg>
+            edit
+          </span>
           Update Bank Account
         </h3>
         <button
           (click)="closeUpdateModal()"
-          class="p-2 hover:bg-[#FFB366] rounded-xl transition-colors duration-200"
+          class="p-1 hover:bg-[var(--color-hover)] rounded transition-colors"
         >
-          <svg
-            class="w-6 h-6 text-[#1F2937] hover:text-[#E67A00]"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <span
+            class="material-symbols-outlined text-[var(--color-font)] hover:text-[var(--color-primary)]"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            ></path>
-          </svg>
+            close
+          </span>
         </button>
       </div>
 
       <!-- Modal Body -->
-      <div class="p-6">
-        <form (ngSubmit)="submitUpdate()" class="space-y-6">
+      <div class="p-4">
+        <form (ngSubmit)="submitUpdate()" class="space-y-4">
           <!-- Account Number -->
           <div>
-            <label class="block text-sm font-semibold text-[#1F2937] mb-2">
+            <label
+              class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+            >
               Account Number
             </label>
             <input
@@ -1001,14 +1365,16 @@
               [(ngModel)]="updateForm.accountNo"
               name="accountNo"
               required
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
               placeholder="Enter account number"
             />
           </div>
 
           <!-- Account Holder Name -->
           <div>
-            <label class="block text-sm font-semibold text-[#1F2937] mb-2">
+            <label
+              class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+            >
               Account Holder Name
             </label>
             <input
@@ -1016,14 +1382,16 @@
               [(ngModel)]="updateForm.accountHolderName"
               name="accountHolderName"
               required
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
               placeholder="Enter account holder name"
             />
           </div>
 
           <!-- IFSC Code -->
           <div>
-            <label class="block text-sm font-semibold text-[#1F2937] mb-2">
+            <label
+              class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+            >
               IFSC Code
             </label>
             <input
@@ -1031,14 +1399,16 @@
               [(ngModel)]="updateForm.ifsc"
               name="ifsc"
               required
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
               placeholder="Enter IFSC code"
             />
           </div>
 
           <!-- Limit Amount -->
           <div>
-            <label class="block text-sm font-semibold text-[#1F2937] mb-2">
+            <label
+              class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+            >
               Limit Amount
             </label>
             <input
@@ -1048,14 +1418,16 @@
               required
               min="0"
               step="0.01"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
               placeholder="Enter limit amount"
             />
           </div>
 
-
-           <div>
-            <label class="block text-sm font-semibold text-[#1F2937] mb-2">
+          <!-- Min Amount -->
+          <div>
+            <label
+              class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+            >
               Min Amount
             </label>
             <input
@@ -1065,14 +1437,16 @@
               required
               min="0"
               step="0.01"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
               placeholder="Enter min amount"
             />
           </div>
 
-
-           <div>
-            <label class="block text-sm font-semibold text-[#1F2937] mb-2">
+          <!-- Max Amount -->
+          <div>
+            <label
+              class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+            >
               Max Amount
             </label>
             <input
@@ -1082,37 +1456,40 @@
               required
               min="0"
               step="0.01"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] transition-all duration-200 bg-white hover:border-[#FFB366]"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
               placeholder="Enter max amount"
             />
           </div>
 
-
           <!-- Account Type -->
           <div>
-            <label class="block text-sm font-semibold text-[#1F2937] mb-2">
+            <label
+              class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+            >
               Account Type
             </label>
             <select
               [(ngModel)]="updateForm.accountType"
               name="accountType"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] bg-white transition-all duration-200 hover:border-[#FFB366] font-medium"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] transition-all duration-200 hover:border-[var(--color-primary-light)] text-sm"
             >
-              <option value="saving">Saving</option>
-              <option value="current">Current</option>
-              <option value="salary">Salary</option>
+              <option value="saving">Saving Account</option>
+              <option value="current">Current Account</option>
+              <option value="salary">Salary Account</option>
             </select>
           </div>
 
           <!-- Status -->
           <div>
-            <label class="block text-sm font-semibold text-[#1F2937] mb-2">
+            <label
+              class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+            >
               Status
             </label>
             <select
               [(ngModel)]="updateForm.status"
               name="status"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#E67A00] focus:border-[#E67A00] bg-white transition-all duration-200 hover:border-[#FFB366] font-medium"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] transition-all duration-200 hover:border-[var(--color-primary-light)] text-sm"
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -1121,41 +1498,25 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex gap-4 pt-4">
+          <div class="flex gap-2 pt-3">
             <button
               type="submit"
               [disabled]="isSubmitting"
-              class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-[#E67A00] to-[#FFB366] text-[#1F2937] rounded-xl hover:from-[#FF8A1A] hover:to-[#E67A00] transition-all duration-200 shadow-lg hover:shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed border border-[#CC6A00]"
-              style="box-shadow: 0 4px 14px rgba(230, 122, 0, 0.25)"
+              class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 font-medium shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             >
-              <svg
+              <span
                 *ngIf="isSubmitting"
-                class="animate-spin -ml-1 mr-3 h-5 w-5 text-[#1F2937]"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+                class="material-symbols-outlined animate-spin text-[var(--color-surface)] mr-1.5"
               >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
+                refresh
+              </span>
               {{ isSubmitting ? "Updating..." : "Update Account" }}
             </button>
             <button
               type="button"
               (click)="closeUpdateModal()"
               [disabled]="isSubmitting"
-              class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gray-200 text-[#1F2937] rounded-xl hover:bg-gray-300 transition-all duration-200 font-semibold disabled:opacity-50 border border-gray-300"
+              class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] transition-all duration-200 font-medium border border-[var(--color-border)] disabled:opacity-50 text-sm"
             >
               Cancel
             </button>

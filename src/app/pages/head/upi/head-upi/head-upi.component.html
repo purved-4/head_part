@@ -702,26 +702,93 @@
           (ngSubmit)="submitAddUpi()"
           class="space-y-4"
         >
-          <!-- Website Selection -->
+          <!-- Website Selection - SEARCH BASED INPUT -->
           <div>
             <label
               class="block text-sm font-medium text-[var(--color-font)] mb-1"
             >
               Website <span class="text-[var(--color-danger)]">*</span>
             </label>
-            <select
-              formControlName="websiteId"
-              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
-              [class.border-[var(--color-danger)]]="
-                addUpiForm.get('websiteId')?.touched &&
-                addUpiForm.get('websiteId')?.invalid
-              "
+
+            <!-- Search Input with Results -->
+            <div class="relative">
+              <div class="relative">
+                <span
+                  class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+                >
+                  search
+                </span>
+                <input
+                  type="text"
+                  [(ngModel)]="upiWebsiteSearch"
+                  (ngModelChange)="onUpiWebsiteSearch()"
+                  (focus)="onUpiWebsiteSearch()"
+                  placeholder="Search and select website..."
+                  class="w-full pl-10 pr-10 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+                  [class.border-[var(--color-danger)]]="
+                    addUpiForm.get('websiteId')?.touched &&
+                    addUpiForm.get('websiteId')?.invalid
+                  "
+                  [ngModelOptions]="{ standalone: true }"
+                />
+                <button
+                  *ngIf="selectedUpiWebsite"
+                  type="button"
+                  (click)="clearUpiWebsiteSelection()"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-danger)]"
+                >
+                  <span class="material-icons text-sm">close</span>
+                </button>
+              </div>
+
+              <!-- Search Results Dropdown -->
+              <div
+                *ngIf="upiWebsiteSearch && upiFilteredWebsites.length > 0"
+                class="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
+              >
+                <div
+                  *ngFor="let site of upiFilteredWebsites"
+                  class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-sm text-[var(--color-font)] border-b border-[var(--color-border)] last:border-b-0 flex justify-between items-center"
+                  (click)="selectUpiWebsite(site)"
+                >
+                  <span>{{ site.domain }}</span>
+                  <span class="text-xs text-[var(--color-muted)]">{{
+                    site.currency
+                  }}</span>
+                </div>
+              </div>
+
+              <!-- No Results Message -->
+              <div
+                *ngIf="upiWebsiteSearch && upiFilteredWebsites.length === 0"
+                class="absolute z-50 mt-1 w-full border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
+              >
+                <div class="px-3 py-2 text-sm text-[var(--color-muted)] italic">
+                  No websites found
+                </div>
+              </div>
+            </div>
+
+            <!-- Selected Website Display -->
+            <div
+              *ngIf="selectedUpiWebsite"
+              class="mt-2 p-2 bg-[var(--color-primary)]/10 rounded-lg border border-[var(--color-primary)]/20 flex items-center justify-between"
             >
-              <option value="" disabled>Select Website</option>
-              <option *ngFor="let site of websites" [value]="site.id">
-                {{ site.domain }} ({{ site.currency }})
-              </option>
-            </select>
+              <div class="flex items-center">
+                <span
+                  class="material-icons text-[var(--color-primary)] mr-2 text-sm"
+                  >check_circle</span
+                >
+                <span class="text-sm font-medium text-[var(--color-font)]">
+                  {{ selectedUpiWebsite.domain }}
+                </span>
+                <span class="text-xs text-[var(--color-muted)] ml-2">
+                  ({{ selectedUpiWebsite.currency }})
+                </span>
+              </div>
+            </div>
+
+            <!-- Validation Message -->
             <div
               *ngIf="
                 addUpiForm.get('websiteId')?.touched &&
