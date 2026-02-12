@@ -39,8 +39,7 @@ export class HeadUpiComponent implements OnInit {
   qrData: string | null = null;
   generatedFile: File | null = null;
 
-  // Add modal website search properties
-  showUpiWebsiteDropdown = false;
+  // ✅ Add modal website search – PURE SEARCH‑BASED (no dropdown)
   upiWebsiteSearch = "";
   upiFilteredWebsites: any[] = [];
   selectedUpiWebsite: any = null;
@@ -60,29 +59,27 @@ export class HeadUpiComponent implements OnInit {
   updateQrData: string | null = null;
   generatedUpdateFile: File | null = null;
   originalVpa: string = "";
+  // ✅ Inline error for QR generation
+  updateQrError: string = "";
   currentRoleId: any;
   currentUserId: any;
   role: any;
 
-  // Filter properties
+  // Filter properties (unchanged)
   websiteSearchTerm: string = "";
   selectedWebsite: any = null;
   showWebsiteDropdown: boolean = false;
   filteredWebsites: any[] = [];
 
   // TWO filter sets:
-  // 1. Separate for Limit Amount
   limitMinAmount: number | null = null;
   limitMaxAmount: number | null = null;
-
-  // 2. Combined for Transaction Range (applies to minAmount AND maxAmount)
   transactionMinAmount: number | null = null;
   transactionMaxAmount: number | null = null;
 
-  // New property for amount filter dropdown
   showAmountFilter: boolean = false;
 
-  // Pagination properties
+  // Pagination
   currentPage: number = 1;
   pageSize: number = 5;
 
@@ -93,8 +90,12 @@ export class HeadUpiComponent implements OnInit {
 
   private vpaPattern = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
 
-  // Make Math available in template
   Math = Math;
+
+  // ---------- ✅ SUCCESS TOAST PROPERTIES ----------
+  showUpdateSuccessPopup = false;
+  updateSuccessMessage = "";
+  private successPopupTimeout: any;
 
   // Computed properties for filter states
   get limitFilterActive(): boolean {
@@ -105,7 +106,6 @@ export class HeadUpiComponent implements OnInit {
     return !!(this.transactionMinAmount || this.transactionMaxAmount);
   }
 
-  // Computed property for active filters count
   get activeFilters(): number {
     let count = 0;
     if (this.searchTerm.trim()) count++;
@@ -132,7 +132,6 @@ export class HeadUpiComponent implements OnInit {
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
 
-    // Load UPIs and websites
     this.loadUpis(this.currentRoleId);
     this.loadWebsites(this.currentRoleId);
   }
@@ -215,9 +214,8 @@ export class HeadUpiComponent implements OnInit {
     });
   }
 
-  // ==================== WEBSITE FILTER METHODS ====================
+  // ==================== WEBSITE FILTER METHODS (unchanged) ====================
   onWebsiteInputBlur() {
-    // Small delay to allow click events to register
     setTimeout(() => {
       this.showWebsiteDropdown = false;
     }, 200);
@@ -253,8 +251,6 @@ export class HeadUpiComponent implements OnInit {
     this.selectedWebsite = website;
     this.websiteSearchTerm = website.domain;
     this.showWebsiteDropdown = false;
-
-    // Apply filters immediately when website is selected
     setTimeout(() => {
       this.applyAllFilters();
     }, 100);
@@ -265,47 +261,46 @@ export class HeadUpiComponent implements OnInit {
     this.websiteSearchTerm = "";
     this.filteredWebsites = [...this.websites];
     this.showWebsiteDropdown = false;
-
-    // Re-apply filters after clearing
     setTimeout(() => {
       this.applyAllFilters();
     }, 100);
   }
 
-  // ==================== ADD MODAL WEBSITE SEARCH METHODS ====================
-  toggleUpiWebsiteDropdown() {
-    this.showUpiWebsiteDropdown = !this.showUpiWebsiteDropdown;
-    if (this.showUpiWebsiteDropdown) {
-      this.upiFilteredWebsites = [...this.websites];
-    }
-  }
-
+  // ==================== ✅ ADD MODAL WEBSITE SEARCH – PURE SEARCH‑BASED ====================
   onUpiWebsiteSearch() {
-    const searchTerm = this.upiWebsiteSearch.toLowerCase();
-    if (searchTerm) {
+    const term = (this.upiWebsiteSearch || "").trim().toLowerCase();
+    if (!term) {
+      // Empty search → no results (hides the list)
+      this.upiFilteredWebsites = [];
+    } else {
+      // Filter websites that are NOT already assigned (if you want that)
+      // Here we simply filter from all websites
       this.upiFilteredWebsites = this.websites.filter(
         (site) =>
-          site.domain.toLowerCase().includes(searchTerm) ||
-          (site.currency && site.currency.toLowerCase().includes(searchTerm)),
+          site.domain.toLowerCase().includes(term) ||
+          (site.currency && site.currency.toLowerCase().includes(term)),
       );
-    } else {
-      this.upiFilteredWebsites = [...this.websites];
     }
   }
 
   selectUpiWebsite(site: any) {
     this.selectedUpiWebsite = site;
-    this.addUpiForm.patchValue({
-      websiteId: site.id,
-    });
+    this.addUpiForm.patchValue({ websiteId: site.id });
     this.addUpiForm.get("websiteId")?.markAsTouched();
-    this.showUpiWebsiteDropdown = false;
+    // Hide results and show selected domain in input
+    this.upiWebsiteSearch = site.domain;
+    this.upiFilteredWebsites = [];
+  }
+
+  clearUpiWebsiteSelection() {
+    this.selectedUpiWebsite = null;
     this.upiWebsiteSearch = "";
-    this.upiFilteredWebsites = [...this.websites];
+    this.upiFilteredWebsites = [];
+    this.addUpiForm.patchValue({ websiteId: "" });
+    this.addUpiForm.get("websiteId")?.markAsTouched();
   }
 
   // ==================== FILTERING METHODS ====================
-  // Helper method for number range checking
   private checkNumberRange(
     value: number,
     min: number | null,
@@ -317,45 +312,36 @@ export class HeadUpiComponent implements OnInit {
     return true;
   }
 
-  // Parse number input safely
   private parseNumberInput(value: any): number | null {
     if (value === null || value === undefined || value === "") return null;
     const num = parseFloat(value);
     return isNaN(num) ? null : num;
   }
 
-  // Main filter application method
   applyAllFilters() {
     const searchTerm = this.searchTerm.trim().toLowerCase();
     const statusFilter = this.filterStatus.trim().toLowerCase();
 
-    // Parse all number filters
     const limitMinNum = this.parseNumberInput(this.limitMinAmount);
     const limitMaxNum = this.parseNumberInput(this.limitMaxAmount);
     const transMinNum = this.parseNumberInput(this.transactionMinAmount);
     const transMaxNum = this.parseNumberInput(this.transactionMaxAmount);
 
     this.filteredUpis = this.upis.filter((upi) => {
-      // 1. Basic search filter
       const matchesSearch =
         !searchTerm ||
         (upi.websiteDomain || "").toLowerCase().includes(searchTerm) ||
         (upi.vpa || "").toLowerCase().includes(searchTerm) ||
         (upi.qrId || "").toString().toLowerCase().includes(searchTerm);
 
-      // 2. Status filter
       const matchesStatus =
         !statusFilter || (upi.status || "").toLowerCase() === statusFilter;
 
-      // 3. Website filter
       let matchesWebsite = true;
       if (this.selectedWebsite) {
-        // Try to match by website ID first
         if (upi.websiteId && this.selectedWebsite.websiteId) {
           matchesWebsite = upi.websiteId === this.selectedWebsite.websiteId;
-        }
-        // Fallback to domain name matching
-        else if (upi.websiteDomain && this.selectedWebsite.domain) {
+        } else if (upi.websiteDomain && this.selectedWebsite.domain) {
           matchesWebsite = upi.websiteDomain
             .toLowerCase()
             .includes(this.selectedWebsite.domain.toLowerCase());
@@ -364,7 +350,6 @@ export class HeadUpiComponent implements OnInit {
         }
       }
 
-      // 4. Limit Amount filter (separate for limitAmount field)
       let matchesLimit = true;
       if (limitMinNum !== null || limitMaxNum !== null) {
         const limitAmount = parseFloat(upi.limitAmount) || 0;
@@ -375,13 +360,10 @@ export class HeadUpiComponent implements OnInit {
         );
       }
 
-      // 5. Transaction Range filter (applies to BOTH minAmount AND maxAmount)
       let matchesTransaction = true;
       if (transMinNum !== null || transMaxNum !== null) {
         const minAmount = parseFloat(upi.minAmount) || 0;
         const maxAmount = parseFloat(upi.maxAmount) || 0;
-
-        // Check if EITHER minAmount OR maxAmount falls within the range
         const matchesMin = this.checkNumberRange(
           minAmount,
           transMinNum,
@@ -392,8 +374,6 @@ export class HeadUpiComponent implements OnInit {
           transMinNum,
           transMaxNum,
         );
-
-        // Show item if ANY of the transaction fields match
         matchesTransaction = matchesMin || matchesMax;
       }
 
@@ -406,26 +386,21 @@ export class HeadUpiComponent implements OnInit {
       );
     });
 
-    // Reset to first page after filtering
     this.currentPage = 1;
   }
 
   onSearch() {
-    // Apply all filters when search term changes
     this.applyAllFilters();
   }
 
   onNumberFilterChange() {
-    // Apply all filters when number inputs change
     this.applyAllFilters();
   }
 
   onAmountFilterChange() {
-    // This method can be used as an alias for onNumberFilterChange
     this.applyAllFilters();
   }
 
-  // Clear filter methods
   clearLimitFilter(): void {
     this.limitMinAmount = null;
     this.limitMaxAmount = null;
@@ -449,12 +424,11 @@ export class HeadUpiComponent implements OnInit {
     this.limitMaxAmount = null;
     this.transactionMinAmount = null;
     this.transactionMaxAmount = null;
-    this.showAmountFilter = false; // Close the dropdown
+    this.showAmountFilter = false;
     this.filteredUpis = [...this.upis];
     this.currentPage = 1;
   }
 
-  // For backward compatibility
   resetAllFilters() {
     this.resetFilters();
   }
@@ -491,13 +465,9 @@ export class HeadUpiComponent implements OnInit {
     if (this.websites === null || this.websites.length === 0) {
       this.loadWebsites(this.currentRoleId);
     }
-
-    // Reset add modal website search properties
     this.selectedUpiWebsite = null;
-    this.showUpiWebsiteDropdown = false;
     this.upiWebsiteSearch = "";
-    this.upiFilteredWebsites = [...this.websites];
-
+    this.upiFilteredWebsites = []; // start with empty results
     this.showAddModal = true;
     document.body.style.overflow = "hidden";
   }
@@ -508,13 +478,9 @@ export class HeadUpiComponent implements OnInit {
     this.qrData = null;
     this.generatedFile = null;
     this.isAddingUpi = false;
-
-    // Reset add modal website search properties
     this.selectedUpiWebsite = null;
-    this.showUpiWebsiteDropdown = false;
     this.upiWebsiteSearch = "";
     this.upiFilteredWebsites = [];
-
     document.body.style.overflow = "auto";
   }
 
@@ -530,6 +496,7 @@ export class HeadUpiComponent implements OnInit {
     this.originalVpa = upi.vpa || "";
     this.updateQrData = null;
     this.generatedUpdateFile = null;
+    this.updateQrError = ""; // clear any previous error
     this.showUpdateModal = true;
     document.body.style.overflow = "hidden";
   }
@@ -549,23 +516,22 @@ export class HeadUpiComponent implements OnInit {
     this.generatedUpdateFile = null;
     this.isSubmitting = false;
     this.isGeneratingUpdateQr = false;
+    this.updateQrError = "";
+    this.closeUpdateSuccessPopup(); // hide any visible toast
     document.body.style.overflow = "auto";
   }
 
   // ==================== QR CODE METHODS ====================
-  // Check if UPI ID is valid
   isValidUpiId(vpa: string): boolean {
     return this.vpaPattern.test(vpa);
   }
 
-  // Handle VPA change in update form
   onUpdateVpaChange() {
     if (this.updateForm.vpa !== this.originalVpa) {
       this.removeGeneratedUpdateQr();
     }
   }
 
-  // Generate QR from VPA (for add modal)
   generateQrFromVpa() {
     const vpaControl = this.addUpiForm.get("vpa");
     if (!vpaControl || vpaControl.invalid) {
@@ -583,14 +549,15 @@ export class HeadUpiComponent implements OnInit {
     }, 300);
   }
 
-  // Generate QR for update modal
+  // ✅ Updated – no alert, uses inline error
   generateQrForUpdate() {
     const vpa = String(this.updateForm.vpa).trim();
 
     if (!this.isValidUpiId(vpa)) {
-      alert("Please enter a valid UPI ID first");
+      this.updateQrError = "Please enter a valid UPI ID first";
       return;
     }
+    this.updateQrError = ""; // clear error
 
     const upiIntent = `upi://pay?pa=${encodeURIComponent(vpa)}&cu=INR`;
     this.updateQrData = upiIntent;
@@ -675,7 +642,6 @@ export class HeadUpiComponent implements OnInit {
 
   downloadQr() {
     if (!this.generatedFile) return;
-
     const url = URL.createObjectURL(this.generatedFile);
     const a = document.createElement("a");
     a.href = url;
@@ -696,7 +662,7 @@ export class HeadUpiComponent implements OnInit {
     this.generatedUpdateFile = null;
   }
 
-  // ==================== DATA LOADING METHODS ====================
+  // ==================== DATA LOADING ====================
   loadWebsites(agentId: string) {
     if (!agentId) return;
 
@@ -730,9 +696,9 @@ export class HeadUpiComponent implements OnInit {
           currency: item.currency || "INR",
         }));
 
-        // Initialize filtered websites
         this.filteredWebsites = [...this.websites];
-        this.upiFilteredWebsites = [...this.websites];
+        // DO NOT pre‑fill upiFilteredWebsites – it should start empty
+        this.upiFilteredWebsites = [];
       });
   }
 
@@ -781,7 +747,7 @@ export class HeadUpiComponent implements OnInit {
         });
 
         this.filteredUpis = [...this.upis];
-        this.currentPage = 1; // Reset to first page when data loads
+        this.currentPage = 1;
       },
       error: (err: any) => {
         console.error("Error loading UPIs:", err);
@@ -791,8 +757,7 @@ export class HeadUpiComponent implements OnInit {
     });
   }
 
-  // ==================== FORM SUBMISSION METHODS ====================
-  // Submit add UPI form
+  // ==================== FORM SUBMISSION ====================
   submitAddUpi() {
     Object.keys(this.addUpiForm.controls).forEach((key) => {
       const control = this.addUpiForm.get(key);
@@ -838,7 +803,6 @@ export class HeadUpiComponent implements OnInit {
       type: "application/json",
     });
     formData.append("dto", dtoBlob);
-
     formData.append("file", this.generatedFile, this.generatedFile.name);
 
     if (this.currentRoleId) formData.append("agent_id", this.currentRoleId);
@@ -867,7 +831,7 @@ export class HeadUpiComponent implements OnInit {
     });
   }
 
-  // Submit update form
+  // ✅ Updated – uses toast instead of alert
   submitUpdate() {
     if (!this.editingUpi) return;
 
@@ -889,6 +853,10 @@ export class HeadUpiComponent implements OnInit {
     if (isNaN(limit) || limit <= 0) {
       alert("Please enter a valid limit amount");
       return;
+    }
+
+    if (vpa !== this.originalVpa) {
+      console.log("yes");
     }
 
     this.isSubmitting = true;
@@ -916,7 +884,6 @@ export class HeadUpiComponent implements OnInit {
     });
     formData.append("dto", dtoBlob);
 
-    // Only append file if a new QR was generated
     if (this.generatedUpdateFile) {
       formData.append(
         "file",
@@ -930,7 +897,13 @@ export class HeadUpiComponent implements OnInit {
         this.isSubmitting = false;
         this.closeUpdateModal();
         this.loadUpis(this.currentRoleId);
-        alert("UPI updated successfully!");
+
+        // ✅ Show success toast
+        this.updateSuccessMessage = "UPI updated successfully!";
+        this.showUpdateSuccessPopup = true;
+        this.successPopupTimeout = setTimeout(() => {
+          this.closeUpdateSuccessPopup();
+        }, 3000);
       },
       error: (err: any) => {
         console.error("Error updating UPI:", err);
@@ -938,6 +911,13 @@ export class HeadUpiComponent implements OnInit {
         alert("Error updating UPI. Please try again.");
       },
     });
+  }
+
+  // ✅ Close success toast
+  closeUpdateSuccessPopup(): void {
+    clearTimeout(this.successPopupTimeout);
+    this.showUpdateSuccessPopup = false;
+    this.updateSuccessMessage = "";
   }
 
   // ==================== IMAGE MODAL METHODS ====================
@@ -973,33 +953,22 @@ export class HeadUpiComponent implements OnInit {
   }
 
   // ==================== EVENT HANDLERS ====================
-  // Close website dropdown when clicking outside
   @HostListener("document:click", ["$event"])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
 
-    // Close filter website dropdown
     const websiteFilterContainer = target.closest(".website-filter-container");
     if (!websiteFilterContainer && this.showWebsiteDropdown) {
       this.showWebsiteDropdown = false;
     }
 
-    // Close add modal website dropdown
-    const addModalWebsiteContainer = target.closest(".relative");
-    if (!addModalWebsiteContainer && this.showUpiWebsiteDropdown) {
-      this.showUpiWebsiteDropdown = false;
-    }
+    // ❌ Removed all references to showUpiWebsiteDropdown
   }
 
-  // Handle window resize for dropdown positioning
   @HostListener("window:resize")
   onWindowResize() {
     if (this.showWebsiteDropdown) {
-      // Close dropdown on resize to avoid positioning issues
       this.showWebsiteDropdown = false;
-    }
-    if (this.showUpiWebsiteDropdown) {
-      this.showUpiWebsiteDropdown = false;
     }
   }
 
@@ -1008,15 +977,5 @@ export class HeadUpiComponent implements OnInit {
   toggleActionsDropdown(upiId: string) {
     this.activeDropdownUpiId =
       this.activeDropdownUpiId === upiId ? null : upiId;
-  }
-
-  clearUpiWebsiteSelection() {
-    this.selectedUpiWebsite = null;
-    this.upiWebsiteSearch = "";
-    this.upiFilteredWebsites = [];
-    this.addUpiForm.patchValue({
-      websiteId: "",
-    });
-    this.addUpiForm.get("websiteId")?.markAsTouched();
   }
 }

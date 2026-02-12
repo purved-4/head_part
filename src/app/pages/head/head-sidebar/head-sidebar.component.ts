@@ -49,8 +49,7 @@ export class HeadSidebarComponent implements OnInit {
   head: any;
   user: any;
 
-
-   ReportItem: MenuItem = {
+  ReportItem: MenuItem = {
     label: "Report Management",
     route: "/admin/reports",
     expanded: false,
@@ -65,24 +64,22 @@ export class HeadSidebarComponent implements OnInit {
       { label: "Timing & Rejection", route: "/head/reports/timing-rejection" },
       { label: "Approval (By Site)", route: "/head/reports/approval" },
     ],
-  };  
+  };
   sidebarWidth: number = 384; // Initial width matching w-96
-settingPopup: boolean = false;
+  settingPopup: boolean = false;
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private headService: HeadService,
     private ManagerService: ManagerService,
-    private userStateService: UserStateService
+    private userStateService: UserStateService,
   ) {}
 
   ngOnInit() {
     this.checkMobileView();
     this.userId = this.userStateService.getUserId();
     this.managerId = this.userStateService.getCurrentRoleId();
-
-     
 
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
@@ -127,19 +124,13 @@ settingPopup: boolean = false;
     }
   }
 
-   
-
   navigateToDashboard() {
     if (this.managerId && this.userId) {
       // route: /head/branch/add/:managerId/:userId
-      this.router.navigate([
-        "/head/dashboard",
-        this.managerId,
-        this.userId,
-      ]);
+      this.router.navigate(["/head/dashboard", this.managerId, this.userId]);
     } else {
       console.error(
-        "head ID or User ID not available - falling back to base route"
+        "head ID or User ID not available - falling back to base route",
       );
       // Fallback to base route if IDs are not available
       // this.router.navigate(["/head/branch/add"]);
@@ -155,14 +146,10 @@ settingPopup: boolean = false;
   navigateToAddUser() {
     if (this.managerId && this.userId) {
       // route: /head/branch/add/:managerId/:userId
-      this.router.navigate([
-        "/head/branch/add",
-        this.managerId,
-        this.userId,
-      ]);
+      this.router.navigate(["/head/branch/add", this.managerId, this.userId]);
     } else {
       console.error(
-        "head ID or User ID not available - falling back to base route"
+        "head ID or User ID not available - falling back to base route",
       );
       // Fallback to base route if IDs are not available
       this.router.navigate(["/head/branch/add"]);
@@ -180,7 +167,7 @@ settingPopup: boolean = false;
       this.router.navigate(["/head/chat"]);
     } else {
       console.error(
-        "head ID or User ID not available - falling back to base route"
+        "head ID or User ID not available - falling back to base route",
       );
       // Fallback to base route if IDs are not available
       this.router.navigate(["/head/branch/add"]);
@@ -203,7 +190,7 @@ settingPopup: boolean = false;
       ]);
     } else {
       console.error(
-        "head ID or User ID not available - falling back to base route"
+        "head ID or User ID not available - falling back to base route",
       );
       // Fallback to base route if IDs are not available
       this.router.navigate(["/head/branch/manage"]);
@@ -216,11 +203,7 @@ settingPopup: boolean = false;
   }
 
   isActive(route: string): boolean {
-    console.log( this.currentRoute === route );
-    
-    return (
-      this.currentRoute === route 
-    );
+    return this.currentRoute === route;
   }
 
   isParentActive(item: MenuItem): boolean {
@@ -240,11 +223,10 @@ settingPopup: boolean = false;
   }
 
   onSidebarWidthChange(width: any): void {
-  this.sidebarWidth = width;
-  
-}
+    this.sidebarWidth = width;
+  }
 
- openSettings() {
+  openSettings() {
     this.settingPopup = true;
   }
 

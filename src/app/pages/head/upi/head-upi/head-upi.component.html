@@ -2,7 +2,7 @@
   id="webcrumbs"
   class="max-w-7xl mx-auto p-6 bg-[var(--color-surface)] rounded-xl shadow-sm border border-[var(--color-border)]"
 >
-  <!-- Header Section -->
+  <!-- ========== HEADER ========== -->
   <div
     class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
   >
@@ -30,6 +30,7 @@
     </button>
   </div>
 
+  <!-- ========== FILTER SECTION (unchanged, fully included) ========== -->
   <div
     class="bg-[var(--color-bg)] rounded-lg p-4 mb-6 border border-[var(--color-border)]"
   >
@@ -361,9 +362,7 @@
     </div>
   </div>
 
-  <!-- Rest of your HTML template (UPI table, modals, etc.) remains the same -->
-
-  <!-- Table Section -->
+  <!-- ========== UPI TABLE & PAGINATION ========== -->
   <div
     class="overflow-x-auto bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]"
   >
@@ -497,7 +496,6 @@
               </div>
             </div>
           </td>
-          <!-- Status Column -->
           <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center">
               <div
@@ -514,12 +512,9 @@
               </div>
             </div>
           </td>
-          <!-- Actions Column - CORRECTED VERSION -->
-          <!-- Actions Column - DROPDOWN VERSION -->
           <td class="px-4 py-3 whitespace-nowrap">
             <!-- Actions Dropdown -->
             <div class="relative">
-              <!-- Three dots button -->
               <button
                 (click)="toggleActionsDropdown(upi.id)"
                 class="p-2 text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-hover)] rounded-lg transition-colors"
@@ -527,13 +522,10 @@
               >
                 <span class="material-icons">more_vert</span>
               </button>
-
-              <!-- Dropdown menu -->
               <div
                 *ngIf="activeDropdownUpiId === upi.id"
                 class="absolute right-0 mt-2 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg z-50"
               >
-                <!-- Toggle Status -->
                 <button
                   (click)="toggleUpiStatus(upi); activeDropdownUpiId = null"
                   class="w-full px-4 py-3 text-left text-sm text-[var(--color-font)] hover:bg-[var(--color-hover)] flex items-center gap-3 border-b border-[var(--color-border)]"
@@ -541,14 +533,12 @@
                   <span class="material-icons">toggle_on</span>
                   <span>Toggle Status</span>
                 </button>
-
-                <!-- Edit Model -->
                 <button
                   (click)="openUpdateModal(upi); activeDropdownUpiId = null"
                   class="w-full px-4 py-3 text-left text-sm text-[var(--color-font)] hover:bg-[var(--color-hover)] flex items-center gap-3"
                 >
                   <span class="material-icons">edit</span>
-                  <span>Edit Model</span>
+                  <span>Edit</span>
                 </button>
               </div>
             </div>
@@ -665,7 +655,7 @@
     </div>
   </div>
 
-  <!-- Add UPI Modal -->
+  <!-- ========== ADD UPI MODAL – SEARCH‑BASED ========== -->
   <div
     *ngIf="showAddModal"
     class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -675,7 +665,6 @@
       class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg border border-[var(--color-border)]"
       (click)="$event.stopPropagation()"
     >
-      <!-- Modal Header -->
       <div
         class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
       >
@@ -695,22 +684,19 @@
         </button>
       </div>
 
-      <!-- Modal Body -->
       <div class="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
         <form
           [formGroup]="addUpiForm"
           (ngSubmit)="submitAddUpi()"
           class="space-y-4"
         >
-          <!-- Website Selection - SEARCH BASED INPUT -->
+          <!-- Website Selection – SEARCH BASED -->
           <div>
             <label
               class="block text-sm font-medium text-[var(--color-font)] mb-1"
             >
               Website <span class="text-[var(--color-danger)]">*</span>
             </label>
-
-            <!-- Search Input with Results -->
             <div class="relative">
               <div class="relative">
                 <span
@@ -722,8 +708,7 @@
                   type="text"
                   [(ngModel)]="upiWebsiteSearch"
                   (ngModelChange)="onUpiWebsiteSearch()"
-                  (focus)="onUpiWebsiteSearch()"
-                  placeholder="Search and select website..."
+                  placeholder="Type to search websites..."
                   class="w-full pl-10 pr-10 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
                   [class.border-[var(--color-danger)]]="
                     addUpiForm.get('websiteId')?.touched &&
@@ -741,9 +726,13 @@
                 </button>
               </div>
 
-              <!-- Search Results Dropdown -->
+              <!-- Search results – only when typing -->
               <div
-                *ngIf="upiWebsiteSearch && upiFilteredWebsites.length > 0"
+                *ngIf="
+                  upiWebsiteSearch &&
+                  upiWebsiteSearch.trim() !== '' &&
+                  upiFilteredWebsites.length > 0
+                "
                 class="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
               >
                 <div
@@ -758,15 +747,27 @@
                 </div>
               </div>
 
-              <!-- No Results Message -->
+              <!-- No results -->
               <div
-                *ngIf="upiWebsiteSearch && upiFilteredWebsites.length === 0"
+                *ngIf="
+                  upiWebsiteSearch &&
+                  upiWebsiteSearch.trim() !== '' &&
+                  upiFilteredWebsites.length === 0
+                "
                 class="absolute z-50 mt-1 w-full border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
               >
                 <div class="px-3 py-2 text-sm text-[var(--color-muted)] italic">
-                  No websites found
+                  No websites match "{{ upiWebsiteSearch }}"
                 </div>
               </div>
+
+              <!-- Hint when search is empty -->
+              <p
+                *ngIf="!upiWebsiteSearch || upiWebsiteSearch.trim() === ''"
+                class="text-xs text-[var(--color-muted)] italic mt-1"
+              >
+                Start typing to see matching websites
+              </p>
             </div>
 
             <!-- Selected Website Display -->
@@ -915,7 +916,6 @@
                 />
               </div>
             </div>
-
             <div>
               <label
                 class="block text-sm font-medium text-[var(--color-font)] mb-1"
@@ -937,7 +937,6 @@
                 />
               </div>
             </div>
-
             <div>
               <label
                 class="block text-sm font-medium text-[var(--color-font)] mb-1"
@@ -996,7 +995,7 @@
     </div>
   </div>
 
-  <!-- Update UPI Modal -->
+  <!-- ========== UPDATE UPI MODAL – with inline VPA validation + success toast ========== -->
   <div
     *ngIf="showUpdateModal"
     class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -1006,7 +1005,6 @@
       class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg border border-[var(--color-border)]"
       (click)="$event.stopPropagation()"
     >
-      <!-- Modal Header -->
       <div
         class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
       >
@@ -1026,7 +1024,6 @@
         </button>
       </div>
 
-      <!-- Modal Body -->
       <div class="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
         <form (ngSubmit)="submitUpdate()" class="space-y-4">
           <!-- Current QR Display -->
@@ -1052,8 +1049,12 @@
               <button
                 type="button"
                 (click)="generateQrForUpdate()"
-                [disabled]="!updateForm.vpa || isGeneratingUpdateQr"
-                class="px-3 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50"
+                [disabled]="
+                  !updateForm.vpa ||
+                  isGeneratingUpdateQr ||
+                  !isValidUpiId(updateForm.vpa)
+                "
+                class="px-3 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span *ngIf="!isGeneratingUpdateQr" class="flex items-center">
                   <span class="material-icons mr-1">qr_code</span>
@@ -1066,7 +1067,7 @@
             </div>
           </div>
 
-          <!-- UPI ID -->
+          <!-- UPI ID with inline validation -->
           <div>
             <label
               class="block text-sm font-medium text-[var(--color-font)] mb-1"
@@ -1078,9 +1079,18 @@
               [(ngModel)]="updateForm.vpa"
               name="vpa"
               required
+              (input)="onUpdateVpaChange()"
               class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
               placeholder="username@paytm"
             />
+            <!-- Inline error -->
+            <div
+              *ngIf="updateForm.vpa && !isValidUpiId(updateForm.vpa)"
+              class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
+            >
+              <span class="material-icons mr-1 text-sm">error</span>
+              Please enter a valid UPI ID
+            </div>
           </div>
 
           <!-- Amount Fields -->
@@ -1107,7 +1117,6 @@
                 />
               </div>
             </div>
-
             <div>
               <label
                 class="block text-sm font-medium text-[var(--color-font)] mb-1"
@@ -1130,7 +1139,6 @@
                 />
               </div>
             </div>
-
             <div>
               <label
                 class="block text-sm font-medium text-[var(--color-font)] mb-1"
@@ -1207,7 +1215,7 @@
     </div>
   </div>
 
-  <!-- Image Modal -->
+  <!-- ========== IMAGE MODAL ========== -->
   <div
     *ngIf="selectedImage"
     class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -1217,7 +1225,6 @@
       class="bg-[var(--color-surface)] rounded-xl max-w-sm w-full shadow-lg border border-[var(--color-border)]"
       (click)="$event.stopPropagation()"
     >
-      <!-- Modal Header -->
       <div
         class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
       >
@@ -1236,8 +1243,6 @@
           <span class="material-icons text-[var(--color-muted)]"> close </span>
         </button>
       </div>
-
-      <!-- Modal Body -->
       <div class="p-6 flex flex-col items-center">
         <div
           class="mb-4 p-3 bg-white rounded border border-[var(--color-border)]"
@@ -1265,6 +1270,36 @@
           </button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ========== ✅ SUCCESS TOAST ========== -->
+  <div
+    *ngIf="showUpdateSuccessPopup"
+    class="fixed top-5 right-5 z-[9999] animate-slide-down"
+    role="alert"
+  >
+    <div
+      class="flex items-center gap-3 px-5 py-4 bg-white border-l-4 border-[var(--color-success)] rounded-lg shadow-xl"
+    >
+      <div
+        class="flex-shrink-0 w-8 h-8 bg-[var(--color-success)]/10 rounded-full flex items-center justify-center"
+      >
+        <span class="material-icons text-[var(--color-success)] text-lg">
+          check_circle
+        </span>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-bold text-[var(--color-font)]">
+          {{ updateSuccessMessage }}
+        </p>
+      </div>
+      <button
+        (click)="closeUpdateSuccessPopup()"
+        class="text-[var(--color-muted)] hover:text-[var(--color-font)] transition-colors"
+      >
+        <span class="material-icons text-base">close</span>
+      </button>
     </div>
   </div>
 </div>
