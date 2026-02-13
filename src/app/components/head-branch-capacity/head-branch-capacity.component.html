@@ -43,52 +43,7 @@
 
       <!-- Content Area -->
       <div class="p-5">
-        <!-- Success/Error Messages -->
-        <div
-          *ngIf="successMessage"
-          class="mb-4 p-3 rounded-lg border flex items-center justify-between animate-fade-in shadow-sm border-[var(--color-success)] text-[var(--color-success)]"
-          [ngStyle]="{
-            background:
-              'linear-gradient(to right, var(--color-success) / 10%, var(--color-success) / 5%)',
-          }"
-        >
-          <div class="flex items-center">
-            <div
-              class="w-8 h-8 rounded-full flex items-center justify-center mr-2 bg-[var(--color-success)]/10"
-            >
-              <svg
-                class="w-4 h-4 text-[var(--color-success)]"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            <div>
-              <p class="font-semibold text-xs">Success</p>
-              <p class="text-xs text-[var(--color-success)]">
-                {{ successMessage }}
-              </p>
-            </div>
-          </div>
-          <button
-            (click)="successMessage = ''"
-            class="transition-colors p-1 rounded-lg text-[var(--color-success)]"
-          >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
-        </div>
-
+        <!-- Error Message (Inline) -->
         <div
           *ngIf="errorMessage"
           class="mb-4 p-3 rounded-lg border flex items-center justify-between animate-fade-in shadow-sm border-[var(--color-danger)] text-[var(--color-danger)]"
@@ -101,17 +56,9 @@
             <div
               class="w-8 h-8 rounded-full flex items-center justify-center mr-2 bg-[var(--color-danger)]/10"
             >
-              <svg
-                class="w-4 h-4 text-[var(--color-danger)]"
-                fill="currentColor"
-                viewBox="0 0 20 20"
+              <span class="material-icons text-[var(--color-danger)]"
+                >error</span
               >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clip-rule="evenodd"
-                />
-              </svg>
             </div>
             <div>
               <p class="font-semibold text-xs">Error</p>
@@ -124,13 +71,7 @@
             (click)="errorMessage = ''"
             class="transition-colors p-1 rounded-lg text-[var(--color-danger)]"
           >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              />
-            </svg>
+            <span class="material-icons">close</span>
           </button>
         </div>
 
@@ -152,26 +93,11 @@
                     'linear-gradient(to right, var(--color-surface), var(--color-surface) / 50%)',
                 }"
               ></div>
-              <svg
-                class="absolute inset-0 m-auto animate-spin h-16 w-16 text-[var(--color-muted)]"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+              <span
+                class="absolute inset-0 m-auto animate-spin material-icons text-4xl text-[var(--color-muted)]"
               >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
+                refresh
+              </span>
             </div>
             <p class="font-medium text-xs text-[var(--color-muted)]">
               Loading configuration...
@@ -343,19 +269,9 @@
                   "
                 >
                   <div class="flex-shrink-0 pl-3">
-                    <svg
-                      class="w-4 h-4 text-[var(--color-muted)]"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                    <span class="material-icons text-[var(--color-muted)]"
+                      >public</span
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-                      />
-                    </svg>
                   </div>
                   <input
                     type="text"
@@ -370,19 +286,10 @@
                     <div
                       class="w-5 h-5 flex items-center justify-center rounded-full bg-[var(--color-surface)]"
                     >
-                      <svg
-                        class="w-3.5 h-3.5 text-[var(--color-muted)]"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                      <span
+                        class="material-icons text-[var(--color-muted)] text-sm"
+                        >arrow_drop_down</span
                       >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
                     </div>
                   </div>
                 </div>
@@ -417,19 +324,10 @@
                           'linear-gradient(to right, var(--color-primary) / 20%, var(--color-primary) / 10%)',
                       }"
                     >
-                      <svg
-                        class="w-3 h-3 text-[var(--color-primary)]"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                      <span
+                        class="material-icons text-[var(--color-primary)] text-sm"
+                        >public</span
                       >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-                        />
-                      </svg>
                     </div>
                     <div class="flex-1">
                       <div
@@ -449,17 +347,9 @@
                           'linear-gradient(to right, var(--color-primary), var(--color-primary-light))',
                       }"
                     >
-                      <svg
-                        class="w-3 h-3 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
+                      <span class="material-icons text-white text-xs"
+                        >check</span
                       >
-                        <path
-                          fill-rule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
                     </div>
                   </div>
                 </div>
@@ -471,19 +361,9 @@
                   <div
                     class="w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center bg-[var(--color-surface)]"
                   >
-                    <svg
-                      class="w-4 h-4 text-[var(--color-muted)]"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                    <span class="material-icons text-[var(--color-muted)]"
+                      >info</span
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
                   </div>
                   <p class="text-xs font-medium text-[var(--color-muted)]">
                     No websites found
@@ -503,17 +383,10 @@
                 }"
               >
                 <div class="flex items-center">
-                  <svg
-                    class="w-4 h-4 mr-1.5 text-[var(--color-success)]"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                  <span
+                    class="material-icons mr-1.5 text-[var(--color-success)]"
+                    >check_circle</span
                   >
-                    <path
-                      fill-rule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
                   <span class="font-medium text-xs text-[var(--color-success)]"
                     >Selected:</span
                   >
@@ -525,7 +398,7 @@
             </div>
           </div>
 
-          <!-- Capacity Ranges Card -->
+          <!-- Capacity Ranges Card (with one‑line header, no icons) -->
           <div
             class="rounded-xl border p-4 shadow-sm border-[var(--color-border)]"
             [ngStyle]="{
@@ -564,59 +437,12 @@
                     hasUptoRange,
                 }"
               >
-                <svg
-                  class="w-3.5 h-3.5 mr-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
+                <span class="material-icons mr-1 text-sm">add</span>
                 Add Range
                 <span *ngIf="hasUptoRange" class="ml-1 text-2xs opacity-75"
                   >(Upto added)</span
                 >
               </button>
-            </div>
-
-            <!-- Upto Requirement Warning -->
-            <div
-              *ngIf="!hasUptoRange && capacityRanges.length > 0"
-              class="mb-4 p-3 rounded-lg border-2 animate-pulse border-[var(--color-warning)]"
-              [ngStyle]="{
-                background:
-                  'linear-gradient(to right, var(--color-warning) / 10%, var(--color-warning) / 5%)',
-              }"
-            >
-              <div class="flex items-start">
-                <div
-                  class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-2 bg-[var(--color-warning)]/10"
-                >
-                  <svg
-                    class="w-3.5 h-3.5 text-[var(--color-warning)]"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-xs font-medium text-[var(--color-warning)]">
-                    Upto Range Required
-                  </p>
-                  <p class="text-2xs mt-0.5 text-[var(--color-warning)]">
-                    Add at least one range marked as "upto" for infinite
-                    capacity
-                  </p>
-                </div>
-              </div>
             </div>
 
             <!-- Capacity Ranges List -->
@@ -649,7 +475,7 @@
                     'bg-[var(--color-surface)]/80': !range.get('upto')?.value,
                   }"
                 >
-                  <!-- INFINITE BADGE - COMPACT -->
+                  <!-- INFINITE BADGE - COMPACT (plain text) -->
                   <div
                     *ngIf="range.get('upto')?.value"
                     class="absolute -top-2 right-3 px-1.5 py-0.5 rounded-full text-2xs font-bold shadow-sm border border-[var(--color-primary)]/60 text-white"
@@ -658,142 +484,72 @@
                         'linear-gradient(135deg, var(--color-primary), var(--color-primary-light))',
                     }"
                   >
-                    <div class="flex items-center">
-                      <svg
-                        class="w-2 h-2 mr-0.5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                      INF
-                    </div>
+                    <span>INF</span>
                   </div>
 
-                  <!-- ===== COMPACT HEADER - ALL DATA IN TIGHT SPACE ===== -->
-                  <div class="flex flex-col space-y-1.5">
-                    <!-- Range Title and Toggle Button Row -->
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center">
-                        <span
-                          class="text-xs font-semibold text-[var(--color-font)]"
-                          >R{{ i + 1 }}</span
-                        >
-                      </div>
-
-                      <!-- UP/DOWN ARROW TOGGLE BUTTON - COMPACT -->
-                      <div class="relative">
-                        <button
-                          type="button"
-                          (click)="toggleRangeMenu(i)"
-                          class="p-1 transition-all duration-200 rounded-lg hover:bg-gray-100 text-[var(--color-muted)] range-menu-button flex items-center justify-center"
-                          [ngClass]="{
-                            'bg-gray-100 text-[var(--color-primary)]':
-                              activeRangeMenu === i,
-                          }"
-                          title="Toggle Edit Menu"
-                        >
-                          <svg
-                            class="w-3.5 h-3.5 transition-transform duration-200"
-                            [class.rotate-180]="activeRangeMenu === i"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-
-                    <!-- AMOUNT DISPLAY - COMPACT HORIZONTAL LAYOUT -->
-                    <div class="flex items-center flex-wrap gap-x-1">
-                      <span class="text-2xs text-[var(--color-muted)]">₹</span>
-                      <span
-                        class="text-xs font-bold text-[var(--color-primary)]"
+                  <!-- ===== COMPACT HEADER - ONE LINE, NO ICONS ===== -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2 text-xs">
+                      <span class="font-semibold text-[var(--color-font)]"
+                        >R{{ i + 1 }}</span
                       >
-                        {{ range.get("minRange")?.value || 0 }}
-                      </span>
-                      <span class="text-2xs text-[var(--color-muted)] mx-0.5"
-                        >→</span
-                      >
-                      <span class="text-2xs text-[var(--color-muted)]">₹</span>
+                      <span class="text-[var(--color-muted)]">₹</span>
+                      <span class="font-bold text-[var(--color-primary)]">{{
+                        range.get("minRange")?.value || 0
+                      }}</span>
+                      <span class="text-[var(--color-muted)]">→</span>
+                      <span class="text-[var(--color-muted)]">₹</span>
                       <span
                         *ngIf="!range.get('upto')?.value"
-                        class="text-xs font-bold text-[var(--color-primary)]"
+                        class="font-bold text-[var(--color-primary)]"
                       >
                         {{ range.get("maxRange")?.value || "___" }}
                       </span>
                       <span
                         *ngIf="range.get('upto')?.value"
-                        class="text-xs font-bold text-[var(--color-primary-light)]"
+                        class="font-bold text-[var(--color-primary-light)]"
+                        >∞</span
                       >
-                        ∞
-                      </span>
-                    </div>
-
-                    <!-- TRANSACTIONS AND TIME - COMPACT ONE LINE -->
-                    <div class="flex items-center flex-wrap text-2xs">
-                      <span class="text-[var(--color-muted)] mr-0.5">=</span>
-                      <span class="text-[var(--color-muted)] mr-0.5">₹</span>
-                      <span
-                        class="flex items-center text-[var(--color-font)] mr-1"
-                      >
-                        <svg
-                          class="w-2.5 h-2.5 mr-0.5 text-[var(--color-muted)]"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                          <path
-                            fill-rule="evenodd"
-                            d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                        {{ range.get("quantity")?.value || 0 }}
-                      </span>
-                      <span class="text-[var(--color-muted)] mx-0.5">·</span>
-                      <span class="text-[var(--color-muted)] mr-0.5">●●</span>
-                      <span class="flex items-center text-[var(--color-font)]">
-                        <svg
-                          class="w-2.5 h-2.5 mr-0.5 text-[var(--color-muted)]"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                        {{ range.get("time")?.value || 0 }}
-                      </span>
+                      <span class="text-[var(--color-muted)] mx-1">·</span>
+                      <span class="text-[var(--color-font)]">{{
+                        range.get("quantity")?.value || 0
+                      }}</span>
+                      <span class="text-[var(--color-muted)]">·</span>
+                      <span class="text-[var(--color-font)]">{{
+                        range.get("time")?.value || 0
+                      }}</span>
                       <span class="text-[var(--color-muted)] ml-1">CAP:</span>
-                      <span
-                        class="font-semibold text-[var(--color-font)] ml-0.5"
-                      >
+                      <span class="font-semibold text-[var(--color-font)]">
                         {{ range.get("quantity")?.value || 0 }}/{{
                           range.get("time")?.value || 0
                         }}
                       </span>
                     </div>
+
+                    <!-- Toggle button with plain Unicode arrows (no Material Icon) -->
+                    <button
+                      type="button"
+                      (click)="toggleRangeMenu(i)"
+                      class="p-1 transition-all duration-200 rounded-lg hover:bg-gray-100 text-[var(--color-muted)] range-menu-button"
+                      [ngClass]="{
+                        'bg-gray-100 text-[var(--color-primary)]':
+                          activeRangeMenu === i,
+                      }"
+                      title="Toggle Edit Menu"
+                    >
+                      <span class="text-sm font-bold">
+                        {{ activeRangeMenu === i ? "▲" : "▼" }}
+                      </span>
+                    </button>
                   </div>
-                  <!-- ===== END COMPACT HEADER ===== -->
+                  <!-- ===== END ONE-LINE HEADER ===== -->
 
                   <!-- ===== DROPDOWN MENU WITH FULL EDIT FORM ===== -->
                   <div
                     *ngIf="activeRangeMenu === i"
                     class="mt-3 p-3 rounded-lg border-2 bg-[var(--color-surface)] border-[var(--color-primary)]/30 shadow-lg range-menu-dropdown"
                   >
-                    <!-- Edit Header - Compact -->
+                    <!-- Edit Header -->
                     <div
                       class="flex items-center justify-between mb-2 pb-2 border-b border-[var(--color-border)]"
                     >
@@ -801,15 +557,10 @@
                         <div
                           class="w-5 h-5 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center mr-1.5"
                         >
-                          <svg
-                            class="w-3 h-3 text-[var(--color-primary)]"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
+                          <span
+                            class="material-icons text-[var(--color-primary)] text-sm"
+                            >edit</span
                           >
-                            <path
-                              d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"
-                            />
-                          </svg>
                         </div>
                         <span
                           class="text-xs font-semibold text-[var(--color-font)]"
@@ -835,17 +586,7 @@
                           class="p-1 transition-colors rounded-lg hover:bg-red-50 text-[var(--color-danger)]"
                           title="Delete Range"
                         >
-                          <svg
-                            class="w-3.5 h-3.5"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <span class="material-icons text-sm">delete</span>
                         </button>
                         <!-- CLOSE BUTTON -->
                         <button
@@ -854,22 +595,12 @@
                           class="p-1 transition-colors rounded-lg hover:bg-gray-100 text-[var(--color-muted)]"
                           title="Close"
                         >
-                          <svg
-                            class="w-3.5 h-3.5"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <span class="material-icons text-sm">close</span>
                         </button>
                       </div>
                     </div>
 
-                    <!-- UPTO TOGGLE - Compact -->
+                    <!-- UPTO TOGGLE -->
                     <div
                       class="mb-3 p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/50"
                     >
@@ -917,15 +648,13 @@
                       </label>
                     </div>
 
-                    <!-- INPUT FIELDS GRID - 4 COLUMNS EXTRA COMPACT -->
+                    <!-- INPUT FIELDS GRID -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
-                      <!-- Min Range -->
                       <div>
                         <label
                           class="block text-2xs font-medium mb-0.5 text-[var(--color-muted)]"
+                          >Min</label
                         >
-                          Min
-                        </label>
                         <div class="relative">
                           <input
                             type="number"
@@ -943,14 +672,11 @@
                           </div>
                         </div>
                       </div>
-
-                      <!-- Max Range -->
                       <div>
                         <label
                           class="block text-2xs font-medium mb-0.5 text-[var(--color-muted)]"
+                          >Max*</label
                         >
-                          Max*
-                        </label>
                         <div class="relative">
                           <input
                             type="number"
@@ -976,14 +702,11 @@
                           </div>
                         </div>
                       </div>
-
-                      <!-- Quantity -->
                       <div>
                         <label
                           class="block text-2xs font-medium mb-0.5 text-[var(--color-muted)]"
+                          >Qty*</label
                         >
-                          Qty*
-                        </label>
                         <input
                           type="number"
                           formControlName="quantity"
@@ -991,14 +714,11 @@
                           placeholder="#"
                         />
                       </div>
-
-                      <!-- Time -->
                       <div>
                         <label
                           class="block text-2xs font-medium mb-0.5 text-[var(--color-muted)]"
+                          >Time*</label
                         >
-                          Time*
-                        </label>
                         <input
                           type="number"
                           formControlName="time"
@@ -1008,7 +728,7 @@
                       </div>
                     </div>
 
-                    <!-- Validation Messages - Compact -->
+                    <!-- Validation Messages -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-2 mt-1">
                       <div></div>
                       <div
@@ -1065,37 +785,19 @@
             </div>
           </div>
 
-          <!-- Submit Section - Compact -->
+          <!-- Submit Section -->
           <div class="pt-3 border-t border-[var(--color-border)]">
             <div
               class="flex flex-col md:flex-row items-center justify-between gap-3"
             >
               <div class="text-2xs text-[var(--color-muted)] flex items-center">
-                <svg
-                  class="w-3 h-3 mr-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
+                <span class="material-icons text-sm mr-1">info</span>
                 <span>* Required</span>
                 <span class="mx-1">·</span>
                 <span class="flex items-center">
-                  <svg
-                    class="w-3 h-3 mr-0.5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                  <span class="material-icons text-sm mr-0.5"
+                    >all_inclusive</span
                   >
-                    <path
-                      fill-rule="evenodd"
-                      d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
                   1+ upto
                 </span>
               </div>
@@ -1122,17 +824,7 @@
                   *ngIf="!isSubmitting"
                   class="relative flex items-center justify-center"
                 >
-                  <svg
-                    class="w-3 h-3 mr-1"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
+                  <span class="material-icons mr-1 text-sm">save</span>
                   Save
                 </span>
 
@@ -1140,26 +832,9 @@
                   *ngIf="isSubmitting"
                   class="relative flex items-center justify-center"
                 >
-                  <svg
-                    class="animate-spin -ml-1 mr-1 h-3 w-3"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
+                  <span class="material-icons animate-spin mr-1 text-sm"
+                    >refresh</span
                   >
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
                   Saving
                 </span>
               </button>
@@ -1167,6 +842,36 @@
           </div>
         </form>
       </div>
+    </div>
+  </div>
+
+  <!-- ========== ✅ SUCCESS TOAST (AUTO-HIDE) ========== -->
+  <div
+    *ngIf="showAddSuccessPopup"
+    class="fixed top-5 right-5 z-[9999] animate-slide-down"
+    role="alert"
+  >
+    <div
+      class="flex items-center gap-3 px-5 py-4 bg-white border-l-4 border-[var(--color-success)] rounded-lg shadow-xl"
+    >
+      <div
+        class="flex-shrink-0 w-8 h-8 bg-[var(--color-success)]/10 rounded-full flex items-center justify-center"
+      >
+        <span class="material-icons text-[var(--color-success)]"
+          >check_circle</span
+        >
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-bold text-[var(--color-font)]">
+          {{ addSuccessMessage }}
+        </p>
+      </div>
+      <button
+        (click)="closeAddSuccessPopup()"
+        class="text-[var(--color-muted)] hover:text-[var(--color-font)] transition-colors"
+      >
+        <span class="material-icons">close</span>
+      </button>
     </div>
   </div>
 </div>

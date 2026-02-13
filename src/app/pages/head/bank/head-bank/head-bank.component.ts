@@ -39,42 +39,47 @@ interface Website {
   styleUrls: ["./head-bank.component.css"],
 })
 export class HeadBankComponent implements OnInit, OnDestroy {
+  // ---------- DATA (server‑paginated) ----------
   bankAccounts: BankAccount[] = [];
-  filteredBankAccounts: BankAccount[] = [];
-  paginatedAccounts: BankAccount[] = [];
-
-  // Search filters
-  searchAccountNo = "";
-  searchHolder = "";
-  searchWebsite = "";
-  searchIFSC = "";
-  searchStatus = "";
-  searchAccountType = "";
-  searchMinAmount: number | null = null;
-  searchMaxAmount: number | null = null;
-  searchLimit: number | null = null;
-
-  // Pagination properties
-  currentPage = 1;
-  itemsPerPage = 10;
-  totalPages = 1;
-
-  // Website search properties
-  allWebsites: string[] = [];
-  filteredWebsites: string[] = [];
-  uniqueWebsites: string[] = [];
-
+  totalElements = 0;
+  totalPagesCount = 0;
   loading = false;
-  private subs = new Subscription();
 
-  // Add modal properties
+  // ---------- FILTERS (sent to backend) ----------
+  searchTerm = ""; // unified search (accountNo, holder, IFSC, website)
+  filterStatus = ""; // 'active', 'inactive', '' (empty = all)
+  selectedWebsite: Website | null = null;
+  minAmount: number | null = null;
+  maxAmount: number | null = null;
+  maxLimit: number | null = null; // max limit filter
+
+  // UI state for website filter dropdown
+  websiteSearchTerm = "";
+  showWebsiteDropdown = false;
+  filteredWebsites: Website[] = [];
+
+  // UI toggle for amount filter section
+  showAmountFilter = false;
+
+  // ---------- PAGINATION ----------
+  currentPage = 1;
+  pageSize = 10;
+  Math = Math;
+
+  // ---------- ADD MODAL ----------
   showAddModal = false;
   isAdding = false;
   websites: Website[] = [];
   addBankForm: FormGroup;
-  showDebug = false; // Changed from true to false to hide debug info
+  showDebug = false; // kept for debug, but you can remove
 
-  // Update modal properties
+  // Modal website search
+  modalWebsiteSearch = "";
+  modalFilteredWebsites: Website[] = [];
+  selectedModalWebsite: Website | null = null;
+  showModalWebsiteDropdown = false;
+
+  // ---------- UPDATE MODAL ----------
   showUpdateModal = false;
   editingAccount: BankAccount | null = null;
   updateForm: any = {
@@ -88,21 +93,36 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     maxAmount: "",
   };
   isSubmitting = false;
+
+  // ---------- USER / ROLE ----------
   currentRoleId: any;
   currentUserId: any;
   role: any;
 
-  // Modal website search properties
-  modalWebsiteSearch: string = "";
-  modalFilteredWebsites: Website[] = [];
-  selectedModalWebsite: Website | null = null;
-  showWebsiteDropdown = false;
-
-  // Action dropdown property
+  // ---------- ACTION DROPDOWN ----------
   activeActionDropdown: string | null = null;
-
-  // Status update loading
   isUpdatingStatus: { [key: string]: boolean } = {};
+
+  // ---------- SUCCESS TOASTS (for add/update) ----------
+  showAddSuccessPopup = false;
+  addSuccessMessage = "";
+  showUpdateSuccessPopup = false;
+  updateSuccessMessage = "";
+  private successPopupTimeout: any;
+
+  // ---------- SUBSCRIPTION MANAGEMENT ----------
+  private subs = new Subscription();
+
+  // ---------- COMPUTED: active filters count ----------
+  get activeFilters(): number {
+    let count = 0;
+    if (this.searchTerm.trim()) count++;
+    if (this.filterStatus) count++;
+    if (this.selectedWebsite) count++;
+    if (this.minAmount !== null || this.maxAmount !== null) count++;
+    if (this.maxLimit !== null && this.maxLimit > 0) count++;
+    return count;
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -119,22 +139,258 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
 
-    this.loadBankAccounts(this.currentRoleId);
+    this.fetchBankAccounts();
 
-    // Listen for clicks outside website dropdown
     document.addEventListener("click", this.handleOutsideClick.bind(this));
   }
 
   ngOnDestroy() {
     this.subs.unsubscribe();
     document.removeEventListener("click", this.handleOutsideClick.bind(this));
+    if (this.successPopupTimeout) clearTimeout(this.successPopupTimeout);
   }
 
-  // ========== FORM METHODS ==========
+  // ========== DATA FETCH (server‑side paginated) ==========
+  fetchBankAccounts(): void {
+    if (!this.currentRoleId) return;
+
+    this.loading = true;
+
+    const options: any = {
+      page: this.currentPage - 1,
+      size: this.pageSize,
+      query: this.searchTerm.trim() || undefined,
+      minAmount: this.minAmount ?? undefined,
+      maxAmount: this.maxAmount ?? undefined,
+      limit: this.maxLimit ?? undefined,
+      websiteId: this.selectedWebsite?.websiteId || undefined,
+    };
+
+    if (this.filterStatus === "active") options.active = true;
+    if (this.filterStatus === "inactive") options.active = false;
+
+    const sub = this.bankService
+      .getBankDataWithSubAdminIdPaginated(this.currentRoleId, options)
+      .pipe(
+        catchError((err) => {
+          console.error("Error fetching bank accounts", err);
+          this.loading = false;
+          return of({ data: [], totalElements: 0, totalPages: 0 });
+        }),
+      )
+      .subscribe((res: any) => {
+        this.loading = false;
+
+        // Handle different possible response structures
+        const rows = Array.isArray(res.data?.content)
+          ? res.data.content
+          : Array.isArray(res.data)
+            ? res.data
+            : [];
+
+        this.bankAccounts = rows.map((r: any) => {
+          let status: StatusString = "inactive";
+          if (typeof r.status === "string" && r.status.trim() !== "") {
+            status = r.status.toLowerCase();
+          } else if (typeof r.active === "boolean") {
+            status = r.active ? "active" : "inactive";
+          } else if (typeof r.status === "boolean") {
+            status = r.status ? "active" : "inactive";
+          }
+
+          let accountType = r.accountType ?? "";
+          if (accountType.toLowerCase() === "savings") {
+            accountType = "saving";
+          }
+
+          return {
+            id: r.id,
+            branchId: r.branchId ?? null,
+            website: r.websiteDomain ?? null,
+            websiteId: r.website ?? null,
+            websiteDomain: r.websiteDomain ?? null,
+            accountHolderName: r.accountHolderName ?? r.name ?? "-",
+            accountNo: r.accountNo ?? r.accountNumber ?? "",
+            accountType: accountType,
+            status,
+            ifsc: r.ifsc ?? "",
+            bankRange: r.bankRange ?? r.range ?? "",
+            createdAt: r.createdAt
+              ? new Date(r.createdAt)
+              : (r.createdAt ?? null),
+            limitAmount: r.limitAmount,
+            minAmount: r.minAmount || "",
+            maxAmount: r.maxAmount || "",
+          } as BankAccount;
+        });
+
+        this.totalElements = res.totalElements || res.data?.totalElements || 0;
+        this.totalPagesCount = res.totalPages || res.data?.totalPages || 0;
+      });
+
+    this.subs.add(sub);
+  }
+
+  // ========== FILTER ACTIONS ==========
+  onSearch(): void {
+    this.currentPage = 1;
+    this.fetchBankAccounts();
+  }
+
+  onFilterChange(): void {
+    this.currentPage = 1;
+    this.fetchBankAccounts();
+  }
+
+  clearMinMaxFilter(): void {
+    this.minAmount = null;
+    this.maxAmount = null;
+    this.onFilterChange();
+  }
+
+  clearLimitFilter(): void {
+    this.maxLimit = null;
+    this.onFilterChange();
+  }
+
+  resetFilters(): void {
+    this.searchTerm = "";
+    this.filterStatus = "";
+    this.selectedWebsite = null;
+    this.websiteSearchTerm = "";
+    this.minAmount = null;
+    this.maxAmount = null;
+    this.maxLimit = null;
+    this.showWebsiteDropdown = false;
+    this.currentPage = 1;
+    this.fetchBankAccounts();
+  }
+
+  // ========== WEBSITE FILTER DROPDOWN ==========
+  onWebsiteInputBlur(): void {
+    setTimeout(() => (this.showWebsiteDropdown = false), 200);
+  }
+
+  filterWebsites(): void {
+    const term = this.websiteSearchTerm.trim().toLowerCase();
+    if (!term) {
+      this.filteredWebsites = [...this.websites];
+      this.showWebsiteDropdown = this.websites.length > 0;
+      return;
+    }
+    this.filteredWebsites = this.websites.filter(
+      (site) =>
+        site.websiteDomain.toLowerCase().includes(term) ||
+        (site.currency && site.currency.toLowerCase().includes(term)),
+    );
+    this.showWebsiteDropdown = this.filteredWebsites.length > 0;
+  }
+
+  openWebsiteDropdown(): void {
+    if (this.websites.length > 0) {
+      this.filteredWebsites = [...this.websites];
+      this.showWebsiteDropdown = true;
+    }
+  }
+
+  selectWebsite(website: Website): void {
+    this.selectedWebsite = website;
+    this.websiteSearchTerm = website.websiteDomain;
+    this.showWebsiteDropdown = false;
+    this.onFilterChange();
+  }
+
+  clearWebsiteFilter(): void {
+    this.selectedWebsite = null;
+    this.websiteSearchTerm = "";
+    this.filteredWebsites = [...this.websites];
+    this.showWebsiteDropdown = false;
+    this.onFilterChange();
+  }
+
+  // ========== PAGINATION ==========
+  totalPages(): number {
+    return this.totalPagesCount;
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisible = 5;
+    const total = this.totalPages();
+    if (total <= maxVisible) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      if (this.currentPage <= 3) {
+        for (let i = 1; i <= 5; i++) pages.push(i);
+      } else if (this.currentPage >= total - 2) {
+        for (let i = total - 4; i <= total; i++) pages.push(i);
+      } else {
+        for (let i = this.currentPage - 2; i <= this.currentPage + 2; i++)
+          pages.push(i);
+      }
+    }
+    return pages;
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.fetchBankAccounts();
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages()) {
+      this.currentPage++;
+      this.fetchBankAccounts();
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages() && page !== this.currentPage) {
+      this.currentPage = page;
+      this.fetchBankAccounts();
+    }
+  }
+
+  onPageSizeChange(): void {
+    this.currentPage = 1;
+    this.fetchBankAccounts();
+  }
+
+  // ========== TOAST METHODS (for add/update) ==========
+  closeAddSuccessPopup(): void {
+    if (this.successPopupTimeout) clearTimeout(this.successPopupTimeout);
+    this.showAddSuccessPopup = false;
+    this.addSuccessMessage = "";
+  }
+
+  closeUpdateSuccessPopup(): void {
+    if (this.successPopupTimeout) clearTimeout(this.successPopupTimeout);
+    this.showUpdateSuccessPopup = false;
+    this.updateSuccessMessage = "";
+  }
+
+  private showAddSuccess(message: string): void {
+    this.addSuccessMessage = message;
+    this.showAddSuccessPopup = true;
+    this.successPopupTimeout = setTimeout(() => {
+      this.closeAddSuccessPopup();
+    }, 3000);
+  }
+
+  private showUpdateSuccess(message: string): void {
+    this.updateSuccessMessage = message;
+    this.showUpdateSuccessPopup = true;
+    this.successPopupTimeout = setTimeout(() => {
+      this.closeUpdateSuccessPopup();
+    }, 3000);
+  }
+
+  // ========== FORM METHODS (unchanged, but use toasts) ==========
   private createAddBankForm(): FormGroup {
     return this.fb.group(
       {
-        // Changed from websiteList to website to match template
         website: ["", Validators.required],
         accountNumber: [
           "",
@@ -160,38 +416,81 @@ export class HeadBankComponent implements OnInit, OnDestroy {
           [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)],
         ],
       },
-      {
-        validators: this.accountNumberMatchValidator,
-      },
+      { validators: this.accountNumberMatchValidator },
     );
   }
 
   private accountNumberMatchValidator(g: FormGroup) {
-    const accountNumber = g.get("accountNumber")?.value;
-    const confirmAccountNumber = g.get("confirmAccountNumber")?.value;
-    return accountNumber === confirmAccountNumber ? null : { mismatch: true };
+    const acc = g.get("accountNumber")?.value;
+    const conf = g.get("confirmAccountNumber")?.value;
+    return acc === conf ? null : { mismatch: true };
   }
 
   onAccountNumberChange() {
-    // Trigger validation check when account number changes
     if (this.addBankForm.get("confirmAccountNumber")?.value) {
       this.addBankForm.updateValueAndValidity();
     }
   }
 
-  // ========== MODAL METHODS ==========
+  // ========== MODAL WEBSITE LOADING ==========
+  loadWebsites() {
+    if (this.currentRoleId) {
+      const sub = this.headService
+        .getAllHeadsWithWebsitesById(this.currentRoleId, "BANK")
+        .subscribe({
+          next: (res: any) => {
+            this.websites = Array.isArray(res) ? res : [];
+            this.modalFilteredWebsites = [...this.websites];
+          },
+          error: (err) => {
+            console.error("Error loading websites", err);
+            this.websites = [];
+            this.modalFilteredWebsites = [];
+          },
+        });
+      this.subs.add(sub);
+    }
+  }
+
+  // ========== MODAL WEBSITE SEARCH ==========
+  onModalWebsiteSearch() {
+    const term = this.modalWebsiteSearch.toLowerCase();
+    if (term) {
+      this.modalFilteredWebsites = this.websites.filter(
+        (w) =>
+          w.websiteDomain.toLowerCase().includes(term) ||
+          (w.currency && w.currency.toLowerCase().includes(term)),
+      );
+    } else {
+      this.modalFilteredWebsites = [...this.websites];
+    }
+  }
+
+  selectWebsiteForForm(website: Website) {
+    this.selectedModalWebsite = website;
+    this.showModalWebsiteDropdown = false;
+    this.modalWebsiteSearch = "";
+    this.modalFilteredWebsites = [...this.websites];
+    this.addBankForm.patchValue({ website: website.websiteId });
+    this.addBankForm.get("website")?.markAsTouched();
+  }
+
+  clearWebsiteSelection() {
+    this.selectedModalWebsite = null;
+    this.addBankForm.patchValue({ website: "" });
+    this.addBankForm.get("website")?.markAsTouched();
+  }
+
+  // ========== MODAL OPEN/CLOSE ==========
   openAddBankModal() {
     this.showAddModal = true;
     this.loadWebsites();
     this.modalWebsiteSearch = "";
     this.modalFilteredWebsites = [];
     this.selectedModalWebsite = null;
-    this.showWebsiteDropdown = false;
-
-    // Reset form and mark as untouched
+    this.showModalWebsiteDropdown = false;
     this.addBankForm.reset();
     this.addBankForm.markAsUntouched();
-
     document.body.style.overflow = "hidden";
   }
 
@@ -202,7 +501,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     this.modalWebsiteSearch = "";
     this.modalFilteredWebsites = [];
     this.selectedModalWebsite = null;
-    this.showWebsiteDropdown = false;
+    this.showModalWebsiteDropdown = false;
     document.body.style.overflow = "auto";
   }
 
@@ -238,123 +537,17 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     };
     this.isSubmitting = false;
     document.body.style.overflow = "auto";
+    this.closeUpdateSuccessPopup();
   }
 
-  // ========== WEBSITE METHODS ==========
-  loadWebsites() {
-    if (this.currentRoleId) {
-      this.headService
-        .getAllHeadsWithWebsitesById(this.currentRoleId, "BANK")
-        .subscribe({
-          next: (res: any) => {
-            console.log("Websites loaded:", res);
-            this.websites = Array.isArray(res) ? res : [];
-            // Initialize filtered websites with all websites
-            this.modalFilteredWebsites = [...this.websites];
-          },
-          error: (err) => {
-            console.error("Error loading websites", err);
-            this.websites = [];
-            this.modalFilteredWebsites = [];
-          },
-        });
-    }
-  }
-
-  toggleWebsiteDropdown() {
-    this.showWebsiteDropdown = !this.showWebsiteDropdown;
-  }
-
-  onWebsiteSearch() {
-    if (!this.searchWebsite) {
-      this.filteredWebsites = this.allWebsites;
-      return;
-    }
-
-    const searchTerm = this.searchWebsite.toLowerCase();
-    this.filteredWebsites = this.allWebsites.filter((website) =>
-      website.toLowerCase().includes(searchTerm),
-    );
-  }
-
-  selectWebsite(website: string) {
-    this.searchWebsite = website;
-    this.filteredWebsites = [];
-    this.onSearch();
-  }
-
-  // ========== MODAL WEBSITE SEARCH METHODS ==========
-  onModalWebsiteSearch() {
-    const searchTerm = this.modalWebsiteSearch.toLowerCase();
-    if (searchTerm) {
-      this.modalFilteredWebsites = this.websites.filter(
-        (website) =>
-          website.websiteDomain.toLowerCase().includes(searchTerm) ||
-          (website.currency &&
-            website.currency.toLowerCase().includes(searchTerm)),
-      );
-    } else {
-      this.modalFilteredWebsites = [...this.websites];
-    }
-  }
-
-  selectWebsiteForForm(website: Website) {
-    console.log("Website selected:", website);
-    this.selectedModalWebsite = website;
-    this.showWebsiteDropdown = false;
-    this.modalWebsiteSearch = "";
-    this.modalFilteredWebsites = [...this.websites];
-
-    // Update form control value with website ID - changed from websiteList to website
-    this.addBankForm.patchValue({
-      website: website.websiteId,
-    });
-
-    // Mark the control as touched to trigger validation
-    this.addBankForm.get("website")?.markAsTouched();
-
-    console.log("Form value after selection:", this.addBankForm.value);
-    console.log("Form valid:", this.addBankForm.valid);
-    console.log("Form errors:", this.addBankForm.errors);
-    console.log(
-      "Website control valid:",
-      this.addBankForm.get("website")?.valid,
-    );
-    console.log(
-      "Website control errors:",
-      this.addBankForm.get("website")?.errors,
-    );
-  }
-
-  clearWebsiteSelection() {
-    this.selectedModalWebsite = null;
-    this.addBankForm.patchValue({
-      website: "",
-    });
-    this.addBankForm.get("website")?.markAsTouched();
-  }
-
-  handleOutsideClick(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    const isWebsiteDropdown = target.closest(".relative")?.contains(target);
-
-    if (!isWebsiteDropdown && this.showWebsiteDropdown) {
-      this.showWebsiteDropdown = false;
-    }
-  }
-
-  // ========== ACTION DROPDOWN METHODS ==========
+  // ========== ACTION DROPDOWN ==========
   toggleActionDropdown(accountId: string, event?: MouseEvent) {
     if (event) {
       event.stopPropagation();
       event.preventDefault();
     }
-
-    if (this.activeActionDropdown === accountId) {
-      this.activeActionDropdown = null;
-    } else {
-      this.activeActionDropdown = accountId;
-    }
+    this.activeActionDropdown =
+      this.activeActionDropdown === accountId ? null : accountId;
   }
 
   @HostListener("document:click")
@@ -362,7 +555,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     this.activeActionDropdown = null;
   }
 
-  // ========== STATUS UPDATE METHODS ==========
+  // ========== STATUS UPDATE ==========
   updateAccountStatus(accountId: string, status: string, event?: MouseEvent) {
     if (event) {
       event.stopPropagation();
@@ -389,12 +582,12 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       maxAmount: account.maxAmount,
     };
 
-    this.bankService.update(payload).subscribe({
-      next: (res: any) => {
+    const sub = this.bankService.update(payload).subscribe({
+      next: () => {
         account.status = status;
         this.isUpdatingStatus[accountId] = false;
         this.activeActionDropdown = null;
-        this.onSearch();
+        this.fetchBankAccounts();
         alert(`Account status updated to ${status}`);
       },
       error: (err) => {
@@ -403,280 +596,27 @@ export class HeadBankComponent implements OnInit, OnDestroy {
         alert("Error updating account status. Please try again.");
       },
     });
-  }
-
-  // ========== DATA LOADING METHODS ==========
-  private loadBankAccounts(branchId: string) {
-    this.loading = true;
-    const sub = this.bankService
-      .getBankDataWithSubAdminId(branchId)
-      .pipe(
-        catchError((err) => {
-          console.error("Error fetching bank accounts", err);
-          this.loading = false;
-          return of([] as any[]);
-        }),
-      )
-      .subscribe(
-        (res: any) => {
-          this.loading = false;
-
-          const rows = Array.isArray(res.data) ? res.data : [];
-
-          this.bankAccounts = rows.map((r: any) => {
-            let status: StatusString = "inactive";
-            if (typeof r.status === "string" && r.status.trim() !== "") {
-              status = r.status.toLowerCase();
-            } else if (typeof r.active === "boolean") {
-              status = r.active ? "active" : "inactive";
-            } else if (typeof r.status === "boolean") {
-              status = r.status ? "active" : "inactive";
-            }
-
-            let accountType = r.accountType ?? "";
-            if (accountType.toLowerCase() === "savings") {
-              accountType = "saving";
-            }
-
-            return {
-              id: r.id,
-              branchId: r.branchId ?? null,
-              website: r.websiteDomain ?? null,
-              websiteId: r.website ?? null,
-              accountHolderName: r.accountHolderName ?? r.name ?? "-",
-              accountNo: r.accountNo ?? r.accountNumber ?? "",
-              accountType: accountType,
-              status,
-              ifsc: r.ifsc ?? "",
-              bankRange: r.bankRange ?? r.range ?? "",
-              createdAt: r.createdAt
-                ? new Date(r.createdAt)
-                : (r.createdAt ?? null),
-              limitAmount: r.limitAmount,
-              minAmount: r.minAmount || "",
-              maxAmount: r.maxAmount || "",
-            } as BankAccount;
-          });
-
-          this.allWebsites = [
-            ...new Set(
-              this.bankAccounts
-                .filter((account) => account.websiteDomain || account.website)
-                .map(
-                  (account) => account.websiteDomain || account.website || "",
-                ),
-            ),
-          ];
-
-          this.uniqueWebsites = this.allWebsites;
-          this.filteredWebsites = this.allWebsites;
-
-          this.onSearch();
-          this.updatePagination();
-        },
-        (err) => {
-          this.loading = false;
-          console.error("Failed to load bank accounts", err);
-          this.filteredBankAccounts = [];
-          this.updatePagination();
-        },
-      );
-
     this.subs.add(sub);
   }
 
-  // ========== FILTER METHODS ==========
-  // ========== FILTER METHODS ==========
-  onSearch() {
-    const qAccNo = (this.searchAccountNo || "").trim();
-    const qHolder = (this.searchHolder || "").trim().toLowerCase();
-    const qWebsite = (this.searchWebsite || "").trim().toLowerCase();
-    const qIFSC = (this.searchIFSC || "").trim().toUpperCase();
-    const qStatus = (this.searchStatus || "").trim().toLowerCase();
-    const qAccountType = (this.searchAccountType || "").trim().toLowerCase();
-    const qMinAmount = this.searchMinAmount;
-    const qMaxAmount = this.searchMaxAmount;
-    const qLimit = this.searchLimit;
-
-    this.filteredBankAccounts = this.bankAccounts.filter((account) => {
-      if (qAccNo && !(account.accountNo || "").includes(qAccNo)) return false;
-      if (
-        qHolder &&
-        !(account.accountHolderName || "").toLowerCase().includes(qHolder)
-      )
-        return false;
-      if (qIFSC && !(account.ifsc || "").toUpperCase().includes(qIFSC))
-        return false;
-
-      const wd = (account.websiteDomain || account.website || "")
-        .toString()
-        .toLowerCase();
-      if (qWebsite && !wd.includes(qWebsite)) return false;
-
-      if (
-        qStatus &&
-        (account.status || "").toString().toLowerCase() !== qStatus
-      )
-        return false;
-
-      if (qAccountType) {
-        const accountType = (account.accountType || "")
-          .toString()
-          .toLowerCase();
-        const searchType = qAccountType.toLowerCase();
-
-        if (searchType === "saving") {
-          if (accountType !== "saving" && accountType !== "savings") {
-            return false;
-          }
-        } else if (accountType !== searchType) {
-          return false;
-        }
-      }
-
-      const accountLimit = parseFloat(account.limitAmount) || 0;
-      const accountMinAmount = parseFloat(account.minAmount) || 0;
-      const accountMaxAmount = parseFloat(account.maxAmount) || 0;
-
-      // Fix: Check if account limit is LESS THAN OR EQUAL TO search limit
-      if (qLimit !== null) {
-        // If user entered 500000 (50 lakhs), show accounts with limit <= 500000
-        if (accountLimit > qLimit) return false;
-      }
-
-      // Min amount filter: account min should be GREATER THAN OR EQUAL TO search min
-      if (qMinAmount !== null && accountMinAmount < qMinAmount) return false;
-
-      // Max amount filter: account max should be LESS THAN OR EQUAL TO search max
-      if (qMaxAmount !== null && accountMaxAmount > qMaxAmount) return false;
-
-      return true;
-    });
-
-    this.currentPage = 1;
-    this.updatePagination();
-  }
-  resetFilters() {
-    this.searchAccountNo = "";
-    this.searchHolder = "";
-    this.searchWebsite = "";
-    this.searchIFSC = "";
-    this.searchStatus = "";
-    this.searchAccountType = "";
-    this.searchMinAmount = null;
-    this.searchMaxAmount = null;
-    this.searchLimit = null;
-    this.filteredWebsites = this.allWebsites;
-    this.onSearch();
-  }
-
-  hasActiveFilters(): boolean {
-    return !!(
-      this.searchAccountNo ||
-      this.searchHolder ||
-      this.searchWebsite ||
-      this.searchIFSC ||
-      this.searchStatus ||
-      this.searchAccountType ||
-      this.searchMinAmount !== null ||
-      this.searchMaxAmount !== null ||
-      this.searchLimit !== null
-    );
-  }
-
-  // ========== PAGINATION METHODS ==========
-  updatePagination() {
-    this.totalPages = Math.ceil(
-      this.filteredBankAccounts.length / this.itemsPerPage,
-    );
-    if (this.currentPage > this.totalPages && this.totalPages > 0) {
-      this.currentPage = this.totalPages;
-    }
-
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedAccounts = this.filteredBankAccounts.slice(
-      startIndex,
-      endIndex,
-    );
-  }
-
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
-      this.currentPage = page;
-      this.updatePagination();
-    }
-  }
-
-  onItemsPerPageChange() {
-    this.currentPage = 1;
-    this.updatePagination();
-  }
-
-  getPageNumbers(): number[] {
-    const pages: number[] = [];
-    const maxVisible = 5;
-
-    if (this.totalPages <= maxVisible) {
-      for (let i = 1; i <= this.totalPages; i++) pages.push(i);
-    } else {
-      if (this.currentPage <= 3) {
-        for (let i = 1; i <= 5; i++) pages.push(i);
-      } else if (this.currentPage >= this.totalPages - 2) {
-        for (let i = this.totalPages - 4; i <= this.totalPages; i++)
-          pages.push(i);
-      } else {
-        for (let i = this.currentPage - 2; i <= this.currentPage + 2; i++)
-          pages.push(i);
-      }
-    }
-
-    return pages;
-  }
-
-  // ========== FORM SUBMISSION METHODS ==========
+  // ========== FORM SUBMISSION ==========
   submitAddBankForm() {
-    console.log("=== Form Submission Started ===");
-    console.log("Form value:", this.addBankForm.value);
-    console.log("Form valid:", this.addBankForm.valid);
-    console.log("Form errors:", this.addBankForm.errors);
-
-    // Log each control's status
-    Object.keys(this.addBankForm.controls).forEach((key) => {
-      const control = this.addBankForm.get(key);
-      console.log(`${key}:`, {
-        value: control?.value,
-        valid: control?.valid,
-        errors: control?.errors,
-        touched: control?.touched,
-      });
-    });
+    Object.keys(this.addBankForm.controls).forEach((key) =>
+      this.addBankForm.get(key)?.markAsTouched(),
+    );
 
     if (this.addBankForm.invalid) {
-      console.log("Form is INVALID - marking all as touched");
-      this.addBankForm.markAllAsTouched();
-
-      // Force validation display
-      Object.keys(this.addBankForm.controls).forEach((key) => {
-        const control = this.addBankForm.get(key);
-        control?.markAsTouched();
-      });
-
       alert("Please fill in all required fields correctly.");
       return;
     }
 
-    console.log("Form is VALID - proceeding with submission");
     this.isAdding = true;
 
     const formData = this.addBankForm.value;
-    console.log("Form data to submit:", formData);
-
-    // Updated from formData.websiteList to formData.website
     const payload = {
       entityId: this.currentRoleId,
       entityType: this.role,
-      website: formData.website, // Changed from websiteList to website
+      website: formData.website,
       accountNo: formData.accountNumber,
       accountHolderName: formData.accountHolderName,
       ifsc: formData.ifscCode,
@@ -687,26 +627,20 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       maxAmount: formData.maxAmount,
     };
 
-    console.log("API Payload:", payload);
-
-    this.bankService.addBank(payload).subscribe({
-      next: (res: any) => {
-        console.log("API Success Response:", res);
+    const sub = this.bankService.addBank(payload).subscribe({
+      next: () => {
         this.isAdding = false;
         this.closeAddBankModal();
-        this.loadBankAccounts(this.currentRoleId);
-        alert("Bank account added successfully!");
+        this.fetchBankAccounts();
+        this.showAddSuccess("Bank account added successfully!");
       },
       error: (err) => {
-        console.error("API Error:", err);
-        console.error("Error details:", err.error);
+        console.error("Error adding bank account:", err);
         this.isAdding = false;
         alert("Error adding bank account. Please try again.");
       },
-      complete: () => {
-        console.log("API call completed");
-      },
     });
+    this.subs.add(sub);
   }
 
   submitUpdate() {
@@ -716,17 +650,14 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       alert("Account Number is required");
       return;
     }
-
     if (!this.updateForm.accountHolderName.trim()) {
       alert("Account Holder Name is required");
       return;
     }
-
     if (!this.updateForm.ifsc.trim()) {
       alert("IFSC Code is required");
       return;
     }
-
     if (!this.updateForm.limitAmount || this.updateForm.limitAmount <= 0) {
       alert("Please enter a valid limit amount");
       return;
@@ -749,12 +680,12 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       maxAmount: this.updateForm.maxAmount,
     };
 
-    this.bankService.update(payload).subscribe({
-      next: (res: any) => {
+    const sub = this.bankService.update(payload).subscribe({
+      next: () => {
         this.isSubmitting = false;
         this.closeUpdateModal();
-        this.loadBankAccounts(this.currentRoleId);
-        alert("Bank account updated successfully!");
+        this.fetchBankAccounts();
+        this.showUpdateSuccess("Bank account updated successfully!");
       },
       error: (err) => {
         console.error("Error updating bank account:", err);
@@ -762,6 +693,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
         alert("Error updating bank account. Please try again.");
       },
     });
+    this.subs.add(sub);
   }
 
   // ========== UTILITY METHODS ==========
@@ -813,7 +745,6 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     if (!amount) return "-";
     const num = parseFloat(amount);
     if (isNaN(num)) return amount;
-
     if (num >= 10000000) {
       return (num / 10000000).toFixed(1).replace(/\.0$/, "") + "Cr";
     } else if (num >= 100000) {
@@ -824,8 +755,11 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     return num.toString();
   }
 
-  // For template access
-  get Math() {
-    return Math;
+  handleOutsideClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const isWebsiteDropdown = target.closest(".relative")?.contains(target);
+    if (!isWebsiteDropdown && this.showWebsiteDropdown) {
+      this.showWebsiteDropdown = false;
+    }
   }
 }

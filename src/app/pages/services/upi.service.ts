@@ -1,7 +1,18 @@
 import { Injectable } from "@angular/core";
-import { catchError, map, Observable, throwError } from "rxjs";
-import { HttpClient } from "@angular/common/http";
+import { map, Observable } from "rxjs";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import baseUrl from "./helper";
+
+export interface UpiFilterOptions {
+  page?: number;
+  size?: number;
+  query?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  active?: boolean | null;
+  websiteId?: string;
+  limit?: number;
+}
 
 @Injectable({
   providedIn: "root",
@@ -17,41 +28,49 @@ export class UpiService {
     return this.http.get<any[]>(`${baseUrl}/upi/getAllByEntityId/${id}`);
   }
 
+  /**
+   * Server‑side paginated & filtered call – accepts a single options object.
+   */
   getByBranchIdPaginated(
-    id: string,
-    page: number = 0,
-    size: number = 20,
+    entityId: string,
+    options: UpiFilterOptions = {},
   ): Observable<any> {
-    return this.http.get<any>(
-      `${baseUrl}/upi/getAllByEntityId/paginated/${id}`,
-      {
-        params: {
-          page: page.toString(),
-          size: size.toString(),
-        },
-      },
-    );
+    let params = new HttpParams()
+      .set("page", options.page?.toString() ?? "0")
+      .set("size", options.size?.toString() ?? "20");
+
+    if (options.query) params = params.set("query", options.query);
+    if (options.minAmount !== undefined && options.maxAmount !== undefined) {
+      params = params.set("minAmount", options.minAmount.toString());
+      params = params.set("maxAmount", options.maxAmount.toString());
+    }
+    if (options.active !== undefined && options.active !== null) {
+      params = params.set("active", options.active.toString());
+    }
+    if (options.websiteId) params = params.set("websiteId", options.websiteId);
+    if (options.limit && options.limit > 0) {
+      params = params.set("limit", options.limit.toString());
+    }
+
+    return this.http
+      .get<any>(`${baseUrl}/upi/getAllByEntityId/paginated/${entityId}`, {
+        params,
+      })
+      .pipe(map((res) => res.data));
   }
 
   getAllByEntityIdAndWebsiteId(id: any, websiteId: any): Observable<any[]> {
-    return this.http
-      .get<
-        any[]
-      >(`${baseUrl}/upi/getAllByEntityIdAndWebsiteId/${id}/${websiteId}`)
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(() => error)),
-      );
+    return this.http.get<any[]>(
+      `${baseUrl}/upi/getAllByEntityIdAndWebsiteId/${id}/${websiteId}`,
+    );
   }
 
   getAllByWebsiteId(websiteId: any): Observable<any[]> {
-    return this.http
-      .get<any[]>(`${baseUrl}/upi/getAllByWebsiteId/${websiteId}`)
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(() => error)),
-      );
+    return this.http.get<any[]>(
+      `${baseUrl}/upi/getAllByWebsiteId/${websiteId}`,
+    );
   }
+
   add(upi: FormData): Observable<any> {
     return this.http.post<any>(`${baseUrl}/upi/create`, upi);
   }
@@ -61,11 +80,6 @@ export class UpiService {
   }
 
   toogleUpiStatus(upiId: any): Observable<any[]> {
-    return this.http
-      .patch<any[]>(`${baseUrl}/upi/toggleStatus/${upiId}`, {})
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(() => error)),
-      );
+    return this.http.patch<any[]>(`${baseUrl}/upi/toggleStatus/${upiId}`, {});
   }
 }

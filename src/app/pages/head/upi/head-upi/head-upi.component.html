@@ -30,7 +30,7 @@
     </button>
   </div>
 
-  <!-- ========== FILTER SECTION (unchanged, fully included) ========== -->
+  <!-- ========== FILTER SECTION ========== -->
   <div
     class="bg-[var(--color-bg)] rounded-lg p-4 mb-6 border border-[var(--color-border)]"
   >
@@ -134,7 +134,7 @@
       <!-- Status Filter -->
       <select
         [(ngModel)]="filterStatus"
-        (change)="onSearch()"
+        (change)="onFilterChange()"
         class="px-3 py-2.5 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] transition-colors duration-200 font-medium text-[var(--color-font)] text-sm min-w-[140px]"
       >
         <option value="">All Status</option>
@@ -143,7 +143,28 @@
       </select>
     </div>
 
-    <!-- Amount Filter Dropdown Button -->
+    <!-- ===== MAX LIMIT FILTER (single field) ===== -->
+    <div class="mb-4 flex items-center gap-4">
+      <label
+        class="text-sm font-medium text-[var(--color-font)] whitespace-nowrap"
+      >
+        Max Limit (₹):
+      </label>
+      <input
+        type="number"
+        [(ngModel)]="maxLimit"
+        (ngModelChange)="onFilterChange()"
+        placeholder="e.g. 50000"
+        min="0"
+        step="1"
+        class="w-40 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
+      />
+      <span class="text-xs text-[var(--color-muted)]">
+        (Shows UPIs with Limit ≤ this value)
+      </span>
+    </div>
+
+    <!-- Transaction Range Filter Dropdown -->
     <div class="mb-4">
       <button
         type="button"
@@ -153,58 +174,18 @@
         <span class="material-icons mr-2 text-[var(--color-primary)]">
           filter_alt
         </span>
-        Amount Filter
+        Transaction Range Filter
         <span class="material-icons ml-2">
           {{ showAmountFilter ? "expand_less" : "expand_more" }}
         </span>
       </button>
 
-      <!-- TWO Amount Filters Content -->
+      <!-- Transaction Range Filter Content -->
       <div
         *ngIf="showAmountFilter"
         class="mt-3 p-4 border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)]"
       >
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- 1. Limit Amount Filter -->
-          <div>
-            <label
-              class="block text-sm font-medium text-[var(--color-font)] mb-2"
-            >
-              Limit Amount (₹)
-            </label>
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center gap-2">
-                <input
-                  type="number"
-                  [(ngModel)]="limitMinAmount"
-                  (ngModelChange)="onAmountFilterChange()"
-                  placeholder="Min ₹"
-                  min="0"
-                  step="1"
-                  class="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-bg)] transition-colors duration-200 text-sm"
-                />
-                <span class="text-[var(--color-muted)]">to</span>
-                <input
-                  type="number"
-                  [(ngModel)]="limitMaxAmount"
-                  (ngModelChange)="onAmountFilterChange()"
-                  placeholder="Max ₹"
-                  min="0"
-                  step="1"
-                  class="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-bg)] transition-colors duration-200 text-sm"
-                />
-              </div>
-              <div
-                *ngIf="limitFilterActive"
-                class="text-xs text-[var(--color-muted)]"
-              >
-                Filtering Limit: {{ limitMinAmount || 0 }} -
-                {{ limitMaxAmount || "∞" }} ₹
-              </div>
-            </div>
-          </div>
-
-          <!-- 2. Transaction Range Filter -->
+        <div class="grid grid-cols-1 gap-6">
           <div>
             <label
               class="block text-sm font-medium text-[var(--color-font)] mb-2"
@@ -219,7 +200,7 @@
                 <input
                   type="number"
                   [(ngModel)]="transactionMinAmount"
-                  (ngModelChange)="onAmountFilterChange()"
+                  (ngModelChange)="onFilterChange()"
                   placeholder="Min ₹"
                   min="0"
                   step="1"
@@ -229,7 +210,7 @@
                 <input
                   type="number"
                   [(ngModel)]="transactionMaxAmount"
-                  (ngModelChange)="onAmountFilterChange()"
+                  (ngModelChange)="onFilterChange()"
                   placeholder="Max ₹"
                   min="0"
                   step="1"
@@ -249,14 +230,14 @@
       </div>
     </div>
 
-    <!-- Action Buttons -->
+    <!-- Action Buttons & Active Filters Display -->
     <div
       class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[var(--color-border)]"
     >
       <div
         class="text-sm text-[var(--color-muted)] flex flex-wrap items-center gap-2"
       >
-        <!-- Active Filters Display -->
+        <!-- Active Filters Chips -->
         <div
           *ngIf="selectedWebsite"
           class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
@@ -271,7 +252,6 @@
           </button>
         </div>
 
-        <!-- Status Filter Badge -->
         <div
           *ngIf="filterStatus"
           class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
@@ -279,14 +259,13 @@
           <span class="material-icons mr-1 text-sm">toggle_on</span>
           {{ filterStatus === "active" ? "Active" : "Inactive" }}
           <button
-            (click)="filterStatus = ''; onSearch()"
+            (click)="filterStatus = ''; onFilterChange()"
             class="ml-2 hover:text-[var(--color-danger)] transition-colors"
           >
             <span class="material-icons text-sm">close</span>
           </button>
         </div>
 
-        <!-- Search Term Badge -->
         <div
           *ngIf="searchTerm"
           class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
@@ -301,13 +280,13 @@
           </button>
         </div>
 
-        <!-- Limit Amount Filter Badge -->
+        <!-- Max Limit Chip -->
         <div
           *ngIf="limitFilterActive"
           class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
         >
           <span class="material-icons mr-1 text-sm">currency_rupee</span>
-          Limit: {{ limitMinAmount || "0" }} - {{ limitMaxAmount || "∞" }} ₹
+          Max Limit: ≤ {{ maxLimit }} ₹
           <button
             (click)="clearLimitFilter()"
             class="ml-2 hover:text-[var(--color-danger)] transition-colors"
@@ -316,7 +295,6 @@
           </button>
         </div>
 
-        <!-- Transaction Range Filter Badge -->
         <div
           *ngIf="transactionFilterActive"
           class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
@@ -345,7 +323,7 @@
 
       <div class="flex gap-2">
         <button
-          (click)="applyAllFilters()"
+          (click)="onFilterChange()"
           class="inline-flex items-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors duration-200 shadow-sm"
         >
           <span class="material-icons mr-2">filter_alt</span>
@@ -362,7 +340,7 @@
     </div>
   </div>
 
-  <!-- ========== UPI TABLE & PAGINATION ========== -->
+  <!-- ========== UPI TABLE ========== -->
   <div
     class="overflow-x-auto bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]"
   >
@@ -420,7 +398,7 @@
         class="bg-[var(--color-surface)] divide-y divide-[var(--color-border)]"
       >
         <tr
-          *ngFor="let upi of pagedUpis(); let i = index"
+          *ngFor="let upi of upis; let i = index"
           class="hover:bg-[var(--color-hover)] transition-colors duration-150"
         >
           <td class="px-4 py-3 whitespace-nowrap">
@@ -548,7 +526,7 @@
     </table>
 
     <!-- Empty State -->
-    <div *ngIf="filteredUpis.length === 0" class="text-center py-12">
+    <div *ngIf="upis.length === 0" class="text-center py-12">
       <div class="flex flex-col items-center justify-center">
         <div
           class="w-16 h-16 bg-[var(--color-bg)] rounded-full flex items-center justify-center mb-4 border border-[var(--color-border)]"
@@ -562,14 +540,24 @@
         </h3>
         <p class="text-[var(--color-muted)] max-w-md mb-6 text-sm">
           {{
-            searchTerm || filterStatus
+            searchTerm ||
+            filterStatus ||
+            selectedWebsite ||
+            limitFilterActive ||
+            transactionFilterActive
               ? "Try adjusting your search or filters"
               : "Get started by adding your first UPI"
           }}
         </p>
         <div class="flex gap-3">
           <button
-            *ngIf="!searchTerm && !filterStatus"
+            *ngIf="
+              !searchTerm &&
+              !filterStatus &&
+              !selectedWebsite &&
+              !limitFilterActive &&
+              !transactionFilterActive
+            "
             (click)="openAddModal()"
             class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors duration-200"
           >
@@ -577,7 +565,13 @@
             Add Your First UPI
           </button>
           <button
-            *ngIf="searchTerm || filterStatus"
+            *ngIf="
+              searchTerm ||
+              filterStatus ||
+              selectedWebsite ||
+              limitFilterActive ||
+              transactionFilterActive
+            "
             (click)="resetFilters()"
             class="inline-flex items-center px-4 py-2 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] transition-colors duration-200 font-medium border border-[var(--color-border)]"
           >
@@ -590,14 +584,14 @@
 
     <!-- Pagination -->
     <div
-      *ngIf="filteredUpis.length > 0"
+      *ngIf="totalElements > 0"
       class="px-4 py-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
     >
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
         <div class="text-sm text-[var(--color-muted)]">
           Showing {{ (currentPage - 1) * pageSize + 1 }} to
-          {{ Math.min(currentPage * pageSize, filteredUpis.length) }} of
-          {{ filteredUpis.length }} entries
+          {{ Math.min(currentPage * pageSize, totalElements) }} of
+          {{ totalElements }} entries
         </div>
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-2">
@@ -995,7 +989,7 @@
     </div>
   </div>
 
-  <!-- ========== UPDATE UPI MODAL – with inline VPA validation + success toast ========== -->
+  <!-- ========== UPDATE UPI MODAL ========== -->
   <div
     *ngIf="showUpdateModal"
     class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -1067,6 +1061,40 @@
             </div>
           </div>
 
+          <!-- NEW QR DISPLAY -->
+          <div
+            *ngIf="updateQrData"
+            class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)]"
+          >
+            <div class="flex justify-between items-center mb-2">
+              <label class="text-sm font-medium text-[var(--color-font)]">
+                New QR Code
+              </label>
+              <button
+                type="button"
+                (click)="removeGeneratedUpdateQr()"
+                class="px-2 py-1 text-xs bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] rounded hover:bg-[var(--color-hover)]"
+              >
+                Remove
+              </button>
+            </div>
+            <div class="flex justify-center">
+              <div
+                class="p-2 bg-white rounded border border-[var(--color-border)]"
+              >
+                <qrcode
+                  #updateQrcodeElem
+                  [qrdata]="updateQrData"
+                  [width]="120"
+                  [errorCorrectionLevel]="'H'"
+                  [margin]="1"
+                  [colorDark]="'#000000'"
+                  [colorLight]="'#ffffff'"
+                ></qrcode>
+              </div>
+            </div>
+          </div>
+
           <!-- UPI ID with inline validation -->
           <div>
             <label
@@ -1083,13 +1111,19 @@
               class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
               placeholder="username@paytm"
             />
-            <!-- Inline error -->
             <div
               *ngIf="updateForm.vpa && !isValidUpiId(updateForm.vpa)"
               class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
             >
               <span class="material-icons mr-1 text-sm">error</span>
               Please enter a valid UPI ID
+            </div>
+            <div
+              *ngIf="updateQrError"
+              class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
+            >
+              <span class="material-icons mr-1 text-sm">error</span>
+              {{ updateQrError }}
             </div>
           </div>
 
@@ -1185,7 +1219,7 @@
             <div class="flex gap-3">
               <button
                 type="submit"
-                [disabled]="isSubmitting"
+                [disabled]="isSubmitting || !isValidUpiId(updateForm.vpa)"
                 class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50"
               >
                 <span
@@ -1273,7 +1307,7 @@
     </div>
   </div>
 
-  <!-- ========== ✅ SUCCESS TOAST ========== -->
+  <!-- ========== SUCCESS TOAST ========== -->
   <div
     *ngIf="showUpdateSuccessPopup"
     class="fixed top-5 right-5 z-[9999] animate-slide-down"

@@ -37,13 +37,12 @@
     </button>
   </div>
 
-  <!-- Advanced Filter Section -->
+  <!-- ========== FILTER SECTION (server‑side) ========== -->
   <div
     class="bg-[var(--color-bg)] rounded-lg p-4 mb-6 border border-[var(--color-border)] shadow-sm"
   >
-    <div
-      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4"
-    >
+    <!-- Filter header with active filter chips -->
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
       <h3
         class="text-base font-semibold text-[var(--color-font)] flex items-center"
       >
@@ -55,188 +54,204 @@
         Filter Accounts
       </h3>
 
-      <div class="flex flex-wrap items-center gap-3">
-        <!-- Status Filter (Outside dropdown) -->
-        <div class="flex items-center gap-2">
-          <label
-            class="text-xs font-medium text-[var(--color-font)] whitespace-nowrap"
-            >Status:</label
+      <!-- Active filters chips -->
+      <div class="flex flex-wrap items-center gap-2 text-xs">
+        <span
+          *ngIf="selectedWebsite"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
+        >
+          <span class="material-symbols-outlined mr-1 text-sm">language</span>
+          {{ selectedWebsite.websiteDomain }}
+          <button
+            (click)="clearWebsiteFilter()"
+            class="ml-1 hover:text-[var(--color-danger)]"
           >
-          <select
-            [(ngModel)]="searchStatus"
-            name="searchStatus"
-            (change)="onSearch()"
-            class="border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-xs bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] min-w-[120px]"
-          >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="frozen">Frozen</option>
-          </select>
-        </div>
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </span>
 
-        <div class="flex gap-2">
+        <span
+          *ngIf="filterStatus"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
+        >
+          <span class="material-symbols-outlined mr-1 text-sm">toggle_on</span>
+          {{ filterStatus | titlecase }}
           <button
-            type="button"
-            (click)="onSearch()"
-            class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 font-medium text-xs"
+            (click)="filterStatus = ''; onFilterChange()"
+            class="ml-1 hover:text-[var(--color-danger)]"
           >
-            <span
-              class="material-symbols-outlined text-[var(--color-surface)] mr-1.5 text-sm"
-            >
-              search
-            </span>
-            Search
+            <span class="material-symbols-outlined text-sm">close</span>
           </button>
+        </span>
+
+        <span
+          *ngIf="searchTerm"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
+        >
+          <span class="material-symbols-outlined mr-1 text-sm">search</span>
+          "{{ searchTerm }}"
           <button
-            type="button"
-            (click)="resetFilters()"
-            class="inline-flex items-center px-3 py-1.5 bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] transition-all duration-200 font-medium text-xs border border-[var(--color-border)]"
+            (click)="searchTerm = ''; onSearch()"
+            class="ml-1 hover:text-[var(--color-danger)]"
           >
-            <span
-              class="material-symbols-outlined text-[var(--color-font)] mr-1.5 text-sm"
-            >
-              restart_alt
-            </span>
-            Reset
+            <span class="material-symbols-outlined text-sm">close</span>
           </button>
-        </div>
+        </span>
+
+        <span
+          *ngIf="maxLimit && maxLimit > 0"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
+        >
+          <span class="material-symbols-outlined mr-1 text-sm"
+            >currency_rupee</span
+          >
+          Max Limit: ≤ {{ maxLimit }} ₹
+          <button
+            (click)="clearLimitFilter()"
+            class="ml-1 hover:text-[var(--color-danger)]"
+          >
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </span>
+
+        <span
+          *ngIf="minAmount !== null || maxAmount !== null"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
+        >
+          <span class="material-symbols-outlined mr-1 text-sm"
+            >currency_rupee</span
+          >
+          Amount: {{ minAmount || 0 }} - {{ maxAmount || "∞" }} ₹
+          <button
+            (click)="clearMinMaxFilter()"
+            class="ml-1 hover:text-[var(--color-danger)]"
+          >
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </span>
+
+        <span
+          *ngIf="activeFilters > 0"
+          class="text-[var(--color-primary)] font-medium"
+        >
+          {{ activeFilters }} active
+        </span>
       </div>
     </div>
 
-    <!-- Basic Filters Dropdown -->
-    <div class="mb-4">
-      <details class="group">
-        <summary
-          class="flex items-center justify-between p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] cursor-pointer hover:bg-[var(--color-hover)] transition-colors"
-        >
-          <div class="flex items-center">
-            <span
-              class="material-symbols-outlined text-[var(--color-primary)] mr-2"
-            >
-              expand_more
-            </span>
-            <span class="font-medium text-sm text-[var(--color-font)]"
-              >Account Information Filters</span
-            >
-            <span
-              class="ml-2 text-xs bg-[var(--color-primary)] text-[var(--color-surface)] px-2 py-0.5 rounded-full"
-            >
-              Basic
-            </span>
-          </div>
+    <!-- Main filter inputs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <!-- Unified Search -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-[var(--color-font)]">
           <span
-            class="material-symbols-outlined text-[var(--color-muted)] group-open:rotate-180 transition-transform text-sm"
+            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+            >search</span
           >
-            expand_more
-          </span>
-        </summary>
-        <div
-          class="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]"
+          Search (Account, Holder, IFSC, Website)
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch()"
+          placeholder="Search..."
+          class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+        />
+      </div>
+
+      <!-- Status Filter -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-[var(--color-font)]">
+          <span
+            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+            >toggle_on</span
+          >
+          Status
+        </label>
+        <select
+          [(ngModel)]="filterStatus"
+          (change)="onFilterChange()"
+          class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
         >
-          <!-- Account Number -->
-          <div class="space-y-1">
-            <label class="block text-xs font-medium text-[var(--color-font)]">
-              <span
-                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
-              >
-                credit_card
-              </span>
-              Account Number
-            </label>
-            <input
-              type="text"
-              [(ngModel)]="searchAccountNo"
-              name="searchAccountNo"
-              placeholder="Acc number"
-              (input)="onSearch()"
-              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)]"
-            />
-          </div>
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="frozen">Frozen</option>
+        </select>
+      </div>
 
-          <!-- Account Holder -->
-          <div class="space-y-1">
-            <label class="block text-xs font-medium text-[var(--color-font)]">
-              <span
-                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
-              >
-                person
-              </span>
-              Account Holder
-            </label>
-            <input
-              type="text"
-              [(ngModel)]="searchHolder"
-              name="searchHolder"
-              placeholder="Holder name"
-              (input)="onSearch()"
-              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)]"
-            />
-          </div>
-
-          <!-- IFSC Code -->
-          <div class="space-y-1">
-            <label class="block text-xs font-medium text-[var(--color-font)]">
-              <span
-                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
-              >
-                password
-              </span>
-              IFSC Code
-            </label>
-            <input
-              type="text"
-              [(ngModel)]="searchIFSC"
-              name="searchIFSC"
-              placeholder="IFSC code"
-              (input)="onSearch()"
-              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] uppercase"
-            />
-          </div>
-
-          <!-- Website -->
-          <div class="space-y-1 relative">
-            <label class="block text-xs font-medium text-[var(--color-font)]">
-              <span
-                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
-              >
-                public
-              </span>
-              Website
-            </label>
-            <div class="relative">
-              <input
-                type="text"
-                [(ngModel)]="searchWebsite"
-                (input)="onWebsiteSearch()"
-                placeholder="Search website"
-                class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] pr-8"
-              />
-              <span
-                class="material-symbols-outlined absolute right-2 top-2 text-[var(--color-muted)] text-sm"
-              >
-                search
-              </span>
-            </div>
-            <div
-              *ngIf="filteredWebsites.length > 0 && searchWebsite"
-              class="absolute z-50 mt-1 max-h-32 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg w-full left-0 right-0"
-            >
-              <div
-                *ngFor="let website of filteredWebsites"
-                class="px-2 py-1.5 hover:bg-[var(--color-hover)] cursor-pointer text-xs text-[var(--color-font)] truncate"
-                (click)="selectWebsite(website)"
-              >
-                {{ website }}
-              </div>
+      <!-- Website Filter with dropdown -->
+      <div class="space-y-1 relative website-filter-container">
+        <label class="block text-xs font-medium text-[var(--color-font)]">
+          <span
+            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+            >public</span
+          >
+          Website
+        </label>
+        <div class="relative">
+          <input
+            type="text"
+            [(ngModel)]="websiteSearchTerm"
+            (ngModelChange)="filterWebsites()"
+            (focus)="openWebsiteDropdown()"
+            (blur)="onWebsiteInputBlur()"
+            placeholder="Search website..."
+            class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] pr-8"
+          />
+          <span
+            class="material-symbols-outlined absolute right-2 top-2 text-[var(--color-muted)] text-sm"
+          >
+            search
+          </span>
+        </div>
+        <div
+          *ngIf="showWebsiteDropdown && filteredWebsites.length > 0"
+          class="absolute z-50 w-full mt-1 max-h-40 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
+        >
+          <div
+            *ngFor="let site of filteredWebsites"
+            class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-xs text-[var(--color-font)] border-b border-[var(--color-border)] last:border-b-0"
+            (mousedown)="selectWebsite(site)"
+          >
+            <div class="flex justify-between">
+              <span>{{ site.websiteDomain }}</span>
+              <span class="text-[var(--color-muted)]">{{ site.currency }}</span>
             </div>
           </div>
         </div>
-      </details>
+        <button
+          *ngIf="selectedWebsite"
+          (click)="clearWebsiteFilter()"
+          class="absolute right-2 top-7 text-[var(--color-muted)] hover:text-[var(--color-danger)]"
+        >
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+
+      <!-- Max Limit Filter -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-[var(--color-font)]">
+          <span
+            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+            >monetization_on</span
+          >
+          Max Limit (₹)
+        </label>
+        <input
+          type="number"
+          [(ngModel)]="maxLimit"
+          (ngModelChange)="onFilterChange()"
+          placeholder="e.g. 50000"
+          min="0"
+          step="1"
+          class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+        />
+      </div>
     </div>
 
-    <!-- Advanced Filters Dropdown -->
-    <div>
+    <!-- Transaction Range Filter (collapsible) -->
+    <div class="mt-3">
       <details class="group">
         <summary
           class="flex items-center justify-between p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] cursor-pointer hover:bg-[var(--color-hover)] transition-colors"
@@ -244,17 +259,15 @@
           <div class="flex items-center">
             <span
               class="material-symbols-outlined text-[var(--color-primary)] mr-2"
+              >tune</span
             >
-              tune
-            </span>
             <span class="font-medium text-sm text-[var(--color-font)]"
-              >Financial & Type Filters</span
+              >Transaction Range Filter</span
             >
             <span
               class="ml-2 text-xs bg-[var(--color-secondary)] text-[var(--color-surface)] px-2 py-0.5 rounded-full"
+              >Advanced</span
             >
-              Advanced
-            </span>
           </div>
           <span
             class="material-symbols-outlined text-[var(--color-muted)] group-open:rotate-180 transition-transform text-sm"
@@ -263,68 +276,25 @@
           </span>
         </summary>
         <div
-          class="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]"
+          class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]"
         >
-          <!-- Account Type -->
-          <div class="space-y-1">
-            <label class="block text-xs font-medium text-[var(--color-font)]">
-              <span
-                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
-              >
-                category
-              </span>
-              Account Type
-            </label>
-            <select
-              [(ngModel)]="searchAccountType"
-              name="searchAccountType"
-              (change)="onSearch()"
-              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)]"
-            >
-              <option value="">All Types</option>
-              <option value="saving">Saving Account</option>
-              <option value="current">Current Account</option>
-              <option value="salary">Salary Account</option>
-            </select>
-          </div>
-
-          <!-- Account Limit -->
-          <div class="space-y-1">
-            <label class="block text-xs font-medium text-[var(--color-font)]">
-              <span
-                class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
-              >
-                monetization_on
-              </span>
-              Account Limit
-            </label>
-            <input
-              type="number"
-              [(ngModel)]="searchLimit"
-              name="searchLimit"
-              placeholder="Limit amount"
-              (input)="onSearch()"
-              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)]"
-            />
-          </div>
-
           <!-- Min Amount -->
           <div class="space-y-1">
             <label class="block text-xs font-medium text-[var(--color-font)]">
               <span
                 class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+                >trending_down</span
               >
-                trending_down
-              </span>
-              Min Amount
+              Min Amount (₹)
             </label>
             <input
               type="number"
-              [(ngModel)]="searchMinAmount"
-              name="searchMinAmount"
-              placeholder="Min amount"
-              (input)="onSearch()"
-              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)]"
+              [(ngModel)]="minAmount"
+              (ngModelChange)="onFilterChange()"
+              placeholder="Min"
+              min="0"
+              step="1"
+              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
             />
           </div>
 
@@ -333,27 +303,67 @@
             <label class="block text-xs font-medium text-[var(--color-font)]">
               <span
                 class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+                >trending_up</span
               >
-                trending_up
-              </span>
-              Max Amount
+              Max Amount (₹)
             </label>
             <input
               type="number"
-              [(ngModel)]="searchMaxAmount"
-              name="searchMaxAmount"
-              placeholder="Max amount"
-              (input)="onSearch()"
-              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)]"
+              [(ngModel)]="maxAmount"
+              (ngModelChange)="onFilterChange()"
+              placeholder="Max"
+              min="0"
+              step="1"
+              class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
             />
           </div>
         </div>
       </details>
     </div>
+
+    <!-- Filter action buttons -->
+    <div class="flex justify-end gap-2 mt-4">
+      <button
+        (click)="onFilterChange()"
+        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 text-sm font-medium"
+      >
+        <span class="material-symbols-outlined mr-1.5 text-sm">filter_alt</span>
+        Apply Filters
+      </button>
+      <button
+        (click)="resetFilters()"
+        class="inline-flex items-center px-4 py-2 bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] transition-all duration-200 text-sm font-medium border border-[var(--color-border)]"
+      >
+        <span class="material-symbols-outlined mr-1.5 text-sm"
+          >restart_alt</span
+        >
+        Reset All
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="loading" class="text-center py-12">
+    <div class="flex flex-col items-center justify-center">
+      <div
+        class="w-12 h-12 bg-[var(--color-primary)] rounded-xl flex items-center justify-center mb-3"
+      >
+        <span
+          class="material-symbols-outlined animate-spin text-[var(--color-surface)] text-2xl"
+        >
+          refresh
+        </span>
+      </div>
+      <h3 class="text-base font-medium text-[var(--color-font)] mb-1">
+        Loading bank accounts
+      </h3>
+      <p class="text-[var(--color-muted)] text-sm">Please wait...</p>
+    </div>
   </div>
 
   <!-- Table Section -->
   <div
+    *ngIf="!loading"
     class="overflow-x-auto rounded-lg border border-[var(--color-border)] shadow-sm mb-4"
   >
     <table class="min-w-full divide-y divide-[var(--color-border)] text-sm">
@@ -420,7 +430,7 @@
         class="bg-[var(--color-surface)] divide-y divide-[var(--color-border)]"
       >
         <tr
-          *ngFor="let account of paginatedAccounts; let i = index"
+          *ngFor="let account of bankAccounts; let i = index"
           class="hover:bg-[var(--color-hover)] transition-colors duration-150"
         >
           <td class="px-4 py-3 whitespace-nowrap">
@@ -428,7 +438,7 @@
               <div
                 class="w-7 h-7 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-md flex items-center justify-center text-xs font-medium"
               >
-                {{ (currentPage - 1) * itemsPerPage + i + 1 }}
+                {{ (currentPage - 1) * pageSize + i + 1 }}
               </div>
             </div>
           </td>
@@ -436,9 +446,8 @@
             <div class="flex items-center">
               <span
                 class="material-symbols-outlined text-[var(--color-primary)] mr-1.5 text-sm"
+                >public</span
               >
-                public
-              </span>
               <span
                 class="text-xs font-medium text-[var(--color-primary)] truncate max-w-[120px]"
                 title="{{ account.websiteDomain || account.website || '-' }}"
@@ -451,9 +460,8 @@
             <div class="flex items-center">
               <span
                 class="material-symbols-outlined text-[var(--color-muted)] mr-1.5 text-sm"
+                >credit_card</span
               >
-                credit_card
-              </span>
               <span
                 class="text-xs text-[var(--color-font)] font-mono bg-[var(--color-bg)] px-2 py-1 rounded border border-[var(--color-border)]"
                 title="{{ account.accountNo || '-' }}"
@@ -466,9 +474,8 @@
             <div class="flex items-center">
               <span
                 class="material-symbols-outlined text-[var(--color-muted)] mr-1.5 text-sm"
+                >person</span
               >
-                person
-              </span>
               <span
                 class="text-xs text-[var(--color-font)] truncate max-w-[120px]"
                 title="{{ account.accountHolderName || '-' }}"
@@ -481,9 +488,8 @@
             <div class="flex items-center">
               <span
                 class="material-symbols-outlined text-[var(--color-muted)] mr-1.5 text-sm"
+                >password</span
               >
-                password
-              </span>
               <span
                 class="text-xs text-[var(--color-font)] font-mono bg-[var(--color-bg)] px-2 py-1 rounded border border-[var(--color-border)]"
                 title="{{ account.ifsc || '-' }}"
@@ -497,12 +503,11 @@
               <div class="flex items-center">
                 <span
                   class="material-symbols-outlined text-[var(--color-muted)] mr-1.5 text-sm"
+                  >monetization_on</span
                 >
-                  monetization_on
-                </span>
-                <span class="text-xs text-[var(--color-font)] font-mono">
-                  {{ formatCurrencyShort(account.limitAmount) }}
-                </span>
+                <span class="text-xs text-[var(--color-font)] font-mono">{{
+                  formatCurrencyShort(account.limitAmount)
+                }}</span>
               </div>
               <div
                 class="absolute z-10 left-0 bottom-full mb-1 px-2 py-1 text-xs bg-gray-900 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
@@ -516,12 +521,11 @@
               <div class="flex items-center">
                 <span
                   class="material-symbols-outlined text-[var(--color-muted)] mr-1.5 text-sm"
+                  >trending_down</span
                 >
-                  trending_down
-                </span>
-                <span class="text-xs text-[var(--color-font)] font-mono">
-                  {{ formatCurrencyShort(account.minAmount) }}
-                </span>
+                <span class="text-xs text-[var(--color-font)] font-mono">{{
+                  formatCurrencyShort(account.minAmount)
+                }}</span>
               </div>
               <div
                 class="absolute z-10 left-0 bottom-full mb-1 px-2 py-1 text-xs bg-gray-900 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
@@ -535,12 +539,11 @@
               <div class="flex items-center">
                 <span
                   class="material-symbols-outlined text-[var(--color-muted)] mr-1.5 text-sm"
+                  >trending_up</span
                 >
-                  trending_up
-                </span>
-                <span class="text-xs text-[var(--color-font)] font-mono">
-                  {{ formatCurrencyShort(account.maxAmount) }}
-                </span>
+                <span class="text-xs text-[var(--color-font)] font-mono">{{
+                  formatCurrencyShort(account.maxAmount)
+                }}</span>
               </div>
               <div
                 class="absolute z-10 left-0 bottom-full mb-1 px-2 py-1 text-xs bg-gray-900 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
@@ -555,9 +558,8 @@
             >
               <span
                 class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+                >category</span
               >
-                category
-              </span>
               {{ getAccountTypeLabel(account.accountType) }}
             </span>
           </td>
@@ -581,16 +583,15 @@
           <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center gap-1">
               <div class="relative" #actionDropdown>
+                <!-- Action button now shows only the three dots icon -->
                 <button
                   (click)="toggleActionDropdown(account.id, $event)"
                   class="inline-flex items-center px-2 py-1 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 text-xs"
                 >
                   <span
-                    class="material-symbols-outlined text-[var(--color-surface)] mr-1 text-sm"
+                    class="material-symbols-outlined text-[var(--color-surface)] text-sm"
+                    >more_vert</span
                   >
-                    more_vert
-                  </span>
-                  Actions
                 </button>
 
                 <!-- Dropdown Menu -->
@@ -608,9 +609,8 @@
                     >
                       <span
                         class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-sm"
+                        >edit</span
                       >
-                        edit
-                      </span>
                       Edit Account
                     </button>
 
@@ -682,16 +682,65 @@
     </table>
   </div>
 
+  <!-- Empty State -->
+  <div *ngIf="!loading && bankAccounts.length === 0" class="text-center py-12">
+    <div class="flex flex-col items-center justify-center">
+      <div
+        class="w-16 h-16 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] rounded-xl flex items-center justify-center mb-4 shadow-md"
+      >
+        <span
+          class="material-symbols-outlined text-[var(--color-surface)] text-2xl"
+          >account_balance</span
+        >
+      </div>
+      <h3 class="text-lg font-semibold text-[var(--color-font)] mb-2">
+        No bank accounts found
+      </h3>
+      <p class="text-[var(--color-muted)] text-sm max-w-md mb-4">
+        {{
+          activeFilters > 0
+            ? "Try adjusting your search criteria"
+            : "Get started by adding your first bank account"
+        }}
+      </p>
+      <div class="flex gap-2">
+        <button
+          *ngIf="activeFilters > 0"
+          (click)="resetFilters()"
+          class="inline-flex items-center px-3 py-1.5 bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] transition-colors font-medium text-sm border border-[var(--color-border)]"
+        >
+          <span
+            class="material-symbols-outlined text-[var(--color-font)] mr-1.5"
+            >restart_alt</span
+          >
+          Clear Filters
+        </button>
+        <button
+          *ngIf="activeFilters === 0"
+          (click)="openAddBankModal()"
+          class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-colors font-medium text-sm shadow-sm"
+        >
+          <span
+            class="material-symbols-outlined text-[var(--color-surface)] mr-1.5"
+            >add</span
+          >
+          Add New Account
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Pagination Controls -->
   <div
+    *ngIf="totalElements > 0"
     class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-[var(--color-border)]"
   >
     <div class="flex items-center gap-3">
       <div class="flex items-center gap-2">
         <span class="text-xs text-[var(--color-muted)]">Show:</span>
         <select
-          [(ngModel)]="itemsPerPage"
-          (change)="onItemsPerPageChange()"
+          [(ngModel)]="pageSize"
+          (change)="onPageSizeChange()"
           class="border border-[var(--color-border)] rounded px-2 py-1 text-xs bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
         >
           <option value="5">5</option>
@@ -702,15 +751,15 @@
         <span class="text-xs text-[var(--color-muted)]">entries</span>
       </div>
       <div class="text-xs text-[var(--color-muted)]">
-        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
-        {{ Math.min(currentPage * itemsPerPage, filteredBankAccounts.length) }}
-        of {{ filteredBankAccounts.length }}
+        Showing {{ (currentPage - 1) * pageSize + 1 }} to
+        {{ Math.min(currentPage * pageSize, totalElements) }} of
+        {{ totalElements }}
       </div>
     </div>
 
     <div class="flex items-center gap-1">
       <button
-        (click)="goToPage(currentPage - 1)"
+        (click)="prevPage()"
         [disabled]="currentPage === 1"
         class="p-1.5 rounded border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       >
@@ -732,8 +781,8 @@
       </div>
 
       <button
-        (click)="goToPage(currentPage + 1)"
-        [disabled]="currentPage === totalPages"
+        (click)="nextPage()"
+        [disabled]="currentPage >= totalPages()"
         class="p-1.5 rounded border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       >
         <span class="material-symbols-outlined text-sm">chevron_right</span>
@@ -741,83 +790,11 @@
     </div>
   </div>
 
-  <!-- Empty State -->
-  <div
-    *ngIf="!loading && filteredBankAccounts.length === 0"
-    class="text-center py-12"
-  >
-    <div class="flex flex-col items-center justify-center">
-      <div
-        class="w-16 h-16 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] rounded-xl flex items-center justify-center mb-4 shadow-md"
-      >
-        <span
-          class="material-symbols-outlined text-[var(--color-surface)] text-2xl"
-        >
-          account_balance
-        </span>
-      </div>
-      <h3 class="text-lg font-semibold text-[var(--color-font)] mb-2">
-        No bank accounts found
-      </h3>
-      <p class="text-[var(--color-muted)] text-sm max-w-md mb-4">
-        {{
-          hasActiveFilters()
-            ? "Try adjusting your search criteria"
-            : "Get started by adding your first bank account"
-        }}
-      </p>
-      <div class="flex gap-2">
-        <button
-          *ngIf="hasActiveFilters()"
-          (click)="resetFilters()"
-          class="inline-flex items-center px-3 py-1.5 bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] transition-colors font-medium text-sm border border-[var(--color-border)]"
-        >
-          <span
-            class="material-symbols-outlined text-[var(--color-font)] mr-1.5"
-          >
-            restart_alt
-          </span>
-          Clear Filters
-        </button>
-        <button
-          *ngIf="!hasActiveFilters()"
-          (click)="openAddBankModal()"
-          class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-colors font-medium text-sm shadow-sm"
-        >
-          <span
-            class="material-symbols-outlined text-[var(--color-surface)] mr-1.5"
-          >
-            add
-          </span>
-          Add New Account
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Loading State -->
-  <div *ngIf="loading" class="text-center py-12">
-    <div class="flex flex-col items-center justify-center">
-      <div
-        class="w-12 h-12 bg-[var(--color-primary)] rounded-xl flex items-center justify-center mb-3"
-      >
-        <span
-          class="material-symbols-outlined animate-spin text-[var(--color-surface)] text-2xl"
-        >
-          refresh
-        </span>
-      </div>
-      <h3 class="text-base font-medium text-[var(--color-font)] mb-1">
-        Loading bank accounts
-      </h3>
-      <p class="text-[var(--color-muted)] text-sm">Please wait...</p>
-    </div>
-  </div>
-
-  <!-- Add Bank Account Modal -->
+  <!-- ========== ADD BANK MODAL (unchanged) ========== -->
   <div
     *ngIf="showAddModal"
     class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in"
+    (click)="closeAddBankModal()"
   >
     <div
       class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[85vh] overflow-y-auto shadow-xl border border-[var(--color-border)]"
@@ -832,9 +809,8 @@
         >
           <span
             class="material-symbols-outlined text-[var(--color-primary)] mr-2"
+            >add_circle</span
           >
-            add_circle
-          </span>
           Add Bank Account
         </h3>
         <button
@@ -843,9 +819,8 @@
         >
           <span
             class="material-symbols-outlined text-[var(--color-font)] hover:text-[var(--color-primary)]"
+            >close</span
           >
-            close
-          </span>
         </button>
       </div>
 
@@ -856,28 +831,23 @@
           (ngSubmit)="submitAddBankForm()"
           class="space-y-4"
         >
-          <!-- Website - SEARCH BASED INPUT -->
+          <!-- Website selection -->
           <div class="space-y-1">
             <label
-              class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+              class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
             >
               <span
                 class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                >public</span
               >
-                public
-              </span>
-              Website
-              <span class="text-[var(--color-danger)] ml-1">*</span>
+              Website <span class="text-[var(--color-danger)] ml-1">*</span>
             </label>
-
-            <!-- Search Input with Results -->
             <div class="relative">
               <div class="relative">
                 <span
                   class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+                  >search</span
                 >
-                  search
-                </span>
                 <input
                   type="text"
                   [(ngModel)]="modalWebsiteSearch"
@@ -900,8 +870,6 @@
                   <span class="material-symbols-outlined text-sm">close</span>
                 </button>
               </div>
-
-              <!-- Search Results Dropdown -->
               <div
                 *ngIf="modalWebsiteSearch && modalFilteredWebsites.length > 0"
                 class="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
@@ -917,8 +885,6 @@
                   }}</span>
                 </div>
               </div>
-
-              <!-- No Results Message -->
               <div
                 *ngIf="modalWebsiteSearch && modalFilteredWebsites.length === 0"
                 class="absolute z-50 mt-1 w-full border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
@@ -928,8 +894,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- Selected Website Display -->
             <div
               *ngIf="selectedModalWebsite"
               class="mt-2 p-2 bg-[var(--color-primary)]/10 rounded-lg border border-[var(--color-primary)]/20 flex items-center justify-between"
@@ -937,19 +901,16 @@
               <div class="flex items-center">
                 <span
                   class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-sm"
+                  >check_circle</span
                 >
-                  check_circle
-                </span>
-                <span class="text-sm font-medium text-[var(--color-font)]">
-                  {{ selectedModalWebsite.websiteDomain }}
-                </span>
-                <span class="text-xs text-[var(--color-muted)] ml-2">
-                  ({{ selectedModalWebsite.currency }})
-                </span>
+                <span class="text-sm font-medium text-[var(--color-font)]">{{
+                  selectedModalWebsite.websiteDomain
+                }}</span>
+                <span class="text-xs text-[var(--color-muted)] ml-2"
+                  >({{ selectedModalWebsite.currency }})</span
+                >
               </div>
             </div>
-
-            <!-- Validation Message -->
             <div
               *ngIf="
                 addBankForm.get('website')?.invalid &&
@@ -966,13 +927,12 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="space-y-1">
               <label
-                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+                class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
               >
                 <span
                   class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                  >credit_card</span
                 >
-                  credit_card
-                </span>
                 Account Number
                 <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
@@ -1000,16 +960,14 @@
                 >
               </div>
             </div>
-
             <div class="space-y-1">
               <label
-                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+                class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
               >
                 <span
                   class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                  >verified</span
                 >
-                  verified
-                </span>
                 Confirm Account Number
                 <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
@@ -1052,13 +1010,12 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="space-y-1">
               <label
-                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+                class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
               >
                 <span
                   class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                  >person</span
                 >
-                  person
-                </span>
                 Account Holder Name
                 <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
@@ -1089,18 +1046,15 @@
                 >
               </div>
             </div>
-
             <div class="space-y-1">
               <label
-                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+                class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
               >
                 <span
                   class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                  >password</span
                 >
-                  password
-                </span>
-                IFSC Code
-                <span class="text-[var(--color-danger)] ml-1">*</span>
+                IFSC Code <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
               <input
                 type="text"
@@ -1129,13 +1083,12 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="space-y-1">
               <label
-                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+                class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
               >
                 <span
                   class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                  >category</span
                 >
-                  category
-                </span>
                 Account Type
                 <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
@@ -1166,16 +1119,14 @@
                 Please select account type
               </div>
             </div>
-
             <div class="space-y-1">
               <label
-                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+                class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
               >
                 <span
                   class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                  >monetization_on</span
                 >
-                  monetization_on
-                </span>
                 Bank Limit
                 <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
@@ -1208,13 +1159,12 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="space-y-1">
               <label
-                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+                class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
               >
                 <span
                   class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                  >trending_down</span
                 >
-                  trending_down
-                </span>
                 Min Amount
                 <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
@@ -1239,16 +1189,14 @@
                 >
               </div>
             </div>
-
             <div class="space-y-1">
               <label
-                class="block text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+                class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
               >
                 <span
                   class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                  >trending_up</span
                 >
-                  trending_up
-                </span>
                 Max Amount
                 <span class="text-[var(--color-danger)] ml-1">*</span>
               </label>
@@ -1285,15 +1233,13 @@
               <span
                 *ngIf="isAdding"
                 class="material-symbols-outlined animate-spin text-[var(--color-surface)] mr-1.5"
+                >refresh</span
               >
-                refresh
-              </span>
               <span
                 *ngIf="!isAdding"
                 class="material-symbols-outlined text-[var(--color-surface)] mr-1.5"
+                >add</span
               >
-                add
-              </span>
               {{ isAdding ? "Adding..." : "Add Account" }}
             </button>
             <button
@@ -1304,9 +1250,8 @@
             >
               <span
                 class="material-symbols-outlined text-[var(--color-font)] mr-1.5"
+                >close</span
               >
-                close
-              </span>
               Cancel
             </button>
           </div>
@@ -1315,10 +1260,11 @@
     </div>
   </div>
 
-  <!-- Update Bank Account Modal -->
+  <!-- ========== UPDATE BANK MODAL (unchanged) ========== -->
   <div
     *ngIf="showUpdateModal"
     class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in"
+    (click)="closeUpdateModal()"
   >
     <div
       class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[85vh] overflow-y-auto shadow-xl border border-[var(--color-border)]"
@@ -1333,9 +1279,8 @@
         >
           <span
             class="material-symbols-outlined text-[var(--color-primary)] mr-2"
+            >edit</span
           >
-            edit
-          </span>
           Update Bank Account
         </h3>
         <button
@@ -1344,73 +1289,60 @@
         >
           <span
             class="material-symbols-outlined text-[var(--color-font)] hover:text-[var(--color-primary)]"
+            >close</span
           >
-            close
-          </span>
         </button>
       </div>
 
       <!-- Modal Body -->
       <div class="p-4">
         <form (ngSubmit)="submitUpdate()" class="space-y-4">
-          <!-- Account Number -->
           <div>
-            <label
-              class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+            <label class="text-sm font-semibold text-[var(--color-font)] mb-1"
+              >Account Number</label
             >
-              Account Number
-            </label>
             <input
               type="text"
               [(ngModel)]="updateForm.accountNo"
               name="accountNo"
               required
-              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
               placeholder="Enter account number"
             />
           </div>
-
-          <!-- Account Holder Name -->
           <div>
             <label
               class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+              >Account Holder Name</label
             >
-              Account Holder Name
-            </label>
             <input
               type="text"
               [(ngModel)]="updateForm.accountHolderName"
               name="accountHolderName"
               required
-              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
               placeholder="Enter account holder name"
             />
           </div>
-
-          <!-- IFSC Code -->
           <div>
             <label
               class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+              >IFSC Code</label
             >
-              IFSC Code
-            </label>
             <input
               type="text"
               [(ngModel)]="updateForm.ifsc"
               name="ifsc"
               required
-              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
               placeholder="Enter IFSC code"
             />
           </div>
-
-          <!-- Limit Amount -->
           <div>
             <label
               class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+              >Limit Amount</label
             >
-              Limit Amount
-            </label>
             <input
               type="number"
               [(ngModel)]="updateForm.limitAmount"
@@ -1418,18 +1350,15 @@
               required
               min="0"
               step="0.01"
-              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
               placeholder="Enter limit amount"
             />
           </div>
-
-          <!-- Min Amount -->
           <div>
             <label
               class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+              >Min Amount</label
             >
-              Min Amount
-            </label>
             <input
               type="number"
               [(ngModel)]="updateForm.minAmount"
@@ -1437,18 +1366,15 @@
               required
               min="0"
               step="0.01"
-              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
               placeholder="Enter min amount"
             />
           </div>
-
-          <!-- Max Amount -->
           <div>
             <label
               class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+              >Max Amount</label
             >
-              Max Amount
-            </label>
             <input
               type="number"
               [(ngModel)]="updateForm.maxAmount"
@@ -1456,60 +1382,51 @@
               required
               min="0"
               step="0.01"
-              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] text-sm"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
               placeholder="Enter max amount"
             />
           </div>
-
-          <!-- Account Type -->
           <div>
             <label
               class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+              >Account Type</label
             >
-              Account Type
-            </label>
             <select
               [(ngModel)]="updateForm.accountType"
               name="accountType"
-              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] transition-all duration-200 hover:border-[var(--color-primary-light)] text-sm"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
             >
               <option value="saving">Saving Account</option>
               <option value="current">Current Account</option>
               <option value="salary">Salary Account</option>
             </select>
           </div>
-
-          <!-- Status -->
           <div>
             <label
               class="block text-sm font-semibold text-[var(--color-font)] mb-1"
+              >Status</label
             >
-              Status
-            </label>
             <select
               [(ngModel)]="updateForm.status"
               name="status"
-              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] transition-all duration-200 hover:border-[var(--color-primary-light)] text-sm"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
               <option value="frozen">Frozen</option>
             </select>
           </div>
-
-          <!-- Action Buttons -->
           <div class="flex gap-2 pt-3">
             <button
               type="submit"
               [disabled]="isSubmitting"
-              class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 font-medium shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 font-medium shadow-sm hover:shadow disabled:opacity-50 text-sm"
             >
               <span
                 *ngIf="isSubmitting"
                 class="material-symbols-outlined animate-spin text-[var(--color-surface)] mr-1.5"
+                >refresh</span
               >
-                refresh
-              </span>
               {{ isSubmitting ? "Updating..." : "Update Account" }}
             </button>
             <button
@@ -1523,6 +1440,65 @@
           </div>
         </form>
       </div>
+    </div>
+  </div>
+
+  <!-- ========== SUCCESS TOASTS ========== -->
+  <div
+    *ngIf="showAddSuccessPopup"
+    class="fixed top-5 right-5 z-[9999] animate-slide-down"
+    role="alert"
+  >
+    <div
+      class="flex items-center gap-3 px-5 py-4 bg-white border-l-4 border-[var(--color-success)] rounded-lg shadow-xl"
+    >
+      <div
+        class="flex-shrink-0 w-8 h-8 bg-[var(--color-success)]/10 rounded-full flex items-center justify-center"
+      >
+        <span class="material-icons text-[var(--color-success)] text-lg"
+          >check_circle</span
+        >
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-bold text-[var(--color-font)]">
+          {{ addSuccessMessage }}
+        </p>
+      </div>
+      <button
+        (click)="closeAddSuccessPopup()"
+        class="text-[var(--color-muted)] hover:text-[var(--color-font)] transition-colors"
+      >
+        <span class="material-icons text-base">close</span>
+      </button>
+    </div>
+  </div>
+
+  <div
+    *ngIf="showUpdateSuccessPopup"
+    class="fixed top-5 right-5 z-[9999] animate-slide-down"
+    role="alert"
+  >
+    <div
+      class="flex items-center gap-3 px-5 py-4 bg-white border-l-4 border-[var(--color-success)] rounded-lg shadow-xl"
+    >
+      <div
+        class="flex-shrink-0 w-8 h-8 bg-[var(--color-success)]/10 rounded-full flex items-center justify-center"
+      >
+        <span class="material-icons text-[var(--color-success)] text-lg"
+          >check_circle</span
+        >
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-bold text-[var(--color-font)]">
+          {{ updateSuccessMessage }}
+        </p>
+      </div>
+      <button
+        (click)="closeUpdateSuccessPopup()"
+        class="text-[var(--color-muted)] hover:text-[var(--color-font)] transition-colors"
+      >
+        <span class="material-icons text-base">close</span>
+      </button>
     </div>
   </div>
 </div>

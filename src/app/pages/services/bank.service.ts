@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import baseUrl from "./helper";
 import { catchError, map, Observable, throwError } from "rxjs";
@@ -23,16 +23,29 @@ export class BankService {
 
   getBankDataWithSubAdminIdPaginated(
     id: string,
-    page: number = 0,
-    size: number = 20,
+    options: any = {},
   ): Observable<any> {
+    let params = new HttpParams()
+      .set("page", options.page?.toString() ?? "0")
+      .set("size", options.size?.toString() ?? "20");
+
+    if (options.query) params = params.set("query", options.query);
+    if (options.minAmount !== undefined && options.maxAmount !== undefined) {
+      params = params.set("minAmount", options.minAmount.toString());
+      params = params.set("maxAmount", options.maxAmount.toString());
+    }
+    if (options.active !== undefined && options.active !== null) {
+      params = params.set("active", options.active.toString());
+    }
+    if (options.websiteId) params = params.set("websiteId", options.websiteId);
+    if (options.limit && options.limit > 0) {
+      params = params.set("limit", options.limit.toString());
+    }
+
     return this.http.get<any>(
       `${baseUrl}/banks/getAllByEntityId/paginated/${id}`,
       {
-        params: {
-          page: page.toString(),
-          size: size.toString(),
-        },
+        params,
       },
     );
   }

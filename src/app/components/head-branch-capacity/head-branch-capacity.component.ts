@@ -24,9 +24,13 @@ export class HeadBranchCapacityComponent implements OnInit, OnDestroy {
   websites: any;
   isLoading = false;
   isSubmitting = false;
-  successMessage = "";
   errorMessage = "";
   hasUptoRange = false;
+
+  // ✅ Toast properties
+  showAddSuccessPopup = false;
+  addSuccessMessage = "";
+  private successPopupTimeout: any;
 
   // Dropdown menu state - tracks which range menu is open
   activeRangeMenu: number | null = null;
@@ -139,11 +143,24 @@ export class HeadBranchCapacityComponent implements OnInit, OnDestroy {
     this.checkForUptoRange();
   }
 
+  // ============= TOAST METHODS =============
+
+  closeAddSuccessPopup(): void {
+    clearTimeout(this.successPopupTimeout);
+    this.showAddSuccessPopup = false;
+    this.addSuccessMessage = "";
+  }
+
+  private showAddSuccess(message: string): void {
+    this.addSuccessMessage = message;
+    this.showAddSuccessPopup = true;
+    this.successPopupTimeout = setTimeout(() => {
+      this.closeAddSuccessPopup();
+    }, 3000);
+  }
+
   // ============= DROPDOWN MENU METHODS =============
 
-  /**
-   * Toggle the dropdown menu for a specific range
-   */
   toggleRangeMenu(index: number): void {
     console.log("Toggle clicked for range:", index);
     if (this.activeRangeMenu === index) {
@@ -155,33 +172,23 @@ export class HeadBranchCapacityComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Close the range dropdown menu
-   */
   closeRangeMenu(): void {
     console.log("Closing all range menus");
     this.activeRangeMenu = null;
   }
 
-  /**
-   * Handle document click to close dropdown when clicking outside
-   */
   @HostListener("document:click", ["$event"])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     const isRangeButton = target.closest(".range-menu-button");
     const isRangeMenu = target.closest(".range-menu-dropdown");
 
-    // Only close if clicking outside both the button and the menu
     if (!isRangeButton && !isRangeMenu && this.activeRangeMenu !== null) {
       console.log("Clicked outside, closing menu");
       this.activeRangeMenu = null;
     }
   }
 
-  /**
-   * Prevent click inside menu from closing it
-   */
   @HostListener("click", ["$event"])
   onClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -191,7 +198,9 @@ export class HeadBranchCapacityComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Clean up if needed
+    if (this.successPopupTimeout) {
+      clearTimeout(this.successPopupTimeout);
+    }
   }
 
   // ============= FORM METHODS =============
@@ -603,7 +612,6 @@ export class HeadBranchCapacityComponent implements OnInit, OnDestroy {
 
     this.isSubmitting = true;
     this.errorMessage = "";
-    this.successMessage = "";
 
     const formValue = this.capacityForm.getRawValue();
 
@@ -631,7 +639,9 @@ export class HeadBranchCapacityComponent implements OnInit, OnDestroy {
       const response = await this.capacityService
         .addCapacity(capacityData)
         .toPromise();
-      this.successMessage = "Capacity added successfully!";
+
+      // ✅ Show success toast instead of inline message
+      this.showAddSuccess("Capacity added successfully!");
 
       const websiteId = this.capacityForm.get("websiteId")?.value;
       const type = this.capacityForm.get("type")?.value;
