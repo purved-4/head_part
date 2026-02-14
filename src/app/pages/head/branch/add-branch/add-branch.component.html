@@ -13,7 +13,7 @@
         </p>
       </div>
       <button
-        [routerLink]="'/chief/branch/manage'"
+        [routerLink]="'/head/branch/manage'"
         class="px-6 py-3 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-white rounded-[var(--radius-lg)] text-sm font-medium hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-300 shadow-[var(--shadow-md)] hover:shadow-lg flex items-center gap-2 group"
       >
         <svg
@@ -36,7 +36,7 @@
     <!-- Form -->
     <form [formGroup]="chiefForm" (ngSubmit)="onSubmit()">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Left Column - Branch Details -->
+        <!-- Left Column - Branch Details (unchanged) -->
         <div class="lg:col-span-2 space-y-8">
           <!-- Personal Information Card -->
           <div
@@ -292,12 +292,12 @@
           </div>
         </div>
 
-        <!-- Right Column - Website Assignment with Search -->
+        <!-- Right Column - Website Assignment with Search Dropdown -->
         <div class="lg:col-span-1">
           <div
-            class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-8 border border-[var(--color-border)] sticky top-8"
+            class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-8 border border-[var(--color-border)] sticky top-8 website-dropdown-container"
           >
-            <!-- Header -->
+            <!-- Header with selected count -->
             <div class="flex items-center justify-between mb-6">
               <div>
                 <h2 class="text-xl font-bold text-[var(--color-font)]">
@@ -316,32 +316,85 @@
               </div>
             </div>
 
-            <!-- Search Input -->
+            <!-- Search Input with Dropdown -->
             <div class="relative mb-6">
-              <span
-                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div class="relative">
+                <span
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  ></path>
-                </svg>
-              </span>
-              <input
-                type="text"
-                [(ngModel)]="websiteSearchTerm"
-                (ngModelChange)="filterWebsites()"
-                placeholder="Search websites by domain..."
-                class="w-full pl-10 pr-4 py-3 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all duration-200"
-              />
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    ></path>
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  [value]="websiteSearchTerm"
+                  (input)="onWebsiteSearch($event)"
+                  (focus)="showDropdown = true"
+                  (blur)="hideDropdown()"
+                  placeholder="Search websites by domain or ID..."
+                  class="w-full pl-10 pr-4 py-3 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all duration-200"
+                />
+              </div>
+
+              <!-- Dropdown Suggestions (only available websites) -->
+              <div
+                *ngIf="showDropdown && filteredWebsites.length > 0"
+                class="absolute z-50 w-full mt-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-lg max-h-60 overflow-y-auto"
+              >
+                <div
+                  *ngFor="let website of filteredWebsites"
+                  (mousedown)="selectWebsite(website)"
+                  class="px-4 py-2 hover:bg-[var(--color-hover)] cursor-pointer flex items-center gap-3 border-b border-[var(--color-border)] last:border-b-0"
+                >
+                  <div
+                    class="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-light)] flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-4 h-4 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div class="flex-1">
+                    <div class="font-medium text-[var(--color-font)]">
+                      {{
+                        website.websiteDomain || website.domain || website.name
+                      }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                *ngIf="
+                  showDropdown &&
+                  websiteSearchTerm.trim().length > 0 &&
+                  filteredWebsites.length === 0
+                "
+                class="absolute z-50 w-full mt-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-lg p-4 text-center"
+              >
+                <p class="text-[var(--color-muted)]">
+                  No websites match your search
+                </p>
+              </div>
             </div>
 
             <!-- Tabs -->
@@ -370,113 +423,16 @@
               </button>
             </div>
 
-            <!-- Website List -->
+            <!-- Website Lists -->
             <div
               class="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar"
             >
-              <!-- Available Websites Tab -->
-              <div *ngIf="activeTab === 'available'" class="space-y-3">
-                <div
-                  *ngFor="let website of filteredWebsites"
-                  class="group p-4 border border-[var(--color-border)] rounded-[var(--radius-md)] hover:border-[var(--color-primary)] hover:bg-[var(--color-hover)] transition-all duration-200"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <div class="relative">
-                        <input
-                          type="checkbox"
-                          [checked]="isWebsiteSelected(website.websiteId)"
-                          (change)="
-                            onWebsiteSelectionChange($event, website.websiteId)
-                          "
-                          class="sr-only peer"
-                          id="website_{{ website.websiteId }}"
-                        />
-                        <label
-                          for="website_{{ website.websiteId }}"
-                          class="w-5 h-5 border-2 border-[var(--color-border)] rounded-[var(--radius-sm)] peer-checked:border-[var(--color-primary)] peer-checked:bg-[var(--color-primary)] flex items-center justify-center cursor-pointer transition-all duration-200"
-                        >
-                          <svg
-                            *ngIf="isWebsiteSelected(website.websiteId)"
-                            class="w-3.5 h-3.5 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="3"
-                              d="M5 13l4 4L19 7"
-                            ></path>
-                          </svg>
-                        </label>
-                      </div>
-                      <div>
-                        <label
-                          for="website_{{ website.websiteId }}"
-                          class="font-medium text-[var(--color-font)] cursor-pointer"
-                        >
-                          {{ website.websiteDomain }}
-                        </label>
-                        <p class="text-xs text-[var(--color-muted)] mt-0.5">
-                          {{ website.websiteDomain || "Website" }}
-                        </p>
-                      </div>
-                    </div>
-                    <!-- Quick add button – uses onWebsiteSelectionChange with simulated event -->
-                    <button
-                      type="button"
-                      (click)="
-                        onWebsiteSelectionChange(
-                          { target: { checked: true } },
-                          website.websiteId
-                        )
-                      "
-                      class="p-2 rounded-[var(--radius-md)] bg-[var(--color-bg)] hover:bg-[var(--color-primary)] hover:text-white transition-all duration-200 opacity-0 group-hover:opacity-100"
-                      title="Quick add"
-                    >
-                      <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M12 4v16m8-8H4"
-                        ></path>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div
-                  *ngIf="filteredWebsites.length === 0"
-                  class="text-center py-12"
-                >
-                  <div
-                    class="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--color-bg)] flex items-center justify-center"
-                  >
-                    <svg
-                      class="w-8 h-8 text-[var(--color-muted)]"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      ></path>
-                    </svg>
-                  </div>
-                  <p class="text-[var(--color-muted)] font-medium">
-                    No websites match your search
-                  </p>
-                </div>
+              <!-- Available Websites Tab (empty state only) -->
+              <div
+                *ngIf="activeTab === 'available'"
+                class="text-center py-12 text-[var(--color-muted)]"
+              >
+                <p>Type in the search box above to find and add websites.</p>
               </div>
 
               <!-- Selected Websites Tab -->
@@ -507,7 +463,11 @@
                       </div>
                       <div>
                         <h3 class="font-semibold text-[var(--color-font)]">
-                          {{ website.websiteDomain }}
+                          {{
+                            website.websiteDomain ||
+                              website.domain ||
+                              website.name
+                          }}
                         </h3>
                         <p class="text-xs text-[var(--color-muted)]">
                           Assigned to Branch
@@ -516,7 +476,7 @@
                     </div>
                     <button
                       type="button"
-                      (click)="removeWebsite(website.websiteId)"
+                      (click)="removeWebsite(website.websiteId || website.id)"
                       class="p-2 rounded-[var(--radius-md)] hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] transition-all duration-200"
                       title="Remove"
                     >
@@ -548,11 +508,16 @@
                           type="number"
                           min="0"
                           max="100"
-                          [formControlName]="'topup_' + website.websiteId"
+                          [formControlName]="
+                            'topup_' + (website.websiteId || website.id)
+                          "
                           [class.border-[var(--color-danger)]]="
-                            chiefForm.get('topup_' + website.websiteId)
-                              ?.invalid &&
-                            chiefForm.get('topup_' + website.websiteId)?.touched
+                            chiefForm.get(
+                              'topup_' + (website.websiteId || website.id)
+                            )?.invalid &&
+                            chiefForm.get(
+                              'topup_' + (website.websiteId || website.id)
+                            )?.touched
                           "
                           class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all duration-200"
                           placeholder="0-100"
@@ -573,12 +538,16 @@
                           type="number"
                           min="0"
                           max="100"
-                          [formControlName]="'payout_' + website.websiteId"
+                          [formControlName]="
+                            'payout_' + (website.websiteId || website.id)
+                          "
                           [class.border-[var(--color-danger)]]="
-                            chiefForm.get('payout_' + website.websiteId)
-                              ?.invalid &&
-                            chiefForm.get('payout_' + website.websiteId)
-                              ?.touched
+                            chiefForm.get(
+                              'payout_' + (website.websiteId || website.id)
+                            )?.invalid &&
+                            chiefForm.get(
+                              'payout_' + (website.websiteId || website.id)
+                            )?.touched
                           "
                           class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all duration-200"
                           placeholder="0-100"
@@ -589,24 +558,6 @@
                         >
                       </div>
                     </div>
-                  </div>
-
-                  <!-- Apply All Buttons -->
-                  <div class="flex gap-2 mt-3">
-                    <button
-                      type="button"
-                      (click)="applyToAll('topup')"
-                      class="flex-1 py-1.5 text-xs font-medium bg-[var(--color-bg)] hover:bg-[var(--color-primary)] hover:text-white rounded-[var(--radius-md)] transition-all duration-200"
-                    >
-                      Apply Topup
-                    </button>
-                    <button
-                      type="button"
-                      (click)="applyToAll('payout')"
-                      class="flex-1 py-1.5 text-xs font-medium bg-[var(--color-bg)] hover:bg-[var(--color-primary)] hover:text-white rounded-[var(--radius-md)] transition-all duration-200"
-                    >
-                      Apply Payout
-                    </button>
                   </div>
                 </div>
                 <div
@@ -634,7 +585,7 @@
                     No websites selected
                   </p>
                   <p class="text-sm text-[var(--color-muted)] mt-1">
-                    Select from the available tab
+                    Select from the dropdown above
                   </p>
                 </div>
               </div>
@@ -646,8 +597,8 @@
                 <span class="font-medium text-[var(--color-primary)]"
                   >Note:</span
                 >
-                Select websites and set commission percentages. Use "Apply All"
-                to quickly set same percentages for all selected.
+                Type to search, click to add. Set percentages for each selected
+                website.
               </p>
             </div>
           </div>

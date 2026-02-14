@@ -1,12 +1,12 @@
-<div class="relative">
+<div class="relative" #notificationContainer>
   <!-- Toggle Button -->
   <button
-    class="relative w-9 h-9 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+    class="relative w-9 h-9 rounded-lg flex items-center justify-center hover:bg-[var(--color-hover)] transition-colors"
     title="Notifications"
     (click)="toggleNotifications()"
   >
     <svg
-      class="w-5 h-5 text-gray-600 dark:text-gray-400"
+      class="w-5 h-5 text-[var(--color-muted)]"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -20,32 +20,48 @@
     </svg>
     <div
       *ngIf="getUnreadCount() > 0"
-      class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-900"
+      class="absolute top-1.5 right-1.5 w-2 h-2 bg-[var(--color-danger)] rounded-full ring-2 ring-[var(--color-surface)]"
     ></div>
   </button>
 
   <!-- Notifications Panel -->
   <div
     *ngIf="showNotifications"
-    class="absolute right-0 mt-2 w-96 max-w-[480px] rounded-xl shadow-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-50 overflow-hidden animate-slideIn"
+    class="absolute right-0 mt-2 w-96 max-w-[480px] rounded-xl shadow-xl bg-[var(--color-surface)] border border-[var(--color-border)] z-50 overflow-hidden animate-slideIn"
   >
     <!-- Header -->
-    <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
+    <div
+      class="p-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary-light)] to-[var(--color-primary)] bg-opacity-10"
+    >
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white">Notifications</h3>
-          <span class="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+          <h3 class="text-lg font-bold text-[var(--color-font)]">
+            Notifications
+          </h3>
+          <span
+            class="text-xs font-semibold px-2 py-1 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
+          >
             {{ getTotalCount() }}
           </span>
         </div>
 
         <button
           (click)="filterNotifications('all')"
-          class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          class="p-2 rounded-lg hover:bg-[var(--color-hover)] transition-colors"
           title="Refresh"
         >
-          <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          <svg
+            class="w-5 h-5 text-[var(--color-muted)]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
           </svg>
         </button>
       </div>
@@ -53,17 +69,19 @@
       <!-- Role Badge -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-600 text-white">
-            {{ (currentRoleName || "branch") | uppercase }}
+          <div
+            class="text-xs font-bold px-3 py-1.5 rounded-lg bg-[var(--color-primary)] text-[var(--color-bg)]"
+          >
+            {{ currentRoleName || "branch" | uppercase }}
           </div>
-          <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">
+          <div class="text-sm text-[var(--color-muted)] font-medium">
             {{ getUnreadCount() }} unread
           </div>
         </div>
 
         <button
           *ngIf="normalizeRoleKey(currentRoleName) === 'admin'"
-          class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+          class="text-xs bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-bg)] px-4 py-2 rounded-lg font-semibold transition-colors"
         >
           Admin Dashboard
         </button>
@@ -71,64 +89,84 @@
     </div>
 
     <!-- Tab Navigation -->
-    <div class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+    <div
+      class="flex border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+    >
       <button
         (click)="activeTab = 'branch'"
-        [class]="activeTab === 'branch' 
-          ? 'px-4 py-3 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 dark:text-blue-400' 
-          : 'px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'"
+        [class]="
+          activeTab === 'branch'
+            ? 'px-4 py-3 text-sm font-semibold border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]'
+            : 'px-4 py-3 text-sm font-semibold text-[var(--color-muted)] hover:text-[var(--color-font)]'
+        "
       >
         <span>BRANCH</span>
-        <span class="ml-2 text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 font-semibold">
+        <span
+          class="ml-2 text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-semibold"
+        >
           {{ getGroupCount("branch") }}
         </span>
       </button>
       <button
         *ngIf="currentRoleName != 'BRANCH'"
         (click)="activeTab = 'head'"
-        [class]="activeTab === 'head' 
-          ? 'px-4 py-3 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 dark:text-blue-400' 
-          : 'px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'"
+        [class]="
+          activeTab === 'head'
+            ? 'px-4 py-3 text-sm font-semibold border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]'
+            : 'px-4 py-3 text-sm font-semibold text-[var(--color-muted)] hover:text-[var(--color-font)]'
+        "
       >
         <span>HEAD</span>
-        <span class="ml-2 text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 font-semibold">
+        <span
+          class="ml-2 text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-semibold"
+        >
           {{ getGroupCount("head") }}
         </span>
       </button>
     </div>
 
     <!-- Category Filter -->
-    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+    <div
+      class="px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+    >
       <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
         <button
           (click)="filterByCategory('all')"
-          [class]="activeCategory === 'all'
-            ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-blue-600 text-white'
-            : 'px-3 py-1.5 text-xs font-medium rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
+          [class]="
+            activeCategory === 'all'
+              ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-[var(--color-primary)] text-[var(--color-bg)]'
+              : 'px-3 py-1.5 text-xs font-medium rounded-full bg-[var(--color-hover)] text-[var(--color-muted)] hover:bg-[var(--color-border)]'
+          "
         >
           All
         </button>
         <button
           (click)="filterByCategory('upi')"
-          [class]="activeCategory === 'upi'
-            ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-blue-600 text-white'
-            : 'px-3 py-1.5 text-xs font-medium rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
+          [class]="
+            activeCategory === 'upi'
+              ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-[var(--color-primary)] text-[var(--color-bg)]'
+              : 'px-3 py-1.5 text-xs font-medium rounded-full bg-[var(--color-hover)] text-[var(--color-muted)] hover:bg-[var(--color-border)]'
+          "
         >
           <span class="mr-1.5">💳</span> UPI
         </button>
         <button
           (click)="filterByCategory('bank')"
-          [class]="activeCategory === 'bank'
-            ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-blue-600 text-white'
-            : 'px-3 py-1.5 text-xs font-medium rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
+          [class]="
+            activeCategory === 'bank'
+              ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-[var(--color-primary)] text-[var(--color-bg)]'
+              : 'px-3 py-1.5 text-xs font-medium rounded-full bg-[var(--color-hover)] text-[var(--color-muted)] hover:bg-[var(--color-border)]'
+          "
         >
           <span class="mr-1.5">🏦</span> Bank
         </button>
         <button
           (click)="filterByCategory('payout')"
-          [class]="activeCategory === 'payout'
-            ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-blue-600 text-white'
-            : 'px-3 py-1.5 text-xs font-medium rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
+          [class]="
+            activeCategory === 'payout'
+              ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-[var(--color-primary)] text-[var(--color-bg)]'
+              : 'px-3 py-1.5 text-xs font-medium rounded-full bg-[var(--color-hover)] text-[var(--color-muted)] hover:bg-[var(--color-border)]'
+          "
         >
           <span class="mr-1.5">💰</span> Payout
         </button>
@@ -143,32 +181,38 @@
           <div *ngIf="shouldShowCategory('head', cat)" class="mb-6 last:mb-0">
             <div class="flex items-center justify-between mb-3 px-2">
               <div class="flex items-center gap-2">
-                <div class="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                <div
+                  class="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]"
+                >
                   {{ cat }}
                 </div>
-                <span class="text-xs font-medium text-gray-500 bg-gray-100 dark:bg-gray-700 px-2.5 py-1 rounded-full">
+                <span
+                  class="text-xs font-medium text-[var(--color-muted)] bg-[var(--color-hover)] px-2.5 py-1 rounded-full"
+                >
                   {{ groupedNotifications.head[cat].length }}
                 </span>
               </div>
-              <div class="h-px flex-1 mx-3 bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
+              <div
+                class="h-px flex-1 mx-3 bg-gradient-to-r from-transparent via-[var(--color-border)] to-transparent"
+              ></div>
             </div>
 
             <div class="space-y-3">
               <div
                 *ngFor="let notification of groupedNotifications.head[cat]"
                 (click)="openChat(notification)"
-                class="relative p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all duration-200 group"
+                class="relative p-4 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-primary)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)] cursor-pointer transition-all duration-200 group"
               >
                 <!-- Unread indicator -->
                 <div
                   *ngIf="!notification.isRead"
-                  class="absolute left-3 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-500 rounded-full"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-2 h-2 bg-[var(--color-primary)] rounded-full"
                 ></div>
 
                 <div class="flex items-start gap-3 ml-2">
                   <!-- Avatar -->
                   <div
-                    class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-white bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm"
+                    class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-[var(--color-bg)] bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-light)] shadow-sm"
                   >
                     {{ getNotificationIcon(notification.fundsType) }}
                   </div>
@@ -176,19 +220,25 @@
                   <!-- Content -->
                   <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start mb-1">
-                      <h4 class="font-semibold text-gray-900 dark:text-white text-sm truncate pr-2">
+                      <h4
+                        class="font-semibold text-[var(--color-font)] text-sm truncate pr-2"
+                      >
                         {{
                           notification.fundsType
                             ? notification.fundsType + " Funds"
                             : notification.title || "Notification"
                         }}
                       </h4>
-                      <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap font-medium">
-                        {{ notification.createdAt | date : "shortTime" }}
+                      <span
+                        class="text-xs text-[var(--color-muted)] whitespace-nowrap font-medium"
+                      >
+                        {{ notification.createdAt | date: "shortTime" }}
                       </span>
                     </div>
 
-                    <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-2">
+                    <p
+                      class="text-sm text-[var(--color-muted)] line-clamp-2 mb-2"
+                    >
                       {{
                         notification.queryMessage ||
                           "Created by " + (notification.createdByName || "—")
@@ -198,22 +248,40 @@
                     <!-- Footer -->
                     <div class="flex items-center justify-between">
                       <div class="flex items-center gap-3">
-                        <span class="flex items-center text-xs text-gray-500 dark:text-gray-400 font-medium">
-                          <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        <span
+                          class="flex items-center text-xs text-[var(--color-muted)] font-medium"
+                        >
+                          <svg
+                            class="w-3.5 h-3.5 mr-1.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                            />
                           </svg>
-                          ID: {{ notification.fundsId || notification.id | slice : 0 : 8 }}
+                          ID:
+                          {{
+                            notification.fundsId || notification.id
+                              | slice: 0 : 8
+                          }}
                         </span>
 
                         <span
                           *ngIf="!notification.isRead"
-                          class="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                          class="text-xs font-semibold px-2 py-1 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
                         >
                           New • {{ notification.unreadCount || 1 }}
                         </span>
                       </div>
 
-                      <button class="opacity-0 group-hover:opacity-100 text-xs font-semibold text-blue-600 dark:text-blue-400 transition-opacity duration-200">
+                      <button
+                        class="opacity-0 group-hover:opacity-100 text-xs font-semibold text-[var(--color-primary)] transition-opacity duration-200"
+                      >
                         View →
                       </button>
                     </div>
@@ -226,13 +294,27 @@
 
         <!-- Empty State for HEAD -->
         <div *ngIf="getGroupCount('head') === 0" class="py-12 text-center">
-          <div class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg class="w-10 h-10 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+          <div
+            class="w-20 h-20 bg-[var(--color-hover)] rounded-2xl flex items-center justify-center mx-auto mb-4"
+          >
+            <svg
+              class="w-10 h-10 text-[var(--color-muted)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+              />
             </svg>
           </div>
-          <p class="text-gray-700 dark:text-gray-300 font-semibold mb-1">No HEAD notifications</p>
-          <p class="text-gray-500 dark:text-gray-400 text-sm">
+          <p class="text-[var(--color-font)] font-semibold mb-1">
+            No HEAD notifications
+          </p>
+          <p class="text-[var(--color-muted)] text-sm">
             Notifications from HEAD will appear here
           </p>
         </div>
@@ -244,32 +326,38 @@
           <div *ngIf="shouldShowCategory('branch', cat)" class="mb-6 last:mb-0">
             <div class="flex items-center justify-between mb-3 px-2">
               <div class="flex items-center gap-2">
-                <div class="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                <div
+                  class="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]"
+                >
                   {{ cat }}
                 </div>
-                <span class="text-xs font-medium text-gray-500 bg-gray-100 dark:bg-gray-700 px-2.5 py-1 rounded-full">
+                <span
+                  class="text-xs font-medium text-[var(--color-muted)] bg-[var(--color-hover)] px-2.5 py-1 rounded-full"
+                >
                   {{ groupedNotifications.branch[cat].length }}
                 </span>
               </div>
-              <div class="h-px flex-1 mx-3 bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
+              <div
+                class="h-px flex-1 mx-3 bg-gradient-to-r from-transparent via-[var(--color-border)] to-transparent"
+              ></div>
             </div>
 
             <div class="space-y-3">
               <div
                 *ngFor="let notification of groupedNotifications.branch[cat]"
                 (click)="openChat(notification)"
-                class="relative p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all duration-200 group"
+                class="relative p-4 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-primary)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)] cursor-pointer transition-all duration-200 group"
               >
                 <!-- Unread indicator -->
                 <div
                   *ngIf="!notification.isRead"
-                  class="absolute left-3 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-500 rounded-full"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-2 h-2 bg-[var(--color-primary)] rounded-full"
                 ></div>
 
                 <div class="flex items-start gap-3 ml-2">
                   <!-- Avatar -->
                   <div
-                    class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-white bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm"
+                    class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-[var(--color-bg)] bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-light)] shadow-sm"
                   >
                     {{ getNotificationIcon(notification.fundsType) }}
                   </div>
@@ -277,19 +365,25 @@
                   <!-- Content -->
                   <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start mb-1">
-                      <h4 class="font-semibold text-gray-900 dark:text-white text-sm truncate pr-2">
+                      <h4
+                        class="font-semibold text-[var(--color-font)] text-sm truncate pr-2"
+                      >
                         {{
                           notification.fundsType
                             ? notification.fundsType + " Funds"
                             : notification.title || "Notification"
                         }}
                       </h4>
-                      <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap font-medium">
-                        {{ notification.createdAt | date : "shortTime" }}
+                      <span
+                        class="text-xs text-[var(--color-muted)] whitespace-nowrap font-medium"
+                      >
+                        {{ notification.createdAt | date: "shortTime" }}
                       </span>
                     </div>
 
-                    <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-2">
+                    <p
+                      class="text-sm text-[var(--color-muted)] line-clamp-2 mb-2"
+                    >
                       {{
                         notification.queryMessage ||
                           "Created by " + (notification.createdByName || "—")
@@ -299,22 +393,40 @@
                     <!-- Footer -->
                     <div class="flex items-center justify-between">
                       <div class="flex items-center gap-3">
-                        <span class="flex items-center text-xs text-gray-500 dark:text-gray-400 font-medium">
-                          <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        <span
+                          class="flex items-center text-xs text-[var(--color-muted)] font-medium"
+                        >
+                          <svg
+                            class="w-3.5 h-3.5 mr-1.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                            />
                           </svg>
-                          ID: {{ notification.fundsId || notification.id | slice : 0 : 8 }}
+                          ID:
+                          {{
+                            notification.fundsId || notification.id
+                              | slice: 0 : 8
+                          }}
                         </span>
 
                         <span
                           *ngIf="!notification.isRead"
-                          class="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                          class="text-xs font-semibold px-2 py-1 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
                         >
                           New • {{ notification.unreadCount || 1 }}
                         </span>
                       </div>
 
-                      <button class="opacity-0 group-hover:opacity-100 text-xs font-semibold text-blue-600 dark:text-blue-400 transition-opacity duration-200">
+                      <button
+                        class="opacity-0 group-hover:opacity-100 text-xs font-semibold text-[var(--color-primary)] transition-opacity duration-200"
+                      >
                         View →
                       </button>
                     </div>
@@ -327,13 +439,27 @@
 
         <!-- Empty State for BRANCH -->
         <div *ngIf="getGroupCount('branch') === 0" class="py-12 text-center">
-          <div class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg class="w-10 h-10 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+          <div
+            class="w-20 h-20 bg-[var(--color-hover)] rounded-2xl flex items-center justify-center mx-auto mb-4"
+          >
+            <svg
+              class="w-10 h-10 text-[var(--color-muted)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+              />
             </svg>
           </div>
-          <p class="text-gray-700 dark:text-gray-300 font-semibold mb-1">No BRANCH notifications</p>
-          <p class="text-gray-500 dark:text-gray-400 text-sm">
+          <p class="text-[var(--color-font)] font-semibold mb-1">
+            No BRANCH notifications
+          </p>
+          <p class="text-[var(--color-muted)] text-sm">
             Notifications from BRANCH will appear here
           </p>
         </div>
@@ -341,15 +467,21 @@
     </div>
 
     <!-- Footer -->
-    <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+    <div class="p-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]">
       <div class="flex items-center justify-between">
-        <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">
-          <span class="font-bold text-gray-900 dark:text-white">{{ getUnreadCount() }}</span> unread •
-          <span class="font-bold text-gray-900 dark:text-white">{{ getTotalCount() }}</span> total
+        <div class="text-sm text-[var(--color-muted)] font-medium">
+          <span class="font-bold text-[var(--color-font)]">{{
+            getUnreadCount()
+          }}</span>
+          unread •
+          <span class="font-bold text-[var(--color-font)]">{{
+            getTotalCount()
+          }}</span>
+          total
         </div>
         <button
           (click)="markAllAsRead()"
-          class="text-sm font-semibold px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm hover:shadow"
+          class="text-sm font-semibold px-4 py-2 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-bg)] transition-colors shadow-sm hover:shadow"
           *ngIf="getUnreadCount() > 0"
         >
           Mark all as read
@@ -362,19 +494,33 @@
   <div class="fixed right-6 top-6 space-y-3 z-50 max-w-sm">
     <div
       *ngFor="let t of transientNotifications"
-      class="animate-slideInRight p-4 rounded-lg shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+      class="animate-slideInRight p-4 rounded-lg shadow-lg bg-[var(--color-surface)] border border-[var(--color-border)]"
     >
       <div class="flex items-start gap-3">
-        <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-white bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <div
+          class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-[var(--color-bg)] bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-light)] shadow-sm"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
         </div>
         <div class="flex-1">
-          <div class="font-semibold text-sm text-gray-900 dark:text-white mb-1">
+          <div class="font-semibold text-sm text-[var(--color-font)] mb-1">
             New Notification
           </div>
-          <div class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{{ t.message }}</div>
+          <div class="text-sm text-[var(--color-muted)] leading-relaxed">
+            {{ t.message }}
+          </div>
         </div>
       </div>
     </div>

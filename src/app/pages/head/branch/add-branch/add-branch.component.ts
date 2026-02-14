@@ -27,6 +27,7 @@ export class AddBranchComponent implements OnInit {
   // Search properties
   websiteSearchTerm: string = "";
   filteredWebsites: any[] = [];
+  showDropdown = false;
 
   constructor(
     private fb: FormBuilder,
@@ -55,10 +56,10 @@ export class AddBranchComponent implements OnInit {
   loadWebsites() {
     this.headService.getAllHeadsWithWebsitesById(this.currentUserId).subscribe({
       next: (res: any) => {
-        this.websites =
-          res && res.data ? res.data : Array.isArray(res) ? res : [];
+        this.websites = res;
+        console.log(this.websites);
         this.initializeWebsiteControls();
-        this.filterWebsites(); // initial filter
+        this.filterWebsites(); // initial filter (empty)
       },
       error: (err) => {
         console.error("Error loading websites:", err);
@@ -73,7 +74,7 @@ export class AddBranchComponent implements OnInit {
 
   initializeWebsiteControls() {
     this.websites.forEach((website) => {
-      const wid = website.websiteId;
+      const wid = website.websiteId || website.id;
       if (!this.chiefForm.contains(`topup_${wid}`)) {
         this.chiefForm.addControl(
           `topup_${wid}`,
@@ -109,14 +110,14 @@ export class AddBranchComponent implements OnInit {
   getAvailableWebsites(): any[] {
     const selectedIds: string[] = this.chiefForm.get("websiteIds")?.value || [];
     return this.websites.filter(
-      (website) => !selectedIds.includes(website.websiteId),
+      (website) => !selectedIds.includes(website.websiteId || website.id),
     );
   }
 
   getSelectedWebsites(): any[] {
     const selectedIds: string[] = this.chiefForm.get("websiteIds")?.value || [];
     return this.websites.filter((website) =>
-      selectedIds.includes(website.websiteId),
+      selectedIds.includes(website.websiteId || website.id),
     );
   }
 
@@ -125,18 +126,45 @@ export class AddBranchComponent implements OnInit {
     return (this.chiefForm.get("websiteIds")?.value || []).length;
   }
 
-  // Search filter method
+  // Search filter method – updates filteredWebsites based on available websites
   filterWebsites(): void {
     const term = this.websiteSearchTerm.trim().toLowerCase();
     const available = this.getAvailableWebsites();
-    this.filteredWebsites = available.filter(
-      (website) =>
-        website.websiteDomain?.toLowerCase().includes(term) ||
-        website.websiteId?.toLowerCase().includes(term),
-    );
+    if (!term) {
+      this.filteredWebsites = available; // show all available when search empty
+    } else {
+      this.filteredWebsites = available.filter(
+        (w) =>
+          (w.websiteDomain || w.domain || w.name || "")
+            .toLowerCase()
+            .includes(term) ||
+          (w.websiteId || w.id || "").toLowerCase().includes(term),
+      );
+    }
+  }
+
+  hideDropdown(): void {
+    setTimeout(() => (this.showDropdown = false), 200);
+  }
+
+  // Called when a website is clicked in the dropdown
+  selectWebsite(website: any): void {
+    const websiteId = website.websiteId || website.id;
+    const selectedIds: string[] = this.chiefForm.get("websiteIds")?.value || [];
+    if (!selectedIds.includes(websiteId)) {
+      this.chiefForm.get("websiteIds")?.setValue([...selectedIds, websiteId]);
+      this.chiefForm.get("websiteIds")?.markAsTouched();
+      // Optionally switch to Selected tab
+      this.activeTab = "selected";
+    }
+    this.websiteSearchTerm = "";
+    this.filteredWebsites = [];
+    this.showDropdown = false;
   }
 
   onWebsiteSelectionChange(event: any, websiteId: string): void {
+    // This method is kept for compatibility but no longer used by the dropdown.
+    // If you still have checkboxes elsewhere, you can keep it.
     const selectedIds: string[] = this.chiefForm.get("websiteIds")?.value || [];
 
     if (event.target.checked) {
@@ -175,11 +203,13 @@ export class AddBranchComponent implements OnInit {
     if (selectedWebsites.length === 0) return;
 
     const firstWebsite = selectedWebsites[0];
-    const controlName = `${type}_${firstWebsite.websiteId}`;
+    const controlName = `${type}_${firstWebsite.websiteId || firstWebsite.id}`;
     const value = this.chiefForm.get(controlName)?.value;
 
     selectedWebsites.forEach((website) => {
-      const control = this.chiefForm.get(`${type}_${website.websiteId}`);
+      const control = this.chiefForm.get(
+        `${type}_${website.websiteId || website.id}`,
+      );
       if (control && value !== null && value !== undefined) {
         control.setValue(value);
         control.markAsTouched();
@@ -285,7 +315,7 @@ export class AddBranchComponent implements OnInit {
     });
 
     this.websites.forEach((website) => {
-      const wid = website.websiteId;
+      const wid = website.websiteId || website.id;
       this.chiefForm.get(`topup_${wid}`)?.setValue("");
       this.chiefForm.get(`payout_${wid}`)?.setValue("");
     });
@@ -293,7 +323,8 @@ export class AddBranchComponent implements OnInit {
     this.loading = false;
     this.activeTab = "available";
     this.websiteSearchTerm = "";
-    this.filterWebsites();
+    this.filteredWebsites = [];
+    this.showDropdown = false;
     this.chiefForm.markAsPristine();
     this.chiefForm.markAsUntouched();
   }
@@ -301,5 +332,15 @@ export class AddBranchComponent implements OnInit {
   isFieldInvalid(fieldName: string): boolean {
     const field = this.chiefForm.get(fieldName);
     return field ? field.invalid && field.touched : false;
+  }
+
+  onWebsiteSearch(event: Event): void {
+    const val = (event.target as HTMLInputElement).value || "";
+    this.websiteSearchTerm = val;
+    this.filterWebsites();
+    // keep dropdown visible when user types
+    if (val.trim().length > 0) {
+      this.showDropdown = true;
+    }
   }
 }

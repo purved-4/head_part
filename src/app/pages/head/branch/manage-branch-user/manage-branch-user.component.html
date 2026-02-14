@@ -1,46 +1,81 @@
-<div class="min-h-screen bg-gray-50 p-6">
+<div class="min-h-screen bg-[var(--color-bg)] p-6">
   <!-- Header Section -->
   <div class="mb-8">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <div
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+    >
       <div>
-        <h1 class="text-3xl font-bold text-gray-900">Manage head Users</h1>
-        <p class="mt-2 text-gray-600">Manage head user accounts and permissions</p>
+        <h1 class="text-3xl font-bold text-[var(--color-font)]">
+          Manage Head Users
+        </h1>
+        <p class="mt-2 text-[var(--color-muted)]">
+          Manage head user accounts and permissions
+        </p>
       </div>
-      <button 
-        [routerLink]="['/head/branch/manage',headId,userId]"
-        class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+      <button
+        [routerLink]="['/head/branch/manage']"
+        class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-bg)] text-sm font-medium rounded-lg transition-colors duration-200"
+      >
+        <svg
+          class="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          ></path>
         </svg>
-        Back to head
+        Back to Branch
       </button>
     </div>
 
     <!-- Search Bar -->
     <div class="max-w-md">
       <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+        <div
+          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+        >
+          <svg
+            class="h-5 w-5 text-[var(--color-muted)]"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+              clip-rule="evenodd"
+            ></path>
           </svg>
         </div>
-        <input 
-          type="text" 
-          class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" 
+        <input
+          type="text"
+          class="block w-full pl-10 pr-3 py-3 border border-[var(--color-border)] rounded-lg leading-5 bg-[var(--color-surface)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] sm:text-sm text-[var(--color-font)]"
           placeholder="Search users by name or email..."
           [(ngModel)]="searchTerm"
-          (input)="applyFilter()">
+          (input)="applyFilter()"
+        />
       </div>
     </div>
   </div>
 
   <!-- Users Table -->
-  <div *ngIf="showTable" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <div
+    *ngIf="showTable"
+    class="bg-[var(--color-surface)] rounded-xl shadow-sm border border-[var(--color-border)] overflow-hidden"
+  >
     <!-- Table Header -->
-    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+    <div
+      class="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+    >
       <div class="flex justify-between items-center">
-        <h2 class="text-lg font-semibold text-gray-800">Users List</h2>
-        <span class="text-sm text-gray-500">
+        <h2 class="text-lg font-semibold text-[var(--color-font)]">
+          Users List
+        </h2>
+        <span class="text-sm text-[var(--color-muted)]">
           Showing {{ pagedData.length }} of {{ filteredData.length }} users
         </span>
       </div>
@@ -48,58 +83,129 @@
 
     <!-- Table -->
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table class="min-w-full divide-y divide-[var(--color-border)]">
+        <thead class="bg-[var(--color-bg)]">
           <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
+            >
+              User
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
+            >
+              Email
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
+            >
+              Mobile
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
+            >
+              Status
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
+            >
+              Actions
+            </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngFor="let element of pagedData" class="hover:bg-gray-50 transition-colors duration-150">
+        <tbody
+          class="bg-[var(--color-surface)] divide-y divide-[var(--color-border)]"
+        >
+          <tr
+            *ngFor="let element of pagedData"
+            class="hover:bg-[var(--color-hover)] transition-colors duration-150"
+          >
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center">
-                <div class="flex-shrink-0 h-10 w-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium">
-                  {{ element.userName || 'U' }}
+                <div
+                  class="flex-shrink-0 h-10 w-10 bg-[var(--color-primary)] rounded-full flex items-center justify-center text-[var(--color-bg)] font-medium"
+                >
+                  {{ element.userName?.charAt(0) || "U" }}
                 </div>
                 <div class="ml-4">
-                  <div class="text-sm font-medium text-gray-900">{{ element.userName }}</div>
+                  <div class="text-sm font-medium text-[var(--color-font)]">
+                    {{ element.userName }}
+                  </div>
                 </div>
               </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ element.userEmail }}</div>
+              <div class="text-sm text-[var(--color-font)]">
+                {{ element.userEmail }}
+              </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ element.userPhone || 'N/A' }}</div>
+              <div class="text-sm text-[var(--color-font)]">
+                {{ element.userPhone || "N/A" }}
+              </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <span 
+              <span
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                [ngClass]="element.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-                <span class="w-2 h-2 rounded-full mr-1" 
-                      [ngClass]="element.active ? 'bg-green-400' : 'bg-red-400'"></span>
+                [ngClass]="
+                  element.active
+                    ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                    : 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]'
+                "
+              >
+                <span
+                  class="w-2 h-2 rounded-full mr-1"
+                  [ngClass]="
+                    element.active
+                      ? 'bg-[var(--color-success)]'
+                      : 'bg-[var(--color-danger)]'
+                  "
+                ></span>
                 {{ element.active ? "Active" : "Inactive" }}
               </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <div class="flex space-x-2">
-                <button 
-                  class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-                  (click)="toggleStatus(element)">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                <button
+                  class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-[var(--color-bg)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-colors duration-200"
+                  (click)="toggleStatus(element)"
+                >
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                    ></path>
                   </svg>
                   Toggle Status
                 </button>
-                <button 
-                  class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-                  (click)="onEdit(element)">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                <button
+                  class="inline-flex items-center px-3 py-1.5 border border-[var(--color-border)] text-xs font-medium rounded-md text-[var(--color-font)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-colors duration-200"
+                  (click)="onEdit(element)"
+                >
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    ></path>
                   </svg>
                   Edit
                 </button>
@@ -108,12 +214,26 @@
           </tr>
           <tr *ngIf="pagedData.length === 0">
             <td colspan="5" class="px-6 py-8 text-center">
-              <div class="text-gray-500">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <div class="text-[var(--color-muted)]">
+                <svg
+                  class="mx-auto h-12 w-12 text-[var(--color-muted)]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No users found</h3>
-                <p class="mt-1 text-sm text-gray-500">Try adjusting your search criteria</p>
+                <h3 class="mt-2 text-sm font-medium text-[var(--color-font)]">
+                  No users found
+                </h3>
+                <p class="mt-1 text-sm text-[var(--color-muted)]">
+                  Try adjusting your search criteria
+                </p>
               </div>
             </td>
           </tr>
@@ -122,52 +242,98 @@
     </div>
 
     <!-- Pagination -->
-    <div *ngIf="totalPages > 1" class="bg-white px-6 py-4 border-t border-gray-200">
+    <div
+      *ngIf="totalPages > 1"
+      class="bg-[var(--color-surface)] px-6 py-4 border-t border-[var(--color-border)]"
+    >
       <div class="flex items-center justify-between">
         <div class="flex-1 flex justify-between items-center sm:hidden">
-          <button 
-            (click)="prevPage()" 
+          <button
+            (click)="prevPage()"
             [disabled]="currentPage === 1"
-            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            class="relative inline-flex items-center px-4 py-2 border border-[var(--color-border)] text-sm font-medium rounded-md text-[var(--color-font)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Previous
           </button>
-          <span class="text-sm text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
-          <button 
-            (click)="nextPage()" 
+          <span class="text-sm text-[var(--color-muted)]"
+            >Page {{ currentPage }} of {{ totalPages }}</span
+          >
+          <button
+            (click)="nextPage()"
             [disabled]="currentPage === totalPages"
-            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            class="relative inline-flex items-center px-4 py-2 border border-[var(--color-border)] text-sm font-medium rounded-md text-[var(--color-font)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Next
           </button>
         </div>
-        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div
+          class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between"
+        >
           <div>
-            <p class="text-sm text-gray-700">
-              Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to 
-              <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, filteredData.length) }}</span> of 
-              <span class="font-medium">{{ filteredData.length }}</span> results
+            <p class="text-sm text-[var(--color-muted)]">
+              Showing
+              <span class="font-medium text-[var(--color-font)]">{{
+                (currentPage - 1) * itemsPerPage + 1
+              }}</span>
+              to
+              <span class="font-medium text-[var(--color-font)]">{{
+                Math.min(currentPage * itemsPerPage, filteredData.length)
+              }}</span>
+              of
+              <span class="font-medium text-[var(--color-font)]">{{
+                filteredData.length
+              }}</span>
+              results
             </p>
           </div>
           <div>
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <button 
-                (click)="prevPage()" 
+            <nav
+              class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+              aria-label="Pagination"
+            >
+              <button
+                (click)="prevPage()"
                 [disabled]="currentPage === 1"
-                class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-muted)] hover:bg-[var(--color-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <span class="sr-only">Previous</span>
-                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                <svg
+                  class="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  />
                 </svg>
               </button>
-              <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+              <span
+                class="relative inline-flex items-center px-4 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-font)]"
+              >
                 Page {{ currentPage }} of {{ totalPages }}
               </span>
-              <button 
-                (click)="nextPage()" 
+              <button
+                (click)="nextPage()"
                 [disabled]="currentPage === totalPages"
-                class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-muted)] hover:bg-[var(--color-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <span class="sr-only">Next</span>
-                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                <svg
+                  class="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd"
+                  />
                 </svg>
               </button>
             </nav>
@@ -178,26 +344,61 @@
   </div>
 
   <!-- No Data State -->
-  <div *ngIf="!showTable && responseData.length === 0" class="text-center py-12 bg-white rounded-lg border border-gray-200">
-    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+  <div
+    *ngIf="!showTable && responseData.length === 0"
+    class="text-center py-12 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]"
+  >
+    <svg
+      class="mx-auto h-12 w-12 text-[var(--color-muted)]"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      ></path>
     </svg>
-    <h3 class="mt-2 text-lg font-medium text-gray-900">No users found</h3>
-    <p class="mt-1 text-gray-500">There are no users associated with this agent.</p>
+    <h3 class="mt-2 text-lg font-medium text-[var(--color-font)]">
+      No users found
+    </h3>
+    <p class="mt-1 text-[var(--color-muted)]">
+      There are no users associated with this agent.
+    </p>
   </div>
 
   <!-- Edit Modal -->
-  <div *ngIf="selectedUser" class="fixed top-20 inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start p-4 overflow-auto">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl my-8">
+  <div
+    *ngIf="selectedUser"
+    class="fixed top-20 inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start p-4 overflow-auto"
+  >
+    <div
+      class="bg-[var(--color-surface)] rounded-2xl shadow-xl w-full max-w-2xl my-8 border border-[var(--color-border)]"
+    >
       <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-2xl">
+      <div
+        class="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary-dark)] to-[var(--color-primary)] text-[var(--color-bg)] rounded-t-2xl"
+      >
         <div class="flex justify-between items-center">
           <h2 class="text-xl font-bold">Edit User</h2>
-          <button 
+          <button
             (click)="closeModal()"
-            class="text-white hover:text-gray-200 transition-colors duration-200">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            class="text-[var(--color-bg)] hover:text-white/80 transition-colors duration-200"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
             </svg>
           </button>
         </div>
@@ -208,46 +409,62 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Name Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
-            <input 
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-              [(ngModel)]="selectedUser.name" 
-              name="name" 
-              required 
-              placeholder="Enter user name" />
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+              >Name</label
+            >
+            <input
+              class="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)] text-[var(--color-font)]"
+              [(ngModel)]="selectedUser.name"
+              name="name"
+              required
+              placeholder="Enter user name"
+            />
           </div>
 
           <!-- Email Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <input 
-              type="email" 
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-              [(ngModel)]="selectedUser.email" 
-              name="email" 
-              required 
-              placeholder="Enter email address" />
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+              >Email</label
+            >
+            <input
+              type="email"
+              class="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)] text-[var(--color-font)]"
+              [(ngModel)]="selectedUser.email"
+              name="email"
+              required
+              placeholder="Enter email address"
+            />
           </div>
 
-           <!-- Mobile Field -->
+          <!-- Mobile Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
-            <input 
-              type="phone" 
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-              [(ngModel)]="selectedUser.phone" 
-              name="phone" 
-              required 
-              placeholder="Enter Phone number" />
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+              >Mobile Number</label
+            >
+            <input
+              type="tel"
+              class="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)] text-[var(--color-font)]"
+              [(ngModel)]="selectedUser.phone"
+              name="phone"
+              required
+              placeholder="Enter phone number"
+            />
           </div>
 
           <!-- Status Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-            <select 
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-              [(ngModel)]="selectedUser.active" 
-              name="active">
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+              >Status</label
+            >
+            <select
+              class="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)] text-[var(--color-font)]"
+              [(ngModel)]="selectedUser.active"
+              name="active"
+            >
               <option [ngValue]="true">Active</option>
               <option [ngValue]="false">Inactive</option>
             </select>
@@ -255,33 +472,50 @@
 
           <!-- Password Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-            <input 
-              type="password" 
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-              [(ngModel)]="selectedUser.password" 
-              name="password" 
-              placeholder="Leave blank to keep current" />
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+              >Password</label
+            >
+            <input
+              type="password"
+              class="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)] text-[var(--color-font)]"
+              [(ngModel)]="selectedUser.password"
+              name="password"
+              placeholder="Leave blank to keep current"
+            />
           </div>
 
           <!-- Confirm Password Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-            <input 
-              type="password" 
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-              [(ngModel)]="selectedUser.confirmPassword" 
-              name="confirmPassword" 
-              placeholder="Leave blank to keep current" />
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+              >Confirm Password</label
+            >
+            <input
+              type="password"
+              class="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)] text-[var(--color-font)]"
+              [(ngModel)]="selectedUser.confirmPassword"
+              name="confirmPassword"
+              placeholder="Leave blank to keep current"
+            />
           </div>
         </div>
 
         <!-- Password Mismatch Error -->
-        <div *ngIf="submitAttempted && selectedUser.password !== selectedUser.confirmPassword" 
-             class="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <div class="flex items-center text-red-700">
+        <div
+          *ngIf="
+            submitAttempted &&
+            selectedUser.password !== selectedUser.confirmPassword
+          "
+          class="p-4 bg-[var(--color-danger)]/10 border border-[var(--color-danger)] rounded-lg"
+        >
+          <div class="flex items-center text-[var(--color-danger)]">
             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clip-rule="evenodd"
+              ></path>
             </svg>
             Passwords do not match
           </div>
@@ -289,18 +523,22 @@
       </form>
 
       <!-- Modal Footer -->
-      <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+      <div
+        class="px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-bg)] rounded-b-2xl"
+      >
         <div class="flex justify-end space-x-3">
-          <button 
-            type="button" 
-            class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-            (click)="closeModal()">
+          <button
+            type="button"
+            class="px-5 py-2.5 border border-[var(--color-border)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-colors duration-200"
+            (click)="closeModal()"
+          >
             Cancel
           </button>
-          <button 
-            type="button" 
-            class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-            (click)="handleSubmit()">
+          <button
+            type="button"
+            class="px-5 py-2.5 bg-[var(--color-primary)] text-[var(--color-bg)] rounded-lg hover:bg-[var(--color-primary-dark)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-colors duration-200"
+            (click)="handleSubmit()"
+          >
             Save Changes
           </button>
         </div>
