@@ -1,7 +1,7 @@
 <div
-  class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 p-6 relative overflow-hidden"
+  class="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-white to-white p-6 relative overflow-hidden"
 >
-  <!-- Animated background shapes (optional decorative elements) -->
+  <!-- Animated background shapes -->
   <div class="absolute inset-0 overflow-hidden">
     <div
       class="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse"
@@ -11,123 +11,97 @@
     ></div>
   </div>
 
-  <!-- Main container with spinning conic gradient border -->
+  <!-- Larger card (max-w-lg) with Uiverse design -->
   <div
-    class="relative w-[316px] h-[460px] bg-[#272727] rounded-2xl shadow-[0_4px_8px_rgba(0,0,0,0.2),0_8px_16px_rgba(0,0,0,0.2),0_0_8px_rgba(255,255,255,0.1),0_0_16px_rgba(255,255,255,0.08)] z-10 before:content-[''] before:absolute before:inset-[-50px] before:-z-10 before:bg-[conic-gradient(from_45deg,transparent_75%,#fff,transparent_100%)] before:animate-spin-slow"
+    class="max-w-lg bg-gradient-to-b from-white to-[#f4f7fb] rounded-[40px] p-8 sm:p-10 border-4 border-white shadow-[rgba(133,189,215,0.88)_0px_30px_30px_-20px] mx-auto my-5 z-10"
   >
-    <!-- Inner glass box -->
-    <div
-      class="absolute inset-0 bg-[#272727] rounded-2xl p-7 backdrop-blur-md shadow-[inset_0_40px_60px_-8px_rgba(255,255,255,0.12),inset_4px_0_12px_-6px_rgba(255,255,255,0.12),inset_0_0_12px_-4px_rgba(255,255,255,0.12)]"
-    >
-      <!-- Form -->
-      <form
-        class="flex flex-col items-center gap-2.5 h-full"
-        (ngSubmit)="formSubmit()"
-      >
-        <!-- Logo -->
-        <div
-          class="relative w-[65px] h-[65px] bg-gradient-to-br from-white/20 to-black/20 shadow-[8px_8px_16px_rgba(0,0,0,0.2),-8px_-8px_16px_rgba(255,255,255,0.06)] rounded-[20px] border-2 border-white flex justify-center items-center before:content-[''] before:absolute before:bottom-2.5 before:w-1/2 before:h-1/5 before:border-2.5 before:border-white before:rounded-t-[40px] before:rounded-b-[20px] after:content-[''] after:absolute after:top-2.5 after:w-[30%] after:h-[30%] after:border-2.5 after:border-white after:rounded-full"
-        ></div>
+    <!-- Heading -->
+    <div class="text-center font-black text-3xl text-[#1089d3]">Sign In</div>
 
-        <!-- Header text -->
-        <div class="w-full text-center text-2xl font-bold py-1.5 text-white">
-          Login
-        </div>
+    <!-- Form -->
+    <form class="mt-6" (ngSubmit)="formSubmit()">
+      <!-- Email input -->
+      <input
+        type="email"
+        placeholder="E-mail"
+        class="w-full bg-white border-none p-4 rounded-2xl mt-4 shadow-[#cff0ff_0px_10px_10px_-5px] placeholder-gray-400 focus:outline-none focus:border-2 focus:border-[#12b1d1] transition"
+        [(ngModel)]="loginData.email"
+        name="email"
+        required
+      />
 
-        <!-- Email input -->
+      <!-- Password input with toggle -->
+      <div class="relative w-full">
         <input
-          type="email"
-          class="w-full p-2.5 border-none rounded-xl bg-[#3a3a3a] text-white outline-none text-sm placeholder-gray-400 focus:border focus:border-white transition"
-          placeholder="head@gmail.com"
-          [(ngModel)]="loginData.email"
-          name="email"
+          [type]="showPassword ? 'text' : 'password'"
+          placeholder="Password"
+          class="w-full bg-white border-none p-4 rounded-2xl mt-4 shadow-[#cff0ff_0px_10px_10px_-5px] placeholder-gray-400 pr-12 focus:outline-none focus:border-2 focus:border-[#12b1d1] transition"
+          [(ngModel)]="loginData.password"
+          name="password"
           required
         />
+        <button
+          type="button"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+          (click)="showPassword = !showPassword"
+        >
+          <!-- Eye open icon -->
+          <svg
+            *ngIf="!showPassword"
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+            />
+          </svg>
+          <!-- Eye closed icon -->
+          <svg
+            *ngIf="showPassword"
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M3 3l3.59 3.59"
+            />
+          </svg>
+        </button>
+      </div>
 
-        <!-- Password input with toggle -->
-        <div class="relative w-full">
-          <input
-            [type]="showPassword ? 'text' : 'password'"
-            class="w-full p-2.5 border-none rounded-xl bg-[#3a3a3a] text-white outline-none text-sm placeholder-gray-400 pr-10 focus:border focus:border-white transition"
-            placeholder="Password"
-            [(ngModel)]="loginData.password"
-            name="password"
-            required
-          />
-          <button
-            type="button"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-            (click)="showPassword = !showPassword"
-          >
-            <!-- Eye open icon -->
-            <svg
-              *ngIf="!showPassword"
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-              />
-            </svg>
-            <!-- Eye closed icon -->
-            <svg
-              *ngIf="showPassword"
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M3 3l3.59 3.59"
-              />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Buttons row: Login and Clear -->
-        <div class="flex gap-3 w-full mt-1">
-          <button
-            type="submit"
-            class="flex-1 h-10 border-none rounded-2xl text-sm font-semibold cursor-pointer grid place-content-center bg-[#373737] text-white transition duration-300 shadow-[inset_0px_3px_6px_-4px_rgba(255,255,255,0.6),inset_0px_-3px_6px_-2px_rgba(0,0,0,0.8)] hover:bg-white/25 hover:shadow-[inset_0px_3px_6px_rgba(255,255,255,0.6),inset_0px_-3px_6px_rgba(0,0,0,0.8),0px_0px_8px_rgba(255,255,255,0.05)]"
-          >
-            Login
-          </button>
-          <button
-            type="button"
-            (click)="clearForm()"
-            class="flex-1 h-10 border-none rounded-2xl text-sm font-semibold cursor-pointer grid place-content-center bg-[#373737] text-white transition duration-300 shadow-[inset_0px_3px_6px_-4px_rgba(255,255,255,0.6),inset_0px_-3px_6px_-2px_rgba(0,0,0,0.8)] hover:bg-white/25 hover:shadow-[inset_0px_3px_6px_rgba(255,255,255,0.6),inset_0px_-3px_6px_rgba(0,0,0,0.8),0px_0px_8px_rgba(255,255,255,0.05)]"
-          >
-            Clear
-          </button>
-        </div>
-
-        <!-- Footer link -->
-        <div class="w-full text-left text-xs text-white/50 mt-2">
-          <span>Don't have an account? </span>
-          <a
-            href="#"
-            class="relative text-white/50 font-semibold no-underline transition-colors duration-300 hover:text-white after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:w-0 after:h-px after:bg-current after:rounded after:transition-all after:duration-300 hover:after:w-full"
-          >
-            Sign up
-          </a>
-        </div>
-      </form>
-    </div>
+      <!-- Buttons row: Sign In and Clear -->
+      <div class="flex gap-4 mt-6">
+        <button
+          type="submit"
+          class="flex-1 font-bold bg-gradient-to-r from-[#1089d3] to-[#12b1d1] text-white py-4 rounded-2xl shadow-[rgba(133,189,215,0.88)_0px_20px_10px_-15px] border-none transition-all duration-200 hover:scale-105 hover:shadow-[rgba(133,189,215,0.88)_0px_23px_10px_-20px] active:scale-95 active:shadow-[rgba(133,189,215,0.88)_0px_15px_10px_-10px]"
+        >
+          Sign In
+        </button>
+        <button
+          type="button"
+          (click)="clearForm()"
+          class="flex-1 font-bold bg-gradient-to-r from-gray-500 to-gray-600 text-white py-4 rounded-2xl shadow-[rgba(133,189,215,0.88)_0px_20px_10px_-15px] border-none transition-all duration-200 hover:scale-105 hover:shadow-[rgba(133,189,215,0.88)_0px_23px_10px_-20px] active:scale-95 active:shadow-[rgba(133,189,215,0.88)_0px_15px_10px_-10px]"
+        >
+          Clear
+        </button>
+      </div>
+    </form>
   </div>
 </div>
