@@ -30,6 +30,9 @@ interface BackendThread {
   title?: string;
   queryMessage?: string | null;
   role?: string | null;
+  rejectionReason?: string | null;
+  rejectedBy?: string | null;
+  [key: string]: any;
 }
 
 @Component({
@@ -58,6 +61,10 @@ export class NotificateChatComponent implements OnInit {
   currentRoleName: any;
   currentRoleId: any;
   transientNotifications: { id: string; message: string }[] = [];
+
+  // Popup properties
+  showDetailsPopup = false;
+  selectedNotification: BackendThread | null = null;
 
   sse: any;
 
@@ -186,6 +193,15 @@ export class NotificateChatComponent implements OnInit {
     };
 
     data.forEach((it: any) => {
+      // Filter out thread members (they have threadId but no fundsId)
+      if (it.threadId && !it.fundsId) {
+        return;
+      }
+      // Filter out rejected threads
+      if (it.rejectionReason) {
+        return;
+      }
+
       const thread: BackendThread = {
         ...it,
         id: it.id || it.fundsId,
@@ -255,15 +271,102 @@ export class NotificateChatComponent implements OnInit {
     const entity = (notification.createdByEntityType || "")
       .toString()
       .toUpperCase();
-    if (entity === "BRANCH") {
-      this.router.navigate(["/branch-chat"], {
-        queryParams: { threadId: navId },
+
+    // Choose route based on entity
+    const route = entity === "BRANCH" ? "/head/branch-chat" : "/head/head-chat";
+
+    // Navigate with query parameter (or change to route parameter if needed)
+    this.router
+      .navigate([route], { queryParams: { threadId: navId } })
+      .then((success) => {
+        if (!success) {
+          console.error(
+            `Navigation to ${route} failed. Check if route is defined.`,
+          );
+        }
+      })
+      .catch((err) => {
+        console.error("Navigation error:", err);
       });
-    } else {
-      this.router.navigate(["/head-chat"], {
-        queryParams: { threadId: navId },
-      });
+  }
+
+  // Open details popup
+  openDetailsPopup(notification: BackendThread) {
+    this.selectedNotification = notification;
+    this.showDetailsPopup = true;
+  }
+
+  // Close details popup
+  closeDetailsPopup() {
+    this.showDetailsPopup = false;
+    this.selectedNotification = null;
+  }
+
+  // Get Material Icon name based on funds type
+  getMaterialIcon(fundsType?: string): string {
+    const type = (fundsType || "").toLowerCase();
+    if (type.includes("upi")) return "smartphone";
+    if (type.includes("bank")) return "account_balance";
+    if (
+      type.includes("payout") ||
+      type.includes("payment") ||
+      type.includes("pay")
+    )
+      return "payments";
+    return "info";
+  }
+
+  // Helper to extract display fields from an object, excluding ID-related keys, unread, rejection fields, and rejection thread members
+  getDisplayFields(obj: any): { key: string; value: any }[] {
+    if (!obj || typeof obj !== "object") return [];
+    return Object.keys(obj)
+      .filter((key) => {
+        const lower = key.toLowerCase();
+        return (
+          !lower.includes("id") &&
+          ![
+            "fundsid",
+            "createdbyid",
+            "createdbyentityid",
+            "updatedbyid",
+            "isread",
+            "unreadcount",
+            "rejectedby",
+            "rejectionreason",
+            "rejectionthreadmember",
+            "rejectionthreadmembers",
+          ].includes(lower) &&
+          obj[key] !== null &&
+          obj[key] !== undefined
+        );
+      })
+      .map((key) => ({
+        key: this.formatKey(key),
+        value: this.formatValue(obj[key]),
+      }));
+  }
+
+  // Format key for display (camelCase to Title Case with spaces)
+  private formatKey(key: string): string {
+    return key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (str) => str.toUpperCase())
+      .replace(/_/g, " ");
+  }
+
+  // Format value for display (handle objects, arrays, dates)
+  private formatValue(value: any): string {
+    if (value === null || value === undefined) return "—";
+    if (typeof value === "object") {
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch {
+        return "[Complex Value]";
+      }
     }
+    if (typeof value === "boolean") return value ? "Yes" : "No";
+    if (value instanceof Date) return value.toLocaleString();
+    return String(value);
   }
 
   filterNotifications(type: "all" | "chat" | "approved" | "rejected" | "info") {
@@ -298,6 +401,7 @@ export class NotificateChatComponent implements OnInit {
   }
 
   getNotificationIcon(fundsType?: string): string {
+    // Kept for backward compatibility, but not used in template anymore
     const type = (fundsType || "").toLowerCase();
     if (type.includes("bank")) return "🏦";
     if (type.includes("upi")) return "💳";
@@ -330,6 +434,26 @@ export class NotificateChatComponent implements OnInit {
     const createdAt = eventData.createdAt || new Date().toISOString();
     const createdByEntityType =
       eventData.createdByEntityType || eventData.createdByType || null;
+
+    // If this update is for a thread member (has threadId but no fundsId), ignore and remove
+    if (eventData.threadId && !eventData.fundsId) {
+      this.removeThread(
+        threadId,
+        eventData.createdByEntityType,
+        eventData.fundsType,
+      );
+      return;
+    }
+
+    // If this update contains a rejection reason, remove the thread
+    if (eventData.rejectionReason) {
+      this.removeThread(
+        threadId,
+        eventData.createdByEntityType,
+        eventData.fundsType,
+      );
+      return;
+    }
 
     const existing = this.notifications.find(
       (n) => n.fundsId === threadId || n.id === threadId,
@@ -387,6 +511,34 @@ export class NotificateChatComponent implements OnInit {
     this.applyFilter();
   }
 
+  private removeThread(
+    threadId: string,
+    entityType: string | null,
+    fundsType: string | null,
+  ) {
+    // Remove from notifications array
+    const existingIndex = this.notifications.findIndex(
+      (n) => n.fundsId === threadId || n.id === threadId,
+    );
+    if (existingIndex > -1) {
+      this.notifications.splice(existingIndex, 1);
+    }
+    // Remove from groupedNotifications
+    const entity =
+      (entityType || "BRANCH").toString().toUpperCase() === "HEAD"
+        ? "head"
+        : "branch";
+    const fundsKey = this.normalizeFundsType(fundsType);
+    if (
+      this.groupedNotifications[entity] &&
+      this.groupedNotifications[entity][fundsKey]
+    ) {
+      this.groupedNotifications[entity][fundsKey] = this.groupedNotifications[
+        entity
+      ][fundsKey].filter((t) => t.fundsId !== threadId && t.id !== threadId);
+    }
+  }
+
   getGroupCount(group: "head" | "branch"): number {
     let count = 0;
     for (const cat of ["upi", "bank", "payout", "other"]) {
@@ -418,5 +570,26 @@ export class NotificateChatComponent implements OnInit {
       n.isRead = true;
       n.unreadCount = 0;
     });
+  }
+
+  // Map field keys to Material Icons for the details popup
+  getFieldIcon(fieldKey: string): string {
+    const key = fieldKey.toLowerCase();
+    if (key.includes("type")) return "category";
+    if (key.includes("message")) return "message";
+    if (
+      key.includes("date") ||
+      key.includes("time") ||
+      key.includes("created") ||
+      key.includes("updated")
+    )
+      return "schedule";
+    if (key.includes("name")) return "person";
+    if (key.includes("amount")) return "attach_money";
+    if (key.includes("status")) return "info";
+    if (key.includes("upi")) return "smartphone";
+    if (key.includes("bank")) return "account_balance";
+    if (key.includes("payout")) return "payments";
+    return "label";
   }
 }

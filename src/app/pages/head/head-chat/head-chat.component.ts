@@ -114,7 +114,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
       hover: "#6B1FB3",
       glow: "rgba(90,11,149,0.50)",
     },
-     other: {
+    other: {
       primary: "#5A0B95",
       secondary: "#FFDF80",
       bg: "#F8F5FF",
@@ -191,7 +191,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
     private socketConfigService: SocketConfigService,
     private websiteService: WebsiteService,
     private fundService: FundsService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -215,8 +215,8 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
         typeof res.unreadCount === "number"
           ? res.unreadCount
           : typeof res.unread === "number"
-          ? res.unread
-          : 0;
+            ? res.unread
+            : 0;
 
       if (!threadId) return;
 
@@ -277,10 +277,10 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.subscribedThreadId) {
       try {
         (this.socketConfigService as any).unsubscribeMessagePage?.(
-          this.subscribedThreadId
+          this.subscribedThreadId,
         );
         (this.socketConfigService as any).unsubscribeMessages?.(
-          this.subscribedThreadId
+          this.subscribedThreadId,
         );
       } catch (e) {}
       this.subscribedThreadId = null;
@@ -321,7 +321,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
         (notification) =>
           notification.groupName.toLowerCase().includes(term) ||
           notification.lastMessage.toLowerCase().includes(term) ||
-          notification.lastSender.toLowerCase().includes(term)
+          notification.lastSender.toLowerCase().includes(term),
       );
     }
 
@@ -381,7 +381,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Update filtered notifications if needed
     const filteredIdx = this.filteredNotifications.findIndex(
-      (n) => n.id === threadId
+      (n) => n.id === threadId,
     );
     if (filteredIdx > -1) {
       const notif = this.filteredNotifications[filteredIdx];
@@ -430,7 +430,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
       const threadId = this.route.snapshot.queryParamMap.get("threadId");
       if (threadId) {
         const matchedNotification = this.filteredNotifications.find(
-          (n) => n.id === threadId
+          (n) => n.id === threadId,
         );
         if (matchedNotification) {
           if (
@@ -451,7 +451,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
   // --- NEW helper: merge backend threads into existing notifications, preserving messages & participants ---
   private mergeNotificationsFromThreads(threads: any[]): void {
     const mapped = (threads || []).map((t: any) =>
-      this.mapThreadToNotification(t)
+      this.mapThreadToNotification(t),
     );
 
     for (const n of mapped) {
@@ -466,7 +466,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private updateNotificationInArray(
     array: Notification[],
-    newNotification: Notification
+    newNotification: Notification,
   ): void {
     const existing = array.find((e) => e.id === newNotification.id);
     if (existing) {
@@ -528,11 +528,11 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.filteredQuestions = (this.questions || []).filter((panel: any) =>
       String(panel.messageText || "")
         .toLowerCase()
-        .includes(lower)
+        .includes(lower),
     );
 
     const exact = (this.questions || []).find(
-      (q: any) => String(q.messageText || "").toLowerCase() === lower
+      (q: any) => String(q.messageText || "").toLowerCase() === lower,
     );
 
     if (exact) {
@@ -560,7 +560,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
       try {
         this.snackBar.show(
           "Please choose a question from the suggestions before sending.",
-          false
+          false,
         );
       } catch {}
     }
@@ -689,7 +689,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.branchId,
         this.role,
         isResolved,
-        this.fundTypeFilter
+        this.fundTypeFilter,
       )
       .subscribe({
         next: (res: any) => {
@@ -726,8 +726,8 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
       const members = Array.isArray(t.rejectionThreadMember)
         ? t.rejectionThreadMember
         : Array.isArray(t.threadMembers)
-        ? t.threadMembers
-        : [];
+          ? t.threadMembers
+          : [];
 
       const myEntry =
         members && this.currentUserId
@@ -735,7 +735,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
               (m: any) =>
                 m.entityId === this.currentUserId ||
                 m.userId === this.currentUserId ||
-                m.id === this.currentUserId
+                m.id === this.currentUserId,
             )
           : null;
       if (myEntry) {
@@ -767,7 +767,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
       fundId: t.fundsId,
       fundType: t.fundsType,
       threadType: threadType,
-      name:rawName
+      name: rawName,
     };
   }
 
@@ -781,7 +781,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {
       // make sure we reference the object from notifications array (keeps arrays same reference)
       const existingRef = this.notifications.find(
-        (n) => n.id === notification.id
+        (n) => n.id === notification.id,
       );
       if (existingRef) {
         this.selectedNotification = existingRef;
@@ -801,10 +801,10 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {
       try {
         (this.socketConfigService as any).unsubscribeMessagePage?.(
-          this.subscribedThreadId
+          this.subscribedThreadId,
         );
         (this.socketConfigService as any).unsubscribeMessages?.(
-          this.subscribedThreadId
+          this.subscribedThreadId,
         );
       } catch (e) {}
       this.subscribedThreadId = null;
@@ -842,8 +842,8 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
         const members = Array.isArray(membersRes)
           ? membersRes
           : membersRes
-          ? [membersRes]
-          : [];
+            ? [membersRes]
+            : [];
         const mappedMembers: GroupParticipant[] = membersRes.map((m: any) => ({
           id: m.id,
           userId: m.userId,
@@ -887,14 +887,14 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
           const msgs = Array.isArray(messagesRes)
             ? messagesRes
             : messagesRes
-            ? [messagesRes]
-            : [];
+              ? [messagesRes]
+              : [];
           if (msgs.length < this.pageSize) {
             this.noMoreMessages = true;
           }
 
           const mapped: GroupMessage[] = msgs.map((m: any) =>
-            this.mapBackendMessageToGroupMessage(m)
+            this.mapBackendMessageToGroupMessage(m),
           );
 
           this.zone.run(() => {
@@ -991,10 +991,10 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.subscribedThreadId) {
       try {
         (this.socketConfigService as any).unsubscribeMessagePage?.(
-          this.subscribedThreadId
+          this.subscribedThreadId,
         );
         (this.socketConfigService as any).unsubscribeMessages?.(
-          this.subscribedThreadId
+          this.subscribedThreadId,
         );
       } catch (e) {}
     }
@@ -1033,7 +1033,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
       try {
         this.snackBar.show(
           "No conversation selected to fetch fund info.",
-          false
+          false,
         );
       } catch {}
       return;
@@ -1103,7 +1103,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // try to find in the internal notifications array (legacy place you used)
     const existingIndex = this.notifications.findIndex(
-      (n) => n.id === threadId || n._raw?.threadId === threadId
+      (n) => n.id === threadId || n._raw?.threadId === threadId,
     );
 
     // helper: update an existing notification object consistently
@@ -1146,7 +1146,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
       // also keep UI arrays in sync (filteredNotifications / all/resolved/unresolved)
       // find matching item in filteredNotifications and move/update it to top
       const fi = this.filteredNotifications.findIndex(
-        (n) => n.id === existing.id
+        (n) => n.id === existing.id,
       );
       if (fi > -1) {
         const fcopy = [...this.filteredNotifications];
@@ -1173,7 +1173,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // ensure the UI list reflects the updated order (move to top of filteredNotifications)
         const idx = this.filteredNotifications.findIndex(
-          (n) => n.id === foundInUI.id
+          (n) => n.id === foundInUI.id,
         );
         if (idx > -1) {
           const copy = [...this.filteredNotifications];
@@ -1350,7 +1350,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
   openMediaViewer(
     mediaUrl: any,
     name: string = "",
-    type: string = "file"
+    type: string = "file",
   ): void {
     this.currentMediaUrl = mediaUrl;
     this.currentMediaName = name || "";
@@ -1373,7 +1373,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async downloadFile(
     url: string | null | undefined,
-    filename: string = "file"
+    filename: string = "file",
   ) {
     if (!url) return this.snackBar.show("No file to download", false);
     try {
@@ -1424,7 +1424,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private determineMessageType(
     fileUrl: string | null,
-    raw?: any
+    raw?: any,
   ): "text" | "image" | "video" | "audio" | "file" {
     if (raw && raw.type) {
       const t = String(raw.type).toLowerCase();
@@ -1478,73 +1478,79 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
- // Replace existing insertEmoji(emoji: string) with this version
-insertEmoji(emoji: string): void {
-  // Try to use the currently focused input if available
-  const active = document.activeElement as HTMLInputElement | null;
+  // Replace existing insertEmoji(emoji: string) with this version
+  insertEmoji(emoji: string): void {
+    // Try to use the currently focused input if available
+    const active = document.activeElement as HTMLInputElement | null;
 
-  // Helper to insert at cursor position in a given input element and update model
-  const insertIntoInput = (inputEl: HTMLInputElement, modelKey: 'questionSearchTerm' | 'newMessage') => {
-    const start = (inputEl.selectionStart ?? inputEl.value.length);
-    const end = (inputEl.selectionEnd ?? inputEl.value.length);
-    const text = inputEl.value || '';
-    const newText = text.substring(0, start) + emoji + text.substring(end);
+    // Helper to insert at cursor position in a given input element and update model
+    const insertIntoInput = (
+      inputEl: HTMLInputElement,
+      modelKey: "questionSearchTerm" | "newMessage",
+    ) => {
+      const start = inputEl.selectionStart ?? inputEl.value.length;
+      const end = inputEl.selectionEnd ?? inputEl.value.length;
+      const text = inputEl.value || "";
+      const newText = text.substring(0, start) + emoji + text.substring(end);
 
-    // Update DOM input value
-    inputEl.value = newText;
+      // Update DOM input value
+      inputEl.value = newText;
 
-    // Update Angular model
-    if (modelKey === 'questionSearchTerm') {
-      this.questionSearchTerm = newText;
-      this.filterQuestion(); // keep suggestions in sync
-    } else {
-      this.newMessage = newText;
+      // Update Angular model
+      if (modelKey === "questionSearchTerm") {
+        this.questionSearchTerm = newText;
+        this.filterQuestion(); // keep suggestions in sync
+      } else {
+        this.newMessage = newText;
+      }
+
+      // Restore cursor after emoji
+      setTimeout(() => {
+        try {
+          inputEl.setSelectionRange(start + emoji.length, start + emoji.length);
+          inputEl.focus();
+        } catch {}
+      }, 0);
+    };
+
+    // If focused element is an input and is one of our two target inputs, use it
+    if (active && active.tagName === "INPUT") {
+      const aria = active.getAttribute("aria-label") || "";
+      if (aria.toLowerCase().includes("search questions")) {
+        insertIntoInput(active as HTMLInputElement, "questionSearchTerm");
+        this.showEmojiPicker = false;
+        return;
+      } else if (aria.toLowerCase().includes("type message")) {
+        insertIntoInput(active as HTMLInputElement, "newMessage");
+        this.showEmojiPicker = false;
+        return;
+      }
     }
 
-    // Restore cursor after emoji
-    setTimeout(() => {
-      try {
-        inputEl.setSelectionRange(start + emoji.length, start + emoji.length);
-        inputEl.focus();
-      } catch {}
-    }, 0);
-  };
-
-  // If focused element is an input and is one of our two target inputs, use it
-  if (active && active.tagName === 'INPUT') {
-    const aria = active.getAttribute('aria-label') || '';
-    if (aria.toLowerCase().includes('search questions')) {
-      insertIntoInput(active as HTMLInputElement, 'questionSearchTerm');
-      this.showEmojiPicker = false;
-      return;
-    } else if (aria.toLowerCase().includes('type message')) {
-      insertIntoInput(active as HTMLInputElement, 'newMessage');
+    // Fallback: try to find the search input first, then the message input
+    const searchInput = document.querySelector(
+      'input[aria-label="Search questions"]',
+    ) as HTMLInputElement | null;
+    if (searchInput) {
+      insertIntoInput(searchInput, "questionSearchTerm");
       this.showEmojiPicker = false;
       return;
     }
-  }
 
-  // Fallback: try to find the search input first, then the message input
-  const searchInput = document.querySelector('input[aria-label="Search questions"]') as HTMLInputElement | null;
-  if (searchInput) {
-    insertIntoInput(searchInput, 'questionSearchTerm');
+    const msgInput = document.querySelector(
+      'input[aria-label="Type message"]',
+    ) as HTMLInputElement | null;
+    if (msgInput) {
+      insertIntoInput(msgInput, "newMessage");
+      this.showEmojiPicker = false;
+      return;
+    }
+
+    // Last fallback: append to questionSearchTerm
+    this.questionSearchTerm = (this.questionSearchTerm || "") + emoji;
     this.showEmojiPicker = false;
-    return;
+    this.filterQuestion();
   }
-
-  const msgInput = document.querySelector('input[aria-label="Type message"]') as HTMLInputElement | null;
-  if (msgInput) {
-    insertIntoInput(msgInput, 'newMessage');
-    this.showEmojiPicker = false;
-    return;
-  }
-
-  // Last fallback: append to questionSearchTerm
-  this.questionSearchTerm = (this.questionSearchTerm || '') + emoji;
-  this.showEmojiPicker = false;
-  this.filterQuestion();
-}
-
 
   switchEmojiCategory(category: string): void {
     this.activeEmojiCategory = category;
@@ -1568,7 +1574,7 @@ insertEmoji(emoji: string): void {
     this.emojis = allEmojis.filter(
       (emoji) =>
         emoji.includes(searchTerm) ||
-        this.getEmojiDescription(emoji)?.includes(searchTerm)
+        this.getEmojiDescription(emoji)?.includes(searchTerm),
     );
   }
 
