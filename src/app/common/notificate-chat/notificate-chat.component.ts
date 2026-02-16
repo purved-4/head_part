@@ -79,6 +79,7 @@ export class NotificateChatComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    
     this.currentUserId = this.userStateService.getUserId();
     this.currentRoleName = this.userStateService.getRole();
     this.currentRoleId = this.userStateService.getCurrentRoleId();
@@ -262,35 +263,58 @@ export class NotificateChatComponent implements OnInit {
     this.showNotifications = !this.showNotifications;
   }
 
-  openChat(notification: BackendThread) {
-    if (!notification) return;
-    notification.isRead = true;
-    notification.unreadCount = 0;
+  // openChat(notification: BackendThread) {
+  //   if (!notification) return;
+  //   notification.isRead = true;
+  //   notification.unreadCount = 0;
 
-    const navId = notification.fundsId || notification.id || "";
-    const entity = (notification.createdByEntityType || "")
-      .toString()
-      .toUpperCase();
+  //   const navId = notification.fundsId || notification.id || "";
+  //   const entity = (notification.createdByEntityType || "")
+  //     .toString()
+  //     .toUpperCase();
 
-    // Choose route based on entity
-    const route = entity === "BRANCH" ? "/head/branch-chat" : "/head/head-chat";
+  //   // Choose route based on entity
+  //   const route = entity === "BRANCH" ? "/head/branch-chat" : "/head/head-chat";
 
-    // Navigate with query parameter (or change to route parameter if needed)
-    this.router
-      .navigate([route], { queryParams: { threadId: navId } })
-      .then((success) => {
-        if (!success) {
-          console.error(
-            `Navigation to ${route} failed. Check if route is defined.`,
-          );
-        }
-      })
-      .catch((err) => {
-        console.error("Navigation error:", err);
-      });
-  }
+  //   // Navigate with query parameter (or change to route parameter if needed)
+  //   this.router
+  //     .navigate([route], { queryParams: { threadId: navId } })
+  //     .then((success) => {
+  //       if (!success) {
+  //         console.error(
+  //           `Navigation to ${route} failed. Check if route is defined.`,
+  //         );
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error("Navigation error:", err);
+  //     });
+  // }
 
   // Open details popup
+  
+  openChat(notification: BackendThread) {
+  if (!notification) return;
+
+  notification.isRead = true;
+  notification.unreadCount = 0;
+
+  // const navId = notification.fundsId || notification.id || "";
+const navId = notification.id || notification.fundsId || "";
+
+  const entity = (notification.createdByEntityType || "")
+    .toString()
+    .toUpperCase();
+
+  const route = entity === "BRANCH"
+    ? "/head/branch-chat"
+    : "/head/head-chat";
+
+  this.router.navigate([route], {
+    queryParams: { threadId: navId },
+  });
+}
+
   openDetailsPopup(notification: BackendThread) {
     this.selectedNotification = notification;
     this.showDetailsPopup = true;

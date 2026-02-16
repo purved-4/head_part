@@ -199,9 +199,25 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.branchId = this.userStateService.getCurrentRoleId();
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
-    this.route.params.subscribe((res) => {
-      this.paramThreadId = res["threadId"];
-    });
+    // this.route.params.subscribe((res) => {
+    //   this.paramThreadId = res["threadId"];
+    // });
+
+    this.route.queryParams.subscribe((params) => {
+this.paramThreadId = params["threadId"];
+if (!this.paramThreadId) return;
+
+setTimeout(() => this.handleThreadSelection(), 0);
+
+
+  if (this.loadingThreads) {
+    setTimeout(() => {
+      this.handleThreadSelection();
+    }, 100);
+    return;
+  }
+  })
+
 
     console.log(this.paramThreadId);
 
@@ -370,6 +386,8 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.filteredNotifications = notifications;
+    setTimeout(() => this.handleThreadSelection(), 0);
+
   }
 
   switchTab(tab: any): void {
@@ -455,28 +473,49 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private handleThreadSelection(): void {
-    if (this.filteredNotifications.length > 0) {
-      const threadId = this.route.snapshot.queryParamMap.get("threadId");
-      if (threadId) {
-        const matchedNotification = this.filteredNotifications.find(
-          (n) => n.id === threadId,
-        );
-        if (matchedNotification) {
-          if (
-            !this.selectedNotification ||
-            this.selectedNotification.id !== matchedNotification.id
-          ) {
-            this.selectNotification(matchedNotification);
-          }
-        } else if (!this.selectedNotification) {
-          this.selectNotification(this.filteredNotifications[0]);
-        }
-      } else if (!this.selectedNotification) {
-        this.selectNotification(this.filteredNotifications[0]);
-      }
+  // private handleThreadSelection(): void {
+  //   if (this.filteredNotifications.length > 0) {
+  //     const threadId = this.route.snapshot.queryParamMap.get("threadId");
+  //     if (threadId) {
+  //       const matchedNotification = this.filteredNotifications.find(
+  //         (n) => n.id === threadId,
+  //       );
+  //       if (matchedNotification) {
+  //         if (
+  //           !this.selectedNotification ||
+  //           this.selectedNotification.id !== matchedNotification.id
+  //         ) {
+  //           this.selectNotification(matchedNotification);
+  //         }
+  //       } else if (!this.selectedNotification) {
+  //         this.selectNotification(this.filteredNotifications[0]);
+  //       }
+  //     } else if (!this.selectedNotification) {
+  //       this.selectNotification(this.filteredNotifications[0]);
+  //     }
+  //   }
+  // }
+
+private handleThreadSelection(): void {
+  const threadId = this.paramThreadId;
+  if (!threadId) return;
+
+  const matched =
+    this.filteredNotifications.find((n) => n.id === threadId) ||
+    this.allNotifications.find((n) => n.id === threadId) ||
+    this.resolvedNotifications.find((n) => n.id === threadId) ||
+    this.unresolvedNotifications.find((n) => n.id === threadId);
+
+  if (matched) {
+    if (!this.selectedNotification || this.selectedNotification.id !== matched.id) {
+      console.log("Opening thread from param:", matched.id);
+      this.selectNotification(matched);
     }
+  } else {
+    console.warn("Thread not found yet:", threadId);
   }
+}
+
 
   private mergeNotificationsFromThreads(threads: any[]): void {
     const mapped = (threads || []).map((t: any) =>
@@ -699,7 +738,7 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.applyFilters();
-    this.handleThreadSelection();
+    // this.handleThreadSelection();
     this.loadingThreads = false;
   }
 
@@ -843,6 +882,9 @@ export class HeadChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadQuestion(notification.websiteId);
 
     this.subscribeToRealTimeMessages(threadId);
+
+    console.log("Selected Thread:", notification.id, notification.name);
+
   }
 
   private loadChatMembers(threadId: any): void {
