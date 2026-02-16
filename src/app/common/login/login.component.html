@@ -1,59 +1,65 @@
 <div
-  class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-6"
+  class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 p-6 relative overflow-hidden"
 >
-  <!-- Glass Card -->
-  <div
-    class="relative bg-white/10 backdrop-blur-xl p-10 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 animate-fade-in"
-  >
-    <!-- Glow effect -->
+  <!-- Animated background shapes (optional decorative elements) -->
+  <div class="absolute inset-0 overflow-hidden">
     <div
-      class="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/30 to-transparent opacity-20"
+      class="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse"
     ></div>
+    <div
+      class="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse animation-delay-2000"
+    ></div>
+  </div>
 
-    <div class="relative text-center mb-10">
-      <h1 class="text-4xl font-extrabold text-white drop-shadow-lg mb-3">
-        ONLINE B
-      </h1>
-      <p class="text-lg text-gray-200 font-light">
-        Welcome back 👋 Login to continue
-      </p>
-    </div>
+  <!-- Main container with spinning conic gradient border -->
+  <div
+    class="relative w-[316px] h-[460px] bg-[#272727] rounded-2xl shadow-[0_4px_8px_rgba(0,0,0,0.2),0_8px_16px_rgba(0,0,0,0.2),0_0_8px_rgba(255,255,255,0.1),0_0_16px_rgba(255,255,255,0.08)] z-10 before:content-[''] before:absolute before:inset-[-50px] before:-z-10 before:bg-[conic-gradient(from_45deg,transparent_75%,#fff,transparent_100%)] before:animate-spin-slow"
+  >
+    <!-- Inner glass box -->
+    <div
+      class="absolute inset-0 bg-[#272727] rounded-2xl p-7 backdrop-blur-md shadow-[inset_0_40px_60px_-8px_rgba(255,255,255,0.12),inset_4px_0_12px_-6px_rgba(255,255,255,0.12),inset_0_0_12px_-4px_rgba(255,255,255,0.12)]"
+    >
+      <!-- Form -->
+      <form
+        class="flex flex-col items-center gap-2.5 h-full"
+        (ngSubmit)="formSubmit()"
+      >
+        <!-- Logo -->
+        <div
+          class="relative w-[65px] h-[65px] bg-gradient-to-br from-white/20 to-black/20 shadow-[8px_8px_16px_rgba(0,0,0,0.2),-8px_-8px_16px_rgba(255,255,255,0.06)] rounded-[20px] border-2 border-white flex justify-center items-center before:content-[''] before:absolute before:bottom-2.5 before:w-1/2 before:h-1/5 before:border-2.5 before:border-white before:rounded-t-[40px] before:rounded-b-[20px] after:content-[''] after:absolute after:top-2.5 after:w-[30%] after:h-[30%] after:border-2.5 after:border-white after:rounded-full"
+        ></div>
 
-    <form class="space-y-6 relative z-10" (ngSubmit)="formSubmit()">
-      <!-- Email -->
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-white/80">Email</label>
-        <div class="relative">
-          <input
-            type="text"
-            class="w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition backdrop-blur-md"
-            placeholder="Enter your email"
-            [(ngModel)]="loginData.email"
-            name="email"
-            required
-          />
+        <!-- Header text -->
+        <div class="w-full text-center text-2xl font-bold py-1.5 text-white">
+          Login
         </div>
-      </div>
 
-      <!-- Password -->
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-white/80">Password</label>
-        <div class="relative">
+        <!-- Email input -->
+        <input
+          type="email"
+          class="w-full p-2.5 border-none rounded-xl bg-[#3a3a3a] text-white outline-none text-sm placeholder-gray-400 focus:border focus:border-white transition"
+          placeholder="head@gmail.com"
+          [(ngModel)]="loginData.email"
+          name="email"
+          required
+        />
+
+        <!-- Password input with toggle -->
+        <div class="relative w-full">
           <input
             [type]="showPassword ? 'text' : 'password'"
-            class="w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition backdrop-blur-md pr-12"
-            placeholder="Enter your password"
+            class="w-full p-2.5 border-none rounded-xl bg-[#3a3a3a] text-white outline-none text-sm placeholder-gray-400 pr-10 focus:border focus:border-white transition"
+            placeholder="Password"
             [(ngModel)]="loginData.password"
             name="password"
             required
           />
-
-          <!-- Toggle button -->
           <button
             type="button"
-            class="absolute inset-y-0 right-3 flex items-center text-gray-300 hover:text-white"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
             (click)="showPassword = !showPassword"
           >
+            <!-- Eye open icon -->
             <svg
               *ngIf="!showPassword"
               xmlns="http://www.w3.org/2000/svg"
@@ -75,6 +81,7 @@
                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
               />
             </svg>
+            <!-- Eye closed icon -->
             <svg
               *ngIf="showPassword"
               xmlns="http://www.w3.org/2000/svg"
@@ -92,24 +99,35 @@
             </svg>
           </button>
         </div>
-      </div>
 
-      <!-- Buttons -->
-      <div class="flex gap-4 pt-2">
-        <button
-          type="submit"
-          class="flex-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:scale-105 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-300"
-        >
-          Login
-        </button>
-        <button
-          type="button"
-          (click)="clearForm()"
-          class="flex-1 bg-gradient-to-r from-red-500 to-pink-500 hover:scale-105 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-300"
-        >
-          Clear
-        </button>
-      </div>
-    </form>
+        <!-- Buttons row: Login and Clear -->
+        <div class="flex gap-3 w-full mt-1">
+          <button
+            type="submit"
+            class="flex-1 h-10 border-none rounded-2xl text-sm font-semibold cursor-pointer grid place-content-center bg-[#373737] text-white transition duration-300 shadow-[inset_0px_3px_6px_-4px_rgba(255,255,255,0.6),inset_0px_-3px_6px_-2px_rgba(0,0,0,0.8)] hover:bg-white/25 hover:shadow-[inset_0px_3px_6px_rgba(255,255,255,0.6),inset_0px_-3px_6px_rgba(0,0,0,0.8),0px_0px_8px_rgba(255,255,255,0.05)]"
+          >
+            Login
+          </button>
+          <button
+            type="button"
+            (click)="clearForm()"
+            class="flex-1 h-10 border-none rounded-2xl text-sm font-semibold cursor-pointer grid place-content-center bg-[#373737] text-white transition duration-300 shadow-[inset_0px_3px_6px_-4px_rgba(255,255,255,0.6),inset_0px_-3px_6px_-2px_rgba(0,0,0,0.8)] hover:bg-white/25 hover:shadow-[inset_0px_3px_6px_rgba(255,255,255,0.6),inset_0px_-3px_6px_rgba(0,0,0,0.8),0px_0px_8px_rgba(255,255,255,0.05)]"
+          >
+            Clear
+          </button>
+        </div>
+
+        <!-- Footer link -->
+        <div class="w-full text-left text-xs text-white/50 mt-2">
+          <span>Don't have an account? </span>
+          <a
+            href="#"
+            class="relative text-white/50 font-semibold no-underline transition-colors duration-300 hover:text-white after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:w-0 after:h-px after:bg-current after:rounded after:transition-all after:duration-300 hover:after:w-full"
+          >
+            Sign up
+          </a>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
