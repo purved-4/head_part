@@ -24,6 +24,19 @@ canvas {
   --color-bg: #ede9fe;
   --color-surface: #ffffff;
   --color-font: #0f172a;
+  --color-primary-light: #8b5cf6;
+--color-primary-dark: #4c1d95;
+
+--color-border: #e5e7eb;
+--color-hover: #f3f4f6;
+
+--color-success-bg: #ecfdf5;
+--color-warning-bg: #fffbeb;
+--color-danger-bg: #fef2f2;
+--color-info-bg: #eff6ff;
+
+--color-surface-2: #f8fafc;
+
 }
 
 :root[data-role="head"] {
@@ -53,4 +66,70 @@ canvas {
 
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
+}
+
+/* ===== SURFACE ===== */
+.surface {
+  background: var(--color-surface);
+  color: var(--color-font);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== PRIMARY BUTTON ===== */
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+/* ===== SECONDARY BUTTON ===== */
+.btn-secondary {
+  background: var(--color-surface-2);
+  color: var(--color-font);
+}
+.btn-secondary:hover {
+  background: var(--color-hover);
+}
+
+/* ===== SUCCESS ===== */
+.success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+/* ===== WARNING ===== */
+.warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+/* ===== DANGER ===== */
+.danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+/* ===== INFO ===== */
+.info {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+/* ===== PAGE BG ===== */
+.page-bg {
+  background: var(--color-bg);
+}
+
+/* ===== CARD HEADER GRADIENT ===== */
+.header-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-light),
+    var(--color-primary)
+  );
+  color: white;
 }

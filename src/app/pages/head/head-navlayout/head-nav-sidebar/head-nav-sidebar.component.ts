@@ -539,60 +539,67 @@ navigate(route: string) {
     this.openSubmenu(item, true);
   }
 
-  getChildIcon(child: MenuItem, parentLabel: string): string {
-    const label = (child.label || "").trim();
+  // getChildIcon(child: MenuItem, parentLabel: string): string {
+  //   const label = (child.label || "").trim();
 
-    const iconMap: { [key: string]: string } = {
-      "Add Chief": "person_add",
-      "Manage Chief": "manage_accounts",
-      "Add Website": "add",
-      "Manage Website": "language",
-      "Head Chat": "chat",
-      "Branch Chat": "forum",
-      "Head Funds": "account_balance_wallet",
-      "Branch Funds": "savings",
-      "Time Setup": "schedule",
-      "Limit Setup": "tune",
-      "Transaction History": "history",
-      "Entity Reports": "assignment",
-      "Funds Reports": "pie_chart",
-      "Amount Percentage": "percent",
-      "Work Time": "access_time",
-      "CB Reports": "bar_chart",
-      Dashboard: "dashboard",
-      Chat: "chat",
-    };
+  //   const iconMap: { [key: string]: string } = {
+  //     "Add Chief": "person_add",
+  //     "Manage Chief": "manage_accounts",
+  //     "Add Website": "add",
+  //     "Manage Website": "language",
+  //     "Head Chat": "chat",
+  //     "Branch Chat": "forum",
+  //     "Head Funds": "account_balance_wallet",
+  //     "Branch Funds": "savings",
+  //     "Time Setup": "schedule",
+  //     "Limit Setup": "tune",
+  //     "Transaction History": "history",
+  //     "Entity Reports": "assignment",
+  //     "Funds Reports": "pie_chart",
+  //     "Amount Percentage": "percent",
+  //     "Work Time": "access_time",
+  //     "CB Reports": "bar_chart",
+  //     Dashboard: "dashboard",
+  //     Chat: "chat",
+  //   };
 
-    return iconMap[label] || "chevron_right";
-  }
+  //   return iconMap[label] || "chevron_right";
+  // }
+
+  getChildIcon(child: MenuItem): string {
+  const route = child.route;
+
+  const map: Record<string, string> = {
+    "/head/dashboard": "dashboard",
+
+    "/head/upi": "qr_code",
+    "/head/bank": "account_balance",
+    "/head/capacity": "inventory_2",
+
+    "/head/head-chat": "chat",
+    "/head/branch-chat": "forum",
+
+    "/head/limit": "credit_card",
+
+    "/head/branch/add": "add_business",
+    "/head/branch/manage": "business_center",
+
+    "/head/reports/transaction-history": "history",
+    "/head/reports/entity-report": "assignment",
+    "/head/reports/funds-report": "pie_chart",
+    "/head/reports/work-time": "schedule",
+    "/head/reports/funds/accepted": "check_circle",
+    "/head/reports/funds/rejected": "cancel",
+  };
+
+  return map[route] || "chevron_right";
+}
+
 
   // --- Replace the existing getMenuIcon method with this ---
-  getMenuIcon(icon: string | undefined): string {
-    const k = (icon || "dashboard").toString().toLowerCase();
-
-    const map: Record<string, string> = {
-      // top-level keys you may use in menuItems
-      dashboard: "dashboard",
-      manage: "settings",
-      manage_accounts: "manage_accounts",
-      website: "language",
-      chat: "chat",
-      funds: "account_balance_wallet",
-      bank: "account_balance",
-      upi: "qr_code",
-      capacity: "inventory_2",
-      reports: "analytics",
-      setup: "settings",
-      settings: "settings",
-      schedule: "schedule",
-      analytics: "analytics",
-      approved: "check_circle",
-      rejected: "cancel",
-    };
-
-    // if user passed a full material name already, return it
-    if (Object.values(map).includes(k)) return k;
-
-    return map[k] || "dashboard";
-  }
+  getMenuIcon(icon?: string): string {
+  return icon || "dashboard";
 }
+
+}
+

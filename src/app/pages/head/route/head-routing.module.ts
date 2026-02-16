@@ -20,8 +20,6 @@ import { HeadChatComponent } from "../head-chat/head-chat.component";
 // import { ApprovedFundsComponent } from "../../branch/approved-funds/approved-funds.component";
 // import { RejectedFundsComponent } from "../../branch/rejected-funds/rejected-funds.component";
 import { HeadBranchCapacityComponent } from "../../../components/head-branch-capacity/head-branch-capacity.component";
-
-import { HeadBranchChatComponent } from "../../../common/branch-chat/head-branch-chat.component";
 import { HeadNavDashboardLayoutComponent } from "../head-navlayout/head-nav-dashboard-layout/head-nav-dashboard-layout.component";
 
 const routes: Routes = [
@@ -66,7 +64,7 @@ const routes: Routes = [
           },
         ],
       },
-      { path: "branch-chat", component: HeadBranchChatComponent },
+      // { path: "branch-chat", component: HeadBranchChatComponent },
       { path: "head-chat", component: HeadChatComponent },
       {
         path: "limit",
@@ -91,7 +89,8 @@ const routes: Routes = [
           // { path: "funds/rejected", component: RejectedFundsComponent },
         ],
       },
-      { path: "capacity", component: HeadBranchCapacityComponent },
+            { path: "capacity", component: HeadBranchCapacityComponent },
+      
     ],
   },
 ];

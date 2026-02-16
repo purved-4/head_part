@@ -1,5 +1,5 @@
 <!-- downlevel-limits.component.html -->
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
+<div class="min-h-screen page-bg p-4 md:p-8">
   <div class="max-w-7xl mx-auto">
     <!-- Header Section -->
     <div class="mb-8">
@@ -23,7 +23,7 @@
   <!-- Current User Limits Section -->
     <div class="mb-8">
       <div
-        class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+        class="surface overflow-hidden"
       >
         <div
           class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50"
@@ -542,7 +542,7 @@
       </div>
 
       <!-- Managers Table for CHIEF -->
-      <div *ngIf="activeTab === 'manager'" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div *ngIf="activeTab === 'manager'" class="surface overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div class="flex items-center justify-between">
             <div>
@@ -687,7 +687,7 @@
       </div>
 
       <!-- Branches Table for CHIEF -->
-      <div *ngIf="activeTab === 'branch'" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div *ngIf="activeTab === 'branch'" class="surface overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-green-50 to-emerald-50">
           <div class="flex items-center justify-between">
             <div>
@@ -850,7 +850,7 @@
     </div>
 
     <!-- Table for Other Roles (Non-CHIEF) -->
-    <div *ngIf="role !== 'CHIEF' && !loading && downlevelData.length > 0" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div *ngIf="role !== 'CHIEF' && !loading && downlevelData.length > 0" class="surface overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div class="flex items-center justify-between">
           <div>
@@ -915,7 +915,7 @@
                   </div>
                   <div class="ml-4">
                     <div class="text-sm font-medium text-gray-900">{{ entity.name || 'Unnamed Entity' }}</div>
-                    <div class="text-sm text-gray-500">ID: {{ entity.id }}</div>
+                    <!-- <div class="text-sm text-gray-500">ID: {{ entity.id }}</div> -->
                     <div class="mt-1">
                       <span [ngClass]="getEntityTypeBadgeClass(entity)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
                         {{ getEntityTypeDisplay(entity) }}

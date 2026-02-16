@@ -26,9 +26,16 @@
   </app-head-nav-sidebar>
 
   <!-- Main content with dynamic left margin -->
-  <main class="main-content" [style.marginLeft.px]="mainMargin">
+  <!-- <main class="main-content" [style.marginLeft.px]="mainMargin">
     <router-outlet></router-outlet>
-  </main>
+  </main> -->
+
+  <main
+  class="main-content pt-[72px]"   
+  [style.marginLeft.px]="mainMargin"
+>
+  <router-outlet></router-outlet>
+</main>
 
   <!-- Optional settings modal – can be moved to a service or separate component -->
   <!-- <app-settings-modal *ngIf="showSettings" (close)="closeSettings()"></app-settings-modal> -->
