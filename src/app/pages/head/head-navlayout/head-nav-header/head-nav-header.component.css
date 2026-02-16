@@ -1,0 +1,108 @@
+/* Custom animations for dropdown */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.fade-in-0 {
+  opacity: 0;
+  animation-fill-mode: both;
+}
+
+.zoom-in-95 {
+  transform: scale(0.95);
+  animation-fill-mode: both;
+}
+
+/* Backdrop blur effects */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+/* Enhanced shadows */
+.shadow-lg {
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Smooth transitions */
+button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus states */
+.focus\:ring-white:focus {
+  --tw-ring-color: rgba(255, 255, 255, 0.5);
+}
+
+.focus\:ring-offset-purple-600:focus {
+  --tw-ring-offset-color: #7c3aed;
+}
+
+/* Hover effects enhancement */
+.hover\:bg-opacity-20:hover {
+  --tw-bg-opacity: 0.2;
+}
+
+/* Glass morphism effect for dropdown */
+.glass-effect {
+  background: rgba(139, 92, 246, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .user-info-mobile {
+    padding: 0.5rem;
+  }
+  
+  .header-title {
+    font-size: 1.125rem;
+  }
+}
+
+/* Custom scrollbar for dropdown if needed */
+.dropdown-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.dropdown-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dropdown-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dropdown-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.dropdown-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+/* small optional tweaks; main visuals are from Tailwind in the template */
+:host {
+  display: block;
+  width: calc(100% - var(--sidebar-offset, 0px));
+}
+
+/* optionally add a smooth transform origin for the animation */
+#user-menu {
+  transform-origin: top right;
+}
+
+
