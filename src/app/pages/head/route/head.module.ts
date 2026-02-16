@@ -17,6 +17,9 @@ import { HeadUpiComponent } from "../upi/head-upi/head-upi.component";
 import { HeadBankComponent } from "../bank/head-bank/head-bank.component";
 import { QRCodeComponent } from "angularx-qrcode";
 import {HeadChatComponent} from "../head-chat/head-chat.component";
+import { HeadNavSidebarComponent } from "../head-navlayout/head-nav-sidebar/head-nav-sidebar.component";
+import { HeadNavHeaderComponent } from "../head-navlayout/head-nav-header/head-nav-header.component";
+import { HeadNavDashboardLayoutComponent } from "../head-navlayout/head-nav-dashboard-layout/head-nav-dashboard-layout.component";
   
 
 @NgModule({
@@ -31,7 +34,12 @@ import {HeadChatComponent} from "../head-chat/head-chat.component";
    ManageBranchUserComponent,
    HeadUpiComponent,
    HeadBankComponent,
-      HeadChatComponent
+      HeadChatComponent,
+
+    //new 
+    HeadNavSidebarComponent,
+    HeadNavHeaderComponent,
+    HeadNavDashboardLayoutComponent
 
 
   ],

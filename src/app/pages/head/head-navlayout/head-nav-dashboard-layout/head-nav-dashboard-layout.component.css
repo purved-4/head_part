@@ -1,0 +1,18 @@
+.owner-layout {
+  position: relative;
+  min-height: 100vh;
+}
+
+app-owner-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 40; /* below sidebar's z-50? ensure header is under sidebar? */
+}
+
+.main-content {
+  margin-top: 60px; /* height of header – adjust as needed */
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+}

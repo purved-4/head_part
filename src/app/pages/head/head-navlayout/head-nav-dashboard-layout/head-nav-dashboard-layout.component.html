@@ -1,0 +1,35 @@
+<div class="owner-layout">
+  <!-- Fixed Header -->
+  <!-- <app-manager-nav-header
+    [pageTitle]="pageTitle"
+    [userName]="userName"
+    (toggleSidebar)="toggleSidebar()"
+    (openSettings)="openSettings()"
+    (search)="onSearch($event)">
+  </app-manager-nav-header> -->
+
+<app-head-nav-header
+  [pageTitle]="pageTitle"
+  [userName]="userName"
+  [marginLeft]="mainMargin"
+  (toggleSidebar)="toggleSidebar()"
+  (openSettings)="openSettings()"
+  (search)="onSearch($event)">
+</app-head-nav-header>
+
+
+  <!-- Sidebar (fixed) -->
+  <app-head-nav-sidebar
+    [collapsed]="sidebarCollapsed"
+    (toggleSidebar)="toggleSidebar()"
+    (secondaryPanelStateChange)="onSecondaryPanelChange($event)">
+  </app-head-nav-sidebar>
+
+  <!-- Main content with dynamic left margin -->
+  <main class="main-content" [style.marginLeft.px]="mainMargin">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Optional settings modal – can be moved to a service or separate component -->
+  <!-- <app-settings-modal *ngIf="showSettings" (close)="closeSettings()"></app-settings-modal> -->
+</div>

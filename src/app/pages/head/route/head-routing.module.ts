@@ -20,12 +20,14 @@ import { HeadChatComponent } from "../head-chat/head-chat.component";
 // import { ApprovedFundsComponent } from "../../branch/approved-funds/approved-funds.component";
 // import { RejectedFundsComponent } from "../../branch/rejected-funds/rejected-funds.component";
 import { HeadBranchCapacityComponent } from "../../../components/head-branch-capacity/head-branch-capacity.component";
+
 import { HeadBranchChatComponent } from "../../../common/branch-chat/head-branch-chat.component";
+import { HeadNavDashboardLayoutComponent } from "../head-navlayout/head-nav-dashboard-layout/head-nav-dashboard-layout.component";
 
 const routes: Routes = [
   {
     path: "",
-    component: HeadDashboardLayoutComponent,
+    component: HeadNavDashboardLayoutComponent,
     children: [
       {
         path: "",
