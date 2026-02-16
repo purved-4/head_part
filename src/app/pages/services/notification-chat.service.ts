@@ -100,8 +100,6 @@ export class NotificationChatService {
       );
   }
 
-  
-
   getThreadByHeadIdAndIsResolved(
     branchId: string,
     entityType: any,
@@ -167,25 +165,18 @@ export class NotificationChatService {
       .pipe(map((res: any) => res.data));
   }
 
-   uploadAttachment(
-    threadId: string,
-    file: File
-  ): Observable<any> {
+  uploadAttachment(threadId: string, file: File): Observable<any> {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
-    return this.http.post(
-      `${baseUrl}/api/chat/upload/${threadId}`,
-      formData
-    ).pipe(map((res: any) => res.data));
+    return this.http
+      .post(`${baseUrl}/api/chat/upload/${threadId}`, formData)
+      .pipe(map((res: any) => res.data));
   }
 
- 
-
-   getFileDownloadUrl(fileId: any): Observable<any> {
+  getFileDownloadUrl(fileId: any): Observable<any> {
     return this.http
       .get(`${baseUrl}/api/files/private/${fileId}`)
       .pipe(map((res: any) => res.data));
   }
-
 }
