@@ -5,16 +5,17 @@
     <div class="mb-8">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Entity Management</h1>
-          <p class="text-gray-600 mt-2">
+          <h1 class="text-2xl md:text-3xl font-bold text-[var(--color-text-main)]">Entity Management</h1>
+          <p class="text-[var(--color-text-muted)] mt-2">
             Manage limits and allocations for
-            <span class="font-semibold text-blue-600">{{ role }}</span> role
+            <span class="font-semibold text-[var(--color-primary)]">{{ role }}</span> role
           </p>
         </div>
         <div class="flex items-center gap-3">
-          <div class="px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm">
-            <div class="text-xs text-gray-500">Logged in as</div>
-            <div class="text-sm font-medium text-gray-800">{{ role }}</div>
+          <!-- <div class="px-4 py-2 bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-border)] shadow-sm"> -->
+            <div class="px-4 py-2 surface">
+            <div class="text-xs text-[var(--color-text-muted)]">Logged in as</div>
+            <div class="text-sm font-medium text-[var(--color-text-main)]">{{ role }}</div>
           </div>
         </div>
       </div>
@@ -26,14 +27,14 @@
         class="surface overflow-hidden"
       >
         <div
-          class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50"
+          class="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--primary-soft-10)] to-[var(--color-primary)]/10"
         >
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-lg font-semibold text-gray-800">
+              <h2 class="text-lg font-semibold text-[var(--color-text-main)]">
                 Your Current Limits
               </h2>
-              <p class="text-sm text-gray-600">
+              <p class="text-sm text-[var(--color-text-muted)]">
                 Real-time balance and limit information for your account
               </p>
             </div>
@@ -88,7 +89,7 @@
               <button
                 (click)="loadCurrentUserLimits()"
                 [disabled]="loadingCurrentUserLimits"
-                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-blue-700 bg-blue-100 hover:bg-blue-200 disabled:opacity-50 transition-colors"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-[var(--color-primary)] bg-[var(--color-primary-light)]/15 hover:opacity-90 disabled:opacity-50 transition-colors"
               >
                 <svg
                   class="w-4 h-4 mr-1"
@@ -135,9 +136,9 @@
         <div *ngIf="loadingCurrentUserLimits" class="p-6">
           <div class="flex items-center justify-center">
             <div
-              class="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500 mr-3"
+              class="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[var(--color-primary)] mr-3"
             ></div>
-            <span class="text-gray-600">Loading your limit information...</span>
+            <span class="text-[var(--color-text-muted)]">Loading your limit information...</span>
           </div>
         </div>
 
@@ -148,7 +149,7 @@
         >
           <div class="text-center py-4">
             <svg
-              class="w-12 h-12 mx-auto text-gray-400 mb-3"
+              class="w-12 h-12 mx-auto text-[var(--color-text-muted)] mb-3"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -160,16 +161,16 @@
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               ></path>
             </svg>
-            <h4 class="text-lg font-medium text-gray-900 mb-2">
+            <h4 class="text-lg font-medium text-[var(--color-text-main)] mb-2">
               No Limit Information Found
             </h4>
-            <p class="text-gray-600 mb-4">
+            <p class="text-[var(--color-text-muted)] mb-4">
               You don't have any limit records yet.
             </p>
             <button
               *ngIf="role === 'OWNER'"
               (click)="openAdminSelfAmountModal()"
-              class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 transition-all"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-[var(--color-primary)] to-indigo-700 hover:from-blue-600 hover:to-indigo-700 transition-all"
             >
               Add Your First Amount
             </button>
@@ -179,14 +180,14 @@
         <!-- Limits Display -->
         <div *ngIf="!loadingCurrentUserLimits && currentUserLimits" class="p-6">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Running Balance Card -->
+            <!-- Running Balance Card reuired changes -->  
             <div
-              class="bg-gradient-to-br from-purple-50 to-indigo-100 rounded-xl p-5 border border-purple-200"
+              class="bg-gradient-to-br from-[var(--primary-soft-20)] to-[var(--primary-soft-10)] rounded-xl p-5 border border-[var(--color-primary-border-soft)]"
             >
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
                   <div
-                    class="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center mr-3"
+                    class="w-10 h-10 rounded-lg bg-[var(--primary-soft-10)] flex items-center justify-center mr-3"
                   >
                     <svg
                       class="w-6 h-6 text-white"
@@ -203,22 +204,22 @@
                     </svg>
                   </div>
                   <div>
-                    <h3 class="text-sm font-medium text-purple-800">
+                    <h3 class="text-sm font-medium text-[var(--color-primary)]">
                       Total Balance
                     </h3>
-                    <p class="text-xs text-purple-600">Current total balance</p>
+                    <p class="text-xs text-[var(--color-primary)]">Current total balance</p>
                   </div>
                 </div>
                 <span
-                  class="text-xs font-medium px-2 py-1 rounded-full bg-purple-200 text-purple-800"
+                  class="text-xs font-medium px-2 py-1 rounded-full bg-purple-200 text-[var(--color-primary)]"
                 >
                   Live
                 </span>
               </div>
-              <div class="text-2xl font-bold text-gray-900 mb-1">
+              <div class="text-2xl font-bold text-[var(--color-text-main)] mb-1">
                 ₹{{ currentUserLimits.runningBalance | number : "1.2-2" }}
               </div>
-              <div class="flex items-center text-sm text-purple-700">
+              <div class="flex items-center text-sm text-[var(--color-primary)]">
                 <svg
                   class="w-4 h-4 mr-1"
                   fill="none"
@@ -237,7 +238,7 @@
                     currentUserLimits.runningBalance >
                     (currentUserLimits.previousBalance || 0)
                   "
-                  class="text-green-600"
+                  class="text-[var(--color-success)]"
                 >
                   ↑ Increased from ₹{{
                     currentUserLimits.previousBalance | number : "1.2-2"
@@ -248,7 +249,7 @@
                     currentUserLimits.runningBalance <
                     (currentUserLimits.previousBalance || 0)
                   "
-                  class="text-red-600"
+                  class="text-[var(--color-danger)]"
                 >
                   ↓ Decreased from ₹{{
                     currentUserLimits.previousBalance | number : "1.2-2"
@@ -259,7 +260,7 @@
                     currentUserLimits.runningBalance ===
                     (currentUserLimits.previousBalance || 0)
                   "
-                  class="text-gray-600"
+                  class="text-[var(--color-text-muted)]"
                 >
                   No change from previous
                 </span>
@@ -268,12 +269,12 @@
 
             <!-- Given Amount Card -->
             <div
-              class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200"
+              class="bg-gradient-to-br from-[var(--primary-soft-20)] to-[var(--primary-soft-10)] rounded-xl p-5 border border-[var(--color-primary-border-soft)]"
             >
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
                   <div
-                    class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center mr-3"
+                    class="w-10 h-10 rounded-lg bg-[var(--primary-soft-20)] flex items-center justify-center mr-3"
                   >
                     <svg
                       class="w-6 h-6 text-white"
@@ -290,22 +291,22 @@
                     </svg>
                   </div>
                   <div>
-                    <h3 class="text-sm font-medium text-blue-800">
+                    <h3 class="text-sm font-medium text-[var(--color-primary)]">
                       Given Amount
                     </h3>
-                    <p class="text-xs text-blue-600">Total amount allocated</p>
+                    <p class="text-xs text-[var(--color-primary)]">Total amount allocated</p>
                   </div>
                 </div>
                 <span
-                  class="text-xs font-medium px-2 py-1 rounded-full bg-blue-200 text-blue-800"
+                  class="text-xs font-medium px-2 py-1 rounded-full bg-blue-200 text-[var(--color-primary)]"
                 >
                   {{ role }}
                 </span>
               </div>
-              <div class="text-2xl font-bold text-gray-900 mb-1">
+              <div class="text-2xl font-bold text-[var(--color-text-main)] mb-1">
                 ₹{{ (currentUserLimits.givenAmount  || currentUserLimits.runningBalance - currentUserLimits.remainingAmount )| number : "1.2-2" }}
               </div>
-              <div class="flex items-center text-sm text-blue-700">
+              <div class="flex items-center text-sm text-[var(--color-primary)]">
                 <svg
                   class="w-4 h-4 mr-1"
                   fill="none"
@@ -326,12 +327,12 @@
 
             <!-- Remaining Amount Card -->
             <div
-              class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-5 border border-green-200"
+              class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-5 border border-[var(--success-soft-30)]"
             >
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
                   <div
-                    class="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center mr-3"
+                    class="w-10 h-10 rounded-lg bg-[var(--success-soft-12)] flex items-center justify-center mr-3"
                   >
                     <svg
                       class="w-6 h-6 text-white"
@@ -348,20 +349,20 @@
                     </svg>
                   </div>
                   <div>
-                    <h3 class="text-sm font-medium text-green-800">
+                    <h3 class="text-sm font-medium text-[var(--color-success)]">
                       Remaining Amount
                     </h3>
-                    <p class="text-xs text-green-600">Available balance</p>
+                    <p class="text-xs text-[var(--color-success)]">Available balance</p>
                   </div>
                 </div>
                 <span
                   [ngClass]="{
                     'px-2 py-1 text-xs font-medium rounded-full': true,
-                    'bg-green-200 text-green-800':
+                    'bg-green-200 text-[var(--color-success)]':
                       currentUserLimits.remainingAmount > 0,
-                    'bg-red-200 text-red-800':
+                    'bg-red-50 text-red-800':
                       currentUserLimits.remainingAmount <= 0,
-                    'bg-yellow-200 text-yellow-800':
+                    'bg-[color-mix(in srgb, var(--color-warning) 20%, transparent)] text-[var(--color-warning)]':
                       currentUserLimits.remainingAmount > 0 &&
                       currentUserLimits.remainingAmount <
                         currentUserLimits.amount
@@ -374,16 +375,16 @@
                   }}
                 </span>
               </div>
-              <div class="text-2xl font-bold text-gray-900 mb-1">
+              <div class="text-2xl font-bold text-[var(--color-text-main)] mb-1">
                 ₹{{ currentUserLimits.remainingAmount | number : "1.2-2" }}
               </div>
               <div class="flex items-center">
-                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="w-full bg-[var(--color-border)] rounded-full h-2.5">
                   <div
                     [ngClass]="{
                       'h-2.5 rounded-full': true,
-                      'bg-green-500': currentUserLimits.remainingAmount > 0,
-                      'bg-red-500': currentUserLimits.remainingAmount <= 0
+                      'bg-[var(--success-soft-12)]': currentUserLimits.remainingAmount > 0,
+                      'bg-red-50': currentUserLimits.remainingAmount <= 0
                     }"
                     [style.width.%]="
                       (currentUserLimits.remainingAmount /
@@ -392,7 +393,7 @@
                     "
                   ></div>
                 </div>
-                <span class="ml-3 text-sm font-medium text-gray-700">
+                <span class="ml-3 text-sm font-medium text-[var(--color-text-main)]">
                   {{
                     (
                       (currentUserLimits.remainingAmount /
@@ -406,11 +407,11 @@
           </div>
 
           <!-- Additional Info -->
-          <div class="mt-6 pt-6 border-t border-gray-200">
+          <div class="mt-6 pt-6 border-t border-[var(--color-border)]">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="flex items-center text-sm text-gray-600">
+              <div class="flex items-center text-sm text-[var(--color-text-muted)]">
                 <svg
-                  class="w-5 h-5 mr-2 text-gray-400"
+                  class="w-5 h-5 mr-2 text-[var(--color-text-muted)]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -427,9 +428,9 @@
                   {{ currentUserLimits.createdAt | date : "medium" }}</span
                 >
               </div>
-              <div class="flex items-center text-sm text-gray-600">
+              <div class="flex items-center text-sm text-[var(--color-text-muted)]">
                 <svg
-                  class="w-5 h-5 mr-2 text-gray-400"
+                  class="w-5 h-5 mr-2 text-[var(--color-text-muted)]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -456,16 +457,16 @@
     <div *ngIf="loading" class="flex justify-center items-center py-20">
       <div class="text-center">
         <div
-          class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"
+          class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)] mb-4"
         ></div>
-        <p class="text-gray-600">Loading entities...</p>
+        <p class="text-[var(--color-text-muted)]">Loading entities...</p>
       </div>
     </div>
 
     <!-- Error State -->
     <div
       *ngIf="error"
-      class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg"
+      class="mb-6 p-4 bg-red-50 border-l-4 border-[var(--color-danger)] rounded-r-lg"
     >
       <div class="flex">
         <div class="flex-shrink-0">
@@ -482,7 +483,7 @@
           </svg>
         </div>
         <div class="ml-3">
-          <p class="text-sm text-red-700">{{ error }}</p>
+          <p class="text-sm text-[var(--color-danger)]">{{ error }}</p>
         </div>
       </div>
     </div>
@@ -491,13 +492,13 @@
     <div *ngIf="role === 'CHIEF' && !loading && downlevelData.length > 0">
       <!-- Tabs Navigation for CHIEF -->
       <div class="mb-6">
-        <div class="border-b border-gray-200">
+        <div class="border-b border-[var(--color-border)]">
           <nav class="-mb-px flex space-x-8" aria-label="Tabs">
             <button
               (click)="activeTab = 'manager'"
               [ngClass]="{
-                'border-blue-500 text-blue-600': activeTab === 'manager',
-                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'manager'
+                'border-[var(--color-primary)] text-[var(--color-primary)]': activeTab === 'manager',
+                'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:border-[var(--color-border)]': activeTab !== 'manager'
               }"
               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200"
             >
@@ -510,7 +511,7 @@
                   </svg>
                 </div>
                 Managers
-                <span class="ml-2 bg-blue-100 text-blue-600 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                <span class="ml-2 bg-[var(--color-primary-light)]/15 text-[var(--color-primary)] text-xs font-medium px-2.5 py-0.5 rounded-full">
                   {{ managersData.length }}
                 </span>
               </div>
@@ -518,8 +519,8 @@
             <button
               (click)="activeTab = 'branch'"
               [ngClass]="{
-                'border-blue-500 text-blue-600': activeTab === 'branch',
-                'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'branch'
+                'border-[var(--color-primary)] text-[var(--color-primary)]': activeTab === 'branch',
+                'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:border-[var(--color-border)]': activeTab !== 'branch'
               }"
               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200"
             >
@@ -532,7 +533,7 @@
                   </svg>
                 </div>
                 Branches
-                <span class="ml-2 bg-green-100 text-green-600 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                <span class="ml-2 bg-[var(--success-soft-12)] text-[var(--color-success)] text-xs font-medium px-2.5 py-0.5 rounded-full">
                   {{ branchesData.length }}
                 </span>
               </div>
@@ -543,19 +544,19 @@
 
       <!-- Managers Table for CHIEF -->
       <div *ngIf="activeTab === 'manager'" class="surface overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div class="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--primary-soft-10)] to-[var(--color-primary)]/10">
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-lg font-semibold text-gray-800">Managers</h2>
-              <p class="text-sm text-gray-600">All managers under your jurisdiction</p>
+              <h2 class="text-lg font-semibold text-[var(--color-text-main)]">Managers</h2>
+              <p class="text-sm text-[var(--color-text-muted)]">All managers under your jurisdiction</p>
             </div>
             <div class="flex items-center gap-4">
-              <div class="text-sm text-gray-500">
+              <div class="text-sm text-[var(--color-text-muted)]">
                 {{ managersData.length }} manager{{ managersData.length !== 1 ? 's' : '' }}
               </div>
               <button
                 (click)="exportManagers()"
-                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-[var(--color-text-main)] bg-[var(--color-bg-surface)] hover:bg-[var(--color-border)] transition-colors"
               >
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -569,37 +570,37 @@
         </div>
 
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="min-w-full divide-y border-[var(--color-border)]">
+            <thead class="bg-[var(--color-bg-surface)]">
               <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                   Manager Details
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                   Contact Information
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                   Status
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr *ngFor="let manager of managersData" class="hover:bg-gray-50 transition-colors duration-150">
+            <tbody class="bg-[var(--color-bg-card)] divide-y border-[var(--color-border)]">
+              <tr *ngFor="let manager of managersData" class="hover:bg-[var(--color-bg-surface)] transition-colors duration-150">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 h-10 w-10">
-                      <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
+                      <div class="h-10 w-10 rounded-full bg-gradient-to-r from-[var(--color-primary)] to-indigo-700 flex items-center justify-center text-white font-bold text-sm">
                         {{ manager.name?.charAt(0) || 'M' }}
                       </div>
                     </div>
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900">{{ manager.name || 'Unnamed Manager' }}</div>
-                      <div class="text-sm text-gray-500">ID: {{ manager.id }}</div>
+                      <div class="text-sm font-medium text-[var(--color-text-main)]">{{ manager.name || 'Unnamed Manager' }}</div>
+                      <div class="text-sm text-[var(--color-text-muted)]">ID: {{ manager.id }}</div>
                       <div class="mt-1">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--color-primary-light)]/15 text-[var(--color-primary)]">
                           <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                           </svg>
@@ -611,14 +612,14 @@
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex flex-col space-y-1">
-                    <div class="flex items-center text-sm text-gray-900">
-                      <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center text-sm text-[var(--color-text-main)]">
+                      <svg class="w-4 h-4 mr-2 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                       </svg>
                       {{ manager.email || 'No email' }}
                     </div>
-                    <div class="flex items-center text-sm text-gray-500">
-                      <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center text-sm text-[var(--color-text-muted)]">
+                      <svg class="w-4 h-4 mr-2 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                       </svg>
                       {{ manager.mobile || 'No mobile' }}
@@ -629,18 +630,18 @@
                   <div class="flex flex-col space-y-2">
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
                       [ngClass]="{
-                        'bg-green-100 text-green-800': manager.status === 'active',
-                        'bg-red-100 text-red-800': manager.status === 'inactive',
-                        'bg-yellow-100 text-yellow-800': !manager.status || manager.status === 'pending'
+                        'text-[var(--color-success)] bg-[color-mix(in srgb, var(--color-success) 15%, transparent)]': manager.status === 'active',
+                        'text-[var(--color-danger)] bg-[color-mix(in srgb, var(--color-danger) 15%, transparent)]': manager.status === 'inactive',
+                        'text-[var(--color-warning)] bg-[color-mix(in srgb, var(--color-warning) 15%, transparent)]': !manager.status || manager.status === 'pending'
                       }">
                       <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                         <circle cx="10" cy="10" r="5" />
                       </svg>
                       {{ (manager.status || 'pending') | titlecase }}
                     </span>
-                    <div class="text-xs text-gray-500">
+                    <div class="text-xs text-[var(--color-text-muted)]">
                       <div class="flex items-center">
-                        <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-3 h-3 mr-1 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
                         Created: {{ manager.createdAt | date:'shortDate' }}
@@ -652,7 +653,9 @@
                   <div class="flex space-x-2">
                     <button
                       (click)="openAddAmountModal(manager)"
-                      class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200"
+                      class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gradient-to-r from-[var(--color-success)]  to-[color-mix(in srgb, var(--color-success) 80%, black)]  hover:from-[color-mix(in srgb, var(--color-success) 90%, black)]  hover:to-[color-mix(in srgb, var(--color-success) 70%, black)] 
+ focus:outline-none focus:ring-2 focus:ring-offset-2 
+ focus:ring-[var(--color-success)] transition-all duration-200"
                     >
                       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -661,7 +664,7 @@
                     </button>
                     <button
                       (click)="viewLimits(manager)"
-                      class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                      class="inline-flex items-center px-3 py-2 border border-[var(--color-border)] text-sm leading-4 font-medium rounded-md text-[var(--color-text-main)] bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-surface)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-all duration-200"
                     >
                       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -678,29 +681,29 @@
 
         <!-- Empty State for Managers -->
         <div *ngIf="managersData.length === 0" class="text-center py-12">
-          <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-16 h-16 mx-auto text-[var(--color-text-muted)] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0c-.66 0-1.293-.106-1.879-.304m-8.121-7.193a4 4 0 11-8 0 4 4 0 018 0z"></path>
           </svg>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No Managers Found</h3>
-          <p class="text-gray-600 mb-6">There are no managers assigned to your account.</p>
+          <h3 class="text-lg font-medium text-[var(--color-text-main)] mb-2">No Managers Found</h3>
+          <p class="text-[var(--color-text-muted)] mb-6">There are no managers assigned to your account.</p>
         </div>
       </div>
 
       <!-- Branches Table for CHIEF -->
       <div *ngIf="activeTab === 'branch'" class="surface overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-green-50 to-emerald-50">
+        <div class="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--primary-soft-10)] to-[var(--color-primary)]/10">
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-lg font-semibold text-gray-800">Branches</h2>
-              <p class="text-sm text-gray-600">All branches under your jurisdiction</p>
+              <h2 class="text-lg font-semibold text-[var(--color-text-main)]">Branches</h2>
+              <p class="text-sm text-[var(--color-text-muted)]">All branches under your jurisdiction</p>
             </div>
             <div class="flex items-center gap-4">
-              <div class="text-sm text-gray-500">
+              <div class="text-sm text-[var(--color-text-muted)]">
                 {{ branchesData.length }} branch{{ branchesData.length !== 1 ? 'es' : '' }}
               </div>
               <button
                 (click)="exportBranches()"
-                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-[var(--color-text-main)] bg-[var(--color-bg-surface)] hover:bg-[var(--color-border)] transition-colors"
               >
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -714,40 +717,40 @@
         </div>
 
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="min-w-full divide-y border-[var(--color-border)]">
+            <thead class="bg-[var(--color-bg-surface)]">
               <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                   Branch Details
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                   Contact Information
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                   Location
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                   Status
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr *ngFor="let branch of branchesData" class="hover:bg-gray-50 transition-colors duration-150">
+            <tbody class="bg-[var(--color-bg-card)] divide-y border-[var(--color-border)]">
+              <tr *ngFor="let branch of branchesData" class="hover:bg-[var(--color-bg-surface)] transition-colors duration-150">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 h-10 w-10">
-                      <div class="h-10 w-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm">
+                      <div class="h-10 w-10 rounded-full bg-gradient-to-r from-[var(--color-primary)] to-indigo-700 flex items-center justify-center text-white font-bold text-sm">
                         {{ branch.name?.charAt(0) || 'B' }}
                       </div>
                     </div>
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900">{{ branch.name || 'Unnamed Branch' }}</div>
-                      <div class="text-sm text-gray-500">ID: {{ branch.id }}</div>
+                      <div class="text-sm font-medium text-[var(--color-text-main)]">{{ branch.name || 'Unnamed Branch' }}</div>
+                      <div class="text-sm text-[var(--color-text-muted)]">ID: {{ branch.id }}</div>
                       <div class="mt-1">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-[var(--color-success)] bg-[color-mix(in srgb, var(--color-success) 15%, transparent)]">
                           <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"></path>
                           </svg>
@@ -759,14 +762,14 @@
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex flex-col space-y-1">
-                    <div class="flex items-center text-sm text-gray-900">
-                      <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center text-sm text-[var(--color-text-main)]">
+                      <svg class="w-4 h-4 mr-2 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                       </svg>
                       {{ branch.email || 'No email' }}
                     </div>
-                    <div class="flex items-center text-sm text-gray-500">
-                      <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center text-sm text-[var(--color-text-muted)]">
+                      <svg class="w-4 h-4 mr-2 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                       </svg>
                       {{ branch.mobile || 'No mobile' }}
@@ -775,14 +778,14 @@
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex flex-col space-y-1">
-                    <div class="flex items-start text-sm text-gray-900">
-                      <svg class="w-4 h-4 mr-2 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-start text-sm text-[var(--color-text-main)]">
+                      <svg class="w-4 h-4 mr-2 text-[var(--color-text-muted)] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                       </svg>
                       <span class="truncate max-w-xs">{{ branch.address || 'Location not specified' }}</span>
                     </div>
-                    <div class="text-sm text-gray-500 ml-6">
+                    <div class="text-sm text-[var(--color-text-muted)] ml-6">
                       {{ branch.city || '' }}{{ branch.city && branch.state ? ', ' : '' }}{{ branch.state || '' }}
                     </div>
                   </div>
@@ -791,18 +794,18 @@
                   <div class="flex flex-col space-y-2">
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
                       [ngClass]="{
-                        'bg-green-100 text-green-800': branch.status === 'active',
-                        'bg-red-100 text-red-800': branch.status === 'inactive',
-                        'bg-yellow-100 text-yellow-800': !branch.status || branch.status === 'pending'
+                        'text-[var(--color-success)] bg-[color-mix(in srgb, var(--color-success) 15%, transparent)]': branch.status === 'active',
+                        'text-[var(--color-danger)] bg-[color-mix(in srgb, var(--color-danger) 15%, transparent)]': branch.status === 'inactive',
+                        'text-[var(--color-warning)] bg-[color-mix(in srgb, var(--color-warning) 15%, transparent)]': !branch.status || branch.status === 'pending'
                       }">
                       <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                         <circle cx="10" cy="10" r="5" />
                       </svg>
                       {{ (branch.status || 'pending') | titlecase }}
                     </span>
-                    <div class="text-xs text-gray-500">
+                    <div class="text-xs text-[var(--color-text-muted)]">
                       <div class="flex items-center">
-                        <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-3 h-3 mr-1 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
                         Created: {{ branch.createdAt | date:'shortDate' }}
@@ -814,7 +817,10 @@
                   <div class="flex space-x-2">
                     <button
                       (click)="openAddAmountModal(branch)"
-                      class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200"
+                      class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gradient-to-r from-[var(--color-success)]  to-[color-mix(in srgb, var(--color-success) 80%, black)]  hover:from-[color-mix(in srgb, var(--color-success) 90%, black)]  hover:to-[color-mix(in srgb, var(--color-success) 70%, black)] 
+ focus:outline-none focus:ring-2 focus:ring-offset-2 
+ focus:ring-[var(--color-success)]
+ transition-all duration-200"
                     >
                       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -823,7 +829,7 @@
                     </button>
                     <button
                       (click)="viewLimits(branch)"
-                      class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                      class="inline-flex items-center px-3 py-2 border border-[var(--color-border)] text-sm leading-4 font-medium rounded-md text-[var(--color-text-main)] bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-surface)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-all duration-200"
                     >
                       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -840,34 +846,34 @@
 
         <!-- Empty State for Branches -->
         <div *ngIf="branchesData.length === 0" class="text-center py-12">
-          <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-16 h-16 mx-auto text-[var(--color-text-muted)] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
           </svg>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No Branches Found</h3>
-          <p class="text-gray-600 mb-6">There are no branches assigned to your account.</p>
+          <h3 class="text-lg font-medium text-[var(--color-text-main)] mb-2">No Branches Found</h3>
+          <p class="text-[var(--color-text-muted)] mb-6">There are no branches assigned to your account.</p>
         </div>
       </div>
     </div>
 
     <!-- Table for Other Roles (Non-CHIEF) -->
     <div *ngIf="role !== 'CHIEF' && !loading && downlevelData.length > 0" class="surface overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <div class="px-6 py-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--primary-soft-10)] to-[var(--color-primary)]/10">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-lg font-semibold text-gray-800">
+            <h2 class="text-lg font-semibold text-[var(--color-text-main)]">
               {{ getRoleDisplayName() }} Entities
             </h2>
-            <p class="text-sm text-gray-600">
+            <p class="text-sm text-[var(--color-text-muted)]">
               All {{ getRoleDisplayName().toLowerCase() }} entities under your management
             </p>
           </div>
           <div class="flex items-center gap-4">
-            <div class="text-sm text-gray-500">
+            <div class="text-sm text-[var(--color-text-muted)]">
               {{ downlevelData.length }} entity{{ downlevelData.length !== 1 ? 's' : '' }}
             </div>
             <button
               (click)="exportEntities()"
-              class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-[var(--color-text-main)] bg-[var(--color-bg-surface)] hover:bg-[var(--color-border)] transition-colors"
             >
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -881,28 +887,28 @@
       </div>
 
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y border-[var(--color-border)]">
+          <thead class="bg-[var(--color-bg-surface)]">
             <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                 Entity Details
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                 Contact Information
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                 Entity Type
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                 Status
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr *ngFor="let entity of downlevelData" class="hover:bg-gray-50 transition-colors duration-150">
+          <tbody class="bg-[var(--color-bg-card)] divide-y border-[var(--color-border)]">
+            <tr *ngFor="let entity of downlevelData" class="hover:bg-[var(--color-bg-surface)] transition-colors duration-150">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
                   <div class="flex-shrink-0 h-10 w-10">
@@ -914,8 +920,8 @@
                     </div>
                   </div>
                   <div class="ml-4">
-                    <div class="text-sm font-medium text-gray-900">{{ entity.name || 'Unnamed Entity' }}</div>
-                    <!-- <div class="text-sm text-gray-500">ID: {{ entity.id }}</div> -->
+                    <div class="text-sm font-medium text-[var(--color-text-main)]">{{ entity.name || 'Unnamed Entity' }}</div>
+                    <!-- <div class="text-sm text-[var(--color-text-muted)]">ID: {{ entity.id }}</div> -->
                     <div class="mt-1">
                       <span [ngClass]="getEntityTypeBadgeClass(entity)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
                         {{ getEntityTypeDisplay(entity) }}
@@ -926,14 +932,14 @@
               </td>
               <td class="px-6 py-4">
                 <div class="flex flex-col space-y-1">
-                  <div class="flex items-center text-sm text-gray-900">
-                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="flex items-center text-sm text-[var(--color-text-main)]">
+                    <svg class="w-4 h-4 mr-2 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                     </svg>
                     {{ entity.email || 'No email' }}
                   </div>
-                  <div class="flex items-center text-sm text-gray-500">
-                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="flex items-center text-sm text-[var(--color-text-muted)]">
+                    <svg class="w-4 h-4 mr-2 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                     </svg>
                     {{ entity.mobile || 'No mobile' }}
@@ -941,8 +947,8 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ getEntityTypeDisplay(entity) }}</div>
-                <div *ngIf="entity.entityType" class="text-xs text-gray-500">
+                <div class="text-sm text-[var(--color-text-main)]">{{ getEntityTypeDisplay(entity) }}</div>
+                <div *ngIf="entity.entityType" class="text-xs text-[var(--color-text-muted)]">
                   {{ entity.entityType }}
                 </div>
               </td>
@@ -950,18 +956,18 @@
                 <div class="flex flex-col space-y-2">
                   <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
                     [ngClass]="{
-                      'bg-green-100 text-green-800': entity.status === 'active',
-                      'bg-red-100 text-red-800': entity.status === 'inactive',
-                      'bg-yellow-100 text-yellow-800': !entity.status || entity.status === 'pending'
+                      'text-[var(--color-success)] bg-[color-mix(in srgb, var(--color-success) 15%, transparent)]': entity.status === 'active',
+                      'text-[var(--color-danger)] bg-[color-mix(in srgb, var(--color-danger) 15%, transparent)]': entity.status === 'inactive',
+                      'text-[var(--color-warning)] bg-[color-mix(in srgb, var(--color-warning) 15%, transparent)]': !entity.status || entity.status === 'pending'
                     }">
                     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                       <circle cx="10" cy="10" r="5" />
                     </svg>
                     {{ (entity.status || 'active') | titlecase }}
                   </span>
-                  <div class="text-xs text-gray-500">
+                  <div class="text-xs text-[var(--color-text-muted)]">
                     <div class="flex items-center">
-                      <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-3 h-3 mr-1 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                       </svg>
                       Created: {{ entity.createdAt | date:'shortDate' }}
@@ -973,7 +979,9 @@
                 <div class="flex space-x-2">
                   <button
                     (click)="openAddAmountModal(entity)"
-                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200"
+                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gradient-to-r from-[var(--color-success)]  to-[color-mix(in srgb, var(--color-success) 80%, black)]  hover:from-[color-mix(in srgb, var(--color-success) 90%, black)]  hover:to-[color-mix(in srgb, var(--color-success) 70%, black)] 
+ focus:outline-none focus:ring-2 focus:ring-offset-2 
+ focus:ring-[var(--color-success)] transition-all duration-200"
                   >
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -982,7 +990,7 @@
                   </button>
                   <button
                     (click)="viewLimits(entity)"
-                    class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                    class="inline-flex items-center px-3 py-2 border border-[var(--color-border)] text-sm leading-4 font-medium rounded-md text-[var(--color-text-main)] bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-surface)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-all duration-200"
                   >
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -999,25 +1007,25 @@
 
       <!-- Empty State for Non-CHIEF roles -->
       <div *ngIf="downlevelData.length === 0" class="text-center py-12">
-        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-16 h-16 mx-auto text-[var(--color-text-muted)] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
         </svg>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">No Entities Found</h3>
-        <p class="text-gray-600 mb-6">There are no entities available for your current role.</p>
+        <h3 class="text-lg font-medium text-[var(--color-text-main)] mb-2">No Entities Found</h3>
+        <p class="text-[var(--color-text-muted)] mb-6">There are no entities available for your current role.</p>
       </div>
     </div>
 
     <!-- Empty State (when no data for any role) -->
     <div
       *ngIf="!loading && ((role === 'CHIEF' && managersData.length === 0 && branchesData.length === 0) || (role !== 'CHIEF' && downlevelData.length === 0))"
-      class="text-center py-16 px-4 bg-white rounded-2xl shadow-sm border border-gray-200"
+      class="text-center py-16 px-4 bg-[var(--color-bg-card)] rounded-2xl shadow-sm border border-[var(--color-border)]"
     >
       <div class="max-w-md mx-auto">
         <div
-          class="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center"
+          class="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-[var(--primary-soft-10)] to-[var(--color-primary)]/10 flex items-center justify-center"
         >
           <svg
-            class="w-10 h-10 text-blue-500"
+            class="w-10 h-10 text-[var(--color-primary)]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -1030,10 +1038,10 @@
             ></path>
           </svg>
         </div>
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">
+        <h3 class="text-xl font-semibold text-[var(--color-text-main)] mb-2">
           No Entities Found
         </h3>
-        <p class="text-gray-600 mb-6">
+        <p class="text-[var(--color-text-muted)] mb-6">
           There are no downlevel entities available for your current role.
         </p>
       </div>
@@ -1053,29 +1061,29 @@
     >
       <!-- Background overlay -->
       <div
-        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        class="fixed inset-0 bg-[var(--color-bg-surface)] bg-opacity-75 transition-opacity"
         aria-hidden="true"
         (click)="closeAddAmountModal()"
       ></div>
 
       <!-- Modal panel -->
       <div
-        class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+        class="inline-block align-bottom bg-[var(--color-bg-card)] rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
       >
-        <div class="bg-white px-6 pt-6 pb-4">
+        <div class="bg-[var(--color-bg-card)] px-6 pt-6 pb-4">
           <div class="flex items-start justify-between mb-4">
             <div>
-              <h3 class="text-xl font-bold text-gray-900" id="modal-title">
+              <h3 class="text-xl font-bold text-[var(--color-text-main)]" id="modal-title">
                 Add Amount to {{ selectedEntity?.name }}
               </h3>
-              <p class="text-sm text-gray-500 mt-1">
+              <p class="text-sm text-[var(--color-text-muted)] mt-1">
                 Enter the amount to allocate to this entity
               </p>
             </div>
             <button
               type="button"
               (click)="closeAddAmountModal()"
-              class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+              class="rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)] focus:outline-none"
             >
               <svg
                 class="h-6 w-6"
@@ -1094,10 +1102,10 @@
           </div>
 
           <div class="mt-6">
-            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+            <div class="mb-6 p-4 bg-[var(--primary-soft-20)] rounded-lg border border-[var(--color-primary-border-soft)]">
               <div class="flex items-center">
                 <svg
-                  class="w-5 h-5 text-blue-500 mr-3"
+                  class="w-5 h-5 text-[var(--color-primary)] mr-3"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -1110,8 +1118,8 @@
                   ></path>
                 </svg>
                 <div>
-                  <p class="text-sm text-blue-700">Entity Details</p>
-                  <p class="text-xs text-blue-600 mt-1">
+                  <p class="text-sm text-[var(--color-primary)]">Entity Details</p>
+                  <p class="text-xs text-[var(--color-primary)] mt-1">
                     ID: {{ selectedEntity?.id }} | Type:
                     {{
                       selectedEntity?.entityType ||
@@ -1126,7 +1134,7 @@
               <div>
                 <label
                   for="amount"
-                  class="block text-sm font-medium text-gray-700 mb-2"
+                  class="block text-sm font-medium text-[var(--color-text-main)] mb-2"
                 >
                   Amount to Add
                 </label>
@@ -1134,27 +1142,27 @@
                   <div
                     class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
                   >
-                    <span class="text-gray-500 sm:text-sm">₹</span>
+                    <span class="text-[var(--color-text-muted)] sm:text-sm">₹</span>
                   </div>
                   <input
                     type="number"
                     id="amount"
                     [(ngModel)]="amountToAdd"
                     placeholder="0.00"
-                    class="block w-full pl-10 pr-12 py-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="block w-full pl-10 pr-12 py-3 text-lg border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
                     aria-describedby="amount-currency"
                   />
                   <div
                     class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
                   >
-                    <span class="text-gray-500 sm:text-sm" id="amount-currency"
+                    <span class="text-[var(--color-text-muted)] sm:text-sm" id="amount-currency"
                       >INR</span
                     >
                   </div>
                 </div>
                 <p
                   *ngIf="amountToAdd <= 0 && amountToAdd !== null"
-                  class="mt-2 text-sm text-red-600"
+                  class="mt-2 text-sm text-[var(--color-danger)]"
                 >
                   Please enter a valid amount greater than 0
                 </p>
@@ -1164,13 +1172,13 @@
         </div>
 
         <div
-          class="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row-reverse gap-3"
+          class="bg-[var(--color-bg-surface)] px-6 py-4 flex flex-col sm:flex-row-reverse gap-3"
         >
           <button
             type="button"
             (click)="submitAddAmount()"
             [disabled]="amountToAdd <= 0 || addingAmount"
-            class="inline-flex justify-center w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium rounded-lg hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+            class="inline-flex justify-center w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-[var(--color-primary)] to-indigo-700 text-white font-medium rounded-lg hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
           >
             <span *ngIf="!addingAmount">Add Amount</span>
             <span *ngIf="addingAmount" class="flex items-center">
@@ -1200,7 +1208,7 @@
           <button
             type="button"
             (click)="closeAddAmountModal()"
-            class="inline-flex justify-center w-full sm:w-auto px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-300"
+            class="inline-flex justify-center w-full sm:w-auto px-6 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] text-[var(--color-text-main)] font-medium rounded-lg hover:bg-[var(--color-bg-surface)] transition-all duration-300"
           >
             Cancel
           </button>
@@ -1222,25 +1230,25 @@
     >
       <!-- Background overlay -->
       <div
-        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        class="fixed inset-0 bg-[var(--color-bg-surface)] bg-opacity-75 transition-opacity"
         aria-hidden="true"
         (click)="closeViewLimitsModal()"
       ></div>
 
       <!-- Modal panel -->
       <div
-        class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
+        class="inline-block align-bottom bg-[var(--color-bg-card)] rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
       >
-        <div class="bg-white px-6 pt-6 pb-4">
+        <div class="bg-[var(--color-bg-card)] px-6 pt-6 pb-4">
           <div class="flex items-start justify-between mb-6">
             <div>
               <h3
-                class="text-xl font-bold text-gray-900"
+                class="text-xl font-bold text-[var(--color-text-main)]"
                 id="limits-modal-title"
               >
                 Limits History for {{ selectedEntity?.name }}
               </h3>
-              <p class="text-sm text-gray-500 mt-1">
+              <p class="text-sm text-[var(--color-text-muted)] mt-1">
                 Complete transaction and balance history
               </p>
             </div>
@@ -1248,7 +1256,7 @@
               <button
                 type="button"
                 (click)="closeViewLimitsModal()"
-                class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+                class="rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)] focus:outline-none"
               >
                 <svg
                   class="h-6 w-6"
@@ -1269,33 +1277,33 @@
 
           <!-- Entity Summary -->
           <div
-            class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100"
+            class="mb-6 p-4 bg-gradient-to-r from-[var(--primary-soft-10)] to-[var(--color-primary)]/10 rounded-xl border border-[var(--color-primary-border-soft)]"
           >
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="p-3 bg-white rounded-lg border border-blue-100">
-                <div class="text-xs text-blue-600 font-medium mb-1">
+              <div class="p-3 bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-primary-border-soft)]">
+                <div class="text-xs text-[var(--color-primary)] font-medium mb-1">
                   Entity ID
                 </div>
-                <div class="font-mono text-sm text-gray-900">
+                <div class="font-mono text-sm text-[var(--color-text-main)]">
                   {{ selectedEntity?.id }}
                 </div>
               </div>
-              <div class="p-3 bg-white rounded-lg border border-blue-100">
-                <div class="text-xs text-blue-600 font-medium mb-1">
+              <div class="p-3 bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-primary-border-soft)]">
+                <div class="text-xs text-[var(--color-primary)] font-medium mb-1">
                   Entity Type
                 </div>
-                <div class="text-sm font-semibold text-gray-900">
+                <div class="text-sm font-semibold text-[var(--color-text-main)]">
                   {{
                     selectedEntity?.entityType ||
                       getType(selectedEntity?.role || role)
                   }}
                 </div>
               </div>
-              <div class="p-3 bg-white rounded-lg border border-blue-100">
-                <div class="text-xs text-blue-600 font-medium mb-1">
+              <div class="p-3 bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-primary-border-soft)]">
+                <div class="text-xs text-[var(--color-primary)] font-medium mb-1">
                   Last Updated
                 </div>
-                <div class="text-sm text-gray-900">
+                <div class="text-sm text-[var(--color-text-main)]">
                   {{ limitsData[0]?.updatedAt | date : "medium" }}
                 </div>
               </div>
@@ -1305,61 +1313,61 @@
           <!-- Limits Data Table -->
           <div
             *ngIf="limitsData.length > 0"
-            class="overflow-hidden rounded-lg border border-gray-200"
+            class="overflow-hidden rounded-lg border border-[var(--color-border)]"
           >
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+            <table class="min-w-full divide-y border-[var(--color-border)]">
+              <thead class="bg-[var(--color-bg-surface)]">
                 <tr>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider"
                   >
                     Date & Time
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider"
                   >
                     Amount Details
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider"
                   >
                     Balance
                   </th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
+              <tbody class="bg-[var(--color-bg-card)] divide-y border-[var(--color-border)]">
                 <tr
                   *ngFor="let limit of limitsData"
-                  class="hover:bg-gray-50 transition-colors"
+                  class="hover:bg-[var(--color-bg-surface)] transition-colors"
                 >
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">
+                    <div class="text-sm text-[var(--color-text-main)]">
                       {{ limit.createdAt | date : "shortDate" }}
                     </div>
-                    <div class="text-xs text-gray-500">
+                    <div class="text-xs text-[var(--color-text-muted)]">
                       {{ limit.createdAt | date : "shortTime" }}
                     </div>
                   </td>
                   <td class="px-6 py-4">
                     <div class="space-y-2">
                       <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Amount Added:</span>
-                        <span class="text-sm font-semibold text-green-600"
+                        <span class="text-xs text-[var(--color-text-muted)]">Amount Added:</span>
+                        <span class="text-sm font-semibold text-[var(--color-success)]"
                           >₹{{ limit.amount | number : "1.2-2" }}</span
                         >
                       </div>
                       <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Given Amount:</span>
-                        <span class="text-sm font-semibold text-blue-600"
+                        <span class="text-xs text-[var(--color-text-muted)]">Given Amount:</span>
+                        <span class="text-sm font-semibold text-[var(--color-primary)]"
                           >₹{{ limit.givenAmount || limit.runningBalance- limit.remainingAmount | number:   "1.2-2"}}</span
                         >
                       </div>
                       <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Remaining:</span>
-                        <span class="text-sm font-semibold text-amber-600"
+                        <span class="text-xs text-[var(--color-text-muted)]">Remaining:</span>
+                        <span class="text-sm font-semibold text-[var(--color-warning)]"
                           >₹{{ limit.remainingAmount | number : "1.2-2" }}</span
                         >
                       </div>
@@ -1368,14 +1376,14 @@
                   <td class="px-6 py-4">
                     <div class="space-y-2">
                       <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Previous:</span>
-                        <span class="text-sm text-gray-700"
+                        <span class="text-xs text-[var(--color-text-muted)]">Previous:</span>
+                        <span class="text-sm text-[var(--color-text-main)]"
                           >₹{{ limit.previousBalance | number : "1.2-2" }}</span
                         >
                       </div>
                       <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Running:</span>
-                        <span class="text-sm font-bold text-gray-900"
+                        <span class="text-xs text-[var(--color-text-muted)]">Running:</span>
+                        <span class="text-sm font-bold text-[var(--color-text-main)]"
                           >₹{{ limit.runningBalance | number : "1.2-2" }}</span
                         >
                       </div>
@@ -1389,10 +1397,10 @@
           <!-- Empty Limits State -->
           <div
             *ngIf="limitsData.length === 0 && !loadingLimits"
-            class="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg"
+            class="text-center py-12 border-2 border-dashed border-[var(--color-border)] rounded-lg"
           >
             <svg
-              class="w-12 h-12 mx-auto text-gray-400"
+              class="w-12 h-12 mx-auto text-[var(--color-text-muted)]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -1404,10 +1412,10 @@
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               ></path>
             </svg>
-            <h4 class="mt-4 text-lg font-medium text-gray-900">
+            <h4 class="mt-4 text-lg font-medium text-[var(--color-text-main)]">
               No Limit Records Found
             </h4>
-            <p class="mt-2 text-sm text-gray-600">
+            <p class="mt-2 text-sm text-[var(--color-text-muted)]">
               This entity doesn't have any limit history yet.
             </p>
           </div>
@@ -1415,17 +1423,17 @@
           <!-- Loading Limits -->
           <div *ngIf="loadingLimits" class="text-center py-12">
             <div
-              class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-4"
+              class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[var(--color-primary)] mb-4"
             ></div>
-            <p class="text-gray-600">Loading limit data...</p>
+            <p class="text-[var(--color-text-muted)]">Loading limit data...</p>
           </div>
         </div>
 
-        <div class="bg-gray-50 px-6 py-4 flex justify-end">
+        <div class="bg-[var(--color-bg-surface)] px-6 py-4 flex justify-end">
           <button
             type="button"
             (click)="closeViewLimitsModal()"
-            class="inline-flex justify-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-300"
+            class="inline-flex justify-center px-6 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] text-[var(--color-text-main)] font-medium rounded-lg hover:bg-[var(--color-bg-surface)] transition-all duration-300"
           >
             Close
           </button>
@@ -1447,29 +1455,29 @@
     >
       <!-- Background overlay -->
       <div
-        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        class="fixed inset-0 bg-[var(--color-bg-surface)] bg-opacity-75 transition-opacity"
         aria-hidden="true"
         (click)="closeAdminSelfAmountModal()"
       ></div>
 
       <!-- Modal panel -->
       <div
-        class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full "
+        class="inline-block align-bottom bg-[var(--color-bg-card)] rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full "
       >
-        <div class="bg-white px-6 pt-6 pb-4">
+        <div class="bg-[var(--color-bg-card)] px-6 pt-6 pb-4">
           <div class="flex items-start justify-between mb-4">
             <div>
-              <h3 class="text-xl font-bold text-gray-900" id="admin-modal-title">
+              <h3 class="text-xl font-bold text-[var(--color-text-main)]" id="admin-modal-title">
                 Add Amount to Your Admin Account
               </h3>
-              <p class="text-sm text-gray-500 mt-1">
+              <p class="text-sm text-[var(--color-text-muted)] mt-1">
                 Set amount for your own OWNER account
               </p>
             </div>
             <button
               type="button"
               (click)="closeAdminSelfAmountModal()"
-              class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+              class="rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)] focus:outline-none"
             >
               <svg
                 class="h-6 w-6"
@@ -1489,7 +1497,7 @@
 
           <div class="mt-6">
             <div
-              class="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-100"
+              class="mb-6 p-4 bg-[var(--primary-soft-10)] rounded-lg border border-[var(--color-primary-border-soft)]"
             >
               <div class="flex items-center">
                 <svg
@@ -1506,8 +1514,8 @@
                   ></path>
               </svg>
                 <div>
-                  <p class="text-sm text-purple-700">Admin Account Details</p>
-                  <p class="text-xs text-purple-600 mt-1">
+                  <p class="text-sm text-[var(--color-primary)]">Admin Account Details</p>
+                  <p class="text-xs text-[var(--color-primary)] mt-1">
                     Role: {{ role }} | ID: {{ currentRoleId }}
                   </p>
                 </div>
@@ -1518,7 +1526,7 @@
               <div>
                 <label
                   for="adminAmount"
-                  class="block text-sm font-medium text-gray-700 mb-2"
+                  class="block text-sm font-medium text-[var(--color-text-main)] mb-2"
                 >
                   Amount to Add to Your Account
                 </label>
@@ -1526,21 +1534,21 @@
                   <div
                     class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
                   >
-                    <span class="text-gray-500 sm:text-sm">₹</span>
+                    <span class="text-[var(--color-text-muted)] sm:text-sm">₹</span>
                   </div>
                   <input
                     type="number"
                     id="adminAmount"
                     [(ngModel)]="adminAmountToAdd"
                     placeholder="0.00"
-                    class="block w-full pl-10 pr-12 py-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    class="block w-full pl-10 pr-12 py-3 text-lg border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-[var(--color-primary)]"
                     aria-describedby="admin-amount-currency"
                   />
                   <div
                     class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
                   >
                     <span
-                      class="text-gray-500 sm:text-sm"
+                      class="text-[var(--color-text-muted)] sm:text-sm"
                       id="admin-amount-currency"
                       >INR</span
                     >
@@ -1548,15 +1556,15 @@
                 </div>
                 <p
                   *ngIf="adminAmountToAdd <= 0 && adminAmountToAdd !== null"
-                  class="mt-2 text-sm text-red-600"
+                  class="mt-2 text-sm text-[var(--color-danger)]"
                 >
                   Please enter a valid amount greater than 0
                 </p>
               </div>
 
               <div class="mt-6">
-                <div class="p-3 bg-purple-50 rounded-lg">
-                  <p class="text-sm text-purple-700 mb-2">
+                <div class="p-3 bg-[var(--primary-soft-10)] rounded-lg">
+                  <p class="text-sm text-[var(--color-primary)] mb-2">
                     <svg
                       class="w-4 h-4 inline mr-1"
                       fill="none"
@@ -1579,7 +1587,7 @@
           </div>
         </div>
 
-        <div class="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row-reverse gap-3">
+        <div class="bg-[var(--color-bg-surface)] px-6 py-4 flex flex-col sm:flex-row-reverse gap-3">
           <button
             type="button"
             (click)="submitAdminSelfAmount()"
@@ -1614,7 +1622,7 @@
           <button
             type="button"
             (click)="closeAdminSelfAmountModal()"
-            class="inline-flex justify-center w-full sm:w-auto px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-300"
+            class="inline-flex justify-center w-full sm:w-auto px-6 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] text-[var(--color-text-main)] font-medium rounded-lg hover:bg-[var(--color-bg-surface)] transition-all duration-300"
           >
             Cancel
           </button>
@@ -1636,25 +1644,25 @@
     >
       <!-- Background overlay -->
       <div
-        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        class="fixed inset-0 bg-[var(--color-bg-surface)] bg-opacity-75 transition-opacity"
         aria-hidden="true"
         (click)="closeAdminLimitsModal()"
       ></div>
 
       <!-- Modal panel -->
       <div
-        class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
+        class="inline-block align-bottom bg-[var(--color-bg-card)] rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
       >
-        <div class="bg-white px-6 pt-6 pb-4">
+        <div class="bg-[var(--color-bg-card)] px-6 pt-6 pb-4">
           <div class="flex items-start justify-between mb-6">
             <div>
               <h3
-                class="text-xl font-bold text-gray-900"
+                class="text-xl font-bold text-[var(--color-text-main)]"
                 id="admin-limits-modal-title"
               >
                 Your Account Limits
               </h3>
-              <p class="text-sm text-gray-500 mt-1">
+              <p class="text-sm text-[var(--color-text-muted)] mt-1">
                 Your personal transaction and balance history
               </p>
             </div>
@@ -1662,7 +1670,7 @@
               <button
                 type="button"
                 (click)="closeAdminLimitsModal()"
-                class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+                class="rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-muted)] focus:outline-none"
               >
                 <svg
                   class="h-6 w-6"
@@ -1683,24 +1691,24 @@
 
           <!-- Admin Summary -->
           <div
-            class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100"
+            class="mb-6 p-4 bg-gradient-to-r from-[var(--primary-soft-10)] to-[var(--color-primary)]/10 rounded-xl border border-[var(--color-primary-border-soft)]"
           >
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="p-3 bg-white rounded-lg border border-purple-100">
-                <div class="text-xs text-purple-600 font-medium mb-1">Role</div>
-                <div class="text-sm font-semibold text-gray-900">{{ role }}</div>
+              <div class="p-3 bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-primary-border-soft)]">
+                <div class="text-xs text-[var(--color-primary)] font-medium mb-1">Role</div>
+                <div class="text-sm font-semibold text-[var(--color-text-main)]">{{ role }}</div>
               </div>
-              <div class="p-3 bg-white rounded-lg border border-purple-100">
-                <div class="text-xs text-purple-600 font-medium mb-1">
+              <div class="p-3 bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-primary-border-soft)]">
+                <div class="text-xs text-[var(--color-primary)] font-medium mb-1">
                   User ID
                 </div>
-                <div class="text-sm text-gray-900">{{ currentUserId }}</div>
+                <div class="text-sm text-[var(--color-text-main)]">{{ currentUserId }}</div>
               </div>
-              <div class="p-3 bg-white rounded-lg border border-purple-100">
-                <div class="text-xs text-purple-600 font-medium mb-1">
+              <div class="p-3 bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-primary-border-soft)]">
+                <div class="text-xs text-[var(--color-primary)] font-medium mb-1">
                   Account Balance
                 </div>
-                <div class="text-sm font-bold text-gray-900">
+                <div class="text-sm font-bold text-[var(--color-text-main)]">
                   ₹{{ currentUserLimits?.runningBalance | number : "1.2-2" }}
                 </div>
               </div>
@@ -1710,61 +1718,61 @@
           <!-- Admin Limits Data Table -->
           <div
             *ngIf="adminLimitsData.length > 0"
-            class="overflow-hidden rounded-lg border border-gray-200"
+            class="overflow-hidden rounded-lg border border-[var(--color-border)]"
           >
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+            <table class="min-w-full divide-y border-[var(--color-border)]">
+              <thead class="bg-[var(--color-bg-surface)]">
                 <tr>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider"
                   >
                     Date & Time
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider"
                   >
                     Amount Details
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider"
                   >
                     Balance
                   </th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
+              <tbody class="bg-[var(--color-bg-card)] divide-y border-[var(--color-border)]">
                 <tr
                   *ngFor="let limit of adminLimitsData"
-                  class="hover:bg-gray-50 transition-colors"
+                  class="hover:bg-[var(--color-bg-surface)] transition-colors"
                 >
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">
+                    <div class="text-sm text-[var(--color-text-main)]">
                       {{ limit.createdAt | date : "shortDate" }}
                     </div>
-                    <div class="text-xs text-gray-500">
+                    <div class="text-xs text-[var(--color-text-muted)]">
                       {{ limit.createdAt | date : "shortTime" }}
                     </div>
                   </td>
                   <td class="px-6 py-4">
                     <div class="space-y-2">
                       <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Amount Added:</span>
-                        <span class="text-sm font-semibold text-green-600"
+                        <span class="text-xs text-[var(--color-text-muted)]">Amount Added:</span>
+                        <span class="text-sm font-semibold text-[var(--color-success)]"
                           >₹{{ limit.amount | number : "1.2-2" }}</span
                         >
                       </div>
                       <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Given Amount:</span>
-                        <span class="text-sm font-semibold text-blue-600"
+                        <span class="text-xs text-[var(--color-text-muted)]">Given Amount:</span>
+                        <span class="text-sm font-semibold text-[var(--color-primary)]"
                           >₹{{ limit.givenAmount | number : "1.2-2" }}</span
                         >
                       </div>
                       <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Remaining:</span>
-                        <span class="text-sm font-semibold text-amber-600"
+                        <span class="text-xs text-[var(--color-text-muted)]">Remaining:</span>
+                        <span class="text-sm font-semibold text-[var(--color-warning)]"
                           >₹{{ limit.remainingAmount | number : "1.2-2" }}</span
                         >
                       </div>
@@ -1773,14 +1781,14 @@
                   <td class="px-6 py-4">
                     <div class="space-y-2">
                       <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Previous:</span>
-                        <span class="text-sm text-gray-700"
+                        <span class="text-xs text-[var(--color-text-muted)]">Previous:</span>
+                        <span class="text-sm text-[var(--color-text-main)]"
                           >₹{{ limit.previousBalance | number : "1.2-2" }}</span
                         >
                       </div>
                       <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Running:</span>
-                        <span class="text-sm font-bold text-gray-900"
+                        <span class="text-xs text-[var(--color-text-muted)]">Running:</span>
+                        <span class="text-sm font-bold text-[var(--color-text-main)]"
                           >₹{{ limit.runningBalance | number : "1.2-2" }}</span
                         >
                       </div>
@@ -1794,7 +1802,7 @@
           <!-- Empty Admin Limits State -->
           <div
             *ngIf="adminLimitsData.length === 0 && !loadingAdminLimits"
-            class="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg"
+            class="text-center py-12 border-2 border-dashed border-[var(--color-border)] rounded-lg"
           >
             <svg
               class="w-12 h-12 mx-auto text-purple-400"
@@ -1809,10 +1817,10 @@
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               ></path>
             </svg>
-            <h4 class="mt-4 text-lg font-medium text-gray-900">
+            <h4 class="mt-4 text-lg font-medium text-[var(--color-text-main)]">
               No Limit Records Found
             </h4>
-            <p class="mt-2 text-sm text-gray-600">
+            <p class="mt-2 text-sm text-[var(--color-text-muted)]">
               You don't have any limit transactions yet.
             </p>
             <button
@@ -1826,13 +1834,13 @@
           <!-- Loading Admin Limits -->
           <div *ngIf="loadingAdminLimits" class="text-center py-12">
             <div
-              class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mb-4"
+              class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[var(--color-primary)] mb-4"
             ></div>
-            <p class="text-gray-600">Loading your limit data...</p>
+            <p class="text-[var(--color-text-muted)]">Loading your limit data...</p>
           </div>
         </div>
 
-        <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+        <div class="bg-[var(--color-bg-surface)] px-6 py-4 flex justify-end gap-3">
           <button
             *ngIf="role === 'OWNER'"
             (click)="openAdminSelfAmountModal()"
@@ -1843,7 +1851,7 @@
           <button
             type="button"
             (click)="closeAdminLimitsModal()"
-            class="inline-flex justify-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-300"
+            class="inline-flex justify-center px-6 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] text-[var(--color-text-main)] font-medium rounded-lg hover:bg-[var(--color-bg-surface)] transition-all duration-300"
           >
             Close
           </button>

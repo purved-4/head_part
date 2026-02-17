@@ -7,62 +7,151 @@
 @import 'tailwindcss/utilities';
 
 
- 
 
 
-.error-snackbar {
-  background-color: transparent !important;
-  box-shadow: none !important;
-  padding: 0 !important;
+
+/* =====================================================
+   GLOBAL THEME (LIGHT)
+===================================================== */
+:root {
+  /* Brand */
+  --color-primary: #4f46e5;
+  --color-primary-light: #6366f1;
+  --color-primary-dark: #4338ca;
+
+  /* Background */
+  --color-bg-page: #f5f7fa;
+  --color-bg-card: #ffffff;
+  --color-bg-surface: #f9fafb;
+
+  /* Text */
+  --color-text-main: #111827;
+  --color-text-muted: #6b7280;
+  --color-text-invert: #ffffff;
+
+  /* Border */
+  --color-border: #e5e7eb;
+
+  /* Status */
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+
+  /* Hover */
+  --color-hover: #f3f4f6;
+
+  /* Shadow */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-modal: 0 10px 25px rgba(0,0,0,0.15);
+
+  /* Soft Primary Shades */
+--primary-soft-10: rgba(79, 70, 229, 0.10);
+--primary-soft-20: rgba(79, 70, 229, 0.20);
+--color-primary-border-soft: rgba(79, 70, 229, 0.25);
+
+/* Soft Success Shades */
+--success-soft-12: rgba(34, 197, 94, 0.12);
+--success-soft-30: rgba(34, 197, 94, 0.30);
+
 }
 
-/* styles.scss */
-.no-padding-snackbar {
-  padding: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
+
+/* =====================================================
+   BASE GLOBAL
+===================================================== */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: var(--color-bg-page);
+  color: var(--color-text-main);
 }
 
+
+/* =====================================================
+   GLOBAL UTILITIES
+===================================================== */
+
+.page-bg {
+  background: var(--color-bg-page);
+}
+
+.surface {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.border-theme {
+  border-color: var(--color-border);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+
+/* =====================================================
+   ANGULAR MATERIAL FIX
+===================================================== */
 
 .mat-mdc-form-field-subscript-wrapper {
-  display: none !important; 
+  display: none !important;
   height: 0 !important;
 }
 
 .mat-mdc-form-field {
   margin-bottom: 0 !important;
 }
-mat-mdc-text-field-wrapper mdc-text-field ng-tns-c508571215-12 mdc-text-field--outlined mdc-text-field--no-label{
-  display: none;
+
+
+/* =====================================================
+   SNACKBAR
+===================================================== */
+
+.no-padding-snackbar {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
-/* Global Styles */
-html, body {
-  height: 100%;
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: #f5f7fa;
-}
-
-/* Snackbar Styles */
 .success-snackbar {
-  background-color: #4caf50 !important;
-  color: white !important;
+  background: var(--color-success) !important;
+  color: #fff !important;
 }
 
 .error-snackbar {
-  background-color: #f44336 !important;
-  color: white !important;
+  background: var(--color-danger) !important;
+  color: #fff !important;
+  border-radius: 6px;
+  box-shadow: var(--shadow-card);
 }
 
-/* Add some animation to snackbars */
+/* Position */
+.mat-snack-bar-container {
+  margin-bottom: 20px !important;
+  margin-right: 20px !important;
+  max-width: 360px !important;
+}
+
+/* Animation */
 .mat-mdc-snack-bar-container {
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.25s ease-out;
 }
 
 @keyframes slideIn {
   from {
-    transform: translateY(100%);
+    transform: translateY(40px);
     opacity: 0;
   }
   to {
@@ -71,7 +160,11 @@ html, body {
   }
 }
 
-/* Custom scrollbar */
+
+/* =====================================================
+   SCROLLBAR
+===================================================== */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -83,32 +176,21 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: #9ca3af;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #6b7280;
 }
 
 
-/* Add this to your global styles */
-.error-snackbar {
-  background-color: #f44336 !important; /* Red background */
-  color: white !important;
-  border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-/* Position it at bottom right */
-.mat-snack-bar-container {
-  margin-bottom: 20px !important;
-  margin-right: 20px !important;
-  max-width: 360px !important;
-}
+/* =====================================================
+   SEARCH HIGHLIGHT
+===================================================== */
 
 mark.app-search-highlight {
-  background-color: #fffb8f; /* soft yellow */
+  background: #fffb8f;
   color: inherit;
   padding: 0 2px;
   border-radius: 2px;
