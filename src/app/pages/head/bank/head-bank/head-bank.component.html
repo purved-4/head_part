@@ -71,20 +71,6 @@
         </span>
 
         <span
-          *ngIf="filterStatus"
-          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
-        >
-          <span class="material-symbols-outlined mr-1 text-sm">toggle_on</span>
-          {{ filterStatus | titlecase }}
-          <button
-            (click)="filterStatus = ''; onFilterChange()"
-            class="ml-1 hover:text-[var(--color-danger)]"
-          >
-            <span class="material-symbols-outlined text-sm">close</span>
-          </button>
-        </span>
-
-        <span
           *ngIf="searchTerm"
           class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
         >
@@ -160,25 +146,6 @@
       </div>
 
       <!-- Status Filter -->
-      <div class="space-y-1">
-        <label class="block text-xs font-medium text-[var(--color-font)]">
-          <span
-            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
-            >toggle_on</span
-          >
-          Status
-        </label>
-        <select
-          [(ngModel)]="filterStatus"
-          (change)="onFilterChange()"
-          class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
-        >
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="frozen">Frozen</option>
-        </select>
-      </div>
 
       <!-- Website Filter with dropdown -->
       <div class="space-y-1 relative website-filter-container">
@@ -414,11 +381,7 @@
           >
             Type
           </th>
-          <th
-            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
-          >
-            Status
-          </th>
+
           <th
             class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
@@ -563,23 +526,7 @@
               {{ getAccountTypeLabel(account.accountType) }}
             </span>
           </td>
-          <td class="px-4 py-3 whitespace-nowrap">
-            <span
-              [ngClass]="getStatusClass(account.status)"
-              class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize"
-            >
-              <span
-                class="w-1.5 h-1.5 rounded-full mr-1"
-                [ngClass]="{
-                  'bg-[var(--color-success)]': account.status === 'active',
-                  'bg-[var(--color-danger)]': account.status === 'inactive',
-                  'bg-[var(--color-warning)]': account.status === 'frozen',
-                  'bg-[var(--color-muted)]': !account.status,
-                }"
-              ></span>
-              {{ account.status || "-" }}
-            </span>
-          </td>
+
           <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center gap-1">
               <div class="relative" #actionDropdown>
@@ -621,55 +568,19 @@
                       <div
                         class="px-3 py-1 text-[10px] font-semibold text-[var(--color-muted)] uppercase tracking-wider"
                       >
-                        Change Status
+                        Delete Account
                       </div>
                       <button
                         (click)="
-                          updateAccountStatus(account.id, 'active');
+                          toggleBankStatus(account.id);
                           activeActionDropdown = null
                         "
-                        [class]="
-                          account.status === 'active'
-                            ? 'w-full flex items-center px-3 py-2 text-xs bg-[var(--color-success)]/10 text-[var(--color-success)] hover:bg-[var(--color-success)]/20'
-                            : 'w-full flex items-center px-3 py-2 text-xs text-[var(--color-font)] hover:bg-[var(--color-hover)]'
-                        "
+                        class="w-full flex items-center px-3 py-2 text-xs text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 transition-colors"
                       >
-                        <span
-                          class="w-1.5 h-1.5 rounded-full bg-[var(--color-success)] mr-2"
-                        ></span>
-                        Active
-                      </button>
-                      <button
-                        (click)="
-                          updateAccountStatus(account.id, 'inactive');
-                          activeActionDropdown = null
-                        "
-                        [class]="
-                          account.status === 'inactive'
-                            ? 'w-full flex items-center px-3 py-2 text-xs bg-[var(--color-danger)]/10 text-[var(--color-danger)] hover:bg-[var(--color-danger)]/20'
-                            : 'w-full flex items-center px-3 py-2 text-xs text-[var(--color-font)] hover:bg-[var(--color-hover)]'
-                        "
-                      >
-                        <span
-                          class="w-1.5 h-1.5 rounded-full bg-[var(--color-danger)] mr-2"
-                        ></span>
-                        Inactive
-                      </button>
-                      <button
-                        (click)="
-                          updateAccountStatus(account.id, 'frozen');
-                          activeActionDropdown = null
-                        "
-                        [class]="
-                          account.status === 'frozen'
-                            ? 'w-full flex items-center px-3 py-2 text-xs bg-[var(--color-warning)]/10 text-[var(--color-warning)] hover:bg-[var(--color-warning)]/20'
-                            : 'w-full flex items-center px-3 py-2 text-xs text-[var(--color-font)] hover:bg-[var(--color-hover)]'
-                        "
-                      >
-                        <span
-                          class="w-1.5 h-1.5 rounded-full bg-[var(--color-warning)] mr-2"
-                        ></span>
-                        Frozen
+                        <span class="material-icons text-base mr-2"
+                          >auto_delete</span
+                        >
+                        Delete
                       </button>
                     </div>
                   </div>
@@ -1401,21 +1312,7 @@
               <option value="salary">Salary Account</option>
             </select>
           </div>
-          <div>
-            <label
-              class="block text-sm font-semibold text-[var(--color-font)] mb-1"
-              >Status</label
-            >
-            <select
-              [(ngModel)]="updateForm.status"
-              name="status"
-              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="frozen">Frozen</option>
-            </select>
-          </div>
+
           <div class="flex gap-2 pt-3">
             <button
               type="submit"

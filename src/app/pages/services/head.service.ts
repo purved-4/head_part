@@ -13,7 +13,7 @@ export class HeadService {
     return this.http.post<any>(`${baseUrl}/head/createHead`, data);
   }
 
-  addHeadUser(data: any,HeadId:any): Observable<any> {
+  addHeadUser(data: any, HeadId: any): Observable<any> {
     return this.http.post<any>(`${baseUrl}/allot-head/${HeadId}`, data);
   }
 
@@ -28,14 +28,14 @@ export class HeadService {
   changeHeadUserStatus(HeadId: any, userId: any): Observable<any> {
     return this.http.patch<any>(
       `${baseUrl}/head/changeStatusByUser/${HeadId}/${userId}`,
-      {}
+      {},
     );
   }
 
   getHeadById(id: any): Observable<any[]> {
     return this.http.get<any[]>(`${baseUrl}/head/getHeadById/${id}`).pipe(
       map((response: any) => response.data),
-      catchError((error) => throwError(error))
+      catchError((error) => throwError(error)),
     );
   }
 
@@ -44,37 +44,33 @@ export class HeadService {
       .get<any[]>(`${baseUrl}/head/getHeadsListByUserId/${id}`)
       .pipe(
         map((response: any) => response.data),
-        catchError((error) => throwError(error))
+        catchError((error) => throwError(error)),
       );
   }
 
   getHeadByUserId(id: any): Observable<any[]> {
-    return this.http
-      .get<any[]>(`${baseUrl}/head/getHeadsByUserId/${id}`)
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(error))
-      );
+    return this.http.get<any[]>(`${baseUrl}/head/getHeadsByUserId/${id}`).pipe(
+      map((response: any) => response.data),
+      catchError((error) => throwError(error)),
+    );
   }
 
-   getHeadByManagerId(id: any): Observable<any[]> {
+  getHeadByManagerId(id: any): Observable<any[]> {
     console.log(id);
-    
+
     return this.http
       .get<any[]>(`${baseUrl}/head/getHeadByManagerId/${id}`)
       .pipe(
         map((response: any) => response.data),
-        catchError((error) => throwError(error))
+        catchError((error) => throwError(error)),
       );
   }
 
   getUsersByHeadId(id: any): Observable<any[]> {
-    return this.http
-      .get<any[]>(`${baseUrl}/head/getUsersByHeadId/${id}`)
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(error))
-      );
+    return this.http.get<any[]>(`${baseUrl}/head/getUsersByHeadId/${id}`).pipe(
+      map((response: any) => response.data),
+      catchError((error) => throwError(error)),
+    );
   }
 
   getHeadByWebsiteId(id: any): Observable<any[]> {
@@ -82,29 +78,37 @@ export class HeadService {
       .get<any[]>(`${baseUrl}/head/getHeadsWithWebsites/${id}`)
       .pipe(
         map((response: any) => response.data),
-        catchError((error) => throwError(error))
+        catchError((error) => throwError(error)),
       );
   }
 
-getAllHeadsWithWebsitesById(id: any, paymentMethod?: any): Observable<any[]> {
+  getAllHeadsWithWebsitesById(id: any, paymentMethod?: any): Observable<any[]> {
+    let params: any = {};
 
-  let params: any = {};
+    if (paymentMethod) {
+      params.paymentMethod = paymentMethod;
+    }
 
-  if (paymentMethod) {
-    params.paymentMethod = paymentMethod;
+    return this.http
+      .get<
+        any[]
+      >(`${baseUrl}/head/getAllHeadsWithWebsitesById/${id}`, { params })
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
   }
-
-  return this.http
-    .get<any[]>(`${baseUrl}/head/getAllHeadsWithWebsitesById/${id}`, { params })
-    .pipe(
-      map((response: any) => response.data),
-      catchError((error) => throwError(() => error))
-    );
-}
-  changeHeadWebsiteStatus(websiteId:any , HeadId: string): Observable<any> {
+  changeHeadWebsiteStatus(websiteId: any, HeadId: string): Observable<any> {
     return this.http.patch<any>(
       `${baseUrl}/head/changeStatus/${HeadId}/${websiteId}`,
-      {}
+      {},
+    );
+  }
+
+  getHeadWebsitePercentage(headId: string): Observable<any> {
+    return this.http.get<any>(`${baseUrl}/head/getPercentages/${headId}`).pipe(
+      map((response) => response.data),
+      catchError((error) => throwError(() => error)),
     );
   }
 }

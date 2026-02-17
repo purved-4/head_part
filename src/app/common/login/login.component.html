@@ -1,5 +1,5 @@
 <div
-  class="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-white to-white p-6 relative overflow-hidden"
+  class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-400 via-slate-500 to-slate-600 p-6 relative overflow-hidden"
 >
   <!-- Animated background shapes -->
   <div class="absolute inset-0 overflow-hidden">
@@ -11,14 +11,14 @@
     ></div>
   </div>
 
-  <!-- Larger card (max-w-lg) with Uiverse design -->
+  <!-- Card with running rounded border (via pseudo-element) and hover effects -->
   <div
-    class="max-w-lg bg-gradient-to-b from-white to-[#f4f7fb] rounded-[40px] p-8 sm:p-10 border-4 border-white shadow-[rgba(133,189,215,0.88)_0px_30px_30px_-20px] mx-auto my-5 z-10"
+    class="max-w-lg rounded-[40px] p-8 sm:p-10 shadow-[rgba(133,189,215,0.88)_0px_30px_30px_-20px] mx-auto my-5 z-10 bg-[#f9f9f9] transition-all duration-300 hover:scale-[1.02] hover:shadow-[rgba(133,189,215,0.88)_0px_35px_40px_-20px] animated-border-card"
   >
     <!-- Heading -->
     <div class="text-center font-black text-3xl text-[#1089d3]">Sign In</div>
 
-    <!-- Form -->
+    <!-- Form (unchanged) -->
     <form class="mt-6" (ngSubmit)="formSubmit()">
       <!-- Email input -->
       <input
@@ -45,7 +45,7 @@
           class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
           (click)="showPassword = !showPassword"
         >
-          <!-- Eye open icon -->
+          <!-- Eye icons (unchanged) -->
           <svg
             *ngIf="!showPassword"
             xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +67,6 @@
               d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
             />
           </svg>
-          <!-- Eye closed icon -->
           <svg
             *ngIf="showPassword"
             xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +85,7 @@
         </button>
       </div>
 
-      <!-- Buttons row: Sign In and Clear -->
+      <!-- Buttons row -->
       <div class="flex gap-4 mt-6">
         <button
           type="submit"

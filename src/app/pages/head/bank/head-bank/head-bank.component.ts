@@ -170,7 +170,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     if (this.filterStatus === "inactive") options.active = false;
 
     const sub = this.bankService
-      .getBankDataWithSubAdminIdPaginated(this.currentRoleId, options)
+      .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, options)
       .pipe(
         catchError((err) => {
           console.error("Error fetching bank accounts", err);
@@ -761,5 +761,21 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     if (!isWebsiteDropdown && this.showWebsiteDropdown) {
       this.showWebsiteDropdown = false;
     }
+  }
+
+  toggleBankStatus(bankId: string) {
+    this.bankService.toogleBankStatus(bankId).subscribe({
+      next: (res) => {
+        // Success: refresh the list to reflect the updated status
+        this.fetchBankAccounts();
+        // Optional: show success message
+        // this.showUpdateSuccess('Bank status toggled successfully!');
+      },
+      error: (err) => {
+        console.error("Error toggling bank status:", err);
+        // Optional: show error message to user
+        // alert('Failed to toggle status. Please try again.');
+      },
+    });
   }
 }

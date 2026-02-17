@@ -59,6 +59,34 @@ export class UpiService {
       .pipe(map((res) => res.data));
   }
 
+  getByEntityIdAndActivePaginated(
+    entityId: string,
+    options: any = {},
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set("page", options.page?.toString() ?? "0")
+      .set("size", options.size?.toString() ?? "20");
+
+    if (options.query) params = params.set("query", options.query);
+    if (options.minAmount !== undefined && options.maxAmount !== undefined) {
+      params = params.set("minAmount", options.minAmount.toString());
+      params = params.set("maxAmount", options.maxAmount.toString());
+    }
+    if (options.active !== undefined && options.active !== null) {
+      params = params.set("active", options.active.toString());
+    }
+    if (options.websiteId) params = params.set("websiteId", options.websiteId);
+    if (options.limit && options.limit > 0) {
+      params = params.set("limit", options.limit.toString());
+    }
+
+    return this.http
+      .get<any>(`${baseUrl}/upi/getAllActiveByEntityId/paginated/${entityId}`, {
+        params,
+      })
+      .pipe(map((res) => res.data));
+  }
+
   getAllByEntityIdAndWebsiteId(id: any, websiteId: any): Observable<any[]> {
     return this.http.get<any[]>(
       `${baseUrl}/upi/getAllByEntityIdAndWebsiteId/${id}/${websiteId}`,
@@ -80,6 +108,6 @@ export class UpiService {
   }
 
   toogleUpiStatus(upiId: any): Observable<any[]> {
-    return this.http.patch<any[]>(`${baseUrl}/upi/toggleStatus/${upiId}`, {});
+    return this.http.delete<any[]>(`${baseUrl}/upi/delete/${upiId}`, {});
   }
 }

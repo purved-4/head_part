@@ -132,15 +132,6 @@
       </div>
 
       <!-- Status Filter -->
-      <select
-        [(ngModel)]="filterStatus"
-        (change)="onFilterChange()"
-        class="px-3 py-2.5 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] transition-colors duration-200 font-medium text-[var(--color-font)] text-sm min-w-[140px]"
-      >
-        <option value="">All Status</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-      </select>
     </div>
 
     <!-- ===== MAX LIMIT FILTER (single field) ===== -->
@@ -382,11 +373,7 @@
           >
             QR
           </th>
-          <th
-            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
-          >
-            Status
-          </th>
+
           <th
             class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
@@ -474,22 +461,7 @@
               </div>
             </div>
           </td>
-          <td class="px-4 py-3 whitespace-nowrap">
-            <div class="flex items-center">
-              <div
-                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-                [class.bg-green-100]="upi.status === 'active'"
-                [class.text-green-800]="upi.status === 'active'"
-                [class.bg-red-100]="upi.status === 'inactive'"
-                [class.text-red-800]="upi.status === 'inactive'"
-              >
-                <span class="material-icons text-xs mr-1">
-                  {{ upi.status === "active" ? "check_circle" : "cancel" }}
-                </span>
-                {{ upi.status === "active" ? "Active" : "Inactive" }}
-              </div>
-            </div>
-          </td>
+
           <td class="px-4 py-3 whitespace-nowrap">
             <!-- Actions Dropdown -->
             <div class="relative">
@@ -508,8 +480,8 @@
                   (click)="toggleUpiStatus(upi); activeDropdownUpiId = null"
                   class="w-full px-4 py-3 text-left text-sm text-[var(--color-font)] hover:bg-[var(--color-hover)] flex items-center gap-3 border-b border-[var(--color-border)]"
                 >
-                  <span class="material-icons">toggle_on</span>
-                  <span>Toggle Status</span>
+                  <span class="material-symbols-outlined"> auto_delete </span>
+                  <span>Delete</span>
                 </button>
                 <button
                   (click)="openUpdateModal(upi); activeDropdownUpiId = null"
@@ -1198,21 +1170,6 @@
           </div>
 
           <!-- Status -->
-          <div>
-            <label
-              class="block text-sm font-medium text-[var(--color-font)] mb-1"
-            >
-              Status
-            </label>
-            <select
-              [(ngModel)]="updateForm.status"
-              name="status"
-              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] font-medium text-[var(--color-font)]"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
 
           <!-- Action Buttons -->
           <div class="pt-3 border-t border-[var(--color-border)]">

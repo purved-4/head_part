@@ -50,6 +50,35 @@ export class BankService {
     );
   }
 
+  getBankDataWithSubAdminIdAndActivePaginated(
+    id: string,
+    options: any = {},
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set("page", options.page?.toString() ?? "0")
+      .set("size", options.size?.toString() ?? "20");
+
+    if (options.query) params = params.set("query", options.query);
+    if (options.minAmount !== undefined && options.maxAmount !== undefined) {
+      params = params.set("minAmount", options.minAmount.toString());
+      params = params.set("maxAmount", options.maxAmount.toString());
+    }
+    if (options.active !== undefined && options.active !== null) {
+      params = params.set("active", options.active.toString());
+    }
+    if (options.websiteId) params = params.set("websiteId", options.websiteId);
+    if (options.limit && options.limit > 0) {
+      params = params.set("limit", options.limit.toString());
+    }
+
+    return this.http.get<any>(
+      `${baseUrl}/banks/getAllActiveByEntityId/paginated/${id}`,
+      {
+        params,
+      },
+    );
+  }
+
   getBankDataWithEntityIdAndWebsiteId(
     id: any,
     websiteId: any,
@@ -75,7 +104,7 @@ export class BankService {
 
   toogleBankStatus(bankId: any): Observable<any[]> {
     return this.http
-      .patch<any[]>(`${baseUrl}/banks/toggleStatus/${bankId}`, {})
+      .delete<any[]>(`${baseUrl}/banks/delete/${bankId}`, {})
       .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(() => error)),

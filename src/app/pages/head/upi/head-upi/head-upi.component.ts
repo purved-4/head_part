@@ -187,7 +187,7 @@ export class HeadUpiComponent implements OnInit {
     if (this.filterStatus === "inactive") options.active = false;
 
     this.upiService
-      .getByBranchIdPaginated(this.currentRoleId, options)
+      .getByEntityIdAndActivePaginated(this.currentRoleId, options)
       .subscribe({
         next: (res: any) => {
           const rows = Array.isArray(res.content) ? res.content : [];
