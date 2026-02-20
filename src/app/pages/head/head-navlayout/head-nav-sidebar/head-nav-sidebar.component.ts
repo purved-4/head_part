@@ -112,7 +112,7 @@ managerId! :any
 menuItems: MenuItem[] = [
   {
     label: "Dashboard",
-    route: "/head/dashboard",
+    route: "/head",
     icon: "dashboard",
     children: [
       { label: "Dashboard", route: "/head" }
@@ -471,18 +471,18 @@ navigate(route: string) {
 
 
 
-  // isActive(route: string): boolean {
-  //   if (!route) return false;
-  //   return this.currentRoute === route;
-  // }
-
   isActive(route: string): boolean {
-  if (!route) return false;
-  return (
-    this.currentRoute === route ||
-    this.currentRoute.startsWith(route + "/")
-  );
-}
+    if (!route) return false;
+    return this.currentRoute === route;
+  }
+
+//   isActive(route: string): boolean {
+//   if (!route) return false;
+//   return (
+//     this.currentRoute === route ||
+//     this.currentRoute.startsWith(route + "/")
+//   );
+// }
 
 
   getActiveChildrenCount(): number {
@@ -492,14 +492,19 @@ navigate(route: string) {
     ).length;
   }
 
+  // isParentActive(item: MenuItem): boolean {
+  //   if (!item) return false;
+  //   if (this.isActive(item.route)) return true;
+  //   if (item.children && item.children.length) {
+  //     return item.children.some((child) => this.isActive(child.route));
+  //   }
+  //   return false;
+  // }
+
   isParentActive(item: MenuItem): boolean {
-    if (!item) return false;
-    if (this.isActive(item.route)) return true;
-    if (item.children && item.children.length) {
-      return item.children.some((child) => this.isActive(child.route));
-    }
-    return false;
-  }
+  if (!item) return false;
+  return this.currentRoute === item.route;
+}
 
 
 

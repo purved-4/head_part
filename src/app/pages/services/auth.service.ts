@@ -38,7 +38,9 @@ export class AuthService {
 
   public generateToken(loginData: any): Observable<any> {
     return this.http
-      .post(`${baseUrl}/login`, loginData, { withCredentials: true })
+      // .post(`${baseUrl}/login`, loginData, { withCredentials: true })
+            .post(`${baseUrl}/login`, loginData)
+
       .pipe(
         tap(() => {
           this.isAuthenticated = true;
@@ -71,7 +73,9 @@ export class AuthService {
 
   public getCurrentUser(): Observable<any> {
     return this.http
-      .get(`${baseUrl}/current-user`, { withCredentials: true })
+      // .get(`${baseUrl}/current-user`, { withCredentials: true })
+      .get(`${baseUrl}/current-user`)
+
       .pipe(
         tap((user: any) => {
           this.userData = user?.data || null;
