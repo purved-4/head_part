@@ -19,6 +19,7 @@ import { HeadBranchCapacityComponent } from "../components/head-branch-capacity/
 import { BalanceHistoryReportComponent } from "../components/reports/balance-history-report/balance-history-report.component";
 import { FileSizePipe } from "../pipes/file-size.pipe";
 import { HeadChatComponent } from "../common/head-chat/head-chat.component";
+import { UserProfileComponent } from "../common/user-profile/user-profile.component";
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { HeadChatComponent } from "../common/head-chat/head-chat.component";
     HeadBranchCapacityComponent,
     BalanceHistoryReportComponent,
     FileSizePipe,
-    HeadChatComponent
+    HeadChatComponent,
+    UserProfileComponent,
   ],
   exports: [
     WebhookDataComponent,
@@ -56,7 +58,10 @@ import { HeadChatComponent } from "../common/head-chat/head-chat.component";
     HeadBranchCapacityComponent,
     BalanceHistoryReportComponent,
     FileSizePipe,
-    HeadChatComponent
+    HeadChatComponent,
+        UserProfileComponent,
+
+    
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeComponent],
 })

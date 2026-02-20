@@ -4,6 +4,12 @@ import { LimitsService } from "../../../services/reports/limits.service";
 import { UserStateService } from "../../../../store/user-state.service";
 import { SocketConfigService } from "../../../../common/socket/socket-config.service";
 import { FundsService } from "../../../services/funds.service";
+import { HostListener } from "@angular/core";
+import { ChiefService } from "../../../services/chief.service";
+import { HeadService } from "../../../services/head.service";
+import { ElementRef } from "@angular/core";
+import { ViewChild } from "@angular/core";
+import { NotificateChatComponent } from "../../../../common/notificate-chat/notificate-chat.component";
 @Component({
   selector: 'app-head-nav-header',
   templateUrl: './head-nav-header.component.html',
@@ -15,10 +21,14 @@ export class HeadNavHeaderComponent implements OnInit {
   @Input() notifications: number = 3;
 @Input() marginLeft: number = 0;
 
+    isProfileOpen = false;
+    @ViewChild('profileContainer') profileContainer!: ElementRef;
+
   @Output() toggleSidebar = new EventEmitter<void>();
   @Output() openSettings = new EventEmitter<void>();
   @Output() search = new EventEmitter<string>();
-
+@ViewChild(NotificateChatComponent)
+notificationChat!: NotificateChatComponent;
   dummyStats = {
     currentLimit: "₹50,000",
     workTime: "08:45",
@@ -45,38 +55,73 @@ export class HeadNavHeaderComponent implements OnInit {
     private userStateService: UserStateService,
     private socketService: SocketConfigService,
     private fundService: FundsService,
+      private headServices: HeadService,
   ) {}
 
-  ngOnInit(): void {
-    this.currentRoleId = this.userStateService.getCurrentRoleId();
-    this.currentUserRole = this.userStateService.getRole();
+  // ngOnInit(): void {
+  //   this.currentRoleId = this.userStateService.getCurrentRoleId();
+  //   this.currentUserRole = this.userStateService.getRole();
 
-    this.socketService.subscribeLatestBalance(this.currentRoleId);
+  //   this.socketService.subscribeLatestBalance(this.currentRoleId);
 
-    this.socketService.getLatestBalance().subscribe((res) => {
-      console.log(res);
+  //   this.socketService.getLatestBalance().subscribe((res) => {
+  //     console.log(res);
 
-      if (res?.data?.remainingAmount !== undefined) {
-        this.limitRemainingAmount = res.data.remainingAmount;
-      }
-    });
+  //     if (res?.data?.remainingAmount !== undefined) {
+  //       this.limitRemainingAmount = res.data.remainingAmount;
+  //     }
+  //   });
 
-    this.fundService
-      .broadcast(this.currentRoleId, this.currentUserRole)
-      .subscribe((res) => {
-        this.payoutBalance = res.ACCEPTED_CURRENCY_PAYOUT;
-        this.upiBalance = res.ACCEPTED_CURRENCY_UPI;
-        this.bankBalance = res.ACCEPTED_CURRENCY_BANK;
-        this.rewards = res.Branch_Balance;
-        this.topupBalance = this.upiBalance + this.bankBalance;
+  //   this.fundService
+  //     .broadcast(this.currentRoleId, this.currentUserRole)
+  //     .subscribe((res) => {
+  //       this.payoutBalance = res.ACCEPTED_CURRENCY_PAYOUT;
+  //       this.upiBalance = res.ACCEPTED_CURRENCY_UPI;
+  //       this.bankBalance = res.ACCEPTED_CURRENCY_BANK;
+  //       this.rewards = res.Branch_Balance;
+  //       this.topupBalance = this.upiBalance + this.bankBalance;
+  //     });
+
+  //   this.limitService
+  //     .getLatestLimitsByEntityAndType(this.currentRoleId, this.currentUserRole)
+  //     .subscribe((res) => {
+  //       this.limitRemainingAmount = res.remainingAmount;
+  //     });
+  // }
+
+   ngOnInit(): void {
+      this.currentRoleId = this.userStateService.getCurrentRoleId();
+      this.currentUserRole = this.userStateService.getRole();
+      console.log("RoleId:", this.currentRoleId);
+
+      this.socketService.subscribeLatestBalance(this.currentRoleId);
+
+      this.socketService.getLatestBalance().subscribe((res) => {
+        console.log(res);
+
+        if (res?.data?.remainingAmount !== undefined) {
+          this.limitRemainingAmount = res.data.remainingAmount;
+        }
       });
 
-    this.limitService
-      .getLatestLimitsByEntityAndType(this.currentRoleId, this.currentUserRole)
-      .subscribe((res) => {
-        this.limitRemainingAmount = res.remainingAmount;
-      });
-  }
+      this.fundService
+        .broadcast(this.currentRoleId, this.currentUserRole)
+        .subscribe((res) => {
+          this.payoutBalance = res.ACCEPTED_CURRENCY_PAYOUT;
+          this.upiBalance = res.ACCEPTED_CURRENCY_UPI;
+          this.bankBalance = res.ACCEPTED_CURRENCY_BANK;
+          this.rewards = res.Branch_Balance;
+          this.topupBalance = this.upiBalance + this.bankBalance;
+        });
+
+      this.limitService
+        .getLatestLimitsByEntityAndType(this.currentRoleId, this.currentUserRole)
+        .subscribe((res) => {
+          this.limitRemainingAmount = res.remainingAmount;
+        });
+
+       
+    }
 
   onToggleClick() {
     this.toggleSidebar.emit();
@@ -136,6 +181,123 @@ export class HeadNavHeaderComponent implements OnInit {
 formatFullAmount(amount: number | string): string {
   if (amount === null || amount === undefined) return "₹0";
   return "₹" + Number(amount).toLocaleString("en-IN");
+}
+
+
+
+    // Popup state
+    websitePopupOpen = false;
+    websitePercentages: any[] = [];
+    loadingWebsitePercent = false;
+
+   
+
+   
+
+    // Open popup
+openWebsitePopup() {
+
+  // Ensure roleId is latest
+  this.currentRoleId = this.userStateService.getCurrentRoleId();
+
+  console.log("Opening popup with roleId:", this.currentRoleId);
+
+  if (!this.currentRoleId) {
+    console.warn("RoleId not ready yet");
+    return;
+  }
+
+  this.websitePopupOpen = true;
+  this.websitePercentages = [];
+  this.loadWebsitePercentages();
+
+
+}
+
+    // Close popup
+    closeWebsitePopup() {
+      this.websitePopupOpen = false;
+    }
+
+    // Load API
+   loadWebsitePercentages() {
+  this.loadingWebsitePercent = true;
+
+  this.headServices.getHeadWebsitePercentage(this.currentRoleId)
+    .subscribe({
+      next: (res: any) => {
+        console.log("API RAW Response:", res);
+
+        // 🔥 FIX: handle direct array response
+        if (Array.isArray(res)) {
+          this.websitePercentages = res;
+        } else if (res?.data && Array.isArray(res.data)) {
+          this.websitePercentages = res.data;
+        } else {
+          this.websitePercentages = [];
+        }
+
+        console.log("Final websitePercentages:", this.websitePercentages);
+        this.loadingWebsitePercent = false;
+      },
+      error: (err) => {
+        console.error("API ERROR:", err);
+        this.websitePercentages = [];
+        this.loadingWebsitePercent = false;
+      }
+    });
+}
+
+    // Refresh data
+    refreshWebsiteData() {
+      this.loadWebsitePercentages();
+    }
+
+  
+
+    toggleProfile() {
+      this.isProfileOpen = !this.isProfileOpen;
+    }
+
+    closeProfile() {
+      this.isProfileOpen = false;
+    }
+
+    @HostListener('document:keydown.escape')
+    onEscapeKeydown() {
+      if (this.isProfileOpen) {
+        this.closeProfile();
+      }
+    }
+
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(event: MouseEvent) {
+      if (this.isProfileOpen && this.profileContainer) {
+        const clickedInside = this.profileContainer.nativeElement.contains(event.target);
+        if (!clickedInside) {
+          this.closeProfile();
+        }
+      }
+    }
+
+    @HostListener('document:click', ['$event'])
+onGlobalClick(event: MouseEvent) {
+
+  // Close profile dropdown
+  if (this.isProfileOpen && this.profileContainer) {
+    const clickedInside = this.profileContainer.nativeElement.contains(event.target);
+    if (!clickedInside) {
+      this.closeProfile();
+    }
+  }
+
+  // Close website modal if open
+  if (this.websitePopupOpen) {
+    const modal = document.querySelector('.website-modal-card');
+    if (modal && !modal.contains(event.target as Node)) {
+      this.closeWebsitePopup();
+    }
+  }
 }
 
 

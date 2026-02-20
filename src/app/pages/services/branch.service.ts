@@ -147,4 +147,12 @@ export class BranchService {
       );
   }
 
+
+  getBranchWebsitePercentage(branchId: string): Observable<any> {
+return this.http.get<any>(`${baseUrl}/branch/getPercentages/${branchId}`).pipe(
+    map(response => response.data),
+    catchError(error => throwError(() => error))
+);
+}
+
 }
