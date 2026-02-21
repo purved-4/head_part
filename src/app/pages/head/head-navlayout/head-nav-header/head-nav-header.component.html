@@ -1,44 +1,51 @@
 <header
-  class="main-header fixed top-0 right-0 z-30 overflow-visible bg-gradient-to-r 
-  from-[var(--color-hover)] to-white/80 backdrop-blur-md 
-  border-b border-[var(--color-border)]"
+  class="main-header fixed top-0 right-0 z-30 overflow-visible bg-gradient-to-r from-[var(--color-hover)] to-white/80 border-b border-[var(--color-border)]"
   [style.left.px]="marginLeft"
 >
   <div class="w-full px-6 py-3">
     <div class="flex items-center justify-between mb-2">
-
       <!-- Left: Breadcrumb -->
       <div class="hidden md:flex items-center space-x-2 text-sm">
         <span class="text-[var(--color-muted)]">Dashboard</span>
         <span class="text-[var(--color-muted)]">/</span>
-        <span class="text-[var(--color-font)] font-medium">{{ pageTitle }}</span>
+        <span class="text-[var(--color-font)] font-medium">{{
+          pageTitle
+        }}</span>
       </div>
 
       <!-- Right Controls -->
       <div class="flex items-center space-x-3">
-
         <!-- Search -->
         <div class="relative hidden lg:block">
           <input
             type="text"
             placeholder="Search transactions, users..."
             (input)="onSearchInput($event)"
-            class="w-64 pl-10 pr-4 py-2 text-sm rounded-xl border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white/70 backdrop-blur-sm"
+            class="w-64 pl-10 pr-4 py-2 text-sm rounded-xl border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white/70"
           />
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          <svg
+            class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
         </div>
 
         <!-- Website % Button -->
         <button
+          #websiteButton
           (click)="openWebsitePopup()"
-          class="px-3 py-1.5 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
+          class="px-3 py-1.5 text-sm transition inline-flex items-center gap-1"
         >
-          Websites %
+          <span class="material-icons text-sm text-slate-500">public</span>
         </button>
-
-   
 
         <app-notificate-chat></app-notificate-chat>
 
@@ -50,16 +57,17 @@
 
         <!-- Profile -->
         <div class="relative" #profileContainer>
-
           <!-- Avatar Button -->
           <button
             (click)="toggleProfile()"
             class="flex items-center space-x-2 p-1 rounded-full hover:bg-[var(--color-hover)] transition-all focus:ring-2 focus:ring-[var(--color-primary)]"
             [class.bg-[var(--color-hover)]]="isProfileOpen"
           >
-           <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold text-xs">
-  {{ getUserInitials() }}
-</div>
+            <div
+              class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold text-xs"
+            >
+              {{ getUserInitials() }}
+            </div>
 
             <svg
               class="w-4 h-4 text-[var(--color-muted)] transition-transform"
@@ -68,149 +76,197 @@
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
 
           <!-- Dropdown -->
           <div
             *ngIf="isProfileOpen"
-            class="fixed md:absolute right-4 md:right-0 top-[70px] md:top-full md:mt-2
-                   w-[920px] max-w-[calc(100vw-32px)]
-                   h-[620px] max-h-[80vh]
-                   z-[9999]"
+            class="fixed md:absolute right-4 md:right-0 top-[70px] md:top-full md:mt-2 w-[920px] max-w-[calc(100vw-32px)] h-[620px] max-h-[80vh] z-[9999]"
             [@slideInOut]
           >
             <!-- Arrow -->
-            <div class="hidden md:block absolute right-6 -top-2 w-4 h-4 bg-white border-l border-t border-gray-200 rotate-45"></div>
+            <div
+              class="hidden md:block absolute right-6 -top-2 w-4 h-4 bg-white border-l border-t border-gray-200 rotate-45"
+            ></div>
 
             <!-- Card -->
-            <div class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-gray-200
-                        h-full flex flex-col overflow-hidden">
-
+            <div
+              class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-gray-200 h-full flex flex-col overflow-hidden"
+            >
               <!-- Scrollable Content -->
               <div class="flex-1 overflow-y-auto">
-                <app-user-profile></app-user-profile>
+                <!-- <app-user-profile></app-user-profile> -->
               </div>
-
             </div>
           </div>
-
         </div>
       </div>
     </div>
   </div>
 </header>
 
-  <!-- WEBSITE MODAL - Table Format -->
+<!-- WEBSITE MODAL - Centered & Larger -->
 <div
   *ngIf="websitePopupOpen"
-  class="fixed inset-0 z-[10000] bg-black/20 backdrop-blur-sm"
+  class="fixed inset-0 z-[10000] bg-black/20 flex items-center justify-center"
   (click)="closeWebsitePopup()"
 >
-  <div 
-    class="absolute top-16 right-4 w-[350px] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
+  <div
+    class="website-modal-card bg-white rounded-2xl shadow-2xl border border-gray-200 w-[900px] max-w-[95vw] max-h-[85vh] overflow-hidden flex flex-col"
     (click)="$event.stopPropagation()"
   >
     <!-- HEADER -->
-    <div class="flex items-center justify-between px-3 py-2 border-b bg-gray-50">
-      <h2 class="text-xs font-semibold text-gray-700">Websites %</h2>
-      <div class="flex items-center">
-        <button 
+    <div
+      class="flex items-center justify-between px-5 py-3 border-b bg-gray-50"
+    >
+      <h2 class="text-base font-semibold text-gray-800">Websites Percentage</h2>
+      <div class="flex items-center gap-2">
+        <button
           *ngIf="!loadingWebsitePercent"
-          (click)="refreshWebsiteData()" 
-          class="p-0.5 hover:bg-gray-200 rounded mr-1"
+          (click)="refreshWebsiteData()"
+          class="p-1.5 hover:bg-gray-200 rounded-full transition"
           title="Refresh data"
         >
-          <svg class="w-3 h-3 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          <svg
+            class="w-4 h-4 text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
           </svg>
         </button>
         <button
           (click)="closeWebsitePopup()"
-          class="text-gray-500 hover:text-black text-base leading-none w-5 h-5 flex items-center justify-center rounded hover:bg-gray-200"
+          class="text-gray-500 hover:text-gray-800 text-xl leading-none w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-200 transition"
+          aria-label="Close"
         >
           ×
         </button>
       </div>
     </div>
 
-    <!-- BODY - Table Format -->
-    <div class="p-2 max-h-[400px] overflow-y-auto">
-      
+    <!-- BODY - Scrollable Table -->
+    <div class="flex-1 overflow-y-auto p-4">
       <!-- Loading State -->
-      <div *ngIf="loadingWebsitePercent" class="text-center py-4">
-        <div class="flex flex-col items-center justify-center space-y-1">
-          <svg class="animate-spin h-4 w-4 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <span class="text-[10px] text-gray-600">Loading...</span>
-        </div>
+      <div
+        *ngIf="loadingWebsitePercent"
+        class="flex flex-col items-center justify-center py-8"
+      >
+        <svg
+          class="animate-spin h-6 w-6 text-indigo-600 mb-2"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
+        <span class="text-sm text-gray-600">Loading website data...</span>
       </div>
 
-      <!-- Data Display - Table Format -->
-      <div *ngIf="!loadingWebsitePercent && websitePercentages && websitePercentages.length > 0">
+      <!-- Data Table -->
+      <div
+        *ngIf="
+          !loadingWebsitePercent &&
+          websitePercentages &&
+          websitePercentages.length > 0
+        "
+        class="border rounded-lg overflow-hidden"
+      >
         <!-- Table Header -->
-        <div class="grid grid-cols-4 gap-1 mb-1 px-1">
-          <div class="col-span-1 text-[8px] font-semibold text-gray-500">Website</div>
-          <div class="col-span-1 text-[8px] font-semibold text-gray-500 text-center">FTT</div>
-          <div class="col-span-1 text-[8px] font-semibold text-gray-500 text-center">TOP</div>
-          <div class="col-span-1 text-[8px] font-semibold text-gray-500 text-center">PO</div>
+        <div
+          class="grid grid-cols-4 gap-2 bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-600 border-b"
+        >
+          <div class="col-span-1">Website</div>
+          <div class="col-span-1 text-center">FTT %</div>
+          <div class="col-span-1 text-center">TOP %</div>
+          <div class="col-span-1 text-center">PO %</div>
         </div>
 
         <!-- Table Rows -->
-        <div class="space-y-0.5">
+        <div class="divide-y">
           <div
-            *ngFor="let site of websitePercentages; let i = index"
-            class="grid grid-cols-4 gap-1 items-center p-1.5 bg-white hover:bg-gray-50 rounded border"
+            *ngFor="let site of websitePercentages"
+            class="grid grid-cols-4 gap-2 px-3 py-2 text-sm hover:bg-gray-50"
           >
-            <!-- Website Name with dot -->
-            <div class="col-span-1 flex items-center gap-1">
-              <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-              <span class="text-[9px] font-medium text-gray-700 truncate" title="{{ site.websiteName || 'Unknown' }}">
-                {{ site.websiteName && site.websiteName.length > 12 ? site.websiteName.substring(0, 12) + '...' : (site.websiteName || 'Unknown') }}
+            <div class="col-span-1 flex items-center gap-2">
+              <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+              <span
+                class="font-medium text-gray-800 truncate"
+                [title]="site.websiteName || 'Unknown'"
+              >
+                {{ site.websiteName || "Unknown" }}
               </span>
             </div>
-            
-            <!-- FTT Percentage -->
-            <div class="col-span-1 text-center">
-              <span class="text-[9px] font-bold text-green-600">
-                {{ site.fttPercentage !== undefined ? site.fttPercentage : 0 }}%
-              </span>
+            <div class="col-span-1 text-center font-semibold text-green-600">
+              {{ site.fttPercentage ?? 0 }}%
             </div>
-            
-            <!-- Topup Percentage -->
-            <div class="col-span-1 text-center">
-              <span class="text-[9px] font-bold text-green-600">
-                {{ site.topupPercentage !== undefined ? site.topupPercentage : 0 }}%
-              </span>
+            <div class="col-span-1 text-center font-semibold text-green-600">
+              {{ site.topupPercentage ?? 0 }}%
             </div>
-            
-            <!-- Payout Percentage -->
-            <div class="col-span-1 text-center">
-              <span class="text-[9px] font-bold text-blue-600">
-                {{ site.payoutPercentage !== undefined ? site.payoutPercentage : 0 }}%
-              </span>
+            <div class="col-span-1 text-center font-semibold text-blue-600">
+              {{ site.payoutPercentage ?? 0 }}%
             </div>
           </div>
         </div>
       </div>
 
-      <!-- No Data Found -->
-      <div *ngIf="!loadingWebsitePercent && (!websitePercentages || websitePercentages.length === 0)"
-           class="text-center py-4">
-        <svg class="mx-auto h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 9.75L9 15l5.25-5.25M21 9.75L15.75 15 12 11.25" />
+      <!-- No Data -->
+      <div
+        *ngIf="
+          !loadingWebsitePercent &&
+          (!websitePercentages || websitePercentages.length === 0)
+        "
+        class="flex flex-col items-center justify-center py-8"
+      >
+        <svg
+          class="h-12 w-12 text-gray-300 mb-2"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M3.75 9.75L9 15l5.25-5.25M21 9.75L15.75 15 12 11.25"
+          />
         </svg>
-        <p class="mt-1 text-[10px] text-gray-500">No data found</p>
-        <button 
+        <p class="text-sm text-gray-500">No website data found</p>
+        <button
           (click)="refreshWebsiteData()"
-          class="mt-1 px-2 py-0.5 text-[8px] bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100"
+          class="mt-2 px-3 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100"
         >
           Try Again
         </button>
       </div>
     </div>
+
+    <!-- Optional Footer with Cancel Button -->
+    <div class="border-t px-4 py-3 bg-gray-50 flex justify-end"></div>
   </div>
 </div>
