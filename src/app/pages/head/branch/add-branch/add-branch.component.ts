@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { AfterViewInit, Component, OnInit } from "@angular/core";
 import {
   FormBuilder,
   FormGroup,
@@ -10,24 +10,31 @@ import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
 import { UserStateService } from "../../../../store/user-state.service";
 import { BranchService } from "../../../services/branch.service";
 import { HeadService } from "../../../services/head.service";
-
+import intlTelInput from "intl-tel-input";
+import { IntlTelInputInterface } from "modules/types/public-api";
+import { ViewChild, ElementRef } from "@angular/core";
 @Component({
   selector: "app-add-branch",
   templateUrl: "./add-branch.component.html",
   styleUrls: ["./add-branch.component.scss"],
 })
-export class AddBranchComponent implements OnInit {
+export class AddBranchComponent implements OnInit, AfterViewInit {
   chiefForm: FormGroup;
   loading = false;
   websites: any[] = [];
   activeTab: "available" | "selected" = "available";
   currentUserId: string | null = "";
   role: string | null = "";
-
+@ViewChild("phoneInput") phoneInputRef!: ElementRef;
   // Search properties
   websiteSearchTerm: string = "";
   filteredWebsites: any[] = [];
   showDropdown = false;
+availableSearchTerm: string = "";
+selectedSearchTerm: string = "";
+phoneInput: any;
+iti: any;
+
 
   constructor(
     private fb: FormBuilder,
@@ -39,12 +46,15 @@ export class AddBranchComponent implements OnInit {
   ) {
     this.chiefForm = this.fb.group({
       name: ["", Validators.required],
-      mobile: ["", [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+      // mobile: ["", [Validators.required, Validators.pattern(/^[0-9]{15}$/)]],
+mobile: ["", [Validators.required, Validators.maxLength(15)]],
       email: ["", [Validators.required, Validators.email]],
       info: [""],
       isActive: [true],
       websiteIds: [[], Validators.required],
     });
+
+
   }
 
   ngOnInit() {
@@ -52,6 +62,29 @@ export class AddBranchComponent implements OnInit {
     this.role = this.userStateService.getRole();
     this.loadWebsites();
   }
+
+ngAfterViewInit() {
+  this.iti = intlTelInput(this.phoneInputRef.nativeElement, {
+    initialCountry: "in",
+    separateDialCode: true,
+    preferredCountries: ["in", "us", "gb"],
+    utilsScript:
+      "https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.6/build/js/utils.js",
+  } as any);
+
+  // Sync value to form
+ this.phoneInputRef.nativeElement.addEventListener("blur", () => {
+  const number = this.iti.getNumber();
+
+  // ❗ only update if library returned a value
+  if (number && number.trim() !== "") {
+    this.chiefForm.get("mobile")?.setValue(number);
+  }
+
+  this.chiefForm.get("mobile")?.markAsTouched();
+});
+}
+
 
   loadWebsites() {
     this.headService.getAllHeadsWithWebsitesById(this.currentUserId).subscribe({
@@ -75,6 +108,15 @@ export class AddBranchComponent implements OnInit {
   initializeWebsiteControls() {
     this.websites.forEach((website) => {
       const wid = website.websiteId || website.id;
+      if (!this.chiefForm.contains(`first_topup_${wid}`)) {
+  this.chiefForm.addControl(
+    `first_topup_${wid}`,
+    new FormControl("", [
+      Validators.required,
+      Validators.min(0),
+      Validators.max(100),
+    ]),
+  );}
       if (!this.chiefForm.contains(`topup_${wid}`)) {
         this.chiefForm.addControl(
           `topup_${wid}`,
@@ -107,19 +149,42 @@ export class AddBranchComponent implements OnInit {
     return selectedIds.includes(websiteId);
   }
 
-  getAvailableWebsites(): any[] {
-    const selectedIds: string[] = this.chiefForm.get("websiteIds")?.value || [];
-    return this.websites.filter(
-      (website) => !selectedIds.includes(website.websiteId || website.id),
-    );
-  }
+  // getAvailableWebsites(): any[] {
+  //   const selectedIds: string[] = this.chiefForm.get("websiteIds")?.value || [];
+  //   return this.websites.filter(
+  //     (website) => !selectedIds.includes(website.websiteId || website.id),
+  //   );
+  // }
 
-  getSelectedWebsites(): any[] {
-    const selectedIds: string[] = this.chiefForm.get("websiteIds")?.value || [];
-    return this.websites.filter((website) =>
-      selectedIds.includes(website.websiteId || website.id),
+  getAvailableWebsites(): any[] {
+  const selectedIds: string[] = this.chiefForm.get("websiteIds")?.value || [];
+
+  return this.websites
+    .filter(w => !selectedIds.includes(w.websiteId || w.id))
+    .filter(w =>
+      (w.domain || w.websiteDomain || "")
+        .toLowerCase()
+        .includes(this.availableSearchTerm)
     );
-  }
+}
+
+  // getSelectedWebsites(): any[] {
+  //   const selectedIds: string[] = this.chiefForm.get("websiteIds")?.value || [];
+  //   return this.websites.filter((website) =>
+  //     selectedIds.includes(website.websiteId || website.id),
+  //   );
+  // }
+getSelectedWebsites(): any[] {
+  const selectedIds: string[] = this.chiefForm.get("websiteIds")?.value || [];
+
+  return this.websites
+    .filter(w => selectedIds.includes(w.websiteId || w.id))
+    .filter(w =>
+      (w.domain || w.websiteDomain || "")
+        .toLowerCase()
+        .includes(this.selectedSearchTerm)
+    );
+}
 
   // Getter for selected count
   get selectedWebsiteCount(): number {
@@ -188,6 +253,7 @@ export class AddBranchComponent implements OnInit {
       .get("websiteIds")
       ?.setValue(selectedIds.filter((id: string) => id !== websiteId));
     this.chiefForm.get("websiteIds")?.markAsTouched();
+    this.chiefForm.get(`first_topup_${websiteId}`)?.setValue("");
 
     this.chiefForm.get(`topup_${websiteId}`)?.setValue("");
     this.chiefForm.get(`payout_${websiteId}`)?.setValue("");
@@ -198,7 +264,7 @@ export class AddBranchComponent implements OnInit {
     this.filterWebsites(); // refresh available list
   }
 
-  applyToAll(type: "topup" | "payout") {
+  applyToAll(type: "topup" | "payout" | "first_topup") {
     const selectedWebsites = this.getSelectedWebsites();
     if (selectedWebsites.length === 0) return;
 
@@ -222,22 +288,36 @@ export class AddBranchComponent implements OnInit {
 
     const websiteIds: string[] = this.chiefForm.get("websiteIds")?.value || [];
 
+//    if (!this.iti || !this.iti.isValidNumber()) {
+//   this.snackService.show("Invalid phone number", false, 3000);
+//   return;
+// }
+
+const intl = this.iti.getNumber();
+const raw = this.phoneInputRef.nativeElement.value;
+
+// Only overwrite if intl has value
+this.chiefForm.get("mobile")?.setValue(intl && intl.trim() !== "" ? intl : raw);
     if (websiteIds.length === 0) {
       this.snackService.show("Please select at least one website", false, 3000);
       return;
     }
 
     for (const websiteId of websiteIds) {
+            const fttCtrl = this.chiefForm.get(`first_topup_${websiteId}`);
+
       const topupCtrl = this.chiefForm.get(`topup_${websiteId}`);
       const payoutCtrl = this.chiefForm.get(`payout_${websiteId}`);
+      const ftt = fttCtrl?.value;
 
       const topup = topupCtrl?.value;
       const payout = payoutCtrl?.value;
+      fttCtrl?.markAsTouched();
 
       topupCtrl?.markAsTouched();
       payoutCtrl?.markAsTouched();
 
-      if (!this.isValidPercentage(topup) || !this.isValidPercentage(payout)) {
+      if (!this.isValidPercentage(topup) || !this.isValidPercentage(payout) || !this.isValidPercentage(ftt)) {
         this.snackService.show(
           "Please enter valid Topup & Payout percentage for all selected websites",
           false,
@@ -263,6 +343,8 @@ export class AddBranchComponent implements OnInit {
     const websitePercentages: Record<string, any> = {};
     websiteIds.forEach((id) => {
       websitePercentages[String(id)] = {
+                fttPercentage: Number(this.chiefForm.get(`first_topup_${id}`)?.value),
+
         topupPercentage: Number(this.chiefForm.get(`topup_${id}`)?.value),
         payoutPercentage: Number(this.chiefForm.get(`payout_${id}`)?.value),
       };
@@ -316,6 +398,8 @@ export class AddBranchComponent implements OnInit {
 
     this.websites.forEach((website) => {
       const wid = website.websiteId || website.id;
+            this.chiefForm.get(`first_topup_${wid}`)?.setValue("");
+
       this.chiefForm.get(`topup_${wid}`)?.setValue("");
       this.chiefForm.get(`payout_${wid}`)?.setValue("");
     });
@@ -343,4 +427,14 @@ export class AddBranchComponent implements OnInit {
       this.showDropdown = true;
     }
   }
+
+  onSearch(event: Event): void {
+  const value = (event.target as HTMLInputElement).value.toLowerCase();
+
+  if (this.activeTab === "available") {
+    this.availableSearchTerm = value;
+  } else {
+    this.selectedSearchTerm = value;
+  }
+}
 }

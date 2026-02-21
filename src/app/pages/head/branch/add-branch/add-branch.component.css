@@ -20,3 +20,16 @@ input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   opacity: 1;
 }
+
+
+:host ::ng-deep .iti {
+  @apply w-full;
+}
+
+:host ::ng-deep .iti input {
+  @apply h-12 py-3.5 leading-5;
+}
+
+:host ::ng-deep .iti__flag-container {
+  @apply h-12 flex items-center;
+}

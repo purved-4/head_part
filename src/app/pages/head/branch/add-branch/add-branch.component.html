@@ -94,40 +94,39 @@
               </div>
 
               <!-- Mobile -->
-              <div class="space-y-2">
-                <label
-                  class="text-sm font-semibold text-[var(--color-font)] flex items-center gap-1"
-                >
-                  Mobile Number
-                  <span class="text-[var(--color-danger)]">*</span>
-                </label>
-                <div class="relative">
-                  <div
-                    class="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
-                  >
-                    +91
-                  </div>
-                  <input
-                    formControlName="mobile"
-                    type="text"
-                    [class.border-[var(--color-danger)]]="
-                      isFieldInvalid('mobile')
-                    "
-                    [class.border-[var(--color-primary)]]="
-                      chiefForm.get('mobile')?.valid &&
-                      chiefForm.get('mobile')?.touched
-                    "
-                    class="w-full pl-14 pr-4 py-3.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30 focus:border-transparent transition-all duration-200"
-                    placeholder="98765 43210"
-                  />
-                </div>
-                <div
-                  *ngIf="isFieldInvalid('mobile')"
-                  class="text-[var(--color-danger)] text-sm mt-1"
-                >
-                  Valid 10-digit mobile number is required
-                </div>
-              </div>
+<div class="space-y-2">
+  <label
+    class="text-sm font-semibold text-[var(--color-font)] flex items-center gap-1"
+  >
+    Mobile Number
+    <span class="text-[var(--color-danger)]">*</span>
+  </label>
+
+  <!-- <input
+    #phoneInput
+    id="phone"
+    type="tel"
+    class="w-full px-4 py-3.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+  /> -->
+
+  <input
+  #phoneInput
+  formControlName="mobile"
+  id="phone"
+  type="tel"
+  maxlength="15"
+  class="w-full px-4 py-3.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30 focus:border-transparent transition-all duration-200"
+  placeholder="Mobile No"
+
+/>
+
+  <div
+    *ngIf="isFieldInvalid('mobile')"
+    class="text-[var(--color-danger)] text-sm mt-1"
+  >
+    Valid phone number is required
+  </div>
+</div>
 
               <!-- Email -->
               <div class="space-y-2">
@@ -157,57 +156,52 @@
               </div>
 
               <!-- Active Status -->
-              <div class="space-y-2">
-                <label class="text-sm font-semibold text-[var(--color-font)]"
-                  >Account Status</label
-                >
-                <div
-                  class="flex items-center gap-3 p-4 bg-[var(--color-bg)] rounded-[var(--radius-md)] border border-[var(--color-border)]"
-                >
-                  <div class="relative">
-                    <input
-                      type="checkbox"
-                      id="active"
-                      formControlName="isActive"
-                      class="sr-only"
-                    />
-                    <label
-                      for="active"
-                      [ngClass]="{
-                        'bg-[var(--color-primary)]':
-                          chiefForm.get('isActive')?.value,
-                        'bg-[var(--color-border)]':
-                          !chiefForm.get('isActive')?.value,
-                      }"
-                      class="block w-12 h-6 rounded-full cursor-pointer transition-all duration-300 border-2 border-transparent"
-                    >
-                      <span
-                        [ngClass]="{
-                          'translate-x-6': chiefForm.get('isActive')?.value,
-                          'translate-x-0': !chiefForm.get('isActive')?.value,
-                        }"
-                        class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-[var(--shadow-sm)] transition-transform duration-300"
-                      ></span>
-                    </label>
-                  </div>
-                  <div>
-                    <span class="font-medium text-[var(--color-font)]">
-                      {{
-                        chiefForm.get("isActive")?.value
-                          ? "Active Account"
-                          : "Inactive Account"
-                      }}
-                    </span>
-                    <p class="text-xs text-[var(--color-muted)] mt-0.5">
-                      {{
-                        chiefForm.get("isActive")?.value
-                          ? "Branch can access the system"
-                          : "Branch access is disabled"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
+           <div class="space-y-2">
+  <label class="text-sm font-semibold text-[var(--color-font)]">
+    Account Status
+  </label>
+
+  <div
+    class="flex items-center justify-between px-4 h-[48px] bg-[var(--color-bg)] rounded-[var(--radius-md)] border border-[var(--color-border)]"
+  >
+    <!-- LEFT: Toggle -->
+    <div class="flex items-center gap-3">
+      <div class="relative flex items-center">
+        <input
+          type="checkbox"
+          id="active"
+          formControlName="isActive"
+          class="sr-only"
+        />
+        <label
+          for="active"
+          [ngClass]="{
+            'bg-[var(--color-primary)]': chiefForm.get('isActive')?.value,
+            'bg-[var(--color-border)]': !chiefForm.get('isActive')?.value
+          }"
+          class="block w-11 h-6 rounded-full cursor-pointer transition-all duration-300"
+        >
+          <span
+            [ngClass]="{
+              'translate-x-5': chiefForm.get('isActive')?.value,
+              'translate-x-0': !chiefForm.get('isActive')?.value
+            }"
+            class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-300"
+          ></span>
+        </label>
+      </div>
+
+      <!-- TEXT (single line to prevent height increase) -->
+      <span class="text-sm font-medium text-[var(--color-font)]">
+        {{
+          chiefForm.get("isActive")?.value
+            ? "Active Account"
+            : "Inactive Account"
+        }}
+      </span>
+    </div>
+  </div>
+</div>
             </div>
 
             <!-- Additional Info -->
@@ -293,11 +287,10 @@
         </div>
 
         <!-- Right Column - Website Assignment with Search Dropdown -->
-        <div class="lg:col-span-1">
+        <!-- <div class="lg:col-span-1">
           <div
             class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-8 border border-[var(--color-border)] sticky top-8 website-dropdown-container"
           >
-            <!-- Header with selected count -->
             <div class="flex items-center justify-between mb-6">
               <div>
                 <h2 class="text-xl font-bold text-[var(--color-font)]">
@@ -316,7 +309,6 @@
               </div>
             </div>
 
-            <!-- Search Input with Dropdown -->
             <div class="relative mb-6">
               <div class="relative">
                 <span
@@ -347,7 +339,6 @@
                 />
               </div>
 
-              <!-- Dropdown Suggestions (only available websites) -->
               <div
                 *ngIf="showDropdown && filteredWebsites.length > 0"
                 class="absolute z-50 w-full mt-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-lg max-h-60 overflow-y-auto"
@@ -397,7 +388,6 @@
               </div>
             </div>
 
-            <!-- Tabs -->
             <div
               class="flex gap-1 p-1 bg-[var(--color-bg)] rounded-[var(--radius-md)] mb-6"
             >
@@ -423,11 +413,9 @@
               </button>
             </div>
 
-            <!-- Website Lists -->
             <div
               class="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar"
             >
-              <!-- Available Websites Tab (empty state only) -->
               <div
                 *ngIf="activeTab === 'available'"
                 class="text-center py-12 text-[var(--color-muted)]"
@@ -435,13 +423,11 @@
                 <p>Type in the search box above to find and add websites.</p>
               </div>
 
-              <!-- Selected Websites Tab -->
               <div *ngIf="activeTab === 'selected'" class="space-y-3">
                 <div
                   *ngFor="let website of getSelectedWebsites()"
                   class="p-4 border border-[var(--color-primary)] rounded-[var(--radius-md)] bg-gradient-to-br from-[var(--color-bg)] to-white"
                 >
-                  <!-- Website Header -->
                   <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-3">
                       <div
@@ -496,7 +482,6 @@
                     </button>
                   </div>
 
-                  <!-- Percentage Controls -->
                   <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1.5">
                       <label
@@ -591,7 +576,6 @@
               </div>
             </div>
 
-            <!-- Instructions -->
             <div class="mt-6 pt-6 border-t border-[var(--color-border)]">
               <p class="text-xs text-[var(--color-muted)]">
                 <span class="font-medium text-[var(--color-primary)]"
@@ -602,7 +586,197 @@
               </p>
             </div>
           </div>
+        </div> -->
+      <!-- Right Column - Website Assignment -->
+<div class="lg:col-span-1">
+  <div
+    class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-6 border border-[var(--color-border)] sticky top-8 h-[615px] flex flex-col"
+  >
+    <!-- Header -->
+    <div class="mb-4">
+      <h2 class="text-lg font-semibold text-[var(--color-font)]">
+        Website Assignment
+      </h2>
+
+      <div class="flex items-center gap-2 mt-1 text-xs">
+        <span
+          class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-white font-medium"
+        >
+          {{ getSelectedWebsites().length }} Selected
+        </span>
+
+        <span class="text-[var(--color-muted)]">
+          of {{ websites.length }} total
+        </span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex bg-[var(--color-bg)] rounded-lg p-1 mb-3 text-sm">
+      <button
+        type="button"
+        (click)="setActiveTab('available')"
+        class="flex-1 py-1.5 rounded-md transition"
+        [class.bg-[var(--color-surface)]]="activeTab === 'available'"
+        [class.text-[var(--color-primary)]]="activeTab === 'available'"
+        [class.font-semibold]="activeTab === 'available'"
+      >
+        Available
+      </button>
+
+      <button
+        type="button"
+        (click)="setActiveTab('selected')"
+        class="flex-1 py-1.5 rounded-md transition"
+        [class.bg-[var(--color-surface)]]="activeTab === 'selected'"
+        [class.text-[var(--color-primary)]]="activeTab === 'selected'"
+        [class.font-semibold]="activeTab === 'selected'"
+      >
+        Selected
+      </button>
+    </div>
+
+    <!-- Search -->
+    <div class="mb-3">
+      <div class="relative">
+        <input
+          type="text"
+          [value]="activeTab === 'available' ? availableSearchTerm : selectedSearchTerm"
+          (input)="onSearch($event)"
+          placeholder="Search websites..."
+          class="w-full border border-[var(--color-border)] rounded-md px-3 py-1.5 text-sm bg-[var(--color-bg)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+    </div>
+
+    <!-- LIST -->
+    <!-- <div class="flex-1 overflow-y-auto space-y-2 pr-1"> -->
+<div class="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+      <!-- AVAILABLE TAB -->
+      <div *ngIf="activeTab === 'available'">
+
+        <div
+          *ngIf="getAvailableWebsites().length === 0"
+          class="text-center text-sm text-[var(--color-muted)] py-6"
+        >
+          No available websites
         </div>
+
+        <div
+          *ngFor="let website of getAvailableWebsites()"
+          class="group flex items-center justify-between border border-[var(--color-border)] rounded-md px-3 py-2 text-sm hover:border-[var(--color-primary)] transition"
+        >
+          <span class="truncate font-medium">
+            {{ website.domain || website.websiteDomain }}
+          </span>
+
+          <button
+            type="button"
+            (click)="onWebsiteSelectionChange({target:{checked:true}}, website.websiteId || website.id)"
+            class="opacity-0 group-hover:opacity-100 text-[var(--color-primary)] text-sm transition"
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      <!-- SELECTED TAB -->
+      <div *ngIf="activeTab === 'selected'">
+
+        <div
+          *ngIf="getSelectedWebsites().length === 0"
+          class="text-center text-sm text-[var(--color-muted)] py-6"
+        >
+          No websites selected
+        </div>
+
+        <div
+          *ngFor="let website of getSelectedWebsites()"
+          class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)]"
+        >
+          <!-- Header Row -->
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <div
+                class="w-6 h-6 rounded bg-[var(--color-primary)]/15 flex items-center justify-center text-[var(--color-primary)] text-xs"
+              >
+                🌐
+              </div>
+
+              <span class="text-sm font-medium truncate">
+                {{ website.domain || website.websiteDomain }}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              (click)="removeWebsite(website.websiteId || website.id)"
+              class="text-[var(--color-muted)] hover:text-red-500 text-sm"
+            >
+              ×
+            </button>
+          </div>
+
+          <!-- Percentage Controls -->
+          <div class="grid grid-cols-3 gap-2 text-xs">
+
+            <!-- TOPUP -->
+            <div>
+              <label class="block mb-1 text-[var(--color-muted)]">
+                Topup %
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                placeholder="0-100"
+                [formControlName]="'topup_' + (website.websiteId || website.id)"
+                class="w-full border border-[var(--color-border)] rounded px-2 py-1 text-sm bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+              />
+            </div>
+
+            <!-- PAYOUT -->
+            <div>
+              <label class="block mb-1 text-[var(--color-muted)]">
+                Payout %
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                placeholder="0-100"
+                [formControlName]="'payout_' + (website.websiteId || website.id)"
+                class="w-full border border-[var(--color-border)] rounded px-2 py-1 text-sm bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+              />
+            </div>
+
+            <!-- FTT -->
+            <div>
+              <label class="block mb-1 text-[var(--color-muted)]">
+                FTT %
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                placeholder="0-100"
+                [formControlName]="'first_topup_' + (website.websiteId || website.id)"
+                class="w-full border border-[var(--color-border)] rounded px-2 py-1 text-sm bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+              />
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Note -->
+    <!-- <div class="pt-3 mt-3 border-t text-xs text-[var(--color-muted)]">
+      <span class="font-medium text-[var(--color-primary)]">Note:</span>
+      Select websites and set commission percentages for each.
+    </div> -->
+  </div>
+</div>
       </div>
     </form>
   </div>
