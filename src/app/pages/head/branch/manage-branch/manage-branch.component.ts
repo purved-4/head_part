@@ -9,6 +9,7 @@ import { ManagerService } from "../../../services/manager.service";
 import { BranchService } from "../../../services/branch.service";
 import { HeadService } from "../../../services/head.service";
 import { UserStateService } from "../../../../store/user-state.service";
+import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
 
 interface WebsiteRange {
   websiteId: string;
@@ -147,6 +148,7 @@ viewMode: 'grid' | 'table' = 'table';
     private headService: HeadService,
     private userStateService: UserStateService,
     private cdr: ChangeDetectorRef,
+    private snack : SnackbarService,
   ) {}
 
   ngOnInit(): void {
