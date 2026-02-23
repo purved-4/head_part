@@ -222,6 +222,8 @@ viewMode: 'grid' | 'table' = 'table';
         this.filteredAgents = [];
         this.updatePagination();
         this.loading = false;
+          this.snack.show(this.error, false);
+
       },
     });
   }
@@ -456,43 +458,84 @@ viewMode: 'grid' | 'table' = 'table';
     this.branchService.toggleChiefStatus(targetId).subscribe({
       next: () => {
         this.togglingAgent[targetId] = false;
+        this.snack.show(
+      `Branch ${agent.active ? "activated" : "deactivated"} successfully`,
+      true
+    );
       },
       error: (err) => {
         agent.active = prev;
         this.togglingAgent[targetId] = false;
+        this.snack.show(
+      err?.error?.message || "Failed to update branch status",
+      false
+    );
         console.error("Failed to toggle status", err);
         alert("Failed to update branch status");
       },
     });
   }
 
+  // toggleWebsiteStatus(agent: Agent, website: WebsiteRange): void {
+  //   if (!agent?.id || !website?.websiteId) {
+  //     console.error("Missing agent id or website id for toggleWebsiteStatus");
+  //     return;
+  //   }
+
+  //   const key = `${agent.id}_${website.websiteId}`;
+  //   if (this.togglingWebsite[key]) return;
+  //   this.togglingWebsite[key] = true;
+
+  //   const prevState = website.active;
+  //   website.active = !website.active;
+
+  //   this.branchService
+  //     .changeManagerWebsiteStatus(website.websiteId, agent.id)
+  //     .subscribe({
+  //       next: () => {
+  //         this.togglingWebsite[key] = false;
+  //       },
+  //       error: (err) => {
+  //         website.active = prevState;
+  //         this.togglingWebsite[key] = false;
+  //         console.error("Failed to toggle website status", err);
+  //         alert("Failed to update website status. Please try again.");
+  //       },
+  //     });
+  // }
+
   toggleWebsiteStatus(agent: Agent, website: WebsiteRange): void {
-    if (!agent?.id || !website?.websiteId) {
-      console.error("Missing agent id or website id for toggleWebsiteStatus");
-      return;
-    }
+  if (!agent?.id || !website?.websiteId) return;
 
-    const key = `${agent.id}_${website.websiteId}`;
-    if (this.togglingWebsite[key]) return;
-    this.togglingWebsite[key] = true;
+  const key = `${agent.id}_${website.websiteId}`;
+  if (this.togglingWebsite[key]) return;
+  this.togglingWebsite[key] = true;
 
-    const prevState = website.active;
-    website.active = !website.active;
+  const prevState = website.active;
+  website.active = !website.active;
 
-    this.branchService
-      .changeManagerWebsiteStatus(website.websiteId, agent.id)
-      .subscribe({
-        next: () => {
-          this.togglingWebsite[key] = false;
-        },
-        error: (err) => {
-          website.active = prevState;
-          this.togglingWebsite[key] = false;
-          console.error("Failed to toggle website status", err);
-          alert("Failed to update website status. Please try again.");
-        },
-      });
-  }
+  this.snack.show("Updating website status...", 'warning', 1500);
+
+  this.branchService
+    .changeManagerWebsiteStatus(website.websiteId, agent.id)
+    .subscribe({
+      next: () => {
+        this.togglingWebsite[key] = false;
+        this.snack.show(
+          `Website ${website.active ? "enabled" : "disabled"} successfully`,
+          true
+        );
+      },
+      error: (err) => {
+        website.active = prevState;
+        this.togglingWebsite[key] = false;
+        this.snack.show(
+          err?.error?.message || "Failed to update website status",
+          false
+        );
+      },
+    });
+}
 
   isWebsiteToggling(agentId: string, websiteId: string): boolean {
     return !!this.togglingWebsite[`${agentId}_${websiteId}`];
@@ -646,6 +689,7 @@ viewMode: 'grid' | 'table' = 'table';
     this.addWebsiteSearchTerm = "";
     this.websitesForAdd = [];
     this.cdr.detectChanges();
+    this.snack.show("Websites added successfully", true);
   }
 
   removeWebsiteFromEdit(index: number): void {
@@ -658,6 +702,7 @@ viewMode: 'grid' | 'table' = 'table';
       }
       this.cdr.detectChanges();
     }
+    this.snack.show("Website removed", 'warning', 1500);
   }
 
   // ---------- VALIDATION ----------
@@ -864,19 +909,20 @@ viewMode: 'grid' | 'table' = 'table';
   //   });
   // }
 
-  updateBranch(): void {
+updateBranch(): void {
   this.emailError = "";
   this.mobileError = "";
 
+  // ---------- VALIDATION ----------
   if (!this.editForm.name || this.editForm.name.trim() === "") {
-    alert("Branch name is required");
+    this.snack.show("Branch name is required", 'warning');
     return;
   }
 
   if (this.editForm.email && this.editForm.email.trim() !== "") {
     if (!this.isValidEmail(this.editForm.email)) {
       this.emailError = "Please enter a valid email address";
-      alert(this.emailError);
+      this.snack.show(this.emailError, 'warning');
       return;
     }
   }
@@ -885,20 +931,24 @@ viewMode: 'grid' | 'table' = 'table';
     const cleanMobile = this.editForm.mobile.replace(/\D/g, "");
     if (!this.isValidMobile(cleanMobile)) {
       this.mobileError = "Please enter a valid 10-15 digit mobile number";
-      alert(this.mobileError);
+      this.snack.show(this.mobileError, 'warning');
       return;
     }
     this.editForm.mobile = cleanMobile;
   }
 
   if (!this.validateWebsitePercentages()) {
-    alert("Please enter valid percentages (0-100) for all websites");
+    this.snack.show("Enter valid percentages (0-100) for all websites", 'warning');
     return;
   }
 
+  // ---------- LOADING ----------
   this.updatingbranch = true;
   this.loading = true;
 
+  this.snack.show("Updating branch...", 'warning', 1200);
+
+  // ---------- BUILD PAYLOAD ----------
   const websitePercentages: any = {};
   this.editForm.websitesWithRange.forEach((website) => {
     websitePercentages[website.websiteId] = {
@@ -924,33 +974,38 @@ viewMode: 'grid' | 'table' = 'table';
     websitePercentages: websitePercentages,
   };
 
-  console.log("Update payload:", payload);
-
+  // ---------- API CALL ----------
   this.branchService.updateBranch(payload).subscribe({
-    next: (res: any) => {
-      console.log("Update successful:", res);
+    next: () => {
       this.loadbranchs(this.currentRoleId);
       this.closeEditModal();
+
       this.updatingbranch = false;
       this.loading = false;
 
+      this.snack.show("Branch updated successfully", true);
+
+      // Optional popup (keep if you want animation)
       this.updateSuccessMessage = "Branch updated successfully!";
       this.showUpdateSuccessPopup = true;
       this.successPopupTimeout = setTimeout(() => {
         this.closeUpdateSuccessPopup();
       }, 3000);
     },
+
     error: (err) => {
       console.error("Failed to update branch:", err);
-      this.error = err.error?.message || "Failed to update branch. Please try again.";
-      alert(this.error);
+
       this.updatingbranch = false;
       this.loading = false;
+
+      this.error = err?.error?.message || "Failed to update branch";
+      this.snack.show(this.error, false);
     },
   });
 
   console.log("VALID:", this.validateWebsitePercentages());
-console.log("FORM VALID:", this.isFormValid());
+  console.log("FORM VALID:", this.isFormValid());
 }
 
   closeUpdateSuccessPopup(): void {
@@ -1270,6 +1325,8 @@ loadWebsiteOptions(headId: any): void {
       console.error("Error loading websites:", err);
       this.websiteOptions = [];
       this.loadingWebsites = false;
+        this.snack.show("Failed to load websites", false);
+
     },
   });
 }
