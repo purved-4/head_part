@@ -11,7 +11,7 @@ import {
 import { Router, NavigationEnd } from "@angular/router";
 import { AuthService } from "../../../services/auth.service";
 import { filter } from "rxjs/operators";
-import { UserStateService} from "../../../../store/user-state.service";
+import { UserStateService } from "../../../../store/user-state.service";
 import { BranchService } from "../../../services/branch.service";
 
 interface MenuItem {
@@ -33,8 +33,7 @@ export class HeadNavSidebarComponent implements OnInit {
   @Input() collapsed = false;
   @Output() toggleSidebar = new EventEmitter<boolean>();
   @ViewChild("secondaryPanel") secondaryPanel!: ElementRef;
-    @Output() secondaryPanelStateChange = new EventEmitter<boolean>();
-
+  @Output() secondaryPanelStateChange = new EventEmitter<boolean>();
 
   currentUser: any;
   currentRoute = "";
@@ -52,144 +51,183 @@ export class HeadNavSidebarComponent implements OnInit {
   recentItems: { label: string; route: string }[] = [];
 
   mainMargin = 80;
-managerId! :any
+  managerId!: any;
   readonly PRIMARY_WIDTH_PX = 80; // tailwind w-20 = 5rem = 80px
   readonly PANEL_WIDTH_PX = 320; // tailwind w-80 = 20rem = 320px
 
-// menuItems: MenuItem[] = [
-//   {
-//     label: "Dashboard",
-//     route: "/manager/dashboard",
-//     icon: "dashboard",
-//     children: [
-//       { label: "Dashboard", route: "/manager/dashboard" }
-//     ]
-//   },
+  // menuItems: MenuItem[] = [
+  //   {
+  //     label: "Dashboard",
+  //     route: "/manager/dashboard",
+  //     icon: "dashboard",
+  //     children: [
+  //       { label: "Dashboard", route: "/manager/dashboard" }
+  //     ]
+  //   },
 
-//   {
-//     label: "Head Management",
-//     route: "/manager/head",
-//     icon: "manage_accounts",
-//     children: [
-//       { label: "Add Head", route: "/manager/head/add" },
-//       { label: "Manage Head", route: "/manager/head/manage" }
-//     ]
-//   },
+  //   {
+  //     label: "Head Management",
+  //     route: "/manager/head",
+  //     icon: "manage_accounts",
+  //     children: [
+  //       { label: "Add Head", route: "/manager/head/add" },
+  //       { label: "Manage Head", route: "/manager/head/manage" }
+  //     ]
+  //   },
 
-//   // 🔥 CHATS (Head + Branch inside)
-//   {
-//     label: "Chats",
-//     route: "/manager/chats",
-//     icon: "chat",
-//     children: [
-//       { label: "Head Chat", route: "/manager/head-chat" },
-//       { label: "Branch Chat", route: "/manager/branch-chat" }
-//     ]
-//   },
+  //   // 🔥 CHATS (Head + Branch inside)
+  //   {
+  //     label: "Chats",
+  //     route: "/manager/chats",
+  //     icon: "chat",
+  //     children: [
+  //       { label: "Head Chat", route: "/manager/head-chat" },
+  //       { label: "Branch Chat", route: "/manager/branch-chat" }
+  //     ]
+  //   },
 
-//   {
-//     label: "Limits",
-//     route: "/manager/limit",
-//     icon: "account_balance_wallet",
-//     children: [
-//       { label: "Limits", route: "/manager/limit" }
-//     ]
-//   },
+  //   {
+  //     label: "Limits",
+  //     route: "/manager/limit",
+  //     icon: "account_balance_wallet",
+  //     children: [
+  //       { label: "Limits", route: "/manager/limit" }
+  //     ]
+  //   },
 
-//   {
-//     label: "Reports",
-//     route: "/manager/reports",
-//     icon: "analytics",
-//     children: [
-//       { label: "Transaction History", route: "/manager/reports/transaction-history" },
-//       { label: "Entity Report", route: "/manager/reports/entity-report" },
-//       { label: "Funds Report", route: "/manager/reports/funds-report" },
-//       { label: "Work Time", route: "/manager/reports/work-time" }
-//     ]
-//   }
-// ];
+  //   {
+  //     label: "Reports",
+  //     route: "/manager/reports",
+  //     icon: "analytics",
+  //     children: [
+  //       { label: "Transaction History", route: "/manager/reports/transaction-history" },
+  //       { label: "Entity Report", route: "/manager/reports/entity-report" },
+  //       { label: "Funds Report", route: "/manager/reports/funds-report" },
+  //       { label: "Work Time", route: "/manager/reports/work-time" }
+  //     ]
+  //   }
+  // ];
 
-menuItems: MenuItem[] = [
-  {
-    label: "Dashboard",
-    route: "/head",
-    icon: "dashboard",
-    children: [
-      { label: "Dashboard", route: "/head" }
-    ]
-  },
+  menuItems: MenuItem[] = [
+    {
+      label: "Dashboard",
+      route: "/head",
+      icon: "dashboard",
+      children: [{ label: "Dashboard", route: "/head" }],
+    },
 
-  {
-    label: "UPI Management",
-    route: "/head/upi",
-    icon: "qr_code",
-    children: [
-      { label: "UPI Management", route: "/head/upi" }
-    ]
-  },
+    {
+      label: "UPI Management",
+      route: "/head/upi",
+      icon: "qr_code",
+      children: [{ label: "UPI Management", route: "/head/upi" }],
+    },
 
-  {
-    label: "Bank Management",
-    route: "/head/bank",
-    icon: "account_balance",
-    children: [
-      { label: "Bank Management", route: "/head/bank" }
-    ]
-  },
+    {
+      label: "Bank Management",
+      route: "/head/bank",
+      icon: "account_balance",
+      children: [{ label: "Bank Management", route: "/head/bank" }],
+    },
 
-  {
-    label: "Capacity Management",
-    route: "/head/capacity",
-    icon: "inventory_2",
-    children: [
-      { label: "Capacity Management", route: "/head/capacity" }
-    ]
-  },
+    {
+      label: "Capacity Management",
+      route: "/head/capacity",
+      icon: "inventory_2",
+      children: [{ label: "Capacity Management", route: "/head/capacity" }],
+    },
 
-  {
-    label: "Chats",
-    route: "/head/chats",
-    icon: "chat",
-    children: [
-      { label: "Head Chat", route: "/head/head-chat" },
-      { label: "Branch Chat", route: "/head/branch-chat" }
-    ]
-  },
+    {
+      label: "Chats",
+      route: "/head/chats",
+      icon: "chat",
+      children: [
+        { label: "Head Chat", route: "/head/head-chat" },
+        { label: "Branch Chat", route: "/head/branch-chat" },
+      ],
+    },
 
-  {
-    label: "Limits",
-    route: "/head/limit",
-    icon: "credit_card",
-    children: [
-      { label: "Limits", route: "/head/limit" }
-    ]
-  },
+    {
+      label: "Limits",
+      route: "/head/limit",
+      icon: "credit_card",
+      children: [{ label: "Limits", route: "/head/limit" }],
+    },
 
-  {
-    label: "Branch Management",
-    route: "/head/branch",
-    icon: "business",
-    children: [
-      { label: "Add Branch", route: "/head/branch/add" },
-      { label: "Manage Branch", route: "/head/branch/manage" }
-    ]
-  },
+    {
+      label: "Branch Management",
+      route: "/head/branch",
+      icon: "business",
+      children: [
+        { label: "Add Branch", route: "/head/branch/add" },
+        { label: "Manage Branch", route: "/head/branch/manage" },
+      ],
+    },
 
-  {
-    label: "Reports",
-    route: "/head/reports",
-    icon: "analytics",
-    children: [
-      { label: "Transaction History", route: "/head/reports/transaction-history" },
-      { label: "Entity Report", route: "/head/reports/entity-report" },
-      { label: "Funds Report", route: "/head/reports/funds-report" },
-      { label: "Work Time", route: "/head/reports/work-time" },
-      { label: "Approved Funds", route: "/head/reports/funds/accepted" },
-      { label: "Rejected Funds", route: "/head/reports/funds/rejected" }
-    ]
-  }
-];
+    {
+      label: "Reports",
+      route: "/head/reports",
+      icon: "analytics",
+      children: [
+        {
+          label: "Transaction History",
+          route: "/head/reports/transaction-history",
+        },
+        { label: "Entity Report", route: "/head/reports/entity-report" },
+        { label: "Funds Report", route: "/head/reports/funds-report" },
+        { label: "Work Time", route: "/head/reports/work-time" },
+        { label: "Approved Funds", route: "/head/reports/funds/accepted" },
+        { label: "Rejected Funds", route: "/head/reports/funds/rejected" },
+      ],
+    },
+    {
+      label: "Approved Funds",
+      route: "/head/reports/funds/approved",
+      icon: "approved",
+      notifications: 5,
+      children: [
+        {
+          label: "UPI Logs",
+          route: "/head/reports/funds/approved/upi",
+          notifications: 2,
+        },
+        {
+          label: "BANK Logs",
+          route: "/head/reports/funds/approved/bank",
+          notifications: 2,
+        },
+        {
+          label: "PAYOUT Logs",
+          route: "/head/reports/funds/approved/payout",
+          notifications: 2,
+        },
+      ],
+    },
+    {
+      label: "Rejected Funds",
+      route: "/head/reports/funds/rejects",
+      icon: "rejected",
+      notifications: 8,
+      children: [
+        {
+          label: "UPI logs",
+          route: "/head/reports/funds/rejects/upi",
+          notifications: 4,
+        },
+        {
+          label: "BANK logs",
+          route: "/head/reports/funds/rejects/bank",
+          notifications: 4,
+        },
 
+        {
+          label: "PAYOUT logs",
+          route: "/head/reports/funds/rejects/payout",
+          notifications: 4,
+        },
+      ],
+    },
+  ];
 
   branchId: any;
   userId: any;
@@ -204,14 +242,14 @@ menuItems: MenuItem[] = [
   ) {}
 
   ngOnInit() {
-     this.userId = this.userStateService.getUserId();
-   this.managerId = this.userStateService.getmanagerId();
+    this.userId = this.userStateService.getUserId();
+    this.managerId = this.userStateService.getmanagerId();
     const userId = this.userStateService.getUserId();
     const branchId = this.userStateService.getBranchId();
     this.branchId = branchId;
     this.userId = userId;
     this.checkMobileView();
-    this.secondaryPanelStateChange.emit(false)
+    this.secondaryPanelStateChange.emit(false);
 
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
@@ -402,7 +440,7 @@ menuItems: MenuItem[] = [
   }
 
   openSubmenu(item: MenuItem, isExplicit: boolean = false) {
-       this.activeSubmenuItem = item;
+    this.activeSubmenuItem = item;
 
     if (this.activeSubmenu !== item.label) {
       this.activeSubmenu = item.label;
@@ -423,7 +461,7 @@ menuItems: MenuItem[] = [
     }
   }
 
- closeSubmenu() {
+  closeSubmenu() {
     this.activeSubmenu = null;
     this.submenuContent = null;
     this.explicitlyOpened = false;
@@ -434,56 +472,56 @@ menuItems: MenuItem[] = [
     this.secondaryPanelStateChange.emit(false); // emit closed
   }
 
-  
-navigate(route: string) {
-  if (!route) return;
+  navigate(route: string) {
+    if (!route) return;
 
-  // Dashboard with params
-  if (route === "/head/dashboard" && this.managerId && this.userId) {
-    this.router.navigate(["/head/dashboard", this.managerId, this.userId]);
+    // Dashboard with params
+    if (route === "/head/dashboard" && this.managerId && this.userId) {
+      this.router.navigate(["/head/dashboard", this.managerId, this.userId]);
+    }
+
+    // Add Branch with params
+    else if (route === "/head/branch/add" && this.managerId && this.userId) {
+      this.router.navigate(["/head/branch/add", this.managerId, this.userId]);
+    }
+
+    // Manage Branch with params
+    else if (route === "/head/branch/manage" && this.managerId && this.userId) {
+      this.router.navigate([
+        "/head/branch/manage",
+        this.managerId,
+        this.userId,
+      ]);
+    }
+
+    // Normal routes
+    else {
+      this.router.navigate([route]);
+    }
+
+    if (!this.explicitlyOpened) {
+      setTimeout(() => this.closeSubmenu(), 100);
+    }
+
+    if (this.isMobileView) {
+      this.collapsed = true;
+      this.toggleSidebar.emit(true);
+      this.closeSubmenu();
+    }
   }
-
-  // Add Branch with params
-  else if (route === "/head/branch/add" && this.managerId && this.userId) {
-    this.router.navigate(["/head/branch/add", this.managerId, this.userId]);
-  }
-
-  // Manage Branch with params
-  else if (route === "/head/branch/manage" && this.managerId && this.userId) {
-    this.router.navigate(["/head/branch/manage", this.managerId, this.userId]);
-  }
-
-  // Normal routes
-  else {
-    this.router.navigate([route]);
-  }
-
-  if (!this.explicitlyOpened) {
-    setTimeout(() => this.closeSubmenu(), 100);
-  }
-
-  if (this.isMobileView) {
-    this.collapsed = true;
-    this.toggleSidebar.emit(true);
-    this.closeSubmenu();
-  }
-}
-
-
 
   isActive(route: string): boolean {
     if (!route) return false;
     return this.currentRoute === route;
   }
 
-//   isActive(route: string): boolean {
-//   if (!route) return false;
-//   return (
-//     this.currentRoute === route ||
-//     this.currentRoute.startsWith(route + "/")
-//   );
-// }
-
+  //   isActive(route: string): boolean {
+  //   if (!route) return false;
+  //   return (
+  //     this.currentRoute === route ||
+  //     this.currentRoute.startsWith(route + "/")
+  //   );
+  // }
 
   getActiveChildrenCount(): number {
     if (!this.submenuContent?.children) return 0;
@@ -502,11 +540,9 @@ navigate(route: string) {
   // }
 
   isParentActive(item: MenuItem): boolean {
-  if (!item) return false;
-  return this.currentRoute === item.route;
-}
-
-
+    if (!item) return false;
+    return this.currentRoute === item.route;
+  }
 
   logout() {
     this.authService.logout();
@@ -520,7 +556,7 @@ navigate(route: string) {
     this.settingPopup = false;
   }
 
-   toggleCurrentSubmenu() {
+  toggleCurrentSubmenu() {
     let item: MenuItem | undefined = this.activeSubmenuItem;
 
     if (!item) {
@@ -572,39 +608,36 @@ navigate(route: string) {
   // }
 
   getChildIcon(child: MenuItem): string {
-  const route = child.route;
+    const route = child.route;
 
-  const map: Record<string, string> = {
-    "/head/dashboard": "dashboard",
+    const map: Record<string, string> = {
+      "/head/dashboard": "dashboard",
 
-    "/head/upi": "qr_code",
-    "/head/bank": "account_balance",
-    "/head/capacity": "inventory_2",
+      "/head/upi": "qr_code",
+      "/head/bank": "account_balance",
+      "/head/capacity": "inventory_2",
 
-    "/head/head-chat": "chat",
-    "/head/branch-chat": "forum",
+      "/head/head-chat": "chat",
+      "/head/branch-chat": "forum",
 
-    "/head/limit": "credit_card",
+      "/head/limit": "credit_card",
 
-    "/head/branch/add": "add_business",
-    "/head/branch/manage": "business_center",
+      "/head/branch/add": "add_business",
+      "/head/branch/manage": "business_center",
 
-    "/head/reports/transaction-history": "history",
-    "/head/reports/entity-report": "assignment",
-    "/head/reports/funds-report": "pie_chart",
-    "/head/reports/work-time": "schedule",
-    "/head/reports/funds/accepted": "check_circle",
-    "/head/reports/funds/rejected": "cancel",
-  };
+      "/head/reports/transaction-history": "history",
+      "/head/reports/entity-report": "assignment",
+      "/head/reports/funds-report": "pie_chart",
+      "/head/reports/work-time": "schedule",
+      "/head/reports/funds/accepted": "check_circle",
+      "/head/reports/funds/rejected": "cancel",
+    };
 
-  return map[route] || "chevron_right";
-}
-
+    return map[route] || "chevron_right";
+  }
 
   // --- Replace the existing getMenuIcon method with this ---
   getMenuIcon(icon?: string): string {
-  return icon || "dashboard";
+    return icon || "dashboard";
+  }
 }
-
-}
-

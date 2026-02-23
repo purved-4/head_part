@@ -21,6 +21,8 @@ import { HeadChatComponent } from "../head-chat/head-chat.component";
 // import { RejectedFundsComponent } from "../../branch/rejected-funds/rejected-funds.component";
 import { HeadBranchCapacityComponent } from "../../../components/head-branch-capacity/head-branch-capacity.component";
 import { HeadNavDashboardLayoutComponent } from "../head-navlayout/head-nav-dashboard-layout/head-nav-dashboard-layout.component";
+import { HeadRejectedFundsComponent } from "../head-rejected-funds/head-rejected-funds.component";
+import { HeadApprovedFundsComponent } from "../head-approved-funds/head-approved-funds.component";
 
 const routes: Routes = [
   {
@@ -85,12 +87,21 @@ const routes: Routes = [
             component: PercentageLogComponent,
           },
           { path: "work-time", component: WorkTimeReportComponent },
+
+          {
+            path: "funds/approved/:type",
+            component: HeadApprovedFundsComponent,
+          },
+
+          {
+            path: "funds/rejects/:type",
+            component: HeadRejectedFundsComponent,
+          },
           // { path: "funds/accepted", component: ApprovedFundsComponent },
           // { path: "funds/rejected", component: RejectedFundsComponent },
         ],
       },
-            { path: "capacity", component: HeadBranchCapacityComponent },
-      
+      { path: "capacity", component: HeadBranchCapacityComponent },
     ],
   },
 ];

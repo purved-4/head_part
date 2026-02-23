@@ -1,0 +1,1474 @@
+<div id="webcrumbs">
+  <div
+    class="min-h-screen p-4 md:p-6 lg:p-8"
+    [ngStyle]="{ background: 'var(--color-bg)' }"
+  >
+    <!-- MAIN GRID -->
+    <div class="grid grid-cols-1 gap-6 md:gap-8 mb-6 md:mb-8">
+      <!-- DEPOSITS & WITHDRAWALS VIEWS -->
+      <div class="space-y-8">
+        <!-- UPI DEPOSITS CARD -->
+        <div
+          *ngIf="activeView === 'upi'"
+          class="rounded-3xl overflow-hidden shadow-xl"
+          [ngStyle]="{
+            background:
+              'linear-gradient(180deg, rgba(255,255,255,0.9), var(--color-bg))',
+            border: '1px solid var(--color-border)',
+            'box-shadow':
+              '0 10px 25px rgba(0,0,0,0.06), 0 0 25px var(--shadow-sm)',
+          }"
+        >
+          <!-- Header -->
+          <div
+            class="p-6"
+            [ngStyle]="{
+              background:
+                'linear-gradient(to right, var(--color-primary), var(--color-primary-light))',
+            }"
+          >
+            <div
+              class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
+                  [ngStyle]="{
+                    background: 'rgba(255,255,255,0.2)',
+                    'box-shadow': 'var(--shadow-md)',
+                  }"
+                >
+                  <span
+                    class="material-symbols-outlined text-xl"
+                    [style.color]="'var(--color-font)'"
+                    >qr_code_scanner</span
+                  >
+                </div>
+                <div [style.color]="'var(--color-font)'">
+                  <h3 class="font-bold text-xl">UPI topups</h3>
+                  <p class="mt-1" [style.opacity]="0.8">
+                    {{ filteredUpitopups().length }} records • Real-time updates
+                  </p>
+                </div>
+              </div>
+
+              <!-- Search -->
+              <div class="flex items-center gap-3">
+                <div class="relative group">
+                  <input
+                    type="text"
+                    placeholder="Search UPI topups..."
+                    [(ngModel)]="upiSearchQuery"
+                    (keyup.enter)="onSearchUpitopups()"
+                    class="text-sm border-0 rounded-2xl pl-12 pr-4 py-3 placeholder-opacity-60 focus:ring-2 transition-all duration-300 w-72 shadow-lg"
+                    [ngStyle]="{
+                      background: 'rgba(255,255,255,0.2)',
+                      color: 'var(--color-font)',
+                      border: '1px solid transparent',
+                    }"
+                  />
+                  <span
+                    class="material-symbols-outlined text-xl absolute left-4 top-3"
+                    [style.color]="'var(--color-font)'"
+                    >search</span
+                  >
+                </div>
+                <button
+                  (click)="onSearchUpitopups()"
+                  class="px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-2"
+                  [ngStyle]="{
+                    background: 'var(--color-surface)',
+                    color: 'var(--color-font)',
+                    border: '1px solid var(--color-border)',
+                    'box-shadow': 'var(--shadow-md)',
+                  }"
+                >
+                  <span class="material-symbols-outlined text-lg">search</span>
+                  Search
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="overflow-y-auto h-screen md:h-screen">
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead
+                  class="sticky top-0"
+                  [ngStyle]="{ background: 'var(--color-bg)' }"
+                >
+                  <tr>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Website
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      VPA Details
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Transaction
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Amount
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Status
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Date
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  class="divide-y"
+                  [ngStyle]="{
+                    'border-color': 'var(--color-border)',
+                  }"
+                >
+                  <tr
+                    *ngFor="let a of pagedUpitopups()"
+                    class="hover:transition-all duration-300 group"
+                  >
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm border"
+                          [ngStyle]="{
+                            background:
+                              'linear-gradient(to right, var(--color-surface), var(--color-primary-light))',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-base"
+                            [style.color]="'var(--color-font)'"
+                            >public</span
+                          >
+                        </div>
+                        <div>
+                          <span
+                            class="text-sm font-semibold block"
+                            [style.color]="'var(--color-font)'"
+                            >{{
+                              a.raw.websiteDomain || a.websiteId || "-"
+                            }}</span
+                          >
+                          <span
+                            class="text-xs"
+                            [style.color]="'var(--color-muted)'"
+                            >Website</span
+                          >
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-9 h-9 rounded-lg flex items-center justify-center shadow-sm border"
+                          [ngStyle]="{
+                            background: 'var(--color-surface)',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-sm"
+                            [style.color]="'var(--color-font)'"
+                            >qr_code</span
+                          >
+                        </div>
+                        <div>
+                          <span
+                            class="text-sm font-medium block"
+                            [style.color]="'var(--color-font)'"
+                            >{{ a.vpa || a.upiId || "-" }}</span
+                          >
+                          <span
+                            class="text-xs"
+                            [style.color]="'var(--color-muted)'"
+                            >Virtual Payment Address</span
+                          >
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div>
+                        <span
+                          class="text-sm font-mono font-medium block"
+                          [style.color]="'var(--color-font)'"
+                          >{{ a.transactionId || "-" }}</span
+                        >
+                        <span
+                          class="text-xs"
+                          [style.color]="'var(--color-muted)'"
+                          >Transaction ID</span
+                        >
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="w-8 h-8 rounded-full flex items-center justify-center border"
+                          [ngStyle]="{
+                            background: 'var(--color-surface)',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-sm"
+                            [style.color]="'var(--color-font)'"
+                            >arrow_upward</span
+                          >
+                        </div>
+                        <span
+                          class="text-base font-bold"
+                          [style.color]="'var(--color-font)'"
+                          >+{{ formatCurrency(a.amount) }}</span
+                        >
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex flex-col gap-1">
+                        <span
+                          class="px-3 py-1.5 text-xs rounded-full font-bold text-center shadow-sm"
+                          [class]="getStatusClass(a.reviewStatus || a.status)"
+                          [style.backgroundColor]="
+                            getStatusColor(a.reviewStatus || a.status)
+                          "
+                          [style.borderColor]="
+                            getStatusBorderColor(a.reviewStatus || a.status)
+                          "
+                          [style.color]="
+                            getStatusTextColor(a.reviewStatus || a.status)
+                          "
+                        >
+                          {{ a.reviewStatus || a.status || "-" }}
+                        </span>
+                        <span
+                          class="text-xs text-center"
+                          [style.color]="'var(--color-muted)'"
+                        >
+                          {{
+                            a.settled === true
+                              ? "Settled"
+                              : a.settled === false
+                                ? "Pending"
+                                : "-"
+                          }}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div
+                        class="text-sm font-medium"
+                        [style.color]="'var(--color-font)'"
+                      >
+                        {{ a.date | date: "MMM d, y" }}
+                      </div>
+                      <div class="text-xs" [style.color]="'var(--color-muted)'">
+                        {{ a.date | date: "h:mm a" }}
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <button
+                        (click)="openRecordModal(a)"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
+                        [ngStyle]="{
+                          border: '1px solid var(--color-border)',
+                          color: 'var(--color-font)',
+                          background: 'var(--color-surface)',
+                          'box-shadow': 'var(--shadow-sm)',
+                        }"
+                        title="View proof & details"
+                      >
+                        <span class="material-symbols-outlined text-lg"
+                          >visibility</span
+                        >
+                        <span>Details</span>
+                      </button>
+                    </td>
+                  </tr>
+
+                  <tr *ngIf="filteredUpitopups().length === 0">
+                    <td colspan="7" class="px-4 py-12 text-center">
+                      <div class="flex flex-col items-center">
+                        <div
+                          class="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 shadow-inner border"
+                          [ngStyle]="{
+                            background:
+                              'linear-gradient(to right, var(--color-surface), var(--color-primary-light))',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-3xl"
+                            [style.color]="'var(--color-font)'"
+                            >payments</span
+                          >
+                        </div>
+                        <p
+                          class="text-base font-semibold"
+                          [style.color]="'var(--color-font)'"
+                        >
+                          No UPI topups found
+                        </p>
+                        <p
+                          class="text-sm mt-2"
+                          [style.color]="'var(--color-muted)'"
+                        >
+                          Try adjusting your search criteria
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div
+            class="p-4 flex flex-col sm:flex-row items-center justify-between gap-4"
+            [ngStyle]="{
+              'border-top': '1px solid var(--color-border)',
+              background: 'var(--color-bg)',
+            }"
+          >
+            <div class="flex items-center gap-3">
+              <label
+                class="text-sm font-medium"
+                [style.color]="'var(--color-font)'"
+                >Rows per page:</label
+              >
+              <select
+                [(ngModel)]="upiPageSize"
+                (change)="onChangeUpiPageSize(upiPageSize)"
+                class="text-sm rounded-xl px-3 py-2"
+                [ngStyle]="{
+                  border: '1px solid var(--color-border)',
+                  background: 'var(--color-surface)',
+                  color: 'var(--color-font)',
+                }"
+              >
+                <option *ngFor="let s of upiPageSizes" [value]="s">
+                  {{ s }}
+                </option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="text-sm mr-4" [style.color]="'var(--color-font)'">
+                Page <span class="font-semibold">{{ upiPage + 1 }}</span> of
+                <span class="font-semibold">{{ upiTotalPages() }}</span>
+              </div>
+              <button
+                (click)="setUpiPage(upiPage - 1)"
+                [disabled]="upiPage === 0"
+                class="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
+                [ngStyle]="{
+                  border: '1px solid var(--color-border)',
+                  background: 'transparent',
+                  color: 'var(--color-font)',
+                }"
+                aria-label="Previous page"
+              >
+                <span class="material-symbols-outlined text-lg"
+                  >chevron_left</span
+                >
+                Previous
+              </button>
+              <button
+                (click)="setUpiPage(upiPage + 1)"
+                [disabled]="upiPage >= upiTotalPages() - 1"
+                class="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
+                [ngStyle]="{
+                  border: '1px solid var(--color-border)',
+                  background: 'transparent',
+                  color: 'var(--color-font)',
+                }"
+                aria-label="Next page"
+              >
+                Next
+                <span class="material-symbols-outlined text-lg"
+                  >chevron_right</span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- BANK DEPOSITS CARD -->
+        <div
+          *ngIf="activeView === 'bank'"
+          class="rounded-3xl overflow-hidden shadow-xl"
+          [ngStyle]="{
+            background:
+              'linear-gradient(180deg, rgba(255,255,255,0.9), var(--color-bg))',
+            border: '1px solid var(--color-border)',
+            'box-shadow':
+              '0 10px 25px rgba(0,0,0,0.06), 0 0 25px var(--shadow-sm)',
+          }"
+        >
+          <!-- Header -->
+          <div
+            class="p-6"
+            [ngStyle]="{
+              background:
+                'linear-gradient(to right, var(--color-primary), var(--color-primary-light))',
+            }"
+          >
+            <div
+              class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
+                  [ngStyle]="{
+                    background: 'rgba(255,255,255,0.2)',
+                    'box-shadow': 'var(--shadow-md)',
+                  }"
+                >
+                  <span
+                    class="material-symbols-outlined text-xl"
+                    [style.color]="'var(--color-font)'"
+                    >account_balance</span
+                  >
+                </div>
+                <div [style.color]="'var(--color-font)'">
+                  <h3 class="font-bold text-xl">Bank topups</h3>
+                  <p class="mt-1" [style.opacity]="0.8">
+                    {{ filteredBanktopups().length }} records • Secure
+                    transactions
+                  </p>
+                </div>
+              </div>
+
+              <!-- Search -->
+              <div class="flex items-center gap-3">
+                <div class="relative group">
+                  <input
+                    type="text"
+                    placeholder="Search bank topups..."
+                    [(ngModel)]="bankSearchQuery"
+                    (keyup.enter)="onSearchBanktopups()"
+                    class="text-sm border-0 rounded-2xl pl-12 pr-4 py-3 placeholder-opacity-60 focus:ring-2 transition-all duration-300 w-72 shadow-lg"
+                    [ngStyle]="{
+                      background: 'rgba(255,255,255,0.2)',
+                      color: 'var(--color-font)',
+                    }"
+                  />
+                  <span
+                    class="material-symbols-outlined text-xl absolute left-4 top-3"
+                    [style.color]="'var(--color-font)'"
+                    >search</span
+                  >
+                </div>
+                <button
+                  (click)="onSearchBanktopups()"
+                  class="px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-2"
+                  [ngStyle]="{
+                    background: 'var(--color-surface)',
+                    color: 'var(--color-font)',
+                    border: '1px solid var(--color-border)',
+                    'box-shadow': 'var(--shadow-md)',
+                  }"
+                >
+                  <span class="material-symbols-outlined text-lg">search</span>
+                  Search
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="overflow-y-auto h-screen md:h-screen">
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead
+                  class="sticky top-0"
+                  [ngStyle]="{ background: 'var(--color-bg)' }"
+                >
+                  <tr>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Website
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Bank Details
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Transaction
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Amount
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Status
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Date
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  class="divide-y"
+                  [ngStyle]="{
+                    'border-color': 'var(--color-border)',
+                  }"
+                >
+                  <tr
+                    *ngFor="let a of pagedBanktopups()"
+                    class="hover:transition-all duration-300 group"
+                  >
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm border"
+                          [ngStyle]="{
+                            background:
+                              'linear-gradient(to right, var(--color-surface), var(--color-primary-light))',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-base"
+                            [style.color]="'var(--color-font)'"
+                            >public</span
+                          >
+                        </div>
+                        <div>
+                          <span
+                            class="text-sm font-semibold block"
+                            [style.color]="'var(--color-font)'"
+                            >{{
+                              a.raw.websiteDomain || a.websiteId || "-"
+                            }}</span
+                          >
+                          <span
+                            class="text-xs"
+                            [style.color]="'var(--color-muted)'"
+                            >Website</span
+                          >
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-9 h-9 rounded-lg flex items-center justify-center shadow-sm border"
+                          [ngStyle]="{
+                            background: 'var(--color-surface)',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-sm"
+                            [style.color]="'var(--color-font)'"
+                            >account_balance</span
+                          >
+                        </div>
+                        <div>
+                          <span
+                            class="text-sm font-medium block"
+                            [style.color]="'var(--color-font)'"
+                            >{{ a.accountNo || "-" }}</span
+                          >
+                          <span
+                            class="text-xs"
+                            [style.color]="'var(--color-muted)'"
+                            >{{
+                              a.raw.bankAccountHolderName || "Account Holder"
+                            }}</span
+                          >
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div>
+                        <span
+                          class="text-sm font-mono font-medium block"
+                          [style.color]="'var(--color-font)'"
+                          >{{ a.transactionId || "-" }}</span
+                        >
+                        <span
+                          class="text-xs"
+                          [style.color]="'var(--color-muted)'"
+                          >Transaction ID</span
+                        >
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="w-8 h-8 rounded-full flex items-center justify-center border"
+                          [ngStyle]="{
+                            background: 'var(--color-surface)',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-sm"
+                            [style.color]="'var(--color-font)'"
+                            >arrow_upward</span
+                          >
+                        </div>
+                        <span
+                          class="text-base font-bold"
+                          [style.color]="'var(--color-font)'"
+                          >+{{ formatCurrency(a.amount) }}</span
+                        >
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex flex-col gap-1">
+                        <span
+                          class="px-3 py-1.5 text-xs rounded-full font-bold text-center shadow-sm"
+                          [class]="getStatusClass(a.reviewStatus || a.status)"
+                          [style.backgroundColor]="
+                            getStatusColor(a.reviewStatus || a.status)
+                          "
+                          [style.borderColor]="
+                            getStatusBorderColor(a.reviewStatus || a.status)
+                          "
+                          [style.color]="
+                            getStatusTextColor(a.reviewStatus || a.status)
+                          "
+                          >{{ a.reviewStatus || a.status || "-" }}</span
+                        >
+                        <span
+                          class="text-xs text-center"
+                          [style.color]="'var(--color-muted)'"
+                        >
+                          {{
+                            a.settled === true
+                              ? "Settled"
+                              : a.settled === false
+                                ? "Pending"
+                                : "-"
+                          }}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div
+                        class="text-sm font-medium"
+                        [style.color]="'var(--color-font)'"
+                      >
+                        {{ a.date | date: "MMM d, y" }}
+                      </div>
+                      <div class="text-xs" [style.color]="'var(--color-muted)'">
+                        {{ a.date | date: "h:mm a" }}
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <button
+                        (click)="openRecordModal(a)"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
+                        [ngStyle]="{
+                          border: '1px solid var(--color-border)',
+                          color: 'var(--color-font)',
+                          background: 'var(--color-surface)',
+                          'box-shadow': 'var(--shadow-sm)',
+                        }"
+                        title="View proof & details"
+                      >
+                        <span class="material-symbols-outlined text-lg"
+                          >visibility</span
+                        >
+                        <span>Details</span>
+                      </button>
+                    </td>
+                  </tr>
+
+                  <tr *ngIf="filteredBanktopups().length === 0">
+                    <td colspan="7" class="px-4 py-12 text-center">
+                      <div class="flex flex-col items-center">
+                        <div
+                          class="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 shadow-inner border"
+                          [ngStyle]="{
+                            background:
+                              'linear-gradient(to right, var(--color-surface), var(--color-primary-light))',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-3xl"
+                            [style.color]="'var(--color-font)'"
+                            >account_balance</span
+                          >
+                        </div>
+                        <p
+                          class="text-base font-semibold"
+                          [style.color]="'var(--color-font)'"
+                        >
+                          No bank topups found
+                        </p>
+                        <p
+                          class="text-sm mt-2"
+                          [style.color]="'var(--color-muted)'"
+                        >
+                          Try adjusting your search criteria
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div
+            class="p-4 flex flex-col sm:flex-row items-center justify-between gap-4"
+            [ngStyle]="{
+              'border-top': '1px solid var(--color-border)',
+              background: 'var(--color-bg)',
+            }"
+          >
+            <div class="flex items-center gap-3">
+              <label
+                class="text-sm font-medium"
+                [style.color]="'var(--color-font)'"
+                >Rows per page:</label
+              >
+              <select
+                [(ngModel)]="bankPageSize"
+                (change)="onChangeBankPageSize(bankPageSize)"
+                class="text-sm rounded-xl px-3 py-2"
+                [ngStyle]="{
+                  border: '1px solid var(--color-border)',
+                  background: 'var(--color-surface)',
+                  color: 'var(--color-font)',
+                }"
+              >
+                <option *ngFor="let s of bankPageSizes" [value]="s">
+                  {{ s }}
+                </option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="text-sm mr-4" [style.color]="'var(--color-font)'">
+                Page <span class="font-semibold">{{ bankPage + 1 }}</span> of
+                <span class="font-semibold">{{ bankTotalPages() }}</span>
+              </div>
+              <button
+                (click)="setBankPage(bankPage - 1)"
+                [disabled]="bankPage === 0"
+                class="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
+                [ngStyle]="{
+                  border: '1px solid var(--color-border)',
+                  background: 'transparent',
+                  color: 'var(--color-font)',
+                }"
+                aria-label="Previous bank page"
+              >
+                <span class="material-symbols-outlined text-lg"
+                  >chevron_left</span
+                >
+                Previous
+              </button>
+              <button
+                (click)="setBankPage(bankPage + 1)"
+                [disabled]="bankPage >= bankTotalPages() - 1"
+                class="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
+                [ngStyle]="{
+                  border: '1px solid var(--color-border)',
+                  background: 'transparent',
+                  color: 'var(--color-font)',
+                }"
+                aria-label="Next bank page"
+              >
+                Next
+                <span class="material-symbols-outlined text-lg"
+                  >chevron_right</span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAYOUTS (Approved Withdrawals) -->
+        <div
+          *ngIf="activeView === 'payout'"
+          class="rounded-3xl overflow-hidden shadow-xl"
+          [ngStyle]="{
+            background:
+              'linear-gradient(180deg, rgba(255,255,255,0.9), var(--color-bg))',
+            border: '1px solid var(--color-border)',
+            'box-shadow':
+              '0 10px 25px rgba(0,0,0,0.06), 0 0 25px var(--shadow-sm)',
+          }"
+        >
+          <!-- Header -->
+          <div
+            class="p-6"
+            [ngStyle]="{
+              background:
+                'linear-gradient(to right, var(--color-primary), var(--color-primary-light))',
+            }"
+          >
+            <div
+              class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
+                  [ngStyle]="{
+                    background: 'rgba(255,255,255,0.2)',
+                    'box-shadow': 'var(--shadow-md)',
+                  }"
+                >
+                  <span
+                    class="material-symbols-outlined text-xl"
+                    [style.color]="'var(--color-font)'"
+                    >savings</span
+                  >
+                </div>
+                <div [style.color]="'var(--color-font)'">
+                  <h3 class="font-bold text-xl">Approved payouts</h3>
+                  <p class="mt-1" [style.opacity]="0.8">
+                    {{ filteredApprovedpayouts().length }} records • Processed
+                    payments
+                  </p>
+                </div>
+              </div>
+
+              <!-- Search -->
+              <div class="flex items-center gap-3">
+                <div class="relative group">
+                  <input
+                    type="text"
+                    placeholder="Search payouts..."
+                    [(ngModel)]="payoutSearchQuery"
+                    (keyup.enter)="onSearchApprovedpayouts()"
+                    class="text-sm border-0 rounded-2xl pl-12 pr-4 py-3 placeholder-opacity-60 focus:ring-2 transition-all duration-300 w-72 shadow-lg"
+                    [ngStyle]="{
+                      background: 'rgba(255,255,255,0.2)',
+                      color: 'var(--color-font)',
+                    }"
+                  />
+                  <span
+                    class="material-symbols-outlined text-xl absolute left-4 top-3"
+                    [style.color]="'var(--color-font)'"
+                    >search</span
+                  >
+                </div>
+                <button
+                  (click)="onSearchApprovedpayouts()"
+                  class="px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 flex items-center gap-2"
+                  [ngStyle]="{
+                    background: 'var(--color-surface)',
+                    color: 'var(--color-font)',
+                    border: '1px solid var(--color-border)',
+                    'box-shadow': 'var(--shadow-md)',
+                  }"
+                >
+                  <span class="material-symbols-outlined text-lg">search</span>
+                  Search
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="overflow-y-auto h-screen md:h-screen">
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead
+                  class="sticky top-0"
+                  [ngStyle]="{ background: 'var(--color-bg)' }"
+                >
+                  <tr>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Website
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Account Details
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Bank Info
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Amount
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Status
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                      [style.color]="'var(--color-font)'"
+                    >
+                      Date
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  class="divide-y"
+                  [ngStyle]="{
+                    'border-color': 'var(--color-border)',
+                  }"
+                >
+                  <tr
+                    *ngFor="let w of pagedApprovedpayouts()"
+                    class="hover:transition-all duration-300 group"
+                  >
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm border"
+                          [ngStyle]="{
+                            background:
+                              'linear-gradient(to right, var(--color-surface), var(--color-primary-light))',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-base"
+                            [style.color]="'var(--color-font)'"
+                            >public</span
+                          >
+                        </div>
+                        <div>
+                          <span
+                            class="text-sm font-semibold block"
+                            [style.color]="'var(--color-font)'"
+                            >{{ w.websiteDomain || "-" }}</span
+                          >
+                          <span
+                            class="text-xs"
+                            [style.color]="'var(--color-muted)'"
+                            >Website</span
+                          >
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-9 h-9 rounded-lg flex items-center justify-center shadow-sm border"
+                          [ngStyle]="{
+                            background: 'var(--color-surface)',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-sm"
+                            [style.color]="'var(--color-font)'"
+                            >badge</span
+                          >
+                        </div>
+                        <div>
+                          <span
+                            class="text-sm font-medium block"
+                            [style.color]="'var(--color-font)'"
+                            >{{ w.accountNo || "-" }}</span
+                          >
+                          <span
+                            class="text-xs"
+                            [style.color]="'var(--color-muted)'"
+                            >Account Number</span
+                          >
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-9 h-9 rounded-lg flex items-center justify-center shadow-sm border"
+                          [ngStyle]="{
+                            background: 'var(--color-surface)',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-sm"
+                            [style.color]="'var(--color-font)'"
+                            >account_balance</span
+                          >
+                        </div>
+                        <div>
+                          <span
+                            class="text-sm font-medium block"
+                            [style.color]="'var(--color-font)'"
+                            >{{ w.ifscCode || "-" }}</span
+                          >
+                          <span
+                            class="text-xs"
+                            [style.color]="'var(--color-muted)'"
+                            >{{ w.raw?.holder || "Account Holder" }}</span
+                          >
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="w-8 h-8 rounded-full flex items-center justify-center border"
+                          [ngStyle]="{
+                            background: 'var(--color-surface)',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-sm"
+                            [style.color]="'var(--color-font)'"
+                            >arrow_downward</span
+                          >
+                        </div>
+                        <span
+                          class="text-base font-bold"
+                          [style.color]="'var(--color-font)'"
+                          >-{{ formatCurrency(w.amount) }}</span
+                        >
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="px-3 py-1.5 text-xs rounded-full font-bold text-center shadow-sm"
+                        [class]="getStatusClass(w.status)"
+                        [style.backgroundColor]="getStatusColor(w.status)"
+                        [style.borderColor]="getStatusBorderColor(w.status)"
+                        [style.color]="getStatusTextColor(w.status)"
+                        >{{ w.status || "-" }}</span
+                      >
+                    </td>
+                    <td class="px-6 py-4">
+                      <div
+                        class="text-sm font-medium"
+                        [style.color]="'var(--color-font)'"
+                      >
+                        {{ w.date | date: "MMM d, y" }}
+                      </div>
+                      <div class="text-xs" [style.color]="'var(--color-muted)'">
+                        {{ w.date | date: "h:mm a" }}
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr *ngIf="filteredApprovedpayouts().length === 0">
+                    <td colspan="6" class="px-4 py-12 text-center">
+                      <div class="flex flex-col items-center">
+                        <div
+                          class="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 shadow-inner border"
+                          [ngStyle]="{
+                            background:
+                              'linear-gradient(to right, var(--color-surface), var(--color-primary-light))',
+                            'border-color': 'var(--color-border)',
+                          }"
+                        >
+                          <span
+                            class="material-symbols-outlined text-3xl"
+                            [style.color]="'var(--color-font)'"
+                            >savings</span
+                          >
+                        </div>
+                        <p
+                          class="text-base font-semibold"
+                          [style.color]="'var(--color-font)'"
+                        >
+                          No approved payouts found
+                        </p>
+                        <p
+                          class="text-sm mt-2"
+                          [style.color]="'var(--color-muted)'"
+                        >
+                          Try adjusting your search criteria
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div
+            class="p-4 flex flex-col sm:flex-row items-center justify-between gap-4"
+            [ngStyle]="{
+              'border-top': '1px solid var(--color-border)',
+              background: 'var(--color-bg)',
+            }"
+          >
+            <div class="flex items-center gap-3">
+              <label
+                class="text-sm font-medium"
+                [style.color]="'var(--color-font)'"
+                >Rows per page:</label
+              >
+              <select
+                [(ngModel)]="payoutApprovedPageSize"
+                (change)="
+                  onChangepayoutApprovedPageSize(payoutApprovedPageSize)
+                "
+                class="text-sm rounded-xl px-3 py-2"
+                [ngStyle]="{
+                  border: '1px solid var(--color-border)',
+                  background: 'var(--color-surface)',
+                  color: 'var(--color-font)',
+                }"
+              >
+                <option *ngFor="let s of payoutApprovedPageSizes" [value]="s">
+                  {{ s }}
+                </option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="text-sm mr-4" [style.color]="'var(--color-font)'">
+                Page
+                <span class="font-semibold">{{ payoutApprovedPage + 1 }}</span>
+                of
+                <span class="font-semibold">{{
+                  payoutApprovedTotalPages()
+                }}</span>
+              </div>
+              <button
+                (click)="setpayoutApprovedPage(payoutApprovedPage - 1)"
+                [disabled]="payoutApprovedPage === 0"
+                class="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
+                [ngStyle]="{
+                  border: '1px solid var(--color-border)',
+                  background: 'transparent',
+                  color: 'var(--color-font)',
+                }"
+                aria-label="Previous payout page"
+              >
+                <span class="material-symbols-outlined text-lg"
+                  >chevron_left</span
+                >
+                Previous
+              </button>
+              <button
+                (click)="setpayoutApprovedPage(payoutApprovedPage + 1)"
+                [disabled]="
+                  payoutApprovedPage >= payoutApprovedTotalPages() - 1
+                "
+                class="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
+                [ngStyle]="{
+                  border: '1px solid var(--color-border)',
+                  background: 'transparent',
+                  color: 'var(--color-font)',
+                }"
+                aria-label="Next payout page"
+              >
+                Next
+                <span class="material-symbols-outlined text-lg"
+                  >chevron_right</span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ENHANCED RECORD / PROOF MODAL -->
+<div
+  *ngIf="showRecordModal"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4"
+>
+  <div
+    class="absolute inset-0 transition-opacity duration-300"
+    (click)="closeRecordModal()"
+    [ngStyle]="{
+      background: 'rgba(0,0,0,0.6)',
+      'backdrop-filter': 'blur(6px)',
+    }"
+  ></div>
+
+  <div
+    class="relative rounded-3xl max-w-4xl w-full overflow-hidden animate-fadeIn z-10 transform transition-all duration-300 scale-95"
+    [ngStyle]="{
+      background: 'var(--color-surface)',
+      border: '1px solid var(--color-border)',
+      'box-shadow': 'var(--shadow-2xl)',
+    }"
+  >
+    <!-- header -->
+    <div
+      class="flex items-center justify-between p-6 border-b"
+      [ngStyle]="{
+        'border-color': 'var(--color-border)',
+        background: 'var(--color-bg)',
+      }"
+    >
+      <div class="flex items-center gap-4">
+        <div
+          class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg"
+          [ngStyle]="{
+            background:
+              'linear-gradient(to right, var(--color-primary), var(--color-primary-light))',
+            'box-shadow': 'var(--shadow-md)',
+          }"
+        >
+          <span
+            class="material-symbols-outlined"
+            [style.color]="'var(--color-font)'"
+            >receipt_long</span
+          >
+        </div>
+        <div>
+          <h3 class="font-bold text-xl" [style.color]="'var(--color-font)'">
+            Transaction Details
+          </h3>
+          <p class="text-sm" [style.color]="'var(--color-muted)'">
+            {{ selectedRecord?.mode || "—" }} • Complete information
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button
+          (click)="closeRecordModal()"
+          class="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2"
+          [ngStyle]="{
+            border: '1px solid var(--color-border)',
+            background: 'var(--color-surface)',
+            color: 'var(--color-font)',
+          }"
+        >
+          <span class="material-symbols-outlined">close</span>
+          Close
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+      <!-- LEFT: image + summary -->
+      <div class="flex flex-col gap-4">
+        <div
+          class="w-full h-80 rounded-2xl overflow-hidden border flex items-center justify-center p-4"
+          [ngStyle]="{
+            background: 'var(--color-bg)',
+            'border-color': 'var(--color-border)',
+          }"
+        >
+          <ng-container
+            *ngIf="getImageUrl(selectedRecord) as imgUrl; else noImage"
+          >
+            <img
+              [src]="imgUrl"
+              alt="transaction proof"
+              class="max-h-full max-w-full rounded-lg object-contain"
+              (error)="onImageError($event)"
+            />
+          </ng-container>
+          <ng-template #noImage>
+            <div class="text-center" [style.color]="'var(--color-muted)'">
+              <div class="mb-3">
+                <span class="material-symbols-outlined text-5xl"
+                  >image_not_supported</span
+                >
+              </div>
+              <div class="text-base font-medium">No image available</div>
+              <div class="text-sm mt-2">
+                Proof image not found for this transaction
+              </div>
+            </div>
+          </ng-template>
+        </div>
+
+        <div
+          class="rounded-2xl p-5"
+          [ngStyle]="{
+            background: 'var(--color-bg)',
+            border: '1px solid var(--color-border)',
+          }"
+        >
+          <h4
+            class="font-semibold mb-4 flex items-center gap-2"
+            [style.color]="'var(--color-font)'"
+          >
+            <span class="material-symbols-outlined text-lg">summarize</span>
+            Quick Summary
+          </h4>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="text-sm">Transaction Amount</div>
+              <div
+                class="text-lg font-bold"
+                [style.color]="'var(--color-font)'"
+              >
+                ₹ {{ formatCurrency(selectedRecord?.amount) }}
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="text-sm">Settlement Status</div>
+              <div class="font-semibold" [style.color]="'var(--color-font)'">
+                {{
+                  selectedRecord?.settled === true
+                    ? "Settled"
+                    : selectedRecord?.settled === false
+                      ? "Pending"
+                      : "Unknown"
+                }}
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="text-sm">Review Status</div>
+              <span
+                class="px-3 py-1 text-xs rounded-full font-bold"
+                [class]="
+                  getStatusClass(
+                    selectedRecord?.reviewStatus || selectedRecord?.status
+                  )
+                "
+                [style.backgroundColor]="
+                  getStatusColor(
+                    selectedRecord?.reviewStatus || selectedRecord?.status
+                  )
+                "
+                [style.borderColor]="
+                  getStatusBorderColor(
+                    selectedRecord?.reviewStatus || selectedRecord?.status
+                  )
+                "
+                [style.color]="
+                  getStatusTextColor(
+                    selectedRecord?.reviewStatus || selectedRecord?.status
+                  )
+                "
+                >{{
+                  selectedRecord?.reviewStatus || selectedRecord?.status || "—"
+                }}</span
+              >
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="text-sm">Transaction Date</div>
+              <div
+                class="text-sm font-medium"
+                [style.color]="'var(--color-font)'"
+              >
+                {{
+                  selectedRecord?.date
+                    ? (selectedRecord.date | date: "medium")
+                    : "—"
+                }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: details + raw -->
+      <div class="p-2 overflow-auto max-h-[500px]">
+        <h4
+          class="text-base font-semibold mb-4 flex items-center gap-2"
+          [style.color]="'var(--color-font)'"
+        >
+          <span class="material-symbols-outlined text-lg">info</span>
+          Transaction Details
+        </h4>
+
+        <div class="grid grid-cols-1 gap-4 mb-6">
+          <div
+            *ngFor="let field of getDisplayFields(selectedRecord)"
+            class="rounded-xl p-4"
+            [ngStyle]="{
+              background: 'var(--color-bg)',
+              border: '1px solid var(--color-border)',
+            }"
+          >
+            <div
+              class="text-xs font-medium mb-1 uppercase tracking-wide"
+              [style.color]="'var(--color-muted)'"
+            >
+              {{ field.label }}
+            </div>
+            <div
+              class="text-sm font-semibold"
+              [style.color]="'var(--color-font)'"
+            >
+              {{ field.value }}
+            </div>
+          </div>
+        </div>
+
+        <h4
+          class="text-base font-semibold mb-4 flex items-center gap-2"
+          [style.color]="'var(--color-font)'"
+        >
+          <span class="material-symbols-outlined text-lg">code</span>
+          Raw Data
+        </h4>
+        <div
+          class="rounded-2xl p-4 overflow-auto"
+          [ngStyle]="{
+            background: 'var(--color-font)',
+            border: '1px solid var(--color-border)',
+          }"
+        >
+          <pre
+            class="text-xs whitespace-pre-wrap break-all"
+            [style.color]="'var(--color-surface)'"
+            >{{ selectedRecord?.raw | json }}</pre
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
