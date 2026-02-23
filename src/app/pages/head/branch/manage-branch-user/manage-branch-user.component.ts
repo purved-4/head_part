@@ -1,19 +1,25 @@
- import { Component, OnInit, ViewChild, ViewContainerRef } from "@angular/core";
+import { Component, OnInit, ViewChild, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { UserService } from "../../../services/user.service";
 import { HeadService } from "../../../services/head.service";
 import { BranchService } from "../../../services/branch.service";
-    
+import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
+
 @Component({
   selector: "app-manage-branch-user",
   templateUrl: "./manage-branch-user.component.html",
-  styleUrl: "./manage-branch-user.component.css",
+  styleUrls: ["./manage-branch-user.component.css"],
 })
 export class ManageBranchUserComponent implements OnInit {
   responseData: any[] = [];
   filteredData: any[] = [];
   pagedData: any[] = [];
-  itemsPerPage: number = 5;
+
+  // Separate items per page for each view
+  itemsPerPageTable: number = 5;
+  itemsPerPageGrid: number = 6;
+  itemsPerPage: number = this.itemsPerPageTable; // active value
+
   currentPage: number = 1;
   totalItems: number = 0;
   totalPages: number = 0;
@@ -25,6 +31,9 @@ export class ManageBranchUserComponent implements OnInit {
   selectedUser: any = null;
   submitAttempted: boolean = false;
 
+  // View mode
+  viewMode: "table" | "grid" = "table";
+
   @ViewChild("departmentContainer", { read: ViewContainerRef })
   container!: ViewContainerRef;
   branchId: any;
@@ -34,7 +43,8 @@ export class ManageBranchUserComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private headService: HeadService,
-    private BranchService: BranchService
+    private BranchService: BranchService,
+    private SnackBar: SnackbarService,
   ) {}
 
   ngOnInit(): void {
@@ -45,10 +55,20 @@ export class ManageBranchUserComponent implements OnInit {
 
       this.BranchService.getUsersByBranchId(this.branchId).subscribe({
         next: (res: any) => {
-           this.userId = res[0].userId;
+          this.userId = res[0]?.userId;
         },
       });
     });
+  }
+
+  // View toggle method
+  toggleView(mode: "table" | "grid"): void {
+    this.viewMode = mode;
+    this.itemsPerPage =
+      mode === "table" ? this.itemsPerPageTable : this.itemsPerPageGrid;
+    this.currentPage = 1; // reset to first page
+    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+    this.updatePagedData();
   }
 
   loadUsers(): void {
@@ -61,11 +81,12 @@ export class ManageBranchUserComponent implements OnInit {
       next: (res: any) => {
         this.responseData = res || [];
         this.applyFilter();
+
         this.showTable = true;
       },
-
       error: (err) => {
         console.error(err);
+        this.SnackBar.show(err, false);
         this.responseData = [];
         this.filteredData = [];
         this.showTable = false;
@@ -81,7 +102,7 @@ export class ManageBranchUserComponent implements OnInit {
       this.filteredData = this.responseData.filter(
         (user) =>
           user.name?.toLowerCase().includes(term) ||
-          user.email?.toLowerCase().includes(term)
+          user.email?.toLowerCase().includes(term),
       );
     }
 
@@ -111,6 +132,40 @@ export class ManageBranchUserComponent implements OnInit {
     }
   }
 
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagedData();
+    }
+  }
+
+  // Pagination numbers with ellipsis
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPagesToShow = 5;
+
+    if (this.totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= this.totalPages; i++) pages.push(i);
+    } else {
+      let start = Math.max(1, this.currentPage - 2);
+      let end = Math.min(this.totalPages, start + maxPagesToShow - 1);
+      if (end - start + 1 < maxPagesToShow) {
+        start = Math.max(1, end - maxPagesToShow + 1);
+      }
+      for (let i = start; i <= end; i++) pages.push(i);
+
+      if (start > 1) {
+        pages.unshift(1);
+        if (start > 2) pages.splice(1, 0, -1);
+      }
+      if (end < this.totalPages) {
+        if (end < this.totalPages - 1) pages.push(-1);
+        pages.push(this.totalPages);
+      }
+    }
+    return pages;
+  }
+
   onEdit(user: any): void {
     this.selectedUser = {
       id: user.userId,
@@ -121,8 +176,6 @@ export class ManageBranchUserComponent implements OnInit {
       password: "",
       confirmPassword: "",
     };
-
-    
   }
 
   handleSubmit(): void {
@@ -132,7 +185,6 @@ export class ManageBranchUserComponent implements OnInit {
 
     const { password, confirmPassword } = this.selectedUser;
 
-    // Validate passwords match if provided
     if ((password || confirmPassword) && password !== confirmPassword) {
       return;
     }
@@ -142,38 +194,34 @@ export class ManageBranchUserComponent implements OnInit {
       username: this.selectedUser.name,
       email: this.selectedUser.email,
       active: this.selectedUser.active,
-      phone:this.selectedUser.phone,
+      phone: this.selectedUser.phone,
       password: password || undefined,
     };
 
-    // Call update API (example)
-    this.userService.updateUser(userToUpdate.id,userToUpdate).subscribe({
+    this.userService.updateUser(userToUpdate.id, userToUpdate).subscribe({
       next: () => {
-        alert('User updated successfully');
+        alert("User updated successfully");
         this.loadUsers();
         this.closeModal();
       },
       error: () => {
-        alert('Failed to update user');
-      }
+        alert("Failed to update user");
+      },
     });
-
-      this.loadUsers();
-    this.closeModal();
   }
 
   toggleStatus(user: any): void {
-    this.BranchService
-      .toggleChiefUserStatus(this.branchId, this.userId)
-      .subscribe({
-        next: () => {
-          user.active = !user.active;
-          
-        },
-        error: (err) => {
-          console.error("Failed to toggle user status:", err);
-        },
-      });
+    this.BranchService.toggleChiefUserStatus(
+      this.branchId,
+      this.userId,
+    ).subscribe({
+      next: () => {
+        user.active = !user.active;
+      },
+      error: (err) => {
+        console.error("Failed to toggle user status:", err);
+      },
+    });
   }
 
   closeModal(): void {
@@ -181,6 +229,10 @@ export class ManageBranchUserComponent implements OnInit {
     this.selectedUser = null;
   }
 
-  // Helper function for template
+  clearSearch(): void {
+    this.searchTerm = "";
+    this.applyFilter();
+  }
+
   Math = Math;
 }
