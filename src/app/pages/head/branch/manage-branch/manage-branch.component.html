@@ -1,1475 +1,1204 @@
-<div class="p-4 bg-[var(--color-bg)] min-h-screen">
-  <!-- Header Section -->
-  <div class="mb-6">
-    <div
-      class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4"
-    >
-      <div class="flex items-center space-x-3">
-        <div class="p-1.5 bg-[var(--color-primary)] rounded-lg shadow-sm">
-          <i class="material-icons text-[var(--color-bg)] text-lg">groups</i>
-        </div>
-        <div>
-          <h1 class="text-sm font-bold text-[var(--color-font)]">
+<div class="min-h-screen bg-[var(--color-bg-page)] p-4 md:p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Modern Header -->
+    <div class="mb-8">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6"
+      >
+        <div class="space-y-1">
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
             Branch Management
           </h1>
-        </div>
-      </div>
-      <button
-        [routerLink]="['/head/branch/add']"
-        class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-[var(--color-bg)] font-medium rounded-lg hover:bg-[var(--color-primary-dark)] focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 transition-all text-sm shadow-sm hover:shadow-md transform active:scale-95"
-      >
-        <i class="material-icons text-base mr-1.5">person_add</i>
-        Add New Branch
-      </button>
-    </div>
-  </div>
-
-  <!-- Search Bar -->
-  <div class="mb-6">
-    <div class="relative group">
-      <div
-        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-      >
-        <i class="material-icons text-[var(--color-primary)] text-sm">search</i>
-      </div>
-      <input
-        type="text"
-        class="block w-full pl-10 pr-20 py-2.5 border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-[var(--color-primary)] text-xs shadow-sm transition-all group-hover:border-[var(--color-primary-light)]"
-        placeholder="Search branches by name, email or mobile..."
-        [(ngModel)]="searchTerm"
-        (input)="filterAgents()"
-      />
-      <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-        <span
-          class="text-xs font-semibold text-[var(--color-muted)] bg-[var(--color-hover)] px-2.5 py-1 rounded-md border border-[var(--color-border)]"
-        >
-          {{ filteredAgents.length }}
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Stats Cards -->
-
-  <!-- Loading / Error -->
-  <div *ngIf="loading" class="flex justify-center items-center py-12">
-    <div class="text-center">
-      <div class="relative w-12 h-12 mx-auto">
-        <div
-          class="absolute inset-0 border-4 border-[var(--color-border)] rounded-full"
-        ></div>
-        <div
-          class="absolute inset-0 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"
-        ></div>
-      </div>
-      <p
-        class="mt-4 text-[var(--color-muted)] text-sm font-medium animate-pulse"
-      >
-        Loading branches...
-      </p>
-    </div>
-  </div>
-
-  <div
-    *ngIf="error"
-    class="mb-4 p-4 bg-[var(--color-surface)] border-l-4 border-[var(--color-danger)] rounded-r-lg shadow-sm flex items-start"
-  >
-    <i class="material-icons text-[var(--color-danger)] text-xl mr-3 mt-0.5"
-      >error_outline</i
-    >
-    <div>
-      <p class="text-[var(--color-font)] text-sm font-medium">{{ error }}</p>
-      <button
-        (click)="loadbranchs(currentRoleId)"
-        class="mt-2 text-xs font-bold text-[var(--color-danger)] hover:text-[var(--color-danger)] flex items-center uppercase tracking-wide"
-      >
-        <i class="material-icons text-sm mr-1">refresh</i> Try Again
-      </button>
-    </div>
-  </div>
-
-  <!-- Table -->
-  <div
-    *ngIf="!loading && filteredAgents.length > 0"
-    class="bg-[var(--color-surface)] rounded-xl shadow-sm overflow-hidden border border-[var(--color-border)]"
-  >
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50/80 backdrop-blur">
-          <tr>
-            <th
-              scope="col"
-              class="px-5 py-3.5 text-left text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider"
-            >
-              <div class="flex items-center">
-                <i
-                  class="material-icons text-[var(--color-muted)] text-sm mr-1.5"
-                  >person</i
-                >
-                Branch Details
-              </div>
-            </th>
-            <th
-              scope="col"
-              class="px-5 py-3.5 text-left text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider"
-            >
-              <div class="flex items-center">
-                <i
-                  class="material-icons text-[var(--color-muted)] text-sm mr-1.5"
-                  >email</i
-                >
-                Contact
-              </div>
-            </th>
-            <th
-              scope="col"
-              class="px-5 py-3.5 text-left text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider"
-            >
-              <div class="flex items-center">
-                <i
-                  class="material-icons text-[var(--color-muted)] text-sm mr-1.5"
-                  >language</i
-                >
-                Websites
-              </div>
-            </th>
-            <th
-              scope="col"
-              class="px-5 py-3.5 text-left text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider"
-            >
-              <div class="flex items-center">
-                <i
-                  class="material-icons text-[var(--color-muted)] text-sm mr-1.5"
-                  >toggle_on</i
-                >
-                Status
-              </div>
-            </th>
-            <th
-              scope="col"
-              class="px-5 py-3.5 text-right text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider"
-            >
-              <div class="flex items-center justify-end">
-                Actions
-                <i
-                  class="material-icons text-[var(--color-muted)] text-sm ml-1.5"
-                  >settings</i
-                >
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-[var(--color-surface)] divide-y divide-gray-100">
-          <tr
-            *ngFor="let agent of paginatedAgents"
-            class="hover:bg-[var(--color-hover)] transition-colors duration-200 group"
-          >
-            <!-- Branch Details Column -->
-            <td class="px-5 py-4 align-middle">
-              <div class="flex items-start space-x-3">
-                <div class="flex-shrink-0 pt-0.5">
-                  <div
-                    class="h-10 w-10 rounded-full flex items-center justify-center text-[var(--color-bg)] font-bold text-base shadow-sm ring-2 ring-white"
-                    [ngClass]="
-                      agent.active
-                        ? 'bg-[var(--color-success)]'
-                        : 'bg-[var(--color-muted)]'
-                    "
-                  >
-                    {{ agent.name ? agent.name.charAt(0).toUpperCase() : "?" }}
-                  </div>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <div
-                    class="font-bold text-[var(--color-font)] text-sm truncate"
-                  >
-                    {{ agent.name || "Unnamed Branch" }}
-                  </div>
-                  <div class="mt-0.5"></div>
-                </div>
-              </div>
-            </td>
-
-            <!-- Contact Column -->
-            <td class="px-5 py-4 align-middle">
-              <div class="space-y-1.5">
-                <div class="flex items-center min-w-[150px]">
-                  <i
-                    class="material-icons text-[var(--color-primary)] text-[14px] mr-2 flex-shrink-0"
-                    >email</i
-                  >
-                  <span
-                    class="text-xs text-[var(--color-font)] truncate font-medium"
-                  >
-                    {{ agent.email || "No email" }}
-                  </span>
-                </div>
-                <div class="flex items-center min-w-[150px]">
-                  <i
-                    class="material-icons text-[var(--color-success)] text-[14px] mr-2 flex-shrink-0"
-                    >phone</i
-                  >
-                  <span
-                    class="text-xs text-[var(--color-font)] truncate font-medium"
-                  >
-                    {{ agent.mobile || "No mobile" }}
-                  </span>
-                </div>
-              </div>
-            </td>
-
-            <!-- Websites Column -->
-            <td class="px-5 py-4 align-middle">
-              <div class="flex items-center gap-2 flex-wrap">
-                <div
-                  *ngIf="
-                    !agent.websitesWithRange ||
-                    agent.websitesWithRange.length === 0
-                  "
-                  class="text-center py-1"
-                >
-                  <span
-                    class="text-xs text-[var(--color-muted)] italic px-2 py-1 bg-[var(--color-bg)] rounded-lg"
-                  >
-                    No websites
-                  </span>
-                </div>
-                <div
-                  *ngIf="
-                    agent.websitesWithRange &&
-                    agent.websitesWithRange.length > 0
-                  "
-                >
-                  <button
-                    (click)="
-                      openWebsitePopup(agent, agent.websitesWithRange[0])
-                    "
-                    class="inline-flex items-center px-3 py-1.5 bg-[var(--color-hover)] text-[var(--color-primary)] hover:bg-[var(--color-border)] rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow border border-[var(--color-border)]"
-                  >
-                    <i
-                      class="material-icons text-[var(--color-primary)] text-[14px] mr-1.5"
-                      >public</i
-                    >
-                    {{ agent.websitesWithRange[0].websiteDomain || "Website" }}
-                  </button>
-                </div>
-                <div
-                  *ngIf="
-                    agent.websitesWithRange &&
-                    agent.websitesWithRange.length > 1
-                  "
-                  class="flex items-center"
-                >
-                  <button
-                    (click)="openAllWebsitesPopup(agent)"
-                    class="inline-flex items-center px-2.5 py-1.5 bg-[var(--color-surface)] text-[var(--color-muted)] hover:bg-[var(--color-bg)] rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow border border-[var(--color-border)] ml-1"
-                  >
-                    <i
-                      class="material-icons text-[var(--color-muted)] text-[14px] mr-1"
-                      >more_horiz</i
-                    >
-                    +{{ agent.websitesWithRange.length - 1 }}
-                  </button>
-                </div>
-              </div>
-            </td>
-
-            <!-- Status Column -->
-            <td class="px-5 py-4 align-middle">
-              <div class="flex justify-start">
-                <span
-                  class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border shadow-sm min-w-[90px] justify-center"
-                  [ngClass]="
-                    agent.active
-                      ? 'bg-green-50 text-[var(--color-success)] border-green-200'
-                      : 'bg-[var(--color-bg)] text-[var(--color-muted)] border-[var(--color-border)]'
-                  "
-                >
-                  <i class="material-icons text-[14px] mr-1.5">
-                    {{ agent.active ? "check_circle" : "cancel" }}
-                  </i>
-                  {{ agent.active ? "Active" : "Inactive" }}
-                </span>
-              </div>
-            </td>
-
-            <!-- Actions Column -->
-            <td class="px-5 py-4 align-middle text-right">
-              <div
-                class="relative inline-block text-left actions-menu-container"
-              >
-                <button
-                  type="button"
-                  (click)="toggleActionsMenu(agent.id)"
-                  class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)] text-[var(--color-muted)] hover:text-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 shadow-sm transition-all"
-                  [class.ring-2]="activeActionsMenu === agent.id"
-                  [class.ring-blue-100]="activeActionsMenu === agent.id"
-                  [class.bg-[var(--color-hover)]]="
-                    activeActionsMenu === agent.id
-                  "
-                >
-                  <i class="material-icons text-lg">more_horiz</i>
-                </button>
-                <div
-                  *ngIf="activeActionsMenu === agent.id"
-                  class="absolute right-0 mt-2 w-56 bg-[var(--color-surface)] rounded-xl shadow-xl border border-[var(--color-border)] z-20 overflow-hidden transform origin-top-right transition-all"
-                >
-                  <div class="py-1">
-                    <button
-                      (click)="toggleStatus(agent); closeActionsMenu()"
-                      class="flex items-center w-full px-4 py-3 text-sm font-semibold transition-colors border-b border-gray-50"
-                      [class.text-[var(--color-danger)]]="agent.active"
-                      [class.text-[var(--color-success)]]="!agent.active"
-                      [class.bg-red-50]="agent.active"
-                      [class.bg-green-50]="!agent.active"
-                    >
-                      <i
-                        class="material-icons text-lg mr-3"
-                        [class.text-[var(--color-danger)]]="agent.active"
-                        [class.text-[var(--color-success)]]="!agent.active"
-                      >
-                        {{ agent.active ? "toggle_on" : "toggle_off" }}
-                      </i>
-                      <span>{{
-                        agent.active ? "Deactivate Branch" : "Activate Branch"
-                      }}</span>
-                    </button>
-                    <button
-                      [routerLink]="['/head/branch-user/manage', agent.id]"
-                      class="flex items-center w-full px-4 py-3 text-sm text-[var(--color-muted)] hover:bg-[var(--color-hover)] hover:text-[var(--color-primary)] transition-colors"
-                    >
-                      <i
-                        class="material-icons text-[18px] mr-3 text-[var(--color-muted)] group-hover:text-[var(--color-primary)]"
-                        >people</i
-                      >
-                      View Users
-                    </button>
-                    <button
-                      (click)="openAddUserModal(agent)"
-                      class="flex items-center w-full px-4 py-3 text-sm text-[var(--color-muted)] hover:bg-purple-50 hover:text-purple-700 transition-colors"
-                    >
-                      <i
-                        class="material-icons text-[18px] mr-3 text-[var(--color-muted)] group-hover:text-purple-500"
-                        >person_add</i
-                      >
-                      Add User
-                    </button>
-                    <button
-                      (click)="openEditModal(agent); closeActionsMenu()"
-                      class="flex items-center w-full px-4 py-3 text-sm text-[var(--color-muted)] hover:bg-green-50 hover:text-green-700 transition-colors border-t border-gray-50"
-                    >
-                      <i
-                        class="material-icons text-[18px] mr-3 text-[var(--color-muted)] group-hover:text-green-500"
-                        >edit</i
-                      >
-                      Edit Branch
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- No branches -->
-  <div
-    *ngIf="!loading && filteredAgents.length === 0"
-    class="text-center py-12 bg-[var(--color-surface)] rounded-xl border-2 border-dashed border-[var(--color-border)] shadow-sm"
-  >
-    <div
-      class="w-16 h-16 bg-[var(--color-bg)] rounded-2xl mx-auto flex items-center justify-center shadow-inner"
-    >
-      <i class="material-icons text-[var(--color-primary)] text-3xl">groups</i>
-    </div>
-    <h3 class="mt-4 text-base font-bold text-[var(--color-font)]">
-      No Branches Found
-    </h3>
-    <p class="mt-2 text-[var(--color-muted)] text-sm max-w-xs mx-auto">
-      Get started by adding your first branch to manage users and websites.
-    </p>
-    <button
-      [routerLink]="['/head/branch/add']"
-      class="mt-5 inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-[var(--color-bg)] font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] text-sm shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5"
-    >
-      <i class="material-icons text-base mr-1.5">add</i>
-      Create Branch
-    </button>
-  </div>
-
-  <!-- Pagination -->
-  <div
-    *ngIf="filteredAgents.length > pageSize"
-    class="mt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--color-surface)] rounded-xl p-4 shadow-sm border border-[var(--color-border)]"
-  >
-    <div
-      class="text-xs text-[var(--color-muted)] flex items-center font-medium"
-    >
-      <i class="material-icons text-[var(--color-muted)] text-base mr-1.5"
-        >list_alt</i
-      >
-      Showing
-      <span class="mx-1 font-bold text-[var(--color-font)]">
-        {{ (page - 1) * pageSize + 1 }}-{{
-          Math.min(page * pageSize, filteredAgents.length)
-        }}
-      </span>
-      of
-      <span class="ml-1 font-bold text-[var(--color-font)]">{{
-        filteredAgents.length
-      }}</span>
-    </div>
-    <div class="flex items-center gap-1.5">
-      <button
-        (click)="prevPage()"
-        [disabled]="page === 1"
-        class="p-2 text-[var(--color-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-hover)] hover:text-[var(--color-primary)] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-      >
-        <i class="material-icons text-sm">chevron_left</i>
-      </button>
-      <div class="flex gap-1.5">
-        <button
-          *ngFor="let pageNum of getPageNumbers()"
-          (click)="goToPage(pageNum)"
-          [class]="
-            pageNum === page
-              ? 'w-8 h-8 flex items-center justify-center bg-[var(--color-primary)] text-[var(--color-bg)] rounded-lg text-xs font-bold shadow-sm ring-2 ring-blue-200'
-              : 'w-8 h-8 flex items-center justify-center bg-[var(--color-surface)] text-[var(--color-muted)] border border-[var(--color-border)] rounded-lg text-xs font-semibold hover:bg-[var(--color-hover)] hover:text-[var(--color-primary)] transition-all shadow-sm'
-          "
-        >
-          {{ pageNum }}
-        </button>
-      </div>
-      <button
-        (click)="nextPage()"
-        [disabled]="page * pageSize >= filteredAgents.length"
-        class="p-2 text-[var(--color-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-hover)] hover:text-[var(--color-primary)] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-      >
-        <i class="material-icons text-sm">chevron_right</i>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Single Website Popup Modal -->
-<div
-  *ngIf="showSingleWebsiteModal && selectedWebsite && selectedAgent"
-  class="fixed inset-0 z-[100] overflow-y-auto"
-  aria-labelledby="modal-title"
-  role="dialog"
-  aria-modal="true"
->
-  <div
-    class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0"
-  >
-    <div
-      class="fixed inset-0 transition-opacity bg-gray-900/60 backdrop-blur-sm"
-      aria-hidden="true"
-    ></div>
-    <div
-      class="inline-block w-full max-w-sm my-8 overflow-hidden text-left align-middle transition-all transform bg-[var(--color-surface)] shadow-2xl rounded-2xl border border-[var(--color-border)]"
-    >
-      <div class="bg-[var(--color-primary)] px-5 py-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <div class="bg-white/20 p-1.5 rounded-lg mr-3">
-              <i class="material-icons text-[var(--color-bg)] text-xl"
-                >public</i
-              >
-            </div>
-            <div>
-              <h3 class="text-base font-bold text-[var(--color-bg)]">
-                Website Details
-              </h3>
-              <p class="text-blue-100 text-xs mt-0.5">
-                {{ selectedAgent.name || "Branch" }}
-              </p>
-            </div>
-          </div>
-          <button
-            (click)="closeSingleWebsiteModal()"
-            class="text-[var(--color-bg)]/70 hover:text-[var(--color-bg)] hover:bg-white/10 rounded-full p-1 transition-all"
-          >
-            <i class="material-icons text-lg">close</i>
-          </button>
-        </div>
-      </div>
-      <div class="p-5">
-        <div class="mb-5 text-center">
-          <div
-            class="h-14 w-14 bg-[var(--color-bg)] rounded-2xl flex items-center justify-center mx-auto mb-3 border border-[var(--color-border)]"
-          >
-            <i class="material-icons text-[var(--color-primary)] text-2xl"
-              >language</i
-            >
-          </div>
-          <h4 class="text-lg font-bold text-[var(--color-font)]">
-            {{ getWebsiteDomain(selectedWebsite) || "Unknown Website" }}
-          </h4>
-        </div>
-        <div class="grid grid-cols-2 gap-3 mb-5">
-          <div
-            class="bg-[var(--color-bg)] rounded-xl p-3 border border-[var(--color-border)] text-center"
-          >
-            <div
-              class="text-[10px] font-bold text-[var(--color-success)] uppercase tracking-wider mb-1"
-            >
-              Topup Share
-            </div>
-            <div class="text-2xl font-black text-[var(--color-success)]">
-              {{ getWebsiteProperty(selectedWebsite, "topupPercentage") || 0
-              }}<span class="text-sm font-semibold ml-0.5">%</span>
-            </div>
-          </div>
-          <div
-            class="bg-[var(--color-bg)] rounded-xl p-3 border border-[var(--color-border)] text-center"
-          >
-            <div
-              class="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider mb-1"
-            >
-              Payout Share
-            </div>
-            <div class="text-2xl font-black text-[var(--color-primary)]">
-              {{ getWebsiteProperty(selectedWebsite, "payoutPercentage") || 0
-              }}<span class="text-sm font-semibold ml-0.5">%</span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="bg-[var(--color-bg)] rounded-xl p-3 border border-[var(--color-border)]"
-        >
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <i class="material-icons text-[var(--color-muted)] text-lg mr-2"
-                >settings_input_component</i
-              >
-              <div>
-                <div class="text-xs font-bold text-[var(--color-font)]">
-                  Website Status
-                </div>
-                <div class="text-[10px] text-[var(--color-muted)]">
-                  Enable/Disable access
-                </div>
-              </div>
-            </div>
-            <button
-              type="button"
-              class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              [class.bg-[var(--color-success)]]="selectedWebsite.active"
-              [class.bg-[var(--color-muted)]]="!selectedWebsite.active"
-              (click)="toggleWebsiteStatus(selectedAgent, selectedWebsite)"
-            >
-              <span
-                class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
-                [class.translate-x-5]="selectedWebsite.active"
-                [class.translate-x-0]="!selectedWebsite.active"
-              ></span>
-            </button>
-          </div>
-        </div>
-        <div class="mt-6">
-          <button
-            (click)="closeSingleWebsiteModal()"
-            class="w-full px-4 py-2.5 text-sm font-semibold text-[var(--color-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-hover)] hover:text-[var(--color-font)] transition-all shadow-sm"
-          >
-            Close Details
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- All Websites Modal -->
-<div
-  *ngIf="showAllWebsitesModal && selectedAgent"
-  class="fixed inset-0 z-[100] overflow-y-auto"
->
-  <div
-    class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0"
-  >
-    <div
-      class="fixed inset-0 transition-opacity bg-gray-900/60 backdrop-blur-sm"
-      aria-hidden="true"
-    ></div>
-    <div
-      class="inline-block w-full max-w-4xl my-8 overflow-hidden text-left align-middle transition-all transform bg-[var(--color-surface)] shadow-2xl rounded-2xl border border-[var(--color-border)]"
-    >
-      <div class="bg-[var(--color-primary)] px-6 py-5">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <div class="bg-white/20 p-2 rounded-xl mr-4">
-              <i class="material-icons text-[var(--color-bg)] text-2xl">web</i>
-            </div>
-            <div>
-              <h3 class="text-lg font-bold text-[var(--color-bg)]">
-                All Websites
-              </h3>
-              <p class="text-blue-100 text-sm mt-0.5">
-                Managing {{ selectedAgent.name || "Branch" }}'s websites
-              </p>
-            </div>
-          </div>
-          <button
-            (click)="closeAllWebsitesModal()"
-            class="text-[var(--color-bg)]/70 hover:text-[var(--color-bg)] hover:bg-white/10 rounded-full p-1.5 transition-all"
-          >
-            <i class="material-icons text-xl">close</i>
-          </button>
-        </div>
-      </div>
-      <div
-        class="px-6 pt-6 pb-4 bg-gradient-to-b from-white to-[var(--color-bg)]"
-      >
-        <div class="relative group">
-          <div
-            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-          >
-            <i class="material-icons text-[var(--color-primary)] text-base"
-              >search</i
-            >
-          </div>
-          <input
-            type="text"
-            [(ngModel)]="websiteModalSearchTerm"
-            (input)="filterWebsitesInModal()"
-            class="block w-full pl-12 pr-10 py-3.5 border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-[var(--color-primary)] text-sm shadow-sm transition-all group-hover:border-[var(--color-primary-light)]"
-            placeholder="Search websites by domain..."
-          />
-          <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-            <span
-              class="text-xs font-semibold text-[var(--color-muted)] bg-[var(--color-hover)] px-2.5 py-1 rounded-md border border-[var(--color-border)]"
-            >
-              {{ filteredModalWebsites.length || 0 }}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="p-6 pt-0">
-        <div
-          class="overflow-hidden rounded-xl border border-[var(--color-border)] shadow-sm mt-4"
-        >
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-[var(--color-bg)]">
-              <tr>
-                <th
-                  scope="col"
-                  class="px-6 py-3.5 text-left text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider"
-                >
-                  <div class="flex items-center">
-                    <i
-                      class="material-icons text-[var(--color-muted)] text-sm mr-2"
-                      >public</i
-                    >
-                    Website
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3.5 text-center text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider"
-                >
-                  <div class="flex items-center justify-center">
-                    <i
-                      class="material-icons text-[var(--color-success)] text-sm mr-2"
-                      >trending_up</i
-                    >
-                    Topup %
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3.5 text-center text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider"
-                >
-                  <div class="flex items-center justify-center">
-                    <i
-                      class="material-icons text-[var(--color-primary)] text-sm mr-2"
-                      >trending_down</i
-                    >
-                    Payout %
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3.5 text-center text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider"
-                >
-                  <div class="flex items-center justify-center">
-                    <i
-                      class="material-icons text-[var(--color-muted)] text-sm mr-2"
-                      >toggle_on</i
-                    >
-                    Status
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3.5 text-right text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider"
-                >
-                  <div class="flex items-center justify-end">
-                    Action
-                    <i
-                      class="material-icons text-[var(--color-muted)] text-sm ml-2"
-                      >settings</i
-                    >
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-[var(--color-surface)] divide-y divide-gray-100">
-              <tr
-                *ngFor="let website of filteredModalWebsites"
-                class="hover:bg-[var(--color-hover)] transition-colors"
-              >
-                <td class="px-6 py-4">
-                  <div class="flex items-center">
-                    <div
-                      class="h-10 w-10 bg-[var(--color-bg)] rounded-lg flex items-center justify-center mr-3 border border-[var(--color-border)]"
-                    >
-                      <i
-                        class="material-icons text-[var(--color-primary)] text-base"
-                        >public</i
-                      >
-                    </div>
-                    <div class="min-w-0">
-                      <span
-                        class="text-sm font-bold text-[var(--color-font)] block truncate max-w-[200px]"
-                      >
-                        {{ getWebsiteDomain(website) || "Unknown Website" }}
-                      </span>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <div class="flex items-center justify-center">
-                    <span
-                      class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-[var(--color-bg)] text-[var(--color-success)] border border-[var(--color-border)]"
-                    >
-                      {{ getWebsiteProperty(website, "topupPercentage") || 0 }}%
-                    </span>
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <div class="flex items-center justify-center">
-                    <span
-                      class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-[var(--color-bg)] text-[var(--color-primary)] border border-[var(--color-border)]"
-                    >
-                      {{
-                        getWebsiteProperty(website, "payoutPercentage") || 0
-                      }}%
-                    </span>
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <div class="flex items-center justify-center">
-                    <span
-                      class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border min-w-[90px] justify-center"
-                      [ngClass]="
-                        website.active
-                          ? 'bg-green-50 text-[var(--color-success)] border-green-200'
-                          : 'bg-[var(--color-bg)] text-[var(--color-muted)] border-[var(--color-border)]'
-                      "
-                    >
-                      <i class="material-icons text-[14px] mr-1.5">
-                        {{ website.active ? "check_circle" : "cancel" }}
-                      </i>
-                      {{ website.active ? "Active" : "Inactive" }}
-                    </span>
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <div class="flex items-center justify-end space-x-3">
-                    <button
-                      type="button"
-                      class="relative inline-flex flex-shrink-0 h-7 w-12 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                      [class.bg-[var(--color-success)]]="website.active"
-                      [class.bg-[var(--color-muted)]]="!website.active"
-                      (click)="toggleWebsiteStatus(selectedAgent, website)"
-                    >
-                      <span
-                        class="pointer-events-none inline-block h-6 w-6 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
-                        [class.translate-x-5]="website.active"
-                        [class.translate-x-0]="!website.active"
-                      ></span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div
-          *ngIf="
-            websiteModalSearchTerm &&
-            (!filteredModalWebsites || filteredModalWebsites.length === 0)
-          "
-          class="text-center py-10 bg-[var(--color-bg)] rounded-xl border-2 border-dashed border-[var(--color-border)] mt-4"
-        >
-          <i class="material-icons text-[var(--color-muted)] text-4xl mb-3"
-            >search_off</i
-          >
-          <p class="text-sm text-[var(--color-muted)] mt-2 font-medium">
-            No websites found for "{{ websiteModalSearchTerm }}"
+          <p class="text-sm text-gray-600">
+            Manage and monitor all Branch accounts
           </p>
         </div>
-        <div class="mt-6 flex justify-between items-center">
-          <div class="text-xs text-[var(--color-muted)] font-medium">
-            <i class="material-icons text-[var(--color-muted)] text-sm mr-1.5"
-              >info</i
-            >
-            Showing {{ filteredModalWebsites.length }} websites
+
+        <div class="flex gap-3">
+          <!-- Quick Stats -->
+          <div class="hidden md:flex items-center gap-4">
+            <div class="px-3 py-2 bg-white rounded-lg border border-gray-200">
+              <div class="text-xs text-gray-500">Active</div>
+              <div class="font-bold text-green-600">{{ getActiveCount() }}</div>
+            </div>
+            <div class="px-3 py-2 bg-white rounded-lg border border-gray-200">
+              <div class="text-xs text-gray-500">Inactive</div>
+              <div class="font-bold text-red-600">{{ getInactiveCount() }}</div>
+            </div>
           </div>
+
           <button
-            (click)="closeAllWebsitesModal()"
-            class="px-5 py-2.5 text-sm font-semibold text-[var(--color-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-hover)] hover:text-[var(--color-font)] transition-all shadow-sm"
+            [routerLink]="'/chief/branch/add'"
+            class="inline-flex items-center gap-2 px-5 py-3 text-white font-medium rounded-xl shadow
+         bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)]
+         hover:shadow-lg hover:scale-[1.02] transition-all"
           >
-            Close Window
+            <span class="material-icons text-sm md:text-base">add</span>
+            Add Branch
           </button>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Edit Modal -->
-<!-- Edit Modal -->
-<div *ngIf="showEditModal" class="fixed inset-0 z-40 overflow-y-auto">
-  <div
-    class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0"
-  >
-    <div
-      class="fixed inset-0 transition-opacity bg-gray-900/60 backdrop-blur-sm"
-      aria-hidden="true"
-    ></div>
-    <div
-      class="inline-block w-full max-w-5xl my-8 overflow-hidden text-left align-middle transition-all transform bg-[var(--color-surface)] shadow-2xl rounded-2xl border border-[var(--color-border)]"
-    >
-      <div
-        class="bg-[var(--color-surface)] px-6 py-4 border-b border-[var(--color-border)]"
-      >
+    <!-- Search Bar and View Toggle -->
+    <div class="mb-6 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+      <div class="relative max-w-xl flex-1">
+        <div
+          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+        >
+          <span class="material-icons text-gray-400 text-lg">search</span>
+        </div>
+        <input
+          type="text"
+          class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200"
+          placeholder="Search Branch by name, email or mobile..."
+          [(ngModel)]="searchTerm"
+          (input)="filterAgents()"
+        />
+      </div>
+
+      <!-- View Toggle Buttons -->
+      <div class="flex items-center gap-2 bg-white rounded-xl border border-gray-200 p-1">
+        <button
+          type="button"
+          (click)="setViewMode('grid')"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+          [ngClass]="{
+            'bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-white shadow-md': viewMode === 'grid',
+            'text-gray-600 hover:bg-gray-100': viewMode !== 'grid'
+          }"
+        >
+          <span class="material-icons text-base">grid_view</span>
+        </button>
+        <button
+          type="button"
+          (click)="setViewMode('table')"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+          [ngClass]="{
+            'bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-white shadow-md': viewMode === 'table',
+            'text-gray-600 hover:bg-gray-100': viewMode !== 'table'
+          }"
+        >
+          <span class="material-icons text-base">table_rows</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center p-12">
+      <div class="text-center space-y-4">
+        <div
+          class="w-14 h-14 mx-auto rounded-xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-light)] flex items-center justify-center animate-pulse"
+        >
+          <span class="material-icons text-white text-2xl">sync</span>
+        </div>
+        <p class="text-gray-600">Loading Branch data...</p>
+      </div>
+    </div>
+
+    <!-- Error State with Dismiss Button -->
+    <div *ngIf="error && !loading" class="mb-6">
+      <div class="p-4 bg-red-50 border border-red-100 rounded-xl">
         <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <div class="bg-[var(--color-primary)]/10 p-2.5 rounded-xl mr-3">
-              <i class="material-icons text-[var(--color-primary)] text-xl"
-                >edit</i
-              >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0"
+            >
+              <span class="material-icons text-red-500 text-sm">error</span>
             </div>
-            <div>
-              <h3 class="text-lg font-bold text-[var(--color-font)]">
-                Edit Branch Details
-              </h3>
-              <p class="text-[var(--color-muted)] text-xs mt-0.5">
-                Update information and permissions
-              </p>
-            </div>
+            <p class="text-red-700">{{ error }}</p>
           </div>
           <button
-            (click)="closeEditModal()"
-            class="text-[var(--color-muted)] hover:text-[var(--color-font)] hover:bg-[var(--color-hover)] rounded-full p-1.5 transition-all"
+            (click)="dismissError()"
+            class="p-1 hover:bg-red-200 rounded-lg transition-colors"
+            aria-label="Dismiss error"
           >
-            <i class="material-icons text-lg">close</i>
+            <span class="material-icons text-red-500 text-sm">close</span>
           </button>
         </div>
       </div>
-      <form
-        (ngSubmit)="updateBranch()"
-        class="p-4 max-h-[75vh] overflow-y-auto custom-scrollbar"
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && agents.length === 0" class="text-center py-12">
+      <div class="max-w-md mx-auto">
+        <div
+          class="w-16 h-16 mx-auto rounded-xl bg-gradient-to-br from-[#F0F7FF] to-white border border-gray-100 flex items-center justify-center mb-5"
+        >
+          <span class="material-icons text-gray-300 text-3xl">people_outline</span>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">
+          No Branch Accounts Found
+        </h3>
+        <p class="text-gray-500 mb-5">
+          Get started by creating your first Branch account
+        </p>
+        <button
+          [routerLink]="'/chief/branch/add'"
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-white font-medium rounded-xl hover:shadow-lg transition-all duration-200"
+        >
+          <span class="material-icons text-sm">add</span>
+          Create First Branch
+        </button>
+      </div>
+    </div>
+
+    <!-- Grid View (Icons only with tooltips) -->
+    <div
+      *ngIf="viewMode === 'grid' && !loading && agents.length > 0"
+      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5"
+    >
+      <div
+        *ngFor="let agent of paginatedAgents"
+        class="bg-white rounded-xl border border-gray-200 hover:border-[var(--color-primary)]/30 transition-all duration-200 hover:shadow-md overflow-hidden flex flex-col"
       >
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Left Column: Basic Information -->
-          <div class="space-y-5">
-            <div
-              class="flex items-center pb-2 border-b border-[var(--color-border)]"
-            >
-              <i class="material-icons text-[var(--color-primary)] text-sm mr-2"
-                >badge</i
+        <!-- Card Header -->
+        <div class="p-4 md:p-5 border-b border-gray-100">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div
+                class="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] flex items-center justify-center text-white font-bold text-sm md:text-base shadow flex-shrink-0"
               >
-              <h4
-                class="text-sm font-semibold text-[var(--color-font)] uppercase tracking-wide"
-              >
-                Basic Information
-              </h4>
-            </div>
-            <div class="space-y-4">
-              <!-- Branch Name -->
-              <div>
-                <label
-                  class="block text-xs font-semibold text-[var(--color-font)] mb-1.5"
-                >
-                  Branch Name
-                  <span class="text-[var(--color-danger)] ml-0.5">*</span>
-                </label>
-                <input
-                  type="text"
-                  [(ngModel)]="editForm.name"
-                  name="branchName"
-                  class="w-full px-3 py-2 text-xs border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all"
-                  placeholder="Enter branch name"
-                  required
-                />
-                <div
-                  *ngIf="!editForm.name"
-                  class="text-[var(--color-danger)] text-xs mt-1 flex items-center font-medium"
-                >
-                  <i class="material-icons text-xs mr-0.5">error</i>
-                  Name is required
-                </div>
+                {{ initialLetter(agent) }}
               </div>
-
-              <!-- Email -->
-              <div>
-                <label
-                  class="block text-xs font-semibold text-[var(--color-font)] mb-1.5"
+              <div class="min-w-0 flex-1">
+                <h3
+                  class="font-bold text-gray-900 text-base md:text-lg truncate"
+                  [title]="agent.name"
                 >
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  [(ngModel)]="editForm.email"
-                  name="email"
-                  (input)="validateEmail()"
-                  [class.border-[var(--color-danger)]]="emailError"
-                  class="w-full px-3 py-2 text-xs border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all"
-                  placeholder="email@example.com"
-                />
-                <div
-                  *ngIf="emailError"
-                  class="text-[var(--color-danger)] text-xs mt-1 flex items-center font-medium"
-                >
-                  <i class="material-icons text-xs mr-0.5">error</i>
-                  {{ emailError }}
-                </div>
-              </div>
-
-              <!-- Mobile -->
-              <div>
-                <label
-                  class="block text-xs font-semibold text-[var(--color-font)] mb-1.5"
-                >
-                  Mobile Number
-                </label>
-                <input
-                  type="tel"
-                  [(ngModel)]="editForm.mobile"
-                  name="mobile"
-                  (input)="validateMobile()"
-                  [class.border-[var(--color-danger)]]="mobileError"
-                  class="w-full px-3 py-2 text-xs border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all"
-                  placeholder="+1234567890"
-                />
-                <div
-                  *ngIf="mobileError"
-                  class="text-[var(--color-danger)] text-xs mt-1 flex items-center font-medium"
-                >
-                  <i class="material-icons text-xs mr-0.5">error</i>
-                  {{ mobileError }}
-                </div>
-              </div>
-
-              <!-- ===== ADDITIONAL INFO FIELD ===== -->
-              <div>
-                <label
-                  class="block text-xs font-semibold text-[var(--color-font)] mb-1.5"
-                >
-                  Additional Information
-                  <span class="text-xs text-[var(--color-muted)] ml-1"
-                    >(optional)</span
+                  {{ agent.name }}
+                </h3>
+                <div class="flex items-center gap-2 mt-1 flex-wrap">
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                    [ngClass]="
+                      agent.active
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    "
                   >
-                </label>
-                <textarea
-                  [(ngModel)]="editForm.info"
-                  name="info"
-                  rows="2"
-                  class="w-full px-3 py-2 text-xs border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all resize-none"
-                  placeholder="Add any additional notes or information about this branch..."
-                ></textarea>
-              </div>
+                    {{ agent.active ? "Active" : "Inactive" }}
+                  </span>
+                  <span
+                    class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full"
+                  >
+                    {{ agent.websitesWithRange?.length || 0 }} websites
+                  </span>
 
-              <!-- Account Status Toggle -->
-              <div class="pt-2">
+                  <!-- Business Type badges (if available) -->
+                  <ng-container *ngIf="agent.businessTypes?.length">
+                    <span *ngFor="let bt of agent.businessTypes"
+                          class="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--primary-soft-10)] text-[var(--color-primary)]">
+                      {{ bt }}
+                    </span>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="p-4 md:p-5 flex-1 flex flex-col">
+          <!-- Split Contact Info - Email and Phone on separate lines -->
+          <div class="space-y-2 mb-4">
+            <!-- Email -->
+            <div class="flex items-center gap-2 text-sm">
+              <div
+                class="w-6 h-6 rounded-md bg-[var(--primary-soft-10)] flex items-center justify-center flex-shrink-0"
+              >
+                <span class="material-icons text-blue-500 text-sm">email</span>
+              </div>
+              <span class="text-gray-600 truncate">{{ agent.email || 'No email' }}</span>
+            </div>
+            <!-- Phone -->
+            <div class="flex items-center gap-2 text-sm">
+              <div
+                class="w-6 h-6 rounded-md bg-green-50 flex items-center justify-center flex-shrink-0"
+              >
+                <span class="material-icons text-green-500 text-sm">phone</span>
+              </div>
+              <span class="text-gray-600">{{ agent.mobile || 'No phone' }}</span>
+            </div>
+          </div>
+
+          <!-- Website Summary - Only first website visible with More button -->
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs text-gray-500"
+                >{{ agent.websitesWithRange?.length || 0 }} websites</span
+              >
+            </div>
+
+            <!-- No Websites -->
+            <div
+              *ngIf="!agent.websitesWithRange || agent.websitesWithRange.length === 0"
+              class="p-3 bg-gray-50 rounded-lg border border-gray-100"
+            >
+              <div class="flex items-center gap-3">
                 <div
-                  class="flex items-center justify-between p-3 bg-[var(--color-bg)] rounded-lg border border-[var(--color-border)]"
+                  class="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center"
                 >
-                  <div class="flex items-center">
-                    <div class="bg-[var(--color-surface)] p-2 rounded-lg mr-3">
-                      <i
-                        class="material-icons text-[var(--color-primary)] text-sm"
-                        >toggle_on</i
-                      >
-                    </div>
-                    <div>
-                      <span
-                        class="text-xs font-semibold text-[var(--color-font)] block"
-                        >Account Status</span
-                      >
-                      <span class="text-xs text-[var(--color-muted)]"
-                        >Enable or disable login</span
-                      >
-                    </div>
+                  <span class="material-icons text-gray-400 text-sm">language</span>
+                </div>
+                <div class="text-sm text-gray-500">No websites assigned</div>
+              </div>
+            </div>
+
+            <!-- Website Display - Only first website -->
+            <div
+              *ngIf="agent.websitesWithRange && agent.websitesWithRange.length > 0"
+              class="space-y-2"
+            >
+              <!-- First Website - Only name and status toggle -->
+              <div class="p-2 bg-gray-50 rounded-lg border border-gray-100">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="w-1.5 h-1.5 rounded-full"
+                      [ngClass]="agent.websitesWithRange[0].active ? 'bg-green-500' : 'bg-red-500'"
+                    ></div>
+                    <button
+                      type="button"
+                      (click)="openWebsitePopup(agent, agent.websitesWithRange[0])"
+                      class="text-xs font-medium text-[var(--color-primary)] hover:underline truncate max-w-[180px] text-left"
+                      [title]="getWebsiteDomain(agent.websitesWithRange[0])"
+                    >
+                      {{ getWebsiteDomain(agent.websitesWithRange[0]) }}
+                    </button>
                   </div>
                   <button
-                    type="button"
-                    class="relative inline-flex flex-shrink-0 h-5 w-10 border-2 border-transparent rounded-full cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    [class.bg-[var(--color-success)]]="editForm.isActive"
-                    [class.bg-[var(--color-muted)]]="!editForm.isActive"
-                    (click)="toggleActiveState()"
+                    (click)="toggleWebsiteStatus(agent, agent.websitesWithRange[0])"
+                    [disabled]="isWebsiteToggling(agent.id, agent.websitesWithRange[0].websiteId)"
+                    class="relative inline-flex items-center h-4 rounded-full w-8 flex-shrink-0 border border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:ring-offset-1"
+                    [ngClass]="agent.websitesWithRange[0].active ? 'bg-green-500' : 'bg-gray-300'"
                   >
                     <span
-                      class="pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
-                      [class.translate-x-5]="editForm.isActive"
-                      [class.translate-x-0]="!editForm.isActive"
+                      class="inline-block h-3 w-3 transform bg-white rounded-full transition duration-200 ease-in-out shadow"
+                      [ngClass]="
+                        agent.websitesWithRange[0].active ? 'translate-x-4' : 'translate-x-0.5'
+                      "
                     ></span>
                   </button>
                 </div>
               </div>
+
+              <!-- More Websites Button (if more than 1) -->
+              <div *ngIf="agent.websitesWithRange.length > 1" class="text-center">
+                <button
+                  type="button"
+                  (click)="openAllWebsitesPopup(agent)"
+                  class="inline-flex items-center gap-1 text-[var(--color-warning)] hover:text-[#4F83E8] font-medium bg-[var(--primary-soft-10)] px-3 py-1.5 rounded-lg transition-colors w-full justify-center"
+                >
+                  <span class="material-icons text-sm">more_horiz</span>
+                  View {{ agent.websitesWithRange.length - 1 }} more website{{ agent.websitesWithRange.length - 1 > 1 ? 's' : '' }}
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Right Column: Website Management (unchanged) -->
-          <div class="space-y-5">
-            <div
-              class="flex items-center justify-between pb-2 border-b border-[var(--color-border)]"
+          <!-- Action Buttons - Icons only with tooltips -->
+          <div class="flex flex-nowrap gap-1.5 pt-4 border-t border-gray-100 mt-auto overflow-x-auto pb-1">
+            <!-- Info Button -->
+            <button
+              (click)="openInfoModal(agent)"
+              class="inline-flex items-center justify-center p-2 bg-gradient-to-r from-gray-500 to-gray-600 text-white text-xs font-medium rounded-lg hover:shadow transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              [title]="'View Details'"
             >
-              <div class="flex items-center">
-                <i
-                  class="material-icons text-[var(--color-success)] text-sm mr-2"
-                  >language</i
-                >
-                <h4
-                  class="text-sm font-semibold text-[var(--color-font)] uppercase tracking-wide"
-                >
-                  Website Management
-                </h4>
-                <span
-                  class="ml-2 text-xs text-[var(--color-muted)] bg-[var(--color-bg)] px-1.5 py-0.5 rounded-full"
-                >
-                  {{ editForm.websitesWithRange.length || 0 }} websites
-                </span>
-              </div>
-              <div class="relative">
-                <div
-                  class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none"
-                >
-                  <i class="material-icons text-[var(--color-muted)] text-xs"
-                    >search</i
-                  >
-                </div>
-                <input
-                  type="text"
-                  [(ngModel)]="assignedWebsiteSearch"
-                  name="assignedSearch"
-                  placeholder="Search assigned websites..."
-                  class="w-40 pl-8 pr-3 py-1.5 text-xs border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]"
-                />
-                <button
-                  *ngIf="assignedWebsiteSearch"
-                  (click)="clearAssignedWebsiteSearch()"
-                  class="absolute right-2 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-font)]"
-                >
-                  <i class="material-icons text-xs">close</i>
-                </button>
-              </div>
-            </div>
+              <span class="material-icons text-sm">info</span>
+            </button>
 
-            <!-- Add Websites Section - SEARCH BASED -->
-            <div class="relative">
-              <div
-                class="bg-[var(--color-bg)] p-3 rounded-lg border border-[var(--color-border)]"
-              >
-                <div class="flex items-center mb-2">
-                  <i
-                    class="material-icons text-[var(--color-primary)] text-sm mr-1.5"
-                    >add_circle</i
-                  >
-                  <span class="text-xs font-semibold text-[var(--color-font)]"
-                    >Add New Websites</span
-                  >
-                </div>
-                <div class="relative mb-2">
-                  <div
-                    class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none"
-                  >
-                    <i class="material-icons text-[var(--color-muted)] text-xs"
-                      >search</i
-                    >
-                  </div>
-                  <input
-                    type="text"
-                    [(ngModel)]="addWebsiteSearchTerm"
-                    name="addWebsiteSearch"
-                    (input)="filterWebsitesForAdd()"
-                    placeholder="Type to search websites..."
-                    class="w-full pl-8 pr-3 py-1.5 text-xs border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]"
-                  />
-                  <button
-                    *ngIf="addWebsiteSearchTerm"
-                    (click)="clearAddWebsiteSearch()"
-                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-font)]"
-                  >
-                    <i class="material-icons text-xs">close</i>
-                  </button>
-                </div>
-
-                <!-- SEARCH RESULTS – ONLY VISIBLE WHEN TYPING -->
-                <div
-                  *ngIf="
-                    addWebsiteSearchTerm && addWebsiteSearchTerm.trim() !== ''
-                  "
-                  class="border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-xl max-h-40 overflow-y-auto mt-1"
-                >
-                  <div *ngIf="websitesForAdd && websitesForAdd.length > 0">
-                    <div
-                      *ngFor="let website of websitesForAdd"
-                      class="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-hover)] transition-colors"
-                    >
-                      <label class="flex items-center p-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          [checked]="isWebsiteSelectedForAdd(website.websiteId)"
-                          (change)="toggleWebsiteForAdd(website.websiteId)"
-                          class="h-3 w-3 text-[var(--color-primary)] border-[var(--color-border)] rounded focus:ring-[var(--color-primary)]"
-                        />
-                        <div class="ml-2 flex-1">
-                          <div class="flex items-center">
-                            <i
-                              class="material-icons text-[var(--color-primary)] text-xs mr-1.5"
-                              >public</i
-                            >
-                            <span
-                              class="text-xs font-medium text-[var(--color-font)] truncate"
-                            >
-                              {{ website.websiteDomain || "Unknown Website" }}
-                            </span>
-                          </div>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-                  <div
-                    *ngIf="!websitesForAdd || websitesForAdd.length === 0"
-                    class="p-3 text-center"
-                  >
-                    <div
-                      class="flex justify-center items-center text-[var(--color-muted)]"
-                    >
-                      <i class="material-icons text-sm mr-1">search_off</i>
-                      <span class="text-xs"
-                        >No websites match "{{ addWebsiteSearchTerm }}"</span
-                      >
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Hint when search is empty -->
-                <p
-                  *ngIf="
-                    !addWebsiteSearchTerm || addWebsiteSearchTerm.trim() === ''
-                  "
-                  class="text-xs text-[var(--color-muted)] italic mt-1"
-                >
-                  Start typing to see matching websites
-                </p>
-
-                <button
-                  *ngIf="selectedWebsitesForAdd.length > 0"
-                  type="button"
-                  (click)="addSelectedWebsites()"
-                  class="w-full mt-2 px-3 py-1.5 text-xs font-semibold text-white bg-[var(--color-success)] rounded-lg hover:bg-[var(--color-success-dark)] transition-all flex items-center justify-center"
-                >
-                  <i class="material-icons text-xs mr-1.5">add</i>
-                  Add {{ selectedWebsitesForAdd.length }} Website(s)
-                </button>
-              </div>
-            </div>
-
-            <!-- Assigned Websites Table -->
-            <div
-              class="border border-[var(--color-border)] rounded-lg overflow-hidden"
+            <!-- Toggle Status -->
+            <button
+              (click)="toggleStatus(agent)"
+              class="inline-flex items-center justify-center p-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-medium rounded-lg hover:shadow transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              [title]="'Toggle Status'"
             >
-              <div
-                class="grid grid-cols-12 bg-[var(--color-bg)] border-b border-[var(--color-border)] p-2 text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider"
-              >
-                <div class="col-span-4 flex items-center">
-                  <i class="material-icons text-xs mr-1.5">public</i>
-                  <span>WEBSITE</span>
+              <span class="material-icons text-sm">swap_horiz</span>
+            </button>
+
+            <!-- View Users -->
+            <button
+              *ngIf="agent.id"
+              [routerLink]="['/head/branch-user/manage', agent.id]"
+              class="inline-flex items-center justify-center p-2 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-medium rounded-lg hover:shadow transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              [title]="'View Users'"
+            >
+              <span class="material-icons text-sm">visibility</span>
+            </button>
+
+            <!-- Add User -->
+            <button
+              *ngIf="agent.id"
+              (click)="openAddUserModal(agent)"
+              class="inline-flex items-center justify-center p-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-xs font-medium rounded-lg hover:shadow transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              [title]="'Add User'"
+            >
+              <span class="material-icons text-sm">person_add</span>
+            </button>
+
+            <!-- Edit -->
+            <button
+              (click)="openEditModal(agent)"
+              class="inline-flex items-center justify-center p-2 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-white text-xs font-medium rounded-lg hover:shadow transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              [title]="'Edit'"
+            >
+              <span class="material-icons text-sm">edit</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table View (with split contact columns and Info option) -->
+    <div
+      *ngIf="viewMode === 'table' && !loading && agents.length > 0"
+      class="bg-white rounded-xl border border-gray-200 overflow-hidden"
+      (click)="closeAllActionMenus()"
+    >
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+          <!-- Table Header -->
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Branch</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Phone</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Website</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</th>
+            </tr>
+          </thead>
+          <!-- Table Body -->
+          <tbody class="divide-y divide-gray-100">
+            <tr *ngFor="let agent of paginatedAgents" class="hover:bg-gray-50 transition-colors">
+              <!-- Branch Info -->
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] flex items-center justify-center text-white font-bold text-xs shadow flex-shrink-0">
+                    {{ initialLetter(agent) }}
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">{{ agent.name }}</div>
+                  </div>
                 </div>
-                <div class="col-span-3 text-center">
-                  <i class="material-icons text-xs mr-1.5">trending_up</i>
-                  <span>TOPUP %</span>
+              </td>
+              <!-- Email Column -->
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2 text-xs">
+                  <span class="material-icons text-gray-400 text-sm">email</span>
+                  <span class="text-gray-600">{{ agent.email || 'No email' }}</span>
                 </div>
-                <div class="col-span-3 text-center">
-                  <i class="material-icons text-xs mr-1.5">trending_down</i>
-                  <span>PAYOUT %</span>
+              </td>
+              <!-- Phone Column -->
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2 text-xs">
+                  <span class="material-icons text-gray-400 text-sm">phone</span>
+                  <span class="text-gray-600">{{ agent.mobile || 'No phone' }}</span>
                 </div>
-                <div class="col-span-2 text-center">
-                  <i class="material-icons text-xs mr-1.5">settings</i>
-                  <span>ACTIONS</span>
-                </div>
-              </div>
-              <div class="max-h-[250px] overflow-y-auto">
-                <div
-                  *ngIf="
-                    !editForm.websitesWithRange ||
-                    editForm.websitesWithRange.length === 0
-                  "
-                  class="text-center py-6"
-                >
-                  <i
-                    class="material-icons text-[var(--color-muted)] text-2xl mb-1.5"
-                    >language_off</i
-                  >
-                  <p class="text-[var(--color-muted)] text-xs font-medium">
-                    No websites assigned. Add websites above.
-                  </p>
-                </div>
-                <div
-                  *ngFor="
-                    let website of getFilteredAssignedWebsites();
-                    let i = index
-                  "
-                  class="grid grid-cols-12 items-center p-2 border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-hover)] transition-all group"
-                >
-                  <div class="col-span-4 flex items-center">
-                    <div
-                      class="h-6 w-6 bg-[var(--color-bg)] rounded-md flex items-center justify-center mr-2 border border-[var(--color-border)]"
-                    >
-                      <i
-                        class="material-icons text-[var(--color-primary)] text-xs"
-                        >public</i
+              </td>
+              <!-- Website Column - Only first website visible with More button -->
+              <td class="px-6 py-4">
+                <div *ngIf="agent.websitesWithRange && agent.websitesWithRange.length > 0; else noWebsites">
+                  <!-- First Website -->
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                      <div class="w-1.5 h-1.5 rounded-full"
+                        [ngClass]="agent.websitesWithRange[0].active ? 'bg-green-500' : 'bg-red-500'"></div>
+                      <button
+                        type="button"
+                        (click)="openWebsitePopup(agent, agent.websitesWithRange[0])"
+                        class="text-xs font-medium text-[var(--color-primary)] hover:underline truncate max-w-[180px] text-left"
+                        [title]="getWebsiteDomain(agent.websitesWithRange[0])"
                       >
-                    </div>
-                    <div class="min-w-0 flex-1">
-                      <h5
-                        class="text-xs font-semibold text-[var(--color-font)] truncate"
-                        title="{{ website.websiteDomain }}"
-                      >
-                        {{ website.websiteDomain }}
-                      </h5>
+                        {{ getWebsiteDomain(agent.websitesWithRange[0]) }}
+                      </button>
                     </div>
                   </div>
-                  <div class="col-span-3">
-                    <div class="flex items-center justify-center space-x-1">
-                      <div class="relative w-16">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.1"
-                          [(ngModel)]="website.topupPercentage"
-                          name="topup-{{ i }}"
-                          (change)="
-                            onPercentageChange(
-                              website,
-                              'topupPercentage',
-                              $event
-                            )
-                          "
-                          class="w-full px-2 py-1 text-xs font-bold text-center border border-[var(--color-border)] rounded focus:outline-none focus:border-[var(--color-success)] focus:ring-1 focus:ring-[var(--color-success)]/20"
-                        />
-                        <span
-                          class="absolute right-2 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] text-xs"
-                          >%</span
-                        >
-                      </div>
-                      <div class="flex flex-col space-y-0.5">
-                        <button
-                          type="button"
-                          (click)="
-                            incrementPercentage(website, 'topupPercentage')
-                          "
-                          class="h-2.5 w-2.5 flex items-center justify-center text-[var(--color-success)] hover:bg-[var(--color-success)]/10 rounded"
-                        >
-                          <i class="material-icons text-[8px]">arrow_drop_up</i>
-                        </button>
-                        <button
-                          type="button"
-                          (click)="
-                            decrementPercentage(website, 'topupPercentage')
-                          "
-                          class="h-2.5 w-2.5 flex items-center justify-center text-[var(--color-success)] hover:bg-[var(--color-success)]/10 rounded"
-                        >
-                          <i class="material-icons text-[8px]"
-                            >arrow_drop_down</i
-                          >
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-span-3">
-                    <div class="flex items-center justify-center space-x-1">
-                      <div class="relative w-16">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.1"
-                          [(ngModel)]="website.payoutPercentage"
-                          name="payout-{{ i }}"
-                          (change)="
-                            onPercentageChange(
-                              website,
-                              'payoutPercentage',
-                              $event
-                            )
-                          "
-                          class="w-full px-2 py-1 text-xs font-bold text-center border border-[var(--color-border)] rounded focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]/20"
-                        />
-                        <span
-                          class="absolute right-2 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] text-xs"
-                          >%</span
-                        >
-                      </div>
-                      <div class="flex flex-col space-y-0.5">
-                        <button
-                          type="button"
-                          (click)="
-                            incrementPercentage(website, 'payoutPercentage')
-                          "
-                          class="h-2.5 w-2.5 flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded"
-                        >
-                          <i class="material-icons text-[8px]">arrow_drop_up</i>
-                        </button>
-                        <button
-                          type="button"
-                          (click)="
-                            decrementPercentage(website, 'payoutPercentage')
-                          "
-                          class="h-2.5 w-2.5 flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded"
-                        >
-                          <i class="material-icons text-[8px]"
-                            >arrow_drop_down</i
-                          >
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-span-2 flex justify-center">
+                  
+                  <!-- More button if there are additional websites -->
+                  <div *ngIf="agent.websitesWithRange.length > 1" class="mt-2">
                     <button
                       type="button"
-                      (click)="removeWebsiteFromEdit(i)"
-                      class="text-[var(--color-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 p-1 rounded transition-colors"
-                      title="Remove website"
+                      (click)="openAllWebsitesPopup(agent)"
+                      class="inline-flex items-center gap-1 text-xs text-[var(--color-warning)] hover:text-[var(--color-warning)]s font-medium bg-[var(--primary-soft-10)] px-2 py-1 rounded-lg transition-colors"
                     >
-                      <i class="material-icons text-sm">delete_outline</i>
+                      <span class="material-icons text-sm">more_horiz</span>
+                      +{{ agent.websitesWithRange.length - 1 }} more
                     </button>
                   </div>
                 </div>
+                <ng-template #noWebsites>
+                  <span class="text-xs text-gray-400">No websites</span>
+                </ng-template>
+              </td>
+              <!-- Status -->
+              <td class="px-6 py-4">
+                <span
+                  class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                  [ngClass]="agent.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                >
+                  {{ agent.active ? "Active" : "Inactive" }}
+                </span>
+              </td>
+              <!-- Actions - 3 Dots Menu with Info option -->
+              <td class="px-6 py-4" (click)="$event.stopPropagation()">
+                <div class="flex items-center justify-end relative">
+                  <button
+                    (click)="toggleActionMenu(agent.id)"
+                    class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors relative"
+                    [attr.data-chief-id]="agent.id"
+                  >
+                    <span class="material-icons">more_vert</span>
+                  </button>
+                  
+                  <!-- Dropdown Menu -->
+                  <div
+                    *ngIf="activeActionsMenu === agent.id"
+                    class="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
+                  >
+                    <!-- Info Option -->
+                    <button
+                      (click)="openInfoModal(agent); closeActionsMenu()"
+                      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <span class="material-icons text-gray-600 text-sm">info</span>
+                      Info
+                    </button>
+
+                    <button
+                      (click)="toggleStatus(agent); closeActionsMenu()"
+                      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[var(--primary-soft-10)] flex items-center gap-2"
+                    >
+                      <span class="material-icons text-[var(--color-primary)] text-sm">swap_horiz</span>
+                      Toggle Status
+                    </button>
+                    
+                    <button
+                      *ngIf="agent.id"
+                      [routerLink]="['/head/branch-user/manage', agent.id]"
+                      (click)="closeActionsMenu()"
+                      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-green-50 flex items-center gap-2"
+                    >
+                      <span class="material-icons text-green-600 text-sm">visibility</span>
+                      View Users
+                    </button>
+                    
+                    <button
+                      *ngIf="agent.id"
+                      (click)="openAddUserModal(agent); closeActionsMenu()"
+                      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2"
+                    >
+                      <span class="material-icons text-purple-600 text-sm">person_add</span>
+                      Add User
+                    </button>
+                    
+                    <button
+                      (click)="openEditModal(agent); closeActionsMenu()"
+                      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[var(--primary-soft-10)] flex items-center gap-2"
+                    >
+                      <span class="material-icons text-[var(--color-primary)] text-sm">edit</span>
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="!loading && filteredAgents.length > pageSize" class="mt-6">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-xs md:text-sm text-gray-600">
+          Showing
+          <span class="font-semibold text-gray-900">{{
+            (page - 1) * pageSize + 1
+          }}</span>
+          to
+          <span class="font-semibold text-gray-900">{{
+            Math.min(page * pageSize, filteredAgents.length)
+          }}</span>
+          of
+          <span class="font-semibold text-gray-900">{{ filteredAgents.length }}</span>
+          Branches
+        </div>
+        <div class="flex gap-1.5">
+          <button
+            (click)="prevPage()"
+            [disabled]="page === 1"
+            class="inline-flex items-center gap-1 px-3 py-2 border border-gray-300 text-gray-700 text-xs md:text-sm font-medium rounded-lg hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span class="material-icons text-sm">chevron_left</span>
+            Prev
+          </button>
+          <button
+            (click)="nextPage()"
+            [disabled]="page * pageSize >= filteredAgents.length"
+            class="inline-flex items-center gap-1 px-3 py-2 border border-gray-300 text-gray-700 text-xs md:text-sm font-medium rounded-lg hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+            <span class="material-icons text-sm">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Website Details Modal (with search bar) -->
+  <div
+    *ngIf="showAllWebsitesModal && selectedAgent"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    (click)="closeAllWebsitesModal()"
+  >
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div
+      class="relative z-10 w-full max-w-4xl bg-white rounded-xl shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="p-4 border-b border-gray-100">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-semibold text-gray-900">
+            Websites - {{ selectedAgent.name }}
+          </h3>
+          <button
+            (click)="closeAllWebsitesModal()"
+            class="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <span class="material-icons text-gray-500">close</span>
+          </button>
+        </div>
+        
+        <!-- Search Bar in Modal -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="material-icons text-gray-400 text-sm">search</span>
+          </div>
+          <input
+            type="text"
+            class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] transition-all duration-200 text-sm"
+            placeholder="Search websites..."
+            [(ngModel)]="websiteModalSearchTerm"
+            (input)="filterWebsitesInModal()"
+          />
+        </div>
+      </div>
+      
+      <div class="p-4 max-h-96 overflow-y-auto">
+        <div class="space-y-3">
+          <div
+            *ngFor="let website of filteredModalWebsites"
+            class="p-3 bg-gray-50 rounded-lg border border-gray-100"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-2 h-2 rounded-full"
+                  [ngClass]="website.active ? 'bg-green-500' : 'bg-red-500'"
+                ></div>
+                <span class="font-medium text-gray-900">
+                  {{ getWebsiteDomain(website) }}
+                </span>
               </div>
+              <button
+                (click)="toggleWebsiteStatus(selectedAgent, website)"
+                [disabled]="isWebsiteToggling(selectedAgent.id, website.websiteId)"
+                class="relative inline-flex items-center h-5 rounded-full w-9 flex-shrink-0 border border-transparent transition-colors duration-200 ease-in-out"
+                [ngClass]="website.active ? 'bg-green-500' : 'bg-gray-300'"
+              >
+                <span
+                  class="inline-block h-4 w-4 transform bg-white rounded-full transition duration-200 ease-in-out shadow"
+                  [ngClass]="
+                    website.active ? 'translate-x-4' : 'translate-x-0.5'
+                  "
+                ></span>
+              </button>
+            </div>
+            <div class="flex gap-3 text-sm mt-2 pt-2 border-t border-gray-200">
+              <div class="flex-1">
+                <div class="text-xs text-gray-500">Topup</div>
+                <div class="font-semibold text-green-600">
+                  {{ website.topupPercentage || 0 }}%
+                </div>
+              </div>
+              <div class="flex-1">
+                <div class="text-xs text-gray-500">Payout</div>
+                <div class="font-semibold text-[var(--color-primary)]">
+                  {{ website.payoutPercentage || 0 }}%
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="filteredModalWebsites.length === 0" class="text-center py-8">
+            <span class="material-icons text-gray-300 text-3xl mb-2">search_off</span>
+            <p class="text-gray-500 text-sm">No websites match your search</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Single Website Modal -->
+  <div
+    *ngIf="showSingleWebsiteModal && selectedWebsite"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    (click)="closeSingleWebsiteModal()"
+  >
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div
+      class="relative z-10 w-full max-w-md bg-white rounded-xl shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-gray-900">
+          Website Details
+        </h3>
+        <button
+          (click)="closeSingleWebsiteModal()"
+          class="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <span class="material-icons text-gray-500">close</span>
+        </button>
+      </div>
+      <div class="p-4">
+        <div class="text-center mb-4">
+          <span class="font-medium text-gray-900 text-lg">
+            {{ getWebsiteDomain(selectedWebsite) }}
+          </span>
+        </div>
+        <div class="space-y-3">
+          <div class="p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-2 h-2 rounded-full"
+                  [ngClass]="selectedWebsite.active ? 'bg-green-500' : 'bg-red-500'"
+                ></div>
+                <span class="text-sm text-gray-600">Status</span>
+              </div>
+              <span class="text-sm font-medium" [ngClass]="selectedWebsite.active ? 'text-green-600' : 'text-red-600'">
+                {{ selectedWebsite.active ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <div class="text-xs text-gray-500 mb-1">Topup</div>
+              <div class="text-lg font-semibold text-green-600">
+                {{ selectedWebsite.topupPercentage || 0 }}%
+              </div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <div class="text-xs text-gray-500 mb-1">Payout</div>
+              <div class="text-lg font-semibold text-[var(--color-primary)]">
+                {{ selectedWebsite.payoutPercentage || 0 }}%
+              </div>
+            </div>
+          </div>
+          <button
+            (click)="toggleWebsiteStatus(selectedAgent!, selectedWebsite)"
+            [disabled]="isWebsiteToggling(selectedAgent?.id || '', selectedWebsite.websiteId)"
+            class="w-full mt-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:shadow transition-all"
+          >
+            Toggle Status
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Modal -->
+  <div
+    *ngIf="showInfoModal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    (click)="closeInfoModal()"
+  >
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div
+      class="relative z-10 w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Branch Details</h3>
+          <p class="text-xs text-gray-500">Profile overview</p>
+        </div>
+        <button (click)="closeInfoModal()" class="p-2 hover:bg-gray-200 rounded-lg">
+          <span class="material-icons text-gray-600">close</span>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6" *ngIf="selectedAgentForInfo">
+        <div class="grid grid-cols-2 gap-6">
+          <!-- ================= LEFT ================= -->
+          <div class="space-y-5">
+            <!-- Profile -->
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] flex items-center justify-center text-white text-lg font-bold shadow-md">
+                {{ initialLetter(selectedAgentForInfo) }}
+              </div>
+              <div>
+                <div class="text-lg font-semibold text-gray-900">
+                  {{ selectedAgentForInfo.name }}
+                </div>
+                <span
+                  class="inline-flex mt-1 px-3 py-1 text-xs font-medium rounded-full"
+                  [ngClass]="selectedAgentForInfo.active 
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'"
+                >
+                  {{ selectedAgentForInfo.active ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Email + Phone -->
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="material-icons text-[var(--color-primary)] text-[18px]">email</span>
+                  <span class="text-xs text-gray-500">Email</span>
+                </div>
+                <div class="text-sm font-medium text-gray-900 truncate">
+                  {{ selectedAgentForInfo.email || 'No email' }}
+                </div>
+              </div>
+
+              <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="material-icons text-green-600 text-[18px]">phone</span>
+                  <span class="text-xs text-gray-500">Phone</span>
+                </div>
+                <div class="text-sm font-medium text-gray-900">
+                  {{ selectedAgentForInfo.mobile || 'No phone' }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Balance + Business -->
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="material-icons text-yellow-600 text-[18px]">
+                    account_balance_wallet
+                  </span>
+                  <span class="text-xs text-gray-500">Balance</span>
+                </div>
+                <div class="text-sm font-semibold text-green-600">
+                  ₹{{ selectedAgentForInfo.balance || 0 }}
+                </div>
+              </div>
+
+              <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="material-icons text-purple-600 text-[18px]">business</span>
+                  <span class="text-xs text-gray-500">Business Type</span>
+                </div>
+                <div class="text-sm font-medium text-gray-900">
+                  {{
+                    selectedAgentForInfo.businessTypes?.length
+                      ? selectedAgentForInfo.businessTypes.join(', ')
+                      : 'N/A'
+                  }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= RIGHT ================= -->
+          <div>
+            <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 h-full flex flex-col">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="material-icons text-gray-600 text-[18px]">description</span>
+                <span class="text-sm font-semibold text-gray-800">
+                  Additional Info
+                </span>
+              </div>
+              <p class="text-sm text-gray-700 leading-relaxed flex-1">
+                {{ selectedAgentForInfo.info || 'No additional information added.' }}
+              </p>
+              <!-- <div class="mt-4 pt-4 border-t border-gray-200">
+                <span class="text-xs font-medium text-gray-500 block mb-2">Websites Assigned</span>
+                <div class="flex flex-wrap gap-1">
+                  <span *ngFor="let website of selectedAgentForInfo.websitesWithRange?.slice(0, 3)" 
+                        class="text-xs bg-white px-2 py-1 rounded border border-gray-200">
+                    {{ getWebsiteDomain(website) }}
+                  </span>
+                  <span *ngIf="selectedAgentForInfo.websitesWithRange?.length > 3" 
+                        class="text-xs bg-white px-2 py-1 rounded border border-gray-200 text-gray-500">
+                    +{{ selectedAgentForInfo.websitesWithRange?.length - 3 }} more
+                  </span>
+                </div>
+              </div> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Edit Branch Modal (Fixed Version) -->
+<div
+  *ngIf="showEditModal"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4"
+  aria-modal="true"
+  role="dialog"
+>
+  <!-- Backdrop -->
+  <div
+    class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+    (click)="closeEditModal()"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Modal Panel - Increased to max-w-5xl for better visibility -->
+  <div
+    class="relative z-10 w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-white rounded-xl md:rounded-2xl shadow-2xl"
+  >
+    <!-- Modal Header -->
+    <div
+      class="p-4 md:p-6 border-b border-gray-100 sticky top-0 bg-white z-10"
+    >
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-light)] flex items-center justify-center"
+          >
+            <span class="material-icons text-white">edit</span>
+          </div>
+          <div>
+            <h2 class="text-lg md:text-xl font-bold text-gray-900">
+              Edit Branch
+            </h2>
+            <p class="text-sm text-gray-500">
+              Update Branch details and website assignments
+            </p>
+          </div>
+        </div>
+
+        <button
+          (click)="closeEditModal()"
+          class="w-7 h-7 md:w-8 md:h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors"
+          aria-label="Close modal"
+        >
+          <span class="material-icons text-gray-400">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-4 md:p-6">
+      <form (ngSubmit)="updateBranch()" class="space-y-5 md:space-y-6">
+        <!-- Personal Information Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <!-- Name -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
+              >Full Name <span class="text-red-500 ml-0.5">*</span></label
+            >
+            <input
+              type="text"
+              [(ngModel)]="editForm.name"
+              name="name"
+              class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200"
+              placeholder="Enter full name"
+              required
+            />
+            <div
+              *ngIf="!editForm.name"
+              class="text-red-500 text-xs mt-1 flex items-center font-medium"
+            >
+              <span class="material-icons text-xs mr-0.5">error</span>
+              Name is required
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
+              >Email Address</label
+            >
+            <input
+              type="email"
+              [(ngModel)]="editForm.email"
+              name="email"
+              (input)="validateEmail()"
+              [class.border-red-500]="emailError"
+              class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200"
+              placeholder="Enter email"
+            />
+            <div
+              *ngIf="emailError"
+              class="text-red-500 text-xs mt-1 flex items-center font-medium"
+            >
+              <span class="material-icons text-xs mr-0.5">error</span>
+              {{ emailError }}
+            </div>
+          </div>
+
+          <!-- Mobile -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
+              >Mobile Number</label
+            >
+            <input
+              type="text"
+              [(ngModel)]="editForm.mobile"
+              name="mobile"
+              (input)="validateMobile()"
+              [class.border-red-500]="mobileError"
+              class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200"
+              placeholder="Enter mobile"
+            />
+            <div
+              *ngIf="mobileError"
+              class="text-red-500 text-xs mt-1 flex items-center font-medium"
+            >
+              <span class="material-icons text-xs mr-0.5">error</span>
+              {{ mobileError }}
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
+              >Account Status</label
+            >
+            <div
+              class="flex items-center p-3 md:p-4 bg-[#F0F7FF] rounded-lg md:rounded-xl border border-[var(--color-primary)]/10"
+            >
+              <input
+                type="checkbox"
+                [checked]="editForm.isActive"
+                (change)="toggleActiveState()"
+                class="h-4 w-4 md:h-5 md:w-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-gray-300 rounded transition-all duration-200"
+              />
+              <label
+                class="ml-2 md:ml-3 flex items-center gap-1.5 md:gap-2 cursor-pointer"
+                (click)="toggleActiveState()"
+              >
+                <div
+                  class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[var(--color-primary)]"
+                ></div>
+                <span class="text-sm font-medium text-gray-900"
+                  >Active Account</span
+                >
+              </label>
             </div>
           </div>
         </div>
 
-        <div
-          class="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)] mt-4"
-        >
+        <!-- Additional Info -->
+        <div>
+          <label
+            class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
+            >Additional Information</label
+          >
+          <textarea
+            [(ngModel)]="editForm.info"
+            name="info"
+            rows="2"
+            class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200 resize-none"
+            placeholder="Add any notes or additional information..."
+          ></textarea>
+        </div>
+
+        <!-- Websites Section -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-base md:text-lg font-semibold text-gray-900">
+                Website Assignment
+              </h3>
+              <p class="text-xs md:text-sm text-gray-500 mt-0.5">
+                Select websites and set commission percentages
+              </p>
+            </div>
+            <span
+              class="text-xs font-medium px-2.5 py-1 bg-[#F0F7FF] text-[var(--color-primary)] rounded-full"
+            >
+              {{ getSelectedWebsiteCount() }} selected
+            </span>
+          </div>
+
+          <!-- Loading -->
+          <div
+            *ngIf="loadingWebsites"
+            class="p-4 md:p-6 bg-gray-50 rounded-lg md:rounded-xl border border-gray-100"
+          >
+            <div class="flex items-center justify-center gap-2.5 md:gap-3">
+              <div
+                class="w-4 h-4 md:w-5 md:h-5 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"
+              ></div>
+              <span class="text-sm text-gray-600">Loading websites...</span>
+            </div>
+          </div>
+
+          <!-- Websites Grid -->
+          <div
+            *ngIf="!loadingWebsites"
+            class="grid grid-cols-1 gap-3 max-h-[40vh] overflow-y-auto pr-1"
+          >
+            <div
+              *ngFor="let website of websiteOptions"
+              class="bg-white rounded-lg border border-gray-200 p-3 md:p-4 hover:border-[var(--color-primary)] transition-colors"
+            >
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                  <input
+                    type="checkbox"
+                    [id]="'edit-website-' + website.websiteId"
+                    [checked]="isWebsiteSelected(website.websiteId)"
+                    (change)="onWebsiteSelectionChange($event, website.websiteId)"
+                    class="h-4 w-4 md:h-5 md:w-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-gray-300 rounded transition-all duration-200 flex-shrink-0"
+                  />
+                  <div class="min-w-0">
+                    <label
+                      [for]="'edit-website-' + website.websiteId"
+                      class="font-medium text-gray-900 text-sm truncate block cursor-pointer"
+                    >
+                      {{ website.websiteDomain }}
+                    </label>
+                  </div>
+                </div>
+                <span
+                  *ngIf="isInitialWebsite(website.websiteId)"
+                  class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full flex-shrink-0"
+                >
+                  Assigned
+                </span>
+              </div>
+
+              <!-- Percentage Fields - Only show if website is selected -->
+              <div
+                *ngIf="isWebsiteSelected(website.websiteId)"
+                class="grid grid-cols-3 gap-3 mt-3"
+              >
+                <div>
+                  <label
+                    class="block text-xs font-medium text-gray-700 mb-1.5"
+                    >First Topup (%)</label
+                  >
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      [(ngModel)]="getWebsitePercentage(website.websiteId).fttPercentage"
+                      [name]="'ftt_' + website.websiteId"
+                      class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-sm"
+                      placeholder="0-100"
+                    />
+                    <span class="text-gray-500 text-sm">%</span>
+                  </div>
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-medium text-gray-700 mb-1.5"
+                    >Topup (%)</label
+                  >
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      [(ngModel)]="getWebsitePercentage(website.websiteId).topupPercentage"
+                      [name]="'topup_' + website.websiteId"
+                      class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-sm"
+                      placeholder="0-100"
+                    />
+                    <span class="text-gray-500 text-sm">%</span>
+                  </div>
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-medium text-gray-700 mb-1.5"
+                    >Payout (%)</label
+                  >
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      [(ngModel)]="getWebsitePercentage(website.websiteId).payoutPercentage"
+                      [name]="'payout_' + website.websiteId"
+                      class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-sm"
+                      placeholder="0-100"
+                    />
+                    <span class="text-gray-500 text-sm">%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Load More Websites -->
+          <div *ngIf="websitePage + 1 < websiteTotalPages" class="text-center py-2">
+            <button
+              type="button"
+              (click)="loadMoreWebsitesForEdit()"
+              class="px-4 py-2 text-xs font-medium bg-gray-100 hover:bg-[var(--color-primary)] hover:text-white rounded-lg transition-all"
+            >
+              <span *ngIf="!loadingMoreWebsites">Load More Websites</span>
+              <span *ngIf="loadingMoreWebsites">Loading...</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex gap-2.5 md:gap-3 pt-5 border-t border-gray-100">
           <button
             type="button"
             (click)="closeEditModal()"
-            class="px-4 py-2 text-xs font-semibold text-[var(--color-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-hover)] hover:text-[var(--color-font)] transition-all shadow-sm flex items-center"
+            class="flex-1 px-4 md:px-6 py-2.5 md:py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg md:rounded-xl font-medium transition-colors text-sm"
           >
-            <i class="material-icons text-xs mr-1.5">close</i>
             Cancel
           </button>
-          <button
+          <!-- <button
             type="submit"
-            [disabled]="
-              !editForm.name ||
-              loading ||
-              emailError ||
-              mobileError ||
-              !isFormValid()
-            "
-            class="px-5 py-2 text-xs font-semibold text-white bg-[var(--color-primary)] rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow flex items-center"
+            [disabled]="!editForm.name || loading || emailError || mobileError || !isFormValid()"
+            class="flex-1 px-4 md:px-6 py-2.5 md:py-3 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-white font-semibold rounded-lg md:rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
-            <i class="material-icons text-xs mr-1.5">{{
-              loading ? "hourglass_empty" : "save"
-            }}</i>
-            {{ loading ? "Saving..." : "Save Changes" }}
+            {{ loading ? "Updating..." : "Update Branch" }}
+          </button> -->
+           <button
+            type="submit"
+            class="flex-1 px-4 md:px-6 py-2.5 md:py-3 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-white font-semibold rounded-lg md:rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          >
+            {{ loading ? "Updating..." : "Update Branch" }}
           </button>
         </div>
       </form>
     </div>
   </div>
-  <!-- Success Toast Popup for Update -->
-  <div
-    *ngIf="showUpdateSuccessPopup"
-    class="fixed top-5 right-5 z-[1000] animate-slide-down"
-    role="alert"
-  >
-    <div
-      class="flex items-center gap-3 px-5 py-4 bg-white border-l-4 border-[var(--color-success)] rounded-lg shadow-xl"
-    >
-      <div
-        class="flex-shrink-0 w-8 h-8 bg-[var(--color-success)]/10 rounded-full flex items-center justify-center"
-      >
-        <i class="material-icons text-[var(--color-success)] text-lg"
-          >check_circle</i
-        >
-      </div>
-      <div class="flex-1">
-        <p class="text-sm font-bold text-[var(--color-font)]">
-          {{ updateSuccessMessage }}
-        </p>
-      </div>
-      <button
-        (click)="closeUpdateSuccessPopup()"
-        class="text-[var(--color-muted)] hover:text-[var(--color-font)] transition-colors"
-      >
-        <i class="material-icons text-base">close</i>
-      </button>
-    </div>
-  </div>
 </div>
 
-<!-- Add User Modal -->
-<div *ngIf="showAddUserModal" class="fixed inset-0 z-50 overflow-y-auto">
+  <!-- Add User Modal -->
   <div
-    class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0"
+    *ngIf="showAddUserModal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
   >
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeAddUserModal()"></div>
     <div
-      class="fixed inset-0 transition-opacity bg-black bg-opacity-50"
-      (click)="closeAddUserModal()"
-    ></div>
-    <div
-      class="relative inline-block w-full max-w-2xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl pointer-events-none"
+      class="relative w-full max-w-2xl rounded-xl md:rounded-2xl overflow-hidden shadow-2xl"
     >
-      <div class="pointer-events-auto">
-        <app-add-branch-user
-          [associate]="selectedAgentForAdd?.id"
-          [inModal]="true"
-          (created)="handleUserCreated($event)"
-          (close)="closeAddUserModal()"
-        >
-        </app-add-branch-user>
-      </div>
-    </div>
-  </div>
-  <div
-    *ngIf="showUpdateSuccessPopup"
-    class="fixed bottom-5 right-5 z-[9999] animate-slide-up"
-    role="alert"
-  >
-    <div
-      class="flex items-center gap-3 px-5 py-4 bg-white border-l-4 border-[var(--color-success)] rounded-lg shadow-xl min-w-[300px]"
-    >
-      <div
-        class="flex-shrink-0 w-8 h-8 bg-[var(--color-success)]/10 rounded-full flex items-center justify-center"
-      >
-        <i class="material-icons text-[var(--color-success)] text-lg"
-          >check_circle</i
-        >
-      </div>
-      <div class="flex-1">
-        <p class="text-sm font-bold text-[var(--color-font)]">
-          {{ updateSuccessMessage }}
-        </p>
-      </div>
-      <button
-        (click)="closeUpdateSuccessPopup()"
-        class="text-[var(--color-muted)] hover:text-[var(--color-font)] transition-colors"
-      >
-        <i class="material-icons text-base">close</i>
-      </button>
+      <app-add-branch-user
+        [associate]="selectedAgentForAdd?.id"
+        [inModal]="true"
+        (created)="handleUserCreated($event)"
+        (close)="closeAddUserModal()"
+      ></app-add-branch-user>
     </div>
   </div>
 </div>

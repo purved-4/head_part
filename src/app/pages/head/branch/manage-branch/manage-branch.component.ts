@@ -17,6 +17,8 @@ interface WebsiteRange {
   active?: boolean;
   topupPercentage: number;
   payoutPercentage: number;
+    fttPercentage?: number; // Add this line
+
 }
 
 interface Agent {
@@ -62,6 +64,7 @@ export class ManageBranchComponent implements OnInit {
   page = 1;
   pageSize = 5;
   searchTerm = "";
+updatingbranch: boolean = false;
 
   loading = true;
   error = "";
@@ -131,6 +134,12 @@ export class ManageBranchComponent implements OnInit {
   updateSuccessMessage = "";
   private successPopupTimeout: any;
 
+
+  // Add these properties
+showInfoModal = false;
+selectedAgentForInfo: any = null;
+viewMode: 'grid' | 'table' = 'table';
+
   constructor(
     private route: ActivatedRoute,
     private managerService: ManagerService,
@@ -173,6 +182,7 @@ export class ManageBranchComponent implements OnInit {
                 : typeof w.isActive === "boolean"
                   ? w.isActive
                   : true,
+                              fttPercentage: Number(w.fttPercentage) || 0,
             topupPercentage: Number(w.topupPercentage) || 0,
             payoutPercentage: Number(w.payoutPercentage) || 0,
           }));
@@ -252,30 +262,30 @@ export class ManageBranchComponent implements OnInit {
   }
 
   // ---------- LOAD WEBSITE OPTIONS ----------
-  loadWebsiteOptions(headId: any): void {
-    this.loadingWebsites = true;
-    this.headService.getAllHeadsWithWebsitesById(headId).subscribe({
-      next: (res: any) => {
-        const opts = res || [];
-        this.websiteOptions = opts.map((w: any) => ({
-          websiteId: w.websiteId ?? w.id ?? "",
-          websiteDomain: w.websiteDomain ?? w.domain ?? "Unknown Website",
-          active:
-            typeof w.active === "boolean"
-              ? w.active
-              : typeof w.isActive === "boolean"
-                ? w.isActive
-                : true,
-        }));
-        this.loadingWebsites = false;
-      },
-      error: (err: any) => {
-        console.error("Error loading websites:", err);
-        this.websiteOptions = [];
-        this.loadingWebsites = false;
-      },
-    });
-  }
+  // loadWebsiteOptions(headId: any): void {
+  //   this.loadingWebsites = true;
+  //   this.headService.getAllHeadsWithWebsitesById(headId).subscribe({
+  //     next: (res: any) => {
+  //       const opts = res || [];
+  //       this.websiteOptions = opts.map((w: any) => ({
+  //         websiteId: w.websiteId ?? w.id ?? "",
+  //         websiteDomain: w.websiteDomain ?? w.domain ?? "Unknown Website",
+  //         active:
+  //           typeof w.active === "boolean"
+  //             ? w.active
+  //             : typeof w.isActive === "boolean"
+  //               ? w.isActive
+  //               : true,
+  //       }));
+  //       this.loadingWebsites = false;
+  //     },
+  //     error: (err: any) => {
+  //       console.error("Error loading websites:", err);
+  //       this.websiteOptions = [];
+  //       this.loadingWebsites = false;
+  //     },
+  //   });
+  // }
 
   // ---------- PAGINATION ----------
   getPageNumbers(): number[] {
@@ -505,28 +515,30 @@ export class ManageBranchComponent implements OnInit {
   }
 
   // ---------- EDIT MODAL ----------
-  openEditModal(agent: Agent): void {
-    this.editForm = {
-      id: agent.id,
-      name: agent.name,
-      email: agent.email || "",
-      mobile: agent.mobile || "",
-      info: agent.info || "",
-      isActive: agent.active,
-      websitesWithRange: (agent.websitesWithRange || []).map((w) => ({
-        ...w,
-        topupPercentage: Number(w.topupPercentage) || 0,
-        payoutPercentage: Number(w.payoutPercentage) || 0,
-      })),
-    };
-    this.selectedWebsitesForAdd = [];
-    this.addWebsiteSearchTerm = "";
-    this.assignedWebsiteSearch = "";
-    this.emailError = "";
-    this.mobileError = "";
-    this.websitesForAdd = [];
-    this.showEditModal = true;
-  }
+  // openEditModal(agent: Agent): void {
+  //   this.editForm = {
+  //     id: agent.id,
+  //     name: agent.name,
+  //     email: agent.email || "",
+  //     mobile: agent.mobile || "",
+  //     info: agent.info || "",
+  //     isActive: agent.active,
+  //     websitesWithRange: (agent.websitesWithRange || []).map((w) => ({
+  //       ...w,
+  //               fttPercentage: Number(w.fttPercentage) || 0,
+
+  //       topupPercentage: Number(w.topupPercentage) || 0,
+  //       payoutPercentage: Number(w.payoutPercentage) || 0,
+  //     })),
+  //   };
+  //   this.selectedWebsitesForAdd = [];
+  //   this.addWebsiteSearchTerm = "";
+  //   this.assignedWebsiteSearch = "";
+  //   this.emailError = "";
+  //   this.mobileError = "";
+  //   this.websitesForAdd = [];
+  //   this.showEditModal = true;
+  // }
 
   closeEditModal(): void {
     this.showEditModal = false;
@@ -557,9 +569,9 @@ export class ManageBranchComponent implements OnInit {
     );
   }
 
-  isWebsiteSelectedForAdd(websiteId: string): boolean {
-    return this.selectedWebsitesForAdd.includes(websiteId);
-  }
+  // isWebsiteSelectedForAdd(websiteId: string): boolean {
+  //   return this.selectedWebsitesForAdd.includes(websiteId);
+  // }
 
   filterWebsitesForAdd(): void {
     const term = (this.addWebsiteSearchTerm || "").trim().toLowerCase();
@@ -619,6 +631,8 @@ export class ManageBranchComponent implements OnInit {
           websiteId: website.websiteId,
           websiteDomain: website.websiteDomain,
           range: "",
+                    fttPercentage: 0,
+
           topupPercentage: 0,
           payoutPercentage: 0,
           active: true,
@@ -675,10 +689,14 @@ export class ManageBranchComponent implements OnInit {
 
   isWebsiteValid(website: any): boolean {
     return (
+        website.fttPercentage !== null &&
+      website.fttPercentage !== undefined &&
       website.topupPercentage !== null &&
       website.topupPercentage !== undefined &&
       website.payoutPercentage !== null &&
       website.payoutPercentage !== undefined &&
+      website.fttPercentage >= 0 &&
+      website.fttPercentage <= 100 &&
       website.topupPercentage >= 0 &&
       website.topupPercentage <= 100 &&
       website.payoutPercentage >= 0 &&
@@ -711,8 +729,13 @@ export class ManageBranchComponent implements OnInit {
 
   validateWebsitePercentages(): boolean {
     for (const website of this.editForm.websitesWithRange) {
+            const ftt = Number(website.fttPercentage);
+
       const topup = Number(website.topupPercentage);
       const payout = Number(website.payoutPercentage);
+      if (isNaN(ftt) || ftt < 0 || ftt > 100) {
+        return false;
+      }
       if (isNaN(topup) || topup < 0 || topup > 100) {
         return false;
       }
@@ -754,88 +777,179 @@ export class ManageBranchComponent implements OnInit {
   }
 
   // ---------- UPDATE BRANCH (with success popup) ----------
+  // updateBranch(): void {
+  //   this.emailError = "";
+  //   this.mobileError = "";
+
+  //   if (!this.editForm.name || this.editForm.name.trim() === "") {
+  //     alert("Branch name is required");
+  //     return;
+  //   }
+
+  //   if (this.editForm.email && this.editForm.email.trim() !== "") {
+  //     if (!this.isValidEmail(this.editForm.email)) {
+  //       this.emailError = "Please enter a valid email address";
+  //       alert(this.emailError);
+  //       return;
+  //     }
+  //   }
+
+  //   if (this.editForm.mobile && this.editForm.mobile.trim() !== "") {
+  //     const cleanMobile = this.editForm.mobile.replace(/\D/g, "");
+  //     if (!this.isValidMobile(cleanMobile)) {
+  //       this.mobileError = "Please enter a valid 10-15 digit mobile number";
+  //       alert(this.mobileError);
+  //       return;
+  //     }
+  //     this.editForm.mobile = cleanMobile;
+  //   }
+
+  //   if (!this.validateWebsitePercentages()) {
+  //     alert("Please enter valid percentages (0-100) for all websites");
+  //     return;
+  //   }
+
+  //   this.loading = true;
+
+  //   const websitePercentages: any = {};
+  //   this.editForm.websitesWithRange.forEach((website) => {
+  //     websitePercentages[website.websiteId] = {
+  //               fttPercentage: Number(website.fttPercentage) || 0,
+
+  //       topupPercentage: Number(website.topupPercentage) || 0,
+  //       payoutPercentage: Number(website.payoutPercentage) || 0,
+  //     };
+  //   });
+
+  //   const websiteIds: string[] = this.editForm.websitesWithRange
+  //     .map((w) => w.websiteId)
+  //     .filter((id) => !!id);
+
+  //   const payload = {
+  //     id: this.editForm.id,
+  //     name: this.editForm.name.trim(),
+  //     email: this.editForm.email.trim() || null,
+  //     mobile: this.editForm.mobile || null,
+  //     info: this.editForm.info?.trim() || null, // ✅ info added
+  //     isActive: this.editForm.isActive,
+  //     createdById: this.currentRoleId,
+  //     websites: websiteIds,
+  //     websitePercentages: websitePercentages,
+  //   };
+
+  //   console.log("Update payload:", payload);
+
+  //   this.branchService.updateBranch(payload).subscribe({
+  //     next: (res: any) => {
+  //       console.log("Update successful:", res);
+  //       this.loadbranchs(this.currentRoleId);
+  //       this.closeEditModal();
+  //       this.loading = false;
+
+  //       this.updateSuccessMessage = "Branch updated successfully!";
+  //       this.showUpdateSuccessPopup = true;
+  //       this.successPopupTimeout = setTimeout(() => {
+  //         this.closeUpdateSuccessPopup();
+  //       }, 3000);
+  //     },
+  //     error: (err) => {
+  //       console.error("Failed to update branch:", err);
+  //       this.error =
+  //         err.error?.message || "Failed to update branch. Please try again.";
+  //       alert(this.error);
+  //       this.loading = false;
+  //     },
+  //   });
+  // }
+
   updateBranch(): void {
-    this.emailError = "";
-    this.mobileError = "";
+  this.emailError = "";
+  this.mobileError = "";
 
-    if (!this.editForm.name || this.editForm.name.trim() === "") {
-      alert("Branch name is required");
-      return;
-    }
-
-    if (this.editForm.email && this.editForm.email.trim() !== "") {
-      if (!this.isValidEmail(this.editForm.email)) {
-        this.emailError = "Please enter a valid email address";
-        alert(this.emailError);
-        return;
-      }
-    }
-
-    if (this.editForm.mobile && this.editForm.mobile.trim() !== "") {
-      const cleanMobile = this.editForm.mobile.replace(/\D/g, "");
-      if (!this.isValidMobile(cleanMobile)) {
-        this.mobileError = "Please enter a valid 10-15 digit mobile number";
-        alert(this.mobileError);
-        return;
-      }
-      this.editForm.mobile = cleanMobile;
-    }
-
-    if (!this.validateWebsitePercentages()) {
-      alert("Please enter valid percentages (0-100) for all websites");
-      return;
-    }
-
-    this.loading = true;
-
-    const websitePercentages: any = {};
-    this.editForm.websitesWithRange.forEach((website) => {
-      websitePercentages[website.websiteId] = {
-        topupPercentage: Number(website.topupPercentage) || 0,
-        payoutPercentage: Number(website.payoutPercentage) || 0,
-      };
-    });
-
-    const websiteIds: string[] = this.editForm.websitesWithRange
-      .map((w) => w.websiteId)
-      .filter((id) => !!id);
-
-    const payload = {
-      id: this.editForm.id,
-      name: this.editForm.name.trim(),
-      email: this.editForm.email.trim() || null,
-      mobile: this.editForm.mobile || null,
-      info: this.editForm.info?.trim() || null, // ✅ info added
-      isActive: this.editForm.isActive,
-      createdById: this.currentRoleId,
-      websites: websiteIds,
-      websitePercentages: websitePercentages,
-    };
-
-    console.log("Update payload:", payload);
-
-    this.branchService.updateBranch(payload).subscribe({
-      next: (res: any) => {
-        console.log("Update successful:", res);
-        this.loadbranchs(this.currentRoleId);
-        this.closeEditModal();
-        this.loading = false;
-
-        this.updateSuccessMessage = "Branch updated successfully!";
-        this.showUpdateSuccessPopup = true;
-        this.successPopupTimeout = setTimeout(() => {
-          this.closeUpdateSuccessPopup();
-        }, 3000);
-      },
-      error: (err) => {
-        console.error("Failed to update branch:", err);
-        this.error =
-          err.error?.message || "Failed to update branch. Please try again.";
-        alert(this.error);
-        this.loading = false;
-      },
-    });
+  if (!this.editForm.name || this.editForm.name.trim() === "") {
+    alert("Branch name is required");
+    return;
   }
+
+  if (this.editForm.email && this.editForm.email.trim() !== "") {
+    if (!this.isValidEmail(this.editForm.email)) {
+      this.emailError = "Please enter a valid email address";
+      alert(this.emailError);
+      return;
+    }
+  }
+
+  if (this.editForm.mobile && this.editForm.mobile.trim() !== "") {
+    const cleanMobile = this.editForm.mobile.replace(/\D/g, "");
+    if (!this.isValidMobile(cleanMobile)) {
+      this.mobileError = "Please enter a valid 10-15 digit mobile number";
+      alert(this.mobileError);
+      return;
+    }
+    this.editForm.mobile = cleanMobile;
+  }
+
+  if (!this.validateWebsitePercentages()) {
+    alert("Please enter valid percentages (0-100) for all websites");
+    return;
+  }
+
+  this.updatingbranch = true;
+  this.loading = true;
+
+  const websitePercentages: any = {};
+  this.editForm.websitesWithRange.forEach((website) => {
+    websitePercentages[website.websiteId] = {
+      fttPercentage: Number(website.fttPercentage) || 0,
+      topupPercentage: Number(website.topupPercentage) || 0,
+      payoutPercentage: Number(website.payoutPercentage) || 0,
+    };
+  });
+
+  const websiteIds: string[] = this.editForm.websitesWithRange
+    .map((w) => w.websiteId)
+    .filter((id) => !!id);
+
+  const payload = {
+    id: this.editForm.id,
+    name: this.editForm.name.trim(),
+    email: this.editForm.email.trim() || null,
+    mobile: this.editForm.mobile || null,
+    info: this.editForm.info?.trim() || null,
+    isActive: this.editForm.isActive,
+    createdById: this.currentRoleId,
+    websites: websiteIds,
+    websitePercentages: websitePercentages,
+  };
+
+  console.log("Update payload:", payload);
+
+  this.branchService.updateBranch(payload).subscribe({
+    next: (res: any) => {
+      console.log("Update successful:", res);
+      this.loadbranchs(this.currentRoleId);
+      this.closeEditModal();
+      this.updatingbranch = false;
+      this.loading = false;
+
+      this.updateSuccessMessage = "Branch updated successfully!";
+      this.showUpdateSuccessPopup = true;
+      this.successPopupTimeout = setTimeout(() => {
+        this.closeUpdateSuccessPopup();
+      }, 3000);
+    },
+    error: (err) => {
+      console.error("Failed to update branch:", err);
+      this.error = err.error?.message || "Failed to update branch. Please try again.";
+      alert(this.error);
+      this.updatingbranch = false;
+      this.loading = false;
+    },
+  });
+
+  console.log("VALID:", this.validateWebsitePercentages());
+console.log("FORM VALID:", this.isFormValid());
+}
 
   closeUpdateSuccessPopup(): void {
     clearTimeout(this.successPopupTimeout);
@@ -883,10 +997,16 @@ export class ManageBranchComponent implements OnInit {
       "Info",
       "Status",
       "Websites",
+      "Avg Ftt %",
       "Avg Topup %",
       "Avg Payout %",
     ];
     const rows = agents.map((agent) => {
+      const avgFtt =
+        agent.websitesWithRange?.reduce(
+          (sum, w) => sum + (w.fttPercentage || 0),
+          0,
+        ) / (agent.websitesWithRange?.length || 1);
       const avgTopup =
         agent.websitesWithRange?.reduce(
           (sum, w) => sum + (w.topupPercentage || 0),
@@ -904,6 +1024,7 @@ export class ManageBranchComponent implements OnInit {
         agent.info || "",
         agent.active ? "Active" : "Inactive",
         agent.websitesWithRange?.length || 0,
+                avgFtt.toFixed(1),
         avgTopup.toFixed(1),
         avgPayout.toFixed(1),
       ].join(",");
@@ -917,9 +1038,9 @@ export class ManageBranchComponent implements OnInit {
 
   // ---------- UNUSED METHODS (kept for compatibility) ----------
   filterWebsites(): void {}
-  isWebsiteSelected(websiteId: string): boolean {
-    return false;
-  }
+  // isWebsiteSelected(websiteId: string): boolean {
+  //   return false;
+  // }
   toggleWebsite(websiteId: string, event?: Event): void {}
   addWebsite(websiteId: string): void {}
   removeNewWebsite(index: any): void {}
@@ -930,4 +1051,228 @@ export class ManageBranchComponent implements OnInit {
   getFilteredWebsites(): any[] {
     return [];
   }
+
+  // Add these methods
+setViewMode(mode: 'grid' | 'table'): void {
+  this.viewMode = mode;
+}
+
+openInfoModal(agent: any): void {
+  this.selectedAgentForInfo = agent;
+  this.showInfoModal = true;
+}
+
+closeInfoModal(): void {
+  this.showInfoModal = false;
+  this.selectedAgentForInfo = null;
+}
+
+closeAllActionMenus(): void {
+  this.activeActionsMenu = null;
+}
+
+toggleActionMenu(agentId: string): void {
+  this.activeActionsMenu = this.activeActionsMenu === agentId ? null : agentId;
+}
+
+initialLetter(agent: any): string {
+  if (!agent?.name) return '';
+  return agent.name.charAt(0).toUpperCase();
+}
+
+getActiveCount(): number {
+  return this.agents.filter(a => a.active).length;
+}
+
+getInactiveCount(): number {
+  return this.agents.filter(a => !a.active).length;
+}
+
+dismissError(): void {
+  this.error = '';
+}
+
+
+// Add these methods to your component
+
+// For website pagination in edit modal
+websitePage = 0;
+websiteTotalPages = 0;
+loadingMoreWebsites = false;
+initialWebsiteIds: string[] = [];
+
+// Add this method to get websites for edit modal
+getSelectedWebsitesForEdit(): any[] {
+  return this.websiteOptions;
+}
+
+// Add this method to check if a website is selected
+isWebsiteSelected(websiteId: string): boolean {
+  return this.editForm.websitesWithRange.some(w => w.websiteId === websiteId);
+}
+
+// Add this method to check if a website was initially assigned
+isInitialWebsite(websiteId: string): boolean {
+  return this.initialWebsiteIds.includes(websiteId);
+}
+
+// Add this method to handle website selection changes
+onWebsiteSelectionChange(event: any, websiteId: string): void {
+  const isChecked = event.target.checked;
+  
+  if (isChecked) {
+    // Add website
+    const website = this.websiteOptions.find(w => w.websiteId === websiteId);
+    if (website && !this.isWebsiteAlreadyAssigned(websiteId)) {
+      const newWebsite: WebsiteRange = {
+        websiteId: website.websiteId,
+        websiteDomain: website.websiteDomain,
+        range: "",
+        topupPercentage: 0,
+        payoutPercentage: 0,
+        fttPercentage: 0,
+        active: true,
+      };
+      this.editForm.websitesWithRange.push(newWebsite);
+    }
+  } else {
+    // Remove website (only if not initial)
+    if (!this.isInitialWebsite(websiteId)) {
+      this.editForm.websitesWithRange = this.editForm.websitesWithRange.filter(
+        w => w.websiteId !== websiteId
+      );
+    } else {
+      // Re-check for initial websites
+      event.target.checked = true;
+    }
+  }
+  this.cdr.detectChanges();
+}
+
+// Add this method to load more websites
+loadMoreWebsitesForEdit(): void {
+  if (this.websitePage + 1 >= this.websiteTotalPages) return;
+  this.websitePage++;
+  this.loadingMoreWebsites = true;
+  // You'll need to implement this method based on your API
+  this.loadWebsitesForEdit(false);
+}
+
+// Add this method to load websites for edit (if not already present)
+loadWebsitesForEdit(reset: boolean = true): void {
+  if (reset) {
+    this.websitePage = 0;
+    this.websiteOptions = [];
+  }
+
+  this.loadingWebsites = true;
+
+  // You need to implement this based on your API
+  // This is a placeholder - adjust according to your actual API
+  this.headService.getAllHeadsWithWebsitesById(this.currentRoleId).subscribe({
+    next: (res: any) => {
+      const websites = res || [];
+      
+      // Assuming paginated response
+      this.websiteTotalPages = 1; // Set based on your API response
+      
+      this.websiteOptions = [...this.websiteOptions, ...websites];
+      
+      // Store initial website IDs for reference
+      this.initialWebsiteIds = this.editForm.websitesWithRange.map(w => w.websiteId);
+      
+      this.loadingWebsites = false;
+      this.loadingMoreWebsites = false;
+    },
+    error: (err) => {
+      console.error("Error loading websites:", err);
+      this.loadingWebsites = false;
+      this.loadingMoreWebsites = false;
+    },
+  });
+}
+
+// Add this method to get selected website count
+getSelectedWebsiteCount(): number {
+  return this.editForm.websitesWithRange?.length || 0;
+}
+
+
+// Add this method to get website percentages
+getWebsitePercentage(websiteId: string): any {
+  let website = this.editForm.websitesWithRange.find(w => w.websiteId === websiteId);
+  if (!website) {
+    website = {
+      websiteId: websiteId,
+      websiteDomain: '',
+      range: '',
+      fttPercentage: 0,
+      topupPercentage: 0,
+      payoutPercentage: 0,
+      active: true
+    };
+    this.editForm.websitesWithRange.push(website);
+  }
+  return website;
+}
+
+// Update openEditModal to initialize websiteOptions and initialWebsiteIds
+openEditModal(agent: Agent): void {
+  this.editForm = {
+    id: agent.id,
+    name: agent.name,
+    email: agent.email || "",
+    mobile: agent.mobile || "",
+    info: agent.info || "",
+    isActive: agent.active,
+    websitesWithRange: (agent.websitesWithRange || []).map((w) => ({
+      ...w,
+      fttPercentage: Number(w.fttPercentage) || 0,
+      topupPercentage: Number(w.topupPercentage) || 0,
+      payoutPercentage: Number(w.payoutPercentage) || 0,
+    })),
+  };
+  
+  // Store initial website IDs
+  this.initialWebsiteIds = this.editForm.websitesWithRange.map(w => w.websiteId);
+  
+  this.selectedWebsitesForAdd = [];
+  this.addWebsiteSearchTerm = "";
+  this.assignedWebsiteSearch = "";
+  this.emailError = "";
+  this.mobileError = "";
+  this.websitesForAdd = [];
+  this.showEditModal = true;
+  
+  // Load websites if needed
+  if (this.websiteOptions.length === 0) {
+    this.loadWebsiteOptions(this.currentRoleId);
+  }
+}
+
+// Update loadWebsiteOptions to handle pagination
+loadWebsiteOptions(headId: any): void {
+  this.loadingWebsites = true;
+  this.headService.getAllHeadsWithWebsitesById(headId).subscribe({
+    next: (res: any) => {
+      const opts = res || [];
+      this.websiteOptions = opts.map((w: any) => ({
+        websiteId: w.websiteId ?? w.id ?? "",
+        websiteDomain: w.websiteDomain ?? w.domain ?? "Unknown Website",
+        active: typeof w.active === "boolean" ? w.active : true,
+      }));
+      this.websiteTotalPages = 1;
+      this.loadingWebsites = false;
+    },
+    error: (err: any) => {
+      console.error("Error loading websites:", err);
+      this.websiteOptions = [];
+      this.loadingWebsites = false;
+    },
+  });
+}
+
+
+
+
 }
