@@ -1,0 +1,8 @@
+/* Hide scrollbar but keep scroll working */
+.nav-menu {
+  scrollbar-width: none; /* Firefox */
+}
+
+.nav-menu::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}

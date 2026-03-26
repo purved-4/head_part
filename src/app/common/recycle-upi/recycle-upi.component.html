@@ -1,0 +1,247 @@
+<div class="max-w-7xl mx-auto p-6">
+  <!-- Header Section -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <h2 class="text-2xl font-semibold text-gray-800">
+      Recycle UPIs
+      <span class="ml-2 text-sm font-normal text-gray-500">
+        ({{ totalElements }} deleted)
+      </span>
+    </h2>
+
+    <!-- View Toggle - Desktop only -->
+    <div class="hidden sm:flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+      <button
+        (click)="setView('table')"
+        class="w-8 h-8 flex items-center justify-center rounded-md transition-all duration-200"
+        [class]="viewMode === 'table'
+          ? 'bg-white text-blue-600 shadow-sm'
+          : 'text-gray-600 hover:text-gray-900'"
+        [title]="'Table View'"
+      >
+        <span class="material-symbols-outlined text-xl">table_rows</span>
+      </button>
+
+      <button
+        (click)="setView('grid')"
+        class="w-8 h-8 flex items-center justify-center rounded-md transition-all duration-200"
+        [class]="viewMode === 'grid'
+          ? 'bg-white text-blue-600 shadow-sm'
+          : 'text-gray-600 hover:text-gray-900'"
+        [title]="'Grid View'"
+      >
+        <span class="material-symbols-outlined text-xl">grid_view</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Table View - Desktop only -->
+  <div
+    *ngIf="!loading && viewMode === 'table' && upis.length > 0"
+    class="hidden sm:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+  >
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">#</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Portal</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">UPI ID</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Limit</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">QR Code</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Action</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let upi of upis; let i = index" class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ (currentPage - 1) * pageSize + i + 1 }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <div class="flex items-center">
+                <span class="material-symbols-outlined text-gray-400 text-base mr-2">language</span>
+                {{ upi.portalDomain }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
+              <div class="flex items-center">
+                <span class="material-symbols-outlined text-gray-400 text-base mr-2">qr_code_scanner</span>
+                {{ upi.vpa }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <div class="flex items-center">
+                <span class="material-symbols-outlined text-gray-400 text-base mr-2">currency_rupee</span>
+                {{ upi.limitAmount | number }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <img
+                *ngIf="upi.qrImagePath"
+                [src]="upi.qrImagePath"
+                class="w-10 h-10 object-contain rounded border border-gray-200"
+                [alt]="'QR for ' + upi.vpa"
+              />
+              <span *ngIf="!upi.qrImagePath" class="text-gray-400 text-xs">No QR</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <button
+                (click)="reactivateUpi(upi)"
+                class="inline-flex items-center px-3 py-1.5 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors font-medium text-xs"
+              >
+                <span class="material-symbols-outlined text-base mr-1">refresh</span>
+                Restore
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<!-- Grid View - Shows on mobile always, on desktop based on toggle -->
+<div
+  *ngIf="!loading && upis.length > 0"
+  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
+  [class.sm:hidden]="viewMode === 'table'"
+>
+  <div
+    *ngFor="let upi of upis; let i = index"
+    class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden w-full sm:max-w-[320px] sm:mx-auto lg:mx-0"
+  >
+    <!-- Compact Card Header -->
+    <div class="px-3 py-2 bg-gray-50 border-b border-gray-100">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center min-w-0 flex-1">
+          <span class="material-symbols-outlined text-blue-600 text-base mr-1.5 flex-shrink-0">qr_code_scanner</span>
+          <span class="font-medium text-gray-900 text-xs truncate" [title]="upi.vpa">
+            {{ upi.vpa }}
+          </span>
+        </div>
+        <span class="text-2xs text-gray-400 bg-white px-1.5 py-0.5 rounded-full border border-gray-200 flex-shrink-0 ml-1">
+          #{{ (currentPage - 1) * pageSize + i + 1 }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Compact Card Body with QR on Right -->
+    <div class="p-3">
+      <div class="flex gap-3">
+        <!-- Left side - Details -->
+        <div class="flex-1 min-w-0 space-y-1.5">
+          <div class="flex items-start">
+            <span class="material-symbols-outlined text-gray-400 text-xs mr-1 mt-0.5 flex-shrink-0">language</span>
+            <div class="min-w-0">
+              <div class="text-2xs text-gray-500">Portal</div>
+              <div class="text-xs text-gray-900 truncate">{{ upi.portalDomain }}</div>
+            </div>
+          </div>
+
+          <div class="flex items-start">
+            <span class="material-symbols-outlined text-gray-400 text-xs mr-1 mt-0.5 flex-shrink-0">currency_rupee</span>
+            <div>
+              <div class="text-2xs text-gray-500">Daily Limit</div>
+              <div class="text-xs font-medium text-gray-900">₹{{ upi.limitAmount | number }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right side - QR Code -->
+        <div class="flex-shrink-0">
+          <div *ngIf="upi.qrImagePath" class="text-center">
+            <img
+              [src]="upi.qrImagePath"
+              class="w-12 h-12 object-contain rounded border border-gray-200"
+              [alt]="'QR for ' + upi.vpa"
+            />
+          </div>
+          <div *ngIf="!upi.qrImagePath" class="w-12 h-12 flex items-center justify-center bg-gray-50 rounded border border-gray-200">
+            <span class="material-symbols-outlined text-gray-300 text-2xl">qr_code</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button - Full width at bottom -->
+      <button
+        (click)="reactivateUpi(upi)"
+        class="w-full mt-3 inline-flex items-center justify-center px-2 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium text-xs"
+      >
+        <span class="material-symbols-outlined text-sm mr-1">refresh</span>
+        Restore
+      </button>
+    </div>
+  </div>
+</div>
+
+  <!-- Empty State -->
+  <div
+    *ngIf="!loading && upis.length === 0"
+    class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center"
+  >
+    <div class="flex flex-col items-center">
+      <span class="material-symbols-outlined text-6xl text-gray-300 mb-4">delete_sweep</span>
+      <h3 class="text-lg font-medium text-gray-900 mb-1">No deleted UPIs found</h3>
+      <p class="text-sm text-gray-500">There are no UPIs in the recycle bin at the moment.</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div
+    *ngIf="totalElements > 0"
+    class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-4 border-t border-gray-200"
+  >
+    <!-- Left Info -->
+    <div class="text-sm text-gray-500">
+      Showing
+      <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
+      to
+      <span class="font-medium">{{ Math.min(currentPage * pageSize, totalElements) }}</span>
+      of
+      <span class="font-medium">{{ totalElements }}</span>
+      results
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="flex items-center gap-2">
+      <!-- Prev -->
+      <button
+        (click)="prevPage()"
+        [disabled]="currentPage === 1"
+        class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        [title]="'Previous page'"
+      >
+        <span class="material-symbols-outlined text-base">chevron_left</span>
+      </button>
+
+      <!-- Page Numbers -->
+      <div class="flex gap-1">
+        <button
+          *ngFor="let page of getPageNumbers()"
+          (click)="goToPage(page)"
+          class="w-8 h-8 flex items-center justify-center rounded-md text-sm font-medium transition-colors"
+          [class]="
+            page === currentPage
+              ? 'bg-blue-600 text-white'
+              : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+          "
+        >
+          {{ page }}
+        </button>
+      </div>
+
+      <!-- Next -->
+      <button
+        (click)="nextPage()"
+        [disabled]="currentPage >= totalPagesCount"
+        class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        [title]="'Next page'"
+      >
+        <span class="material-symbols-outlined text-base">chevron_right</span>
+      </button>
+    </div>
+  </div>
+</div>

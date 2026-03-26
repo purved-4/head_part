@@ -1,0 +1,526 @@
+<div class="min-h-screen bg-[var(--color-bg)] py-4 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header - More Compact -->
+    <div class="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div>
+        <h1 class="text-2xl font-bold text-[var(--color-font)]">
+          Create New Branch
+        </h1>
+        <p class="text-[var(--color-muted)] text-sm mt-0.5">
+          Add a new branch with portal permissions and commission rates
+        </p>
+      </div>
+      <button
+        [routerLink]="'/head/branch/manage'"
+        class="px-4 py-2 bg-[var(--color-primary-light)] text-white rounded-[var(--radius-lg)] text-sm font-medium hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-300 shadow-[var(--shadow-md)] hover:shadow-lg flex items-center gap-1.5 group"
+      >
+        <svg
+          class="w-4 h-4 group-hover:translate-x-1 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          ></path>
+        </svg>
+        View All Branches
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="chiefForm" (ngSubmit)="onSubmit()">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Left Column - Branch Details (Compact) -->
+        <div class="lg:col-span-2 space-y-4">
+          <!-- Personal Information Card - Compact -->
+          <div
+            class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-5 border border-[var(--color-border)]"
+          >
+            <div class="flex items-center gap-2 mb-4">
+              <div
+                class="p-2 rounded-[var(--radius-md)] bg-[var(--color-bg)]"
+              >
+                <svg
+                  class="w-5 h-5 text-[var(--color-primary)]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  ></path>
+                </svg>
+              </div>
+              <h2 class="text-lg font-bold text-[var(--color-font)]">
+                Branch Information
+              </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Name -->
+              <div class="space-y-1">
+                <label
+                  class="text-xs font-semibold text-[var(--color-font)] flex items-center gap-1"
+                >
+                  Full Name
+                  <span class="text-[var(--color-danger)]">*</span>
+                </label>
+                <input
+                  formControlName="name"
+                  type="text"
+                  [class.border-[var(--color-danger)]]="isFieldInvalid('name')"
+                  [class.border-[var(--color-primary)]]="
+                    chiefForm.get('name')?.valid &&
+                    chiefForm.get('name')?.touched
+                  "
+                  class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] placeholder-[var(--color-muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30 focus:border-transparent transition-all duration-200"
+                  placeholder="Enter branch's full name"
+                />
+                <div
+                  *ngIf="isFieldInvalid('name')"
+                  class="text-[var(--color-danger)] text-xs mt-0.5"
+                >
+                  Name is required
+                </div>
+              </div>
+
+              <!-- Mobile - Compact -->
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-[var(--color-font)] flex items-center gap-1">
+                  Mobile Number
+                  <span class="text-[var(--color-danger)]">*</span>
+                </label>
+
+                <div class="flex border border-[var(--color-border)] rounded-[var(--radius-md)] overflow-hidden h-[38px]">
+                  <!-- Country Code -->
+                  <select
+                    [(ngModel)]="selectedCountry"
+                    [ngModelOptions]="{standalone: true}"
+                    class="bg-[var(--color-bg)] px-2 text-xs border-r border-[var(--color-border)] focus:outline-none"
+                  >
+                    <option *ngFor="let c of countryCodes" [ngValue]="c">
+                      {{ c.flag }} {{ c.dialCode }}
+                    </option>
+                  </select>
+
+                  <!-- Phone -->
+                  <input
+                    formControlName="mobile"
+                    type="tel"
+                    maxlength="15"
+                    placeholder="Mobile No"
+                    class="flex-1 px-3 py-2.5 text-[var(--color-font)] text-sm focus:outline-none"
+                  />
+                </div>
+
+                <div
+                  *ngIf="isFieldInvalid('mobile')"
+                  class="text-[var(--color-danger)] text-xs mt-0.5"
+                >
+                  Valid phone number is required
+                </div>
+              </div>
+
+              <!-- Email -->
+              <div class="space-y-1">
+                <label
+                  class="text-xs font-semibold text-[var(--color-font)] flex items-center gap-1"
+                >
+                  Email Address
+                  <span class="text-[var(--color-danger)]">*</span>
+                </label>
+                <input
+                  formControlName="email"
+                  type="email"
+                  [class.border-[var(--color-danger)]]="isFieldInvalid('email')"
+                  [class.border-[var(--color-primary)]]="
+                    chiefForm.get('email')?.valid &&
+                    chiefForm.get('email')?.touched
+                  "
+                  class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] placeholder-[var(--color-muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30 focus:border-transparent transition-all duration-200"
+                  placeholder="Enter Email ID"
+                />
+                <div
+                  *ngIf="isFieldInvalid('email')"
+                  class="text-[var(--color-danger)] text-xs mt-0.5"
+                >
+                  Valid email is required
+                </div>
+              </div>
+
+              <!-- Active Status - Compact -->
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-[var(--color-font)]">
+                  Account Status
+                </label>
+
+                <div class="flex items-center justify-between px-3 h-[38px] bg-[var(--color-bg)] rounded-[var(--radius-md)] border border-[var(--color-border)]">
+                  <div class="flex items-center gap-2">
+                    <div class="relative flex items-center">
+                      <input
+                        type="checkbox"
+                        id="active"
+                        formControlName="isActive"
+                        class="sr-only"
+                      />
+                      <label
+                        for="active"
+                        [ngClass]="{
+                          'bg-[var(--color-primary)]': chiefForm.get('isActive')?.value,
+                          'bg-[var(--color-border)]': !chiefForm.get('isActive')?.value
+                        }"
+                        class="block w-9 h-5 rounded-full cursor-pointer transition-all duration-300"
+                      >
+                        <span
+                          [ngClass]="{
+                            'translate-x-4': chiefForm.get('isActive')?.value,
+                            'translate-x-0': !chiefForm.get('isActive')?.value
+                          }"
+                          class="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full shadow transition-transform duration-300"
+                        ></span>
+                      </label>
+                    </div>
+
+                    <span class="text-xs font-medium text-[var(--color-font)]">
+                      {{
+                        chiefForm.get("isActive")?.value
+                          ? "Active"
+                          : "Inactive"
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Info - Compact -->
+            <div class="mt-4 space-y-1">
+              <label class="text-xs font-semibold text-[var(--color-font)]"
+                >Additional Information</label
+              >
+              <textarea
+                formControlName="info"
+                rows="2"
+                class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] placeholder-[var(--color-muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30 focus:border-transparent transition-all duration-200 resize-none"
+                placeholder="Add any additional notes..."
+              ></textarea>
+            </div>
+
+            <!-- Divider Line -->
+            <div class="mt-3 pt-3 border-t border-[var(--color-border)]"></div>
+
+            <!-- User Credentials - Compact -->
+            <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- User Email -->
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-[var(--color-font)]">
+                  User Email
+                  <span class="text-[var(--color-danger)]">*</span>
+                </label>
+
+                <input
+                  formControlName="userEmail"
+                  type="email"
+                  placeholder="Enter user email"
+                  class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] text-sm bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30"
+                />
+
+                <div
+                  *ngIf="isFieldInvalid('userEmail')"
+                  class="text-[var(--color-danger)] text-xs"
+                >
+                  Valid user email is required
+                </div>
+              </div>
+
+              <!-- User Password -->
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-[var(--color-font)]">
+                  User Password
+                  <span class="text-[var(--color-danger)]">*</span>
+                </label>
+
+                <div class="relative">
+                  <input
+                    formControlName="userPassword"
+                    type="password"
+                    placeholder="Enter password"
+                    class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] text-sm bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30"
+                  />
+
+                  <span
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] cursor-pointer text-sm"
+                  >
+                    👁
+                  </span>
+                </div>
+
+                <div
+                  *ngIf="isFieldInvalid('userPassword')"
+                  class="text-[var(--color-danger)] text-xs"
+                >
+                  Password is required
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons - Compact -->
+          <div
+            class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-4 border border-[var(--color-border)]"
+          >
+            <div class="flex gap-3">
+              <button
+                type="button"
+                (click)="clearForm()"
+                [disabled]="loading"
+                class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-font)] font-medium rounded-[var(--radius-md)] text-sm hover:bg-[var(--color-hover)] hover:border-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-1.5"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  ></path>
+                </svg>
+                Clear
+              </button>
+              <button
+                type="submit"
+                [disabled]="loading"
+                class="flex-1 px-4 py-2.5 bg-[var(--color-primary)] text-white font-medium rounded-[var(--radius-md)] text-sm hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-[var(--shadow-md)] hover:shadow-lg flex items-center justify-center gap-1.5"
+              >
+                <span *ngIf="!loading" class="flex items-center gap-1.5">
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4v16m8-8H4"
+                    ></path>
+                  </svg>
+                  Create
+                </span>
+                <span *ngIf="loading" class="flex items-center gap-1.5">
+                  <svg
+                    class="w-4 h-4 animate-spin"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    ></path>
+                  </svg>
+                  Creating...
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Portal Assignment (Compact) -->
+        <div class="lg:col-span-1">
+          <div
+            class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-4 border border-[var(--color-border)] sticky top-4 h-[calc(100vh-120px)] flex flex-col"
+          >
+            <!-- Header - Compact -->
+            <div class="mb-2">
+              <h2 class="text-base font-semibold text-[var(--color-font)]">
+                Portal Assignment
+              </h2>
+
+              <div class="flex items-center gap-2 mt-0.5 text-xs">
+                <span
+                  class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-white font-medium"
+                >
+                  {{ getSelectedPortals().length }} Selected
+                </span>
+
+                <span class="text-[var(--color-muted)]">
+                  of {{ portals.length }} total
+                </span>
+              </div>
+            </div>
+
+            <!-- Tabs - Compact -->
+            <div class="flex bg-[var(--color-bg)] rounded-lg p-0.5 mb-2 text-xs">
+              <button
+                type="button"
+                (click)="setActiveTab('available')"
+                class="flex-1 py-1.5 rounded-md transition"
+                [class.bg-[var(--color-surface)]]="activeTab === 'available'"
+                [class.text-[var(--color-primary)]]="activeTab === 'available'"
+                [class.font-semibold]="activeTab === 'available'"
+              >
+                Available
+              </button>
+
+              <button
+                type="button"
+                (click)="setActiveTab('selected')"
+                class="flex-1 py-1.5 rounded-md transition"
+                [class.bg-[var(--color-surface)]]="activeTab === 'selected'"
+                [class.text-[var(--color-primary)]]="activeTab === 'selected'"
+                [class.font-semibold]="activeTab === 'selected'"
+              >
+                Selected
+              </button>
+            </div>
+
+            <!-- Search - Compact -->
+            <div class="mb-2">
+              <div class="relative">
+                <input
+                  type="text"
+                  [value]="activeTab === 'available' ? availableSearchTerm : selectedSearchTerm"
+                  (input)="onSearch($event)"
+                  placeholder="Search portals..."
+                  class="w-full border border-[var(--color-border)] rounded-md px-2.5 py-1.5 text-xs bg-[var(--color-bg)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                />
+              </div>
+            </div>
+
+            <!-- LIST - Compact with scroll -->
+            <div class="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
+              <!-- AVAILABLE TAB -->
+              <div *ngIf="activeTab === 'available'">
+                <div
+                  *ngIf="getAvailablePortals().length === 0"
+                  class="text-center text-xs text-[var(--color-muted)] py-4"
+                >
+                  No available portals
+                </div>
+
+                <div
+                  *ngFor="let portal of getAvailablePortals()"
+                  class="group flex items-center justify-between border border-[var(--color-border)] rounded-md px-2 py-1.5 text-xs hover:border-[var(--color-primary)] transition"
+                >
+                  <span class="truncate font-medium max-w-[120px]">
+                    {{ portal.domain || portal.portalDomain }}
+                  </span>
+
+                  <button
+                    type="button"
+                    (click)="onPortalSelectionChange({target:{checked:true}}, portal.portalId || portal.id)"
+                    class="opacity-0 group-hover:opacity-100 text-[var(--color-primary)] text-sm transition w-5 h-5 flex items-center justify-center hover:bg-[var(--color-primary)]/10 rounded"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <!-- SELECTED TAB -->
+              <div *ngIf="activeTab === 'selected'">
+                <div
+                  *ngIf="getSelectedPortals().length === 0"
+                  class="text-center text-xs text-[var(--color-muted)] py-4"
+                >
+                  No portals selected
+                </div>
+
+                <div
+                  *ngFor="let portal of getSelectedPortals()"
+                  class="border border-[var(--color-border)] rounded-lg p-2 bg-[var(--color-bg)]"
+                >
+                  <!-- Header Row -->
+                  <div class="flex items-center justify-between mb-1.5">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                      <div
+                        class="w-5 h-5 rounded bg-[var(--color-primary)]/15 flex items-center justify-center text-[var(--color-primary)] text-xs"
+                      >
+                        🌐
+                      </div>
+
+                      <span class="text-xs font-medium truncate max-w-[100px]">
+                        {{ portal.domain || portal.portalDomain }}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      (click)="removePortal(portal.portalId || portal.id)"
+                      class="text-[var(--color-muted)] hover:text-red-500 text-sm w-5 h-5 flex items-center justify-center"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <!-- Percentage Controls - Compact Grid -->
+                  <div class="grid grid-cols-3 gap-1 text-xs">
+                    <!-- TOPUP -->
+                    <div>
+                      <label class="block mb-0.5 text-[var(--color-muted)] text-[10px]">
+                        Topup
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        placeholder="%"
+                        [formControlName]="'topup_' + (portal.portalId || portal.id)"
+                        class="w-full border border-[var(--color-border)] rounded px-1.5 py-1 text-xs bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                      />
+                    </div>
+
+                    <!-- PAYOUT -->
+                    <div>
+                      <label class="block mb-0.5 text-[var(--color-muted)] text-[10px]">
+                        Payout
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        placeholder="%"
+                        [formControlName]="'payout_' + (portal.portalId || portal.id)"
+                        class="w-full border border-[var(--color-border)] rounded px-1.5 py-1 text-xs bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                      />
+                    </div>
+
+                    <!-- FTT -->
+                    <div>
+                      <label class="block mb-0.5 text-[var(--color-muted)] text-[10px]">
+                        FTT
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        placeholder="%"
+                        [formControlName]="'first_topup_' + (portal.portalId || portal.id)"
+                        class="w-full border border-[var(--color-border)] rounded px-1.5 py-1 text-xs bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+

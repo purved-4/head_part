@@ -1,0 +1,164 @@
+<div
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+>
+  <div
+    class="w-full max-w-md mx-4"
+    style="
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    "
+  >
+    <!-- Header -->
+    <div
+      class="px-6 py-4"
+      style="
+        background: linear-gradient(
+          to right,
+          var(--color-primary),
+          var(--color-primary-light)
+        );
+        border-top-left-radius: var(--radius-lg);
+        border-top-right-radius: var(--radius-lg);
+      "
+    >
+      <h2 class="text-white text-xl font-semibold">Add New Limit</h2>
+    </div>
+
+    <!-- Content -->
+    <div class="px-6 py-6">
+      <!-- Current Limit Display -->
+      <div
+        class="mb-6 p-4"
+        style="
+          background: var(--color-hover);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+        "
+      >
+        <p class="text-sm font-medium" style="color: var(--color-muted)">
+          Self Limit
+        </p>
+
+        <p class="text-3xl font-bold mt-2" style="color: var(--color-primary)">
+          {{ selfLimitRemainingAmount || 0 }}
+        </p>
+      </div>
+      <!-- Current Limit Display -->
+      <div
+        class="mb-6 p-4"
+        style="
+          background: var(--color-hover);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+        "
+      >
+        <p class="text-sm font-medium" style="color: var(--color-muted)">
+          Current Limit
+        </p>
+
+        <p class="text-3xl font-bold mt-2" style="color: var(--color-primary)">
+          {{ limitRemainingAmount || 0 }}
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form (ngSubmit)="addLimit()" #limitForm="ngForm">
+        <!-- Amount Input -->
+        <div class="mb-6">
+          <label
+            for="transactionAmount"
+            class="block text-sm font-medium mb-2"
+            style="color: var(--color-font)"
+          >
+            Amount
+          </label>
+
+          <input
+            type="number"
+            id="transactionAmount"
+            [(ngModel)]="transactionAmount"
+            name="transactionAmount"
+            placeholder="Enter Amount"
+            step="0.01"
+            min="0"
+            required
+            class="w-full px-4 py-2 transition"
+            style="
+              border: 1px solid var(--color-border);
+              border-radius: var(--radius-md);
+              outline: none;
+            "
+            onfocus="
+              this.style.boxShadow = '0 0 0 2px var(--color-primary-light)'
+            "
+            onblur="this.style.boxShadow = 'none'"
+          />
+
+          <p class="mt-2 text-xs" style="color: var(--color-muted)">
+            Please enter a valid Amount greater than 0
+          </p>
+        </div>
+
+        <!-- Error Message -->
+        <div
+          *ngIf="errorMessage"
+          class="mb-4 p-3"
+          style="
+            background: #fef2f2;
+            border: 1px solid var(--color-danger);
+            border-radius: var(--radius-md);
+          "
+        >
+          <p class="text-sm" style="color: var(--color-danger)">
+            {{ errorMessage }}
+          </p>
+        </div>
+
+        <!-- Success Message -->
+        <div
+          *ngIf="successMessage"
+          class="mb-4 p-3"
+          style="
+            background: #f0fdf4;
+            border: 1px solid var(--color-success);
+            border-radius: var(--radius-md);
+          "
+        >
+          <p class="text-sm" style="color: var(--color-success)">
+            {{ successMessage }}
+          </p>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3">
+          <button
+            type="button"
+            (click)="onCancel()"
+            class="flex-1 px-4 py-2 font-medium transition"
+            style="
+              background: var(--color-hover);
+              color: var(--color-font);
+              border-radius: var(--radius-md);
+            "
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="flex-1 px-4 py-2 font-medium text-white transition"
+            style="
+              background: var(--color-primary);
+              border-radius: var(--radius-md);
+            "
+            onmouseover="this.style.background = 'var(--color-primary-dark)'"
+            onmouseout="this.style.background = 'var(--color-primary)'"
+          >
+            Add Limit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

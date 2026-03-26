@@ -1,0 +1,18 @@
+<div class="p-4">
+  <h2 class="text-xl font-semibold mb-4">Recycle Management</h2>
+
+  <div class="mb-4">
+    <label class="mr-2 font-medium">Select Type:</label>
+
+    <select [(ngModel)]="selectedType" class="border p-2 rounded">
+      <option value="bank">Bank</option>
+      <option value="upi">UPI</option>
+    </select>
+  </div>
+
+  <!-- Recycle Bank -->
+  <app-recycle-bank *ngIf="selectedType === 'bank'"></app-recycle-bank>
+
+  <!-- Recycle UPI -->
+  <app-recycle-upi *ngIf="selectedType === 'upi'"></app-recycle-upi>
+</div>

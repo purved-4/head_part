@@ -1,0 +1,600 @@
+
+<!-- Limits Overview Popup -->
+<div class="w-full h-full animate-fadeIn">
+  <div
+    class="bg-white rounded-2xl w-full overflow-hidden shadow-lg border border-[var(--color-border)] animate-slideUp"
+  >
+    <!-- Header -->
+    <div class="p-6 border-b border-[var(--color-border)] bg-[var(--color-bg)]">
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="text-xl font-bold text-[var(--color-primary)]">
+            Account Limits Overview
+          </h3>
+          <p class="text-sm mt-1 text-[var(--color-font)] opacity-80">
+            Manage UPI & Bank transaction limits
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="flex border-b border-[var(--color-border)]">
+      <button
+        (click)="setActiveTab('upi')"
+        [class.active]="activeTab === 'upi'"
+        class="flex-1 px-6 py-4 font-medium transition"
+        [ngClass]="activeTab === 'upi' ? 'font-bold' : ''"
+        [ngStyle]="
+          activeTab === 'upi'
+            ? {
+                background: 'var(--color-bg)',
+                'border-bottom': '2px solid var(--color-primary)',
+              }
+            : { background: 'transparent' }
+        "
+      >
+        <div
+          class="flex items-center justify-center gap-2 text-[var(--color-font)]"
+        >
+          <span class="material-symbols-outlined">payments</span>
+          UPI
+        </div>
+      </button>
+
+      <button
+        (click)="setActiveTab('bank')"
+        class="flex-1 px-6 py-4 font-medium transition"
+        [ngClass]="activeTab === 'bank' ? 'font-bold' : ''"
+        [ngStyle]="
+          activeTab === 'bank'
+            ? {
+                background: 'var(--color-bg)',
+                'border-bottom': '2px solid var(--color-primary)',
+              }
+            : { background: 'transparent' }
+        "
+      >
+        <div
+          class="flex items-center justify-center gap-2 text-[var(--color-font)]"
+        >
+          <span class="material-symbols-outlined">account_balance</span>
+          Bank
+        </div>
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="p-6" style="max-height: calc(90vh - 280px); overflow-y: auto">
+      <!-- UPI Tab -->
+      <div *ngIf="activeTab === 'upi'">
+        <div class="mb-6">
+          <h4 class="text-lg font-bold mb-2 text-[var(--color-primary)]">
+            UPI Accounts
+          </h4>
+          <p class="text-sm text-[var(--color-font)] opacity-80">
+            UPI accounts with their transaction limits and validity
+          </p>
+        </div>
+
+        <div
+          *ngIf="!sortedUpis || sortedUpis.length === 0"
+          class="text-center py-12"
+        >
+          <div
+            class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center border border-[var(--color-border)]"
+            [ngStyle]="{ background: 'var(--color-secondary)' }"
+          >
+            <span
+              class="material-symbols-outlined text-3xl text-[var(--color-font)]"
+              >payments</span
+            >
+          </div>
+          <p class="font-medium text-[var(--color-font)]">
+            No UPI accounts found
+          </p>
+          <p class="text-sm mt-1 text-[var(--color-font)] opacity-80">
+            Add UPI accounts to get started
+          </p>
+        </div>
+
+        <div *ngIf="sortedUpis && sortedUpis.length > 0" class="space-y-3">
+          <!-- Table Structure -->
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr
+                  class="rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)]"
+                >
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold uppercase text-[var(--color-font)]"
+                  >
+                    UPI ID
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-semibold uppercase text-[var(--color-font)]"
+                  >
+                    Limit
+                  </th>
+                  <th
+                    class="px-4 py-3 text-center text-xs font-semibold uppercase text-[var(--color-font)]"
+                  >
+                    Time
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-semibold uppercase text-[var(--color-font)]"
+                  >
+                    Status
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-semibold uppercase text-[var(--color-font)]"
+                  >
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let upi of pagedUpis()">
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-8 h-8 rounded-lg flex items-center justify-center"
+                        [ngStyle]="{
+                          background:
+                            'linear-gradient(45deg, var(--color-primary), var(--color-secondary))',
+                        }"
+                      >
+                        <span
+                          class="material-symbols-outlined text-sm text-[var(--color-font)]"
+                          >payments</span
+                        >
+                      </div>
+                      <p
+                        class="font-medium truncate text-sm text-[var(--color-font)]"
+                      >
+                        {{ upi.vpa }}
+                      </p>
+                    </div>
+                  </td>
+
+                  <!-- Limit Amount with tooltip -->
+                  <td class="px-4 py-4 text-right">
+                    <div class="group relative inline-block">
+                      <span
+                        class="text-sm font-semibold cursor-help text-[var(--color-font)]"
+                        [title]="formatCurrency(upi.limitAmount)"
+                      >
+                        {{ formatAbbreviated(upi.limitAmount) }}
+                      </span>
+                      <!-- Tooltip -->
+                      <span
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50"
+                      >
+                        {{ formatCurrency(upi.limitAmount) }}
+                      </span>
+                      <!-- Arrow -->
+                      <span
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 border-4 border-transparent border-t-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50"
+                      ></span>
+                    </div>
+                  </td>
+
+                  <!-- Limit Time - Color coded based on upi active status and future time -->
+                  <td class="px-4 py-4 text-center">
+                    <div class="group relative inline-block">
+                      <span
+                        class="text-sm font-semibold cursor-help"
+                        [ngClass]="
+                          upi.upi === true &&
+                          upi.limitTime &&
+                          isFutureTime(upi.limitTime)
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        "
+                        [title]="
+                          upi.limitTime
+                            ? (upi.limitTime | date: 'full')
+                            : 'No expiry'
+                        "
+                      >
+                        {{
+                          upi.limitTime
+                            ? (upi.limitTime | date: "dd MMM yyyy, hh:mm a")
+                            : "Not Set"
+                        }}
+                      </span>
+                      <span
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50"
+                      >
+                        {{
+                          upi.limitTime
+                            ? (upi.limitTime | date: "full")
+                            : "Not Set"
+                        }}
+                      </span>
+                      <span
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 border-4 border-transparent border-t-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50"
+                      ></span>
+                    </div>
+                  </td>
+
+                  <!-- Status - Based on UPI active status and time -->
+                  <td class="px-4 py-4 text-right">
+                    <div
+                      class="flex items-center justify-end gap-2 px-2 py-1 rounded-full border w-fit ml-auto"
+                      [ngClass]="
+                        upi.upi === true &&
+                        upi.limitTime &&
+                        isFutureTime(upi.limitTime)
+                          ? 'bg-green-100 text-green-700 border-green-300'
+                          : 'bg-red-100 text-red-700 border-red-300'
+                      "
+                    >
+                      <!-- DOT -->
+                      <span
+                        class="w-2 h-2 rounded-full"
+                        [ngClass]="
+                          upi.upi === true &&
+                          upi.limitTime &&
+                          isFutureTime(upi.limitTime)
+                            ? 'bg-green-500 blink-dot'
+                            : 'bg-red-500'
+                        "
+                      ></span>
+
+                      <!-- TEXT -->
+                      <span class="text-xs font-semibold">
+                        {{
+                          upi.upi === true &&
+                          upi.limitTime &&
+                          isFutureTime(upi.limitTime)
+                            ? "LIVE"
+                            : "LIVE"
+                        }}
+                      </span>
+                    </div>
+                  </td>
+
+                  <!-- Action Button -->
+                  <td class="px-4 py-4 text-right">
+                    <button
+                      (click)="openUpiLimitModal(upi)"
+                      class="px-3 py-1 text-sm rounded-lg transition whitespace-nowrap flex items-center gap-1 text-[var(--color-font)] hover:bg-[var(--color-hover)]"
+                    >
+                      <span class="material-symbols-outlined text-base"
+                        >calendar_clock</span
+                      >
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination controls -->
+          <div class="flex items-center justify-between mt-4 pt-2">
+            <div class="text-sm text-[var(--color-font)]">
+              Showing {{ (upiPage - 1) * pageSize + 1 }} -
+              {{ Math.min(upiPage * pageSize, sortedUpis.length) }} of
+              {{ sortedUpis.length }}
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                class="px-3 py-1 rounded-md border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)]"
+                (click)="changeUpiPage(-1)"
+                [disabled]="upiPage === 1"
+              >
+                Prev
+              </button>
+              <div
+                class="px-3 py-1 rounded-md border border-[var(--color-border)] text-[var(--color-font)]"
+              >
+                {{ upiPage }}
+              </div>
+              <button
+                class="px-3 py-1 rounded-md border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)]"
+                (click)="changeUpiPage(1)"
+                [disabled]="upiPage >= Math.ceil(sortedUpis.length / pageSize)"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bank Tab -->
+      <div *ngIf="activeTab === 'bank'">
+        <div class="mb-6">
+          <h4 class="text-lg font-bold mb-2 text-[var(--color-primary)]">
+            Bank Accounts
+          </h4>
+          <p class="text-sm text-[var(--color-font)] opacity-80">
+            Bank accounts with their transaction limits and validity
+          </p>
+        </div>
+
+        <div
+          *ngIf="!sortedBanks || sortedBanks.length === 0"
+          class="text-center py-12"
+        >
+          <div
+            class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center border border-[var(--color-border)]"
+            [ngStyle]="{ background: 'var(--color-secondary)' }"
+          >
+            <span
+              class="material-symbols-outlined text-3xl text-[var(--color-font)]"
+              >account_balance</span
+            >
+          </div>
+          <p class="font-medium text-[var(--color-font)]">
+            No bank accounts found
+          </p>
+          <p class="text-sm mt-1 text-[var(--color-font)] opacity-80">
+            Add bank accounts to get started
+          </p>
+        </div>
+
+        <div *ngIf="sortedBanks && sortedBanks.length > 0" class="space-y-3">
+          <!-- Table Structure -->
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr
+                  class="rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)]"
+                >
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold uppercase text-[var(--color-font)]"
+                  >
+                    Account Number
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-semibold uppercase text-[var(--color-font)]"
+                  >
+                    Limit
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-semibold uppercase text-[var(--color-font)]"
+                  >
+                    Time
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-semibold uppercase text-[var(--color-font)]"
+                  >
+                    Status
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-semibold uppercase text-[var(--color-font)]"
+                  >
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let bank of pagedBanks()">
+                  <td class="px-4 py-4">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-8 h-8 rounded-lg flex items-center justify-center"
+                        [ngStyle]="{
+                          background:
+                            'linear-gradient(45deg, var(--color-primary), var(--color-secondary))',
+                        }"
+                      >
+                        <span
+                          class="material-symbols-outlined text-sm text-[var(--color-font)]"
+                          >account_balance</span
+                        >
+                      </div>
+                      <p
+                        class="font-medium text-sm truncate text-[var(--color-font)]"
+                      >
+                        {{ bank.accountNumber }}
+                      </p>
+                    </div>
+                  </td>
+
+                  <!-- Limit Amount -->
+                  <td class="px-4 py-4 text-right">
+                    <div class="group relative inline-block">
+                      <span
+                        class="text-sm font-semibold cursor-help text-[var(--color-font)]"
+                        [title]="formatCurrency(bank.limitAmount)"
+                      >
+                        {{ formatAbbreviated(bank.limitAmount) }}
+                      </span>
+                      <span
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50"
+                      >
+                        {{ formatCurrency(bank.limitAmount) }}
+                      </span>
+                      <span
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 border-4 border-transparent border-t-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50"
+                      ></span>
+                    </div>
+                  </td>
+
+                  <!-- Limit Time - Color coded based on bank active status and future time -->
+                  <td class="px-4 py-4 text-right">
+                    <div class="group relative inline-block">
+                      <span
+                        class="text-sm font-semibold cursor-help"
+                        [ngClass]="
+                          bank.bank === true &&
+                          bank.limitTime &&
+                          isFutureTime(bank.limitTime)
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        "
+                        [title]="
+                          bank.limitTime
+                            ? (bank.limitTime | date: 'full')
+                            : 'No expiry'
+                        "
+                      >
+                        {{
+                          bank.limitTime
+                            ? (bank.limitTime | date: "dd MMM yyyy, hh:mm a")
+                            : "Not Set"
+                        }}
+                      </span>
+                      <span
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50"
+                      >
+                        {{
+                          bank.limitTime
+                            ? (bank.limitTime | date: "full")
+                            : "Not Set"
+                        }}
+                      </span>
+                      <span
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 border-4 border-transparent border-t-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50"
+                      ></span>
+                    </div>
+                  </td>
+
+                  <!-- Status - Based on Bank active status and time -->
+                  <td class="px-4 py-4 text-right">
+                    <div
+                      class="flex items-center justify-end gap-2 px-2 py-1 rounded-full border w-fit ml-auto"
+                      [ngClass]="
+                        bank.bank === true &&
+                        bank.limitTime &&
+                        isFutureTime(bank.limitTime)
+                          ? 'bg-green-100 text-green-700 border-green-300'
+                          : 'bg-red-100 text-red-700 border-red-300'
+                      "
+                    >
+                      <!-- DOT -->
+                      <span
+                        class="w-2 h-2 rounded-full"
+                        [ngClass]="
+                          bank.bank === true &&
+                          bank.limitTime &&
+                          isFutureTime(bank.limitTime)
+                            ? 'bg-green-500 blink-dot'
+                            : 'bg-red-500'
+                        "
+                      ></span>
+
+                      <!-- TEXT -->
+                      <span class="text-xs font-semibold">
+                        {{
+                          bank.bank === true &&
+                          bank.limitTime &&
+                          isFutureTime(bank.limitTime)
+                            ? "LIVE"
+                            : "LIVE"
+                        }}
+                      </span>
+                    </div>
+                  </td>
+
+                  <!-- Action Button -->
+                  <td class="px-4 py-4 text-right">
+                    <button
+                      (click)="openBankLimitModal(bank)"
+                      class="px-3 py-1 text-sm rounded-lg transition whitespace-nowrap flex items-center gap-1 text-[var(--color-font)] hover:bg-[var(--color-hover)]"
+                    >
+                      <span class="material-symbols-outlined text-base"
+                        >calendar_clock</span
+                      >
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="flex items-center justify-between mt-4 pt-2">
+            <div class="text-sm text-[var(--color-font)]">
+              Showing {{ (bankPage - 1) * pageSize + 1 }} -
+              {{ Math.min(bankPage * pageSize, sortedBanks.length) }} of
+              {{ sortedBanks.length }}
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                class="px-3 py-1 rounded-md border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)]"
+                (click)="changeBankPage(-1)"
+                [disabled]="bankPage === 1"
+              >
+                Prev
+              </button>
+              <div
+                class="px-3 py-1 rounded-md border border-[var(--color-border)] text-[var(--color-font)]"
+              >
+                {{ bankPage }}
+              </div>
+              <button
+                class="px-3 py-1 rounded-md border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)]"
+                (click)="changeBankPage(1)"
+                [disabled]="
+                  bankPage >= Math.ceil(sortedBanks.length / pageSize)
+                "
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Set Limit Time Modal (Common for both UPI and Bank) -->
+<div
+  *ngIf="showLimitModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+>
+  <!-- Modal Box -->
+  <div class="bg-white w-full max-w-md rounded-xl shadow-xl p-6 animate-fadeIn">
+    <!-- Title -->
+    <h2
+      class="text-lg font-semibold text-[var(--color-font)] mb-4 flex items-center gap-2"
+    >
+      <span class="material-icons text-blue-500">schedule</span>
+      Set Limit Time for
+      <span class="text-[var(--color-primary)]">
+        {{
+          editingType === "upi" ? editingItem?.vpa : editingItem?.accountNumber
+        }}
+      </span>
+    </h2>
+
+    <!-- Date Time Input -->
+    <div class="mb-4">
+      <label class="block text-sm mb-1 text-[var(--color-muted)]">
+        Select Date & Time
+      </label>
+      <input
+        type="datetime-local"
+        [(ngModel)]="limitDateTime"
+        [min]="minLimitDateTime"
+        class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-font)]"
+      />
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex gap-3 pt-2">
+      <!-- Submit -->
+      <button
+        (click)="submitLimitTime()"
+        [disabled]="!limitDateTime || isSubmittingLimit"
+        class="flex-1 bg-[var(--color-primary)] text-white py-2 rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50 flex items-center justify-center gap-2"
+      >
+        <span *ngIf="!isSubmittingLimit">Submit</span>
+        <span *ngIf="isSubmittingLimit">Processing...</span>
+      </button>
+
+      <!-- Cancel -->
+      <button
+        (click)="closeLimitModal()"
+        class="flex-1 border border-[var(--color-border)] text-[var(--color-font)] py-2 rounded-lg hover:bg-[var(--color-hover)]"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>

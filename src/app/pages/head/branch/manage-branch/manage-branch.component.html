@@ -1,0 +1,1411 @@
+<div class="min-h-screen bg-[var(--color-bg-page)] p-4 md:p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Modern Header -->
+    <div class="mb-8">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6"
+      >
+        <div class="space-y-1">
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
+            Branch Management
+          </h1>
+          <p class="text-sm text-gray-600">
+            Manage and monitor all Branch accounts
+          </p>
+        </div>
+
+        <div class="flex gap-3">
+          <!-- Quick Stats -->
+          <div class="hidden md:flex items-center gap-4">
+            <div class="px-3 py-2 bg-white rounded-lg border border-gray-200">
+              <div class="text-xs text-gray-500">Active</div>
+              <div class="font-bold text-green-600">{{ getActiveCount() }}</div>
+            </div>
+            <div class="px-3 py-2 bg-white rounded-lg border border-gray-200">
+              <div class="text-xs text-gray-500">Inactive</div>
+              <div class="font-bold text-red-600">{{ getInactiveCount() }}</div>
+            </div>
+          </div>
+
+          <button
+            [routerLink]="'/head/branch/add'"
+            class="inline-flex items-center gap-2 px-5 py-3 text-white font-medium rounded-xl shadow bg-[var(--color-primary)] hover:shadow-lg hover:scale-[1.02] transition-all"
+          >
+            <span class="material-icons text-sm md:text-base">add</span>
+            Add Branch
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Bar and View Toggle -->
+    <div
+      class="mb-6 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between"
+    >
+      <div class="relative max-w-xl flex-1">
+        <div
+          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+        >
+          <span class="material-icons text-gray-400 text-lg">search</span>
+        </div>
+        <input
+          type="text"
+          class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200"
+          placeholder="Search Branch by name, email or mobile..."
+          [(ngModel)]="searchTerm"
+          (input)="filterAgents()"
+        />
+      </div>
+
+      <!-- View Toggle Buttons -->
+      <div
+        class="flex items-center gap-2 bg-white rounded-xl border border-gray-200 p-1 hidden md:flex"
+      >
+        <button
+          type="button"
+          (click)="setViewMode('grid')"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+          [ngClass]="{
+            'bg-[var(--color-primary)] text-white shadow-md':
+              viewMode === 'grid',
+            'text-gray-600 hover:bg-gray-100': viewMode !== 'grid',
+          }"
+        >
+          <span class="material-icons text-base">grid_view</span>
+        </button>
+        <button
+          type="button"
+          (click)="setViewMode('table')"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+          [ngClass]="{
+            'bg-[var(--color-primary)] text-white shadow-md':
+              viewMode === 'table',
+            'text-gray-600 hover:bg-gray-100': viewMode !== 'table',
+          }"
+        >
+          <span class="material-icons text-base">table_rows</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center p-12">
+      <div class="text-center space-y-4">
+        <div
+          class="w-14 h-14 mx-auto rounded-xl bg-[var(--color-primary)] flex items-center justify-center animate-pulse"
+        >
+          <span class="material-icons text-white text-2xl">sync</span>
+        </div>
+        <p class="text-gray-600">Loading Branch data...</p>
+      </div>
+    </div>
+
+    <!-- Error State with Dismiss Button -->
+    <div *ngIf="error && !loading" class="mb-6">
+      <div class="p-4 bg-red-50 border border-red-100 rounded-xl">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0"
+            >
+              <span class="material-icons text-red-500 text-sm">error</span>
+            </div>
+            <p class="text-red-700">{{ error }}</p>
+          </div>
+          <button
+            (click)="dismissError()"
+            class="p-1 hover:bg-red-200 rounded-lg transition-colors"
+            aria-label="Dismiss error"
+          >
+            <span class="material-icons text-red-500 text-sm">close</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && agents.length === 0" class="text-center py-12">
+      <div class="max-w-md mx-auto">
+        <div
+          class="w-16 h-16 mx-auto rounded-xl bg-[var(--color-primary)] border border-gray-100 flex items-center justify-center mb-5"
+        >
+          <span class="material-icons text-gray-300 text-3xl"
+            >people_outline</span
+          >
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">
+          No Branch Accounts Found
+        </h3>
+        <p class="text-gray-500 mb-5">
+          Get started by creating your first Branch account
+        </p>
+        <!-- <button
+          [routerLink]="'/head/branch/add'"
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary)] text-white font-medium rounded-xl hover:shadow-lg transition-all duration-200"
+        >
+          <span class="material-icons text-sm">add</span>
+          
+        </button> -->
+        <button
+          [routerLink]="'/head/branch/add'"
+          class="inline-flex items-center gap-2 px-5 py-3 text-white font-medium rounded-xl shadow bg-[var(--color-primary)] hover:shadow-lg hover:scale-[1.02] transition-all"
+        >
+          <span class="material-icons text-sm md:text-base">add</span>
+          Create First Branch
+        </button>
+      </div>
+    </div>
+
+    <!-- Grid View (Icons only with tooltips) -->
+    <!-- <div
+      *ngIf="viewMode === 'grid' && !loading && agents.length > 0"
+      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5"
+    > -->
+    <div
+      *ngIf="!loading && agents.length > 0"
+      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5"
+      [class.md:hidden]="viewMode === 'table'"
+    >
+      <div
+        *ngFor="let agent of paginatedAgents"
+        class="bg-white rounded-xl border border-gray-200 hover:border-[var(--color-primary)]/30 transition-all duration-200 hover:shadow-md overflow-hidden flex flex-col"
+      >
+        <!-- Card Header -->
+        <div class="p-4 md:p-5 border-b border-gray-100">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div
+                class="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-white font-bold text-sm md:text-base shadow flex-shrink-0"
+              >
+                {{ initialLetter(agent) }}
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3
+                  class="font-bold text-gray-900 text-base md:text-lg truncate"
+                  [title]="agent.name"
+                >
+                  {{ agent.name }}
+                </h3>
+                <div class="flex items-center gap-2 mt-1 flex-wrap">
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                    [ngClass]="
+                      agent.active
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    "
+                  >
+                    {{ agent.active ? "Active" : "Inactive" }}
+                  </span>
+                  <span
+                    class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full"
+                  >
+                    {{ agent.portalsWithRange?.length || 0 }} portals
+                  </span>
+
+                  <!-- Business Type badges (if available) -->
+                  <ng-container *ngIf="agent.businessTypes?.length">
+                    <span
+                      *ngFor="let bt of agent.businessTypes"
+                      class="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--primary-soft-10)] text-[var(--color-primary)]"
+                    >
+                      {{ bt }}
+                    </span>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="p-4 md:p-5 flex-1 flex flex-col">
+          <!-- Split Contact Info - Email and Phone on separate lines -->
+          <div class="space-y-2 mb-4">
+            <!-- Email -->
+            <div class="flex items-center gap-2 text-sm">
+              <div
+                class="w-6 h-6 rounded-md bg-[var(--primary-soft-10)] flex items-center justify-center flex-shrink-0"
+              >
+                <span class="material-icons text-blue-500 text-sm">email</span>
+              </div>
+              <span class="text-gray-600 truncate">{{
+                agent.email || "No email"
+              }}</span>
+            </div>
+            <!-- Phone -->
+            <div class="flex items-center gap-2 text-sm">
+              <div
+                class="w-6 h-6 rounded-md bg-green-50 flex items-center justify-center flex-shrink-0"
+              >
+                <span class="material-icons text-green-500 text-sm">phone</span>
+              </div>
+              <span class="text-gray-600">{{
+                agent.mobile || "No phone"
+              }}</span>
+            </div>
+          </div>
+
+          <!-- Portal Summary - Only first portal visible with More button -->
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs text-gray-500"
+                >{{ agent.portalsWithRange?.length || 0 }} portals</span
+              >
+            </div>
+
+            <!-- No Portals -->
+            <div
+              *ngIf="
+                !agent.portalsWithRange || agent.portalsWithRange.length === 0
+              "
+              class="p-3 bg-gray-50 rounded-lg border border-gray-100"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center"
+                >
+                  <span class="material-icons text-gray-400 text-sm"
+                    >language</span
+                  >
+                </div>
+                <div class="text-sm text-gray-500">No portals assigned</div>
+              </div>
+            </div>
+
+            <!-- Portal Display - Only first portal -->
+            <div
+              *ngIf="
+                agent.portalsWithRange && agent.portalsWithRange.length > 0
+              "
+              class="space-y-2"
+            >
+              <!-- First Portal - Only name and status toggle -->
+              <div class="p-2 bg-gray-50 rounded-lg border border-gray-100">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="w-1.5 h-1.5 rounded-full"
+                      [ngClass]="
+                        agent.portalsWithRange[0].active
+                          ? 'bg-green-500'
+                          : 'bg-red-500'
+                      "
+                    ></div>
+                    <button
+                      type="button"
+                      (click)="
+                        openPortalPopup(agent, agent.portalsWithRange[0])
+                      "
+                      class="text-xs font-medium text-[var(--color-primary)] hover:underline truncate max-w-[180px] text-left"
+                      [title]="getPortalDomain(agent.portalsWithRange[0])"
+                    >
+                      {{ getPortalDomain(agent.portalsWithRange[0]) }}
+                    </button>
+                  </div>
+                  <button
+                    (click)="
+                      togglePortalStatus(agent, agent.portalsWithRange[0])
+                    "
+                    [disabled]="
+                      isPortalToggling(
+                        agent.id,
+                        agent.portalsWithRange[0].portalId
+                      )
+                    "
+                    class="relative inline-flex items-center h-4 rounded-full w-8 flex-shrink-0 border border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:ring-offset-1"
+                    [ngClass]="
+                      agent.portalsWithRange[0].active
+                        ? 'bg-green-500'
+                        : 'bg-gray-300'
+                    "
+                  >
+                    <span
+                      class="inline-block h-3 w-3 transform bg-white rounded-full transition duration-200 ease-in-out shadow"
+                      [ngClass]="
+                        agent.portalsWithRange[0].active
+                          ? 'translate-x-4'
+                          : 'translate-x-0.5'
+                      "
+                    ></span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- More Portals Button (if more than 1) -->
+              <div
+                *ngIf="agent.portalsWithRange.length > 1"
+                class="text-center"
+              >
+                <button
+                  type="button"
+                  (click)="openAllPortalsPopup(agent)"
+                  class="inline-flex items-center gap-1 text-[var(--color-primary)] hover:text-[#4F83E8] font-medium bg-[var(--primary-soft-10)] px-3 py-1.5 rounded-lg transition-colors w-full justify-center"
+                >
+                  <span class="material-icons text-sm">more_horiz</span>
+                  View {{ agent.portalsWithRange.length - 1 }} more portal{{
+                    agent.portalsWithRange.length - 1 > 1 ? "s" : ""
+                  }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons - Icons only with tooltips -->
+          <!-- <div
+            class="flex flex-nowrap gap-1.5 pt-4 border-t border-gray-100 mt-auto overflow-x-auto pb-1"
+          >
+            <button
+              (click)="openInfoModal(agent)"
+              class="inline-flex items-center justify-center p-2 bg-gray-600 text-white text-xs font-medium rounded-lg hover:shadow transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              [title]="'View Details'"
+            >
+              <span class="material-icons text-sm">info</span>
+            </button>
+            <button
+              (click)="toggleStatus(agent)"
+              class="inline-flex items-center justify-center p-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:shadow transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              [title]="'Toggle Status'"
+            >
+              <span class="material-icons text-sm">swap_horiz</span>
+            </button>
+            <button
+              *ngIf="agent.id"
+              [routerLink]="['/head/branch-user/manage', agent.id]"
+              class="inline-flex items-center justify-center p-2 bg-green-600 text-white text-xs font-medium rounded-lg hover:shadow transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              [title]="'View Users'"
+            >
+              <span class="material-icons text-sm">visibility</span>
+            </button>
+            <button
+              *ngIf="agent.id"
+              (click)="openAddUserModal(agent)"
+              class="inline-flex items-center justify-center p-2 bg-purple-600 text-white text-xs font-medium rounded-lg hover:shadow transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              [title]="'Add User'"
+            >
+              <span class="material-icons text-sm">person_add</span>
+            </button>
+            <button
+              (click)="openEditModal(agent)"
+              class="inline-flex items-center justify-center p-2 bg-[var(--color-primary)] text-white text-xs font-medium rounded-lg hover:shadow transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              [title]="'Edit'"
+            >
+              <span class="material-icons text-sm">edit</span>
+            </button>
+          </div> -->
+     <div
+  class="flex flex-nowrap gap-1.5 pt-4 border-t border-gray-100 mt-auto overflow-x-auto pb-1"
+>
+  <!-- Toggle -->
+  <button
+    (click)="toggleStatus(agent)"
+    class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+    title="Toggle Status"
+  >
+    <span class="material-icons text-sm">swap_horiz</span>
+  </button>
+
+  <!-- Limits -->
+  <button
+    *ngIf="agent.id"
+    (click)="openLimitPopup(agent); $event.stopPropagation()"
+    class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+    title="Limits"
+  >
+    <span class="material-icons text-sm">account_balance_wallet</span>
+  </button>
+
+  <!-- View Users -->
+  <button
+    *ngIf="agent.id"
+    [routerLink]="['/head/branch-user/manage', agent.id]"
+    class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+    title="View Users"
+  >
+    <span class="material-icons text-sm">visibility</span>
+  </button>
+
+  <!-- Edit -->
+  <button
+    (click)="openEditModal(agent)"
+    class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+    title="Edit"
+  >
+    <span class="material-icons text-sm">edit_square</span>
+  </button>
+</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table View (with split contact columns and Info option) -->
+    <div
+      *ngIf="viewMode === 'table' && !loading && agents.length > 0"
+      class="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden"
+      (click)="closeAllActionMenus()"
+    >
+      <div class="overflow-x-auto">
+        <div
+          *ngIf="viewMode === 'table' && !loading && agents.length > 0"
+          class="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden"
+        >
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <!-- Header -->
+              <thead class="bg-gray-50 border-b border-gray-200">
+                <tr class="text-xs font-semibold text-gray-600 uppercase">
+                  <th class="px-4 py-2 text-left">Branch</th>
+                  <th class="px-4 py-2 text-left">Email</th>
+                  <th class="px-4 py-2 text-left">Phone</th>
+                  <th class="px-4 py-2 text-left">Portal</th>
+                  <th class="px-4 py-2 text-left">Status</th>
+                  <th class="px-4 py-2 text-right">Actions</th>
+                </tr>
+              </thead>
+
+              <!-- Body -->
+              <tbody class="divide-y divide-gray-100">
+                <tr
+                  *ngFor="let agent of paginatedAgents"
+                  class="hover:bg-gray-50 transition"
+                >
+                  <!-- Branch -->
+                  <td class="px-4 py-2">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-9 h-9 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-white font-bold"
+                      >
+                        {{ initialLetter(agent) }}
+                      </div>
+
+                      <div class="font-medium text-gray-900">
+                        {{ agent.name }}
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Email -->
+                  <td class="px-4 py-2 text-gray-600">
+                    <div class="flex items-center gap-2">
+                      <span class="material-icons text-gray-400 text-sm"
+                        >mail</span
+                      >
+                      {{ agent.email || "No email" }}
+                    </div>
+                  </td>
+
+                  <!-- Phone -->
+                  <td class="px-4 py-2 text-gray-600">
+                    <div class="flex items-center gap-2">
+                      <span class="material-icons text-gray-400 text-sm"
+                        >call</span
+                      >
+                      {{ agent.mobile || "No phone" }}
+                    </div>
+                  </td>
+
+                  <!-- Portal -->
+                <td class="px-4 py-2">
+  <!-- No portal -->
+  <span
+    *ngIf="!agent.portalsWithRange?.length"
+    class="text-gray-400"
+  >
+    No portal
+  </span>
+
+  <!-- One or more portals -->
+  <div
+    *ngIf="agent.portalsWithRange?.length > 0"
+    class="flex flex-col gap-1"
+  >
+    <!-- First portal clickable -->
+    <div class="flex items-center gap-2">
+      <div
+        class="w-2 h-2 rounded-full"
+        [ngClass]="
+          agent.portalsWithRange[0].active ? 'bg-green-500' : 'bg-red-500'
+        "
+      ></div>
+
+      <button
+        type="button"
+        (click)="openPortalPopup(agent, agent.portalsWithRange[0]); $event.stopPropagation()"
+        class="text-[var(--color-primary)] font-medium hover:underline text-left truncate max-w-[180px]"
+        [title]="getPortalDomain(agent.portalsWithRange[0])"
+      >
+        {{ getPortalDomain(agent.portalsWithRange[0]) }}
+      </button>
+    </div>
+
+    <!-- More portals -->
+    <button
+      *ngIf="agent.portalsWithRange.length > 1"
+      type="button"
+      (click)="openAllPortalsPopup(agent); $event.stopPropagation()"
+      class="text-xs text-[var(--color-primary)] hover:underline text-left"
+    >
+      +{{ agent.portalsWithRange.length - 1 }} more
+    </button>
+  </div>
+</td>
+
+                  <!-- Status Toggle -->
+                  <td class="px-4 py-2 text-center">
+                    <button
+                      (click)="toggleStatus(agent)"
+                      class="relative inline-flex items-center h-6 w-11 rounded-full transition"
+                      [ngClass]="agent.active ? 'bg-green-500' : 'bg-gray-300'"
+                    >
+                      <span
+                        class="inline-block w-4 h-4 transform bg-white rounded-full transition"
+                        [ngClass]="
+                          agent.active ? 'translate-x-6' : 'translate-x-1'
+                        "
+                      ></span>
+                    </button>
+                  </td>
+
+                  <!-- Actions -->
+          <td class="px-4 py-2">
+  <div class="flex items-center justify-end gap-2">
+    <button
+      *ngIf="agent.id"
+      (click)="openLimitPopup(agent); $event.stopPropagation()"
+      class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
+      title="Limits"
+    >
+      <span class="material-icons text-[16px]">account_balance_wallet</span>
+    </button>
+
+    <button
+      *ngIf="agent.id"
+      [routerLink]="['/head/branch-user/manage', agent.id]"
+      class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
+      title="View Users"
+    >
+      <span class="material-icons text-[16px]">visibility</span>
+    </button>
+
+    <button
+      (click)="openEditModal(agent)"
+      class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
+      title="Edit"
+    >
+      <span class="material-icons text-[16px]">edit_square</span>
+    </button>
+  </div>
+</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="!loading && filteredAgents.length > pageSize" class="mt-6">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-xs md:text-sm text-gray-600">
+          Showing
+          <span class="font-semibold text-gray-900">{{
+            (page - 1) * pageSize + 1
+          }}</span>
+          to
+          <span class="font-semibold text-gray-900">{{
+            Math.min(page * pageSize, filteredAgents.length)
+          }}</span>
+          of
+          <span class="font-semibold text-gray-900">{{
+            filteredAgents.length
+          }}</span>
+          Branches
+        </div>
+        <div class="flex gap-1.5">
+          <button
+            (click)="prevPage()"
+            [disabled]="page === 1"
+            class="inline-flex items-center gap-1 px-3 py-2 border border-gray-300 text-gray-700 text-xs md:text-sm font-medium rounded-lg hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span class="material-icons text-sm">chevron_left</span>
+            Prev
+          </button>
+          <button
+            (click)="nextPage()"
+            [disabled]="page * pageSize >= filteredAgents.length"
+            class="inline-flex items-center gap-1 px-3 py-2 border border-gray-300 text-gray-700 text-xs md:text-sm font-medium rounded-lg hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+            <span class="material-icons text-sm">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Portal Details Modal (with search bar) -->
+  <div
+    *ngIf="showAllPortalsModal && selectedAgent"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    (click)="closeAllPortalsModal()"
+  >
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div
+      class="relative z-10 w-full max-w-md bg-white rounded-xl shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="p-4 border-b border-gray-100">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-semibold text-gray-900">
+            Portals - {{ selectedAgent.name }}
+          </h3>
+          <button
+            (click)="closeAllPortalsModal()"
+            class="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <span class="material-icons text-gray-500">close</span>
+          </button>
+        </div>
+
+        <!-- Search Bar in Modal -->
+        <div class="relative">
+          <div
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+          >
+            <span class="material-icons text-gray-400 text-sm">search</span>
+          </div>
+          <input
+            type="text"
+            class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] transition-all duration-200 text-sm"
+            placeholder="Search portals..."
+            [(ngModel)]="portalModalSearchTerm"
+            (input)="filterPortalsInModal()"
+          />
+        </div>
+      </div>
+
+      <div class="p-4 max-h-96 overflow-y-auto">
+        <div class="space-y-3">
+          <div
+            *ngFor="let portal of filteredModalPortals"
+            class="p-3 bg-gray-50 rounded-lg border border-gray-100"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-2 h-2 rounded-full"
+                  [ngClass]="portal.active ? 'bg-green-500' : 'bg-red-500'"
+                ></div>
+                <span class="font-medium text-gray-900">
+                  {{ getPortalDomain(portal) }}
+                </span>
+              </div>
+              <button
+                (click)="togglePortalStatus(selectedAgent, portal)"
+                [disabled]="
+                  isPortalToggling(selectedAgent.id, portal.portalId)
+                "
+                class="relative inline-flex items-center h-5 rounded-full w-9 flex-shrink-0 border border-transparent transition-colors duration-200 ease-in-out"
+                [ngClass]="portal.active ? 'bg-green-500' : 'bg-gray-300'"
+              >
+                <span
+                  class="inline-block h-4 w-4 transform bg-white rounded-full transition duration-200 ease-in-out shadow"
+                  [ngClass]="
+                    portal.active ? 'translate-x-4' : 'translate-x-0.5'
+                  "
+                ></span>
+              </button>
+            </div>
+            <div class="flex gap-3 text-sm mt-2 pt-2 border-t border-gray-200">
+                <div class="flex-1">
+                <div class="text-xs text-gray-500">Ftt</div>
+                <div class="font-semibold text-green-600">
+                  {{ portal.fttPercentage || 0 }}%
+                </div>
+              </div>
+              <div class="flex-1">
+                <div class="text-xs text-gray-500">Topup</div>
+                <div class="font-semibold text-green-600">
+                  {{ portal.topupPercentage || 0 }}%
+                </div>
+              </div>
+              <div class="flex-1">
+                <div class="text-xs text-gray-500">Payout</div>
+                <div class="font-semibold text-[var(--color-primary)]">
+                  {{ portal.payoutPercentage || 0 }}%
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            *ngIf="filteredModalPortals.length === 0"
+            class="text-center py-8"
+          >
+            <span class="material-icons text-gray-300 text-3xl mb-2"
+              >search_off</span
+            >
+            <p class="text-gray-500 text-sm">No portals match your search</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Single Portal Modal -->
+  <div
+    *ngIf="showSinglePortalModal && selectedPortal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    (click)="closeSinglePortalModal()"
+  >
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div
+      class="relative z-10 w-full max-w-md bg-white rounded-xl shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div
+        class="p-4 border-b border-gray-100 flex items-center justify-between"
+      >
+        <h3 class="text-lg font-semibold text-gray-900">Portal Details</h3>
+        <button
+          (click)="closeSinglePortalModal()"
+          class="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <span class="material-icons text-gray-500">close</span>
+        </button>
+      </div>
+      <div class="p-4">
+        <div class="text-center mb-4">
+          <span class="font-medium text-gray-900 text-lg">
+            {{ getPortalDomain(selectedPortal) }}
+          </span>
+        </div>
+        <div class="space-y-3">
+          <div class="p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-2 h-2 rounded-full"
+                  [ngClass]="
+                    selectedPortal.active ? 'bg-green-500' : 'bg-red-500'
+                  "
+                ></div>
+                <span class="text-sm text-gray-600">Status</span>
+              </div>
+              <span
+                class="text-sm font-medium"
+                [ngClass]="
+                  selectedPortal.active ? 'text-green-600' : 'text-red-600'
+                "
+              >
+                {{ selectedPortal.active ? "Active" : "Inactive" }}
+              </span>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+             <div class="p-3 bg-gray-50 rounded-lg">
+              <div class="text-xs text-gray-500 mb-1">Ftt</div>
+              <div class="text-lg font-semibold text-green-600">
+                {{ selectedPortal.fttPercentage || 0 }}%
+              </div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <div class="text-xs text-gray-500 mb-1">Topup</div>
+              <div class="text-lg font-semibold text-green-600">
+                {{ selectedPortal.topupPercentage || 0 }}%
+              </div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <div class="text-xs text-gray-500 mb-1">Payout</div>
+              <div class="text-lg font-semibold text-[var(--color-primary)]">
+                {{ selectedPortal.payoutPercentage || 0 }}%
+              </div>
+            </div>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Modal -->
+  <div
+    *ngIf="showInfoModal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    (click)="closeInfoModal()"
+  >
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div
+      class="relative z-10 w-full max-w-3xl bg-white rounded-2xl md:rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div
+        class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50"
+      >
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Branch Details</h3>
+          <p class="text-xs text-gray-500">Profile overview</p>
+        </div>
+        <button
+          (click)="closeInfoModal()"
+          class="p-2 hover:bg-gray-200 rounded-lg"
+        >
+          <span class="material-icons text-gray-600">close</span>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-4 md:p-6" *ngIf="selectedAgentForInfo">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <!-- ================= LEFT ================= -->
+          <div class="space-y-5">
+            <!-- Profile -->
+            <div class="flex items-center gap-3 md:gap-4">
+              <div
+                class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[var(--color-primary)] flex items-center justify-center text-white text-lg font-bold shadow-md"
+              >
+                {{ initialLetter(selectedAgentForInfo) }}
+              </div>
+              <div>
+                <div class="text-lg font-semibold text-gray-900">
+                  {{ selectedAgentForInfo.name }}
+                </div>
+                <span
+                  class="inline-flex mt-1 px-3 py-1 text-xs font-medium rounded-full"
+                  [ngClass]="
+                    selectedAgentForInfo.active
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-red-100 text-red-700'
+                  "
+                >
+                  {{ selectedAgentForInfo.active ? "Active" : "Inactive" }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Email + Phone -->
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-2 mb-1">
+                  <span
+                    class="material-icons text-[var(--color-primary)] text-[18px]"
+                    >email</span
+                  >
+                  <span class="text-xs text-gray-500">Email</span>
+                </div>
+                <div class="text-sm font-medium text-gray-900 truncate">
+                  {{ selectedAgentForInfo.email || "No email" }}
+                </div>
+              </div>
+
+              <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="material-icons text-green-600 text-[18px]"
+                    >phone</span
+                  >
+                  <span class="text-xs text-gray-500">Phone</span>
+                </div>
+                <div class="text-sm font-medium text-gray-900">
+                  {{ selectedAgentForInfo.mobile || "No phone" }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Balance + Business -->
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="material-icons text-yellow-600 text-[18px]">
+                    account_balance_wallet
+                  </span>
+                  <span class="text-xs text-gray-500">Balance</span>
+                </div>
+                <div class="text-sm font-semibold text-green-600">
+                  ₹{{ selectedAgentForInfo.balance || 0 }}
+                </div>
+              </div>
+
+              <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="material-icons text-purple-600 text-[18px]"
+                    >business</span
+                  >
+                  <span class="text-xs text-gray-500">Business Type</span>
+                </div>
+                <div class="text-sm font-medium text-gray-900">
+                  {{
+                    selectedAgentForInfo.businessTypes?.length
+                      ? selectedAgentForInfo.businessTypes.join(", ")
+                      : "N/A"
+                  }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= RIGHT ================= -->
+          <div>
+            <div
+              class="bg-gray-50 p-4 md:p-5 rounded-xl border border-gray-100 h-full flex flex-col"
+            >
+              <div class="flex items-center gap-2 mb-3">
+                <span class="material-icons text-gray-600 text-[18px]"
+                  >description</span
+                >
+                <span class="text-sm font-semibold text-gray-800">
+                  Additional Info
+                </span>
+              </div>
+              <p class="text-sm text-gray-700 leading-relaxed flex-1">
+                {{
+                  selectedAgentForInfo.info ||
+                    "No additional information added."
+                }}
+              </p>
+              <!-- <div class="mt-4 pt-4 border-t border-gray-200">
+                <span class="text-xs font-medium text-gray-500 block mb-2">Portals Assigned</span>
+                <div class="flex flex-wrap gap-1">
+                  <span *ngFor="let portal of selectedAgentForInfo.portalsWithRange?.slice(0, 3)" 
+                        class="text-xs bg-white px-2 py-1 rounded border border-gray-200">
+                    {{ getPortalDomain(portal) }}
+                  </span>
+                  <span *ngIf="selectedAgentForInfo.portalsWithRange?.length > 3" 
+                        class="text-xs bg-white px-2 py-1 rounded border border-gray-200 text-gray-500">
+                    +{{ selectedAgentForInfo.portalsWithRange?.length - 3 }} more
+                  </span>
+                </div>
+              </div> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Branch Modal (Fixed Version) -->
+<div
+  *ngIf="showEditModal"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4"
+  aria-modal="true"
+  role="dialog"
+>
+  <!-- Backdrop -->
+  <div
+    class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+(click)="closeEditModal()"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Modal Panel -->
+  <div
+  class="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-xl md:rounded-2xl shadow-2xl"
+  (click)="$event.stopPropagation()"
+>
+    <!-- Modal Header -->
+    <div
+      class="p-4 md:p-6 border-b border-gray-100 sticky top-0 bg-white z-10"
+    >
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[var(--color-primary)] flex items-center justify-center"
+          >
+            <span class="material-icons text-white">edit</span>
+          </div>
+          <div>
+            <h2 class="text-lg md:text-xl font-bold text-gray-900">
+              Branch Details
+            </h2>
+            <p class="text-sm text-gray-500">
+              View branch information and portal assignments
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Edit Toggle Button -->
+          <button
+            *ngIf="!isEditMode"
+            (click)="enableEditMode()"
+            class="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] flex items-center justify-center transition-colors"
+            aria-label="Edit branch"
+          >
+            <span class="material-icons text-white">edit</span>
+          </button>
+          
+          <!-- Close Button -->
+          <button
+           (click)="closeEditModal()"
+            class="w-7 h-7 md:w-8 md:h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors"
+            aria-label="Close modal"
+          >
+            <span class="material-icons text-gray-400">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Edit Mode Indicator -->
+      <div
+        *ngIf="isEditMode"
+        class="mt-3 flex items-center gap-2 text-sm text-[var(--color-primary)] bg-[#F0F7FF] px-3 py-2 rounded-lg"
+      >
+        <span class="material-icons text-sm">edit</span>
+        <span>You are in edit mode. Make your changes and click Update.</span>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-4 md:p-6">
+      <form (ngSubmit)="updateBranch()" class="space-y-5 md:space-y-6">
+        <!-- Personal Information Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <!-- Name -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
+              >Full Name <span class="text-red-500 ml-0.5">*</span></label
+            >
+            <div class="relative">
+              <input
+                type="text"
+                [(ngModel)]="editForm.name"
+                name="name"
+                [readonly]="!isEditMode"
+                [class.bg-gray-50]="!isEditMode"
+                [class.cursor-default]="!isEditMode"
+                class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200"
+                placeholder="Enter full name"
+                required
+              />
+            </div>
+            <div
+              *ngIf="!editForm.name && isEditMode"
+              class="text-red-500 text-xs mt-1 flex items-center font-medium"
+            >
+              <span class="material-icons text-xs mr-0.5">error</span>
+              Name is required
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
+              >Email Address</label
+            >
+            <input
+              type="email"
+              [(ngModel)]="editForm.email"
+              name="email"
+              [readonly]="!isEditMode"
+              [class.bg-gray-50]="!isEditMode"
+              [class.cursor-default]="!isEditMode"
+              (input)="validateEmail()"
+              [class.border-red-500]="emailError"
+              class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200"
+              placeholder="Enter email"
+            />
+            <div
+              *ngIf="emailError && isEditMode"
+              class="text-red-500 text-xs mt-1 flex items-center font-medium"
+            >
+              <span class="material-icons text-xs mr-0.5">error</span>
+              {{ emailError }}
+            </div>
+          </div>
+
+          <!-- Mobile -->
+        <div>
+  <label class="block text-sm font-medium text-gray-700 mb-2">
+    Mobile Number
+  </label>
+
+  <div class="flex border border-gray-200 rounded-xl overflow-hidden">
+
+    <!-- Country Select -->
+    <select
+      [(ngModel)]="selectedCountry"
+      name="country"
+      [disabled]="!isEditMode"
+      class="bg-gray-50 px-3 border-r border-gray-200 focus:outline-none text-sm"
+    >
+      <option *ngFor="let c of countryCodes" [ngValue]="c">
+        {{ c.flag }} {{ c.dialCode }}
+      </option>
+    </select>
+
+    <!-- Mobile -->
+    <input
+      type="tel"
+      [(ngModel)]="editForm.mobile"
+      name="mobile"
+      [readonly]="!isEditMode"
+      class="flex-1 px-4 py-2 focus:outline-none"
+      placeholder="Enter mobile number"
+    />
+  </div>
+
+</div>
+
+        
+        </div>
+
+        <!-- Additional Info -->
+        <div>
+          <label
+            class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
+            >Additional Information</label
+          >
+          <textarea
+            [(ngModel)]="editForm.info"
+            name="info"
+            rows="2"
+            [readonly]="!isEditMode"
+            [class.bg-gray-50]="!isEditMode"
+            [class.cursor-default]="!isEditMode"
+            class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200 resize-none"
+            placeholder="Add any notes or additional information..."
+          ></textarea>
+        </div>
+
+        <!-- Portals Section -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-base md:text-lg font-semibold text-gray-900">
+                Portal Assignment
+              </h3>
+              <p class="text-xs md:text-sm text-gray-500 mt-0.5">
+                {{ isEditMode ? 'Select portals and set commission percentages' : 'View assigned portals and commission percentages' }}
+              </p>
+            </div>
+            <span
+              class="text-xs font-medium px-2.5 py-1 bg-[#F0F7FF] text-[var(--color-primary)] rounded-full"
+            >
+              {{ getSelectedPortalCount() }} selected
+            </span>
+          </div>
+
+          <!-- Loading -->
+          <div
+            *ngIf="loadingPortals"
+            class="p-4 md:p-6 bg-gray-50 rounded-lg md:rounded-xl border border-gray-100"
+          >
+            <div class="flex items-center justify-center gap-2.5 md:gap-3">
+              <div
+                class="w-4 h-4 md:w-5 md:h-5 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"
+              ></div>
+              <span class="text-sm text-gray-600">Loading portals...</span>
+            </div>
+          </div>
+
+          <!-- Portals Grid -->
+          <div
+            *ngIf="!loadingPortals"
+            class="grid grid-cols-1 gap-3 max-h-[40vh] overflow-y-auto pr-1"
+          >
+            <div
+              *ngFor="let portal of portalOptions"
+              class="bg-white rounded-lg border border-gray-200 p-3 md:p-4 hover:border-[var(--color-primary)] transition-colors"
+            >
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                  <input
+                    type="checkbox"
+                    [id]="'edit-portal-' + portal.portalId"
+                    [checked]="isPortalSelected(portal.portalId)"
+                    (change)="
+                      onPortalSelectionChange($event, portal.portalId)
+                    "
+                    [disabled]="!isEditMode"
+                    class="h-4 w-4 md:h-5 md:w-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-gray-300 rounded transition-all duration-200 flex-shrink-0"
+                  />
+                  <div class="min-w-0">
+                    <label
+                      [for]="'edit-portal-' + portal.portalId"
+                      class="font-medium text-gray-900 text-sm truncate block cursor-pointer"
+                    >
+                      {{ portal.portalDomain }}
+                    </label>
+                  </div>
+                </div>
+                <span
+                  *ngIf="isInitialPortal(portal.portalId)"
+                  class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full flex-shrink-0"
+                >
+                  Assigned
+                </span>
+              </div>
+
+              <!-- Percentage Fields - Only show if portal is selected -->
+              <div
+                *ngIf="isPortalSelected(portal.portalId)"
+                class="grid grid-cols-3 gap-3 mt-3"
+              >
+                <div>
+                  <label
+                    class="block text-xs font-medium text-gray-700 mb-1.5"
+                    >FTT(%)</label
+                  >
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      [(ngModel)]="
+                        getPortalPercentage(portal.portalId).fttPercentage
+                      "
+                      [name]="'ftt_' + portal.portalId"
+                      [readonly]="!isEditMode"
+                      [class.bg-gray-50]="!isEditMode"
+                      [class.cursor-default]="!isEditMode"
+                      class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-sm"
+                      placeholder="0-100"
+                    />
+                    <span class="text-gray-500 text-sm">%</span>
+                  </div>
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-medium text-gray-700 mb-1.5"
+                    >Topup (%)</label
+                  >
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      [(ngModel)]="
+                        getPortalPercentage(portal.portalId).topupPercentage
+                      "
+                      [name]="'topup_' + portal.portalId"
+                      [readonly]="!isEditMode"
+                      [class.bg-gray-50]="!isEditMode"
+                      [class.cursor-default]="!isEditMode"
+                      class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-sm"
+                      placeholder="0-100"
+                    />
+                    <span class="text-gray-500 text-sm">%</span>
+                  </div>
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-medium text-gray-700 mb-1.5"
+                    >Payout (%)</label
+                  >
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      [(ngModel)]="
+                        getPortalPercentage(portal.portalId).payoutPercentage
+                      "
+                      [name]="'payout_' + portal.portalId"
+                      [readonly]="!isEditMode"
+                      [class.bg-gray-50]="!isEditMode"
+                      [class.cursor-default]="!isEditMode"
+                      class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-sm"
+                      placeholder="0-100"
+                    />
+                    <span class="text-gray-500 text-sm">%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Load More Portals -->
+          <div
+            *ngIf="portalPage + 1 < portalTotalPages && isEditMode"
+            class="text-center py-2"
+          >
+            <button
+              type="button"
+              (click)="loadMorePortalsForEdit()"
+              class="px-4 py-2 text-xs font-medium bg-gray-100 hover:bg-[var(--color-primary)] hover:text-white rounded-lg transition-all"
+            >
+              <span *ngIf="!loadingMorePortals">Load More Portals</span>
+              <span *ngIf="loadingMorePortals">Loading...</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex gap-2.5 md:gap-3 pt-5 border-t border-gray-100">
+          <button
+            type="button"
+            (click)="closeEditModal()"
+            class="flex-1 px-4 md:px-6 py-2.5 md:py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg md:rounded-xl font-medium transition-colors text-sm"
+          >
+            {{ isEditMode ? 'Cancel' : 'Close' }}
+          </button>
+          
+          <!-- Update Button - Only shown in edit mode -->
+          <button
+            *ngIf="isEditMode"
+            type="submit"
+            [disabled]="!editForm.name"
+            class="flex-1 px-4 md:px-6 py-2.5 md:py-3 bg-[var(--color-primary)] text-white font-semibold rounded-lg md:rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          >
+            {{ loading ? "Updating..." : "Update Branch" }}
+          </button>
+           <!-- <button
+              type="submit"
+            class="flex-1 px-4 md:px-6 py-2.5 md:py-3 bg-[var(--color-primary)] text-white font-semibold rounded-lg md:rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            >
+              {{ loading ? "Updating..." : "Update Branch" }}
+            </button> -->
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- Add User Modal -->
+  <div
+    *ngIf="showAddUserModal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+  >
+    <div
+      class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+      (click)="closeAddUserModal()"
+    ></div>
+    <div
+      class="relative w-full max-w-2xl rounded-xl md:rounded-2xl overflow-hidden shadow-2xl"
+    >
+      <app-add-branch-user
+        [associate]="selectedAgentForAdd?.id"
+        [inModal]="true"
+        (created)="handleUserCreated($event)"
+        (close)="closeAddUserModal()"
+      ></app-add-branch-user>
+    </div>
+  </div>
+  <!-- Add Limit Popup -->
+  <div
+    *ngIf="showLimitPopup && selectedBranchForLimit"
+    class="fixed inset-0 z-50"
+  >
+    <!-- Backdrop - click karne se close -->
+    <div class="absolute inset-0 bg-black/50" (click)="closeLimitPopup()"></div>
+
+    <!-- Popup container -->
+    <div class="relative z-10 flex items-center justify-center min-h-screen">
+      <app-add-limit-popup
+        [entityId]="selectedBranchForLimit.id"
+        [entityType]="'BRANCH'"
+        (onClose)="closeLimitPopup()"
+      >
+        <!-- ✅ onClose use kiya -->
+      </app-add-limit-popup>
+    </div>
+  </div>
+</div>
+
+
+

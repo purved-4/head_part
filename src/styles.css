@@ -1,0 +1,115 @@
+ 
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+
+ 
+
+
+.error-snackbar {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* styles.scss */
+.no-padding-snackbar {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+
+.mat-mdc-form-field-subscript-wrapper {
+  display: none !important; 
+  height: 0 !important;
+}
+
+.mat-mdc-form-field {
+  margin-bottom: 0 !important;
+}
+mat-mdc-text-field-wrapper mdc-text-field ng-tns-c508571215-12 mdc-text-field--outlined mdc-text-field--no-label{
+  display: none;
+}
+
+/* Global Styles */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: #f5f7fa;
+}
+
+/* Snackbar Styles */
+.success-snackbar {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.error-snackbar {
+  background-color: #f44336 !important;
+  color: white !important;
+}
+
+/* Add some animation to snackbars */
+.mat-mdc-snack-bar-container {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+
+/* Add this to your global styles */
+.error-snackbar {
+  background-color: #f44336 !important; /* Red background */
+  color: white !important;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Position it at bottom right */
+.mat-snack-bar-container {
+  margin-bottom: 20px !important;
+  margin-right: 20px !important;
+  max-width: 360px !important;
+}
+
+mark.app-search-highlight {
+  background-color: #fffb8f; /* soft yellow */
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}

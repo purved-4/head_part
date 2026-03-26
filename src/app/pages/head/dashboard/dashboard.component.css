@@ -1,0 +1,12 @@
+@import url(https://fonts.googleapis.com/css2?family=Lato&display=swap);
+@import url(https://fonts.googleapis.com/css2?family=Open+Sans&display=swap);
+@import url(https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined);
+/* 
+@tailwind base;
+@tailwind components;
+@tailwind utilities; */
+:host { display: block; }
+canvas { width: 100% !important; height: 100% !important; }
+
+/* optional small styling tweaks */
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }

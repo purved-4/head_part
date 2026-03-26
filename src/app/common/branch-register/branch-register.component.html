@@ -1,0 +1,122 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4">
+  <!-- Main container: two columns on md+ screens -->
+  <div class="flex flex-col md:flex-row w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+    
+    <!-- LEFT COLUMN: Image and decorative content (always visible) -->
+    <div class="md:w-1/2 relative bg-gradient-to-br from-indigo-600 to-purple-700 p-8 flex flex-col items-center justify-center text-white">
+      <!-- <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.2"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div> -->
+      <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80" 
+           alt="Branch management" 
+           class="relative z-10 w-4/5 h-auto rounded-2xl shadow-2xl border-4 border-white/30 object-cover">
+      <div class="relative z-10 mt-8 text-center">
+        <h3 class="text-3xl font-bold">Welcome!</h3>
+        <p class="text-indigo-100 mt-2">Register your branch in just a few steps</p>
+      </div>
+      <div class="absolute bottom-4 left-4 w-20 h-20 border-4 border-white/20 rounded-full"></div>
+      <div class="absolute top-4 right-4 w-32 h-32 border-4 border-white/10 rounded-full"></div>
+    </div>
+
+    <!-- RIGHT COLUMN: Dynamic content (loading / error / form) -->
+    <div class="md:w-1/2 p-8 lg:p-12 bg-white">
+      <!-- Header: hidden when autoEnabled === false (error state) -->
+      <h2 *ngIf="!(!loading && autoEnabled === false)" class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+        <span class="material-symbols-outlined text-indigo-600 text-4xl">login</span>
+        Branch Sign In
+      </h2>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="py-12 text-center">
+        <div class="inline-block w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-4 text-gray-500">Checking link / auto status...</p>
+      </div>
+
+      <!-- Auto disabled / invalid link - full screen error message (no back button, no heading) -->
+      <div *ngIf="!loading && autoEnabled === false" class="py-16 text-center">
+        <span class="material-symbols-outlined text-7xl text-red-500">link_off</span>
+        <div class="text-2xl font-semibold text-gray-800 mt-4 mb-2">Link broken or changed</div>
+        <p class="text-gray-500 mb-8">The link appears invalid or auto‑mode is disabled. Please contact support for assistance.</p>
+        <a href="mailto:support@example.com" class="inline-flex items-center gap-2 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full transition shadow-md">
+          <span class="material-symbols-outlined">mail</span>
+          Contact Support
+        </a>
+      </div>
+
+      <!-- Form: visible only when autoEnabled === true -->
+      <form *ngIf="!loading && autoEnabled" #loginForm="ngForm" (ngSubmit)="onSubmit()" class="space-y-5">
+        <!-- Branch Name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Branch Name</label>
+          <div class="flex items-center border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 bg-gray-50">
+            <span class="material-symbols-outlined px-3 text-gray-400">store</span>
+            <input type="text" name="branchName" [(ngModel)]="branchName" placeholder="e.g., Downtown Branch"
+                   class="w-full py-3 pr-3 outline-none bg-transparent text-gray-700 placeholder-gray-400" />
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <div class="flex items-center border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 bg-gray-50">
+            <span class="material-symbols-outlined px-3 text-gray-400">email</span>
+            <input type="email" name="email" [(ngModel)]="email" placeholder="branch@example.com"
+                   class="w-full py-3 pr-3 outline-none bg-transparent text-gray-700 placeholder-gray-400" />
+          </div>
+        </div>
+
+        <!-- Mobile -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Mobile</label>
+          <div class="flex items-center border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 bg-gray-50">
+            <span class="material-symbols-outlined px-3 text-gray-400">phone</span>
+            <input type="tel" name="mobile" [(ngModel)]="mobile" placeholder="+1 234 567 890"
+                   class="w-full py-3 pr-3 outline-none bg-transparent text-gray-700 placeholder-gray-400" />
+          </div>
+        </div>
+
+        <!-- NEW FIELD: Address -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+          <div class="flex items-center border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 bg-gray-50">
+            <span class="material-symbols-outlined px-3 text-gray-400">location_on</span>
+            <input type="text" name="address" [(ngModel)]="address" placeholder="123 Main St, City"
+                   class="w-full py-3 pr-3 outline-none bg-transparent text-gray-700 placeholder-gray-400" />
+          </div>
+        </div>
+
+        <!-- Username -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+          <div class="flex items-center border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 bg-gray-50">
+            <span class="material-symbols-outlined px-3 text-gray-400">person</span>
+            <input type="text" name="username" [(ngModel)]="username" placeholder="Choose a username"
+                   class="w-full py-3 pr-3 outline-none bg-transparent text-gray-700 placeholder-gray-400" />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <div class="flex items-center border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 bg-gray-50">
+            <span class="material-symbols-outlined px-3 text-gray-400">lock</span>
+            <input type="password" name="password" [(ngModel)]="password" placeholder="••••••••"
+                   class="w-full py-3 pr-3 outline-none bg-transparent text-gray-700 placeholder-gray-400" />
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-4 pt-4">
+          <button type="submit"
+                  [disabled]="!autoEnabled"
+                  class="flex-1 bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition shadow-md hover:shadow-lg font-medium">
+            Submit
+          </button>
+          <button type="button" (click)="onClear()"
+                  class="flex-1 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition font-medium">
+            <span class="material-symbols-outlined text-sm">clear</span>
+            Clear
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

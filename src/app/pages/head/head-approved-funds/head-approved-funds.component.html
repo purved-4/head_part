@@ -1,0 +1,1684 @@
+<!-- Root element sets the colour scheme via data-role -->
+<div
+  id="webcrumbs"
+  [attr.data-role]="role?.toLowerCase() || 'branch'"
+  class="min-h-screen p-4 md:p-6 lg:p-8 bg-[var(--color-bg)]"
+>
+  <!-- MAIN GRID -->
+  <div class="grid grid-cols-1 gap-6 md:gap-8 mb-6 md:mb-8">
+    <!-- DEPOSITS & WITHDRAWALS VIEWS -->
+    <div class="space-y-8">
+      <!-- ========== UPI DEPOSITS CARD ========== -->
+      <div
+        *ngIf="activeView === 'upi'"
+        class="rounded-3xl overflow-hidden shadow-xl bg-[var(--color-surface)] border border-[var(--color-border)]"
+      >
+        <!-- Header – solid primary background -->
+        <div class="p-4 sm:p-6 bg-[var(--color-primary)]">
+          <div
+            class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4"
+          >
+            <!-- Title -->
+            <div class="flex items-center gap-3 sm:gap-4">
+              <div
+                class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shadow-lg bg-white/20"
+              >
+                <span
+                  class="material-symbols-outlined text-lg sm:text-xl text-[var(--color-bg)]"
+                >
+                  qr_code_scanner
+                </span>
+              </div>
+              <div class="text-[var(--color-bg)]">
+                <h3 class="font-bold text-lg sm:text-xl">UPI Topups</h3>
+                <p class="mt-1 text-xs sm:text-sm opacity-80">
+                  {{ filteredUpitopups().length }} records • Real-time updates
+                </p>
+              </div>
+            </div>
+
+            <!-- Filters Row -->
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto">
+              <!-- Portal dropdown -->
+              <div class="relative min-w-[140px] sm:min-w-[160px] flex-1 xl:flex-none">
+                <button
+                  (click)="togglePortalDropdown('upi')"
+                  class="w-full text-xs sm:text-sm border-0 rounded-2xl pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
+                >
+                  <span class="truncate">{{
+                    upiPortalFilter || "All Portals"
+                  }}</span>
+                  <span class="material-symbols-outlined text-base sm:text-lg"
+                    >arrow_drop_down</span
+                  >
+                </button>
+                <span
+                  class="material-symbols-outlined text-lg sm:text-xl absolute left-2 sm:left-3 top-2 sm:top-3 pointer-events-none text-[var(--color-bg)]"
+                  >public</span
+                >
+
+                <div
+                  *ngIf="upiPortalDropdownOpen"
+                  class="absolute left-0 mt-2 w-full rounded-2xl shadow-xl z-20 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] max-h-48 overflow-y-auto"
+                >
+                  <button
+                    (click)="selectPortal('upi', '')"
+                    class="w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)]"
+                  >
+                    All Portals
+                  </button>
+                  <button
+                    *ngFor="let site of upiPortals"
+                    (click)="selectPortal('upi', site)"
+                    class="w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)] truncate"
+                  >
+                    {{ site }}
+                  </button>
+                  <div
+                    *ngIf="upiPortals.length === 0"
+                    class="px-4 py-2 text-xs sm:text-sm text-[var(--color-muted)]"
+                  >
+                    No portals
+                  </div>
+                </div>
+              </div>
+
+              <!-- Date Filter Dropdown -->
+              <div class="relative date-filter-container">
+                <button
+                  (click)="toggleFilterDropdown('upi')"
+                  class="px-3 sm:px-4 py-2 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] shadow-md date-filter-button"
+                >
+                  <span class="material-symbols-outlined text-base sm:text-lg"
+                    >filter_alt</span
+                  >
+                  <span class="hidden xs:inline">Date Filter</span>
+                  <span
+                    *ngIf="upiFilterActive"
+                    class="ml-1 w-2 h-2 rounded-full bg-[var(--color-accent)]"
+                  ></span>
+                </button>
+                <!-- Dropdown Panel -->
+                <div
+                  *ngIf="filterDropdownOpen === 'upi'"
+                  class="absolute right-0 mt-2 w-64 sm:w-72 rounded-2xl shadow-xl z-20 p-3 sm:p-4 bg-[var(--color-surface)] border border-[var(--color-border)]"
+                >
+                  <h4 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 text-[var(--color-font)]">
+                    Select Date Range
+                  </h4>
+                  <div class="mb-2 sm:mb-3">
+                    <label class="block text-xs mb-1 text-[var(--color-muted)]"
+                      >From</label
+                    >
+                    <input
+                      type="date"
+                      [(ngModel)]="upiDateFrom"
+                      class="w-full rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-font)]"
+                    />
+                  </div>
+                  <div class="mb-3 sm:mb-4">
+                    <label class="block text-xs mb-1 text-[var(--color-muted)]"
+                      >To</label
+                    >
+                    <input
+                      type="date"
+                      [(ngModel)]="upiDateTo"
+                      class="w-full rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-font)]"
+                    />
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      (click)="applyUpiFiltersAndClose()"
+                      class="flex-1 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-[var(--color-primary)] text-[var(--color-font)] border border-[var(--color-border)]"
+                    >
+                      Apply
+                    </button>
+                    <button
+                      (click)="clearUpiDateFilters()"
+                      class="flex-1 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)]"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Search input -->
+              <div class="relative min-w-[150px] sm:min-w-[200px] flex-1 xl:flex-none">
+                <input
+                  type="text"
+                  placeholder="Search UPI..."
+                  [(ngModel)]="upiSearchQuery"
+                  (keyup.enter)="applyUpiFilters()"
+                  class="text-xs sm:text-sm border-0 rounded-2xl pl-8 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 placeholder-opacity-60 focus:ring-2 transition-all duration-300 w-full shadow-lg bg-white/20 text-[var(--color-bg)]"
+                />
+                <span
+                  class="material-symbols-outlined text-lg sm:text-xl absolute left-2 sm:left-4 top-2 sm:top-3 text-[var(--color-bg)]"
+                >
+                  search
+                </span>
+              </div>
+
+              <!-- Clear filters button -->
+              <button
+                (click)="clearUpiFilters()"
+                class="px-2 sm:px-4 py-2 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] shadow-md"
+                title="Clear all filters"
+              >
+                <span class="material-symbols-outlined text-base sm:text-lg"
+                  >filter_alt_off</span
+                >
+                <span class="hidden sm:inline">Clear</span>
+              </button>
+              <app-reload class="bg-white rounded-xl p-1" (reload)="refreshCurrentView()"></app-reload>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== MOBILE CARD GRID (visible on mobile, hidden on desktop) ========== -->
+        <div class="block md:hidden p-3 sm:p-4">
+          <div class="grid grid-cols-1 gap-3 sm:gap-4">
+            <div
+              *ngFor="let a of pagedUpitopups()"
+              class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-3 sm:p-4 shadow-sm"
+            >
+              <!-- Portal -->
+              <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div
+                  class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)] border border-[var(--color-border)]"
+                >
+                  <span class="material-symbols-outlined text-sm sm:text-base"
+                    >public</span
+                  >
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs sm:text-sm font-semibold">
+                    {{ a.raw.portalDomain || a.portalId || "-" }}
+                  </div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">Portal</div>
+                </div>
+              </div>
+
+              <!-- VPA -->
+              <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div
+                  class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center bg-[var(--color-surface)] border border-[var(--color-border)]"
+                >
+                  <span class="material-symbols-outlined text-xs sm:text-sm">qr_code</span>
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs sm:text-sm font-medium break-all">
+                    {{ a.vpa || a.upiId || "-" }}
+                  </div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                    Virtual Payment Address
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transaction ID -->
+              <div class="mb-2 sm:mb-3">
+                <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                  Transaction ID
+                </div>
+                <div class="text-xs sm:text-sm font-mono font-medium break-all">
+                  {{ a.transactionId || "-" }}
+                </div>
+              </div>
+
+              <!-- Amount and Date row -->
+              <div class="flex justify-between items-center mb-3 sm:mb-4">
+                <div class="flex items-center gap-1 sm:gap-2">
+                  <div
+                    class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border border-[var(--color-border)]"
+                  >
+                    <span class="material-symbols-outlined text-xs sm:text-sm"
+                      >arrow_upward</span
+                    >
+                  </div>
+                  <span class="text-sm sm:text-base font-bold"
+                    >+{{ formatCurrency(a.amount) }}</span
+                  >
+                </div>
+                <div class="text-right">
+                  <div class="text-xs sm:text-sm font-medium">
+                    {{ a.date | date: "MMM d, y" }}
+                  </div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                    {{ a.date | date: "h:mm a" }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Details button -->
+              <button
+                (click)="openRecordModal(a)"
+                class="w-full inline-flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm"
+              >
+                <span class="material-symbols-outlined text-base sm:text-lg"
+                  >visibility</span
+                >
+                Details
+              </button>
+            </div>
+
+            <!-- Empty state for cards -->
+            <div
+              *ngIf="filteredUpitopups().length === 0"
+              class="text-center py-6 sm:py-8"
+            >
+              <div
+                class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl mx-auto mb-2 sm:mb-3 flex items-center justify-center bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)] border border-[var(--color-border)]"
+              >
+                <span class="material-symbols-outlined text-xl sm:text-2xl">payments</span>
+              </div>
+              <p class="text-sm sm:text-base font-semibold">No UPI Topups found</p>
+              <p class="text-xs sm:text-sm text-[var(--color-muted)] mt-1">
+                Try adjusting your search
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== DESKTOP TABLE (hidden on mobile, visible on desktop) ========== -->
+        <div class="hidden md:block overflow-y-auto h-screen">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="sticky top-0 bg-[var(--color-bg)]">
+                <tr>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Portal
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    VPA Details
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Transaction
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Amount
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Date
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--color-border)]">
+                <tr
+                  *ngFor="let a of pagedUpitopups()"
+                  class="hover:bg-[var(--color-hover)] transition-all duration-300 group"
+                >
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                      <div
+                        class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm border border-[var(--color-border)] bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-sm sm:text-base text-[var(--color-font)]"
+                          >public</span
+                        >
+                      </div>
+                      <div>
+                        <span
+                          class="text-xs sm:text-sm font-semibold block text-[var(--color-font)]"
+                          >{{ a.raw.portalDomain || a.portalId || "-" }}</span
+                        >
+                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                          >Portal</span
+                        >
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                      <div
+                        class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shadow-sm border border-[var(--color-border)] bg-[var(--color-surface)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-xs sm:text-sm text-[var(--color-font)]"
+                          >qr_code</span
+                        >
+                      </div>
+                      <div>
+                        <span
+                          class="text-xs sm:text-sm font-medium block text-[var(--color-font)]"
+                          >{{ a.vpa || a.upiId || "-" }}</span
+                        >
+                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                          >Virtual Payment Address</span
+                        >
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div>
+                      <span
+                        class="text-xs sm:text-sm font-mono font-medium block text-[var(--color-font)]"
+                        >{{ a.transactionId || "-" }}</span
+                      >
+                      <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                        >Transaction ID</span
+                      >
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="flex items-center gap-1 sm:gap-2">
+                      <div
+                        class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border border-[var(--color-border)] bg-[var(--color-surface)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-xs sm:text-sm text-[var(--color-font)]"
+                          >arrow_upward</span
+                        >
+                      </div>
+                      <span class="text-sm sm:text-base font-bold text-[var(--color-font)]"
+                        >+{{ formatCurrency(a.amount) }}</span
+                      >
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="text-xs sm:text-sm font-medium text-[var(--color-font)]">
+                      {{ a.date | date: "MMM d, y" }}
+                    </div>
+                    <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                      {{ a.date | date: "h:mm a" }}
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <button
+                      (click)="openRecordModal(a)"
+                      class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] text-[var(--color-font)] bg-[var(--color-surface)] shadow-sm"
+                      title="View proof & details"
+                    >
+                      <span class="material-symbols-outlined text-base sm:text-lg"
+                        >visibility</span
+                      >
+                      <span>Details</span>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="filteredUpitopups().length === 0">
+                  <td colspan="7" class="px-4 py-8 sm:py-12 text-center">
+                    <div class="flex flex-col items-center">
+                      <div
+                        class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mb-3 sm:mb-4 shadow-inner border border-[var(--color-border)] bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-2xl sm:text-3xl text-[var(--color-font)]"
+                          >payments</span
+                        >
+                      </div>
+                      <p
+                        class="text-sm sm:text-base font-semibold text-[var(--color-font)]"
+                      >
+                        No UPI Topups found
+                      </p>
+                      <p class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]">
+                        Try adjusting your search criteria
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div
+          class="p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
+        >
+          <div class="flex items-center gap-2 sm:gap-3">
+            <label class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
+              >Rows:</label
+            >
+            <select
+              [(ngModel)]="upiPageSize"
+              (change)="onChangeUpiPageSize(upiPageSize)"
+              class="text-xs sm:text-sm rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)]"
+            >
+              <option *ngFor="let s of upiPageSizes" [value]="s">
+                {{ s }}
+              </option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="text-xs sm:text-sm mr-2 sm:mr-4 text-[var(--color-font)]">
+              <span class="hidden xs:inline">Page </span>
+              <span class="font-semibold">{{ upiPage + 1 }}</span> of
+              <span class="font-semibold">{{ upiTotalPages() }}</span>
+            </div>
+            <button
+              (click)="setUpiPage(upiPage - 1)"
+              [disabled]="upiPage === 0"
+              class="px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] bg-transparent text-[var(--color-font)] disabled:opacity-50"
+              aria-label="Previous page"
+            >
+              <span class="material-symbols-outlined text-base sm:text-lg"
+                >chevron_left</span
+              >
+              <span class="hidden xs:inline">Prev</span>
+            </button>
+            <button
+              (click)="setUpiPage(upiPage + 1)"
+              [disabled]="upiPage >= upiTotalPages() - 1"
+              class="px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] bg-transparent text-[var(--color-font)] disabled:opacity-50"
+              aria-label="Next page"
+            >
+              <span class="hidden xs:inline">Next</span>
+              <span class="material-symbols-outlined text-base sm:text-lg"
+                >chevron_right</span
+              >
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== BANK DEPOSITS CARD ========== -->
+      <div
+        *ngIf="activeView === 'bank'"
+        class="rounded-3xl overflow-hidden shadow-xl bg-[var(--color-surface)] border border-[var(--color-border)]"
+      >
+        <!-- Header – solid primary background -->
+        <div class="p-4 sm:p-6 bg-[var(--color-primary)]">
+          <div
+            class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4"
+          >
+            <!-- Title -->
+            <div class="flex items-center gap-3 sm:gap-4">
+              <div
+                class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shadow-lg bg-white/20"
+              >
+                <span
+                  class="material-symbols-outlined text-lg sm:text-xl text-[var(--color-bg)]"
+                >
+                  account_balance
+                </span>
+              </div>
+              <div class="text-[var(--color-bg)]">
+                <h3 class="font-bold text-lg sm:text-xl">Bank Topups</h3>
+                <p class="mt-1 text-xs sm:text-sm opacity-80">
+                  {{ filteredBanktopups().length }} records • Secure transactions
+                </p>
+              </div>
+            </div>
+
+            <!-- Filters Row -->
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto">
+              <!-- Bank portal dropdown -->
+              <div class="relative min-w-[140px] sm:min-w-[160px] flex-1 xl:flex-none">
+                <button
+                  (click)="togglePortalDropdown('bank')"
+                  class="w-full text-xs sm:text-sm border-0 rounded-2xl pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
+                >
+                  <span class="truncate">{{
+                    bankPortalFilter || "All Portals"
+                  }}</span>
+                  <span class="material-symbols-outlined text-base sm:text-lg"
+                    >arrow_drop_down</span
+                  >
+                </button>
+                <span
+                  class="material-symbols-outlined text-lg sm:text-xl absolute left-2 sm:left-3 top-2 sm:top-3 pointer-events-none text-[var(--color-bg)]"
+                  >public</span
+                >
+
+                <div
+                  *ngIf="bankPortalDropdownOpen"
+                  class="absolute left-0 mt-2 w-full rounded-2xl shadow-xl z-20 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] max-h-48 overflow-y-auto"
+                >
+                  <button
+                    (click)="selectPortal('bank', '')"
+                    class="w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)]"
+                  >
+                    All Portals
+                  </button>
+                  <button
+                    *ngFor="let site of bankPortals"
+                    (click)="selectPortal('bank', site)"
+                    class="w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)] truncate"
+                  >
+                    {{ site }}
+                  </button>
+                  <div
+                    *ngIf="bankPortals.length === 0"
+                    class="px-4 py-2 text-xs sm:text-sm text-[var(--color-muted)]"
+                  >
+                    No portals
+                  </div>
+                </div>
+              </div>
+
+              <!-- Date Filter Dropdown -->
+              <div class="relative date-filter-container">
+                <button
+                  (click)="toggleFilterDropdown('bank')"
+                  class="px-3 sm:px-4 py-2 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] shadow-md date-filter-button"
+                >
+                  <span class="material-symbols-outlined text-base sm:text-lg"
+                    >filter_alt</span
+                  >
+                  <span class="hidden xs:inline">Date Filter</span>
+                  <span
+                    *ngIf="bankFilterActive"
+                    class="ml-1 w-2 h-2 rounded-full bg-[var(--color-accent)]"
+                  ></span>
+                </button>
+                <!-- Dropdown Panel -->
+                <div
+                  *ngIf="filterDropdownOpen === 'bank'"
+                  class="absolute right-0 mt-2 w-64 sm:w-72 rounded-2xl shadow-xl z-20 p-3 sm:p-4 bg-[var(--color-surface)] border border-[var(--color-border)]"
+                >
+                  <h4 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 text-[var(--color-font)]">
+                    Select Date Range
+                  </h4>
+                  <div class="mb-2 sm:mb-3">
+                    <label class="block text-xs mb-1 text-[var(--color-muted)]"
+                      >From</label
+                    >
+                    <input
+                      type="date"
+                      [(ngModel)]="bankDateFrom"
+                      class="w-full rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-font)]"
+                    />
+                  </div>
+                  <div class="mb-3 sm:mb-4">
+                    <label class="block text-xs mb-1 text-[var(--color-muted)]"
+                      >To</label
+                    >
+                    <input
+                      type="date"
+                      [(ngModel)]="bankDateTo"
+                      class="w-full rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-font)]"
+                    />
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      (click)="applyBankFiltersAndClose()"
+                      class="flex-1 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-[var(--color-primary)] text-[var(--color-font)] border border-[var(--color-border)]"
+                    >
+                      Apply
+                    </button>
+                    <button
+                      (click)="clearBankDateFilters()"
+                      class="flex-1 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)]"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Search input -->
+              <div class="relative min-w-[150px] sm:min-w-[200px] flex-1 xl:flex-none">
+                <input
+                  type="text"
+                  placeholder="Search bank..."
+                  [(ngModel)]="bankSearchQuery"
+                  (keyup.enter)="applyBankFilters()"
+                  class="text-xs sm:text-sm border-0 rounded-2xl pl-8 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 placeholder-opacity-60 focus:ring-2 transition-all duration-300 w-full shadow-lg bg-white/20 text-[var(--color-bg)]"
+                />
+                <span
+                  class="material-symbols-outlined text-lg sm:text-xl absolute left-2 sm:left-4 top-2 sm:top-3 text-[var(--color-bg)]"
+                >
+                  search
+                </span>
+              </div>
+
+              <!-- Clear filters button -->
+              <button
+                (click)="clearBankFilters()"
+                class="px-2 sm:px-4 py-2 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] shadow-md"
+                title="Clear all filters"
+              >
+                <span class="material-symbols-outlined text-base sm:text-lg"
+                  >filter_alt_off</span
+                >
+                <span class="hidden sm:inline">Clear</span>
+              </button>
+              <app-reload class="bg-white rounded-xl p-1" (reload)="refreshCurrentView()"></app-reload>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== MOBILE CARD GRID (visible on mobile, hidden on desktop) ========== -->
+        <div class="block md:hidden p-3 sm:p-4">
+          <div class="grid grid-cols-1 gap-3 sm:gap-4">
+            <div
+              *ngFor="let a of pagedBanktopups()"
+              class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-3 sm:p-4 shadow-sm"
+            >
+              <!-- Portal -->
+              <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div
+                  class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)] border border-[var(--color-border)]"
+                >
+                  <span class="material-symbols-outlined text-sm sm:text-base"
+                    >public</span
+                  >
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs sm:text-sm font-semibold">
+                    {{ a.raw.portalDomain || a.portalId || "-" }}
+                  </div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">Portal</div>
+                </div>
+              </div>
+
+              <!-- Bank Details -->
+              <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div
+                  class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center bg-[var(--color-surface)] border border-[var(--color-border)]"
+                >
+                  <span class="material-symbols-outlined text-xs sm:text-sm">account_balance</span>
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs sm:text-sm font-medium break-all">
+                    {{ a.accountNo || "-" }}
+                  </div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                    {{ a.raw.bankAccountHolderName || "Account Holder" }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transaction ID -->
+              <div class="mb-2 sm:mb-3">
+                <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                  Transaction ID
+                </div>
+                <div class="text-xs sm:text-sm font-mono font-medium break-all">
+                  {{ a.transactionId || "-" }}
+                </div>
+              </div>
+
+              <!-- Amount and Date row -->
+              <div class="flex justify-between items-center mb-3 sm:mb-4">
+                <div class="flex items-center gap-1 sm:gap-2">
+                  <div
+                    class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border border-[var(--color-border)]"
+                  >
+                    <span class="material-symbols-outlined text-xs sm:text-sm"
+                      >arrow_upward</span
+                    >
+                  </div>
+                  <span class="text-sm sm:text-base font-bold"
+                    >+{{ formatCurrency(a.amount) }}</span
+                  >
+                </div>
+                <div class="text-right">
+                  <div class="text-xs sm:text-sm font-medium">
+                    {{ a.date | date: "MMM d, y" }}
+                  </div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                    {{ a.date | date: "h:mm a" }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Details button -->
+              <button
+                (click)="openRecordModal(a)"
+                class="w-full inline-flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm"
+              >
+                <span class="material-symbols-outlined text-base sm:text-lg"
+                  >visibility</span
+                >
+                Details
+              </button>
+            </div>
+
+            <!-- Empty state for cards -->
+            <div
+              *ngIf="filteredBanktopups().length === 0"
+              class="text-center py-6 sm:py-8"
+            >
+              <div
+                class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl mx-auto mb-2 sm:mb-3 flex items-center justify-center bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)] border border-[var(--color-border)]"
+              >
+                <span class="material-symbols-outlined text-xl sm:text-2xl">account_balance</span>
+              </div>
+              <p class="text-sm sm:text-base font-semibold">No Bank Topups found</p>
+              <p class="text-xs sm:text-sm text-[var(--color-muted)] mt-1">
+                Try adjusting your search
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== DESKTOP TABLE (hidden on mobile, visible on desktop) ========== -->
+        <div class="hidden md:block overflow-y-auto h-screen">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="sticky top-0 bg-[var(--color-bg)]">
+                <tr>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Portal
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Bank Details
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Transaction
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Amount
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Date
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--color-border)]">
+                <tr
+                  *ngFor="let a of pagedBanktopups()"
+                  class="hover:bg-[var(--color-hover)] transition-all duration-300 group"
+                >
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                      <div
+                        class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm border border-[var(--color-border)] bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-sm sm:text-base text-[var(--color-font)]"
+                          >public</span
+                        >
+                      </div>
+                      <div>
+                        <span
+                          class="text-xs sm:text-sm font-semibold block text-[var(--color-font)]"
+                          >{{ a.raw.portalDomain || a.portalId || "-" }}</span
+                        >
+                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                          >Portal</span
+                        >
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                      <div
+                        class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shadow-sm border border-[var(--color-border)] bg-[var(--color-surface)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-xs sm:text-sm text-[var(--color-font)]"
+                          >account_balance</span
+                        >
+                      </div>
+                      <div>
+                        <span
+                          class="text-xs sm:text-sm font-medium block text-[var(--color-font)]"
+                          >{{ a.accountNo || "-" }}</span
+                        >
+                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]">{{
+                          a.raw.bankAccountHolderName || "Account Holder"
+                        }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div>
+                      <span
+                        class="text-xs sm:text-sm font-mono font-medium block text-[var(--color-font)]"
+                        >{{ a.transactionId || "-" }}</span
+                      >
+                      <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                        >Transaction ID</span
+                      >
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="flex items-center gap-1 sm:gap-2">
+                      <div
+                        class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border border-[var(--color-border)] bg-[var(--color-surface)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-xs sm:text-sm text-[var(--color-font)]"
+                          >arrow_upward</span
+                        >
+                      </div>
+                      <span class="text-sm sm:text-base font-bold text-[var(--color-font)]"
+                        >+{{ formatCurrency(a.amount) }}</span
+                      >
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="text-xs sm:text-sm font-medium text-[var(--color-font)]">
+                      {{ a.date | date: "MMM d, y" }}
+                    </div>
+                    <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                      {{ a.date | date: "h:mm a" }}
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <button
+                      (click)="openRecordModal(a)"
+                      class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] text-[var(--color-font)] bg-[var(--color-surface)] shadow-sm"
+                      title="View proof & details"
+                    >
+                      <span class="material-symbols-outlined text-base sm:text-lg"
+                        >visibility</span
+                      >
+                      <span>Details</span>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="filteredBanktopups().length === 0">
+                  <td colspan="7" class="px-4 py-8 sm:py-12 text-center">
+                    <div class="flex flex-col items-center">
+                      <div
+                        class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mb-3 sm:mb-4 shadow-inner border border-[var(--color-border)] bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-2xl sm:text-3xl text-[var(--color-font)]"
+                          >account_balance</span
+                        >
+                      </div>
+                      <p
+                        class="text-sm sm:text-base font-semibold text-[var(--color-font)]"
+                      >
+                        No Bank Topups found
+                      </p>
+                      <p class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]">
+                        Try adjusting your search criteria
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div
+          class="p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
+        >
+          <div class="flex items-center gap-2 sm:gap-3">
+            <label class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
+              >Rows:</label
+            >
+            <select
+              [(ngModel)]="bankPageSize"
+              (change)="onChangeBankPageSize(bankPageSize)"
+              class="text-xs sm:text-sm rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)]"
+            >
+              <option *ngFor="let s of bankPageSizes" [value]="s">
+                {{ s }}
+              </option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="text-xs sm:text-sm mr-2 sm:mr-4 text-[var(--color-font)]">
+              <span class="hidden xs:inline">Page </span>
+              <span class="font-semibold">{{ bankPage + 1 }}</span> of
+              <span class="font-semibold">{{ bankTotalPages() }}</span>
+            </div>
+            <button
+              (click)="setBankPage(bankPage - 1)"
+              [disabled]="bankPage === 0"
+              class="px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] bg-transparent text-[var(--color-font)] disabled:opacity-50"
+              aria-label="Previous page"
+            >
+              <span class="material-symbols-outlined text-base sm:text-lg"
+                >chevron_left</span
+              >
+              <span class="hidden xs:inline">Prev</span>
+            </button>
+            <button
+              (click)="setBankPage(bankPage + 1)"
+              [disabled]="bankPage >= bankTotalPages() - 1"
+              class="px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] bg-transparent text-[var(--color-font)] disabled:opacity-50"
+              aria-label="Next page"
+            >
+              <span class="hidden xs:inline">Next</span>
+              <span class="material-symbols-outlined text-base sm:text-lg"
+                >chevron_right</span
+              >
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== PAYOUTS CARD ========== -->
+      <div
+        *ngIf="activeView === 'payout'"
+        class="rounded-3xl overflow-hidden shadow-xl bg-[var(--color-surface)] border border-[var(--color-border)]"
+      >
+        <!-- Header – solid primary background -->
+        <div class="p-4 sm:p-6 bg-[var(--color-primary)]">
+          <div
+            class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4"
+          >
+            <div class="flex items-center gap-3 sm:gap-4">
+              <div
+                class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shadow-lg bg-white/20"
+              >
+                <span
+                  class="material-symbols-outlined text-lg sm:text-xl text-[var(--color-bg)]"
+                >
+                  savings
+                </span>
+              </div>
+              <div class="text-[var(--color-bg)]">
+                <h3 class="font-bold text-lg sm:text-xl">Approved Payouts</h3>
+                <p class="mt-1 text-xs sm:text-sm opacity-80">
+                  {{ filteredApprovedpayouts().length }} records • Processed payments
+                </p>
+              </div>
+            </div>
+
+            <!-- Filters Row -->
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto">
+              <!-- Payout portal dropdown -->
+              <div class="relative min-w-[140px] sm:min-w-[160px] flex-1 xl:flex-none">
+                <button
+                  (click)="togglePortalDropdown('payout')"
+                  class="w-full text-xs sm:text-sm border-0 rounded-2xl pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
+                >
+                  <span class="truncate">{{
+                    payoutPortalFilter || "All Portals"
+                  }}</span>
+                  <span class="material-symbols-outlined text-base sm:text-lg"
+                    >arrow_drop_down</span
+                  >
+                </button>
+                <span
+                  class="material-symbols-outlined text-lg sm:text-xl absolute left-2 sm:left-3 top-2 sm:top-3 pointer-events-none text-[var(--color-bg)]"
+                  >public</span
+                >
+
+                <div
+                  *ngIf="payoutPortalDropdownOpen"
+                  class="absolute left-0 mt-2 w-full rounded-2xl shadow-xl z-20 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] max-h-48 overflow-y-auto"
+                >
+                  <button
+                    (click)="selectPortal('payout', '')"
+                    class="w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)]"
+                  >
+                    All Portals
+                  </button>
+                  <button
+                    *ngFor="let site of payoutPortals"
+                    (click)="selectPortal('payout', site)"
+                    class="w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)] truncate"
+                  >
+                    {{ site }}
+                  </button>
+                  <div
+                    *ngIf="payoutPortals.length === 0"
+                    class="px-4 py-2 text-xs sm:text-sm text-[var(--color-muted)]"
+                  >
+                    No portals
+                  </div>
+                </div>
+              </div>
+
+              <!-- Date Filter Dropdown -->
+              <div class="relative date-filter-container">
+                <button
+                  (click)="toggleFilterDropdown('payout')"
+                  class="px-3 sm:px-4 py-2 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] shadow-md date-filter-button"
+                >
+                  <span class="material-symbols-outlined text-base sm:text-lg"
+                    >filter_alt</span
+                  >
+                  <span class="hidden xs:inline">Date Filter</span>
+                  <span
+                    *ngIf="payoutFilterActive"
+                    class="ml-1 w-2 h-2 rounded-full bg-[var(--color-accent)]"
+                  ></span>
+                </button>
+                <!-- Dropdown Panel -->
+                <div
+                  *ngIf="filterDropdownOpen === 'payout'"
+                  class="absolute right-0 mt-2 w-64 sm:w-72 rounded-2xl shadow-xl z-20 p-3 sm:p-4 bg-[var(--color-surface)] border border-[var(--color-border)]"
+                >
+                  <h4 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 text-[var(--color-font)]">
+                    Select Date Range
+                  </h4>
+                  <div class="mb-2 sm:mb-3">
+                    <label class="block text-xs mb-1 text-[var(--color-muted)]"
+                      >From</label
+                    >
+                    <input
+                      type="date"
+                      [(ngModel)]="payoutDateFrom"
+                      class="w-full rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-font)]"
+                    />
+                  </div>
+                  <div class="mb-3 sm:mb-4">
+                    <label class="block text-xs mb-1 text-[var(--color-muted)]"
+                      >To</label
+                    >
+                    <input
+                      type="date"
+                      [(ngModel)]="payoutDateTo"
+                      class="w-full rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-font)]"
+                    />
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      (click)="applyPayoutFiltersAndClose()"
+                      class="flex-1 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-[var(--color-primary)] text-[var(--color-font)] border border-[var(--color-border)]"
+                    >
+                      Apply
+                    </button>
+                    <button
+                      (click)="clearPayoutDateFilters()"
+                      class="flex-1 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)]"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Search input -->
+              <div class="relative min-w-[150px] sm:min-w-[200px] flex-1 xl:flex-none">
+                <input
+                  type="text"
+                  placeholder="Search payouts..."
+                  [(ngModel)]="payoutSearchQuery"
+                  (keyup.enter)="applyPayoutFilters()"
+                  class="text-xs sm:text-sm border-0 rounded-2xl pl-8 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 placeholder-opacity-60 focus:ring-2 transition-all duration-300 w-full shadow-lg bg-white/20 text-[var(--color-bg)]"
+                />
+                <span
+                  class="material-symbols-outlined text-lg sm:text-xl absolute left-2 sm:left-4 top-2 sm:top-3 text-[var(--color-bg)]"
+                >
+                  search
+                </span>
+              </div>
+
+              <!-- Clear filters button -->
+              <button
+                (click)="clearPayoutFilters()"
+                class="px-2 sm:px-4 py-2 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] shadow-md"
+                title="Clear all filters"
+              >
+                <span class="material-symbols-outlined text-base sm:text-lg"
+                  >filter_alt_off</span
+                >
+                <span class="hidden sm:inline">Clear</span>
+              </button>
+              <app-reload class="bg-white rounded-xl p-1" (reload)="refreshCurrentView()"></app-reload>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== MOBILE CARD GRID (visible on mobile, hidden on desktop) ========== -->
+        <div class="block md:hidden p-3 sm:p-4">
+          <div class="grid grid-cols-1 gap-3 sm:gap-4">
+            <div
+              *ngFor="let w of pagedApprovedpayouts()"
+              class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-3 sm:p-4 shadow-sm"
+            >
+              <!-- Portal -->
+              <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div
+                  class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)] border border-[var(--color-border)]"
+                >
+                  <span class="material-symbols-outlined text-sm sm:text-base"
+                    >public</span
+                  >
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs sm:text-sm font-semibold">
+                    {{ w.portalDomain || "-" }}
+                  </div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">Portal</div>
+                </div>
+              </div>
+
+              <!-- Account Number -->
+              <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div
+                  class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center bg-[var(--color-surface)] border border-[var(--color-border)]"
+                >
+                  <span class="material-symbols-outlined text-xs sm:text-sm">badge</span>
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs sm:text-sm font-medium break-all">
+                    {{ w.accountNo || "-" }}
+                  </div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                    Account Number
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bank Info -->
+              <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div
+                  class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center bg-[var(--color-surface)] border border-[var(--color-border)]"
+                >
+                  <span class="material-symbols-outlined text-xs sm:text-sm">account_balance</span>
+                </div>
+                <div class="flex-1">
+                  <div class="text-xs sm:text-sm font-medium break-all">
+                    {{ w.ifscCode || "-" }}
+                  </div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                    {{ w.holder || "Account Holder" }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Amount and Date row -->
+              <div class="flex justify-between items-center mb-3 sm:mb-4">
+                <div class="flex items-center gap-1 sm:gap-2">
+                  <div
+                    class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border border-[var(--color-border)]"
+                  >
+                    <span class="material-symbols-outlined text-xs sm:text-sm"
+                      >arrow_downward</span
+                    >
+                  </div>
+                  <span class="text-sm sm:text-base font-bold"
+                    >-{{ formatCurrency(w.amount) }}</span
+                  >
+                </div>
+                <div class="text-right">
+                  <div class="text-xs sm:text-sm font-medium">
+                    {{ w.date | date: "MMM d, y" }}
+                  </div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                    {{ w.date | date: "h:mm a" }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Details button -->
+              <button
+                (click)="openRecordModal(w)"
+                class="w-full inline-flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm"
+              >
+                <span class="material-symbols-outlined text-base sm:text-lg"
+                  >visibility</span
+                >
+                Details
+              </button>
+            </div>
+
+            <!-- Empty state for cards -->
+            <div
+              *ngIf="filteredApprovedpayouts().length === 0"
+              class="text-center py-6 sm:py-8"
+            >
+              <div
+                class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl mx-auto mb-2 sm:mb-3 flex items-center justify-center bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)] border border-[var(--color-border)]"
+              >
+                <span class="material-symbols-outlined text-xl sm:text-2xl">savings</span>
+              </div>
+              <p class="text-sm sm:text-base font-semibold">No Approved Payouts found</p>
+              <p class="text-xs sm:text-sm text-[var(--color-muted)] mt-1">
+                Try adjusting your search
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== DESKTOP TABLE (hidden on mobile, visible on desktop) ========== -->
+        <div class="hidden md:block overflow-y-auto h-screen">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="sticky top-0 bg-[var(--color-bg)]">
+                <tr>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Portal
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Account Details
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Bank Info
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Amount
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Date
+                  </th>
+                  <th
+                    class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--color-border)]">
+                <tr
+                  *ngFor="let w of pagedApprovedpayouts()"
+                  class="hover:bg-[var(--color-hover)] transition-all duration-300 group"
+                >
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                      <div
+                        class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm border border-[var(--color-border)] bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-sm sm:text-base text-[var(--color-font)]"
+                          >public</span
+                        >
+                      </div>
+                      <div>
+                        <span
+                          class="text-xs sm:text-sm font-semibold block text-[var(--color-font)]"
+                          >{{ w.portalDomain || "-" }}</span
+                        >
+                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                          >Portal</span
+                        >
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                      <div
+                        class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shadow-sm border border-[var(--color-border)] bg-[var(--color-surface)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-xs sm:text-sm text-[var(--color-font)]"
+                          >badge</span
+                        >
+                      </div>
+                      <div>
+                        <span
+                          class="text-xs sm:text-sm font-medium block text-[var(--color-font)]"
+                          >{{ w.accountNo || "-" }}</span
+                        >
+                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                          >Account Number</span
+                        >
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                      <div
+                        class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shadow-sm border border-[var(--color-border)] bg-[var(--color-surface)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-xs sm:text-sm text-[var(--color-font)]"
+                          >account_balance</span
+                        >
+                      </div>
+                      <div>
+                        <span
+                          class="text-xs sm:text-sm font-medium block text-[var(--color-font)]"
+                          >{{ w.ifscCode || "-" }}</span
+                        >
+                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]">{{
+                          w.holder || "Account Holder"
+                        }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="flex items-center gap-1 sm:gap-2">
+                      <div
+                        class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border border-[var(--color-border)] bg-[var(--color-surface)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-xs sm:text-sm text-[var(--color-font)]"
+                          >arrow_downward</span
+                        >
+                      </div>
+                      <span class="text-sm sm:text-base font-bold text-[var(--color-font)]"
+                        >-{{ formatCurrency(w.amount) }}</span
+                      >
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="text-xs sm:text-sm font-medium text-[var(--color-font)]">
+                      {{ w.date | date: "MMM d, y" }}
+                    </div>
+                    <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                      {{ w.date | date: "h:mm a" }}
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <button
+                      (click)="openRecordModal(w)"
+                      class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] text-[var(--color-font)] bg-[var(--color-surface)] shadow-sm"
+                      title="View details"
+                    >
+                      <span class="material-symbols-outlined text-base sm:text-lg"
+                        >visibility</span
+                      >
+                      <span>Details</span>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="filteredApprovedpayouts().length === 0">
+                  <td colspan="7" class="px-4 py-8 sm:py-12 text-center">
+                    <div class="flex flex-col items-center">
+                      <div
+                        class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mb-3 sm:mb-4 shadow-inner border border-[var(--color-border)] bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)]"
+                      >
+                        <span
+                          class="material-symbols-outlined text-2xl sm:text-3xl text-[var(--color-font)]"
+                          >savings</span
+                        >
+                      </div>
+                      <p
+                        class="text-sm sm:text-base font-semibold text-[var(--color-font)]"
+                      >
+                        No Approved Payouts found
+                      </p>
+                      <p class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]">
+                        Try adjusting your search criteria
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div
+          class="p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
+        >
+          <div class="flex items-center gap-2 sm:gap-3">
+            <label class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
+              >Rows:</label
+            >
+            <select
+              [(ngModel)]="payoutApprovedPageSize"
+              (change)="onChangepayoutApprovedPageSize(payoutApprovedPageSize)"
+              class="text-xs sm:text-sm rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)]"
+            >
+              <option *ngFor="let s of payoutApprovedPageSizes" [value]="s">
+                {{ s }}
+              </option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="text-xs sm:text-sm mr-2 sm:mr-4 text-[var(--color-font)]">
+              <span class="hidden xs:inline">Page </span>
+              <span class="font-semibold">{{ payoutApprovedPage + 1 }}</span> of
+              <span class="font-semibold">{{
+                payoutApprovedTotalPages()
+              }}</span>
+            </div>
+            <button
+              (click)="setpayoutApprovedPage(payoutApprovedPage - 1)"
+              [disabled]="payoutApprovedPage === 0"
+              class="px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] bg-transparent text-[var(--color-font)] disabled:opacity-50"
+            >
+              <span class="material-symbols-outlined text-base sm:text-lg"
+                >chevron_left</span
+              >
+              <span class="hidden xs:inline">Prev</span>
+            </button>
+            <button
+              (click)="setpayoutApprovedPage(payoutApprovedPage + 1)"
+              [disabled]="payoutApprovedPage >= payoutApprovedTotalPages() - 1"
+              class="px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] bg-transparent text-[var(--color-font)] disabled:opacity-50"
+            >
+              <span class="hidden xs:inline">Next</span>
+              <span class="material-symbols-outlined text-base sm:text-lg"
+                >chevron_right</span
+              >
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ENHANCED RECORD MODAL (small image with click-to-popup) -->
+<div
+  *ngIf="showRecordModal"
+  class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+  (keydown.escape)="closeLightbox()"
+  tabindex="0"
+>
+  <!-- Backdrop -->
+  <div
+    class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+    (click)="closeRecordModal()"
+  ></div>
+
+  <!-- Modal Content -->
+  <div
+    class="relative rounded-2xl sm:rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fadeIn z-10 transform transition-all duration-300 scale-95 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-2xl"
+  >
+    <!-- Header – compact on mobile -->
+    <div
+      class="flex items-center justify-between p-3 sm:p-6 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+    >
+      <div class="flex items-center gap-2 sm:gap-4">
+        <div
+          class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)]"
+        >
+          <span
+            class="material-symbols-outlined text-base sm:text-xl text-[var(--color-font)]"
+            >receipt_long</span
+          >
+        </div>
+        <div>
+          <h3 class="font-bold text-sm sm:text-xl text-[var(--color-font)]">
+            Transaction Details
+          </h3>
+          <p class="text-xs sm:text-sm text-[var(--color-muted)]">
+            {{ selectedRecord?.mode || "—" }} • Complete information
+          </p>
+        </div>
+      </div>
+      <button
+        (click)="closeRecordModal()"
+        class="px-2 sm:px-4 py-1 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)]"
+      >
+        <span class="material-symbols-outlined text-base sm:text-lg"
+          >close</span
+        >
+        <span class="hidden sm:inline">Close</span>
+      </button>
+    </div>
+
+    <!-- Body – responsive grid -->
+    <div
+      class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 p-3 sm:p-6 overflow-y-auto max-h-[calc(90vh-80px)]"
+    >
+      <!-- LEFT: Image + Quick Summary -->
+      <div class="flex flex-col gap-3 sm:gap-4">
+        <!-- Clickable thumbnail – smaller on mobile -->
+        <!-- <div
+          class="w-full h-28 sm:h-48 rounded-xl sm:rounded-2xl overflow-hidden border border-[var(--color-border)] bg-[var(--color-bg)] flex items-center justify-center p-1 sm:p-2 cursor-pointer"
+          (click)="openLightbox(getImageUrl(selectedRecord))"
+        >
+          <ng-container
+            *ngIf="getImageUrl(selectedRecord) as imgUrl; else noImage"
+          >
+            <img
+              [src]="imgUrl"
+              alt="transaction proof"
+              class="max-h-full max-w-full rounded object-contain"
+              (error)="onImageError($event)"
+            />
+          </ng-container>
+          <ng-template #noImage>
+            <div class="text-center text-[var(--color-muted)]">
+              <span class="material-symbols-outlined text-3xl sm:text-5xl"
+                >image_not_supported</span
+              >
+              <div class="text-xs sm:text-sm mt-1">No proof image</div>
+            </div>
+          </ng-template>
+        </div> -->
+
+        <!-- Quick Summary – compact -->
+        <div
+          class="rounded-xl sm:rounded-2xl p-3 sm:p-5 bg-[var(--color-bg)] border border-[var(--color-border)]"
+        >
+          <h4
+            class="text-xs sm:text-base font-semibold mb-2 sm:mb-4 flex items-center gap-1 sm:gap-2 text-[var(--color-font)]"
+          >
+            <span class="material-symbols-outlined text-sm sm:text-lg"
+              >summarize</span
+            >
+            Quick Summary
+          </h4>
+          <div class="space-y-2 sm:space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs sm:text-sm text-[var(--color-muted)]"
+                >Amount</span
+              >
+              <span
+                class="text-sm sm:text-lg font-bold text-[var(--color-font)]"
+                >₹ {{ formatCurrency(selectedRecord?.amount) }}</span
+              >
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs sm:text-sm text-[var(--color-muted)]"
+                >Settlement</span
+              >
+              <span
+                class="text-xs sm:text-sm font-semibold text-[var(--color-font)]"
+              >
+                {{
+                  selectedRecord?.settled === true
+                    ? "Settled"
+                    : selectedRecord?.settled === false
+                      ? "Pending"
+                      : "Unknown"
+                }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs sm:text-sm text-[var(--color-muted)]"
+                >Review Status</span
+              >
+              <span
+                class="px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs rounded-full font-bold"
+                [ngClass]="
+                  getStatusClass(
+                    selectedRecord?.reviewStatus || selectedRecord?.status
+                  )
+                "
+              >
+                {{
+                  selectedRecord?.reviewStatus || selectedRecord?.status || "—"
+                }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs sm:text-sm text-[var(--color-muted)]"
+                >Date</span
+              >
+              <span
+                class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
+              >
+                {{
+                  selectedRecord?.date
+                    ? (selectedRecord.date | date: "medium")
+                    : "—"
+                }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Transaction Details – compact grid -->
+      <div class="overflow-auto max-h-[250px] sm:max-h-[500px] pr-1">
+        <h4
+          class="text-xs sm:text-base font-semibold mb-2 sm:mb-4 flex items-center gap-1 sm:gap-2 text-[var(--color-font)]"
+        >
+          <span class="material-symbols-outlined text-sm sm:text-lg"
+            >info</span
+          >
+          Transaction Details
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+          <div
+            *ngFor="let field of getDisplayFields(selectedRecord)"
+            class="rounded-lg sm:rounded-xl p-2 sm:p-4 bg-[var(--color-bg)] border border-[var(--color-border)]"
+          >
+            <div
+              class="text-[9px] sm:text-xs font-medium mb-0.5 uppercase tracking-wide text-[var(--color-muted)]"
+            >
+              {{ field.label }}
+            </div>
+            <div
+              class="text-[10px] sm:text-sm font-semibold text-[var(--color-font)] break-words"
+            >
+              {{ field.value }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX (full‑screen image popup) -->
+<div
+  *ngIf="lightboxImage"
+  class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+  (keydown.escape)="closeLightbox()"
+  tabindex="0"
+>
+  <div
+    class="absolute inset-0 bg-black/80 backdrop-blur-sm"
+    (click)="closeLightbox()"
+  ></div>
+  <div class="relative max-w-5xl max-h-[90vh]">
+    <img
+      [src]="lightboxImage"
+      alt="Proof"
+      class="max-w-full max-h-[90vh] object-contain rounded-lg"
+    />
+    <button
+      (click)="closeLightbox()"
+      class="absolute top-2 right-2 sm:top-4 sm:right-4 p-2 sm:p-3 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+    >
+      <span class="material-symbols-outlined text-xl sm:text-2xl">close</span>
+    </button>
+  </div>
+</div>
+

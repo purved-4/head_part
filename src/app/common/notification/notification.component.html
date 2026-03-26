@@ -1,0 +1,545 @@
+<div class="relative" #notificationContainer>
+  <!-- Toast Notification Stack - Bottom Right -->
+  <div class="fixed bottom-4 right-4 z-[70] flex flex-col gap-3 pointer-events-none max-w-sm">
+    <div
+      *ngFor="let toast of toastStack; trackBy: trackByToastId"
+      class="toast-item pointer-events-auto"
+      (mouseenter)="onToastHover(toast.id, true)"
+      (mouseleave)="onToastHover(toast.id, false)"
+      [@slideIn]
+    >
+      <div
+        class="bg-white rounded-lg shadow-lg overflow-hidden border-l-4 transition-all duration-300 hover:shadow-xl"
+        [style.border-left-color]="toast.borderColor"
+      >
+        <!-- Progress Bar -->
+        <div
+          class="absolute top-0 left-0 right-0 h-1"
+          [style.background-color]="toast.borderColor"
+          [style.width.%]="toast.progress"
+          [style.transition]="'width 0.07s linear'"
+        ></div>
+
+        <div class="p-4">
+          <div class="flex items-start gap-3">
+            <!-- Toast Icon -->
+            <div
+              class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-white font-semibold"
+              [style.background-color]="toast.borderColor"
+            >
+              <span class="material-icons text-lg">{{ toast.icon }}</span>
+            </div>
+
+            <!-- Toast Content -->
+            <div class="flex-1 min-w-0 pr-2">
+              <p
+                class="text-sm font-semibold truncate"
+                [style.color]="toast.textColor"
+              >
+                {{ toast.type | uppercase }}
+              </p>
+              <p class="text-sm text-gray-600 mt-1 line-clamp-2 break-words">
+                {{ toast.message }}
+              </p>
+              <p class="text-xs text-gray-500 mt-2">
+                {{ toast.timestamp | date: "HH:mm:ss" }}
+              </p>
+            </div>
+
+            <!-- Close Button -->
+            <button
+              (click)="removeToastNotification(toast.id)"
+              class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded"
+            >
+              <span class="material-icons text-lg">close</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toggle Button -->
+  <button
+    class="relative w-9 h-9 rounded-lg flex items-center justify-center hover:bg-[var(--color-hover)] transition-colors duration-200"
+    title="Notifications"
+    (click)="toggleNotifications()"
+  >
+    <span class="material-icons text-[var(--color-muted)] text-xl"
+      >notifications</span
+    >
+    <div
+      *ngIf="getUnreadCount() > 0"
+      class="absolute -top-1 -right-1 text-xs px-1.5 py-0.5 rounded-full bg-red-500 text-white font-semibold animate-pulse"
+    >
+      {{ getUnreadCount() }}
+    </div>
+  </button>
+
+  <!-- Notifications Panel – centered on mobile, right‑aligned on desktop -->
+  <div
+    *ngIf="showNotifications"
+    class="fixed sm:absolute inset-x-4 mx-auto sm:inset-x-auto sm:mx-0 sm:right-0 top-24 sm:top-auto sm:mt-2 w-auto sm:w-96 max-w-[480px] rounded-xl shadow-2xl bg-[var(--color-surface)] border border-[var(--color-border)] z-[80] overflow-hidden animate-slideIn"
+  >
+    <!-- Header – compact on mobile -->
+    <div
+      class="p-3 sm:p-4 border-b border-[var(--color-border)] bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] bg-opacity-5"
+    >
+      
+
+      <div class="flex items-center justify-between pt-2 ">
+        <div class="flex items-center gap-3">
+          <div
+            class="text-xs font-bold px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-[var(--color-primary)] text-white"
+          >
+            Notifications
+          </div>
+          <div class="text-xs sm:text-sm text-[var(--color-muted)] font-medium">
+            {{ getUnreadCount() }} unread
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button
+            (click)="filterNotifications('all')"
+            class="p-1.5 sm:p-2 rounded-lg hover:bg-[var(--color-hover)] transition-colors"
+            title="Refresh"
+          >
+            <span class="material-icons text-[var(--color-muted)] text-base sm:text-lg">
+              refresh
+            </span>
+          </button>
+          <button
+            (click)="markAllNotificationsRead()"
+            class="text-xs text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] font-semibold px-2 py-1 rounded hover:bg-[var(--color-hover)] transition-colors"
+            title="Mark all read"
+          >
+           <span class="material-icons text-[var(--color-muted)] text-base sm:text-lg">
+              done_all
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Filter – scrollable, compact -->
+    <div class="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200 bg-white">
+  <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+    <!-- All button -->
+    <button
+      (click)="filterByCategory('all')"
+      [class]="
+        activeCategory === 'all'
+          ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-indigo-600 text-white shadow-md flex items-center gap-1'
+          : 'px-3 py-1.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors flex items-center gap-1'
+      "
+    >
+      All
+    </button>
+
+    <!-- UPI button -->
+    <button
+      (click)="filterByCategory('upi')"
+      [class]="
+        activeCategory === 'upi'
+          ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-purple-600 text-white shadow-md flex items-center gap-1'
+          : 'px-3 py-1.5 text-xs font-medium rounded-full bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors flex items-center gap-1'
+      "
+    >
+      <span class="material-icons text-xs">smartphone</span>
+      UPI
+    </button>
+
+    <!-- Bank button -->
+    <button
+      (click)="filterByCategory('bank')"
+      [class]="
+        activeCategory === 'bank'
+          ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-blue-600 text-white shadow-md flex items-center gap-1'
+          : 'px-3 py-1.5 text-xs font-medium rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors flex items-center gap-1'
+      "
+    >
+      <span class="material-icons text-xs">account_balance</span>
+      Bank
+    </button>
+
+    <!-- Payout button -->
+    <button
+      (click)="filterByCategory('payout')"
+      [class]="
+        activeCategory === 'payout'
+          ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-green-600 text-white shadow-md flex items-center gap-1'
+          : 'px-3 py-1.5 text-xs font-medium rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors flex items-center gap-1'
+      "
+    >
+      <span class="material-icons text-xs">payments</span>
+      Payout
+    </button>
+  </div>
+</div>
+
+    <!-- Notifications List -->
+    <div class="max-h-[420px] overflow-y-auto scrollbar-thin">
+      <!-- BRANCH Tab Content -->
+      <div *ngIf="activeTab === 'branch'" class="p-2 sm:p-3">
+        <ng-container *ngFor="let cat of ['upi', 'bank', 'payout', 'other']">
+          <div
+            *ngIf="shouldShowCategory('data', cat)"
+            class="mb-4 last:mb-0"
+          >
+            <!-- Category header – compact -->
+            <div class="flex items-center justify-between mb-2 px-2">
+              <div class="flex items-center gap-2">
+                <span
+                  class="material-icons text-lg font-bold"
+                  [ngClass]="{
+                    'text-purple-500': cat === 'upi',
+                    'text-blue-500': cat === 'bank',
+                    'text-green-500': cat === 'payout',
+                    'text-gray-500': cat === 'other',
+                  }"
+                >
+                  {{
+                    cat === 'upi'
+                      ? 'smartphone'
+                      : cat === 'bank'
+                        ? 'account_balance'
+                        : cat === 'payout'
+                          ? 'payments'
+                          : 'info'
+                  }}
+                </span>
+                <div
+                  class="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]"
+                >
+                  {{ cat }}
+                </div>
+                <span
+                  class="text-xs font-bold text-white bg-[var(--color-primary)] px-2 py-0.5 rounded-full"
+                >
+                  {{ groupedNotifications.data[cat].length }}
+                </span>
+              </div>
+              <div
+                class="h-px flex-1 mx-2 bg-gradient-to-r from-transparent via-[var(--color-border)] to-transparent"
+              ></div>
+            </div>
+
+            <div class="space-y-2">
+              <div
+                *ngFor="
+                  let notification of groupedNotifications.data[cat];
+                  trackBy: trackById
+                "
+                class="relative p-3 rounded-lg border transition-all duration-200 group cursor-pointer"
+                [ngClass]="{
+                  'bg-blue-50 border-blue-200 hover:bg-blue-100 shadow-sm':
+                    notification.isRead === false,
+                  'bg-[var(--color-surface)] border-[var(--color-border)] hover:bg-[var(--color-hover)] shadow-sm':
+                    notification.isRead === true,
+                }"
+              >
+                <!-- Unread indicator -->
+                <div
+                  *ngIf="notification.isRead === false"
+                  class="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-500 rounded-full animate-pulse"
+                ></div>
+
+                <!-- Compact layout -->
+                <div class="flex items-center gap-2 ml-2">
+                  <!-- Avatar -->
+                  <div
+                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm font-semibold text-sm"
+                    [ngClass]="{
+                      'bg-gradient-to-br from-blue-500 to-blue-400':
+                        notification.isRead === false,
+                      'bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-light)]':
+                        notification.isRead === true,
+                    }"
+                  >
+                    <span class="material-icons text-sm">
+                      {{ getMaterialIcon(notification.fundsType) }}
+                    </span>
+                  </div>
+
+                  <!-- Message and time -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="text-xs sm:text-sm font-medium truncate"
+                        [ngClass]="{
+                          'text-gray-900 font-semibold':
+                            notification.isRead === false,
+                          'text-[var(--color-font)]':
+                            notification.isRead === true,
+                        }"
+                      >
+                        {{ notification.message || notification.queryMessage }}
+                      </span>
+                      <span
+                        class="text-[10px] text-[var(--color-muted)] whitespace-nowrap"
+                      >
+                        {{ notification.createdAt | date: "shortTime" }}
+                      </span>
+                    </div>
+                    <!-- <p class="text-xs text-gray-600 truncate mt-1">
+                      {{ notification.message || notification.queryMessage || "No message" }}
+                    </p> -->
+                  </div>
+
+                  <!-- New badge and View button -->
+                  <div class="flex items-center gap-2 flex-shrink-0">
+                    <span
+                      *ngIf="notification.isRead === false"
+                      class="text-[10px] font-semibold px-2 py-1 rounded-full bg-blue-500 text-white whitespace-nowrap"
+                    >
+                      NEW
+                    </span>
+                    <button
+                      (click)="
+                        $event.stopPropagation(); openDetailsPopup(notification)
+                      "
+                      class="opacity-0 group-hover:opacity-100 text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-all duration-200 p-1 rounded hover:bg-[var(--color-hover)]"
+                      title="View Details"
+                    >
+                      <span class="material-icons text-lg">arrow_forward</span>
+                    </button>
+
+                     <!-- <button
+                      (click)="
+                        $event.stopPropagation(); openChat(notification)
+                      "
+                      class="opacity-0 group-hover:opacity-100 text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-all duration-200 p-1 rounded hover:bg-[var(--color-hover)]"
+                      title="Open in chat"
+                    >
+                      <span class="material-icons text-lg">chat_paste_go_2</span>
+                    </button> -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Empty State for BRANCH -->
+        <div
+          *ngIf="getGroupCount('data') === 0"
+          class="py-12 text-center"
+        >
+          <div
+            class="w-16 h-16 bg-[var(--color-hover)] rounded-2xl flex items-center justify-center mx-auto mb-4"
+          >
+            <span
+              class="material-icons text-3xl text-[var(--color-muted)]"
+              >inbox</span
+            >
+          </div>
+          <p
+            class="text-[var(--color-font)] font-semibold mb-1 text-sm"
+          >
+            No notifications
+          </p>
+          <p class="text-[var(--color-muted)] text-xs">
+            You're all caught up!
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div
+      class="p-3 sm:p-4 border-t border-[var(--color-border)] bg-[var(--color-bg)] flex justify-between items-center"
+    >
+      <div class="text-xs text-[var(--color-muted)]">
+        <span class="font-bold text-[var(--color-font)]">{{
+          getUnreadCount()
+        }}</span>
+        unread •
+        <span class="font-bold text-[var(--color-font)]">{{
+          getTotalCount()
+        }}</span>
+        total
+      </div>
+      <button
+        (click)="markAllAsRead()"
+        class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white transition-colors"
+        *ngIf="getUnreadCount() > 0"
+      >
+        Mark all as read
+      </button>
+    </div>
+  </div>
+
+<div
+  *ngIf="showDetailsPopup"
+  class="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-fadeIn"
+  (click)="closeDetailsPopup()"
+>
+  <div
+class="bg-[var(--color-surface)] rounded-2xl shadow-2xl w-full max-w-lg sm:max-w-2xl h-[90vh] sm:max-h-[90vh] overflow-hidden border border-[var(--color-border)] transform transition-all animate-slideUp flex flex-col"    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal Header -->
+    <div
+      class="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--color-border)]"
+      [ngClass]="{
+        'bg-gradient-to-r from-red-500 to-red-600':
+          selectedNotification?.type?.toUpperCase().includes('REJECT'),
+        'bg-gradient-to-r from-green-500 to-green-600':
+          selectedNotification?.type?.toUpperCase().includes('APPROVED'),
+        'bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)]':
+          !selectedNotification?.type?.toUpperCase().includes('REJECT') &&
+          !selectedNotification?.type?.toUpperCase().includes('APPROVED')
+      }"
+    >
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+          <span class="material-icons text-white text-2xl">
+            {{
+              selectedNotification?.type?.toUpperCase().includes('REJECT')
+                ? 'error_outline'
+                : selectedNotification?.type?.toUpperCase().includes('APPROVED')
+                ? 'check_circle'
+                : 'notifications_active'
+            }}
+          </span>
+        </div>
+        <div class="min-w-0">
+          <h3 class="text-base sm:text-lg font-bold text-white truncate">
+            Notification Details
+          </h3>
+          <p class="text-xs sm:text-sm text-white/80 mt-0.5 break-words">
+            {{ selectedNotification?.type || "Notification" }}
+          </p>
+        </div>
+      </div>
+
+      <button
+        (click)="closeDetailsPopup()"
+        class="p-2 rounded-full hover:bg-white/20 transition-colors text-white flex-shrink-0"
+        title="Close"
+      >
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="flex-1 p-4 sm:p-6 overflow-y-auto min-h-0">
+      <div *ngIf="selectedNotification" class="space-y-6">
+        <!-- Main fields grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <ng-container *ngFor="let item of getDisplayFields(selectedNotification)">
+            <div
+              class="bg-[var(--color-bg)] p-4 rounded-xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-shadow duration-200"
+            >
+              <div class="flex items-start gap-3">
+                <div
+                  class="flex-shrink-0 w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]"
+                >
+                  <span class="material-icons text-sm">
+                    {{ getFieldIcon(item.key) }}
+                  </span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide mb-1">
+                    {{ item.key }}
+                  </div>
+                  <div class="text-sm font-semibold text-[var(--color-font)] break-words leading-relaxed">
+                    {{ item.value }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Bank Funds -->
+        <div *ngIf="selectedNotification.bankFunds">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-1 h-6 bg-blue-500 rounded-full"></div>
+            <span class="material-icons text-blue-500">account_balance</span>
+            <span class="text-sm font-bold text-[var(--color-font)] uppercase">
+              Bank Funds Details
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
+              *ngFor="let field of getDisplayFields(selectedNotification.bankFunds)"
+              class="bg-[var(--color-bg)] p-3 rounded-lg border border-[var(--color-border)]"
+            >
+              <div class="flex items-start gap-2">
+                <span class="material-icons text-blue-500 text-sm mt-0.5">
+                  account_balance
+                </span>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs text-[var(--color-muted)]">
+                    {{ field.key }}
+                  </div>
+                  <div class="text-sm text-[var(--color-font)] font-semibold break-words leading-relaxed">
+                    {{ field.value }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPI Funds -->
+        <div *ngIf="selectedNotification.upiFunds">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-1 h-6 bg-purple-500 rounded-full"></div>
+            <span class="material-icons text-purple-500">smartphone</span>
+            <span class="text-sm font-bold text-[var(--color-font)] uppercase">
+              UPI Funds Details
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
+              *ngFor="let field of getDisplayFields(selectedNotification.upiFunds)"
+              class="bg-[var(--color-bg)] p-3 rounded-lg border border-[var(--color-border)]"
+            >
+              <div class="flex items-start gap-2">
+                <span class="material-icons text-purple-500 text-sm mt-0.5">
+                  smartphone
+                </span>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs text-[var(--color-muted)]">
+                    {{ field.key }}
+                  </div>
+                  <div class="text-sm text-[var(--color-font)] font-semibold break-words leading-relaxed">
+                    {{ field.value }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div
+      class="p-4 border-t border-[var(--color-border)] bg-[var(--color-bg)] flex flex-col sm:flex-row justify-end gap-3"
+    >
+      <button
+        (click)="closeDetailsPopup()"
+        class="w-full sm:w-auto px-6 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold transition-colors flex items-center justify-center gap-2"
+      >
+        <span class="material-icons text-sm">close</span>
+        <span>Close</span>
+      </button>
+
+      <button
+        *ngIf="canRedirectToChat(selectedNotification)"
+        (click)="openChat(selectedNotification); closeDetailsPopup()"
+        class="w-full sm:w-auto px-6 py-2 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold transition-colors flex items-center justify-center gap-2"
+      >
+        <span class="material-icons text-sm">chat</span>
+        <span>View Chat</span>
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
+

@@ -1,0 +1,92 @@
+<!-- Backdrop -->
+<div
+  *ngIf="isOpen"
+  (click)="toggleSheet()"
+  class="fixed inset-0 bg-black/20 backdrop-blur-sm z-20"
+></div>
+
+<!-- Bottom Sheet Wrapper -->
+<div
+  class="fixed bottom-0 left-0 right-0 z-[20] 
+         transition-transform duration-300 ease-in-out"
+  [class.translate-y-[92%]]="!isOpen"
+  [class.translate-y-0]="isOpen"
+>
+
+  <!-- Main Container -->
+  <div
+    class="relative bg-[var(--color-hover)]
+           rounded-t-[22px] 
+           shadow-[0_-6px_20px_rgba(0,0,0,0.15)]"
+  >
+
+    <!-- Slim Top Bar (Integrated Arrow Raised Slightly) -->
+    <div
+      (click)="toggleSheet()"
+      class="relative h-[16px] flex items-center justify-end pr-6 cursor-pointer"
+    >
+      <!-- Arrow (slightly raised inside same container) -->
+      <div
+        class="absolute -top-3.5 right-7 w-10 h-8 
+              bg-[var(--color-hover)] rounded-t-full
+               flex items-center justify-center"
+      >
+        <span class="material-symbols-outlined text-[18px] text-slate-700">
+          {{ isOpen ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div
+      class="px-6 pt-6 pb-8 space-y-5 transition-opacity duration-300"
+      [class.opacity-0]="!isOpen"
+      [class.opacity-100]="isOpen"
+    >
+      <!-- Topup -->
+      <div class="flex justify-between items-center text-sm">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+          <span class="text-slate-600">Topup</span>
+        </div>
+        <span class="font-semibold text-slate-800">
+          ₹{{ format(topup) }}
+        </span>
+      </div>
+
+      <!-- Payout -->
+      <div class="flex justify-between items-center text-sm">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+          <span class="text-slate-600">Payout</span>
+        </div>
+        <span class="font-semibold text-slate-800">
+          ₹{{ format(payout) }}
+        </span>
+      </div>
+
+      <!-- Reward -->
+      <div class="flex justify-between items-center text-sm">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+          <span class="text-slate-600">Reward</span>
+        </div>
+        <span class="font-semibold text-slate-800">
+          ₹{{ format(reward) }}
+        </span>
+      </div>
+
+      <!-- Limit -->
+      <div class="flex justify-between items-center text-sm">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-green-500"></span>
+          <span class="text-slate-600">Balance</span>
+        </div>
+        <span class="font-semibold text-slate-800">
+          ₹{{ format(limit) }}
+        </span>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,38 @@
+/* Ensure emoji picker appears above everything */
+.fixed.inset-x-0.bottom-0 {
+  z-index: 9999 !important;
+}
+
+/* Fix send button states */
+button[disabled] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Ensure click events work properly */
+.question-dropdown-container {
+  position: relative;
+  z-index: 10;
+}
+
+/* Fix for emoji button */
+button.p-2.hover\:bg-gray-100 {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+/* Ensure backdrop catches clicks */
+.fixed.inset-0.bg-black\/50 {
+  z-index: 9998;
+}
+
+/* Thread list items cursor */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Textarea auto-resize */
+textarea {
+  overflow-y: hidden;
+  transition: height 0.2s;
+}

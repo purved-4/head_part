@@ -1,0 +1,1135 @@
+<div class="min-h-screen bg-[var(--color-bg)] p-6">
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+    >
+      <div>
+        <h1 class="text-3xl font-bold text-[var(--color-font)]">
+          Manage Branch Users
+        </h1>
+        <p class="mt-2 text-[var(--color-muted)]">
+          Manage branch user accounts and permissions
+        </p>
+      </div>
+      <!-- <button
+        [routerLink]="['/head/branch/manage']"
+        class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-bg)] text-sm font-medium rounded-lg transition-colors duration-200"
+      >
+        <svg
+          class="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          ></path>
+        </svg>
+        Back to Branch
+      </button> -->
+ <div class="flex gap-3">
+  <!-- Add User Button -->
+  <button
+    (click)="openAddUserModal()"
+    class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+  >
+    <span class="material-icons text-sm mr-1">person_add</span>
+    Add User
+  </button>
+
+  <!-- Back Button -->
+  <button
+    [routerLink]="['/head/branch/manage']"
+    class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-bg)] text-sm font-medium rounded-lg transition-colors duration-200"
+  >
+    Back to Branch
+  </button>
+</div>
+    </div>
+
+    <!-- Search Bar & View Toggle -->
+    <div
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+    >
+      <div class="max-w-md flex-1">
+        <div class="relative">
+          <div
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+          >
+            <svg
+              class="h-5 w-5 text-[var(--color-muted)]"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+          </div>
+          <input
+            type="text"
+            class="block w-full pl-10 pr-3 py-3 border border-[var(--color-border)] rounded-lg leading-5 bg-[var(--color-surface)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] sm:text-sm text-[var(--color-font)]"
+            placeholder="Search users by name or email..."
+            [(ngModel)]="searchTerm"
+            (input)="applyFilter()"
+          />
+        </div>
+      </div>
+
+      <!-- View Toggle Buttons -->
+      <div
+        class="flex items-center gap-2 p-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hidden  md:flex"
+      >
+        <button
+          class="p-2 rounded-lg transition-all duration-150"
+          [ngClass]="{
+            'bg-[var(--color-primary)] text-white': viewMode === 'table',
+            'text-[var(--color-muted)] hover:text-[var(--color-font)] hover:bg-[var(--color-hover)]':
+              viewMode !== 'table',
+          }"
+          (click)="toggleView('table')"
+          title="Table view"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+        <button
+          class="p-2 rounded-lg transition-all duration-150"
+          [ngClass]="{
+            'bg-[var(--color-primary)] text-white': viewMode === 'grid',
+            'text-[var(--color-muted)] hover:text-[var(--color-font)] hover:bg-[var(--color-hover)]':
+              viewMode !== 'grid',
+          }"
+          (click)="toggleView('grid')"
+          title="Grid view"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Container (Table/Grid) -->
+  <!-- <div *ngIf="showTable" [ngSwitch]="viewMode"> -->
+    <div *ngIf="showTable">
+    <!-- ========== TABLE VIEW ========== -->
+    <div
+  class="hidden md:block bg-[var(--color-surface)] rounded-xl shadow-lg border border-[var(--color-border)] overflow-hidden"
+  [class.md:hidden]="viewMode === 'grid'"
+>
+      <!-- Table Header -->
+      <div
+        class="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+      >
+        <div class="flex justify-between items-center">
+          <h2 class="text-lg font-semibold text-[var(--color-font)]">
+            Users List
+          </h2>
+          <span class="text-sm text-[var(--color-muted)]">
+            Showing {{ pagedData.length }} of {{ filteredData.length }} users
+          </span>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-[var(--color-border)]">
+          <thead class="bg-[var(--color-bg)]">
+            <tr>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
+              >
+                User
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
+              >
+                Email
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
+              >
+                Mobile
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
+              >
+                Status
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="bg-[var(--color-surface)] divide-y divide-[var(--color-border)]"
+          >
+            <tr
+              *ngFor="let element of pagedData"
+              class="hover:bg-[var(--color-hover)] hover:shadow-md transition-all duration-150 group"
+            >
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div
+                    class="flex-shrink-0 h-10 w-10 bg-[var(--color-primary)] rounded-full flex items-center justify-center text-[var(--color-bg)] font-medium"
+                  >
+                    {{ element.userName?.charAt(0) || "U" }}
+                  </div>
+                  <div class="ml-4">
+                    <div
+                      class="text-sm font-medium text-[var(--color-font)] group-hover:text-[var(--color-primary)] transition-colors duration-150"
+                    >
+                      {{ element.userName }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-[var(--color-font)]">
+                  {{ element.userEmail }}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-[var(--color-font)]">
+                  {{ element.userPhone || "N/A" }}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  [ngClass]="
+                    element.active
+                      ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                      : 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]'
+                  "
+                >
+                  <span
+                    class="w-2 h-2 rounded-full mr-1"
+                    [ngClass]="
+                      element.active
+                        ? 'bg-[var(--color-success)]'
+                        : 'bg-[var(--color-danger)]'
+                    "
+                  ></span>
+                  {{ element.active ? "Active" : "Inactive" }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex space-x-2">
+                  <button
+                    class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-[var(--color-bg)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] hover:scale-105 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-all duration-200"
+                    (click)="toggleStatus(element)"
+                    [title]="
+                      element.active ? 'Deactivate User' : 'Activate User'
+                    "
+                  >
+                    <svg
+                      class="w-4 h-4 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                      ></path>
+                    </svg>
+                    Toggle Status
+                  </button>
+                  <button
+                    class="inline-flex items-center px-3 py-1.5 border border-[var(--color-border)] text-xs font-medium rounded-md text-[var(--color-font)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)] hover:scale-105 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-all duration-200"
+                    (click)="onEdit(element)"
+                    title="Edit User"
+                  >
+                    <svg
+                      class="w-4 h-4 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      ></path>
+                    </svg>
+                    Edit
+                  </button>
+
+                  <button
+  class="p-2 rounded-lg hover:bg-[var(--color-hover)] transition"
+  (click)="openUserDetails(element)"
+  title="View Details"
+>
+  <span class="material-icons text-[var(--color-muted)]">
+    more_vert
+  </span>
+</button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="pagedData.length === 0">
+              <td colspan="5" class="px-6 py-8 text-center">
+                <div class="text-[var(--color-muted)]">
+                  <svg
+                    class="mx-auto h-12 w-12 text-[var(--color-muted)]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                  </svg>
+                  <h3 class="mt-2 text-sm font-medium text-[var(--color-font)]">
+                    No users found
+                  </h3>
+                  <p class="mt-1 text-sm text-[var(--color-muted)]">
+                    Try adjusting your search criteria
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div
+        *ngIf="totalPages > 1"
+        class="px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
+      >
+        <div
+          class="flex flex-col sm:flex-row justify-between items-center gap-3"
+        >
+          <div class="text-sm text-[var(--color-muted)]">
+            Showing
+            <span class="font-medium text-[var(--color-font)]">
+              {{ (currentPage - 1) * itemsPerPage + 1 }} -
+              {{ Math.min(currentPage * itemsPerPage, filteredData.length) }}
+            </span>
+            of
+            <span class="font-medium text-[var(--color-font)]">{{
+              filteredData.length
+            }}</span>
+            users
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              (click)="prevPage()"
+              [disabled]="currentPage === 1"
+              class="p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] hover:bg-[var(--color-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
+              title="Previous Page"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+
+            <div class="flex items-center gap-1">
+              <button
+                *ngFor="let page of getPageNumbers()"
+                (click)="goToPage(page)"
+                class="w-8 h-8 rounded-lg text-xs font-medium transition-all duration-150"
+                [ngClass]="{
+                  'bg-[var(--color-primary)] text-white': currentPage === page,
+                  'bg-[var(--color-surface)] text-[var(--color-font)] hover:bg-[var(--color-hover)]':
+                    currentPage !== page,
+                }"
+              >
+                {{ page === -1 ? "..." : page }}
+              </button>
+            </div>
+
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage === totalPages"
+              class="p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] hover:bg-[var(--color-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
+              title="Next Page"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ========== GRID VIEW ========== -->
+    <!-- <div *ngSwitchCase="'grid'" class="w-full"> -->
+      <!-- <div *ngSwitchCase="'grid'" class="w-full" [class.md:hidden]="viewMode === 'table'"> -->
+   <div class="w-full md:block" [class.md:hidden]="viewMode === 'table'">
+      <!-- Grid Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-[var(--color-primary)]/10 rounded-lg">
+            <svg
+              class="w-5 h-5 text-[var(--color-primary)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+              />
+            </svg>
+          </div>
+          <h2 class="text-lg font-medium text-[var(--color-font)]">
+            Users Grid
+          </h2>
+        </div>
+        <span class="text-sm text-[var(--color-muted)]"
+          >{{ filteredData.length }} users</span
+        >
+      </div>
+
+      <!-- Grid Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          *ngFor="let user of pagedData"
+          class="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl p-5 shadow-md hover:shadow-2xl hover:border-[var(--color-primary)]/30 transition-all duration-300 flex flex-col group"
+        >
+          <!-- Card Header: Avatar and Actions -->
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-14 h-14 bg-[var(--color-primary)] rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ring-2 ring-[var(--color-primary)]/20"
+              >
+                {{ user.userName?.[0] || "U" | uppercase }}
+              </div>
+              <div>
+                <h3
+                  class="font-semibold text-[var(--color-font)] text-lg group-hover:text-[var(--color-primary)] group-hover:scale-105 transition-all duration-200"
+                >
+                  {{ user.userName }}
+                </h3>
+                <span
+                  class="inline-flex items-center gap-1 text-xs font-medium mt-1"
+                  [ngClass]="
+                    user.active
+                      ? 'text-[var(--color-success)]'
+                      : 'text-[var(--color-danger)]'
+                  "
+                >
+                  <span
+                    class="w-2 h-2 rounded-full"
+                    [ngClass]="
+                      user.active
+                        ? 'bg-[var(--color-success)]'
+                        : 'bg-[var(--color-danger)]'
+                    "
+                  ></span>
+                  {{ user.active ? "Active" : "Inactive" }}
+                </span>
+              </div>
+            </div>
+            <!-- Card Action Buttons -->
+            <div class="flex gap-1">
+              <button
+                class="p-2 rounded-lg transition-all duration-150 hover:scale-105 hover:shadow-sm"
+                [ngClass]="
+                  user.active
+                    ? 'text-red-600 hover:bg-red-50'
+                    : 'text-green-600 hover:bg-green-50'
+                "
+                (click)="toggleStatus(user)"
+                [title]="user.active ? 'Deactivate' : 'Activate'"
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                  />
+                </svg>
+              </button>
+              <button
+                class="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-all duration-150 hover:scale-105 hover:shadow-sm"
+                (click)="onEdit(user); $event.stopPropagation()"
+                title="Edit"
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+              </button>
+
+              <div class="relative">
+  <button
+    class="p-2 rounded-lg hover:bg-[var(--color-hover)] transition"
+    (click)="openUserDetails(user); $event.stopPropagation()"
+  >
+    <span class="material-icons text-[var(--color-muted)]">
+      more_vert
+    </span>
+  </button>
+</div>
+            </div>
+          </div>
+
+          <!-- Card Details -->
+          <div
+            class="space-y-3 text-sm flex-1 pt-2 border-t border-[var(--color-border)]/50"
+          >
+            <div class="flex items-center gap-2 text-[var(--color-font)]">
+              <svg
+                class="w-4 h-4 text-[var(--color-primary)]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+              <span class="truncate">{{ user.userEmail }}</span>
+            </div>
+            <div class="flex items-center gap-2 text-[var(--color-font)]">
+              <svg
+                class="w-4 h-4 text-[var(--color-primary)]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                />
+              </svg>
+              <span>{{ user.userPhone || "N/A" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State for Grid -->
+      <div *ngIf="pagedData.length === 0" class="text-center py-12">
+        <div class="max-w-sm mx-auto">
+          <div
+            class="w-16 h-16 mx-auto mb-4 bg-[var(--color-bg)] rounded-xl flex items-center justify-center"
+          >
+            <svg
+              class="w-8 h-8 text-[var(--color-muted)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-[var(--color-font)] mb-2">
+            No users found
+          </h3>
+          <p class="text-sm text-[var(--color-muted)] mb-4">
+            {{
+              searchTerm
+                ? "No users match your search criteria"
+                : "Get started by adding your first user"
+            }}
+          </p>
+          <!-- <button
+            *ngIf="!searchTerm"
+            (click)="openAddUserModal()"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[var(--color-primary-dark)] to-[var(--color-primary)] text-white font-medium rounded-lg hover:shadow transition-all duration-200"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
+            </svg>
+            Add First User
+          </button> -->
+          <button
+            *ngIf="searchTerm"
+            (click)="clearSearch()"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-surface)] text-[var(--color-font)] font-medium rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-hover)] transition-all duration-200"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+            Clear Search
+          </button>
+        </div>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div
+        *ngIf="totalPages > 1"
+        class="mt-6 pt-4 border-t border-[var(--color-border)]"
+      >
+        <div
+          class="flex flex-col sm:flex-row justify-between items-center gap-3"
+        >
+          <div class="text-sm text-[var(--color-muted)]">
+            Showing
+            <span class="font-medium text-[var(--color-font)]">
+              {{ (currentPage - 1) * itemsPerPage + 1 }} -
+              {{ Math.min(currentPage * itemsPerPage, filteredData.length) }}
+            </span>
+            of
+            <span class="font-medium text-[var(--color-font)]">{{
+              filteredData.length
+            }}</span>
+            users
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              (click)="prevPage()"
+              [disabled]="currentPage === 1"
+              class="p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] hover:bg-[var(--color-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
+              title="Previous Page"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+
+            <div class="flex items-center gap-1">
+              <button
+                *ngFor="let page of getPageNumbers()"
+                (click)="goToPage(page)"
+                class="w-8 h-8 rounded-lg text-xs font-medium transition-all duration-150"
+                [ngClass]="{
+                  'bg-[var(--color-primary)] text-white': currentPage === page,
+                  'bg-[var(--color-surface)] text-[var(--color-font)] hover:bg-[var(--color-hover)]':
+                    currentPage !== page,
+                }"
+              >
+                {{ page === -1 ? "..." : page }}
+              </button>
+            </div>
+
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage === totalPages"
+              class="p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] hover:bg-[var(--color-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
+              title="Next Page"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Data State -->
+  <div
+    *ngIf="!showTable && responseData.length === 0"
+    class="text-center py-12 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]"
+  >
+    <svg
+      class="mx-auto h-12 w-12 text-[var(--color-muted)]"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      ></path>
+    </svg>
+    <h3 class="mt-2 text-lg font-medium text-[var(--color-font)]">
+      No users found
+    </h3>
+    <p class="mt-1 text-[var(--color-muted)]">
+      There are no users associated with this branch.
+    </p>
+  </div>
+
+  <!-- Edit Modal (unchanged) -->
+  <div
+    *ngIf="selectedUser"
+    class="fixed  inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex justify-center items-start p-4 overflow-auto"
+  >
+    <div
+      class="bg-[var(--color-surface)] rounded-2xl shadow-xl w-full max-w-2xl my-8 border border-[var(--color-border)]"
+    >
+      <!-- Modal Header -->
+      <div
+        class="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-primary-dark)] text-[var(--color-bg)] rounded-t-2xl"
+      >
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-bold">Edit User</h2>
+          <button
+            (click)="closeModal()"
+            class="text-[var(--color-bg)] hover:text-white/80 transition-colors duration-200"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <form #editForm="ngForm" class="p-6 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Name Field -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+              >Name</label
+            >
+            <input
+              class="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)] text-[var(--color-font)]"
+              [(ngModel)]="selectedUser.name"
+              name="name"
+              required
+              placeholder="Enter user name"
+            />
+          </div>
+
+          <!-- Email Field -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+              >Email</label
+            >
+            <input
+              type="email"
+              class="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)] text-[var(--color-font)]"
+              [(ngModel)]="selectedUser.email"
+              name="email"
+              required
+              placeholder="Enter email address"
+            />
+          </div>
+
+          <!-- Mobile Field -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+              >Mobile Number</label
+            >
+            <input
+              type="tel"
+              class="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)] text-[var(--color-font)]"
+              [(ngModel)]="selectedUser.phone"
+              name="phone"
+              required
+              placeholder="Enter phone number"
+            />
+          </div>
+
+          <!-- Status Field -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+              >Status</label
+            >
+            <select
+              class="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)] text-[var(--color-font)]"
+              [(ngModel)]="selectedUser.active"
+              name="active"
+            >
+              <option [ngValue]="true">Active</option>
+              <option [ngValue]="false">Inactive</option>
+            </select>
+          </div>
+
+          <!-- Password Field -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+              >Password</label
+            >
+            <input
+              type="password"
+              class="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)] text-[var(--color-font)]"
+              [(ngModel)]="selectedUser.password"
+              name="password"
+              placeholder="Leave blank to keep current"
+            />
+          </div>
+
+          <!-- Confirm Password Field -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-2"
+              >Confirm Password</label
+            >
+            <input
+              type="password"
+              class="w-full px-4 py-3 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)] text-[var(--color-font)]"
+              [(ngModel)]="selectedUser.confirmPassword"
+              name="confirmPassword"
+              placeholder="Leave blank to keep current"
+            />
+          </div>
+        </div>
+
+        <!-- Password Mismatch Error -->
+        <div
+          *ngIf="
+            submitAttempted &&
+            selectedUser.password !== selectedUser.confirmPassword
+          "
+          class="p-4 bg-[var(--color-danger)]/10 border border-[var(--color-danger)] rounded-lg"
+        >
+          <div class="flex items-center text-[var(--color-danger)]">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            Passwords do not match
+          </div>
+        </div>
+      </form>
+
+      <!-- Modal Footer -->
+      <div
+        class="px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-bg)] rounded-b-2xl"
+      >
+        <div class="flex justify-end space-x-3">
+          <button
+            type="button"
+            class="px-5 py-2.5 border border-[var(--color-border)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-colors duration-200"
+            (click)="closeModal()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="px-5 py-2.5 bg-[var(--color-primary)] text-[var(--color-bg)] rounded-lg hover:bg-[var(--color-primary-dark)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-colors duration-200"
+            (click)="handleSubmit()"
+          >
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Add User Modal -->
+<div
+  *ngIf="showAddUserModal"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4"
+>
+  <div
+    class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+    (click)="closeAddUserModal()"
+  ></div>
+
+  <div
+    class="relative w-full max-w-2xl rounded-xl overflow-hidden shadow-2xl"
+  >
+    <app-add-branch-user
+      [associate]="branchId"
+      [inModal]="true"
+      (created)="handleUserCreated($event)"
+      (close)="closeAddUserModal()"
+    ></app-add-branch-user>
+  </div>
+</div>
+
+
+<div
+  *ngIf="showUserDetailsModal"
+  class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 sm:p-4"
+  (click)="closeUserDetails()"
+>
+  <div 
+    class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl"
+    (click)="$event.stopPropagation()"
+  >
+
+    <!-- Header - Fixed -->
+    <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100 flex-shrink-0">
+      <h2 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+        <span class="material-icons text-blue-600 text-lg">person</span>
+        User Details
+      </h2>
+      <button 
+        (click)="closeUserDetails()" 
+        class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+      >
+        <span class="material-icons text-gray-500 text-xl">close</span>
+      </button>
+    </div>
+
+    <!-- Content - Scrollable -->
+    <div class="overflow-y-auto p-4 space-y-3 flex-1">
+      
+      <!-- User Basic Info Card -->
+      <div class="bg-blue-50 rounded-xl p-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-sm flex-shrink-0">
+            {{ selectedUserDetails?.userName?.charAt(0) || 'U' }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-medium text-gray-900 text-sm truncate">{{ selectedUserDetails?.userName }}</h3>
+            <p class="text-xs text-gray-600 truncate">{{ selectedUserDetails?.userEmail }}</p>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="inline-flex items-center gap-1 text-xs" 
+                    [class.text-green-600]="selectedUserDetails?.userIsOnline"
+                    [class.text-gray-500]="!selectedUserDetails?.userIsOnline">
+                <span class="w-1.5 h-1.5 rounded-full" 
+                      [class.bg-green-500]="selectedUserDetails?.userIsOnline"
+                      [class.bg-gray-400]="!selectedUserDetails?.userIsOnline"></span>
+                {{ selectedUserDetails?.userIsOnline ? 'Online' : 'Offline' }}
+              </span>
+              <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+              <span class="text-xs px-2 py-0.5 rounded-full" 
+                    [class.bg-green-100]="selectedUserDetails?.active"
+                    [class.text-green-700]="selectedUserDetails?.active"
+                    [class.bg-gray-100]="!selectedUserDetails?.active"
+                    [class.text-gray-600]="!selectedUserDetails?.active">
+                {{ selectedUserDetails?.active ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="grid grid-cols-2 gap-2">
+        <div class="bg-gray-50 rounded-lg p-2 text-center">
+          <span class="text-xs text-gray-500 block">Login Count</span>
+          <span class="text-lg font-semibold text-gray-900">{{ selectedUserDetails?.userLoginCount || 0 }}</span>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-2 text-center">
+          <span class="text-xs text-gray-500 block">Last Active</span>
+          <span class="text-xs font-medium text-gray-900">{{ selectedUserDetails?.userLastActive || 'N/A' }}</span>
+        </div>
+      </div>
+
+      <!-- Details Grid -->
+      <div class="space-y-2">
+        
+        <!-- Contact Info -->
+        <div class="bg-gray-50 rounded-lg p-3">
+          <h4 class="text-xs font-medium text-gray-500 mb-2">Contact</h4>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-gray-500">Phone:</span>
+              <span class="text-gray-900">{{ selectedUserDetails?.userPhone || 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Branch Info -->
+        <div class="bg-gray-50 rounded-lg p-3">
+          <h4 class="text-xs font-medium text-gray-500 mb-2">Branch</h4>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-gray-500">Name:</span>
+              <span class="text-gray-900">{{ selectedUserDetails?.branchName || 'N/A' }}</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-gray-500">Email:</span>
+              <span class="text-gray-900 truncate max-w-[150px]">{{ selectedUserDetails?.branchEmail || 'N/A' }}</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-gray-500">Mobile:</span>
+              <span class="text-gray-900">{{ selectedUserDetails?.branchMobile || 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Session Info -->
+        <div class="bg-gray-50 rounded-lg p-3">
+          <h4 class="text-xs font-medium text-gray-500 mb-2">Session</h4>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-gray-500">Last Login:</span>
+              <span class="text-gray-900 text-right">{{ selectedUserDetails?.userLastLoginAt || 'N/A' }}</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-gray-500">Last Logout:</span>
+              <span class="text-gray-900 text-right">{{ selectedUserDetails?.userLastLogoutAt || 'N/A' }}</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-gray-500">IP Address:</span>
+              <span class="text-gray-900 text-xs">{{ selectedUserDetails?.userLastIpAddress || 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Agent (collapsible on mobile) -->
+        <div class="bg-gray-50 rounded-lg p-3">
+          <h4 class="text-xs font-medium text-gray-500 mb-2">User Agent</h4>
+          <p class="text-xs text-gray-900 break-words">{{ selectedUserDetails?.userLastUserAgent || 'N/A' }}</p>
+        </div>
+
+        <!-- Timestamps -->
+        <div class="bg-gray-50 rounded-lg p-3">
+          <h4 class="text-xs font-medium text-gray-500 mb-2">Timeline</h4>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between">
+              <span class="text-gray-500">Created:</span>
+              <span class="text-gray-900">{{ selectedUserDetails?.createdAt || 'N/A' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Updated:</span>
+              <span class="text-gray-900">{{ selectedUserDetails?.updatedAt || 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer - Fixed -->
+    <div class="px-4 py-3 border-t border-gray-100 flex justify-end flex-shrink-0">
+      <button 
+        (click)="closeUserDetails()"
+        class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+      >
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>

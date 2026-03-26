@@ -1,0 +1,270 @@
+<header
+  class="main-header fixed top-0 right-0 z-20 overflow-visible bg-[var(--color-hover)] border-b border-[var(--color-border)]"
+  [style.left.px]="marginLeft"
+>
+  <div class="w-full px-6 py-1.5">
+    <div class="flex items-center justify-between">
+      <!-- Left: Hamburger + Breadcrumb -->
+      <div class="flex items-center space-x-4">
+        <!-- Mobile Hamburger (hidden on desktop) -->
+        <button
+          class="[@media(min-width:800px)]:hidden w-10 h-10 rounded-lg flex items-center justify-center hover:bg-[var(--color-hover)] transition-colors"
+          (click)="toggleMobileMenu.emit()"
+        >
+          <span class="material-symbols-outlined text-[24px] text-slate-600">
+            {{ isMobileMenuOpen ? 'close' : 'menu' }}
+          </span>
+        </button>
+
+        <!-- Breadcrumb (hidden on mobile) -->
+        <div class="hidden [@media(min-width:800px)]:flex items-center space-x-2 text-sm">
+          <span class="text-[var(--color-muted)]">Dashboard</span>
+          <span class="text-[var(--color-muted)]">/</span>
+          <span class="text-[var(--color-font)] font-medium">{{
+            pageTitle
+          }}</span>
+        </div>
+      </div>
+
+      <div class="hidden [@media(min-width:800px)]:flex items-center space-x-4 md:space-x-6">
+        <!-- Topup -->
+        <div class="stat-item relative group">
+          <div class="flex items-center space-x-2 cursor-pointer">
+            <div class="w-2 h-2 rounded-full bg-[var(--color-warning)]"></div>
+            <span class="text-sm font-medium">
+              Topup: ₹{{ formatIndianAmount(topupBalance) }}
+            </span>
+          </div>
+
+          <!-- Hover Tooltip -->
+          <div
+            class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs z-45 min-w-[160px]"
+          >
+            <!-- <div class="flex justify-between">
+              <span class="text-[var(--color-muted)]">Bank</span>
+              <span class="font-medium">
+                {{ formatFullAmount(bankBalance) }}
+              </span>
+            </div>
+
+            <div class="flex justify-between mt-1">
+              <span class="text-[var(--color-muted)]">UPI</span>
+              <span class="font-medium">
+                {{ formatFullAmount(upiBalance) }}
+              </span>
+            </div> -->
+             <div class="flex justify-between mt-1">
+               <span class="font-medium">
+                {{ formatFullAmount(topupBalance) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Topup -->
+        <div class="stat-item relative group">
+          <div class="flex items-center space-x-2 cursor-pointer">
+            <div class="w-2 h-2 rounded-full bg-[var(--color-warning)]"></div>
+            <span class="text-sm font-medium">
+              Payout: ₹{{ formatIndianAmount(payoutBalance) }}
+            </span>
+          </div>
+
+          <!-- Hover Tooltip -->
+          <div
+            class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs whitespace-nowrap z-45"
+          >
+            {{ formatFullAmount(payoutBalance) }}
+          </div>
+        </div>
+
+        <div class="stat-item relative group">
+          <div class="flex items-center space-x-2 cursor-pointer">
+            <div class="w-2 h-2 rounded-full bg-[var(--color-info)]"></div>
+            <span class="text-sm font-medium">
+              Reward: ₹{{ formatIndianAmount(rewards) }}
+            </span>
+          </div>
+
+          <div
+            class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs z-45"
+          >
+            {{ formatFullAmount(rewards) }}
+          </div>
+        </div>
+
+        <div class="stat-item relative group">
+          <div class="flex items-center space-x-2 cursor-pointer">
+            <div class="w-2 h-2 rounded-full bg-[var(--color-success)]"></div>
+            <span class="text-sm font-medium">
+              Balance: ₹{{ formatIndianAmount(limitRemainingAmount) }}
+            </span>
+          </div>
+
+          <div
+            class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs z-45"
+          >
+            Remaining: {{ formatFullAmount(limitRemainingAmount) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Controls -->
+      <div class="flex items-center space-x-3">
+        <!-- Search -->
+        <div class="relative hidden lg:block">
+          <input
+            type="text"
+            placeholder="transactions,users..."
+            (input)="onSearchInput($event)"
+            class="w-48 pl-10 pr-4 py-2 text-sm rounded-xl border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white/70"
+          />
+          <svg
+            class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+
+        
+
+        <app-notification></app-notification>
+
+<div class="relative hidden  [@media(min-width:800px)]:block" #portalContainer>
+  <button
+    (click)="togglePortalPopup()"
+    class="mt-2 p-2 rounded-full hover:bg-[var(--color-hover)] transition focus:ring-2 focus:ring-[var(--color-primary)]"
+    [class.bg-[var(--color-hover)]]="isPortalOpen"
+  >
+    <span class="material-symbols-outlined text-[22px] text-slate-600">
+      language
+    </span>
+  </button>
+
+  <div
+    *ngIf="isPortalOpen"
+    class="fixed [@media(min-width:800px)]:absolute right-4 [@media(min-width:800px)]:right-0 top-[70px] [@media(min-width:800px)]:top-full md:mt-2 
+           w-[320px] max-w-[calc(100vw-32px)] z-45"
+  >
+    <div
+      class="hidden [@media(min-width:800px)]:block absolute right-6 -top-2 w-4 h-4 
+             bg-white border-l border-t border-gray-200 rotate-45"
+    ></div>
+
+    <div
+      class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] 
+             border border-gray-200 overflow-visible"
+    >
+      <div class="p-3">
+        <!-- <app-portal-selector></app-portal-selector> -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Wallet / Limits -->
+<div class="relative" #limitsContainer>
+  <!-- Button -->
+  <button
+    (click)="toggleLimitsPopup()"
+    class="mt-2 p-2 rounded-full hover:bg-[var(--color-hover)] transition focus:ring-2 focus:ring-[var(--color-primary)]"
+    [class.bg-[var(--color-hover)]]="isLimitsOpen"
+  >
+    <span class="material-symbols-outlined text-[22px] text-slate-600">
+      account_balance_wallet
+    </span>
+  </button>
+
+  <!-- Popup -->
+  <div
+    *ngIf="isLimitsOpen"
+    class="fixed [@media(min-width:800px)]:absolute right-4 md:right-0 top-[70px] [@media(min-width:800px)]:top-full md:mt-2 
+           w-[500px] max-w-[calc(100vw-32px)] max-h-[80vh] z-50"
+    [@slideInOut]
+  >
+    <!-- Arrow -->
+    <div
+      class="hidden [@media(min-width:800px)]:block absolute right-6 -top-2 w-4 h-4 
+             bg-white border-l border-t border-gray-200 rotate-45"
+    ></div>
+
+    <!-- Card -->
+    <div
+      class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] 
+             border border-gray-200 overflow-hidden"
+    >
+      <div class="max-h-[75vh] overflow-y-auto p-4">
+        <app-user-dashboard-upi-bank-limit></app-user-dashboard-upi-bank-limit>
+      </div>
+    </div>
+  </div>
+</div>
+        <!-- Profile -->
+<div class="relative hidden [@media(min-width:800px)]:block" #profileContainer>
+            <!-- Avatar Button -->
+          <button
+            (click)="toggleProfile()"
+            class="flex items-center space-x-2 p-1 rounded-full hover:bg-[var(--color-hover)] transition-all focus:ring-2 focus:ring-[var(--color-primary)]"
+            [class.bg-[var(--color-hover)]]="isProfileOpen"
+          >
+            <div
+              class="w-8 h-8 rounded-full bg-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold text-xs"
+            >
+              {{ getUserInitials() }}
+            </div>
+
+            <svg
+              class="w-4 h-4 text-[var(--color-muted)] transition-transform"
+              [class.rotate-180]="isProfileOpen"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          <!-- Dropdown -->
+          <div
+            *ngIf="isProfileOpen"
+            class="fixed [@media(min-width:800px)]:absolute right-4 md:right-0 top-[70px] md:top-full md:mt-2 w-[920px] max-w-[calc(100vw-32px)] h-[620px] max-h-[80vh] z-50"
+            [@slideInOut]
+          >
+            <!-- Arrow -->
+            <div
+              class="hidden md:block absolute right-6 -top-2 w-4 h-4 bg-white border-l border-t border-gray-200 rotate-45"
+            ></div>
+
+            <!-- Card -->
+            <div
+              class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-gray-200 h-full flex flex-col overflow-hidden"
+            >
+              <!-- Scrollable Content -->
+              <div class="flex-1 overflow-y-auto">
+                <app-user-profile></app-user-profile>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <app-work-time></app-work-time>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

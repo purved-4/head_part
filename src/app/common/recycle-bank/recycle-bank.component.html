@@ -1,0 +1,233 @@
+<div class="max-w-7xl mx-auto p-6">
+  <!-- Header Section -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <h2 class="text-2xl font-semibold text-gray-800">
+      Recycle Banks
+      <span class="ml-2 text-sm font-normal text-gray-500">
+        ({{ totalElements }} deleted)
+      </span>
+    </h2>
+
+    <!-- View Toggle - Icon Only -->
+    <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+      <button
+        (click)="setView('table')"
+        class="w-8 h-8 flex items-center justify-center rounded-md transition-all duration-200"
+        [class]="viewMode === 'table'
+          ? 'bg-white text-blue-600 shadow-sm'
+          : 'text-gray-600 hover:text-gray-900'"
+        [title]="'Table View'"
+      >
+        <span class="material-symbols-outlined text-xl">table_rows</span>
+      </button>
+
+      <button
+        (click)="setView('grid')"
+        class="w-8 h-8 flex items-center justify-center rounded-md transition-all duration-200"
+        [class]="viewMode === 'grid'
+          ? 'bg-white text-blue-600 shadow-sm'
+          : 'text-gray-600 hover:text-gray-900'"
+        [title]="'Grid View'"
+      >
+        <span class="material-symbols-outlined text-xl">grid_view</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Table View -->
+<div
+  *ngIf="!loading && viewMode === 'table' && bankAccounts.length > 0"
+  class="hidden sm:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">#</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Portal</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Holder</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bank</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Action</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let bank of bankAccounts; let i = index" class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ (currentPage - 1) * pageSize + i + 1 }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <div class="flex items-center">
+                <span class="material-symbols-outlined text-gray-400 text-base mr-2">language</span>
+                {{ bank.portalDomain }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
+              <div class="flex items-center">
+                <span class="material-symbols-outlined text-gray-400 text-base mr-2">account_balance</span>
+                {{ bank.accountNo }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <div class="flex items-center">
+                <span class="material-symbols-outlined text-gray-400 text-base mr-2">person</span>
+                {{ bank.accountHolderName }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <div class="flex items-center">
+                <span class="material-symbols-outlined text-gray-400 text-base mr-2">business</span>
+                {{ bank.bankName }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <button
+                (click)="reactivateBank(bank.id)"
+                class="inline-flex items-center px-3 py-1.5 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors font-medium text-xs"
+              >
+                <span class="material-symbols-outlined text-base mr-1">refresh</span>
+                Restore
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Grid View -->
+  <div
+  *ngIf="!loading && bankAccounts.length > 0"
+  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+  [class.sm:hidden]="viewMode === 'table'"
+>
+    <div
+      *ngFor="let bank of bankAccounts; let i = index"
+      class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group"
+    >
+      <!-- Card Header -->
+      <div class="bg-gradient-to-r from-gray-50 to-white px-4 py-3 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <span class="material-symbols-outlined text-blue-600 mr-2">account_balance</span>
+            <span class="font-semibold text-gray-900">{{ bank.bankName }}</span>
+          </div>
+          <span class="text-xs text-gray-400 bg-white px-2 py-1 rounded-full border border-gray-200">
+            #{{ (currentPage - 1) * pageSize + i + 1 }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Card Body -->
+      <div class="p-4 space-y-3">
+        <div class="flex items-start">
+          <span class="material-symbols-outlined text-gray-400 text-base mr-2 mt-0.5">language</span>
+          <div>
+            <div class="text-xs text-gray-500">Portal</div>
+            <div class="text-sm text-gray-900">{{ bank.portalDomain }}</div>
+          </div>
+        </div>
+
+        <div class="flex items-start">
+          <span class="material-symbols-outlined text-gray-400 text-base mr-2 mt-0.5">credit_card</span>
+          <div>
+            <div class="text-xs text-gray-500">Account Number</div>
+            <div class="text-sm font-mono text-gray-900">{{ bank.accountNo }}</div>
+          </div>
+        </div>
+
+        <div class="flex items-start">
+          <span class="material-symbols-outlined text-gray-400 text-base mr-2 mt-0.5">person</span>
+          <div>
+            <div class="text-xs text-gray-500">Account Holder</div>
+            <div class="text-sm text-gray-900">{{ bank.accountHolderName }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Footer -->
+      <div class="px-4 py-3 bg-gray-50 border-t border-gray-100">
+        <button
+          (click)="reactivateBank(bank.id)"
+          class="w-full inline-flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+        >
+          <span class="material-symbols-outlined text-base mr-1">refresh</span>
+          Restore
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div
+    *ngIf="!loading && bankAccounts.length === 0"
+    class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center"
+  >
+    <div class="flex flex-col items-center">
+      <span class="material-symbols-outlined text-6xl text-gray-300 mb-4">delete_sweep</span>
+      <h3 class="text-lg font-medium text-gray-900 mb-1">No deleted banks found</h3>
+      <p class="text-sm text-gray-500">There are no banks in the recycle bin at the moment.</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div
+    *ngIf="totalElements > 0"
+    class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-4 border-t border-gray-200"
+  >
+    <!-- Left Info -->
+    <div class="text-sm text-gray-500">
+      Showing
+      <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
+      to
+      <span class="font-medium">{{ Math.min(currentPage * pageSize, totalElements) }}</span>
+      of
+      <span class="font-medium">{{ totalElements }}</span>
+      results
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="flex items-center gap-2">
+      <!-- Prev -->
+      <button
+        (click)="prevPage()"
+        [disabled]="currentPage === 1"
+        class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        [title]="'Previous page'"
+      >
+        <span class="material-symbols-outlined text-base">chevron_left</span>
+      </button>
+
+      <!-- Page Numbers -->
+      <div class="flex gap-1">
+        <button
+          *ngFor="let page of getPageNumbers()"
+          (click)="goToPage(page)"
+          class="w-8 h-8 flex items-center justify-center rounded-md text-sm font-medium transition-colors"
+          [class]="
+            page === currentPage
+              ? 'bg-blue-600 text-white'
+              : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+          "
+        >
+          {{ page }}
+        </button>
+      </div>
+
+      <!-- Next -->
+      <button
+        (click)="nextPage()"
+        [disabled]="currentPage >= totalPagesCount"
+        class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        [title]="'Next page'"
+      >
+        <span class="material-symbols-outlined text-base">chevron_right</span>
+      </button>
+    </div>
+  </div>
+</div>

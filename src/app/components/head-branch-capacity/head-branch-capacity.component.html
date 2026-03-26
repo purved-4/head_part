@@ -1,0 +1,164 @@
+<div
+  [ngClass]="{
+    'bg-gradient-to-br from-orange-50 to-orange-25': role?.toLowerCase() === 'head',
+    'bg-gradient-to-br from-yellow-50 to-yellow-25': role?.toLowerCase() === 'branch',
+    'bg-[var(--color-bg)]':
+      role?.toLowerCase() !== 'head' && role?.toLowerCase() !== 'branch'
+  }"
+  class="min-h-screen p-4 md:p-6 transition-all duration-500"
+>
+  <div class="max-w-5xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="mb-6">
+      <h1 class="text-xl font-bold text-[var(--color-font)]">
+        Payout Capacity
+      </h1>
+      <p class="text-xs text-[var(--color-muted)]">
+        Configure payout limits for portals
+      </p>
+    </div>
+
+    <!-- ERROR -->
+    <div *ngIf="errorMessage"
+      class="mb-4 p-3 rounded-lg border text-xs border-red-300 text-red-600 bg-red-50 flex justify-between">
+      {{ errorMessage }}
+      <button (click)="errorMessage = ''">✕</button>
+    </div>
+
+    <!-- FORM -->
+    <form [formGroup]="capacityForm" (ngSubmit)="onSubmit()" class="space-y-5">
+
+      <!-- PORTAL -->
+      <div class="bg-[var(--color-surface)] p-4 rounded-xl border border-[var(--color-border)]">
+        <label class="text-xs font-medium text-[var(--color-font)]">
+          Select Portal
+        </label>
+
+        <input
+          type="text"
+          (input)="onPortalSearch($event)"
+          (focus)="showPortalDropdown = true"
+          (blur)="onPortalBlur()"
+          [value]="selectedPortalDomain"
+          placeholder="Search portal..."
+          class="w-full mt-2 px-3 py-2 text-xs border rounded-lg bg-transparent outline-none border-[var(--color-border)]"
+        />
+
+        <!-- DROPDOWN -->
+        <div *ngIf="showPortalDropdown"
+          class="border mt-1 rounded-lg max-h-48 overflow-auto bg-white shadow">
+
+          <div *ngFor="let w of filteredPortals"
+            (mousedown)="selectPortal(w)"
+            class="px-3 py-2 text-xs cursor-pointer hover:bg-gray-100">
+            {{ w.portalDomain || w.domain }}
+          </div>
+
+          <div *ngIf="filteredPortals.length === 0"
+            class="p-3 text-center text-xs text-gray-400">
+            No results
+          </div>
+        </div>
+
+        <!-- SELECTED -->
+        <div *ngIf="selectedPortalDomain"
+          class="mt-2 text-xs text-green-600">
+          ✔ Selected: {{ selectedPortalDomain }}
+        </div>
+      </div>
+
+      <!-- RANGES -->
+      <div class="bg-[var(--color-surface)] p-4 rounded-xl border border-[var(--color-border)]">
+
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-sm font-semibold">Capacity Ranges</h3>
+
+          <button
+            type="button"
+            (click)="addCapacityRange()"
+            [disabled]="hasUptoRange"
+            class="text-xs px-3 py-1 rounded bg-blue-600 text-white disabled:bg-gray-400">
+            + Add
+          </button>
+        </div>
+
+        <!-- RANGE LIST -->
+        <div formArrayName="capacityRanges" class="space-y-3">
+
+          <div *ngFor="let r of capacityRanges.controls; let i = index"
+            [formGroupName]="i"
+            class="border p-3 rounded-lg text-xs bg-white">
+
+            <!-- RANGE HEADER -->
+            <div class="flex justify-between items-center mb-2">
+              <div>
+                <b>R{{ i + 1 }}</b>
+                ₹ {{ r.get('minRange')?.value }}
+                →
+                <span *ngIf="!r.get('upto')?.value">
+                  {{ r.get('maxRange')?.value || '...' }}
+                </span>
+                <span *ngIf="r.get('upto')?.value">∞</span>
+              </div>
+
+              <button
+                *ngIf="capacityRanges.length > 1 && !r.get('upto')?.value"
+                (click)="removeCapacityRange(i)"
+                type="button"
+                class="text-red-500 text-xs">
+                Delete
+              </button>
+            </div>
+
+            <!-- INPUTS -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+
+              <input type="number" formControlName="minRange"
+                class="border px-2 py-1 rounded bg-gray-100" readonly />
+
+              <input type="number" formControlName="maxRange"
+                placeholder="Max"
+                [readonly]="r.get('upto')?.value"
+                class="border px-2 py-1 rounded" />
+
+              <input type="number" formControlName="quantity"
+                placeholder="Qty"
+                class="border px-2 py-1 rounded" />
+
+              <input type="number" formControlName="time"
+                placeholder="Time"
+                class="border px-2 py-1 rounded" />
+            </div>
+
+            <!-- UPTO -->
+            <label class="flex items-center mt-2 gap-2 text-xs">
+              <input type="checkbox" formControlName="upto"
+                (change)="onUptoChange(i)" />
+              Upto (∞)
+            </label>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <button
+        type="submit"
+        [disabled]="isSubmitting || capacityForm.invalid || !hasUptoRange"
+        class="w-full py-2 rounded-lg text-sm font-semibold bg-blue-700 text-white disabled:bg-gray-400">
+
+        <span *ngIf="!isSubmitting">Save</span>
+        <span *ngIf="isSubmitting">Saving...</span>
+      </button>
+
+    </form>
+  </div>
+
+  <!-- SUCCESS TOAST -->
+  <div *ngIf="showAddSuccessPopup"
+    class="fixed top-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow">
+    {{ addSuccessMessage }}
+  </div>
+</div>

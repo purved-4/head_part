@@ -1,0 +1,886 @@
+<div
+  class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6 font-sans"
+>
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+      Transaction History Report
+    </h1>
+    <p class="text-gray-600 mt-2 text-lg">
+      View and analyze transaction history across entities
+    </p>
+  </div>
+
+  <!-- Filter Card -->
+  <div
+    class="bg-white/90 backdrop-blur-sm rounded-xl shadow-md border border-gray-100 p-4 mb-6 transition-all hover:shadow-lg"
+  >
+    <!-- Header with date range dropdown -->
+    <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+      <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+        <span
+          class="material-icons text-blue-600 bg-blue-50 p-1.5 rounded-lg text-lg"
+          >filter_alt</span
+        >
+        Filter Transactions
+      </h2>
+      <div class="flex items-center gap-2">
+        <!-- Date Range Mode Dropdown -->
+        <div class="flex items-center gap-1 text-xs">
+          <span class="font-medium text-gray-700 whitespace-nowrap"
+            >Date Range:</span
+          >
+          <select
+            [ngModel]="reportForm.get('dateRangeMode')?.value"
+            (ngModelChange)="reportForm.patchValue({ dateRangeMode: $event })"
+            class="px-2 py-1.5 border border-gray-200 rounded-md text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 shadow-sm"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option value="custom">Custom</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
+        </div>
+        <!-- Reset Filters Button -->
+        <button
+          (click)="resetForm()"
+          class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 flex items-center gap-1.5"
+        >
+          <span class="material-icons text-gray-500 text-sm">refresh</span>
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <form [formGroup]="reportForm" class="space-y-4">
+      <!-- Filter Fields -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Entity Type -->
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-gray-700">
+            Entity Type <span class="text-red-500">*</span>
+          </label>
+          <div class="relative group">
+            <div
+              class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500"
+            >
+              <span
+                class="material-icons text-gray-400 group-focus-within:text-blue-500 text-base"
+                >person</span
+              >
+            </div>
+            <select
+              formControlName="entityType"
+              (change)="onRoleChange(reportForm.get('entityType')?.value)"
+              class="w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 appearance-none cursor-pointer hover:border-gray-300"
+              [class.border-red-400]="
+                reportForm.get('entityType')?.invalid &&
+                reportForm.get('entityType')?.touched
+              "
+            >
+              <option value="" disabled class="text-gray-400">
+                Select Entity Type
+              </option>
+              <option
+                *ngFor="let type of entityTypes"
+                [value]="type.id"
+                class="text-gray-900"
+              >
+                {{ type.name }}
+              </option>
+            </select>
+            <div
+              class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none"
+            >
+              <span class="material-icons text-gray-400">arrow_drop_down</span>
+            </div>
+          </div>
+          <div
+            *ngIf="
+              reportForm.get('entityType')?.invalid &&
+              reportForm.get('entityType')?.touched
+            "
+            class="text-xs text-red-600 flex items-center gap-1 mt-0.5"
+          >
+            <span class="material-icons text-xs">error</span>
+            Required
+          </div>
+        </div>
+
+        <!-- Entity -->
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-gray-700">
+            Entity <span class="text-red-500">*</span>
+          </label>
+          <div class="relative group">
+            <div
+              class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500"
+            >
+              <span
+                class="material-icons text-gray-400 group-focus-within:text-blue-500 text-base"
+                >badge</span
+              >
+            </div>
+            <select
+              formControlName="entityId"
+              class="w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 appearance-none cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed hover:border-gray-300"
+              [class.border-red-400]="
+                reportForm.get('entityId')?.invalid &&
+                reportForm.get('entityId')?.touched
+              "
+              [disabled]="loadingEntities || entities.length === 0"
+            >
+              <option value="" disabled class="text-gray-400">
+                Select Entity
+              </option>
+              <option
+                *ngFor="let entity of entities"
+                [value]="entity.id"
+                class="text-gray-900"
+              >
+                {{ entity.name }}
+              </option>
+            </select>
+            <div
+              *ngIf="!loadingEntities"
+              class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none"
+            >
+              <span class="material-icons text-gray-400">arrow_drop_down</span>
+            </div>
+            <div
+              *ngIf="loadingEntities"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center"
+            >
+              <span class="material-icons animate-spin text-blue-600 text-base"
+                >refresh</span
+              >
+            </div>
+          </div>
+          <div
+            *ngIf="
+              reportForm.get('entityId')?.invalid &&
+              reportForm.get('entityId')?.touched
+            "
+            class="text-xs text-red-600 flex items-center gap-1 mt-0.5"
+          >
+            <span class="material-icons text-xs">error</span>
+            Required
+          </div>
+          <div
+            *ngIf="
+              !loadingEntities &&
+              entities.length === 0 &&
+              reportForm.get('entityType')?.value
+            "
+            class="text-xs text-amber-600 flex items-center gap-1 mt-0.5"
+          >
+            <span class="material-icons text-xs">warning</span>
+            No entities found
+          </div>
+        </div>
+
+        <!-- Dynamic Date Fields Based on Mode -->
+        <ng-container [ngSwitch]="reportForm.get('dateRangeMode')?.value">
+          <!-- Custom Mode: From Date and To Date -->
+          <ng-container *ngSwitchCase="'custom'">
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-700"
+                >From Date</label
+              >
+              <div class="relative group">
+                <div
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500"
+                >
+                  <span
+                    class="material-icons text-gray-400 group-focus-within:text-blue-500 text-base"
+                    >calendar_today</span
+                  >
+                </div>
+                <input
+                  type="date"
+                  formControlName="from"
+                  [max]="getTodayDate()"
+                  class="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 hover:border-gray-300"
+                />
+              </div>
+              <div
+                *ngIf="
+                  reportForm.get('from')?.invalid &&
+                  reportForm.get('from')?.touched
+                "
+                class="text-xs text-red-600 flex items-center gap-1 mt-0.5"
+              >
+                <span class="material-icons text-xs">error</span>
+                Required
+              </div>
+            </div>
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-700"
+                >To Date</label
+              >
+              <div class="relative group">
+                <div
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500"
+                >
+                  <span
+                    class="material-icons text-gray-400 group-focus-within:text-blue-500 text-base"
+                    >calendar_today</span
+                  >
+                </div>
+                <input
+                  type="date"
+                  formControlName="to"
+                  [max]="getTodayDate()"
+                  class="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 hover:border-gray-300"
+                />
+              </div>
+              <div
+                *ngIf="
+                  reportForm.get('to')?.invalid && reportForm.get('to')?.touched
+                "
+                class="text-xs text-red-600 flex items-center gap-1 mt-0.5"
+              >
+                <span class="material-icons text-xs">error</span>
+                Required
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Month Mode: From Month, To Month, Year -->
+          <ng-container *ngSwitchCase="'month'">
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-700"
+                >From Month</label
+              >
+              <select
+                formControlName="fromMonth"
+                class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900"
+              >
+                <option value="" disabled>Select</option>
+                <option *ngFor="let month of months" [value]="month.value">
+                  {{ month.name }}
+                </option>
+              </select>
+              <div
+                *ngIf="
+                  reportForm.get('fromMonth')?.invalid &&
+                  reportForm.get('fromMonth')?.touched
+                "
+                class="text-xs text-red-600 flex items-center gap-1 mt-0.5"
+              >
+                <span class="material-icons text-xs">error</span>
+                Required
+              </div>
+            </div>
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-700"
+                >To Month</label
+              >
+              <select
+                formControlName="toMonth"
+                class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900"
+              >
+                <option value="" disabled>Select</option>
+                <option *ngFor="let month of months" [value]="month.value">
+                  {{ month.name }}
+                </option>
+              </select>
+              <div
+                *ngIf="
+                  reportForm.get('toMonth')?.invalid &&
+                  reportForm.get('toMonth')?.touched
+                "
+                class="text-xs text-red-600 flex items-center gap-1 mt-0.5"
+              >
+                <span class="material-icons text-xs">error</span>
+                Required
+              </div>
+            </div>
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-700"
+                >Year</label
+              >
+              <select
+                formControlName="selectedYear"
+                class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900"
+              >
+                <option value="" disabled>Select</option>
+                <option *ngFor="let year of years" [value]="year">
+                  {{ year }}
+                </option>
+              </select>
+              <div
+                *ngIf="
+                  reportForm.get('selectedYear')?.invalid &&
+                  reportForm.get('selectedYear')?.touched
+                "
+                class="text-xs text-red-600 flex items-center gap-1 mt-0.5"
+              >
+                <span class="material-icons text-xs">error</span>
+                Required
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Year Mode: Year only -->
+          <ng-container *ngSwitchCase="'year'">
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-700"
+                >Year</label
+              >
+              <select
+                formControlName="selectedYear"
+                class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900"
+              >
+                <option value="" disabled>Select Year</option>
+                <option *ngFor="let year of years" [value]="year">
+                  {{ year }}
+                </option>
+              </select>
+              <div
+                *ngIf="
+                  reportForm.get('selectedYear')?.invalid &&
+                  reportForm.get('selectedYear')?.touched
+                "
+                class="text-xs text-red-600 flex items-center gap-1 mt-0.5"
+              >
+                <span class="material-icons text-xs">error</span>
+                Required
+              </div>
+            </div>
+            <!-- Empty cells to fill grid layout -->
+            <div></div>
+            <div></div>
+          </ng-container>
+        </ng-container>
+      </div>
+
+      <!-- Month Range Error Message -->
+      <div
+        *ngIf="getMonthRangeError()"
+        class="text-xs text-red-600 flex items-center gap-1"
+      >
+        <span class="material-icons text-xs">error</span>
+        From Month must be ≤ To Month
+      </div>
+
+      <!-- Action Buttons -->
+      <div
+        class="flex flex-col sm:flex-row gap-2 pt-4 border-t border-gray-100"
+      >
+        <button
+          type="button"
+          (click)="loadReport()"
+          [disabled]="loading"
+          class="flex-1 sm:flex-none px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+        >
+          <span class="material-icons text-white text-sm">description</span>
+          <span
+            *ngIf="loading"
+            class="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent"
+          ></span>
+          {{ loading ? "Generating..." : "Generate Report" }}
+        </button>
+        <div class="flex-1 sm:flex-none flex gap-2">
+          <button
+            type="button"
+            (click)="exportReport('PDF')"
+            class="flex-1 px-3 py-2 border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-100 hover:border-gray-300 transition-all flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md bg-white"
+          >
+            <span class="material-icons text-gray-500 text-sm"
+              >picture_as_pdf</span
+            >
+            PDF
+          </button>
+          <button
+            type="button"
+            (click)="exportReport('CSV')"
+            class="flex-1 px-3 py-2 border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-100 hover:border-gray-300 transition-all flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md bg-white"
+          >
+            <!-- Changed to table_chart icon -->
+            <span class="material-icons text-gray-500 text-sm"
+              >table_chart</span
+            >
+            CSV
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <!-- Messages (rest of the component unchanged) -->
+  <div
+    *ngIf="errorMessage"
+    class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-md"
+  >
+    <div class="flex items-center text-red-700">
+      <span class="material-icons mr-2 text-red-500">error</span>
+      <span class="font-medium">{{ errorMessage }}</span>
+    </div>
+  </div>
+
+  <div
+    *ngIf="successMessage"
+    class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow-md"
+  >
+    <div class="flex items-center text-green-700">
+      <span class="material-icons mr-2 text-green-500">check_circle</span>
+      <span class="font-medium">{{ successMessage }}</span>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div *ngIf="hasSearched && reports.length > 0" class="space-y-6">
+    <!-- Compact Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div
+        class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-all"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-xs text-gray-500 mb-0.5">Total Entities</div>
+            <div class="text-xl font-bold text-gray-900">
+              {{ reports.length }}
+            </div>
+          </div>
+          <div
+            class="h-9 w-9 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600"
+          >
+            <span class="material-icons">groups</span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-all"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-xs text-gray-500 mb-0.5">Date Range</div>
+            <div class="text-sm font-semibold text-gray-900">
+              {{ fromDate | date: "dd MMM yyyy" }} -
+              {{ toDate | date: "dd MMM yyyy" }}
+            </div>
+          </div>
+          <div
+            class="h-9 w-9 bg-green-100 rounded-lg flex items-center justify-center text-green-600"
+          >
+            <span class="material-icons">date_range</span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-all"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-xs text-gray-500 mb-0.5">Total Transactions</div>
+            <div class="text-xl font-bold text-gray-900">{{ totalCount }}</div>
+          </div>
+          <div
+            class="h-9 w-9 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600"
+          >
+            <span class="material-icons">receipt</span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 hover:shadow-md transition-all"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-xs text-gray-500 mb-0.5">Report Type</div>
+            <div class="text-sm font-semibold text-gray-900">
+              {{
+                reportForm.get("reportType")?.value === "ENTITY"
+                  ? "Entity"
+                  : "Portal"
+              }}
+            </div>
+          </div>
+          <div
+            class="h-9 w-9 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600"
+          >
+            <span class="material-icons">description</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Entities Table -->
+    <div
+      class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+    >
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              <span class="flex items-center gap-1"
+                ><span class="material-icons text-base">business</span>
+                Entity</span
+              >
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              <span class="flex items-center gap-1"
+                ><span class="material-icons text-base">label</span> Type</span
+              >
+            </th>
+            <th
+              class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              <span class="flex items-center justify-end gap-1"
+                ><span class="material-icons text-base">trending_up</span>
+                Opening</span
+              >
+            </th>
+            <th
+              class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              <span class="flex items-center justify-end gap-1"
+                ><span class="material-icons text-base">trending_down</span>
+                Closing</span
+              >
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              <span class="flex items-center gap-1"
+                ><span class="material-icons text-base">language</span> Portal
+                Balances</span
+              >
+            </th>
+            <th
+              class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              <span class="flex items-center justify-center gap-1"
+                ><span class="material-icons text-base">visibility</span>
+                Action</span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr
+            *ngFor="let entity of reports"
+            class="hover:bg-gray-50 transition-colors"
+          >
+            <td
+              class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900"
+            >
+              {{ entity.name || "Unnamed Entity" }}
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <span
+                class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full"
+                >{{ entity.type || "N/A" }}</span
+              >
+            </td>
+            <td
+              class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-900"
+            >
+              {{ formatCurrency(entity.openingBalance || 0) }}
+            </td>
+            <td
+              class="px-4 py-3 whitespace-nowrap text-sm text-right font-medium text-green-600"
+            >
+              {{ formatCurrency(entity.closingBalance || 0) }}
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-900">
+              <div
+                *ngIf="entity.webBalances?.closing"
+                class="flex flex-wrap gap-1.5"
+              >
+                <span
+                  *ngFor="let site of entity.webBalances.closing | keyvalue"
+                  class="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-full border border-blue-100 shadow-xs whitespace-nowrap"
+                >
+                  {{ site.key }}: {{ formatCurrency(site.value) }}
+                </span>
+              </div>
+              <span *ngIf="!entity.webBalances?.closing" class="text-gray-400"
+                >—</span
+              >
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap text-center">
+              <button
+                (click)="showDetails(entity)"
+                class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-all border border-indigo-100 shadow-xs hover:shadow"
+              >
+                View <span class="material-icons text-xs">arrow_forward</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div
+      *ngIf="totalPages > 1"
+      class="flex items-center justify-between bg-white/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-md border border-gray-100"
+    >
+      <div class="text-sm text-gray-700">
+        Showing page {{ currentPage }} of {{ totalPages }}
+      </div>
+      <div class="flex gap-3">
+        <button
+          (click)="goToPage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+          class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-100 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Previous
+        </button>
+        <button
+          (click)="goToPage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+          class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-100 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Results -->
+  <div
+    *ngIf="hasSearched && reports.length === 0 && !loading"
+    class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-12 text-center border border-gray-100"
+  >
+    <div class="max-w-md mx-auto">
+      <div
+        class="h-20 w-20 mx-auto mb-6 text-gray-300 bg-gray-100 rounded-full flex items-center justify-center"
+      >
+        <span class="material-icons text-4xl">description</span>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-800 mb-3">
+        No transactions found
+      </h3>
+      <p class="text-gray-500 mb-8 text-lg">
+        Try adjusting your filters or search criteria
+      </p>
+      <button
+        (click)="resetForm()"
+        class="px-6 py-3 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all shadow-sm hover:shadow focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      >
+        Clear Filters
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Compact Details Modal (unchanged) -->
+<div
+  *ngIf="showModal"
+  class="fixed inset-0 z-50 overflow-y-auto"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Transaction details modal"
+>
+  <div
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+    aria-hidden="true"
+    (click)="closeShowModal()"
+  ></div>
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <div
+      class="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden transform transition-all scale-100"
+    >
+      <!-- Header -->
+      <div
+        class="sticky top-0 z-10 bg-gradient-to-r from-gray-50 to-white border-b border-gray-200 px-6 py-4"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-gray-900">
+              Transaction Details - {{ activeEntity?.name }}
+            </h2>
+            <p class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+              <span
+                class="px-2 py-0.5 bg-gray-200 rounded-full text-xs font-medium"
+                >{{ activeEntity?.type }}</span
+              >
+              <span
+                >{{ fromDate | date: "dd MMM yyyy" }} -
+                {{ toDate | date: "dd MMM yyyy" }}</span
+              >
+            </p>
+          </div>
+          <button
+            (click)="closeShowModal()"
+            class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+          >
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loadingShow" class="flex items-center justify-center p-16">
+        <div class="text-center">
+          <div
+            class="animate-spin rounded-full h-14 w-14 border-4 border-blue-600 border-t-transparent mx-auto"
+          ></div>
+          <p class="mt-5 text-gray-600 text-lg">
+            Loading transaction details...
+          </p>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div
+        *ngIf="!loadingShow && showResponse"
+        class="overflow-y-auto max-h-[calc(90vh-120px)]"
+      >
+        <!-- Summary Cards -->
+        <div class="p-6 border-b border-gray-200 bg-gray-50/80">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div
+              class="bg-white p-4 rounded-xl shadow-sm border border-gray-100"
+            >
+              <div class="text-xs text-gray-500 mb-1">Entity Type</div>
+              <div class="text-lg font-bold text-gray-900">
+                {{ showResponse.entities[0].type }}
+              </div>
+            </div>
+            <div
+              class="bg-white p-4 rounded-xl shadow-sm border border-gray-100"
+            >
+              <div class="text-xs text-gray-500 mb-1">Opening Balance</div>
+              <div class="text-lg font-bold text-blue-600">
+                {{ formatCurrency(showResponse.entities[0].openingBalance) }}
+              </div>
+            </div>
+            <div
+              class="bg-white p-4 rounded-xl shadow-sm border border-gray-100"
+            >
+              <div class="text-xs text-gray-500 mb-1">Closing Balance</div>
+              <div class="text-lg font-bold text-green-600">
+                {{ formatCurrency(showResponse.entities[0].closingBalance) }}
+              </div>
+            </div>
+            <div
+              class="bg-white p-4 rounded-xl shadow-sm border border-gray-100"
+            >
+              <div class="text-xs text-gray-500 mb-1">Total Transactions</div>
+              <div class="text-lg font-bold text-gray-900">
+                {{ showResponse.entities[0].records?.length || 0 }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="p-6">
+          <h3
+            class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2"
+          >
+            <span class="material-icons text-blue-500">receipt</span>
+            Transaction History
+          </h3>
+          <div
+            class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm"
+          >
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  >
+                    Date & Time
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  >
+                    Type
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  >
+                    Portal
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  >
+                    Amount
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  >
+                    Commission
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  >
+                    Balance Before
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  >
+                    Balance After
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr
+                  *ngFor="let transaction of showResponse.entities[0].records"
+                  class="hover:bg-gray-50 transition-colors"
+                >
+                  <td
+                    class="px-4 py-3 whitespace-nowrap text-xs text-gray-900 font-mono"
+                  >
+                    {{ transaction.dateTime | date: "dd MMM yyyy HH:mm" }}
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span
+                      class="px-2 py-1 rounded-full text-xs font-medium shadow-sm"
+                      [ngClass]="
+                        getTransactionTypeClass(transaction.transactionType)
+                      "
+                      >{{ transaction.transactionType }}</span
+                    >
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-900">
+                    {{ transaction.portalDomain || "N/A" }}
+                  </td>
+                  <td
+                    class="px-4 py-3 whitespace-nowrap text-xs font-semibold"
+                    [ngClass]="
+                      transaction.transactionType === 'topup'
+                        ? 'text-green-600'
+                        : 'text-red-600'
+                    "
+                  >
+                    {{ formatCurrency(transaction.amount) }}
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-900">
+                    {{ formatCurrency(transaction.mutedAmount) }}
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-900">
+                    {{ formatCurrency(transaction.balanceBefore) }}
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-900">
+                    {{ formatCurrency(transaction.balanceAfter) }}
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span
+                      class="px-2 py-1 rounded-full text-xs font-medium shadow-sm"
+                      [ngClass]="getStatusClass(transaction.status)"
+                      >{{ transaction.status || "Completed" }}</span
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

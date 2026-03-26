@@ -1,0 +1,999 @@
+<!-- mobile-chat.component.html -->
+<div class="mobile-chat-container h-[calc(95vh-64px)] flex flex-col bg-gray-50">
+  <!-- ═══════════════════════════════════════
+       TOP HEADER - Contextual
+       ═══════════════════════════════════════ -->
+  <div
+    class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0"
+  >
+    <div class="flex items-center space-x-3">
+      <button
+        *ngIf="selectedNotification"
+        (click)="backToThreads()"
+        class="w-8 h-8 flex items-center justify-center"
+      >
+        <span class="material-icons text-xl text-gray-600">arrow_back</span>
+      </button>
+      <h1 class="text-lg font-bold text-gray-900">
+        {{
+          selectedNotification
+            ? selectedNotification.name || selectedNotification.groupName
+            : "Messages"
+        }}
+      </h1>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <button
+        *ngIf="selectedNotification"
+        (click)="toggleThreadInfo()"
+        class="w-8 h-8 flex items-center justify-center"
+      >
+        <span class="material-icons text-xl text-gray-600">info</span>
+      </button>
+      <button
+        *ngIf="!selectedNotification"
+        (click)="showFilters = !showFilters"
+        class="w-8 h-8 flex items-center justify-center"
+      >
+        <span class="material-icons text-xl text-gray-600">filter_list</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       FILTERS BAR (Collapsible)
+       ═══════════════════════════════════════ -->
+  <div
+    *ngIf="!selectedNotification && showFilters"
+    class="bg-white border-b border-gray-200 px-4 py-3 space-y-3"
+  >
+    <!-- Search -->
+    <div class="relative">
+      <input
+        type="text"
+        placeholder="Search threads..."
+        [(ngModel)]="searchTerm"
+        (input)="applyFilters()"
+        class="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+      />
+      <span
+        class="material-icons text-base text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
+        >search</span
+      >
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="flex space-x-2 overflow-x-auto pb-1 scrollbar-none">
+      <button
+        *ngFor="
+          let tab of [
+            { id: 'pending', label: 'Pending' },
+            { id: 'accepted', label: 'Resolved' },
+          ]
+        "
+        (click)="switchTab(tab.id)"
+        [class]="
+          activeTab === tab.id
+            ? 'px-4 py-1.5 text-sm font-medium bg-indigo-50 text-indigo-700 rounded-full'
+            : 'px-4 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-full'
+        "
+      >
+        {{ tab.label }}
+      </button>
+      <button
+        *ngFor="
+          let ft of [
+            { id: 'all', label: 'All' },
+            { id: 'upi', label: 'UPI' },
+            { id: 'bank', label: 'Bank' },
+            { id: 'payout', label: 'Payout' },
+          ]
+        "
+        (click)="changeFundTypeFilter(ft.id)"
+        [class]="
+          fundTypeFilter === ft.id
+            ? 'px-4 py-1.5 text-sm font-medium bg-violet-50 text-violet-700 rounded-full'
+            : 'px-4 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-full'
+        "
+      >
+        {{ ft.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       MAIN CONTENT AREA - FIXED
+       ═══════════════════════════════════════ -->
+  <div class="flex-1 flex flex-col overflow-hidden relative">
+    <!-- Threads List View - YAHI DEFAULT DIKHNA CHAHIYE -->
+    <div
+      *ngIf="!selectedNotification"
+      class="h-full overflow-y-auto"
+      #threadsContainer
+      (scroll)="onThreadsScroll($event)"
+    >
+      <!-- Loading State -->
+      <div
+        *ngIf="loadingThreads && filteredNotifications.length === 0"
+        class="p-4 space-y-3"
+      >
+        <div *ngFor="let i of [1, 2, 3, 4, 5]" class="animate-pulse">
+          <div class="flex items-center space-x-3 p-3 bg-white rounded-xl">
+            <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thread List -->
+      <div class="p-2 space-y-1">
+        <div
+          *ngFor="let notification of filteredNotifications"
+          (click)="selectNotification(notification)"
+          class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-gray-100 active:bg-indigo-50/50 transition-colors cursor-pointer"
+        >
+          <!-- Avatar with unread badge -->
+          <div class="relative">
+            <div
+              class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm"
+              [style.backgroundColor]="
+                getAvatarColor(notification.name || notification.groupName)
+              "
+            >
+              {{ notification.avatar }}
+            </div>
+            <div
+              *ngIf="notification.unread > 0"
+              class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-white flex items-center justify-center"
+            >
+              <span class="text-white text-xs">{{
+                notification.unread > 9 ? "9+" : notification.unread
+              }}</span>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-gray-900 truncate">
+                {{ notification.name || notification.groupName }}
+              </h3>
+              <span class="text-xs text-gray-400">{{ notification.time }}</span>
+            </div>
+            <p class="text-sm text-gray-500 truncate">
+              {{ notification.lastMessage || "No messages yet" }}
+            </p>
+
+            <!-- Status & Type -->
+            <div class="flex items-center space-x-2 mt-1">
+              <span
+                [class]="getStatusBadgeClass(notification.fundType || '')"
+                class="px-2 py-0.5 text-[10px] font-medium rounded-full"
+              >
+                {{ notification.fundType || "General" }}
+              </span>
+              <span
+                [class]="
+                  getStatusColorClass(getStatusFromNotification(notification))
+                "
+                class="px-2 py-0.5 text-[10px] font-medium rounded-full"
+              >
+                {{ getStatusFromNotification(notification) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Load More -->
+      <div *ngIf="loadingMoreThreads" class="flex justify-center py-4">
+        <div class="flex items-center space-x-2">
+          <div
+            class="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"
+          ></div>
+          <span class="text-sm text-gray-500">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div
+        *ngIf="!loadingThreads && filteredNotifications.length === 0"
+        class="flex flex-col items-center justify-center py-16 px-8"
+      >
+        <div
+          class="w-24 h-24 bg-gray-100 rounded-3xl flex items-center justify-center mb-4"
+        >
+          <span class="material-icons text-4xl text-gray-400"
+            >chat_bubble_outline</span
+          >
+        </div>
+        <p class="text-gray-600 font-medium">No conversations found</p>
+        <p class="text-sm text-gray-400 text-center mt-1">
+          Try adjusting your filters
+        </p>
+      </div>
+    </div>
+
+    <!-- Chat View - SIRF TAB DIKHE JAB KOI SELECTED HO -->
+      <div
+  *ngIf="selectedNotification"
+  class="flex-1 flex flex-col bg-white min-h-0 overflow-hidden"
+>
+      <!-- Messages Area -->
+    
+        <div
+    class="flex-1 min-h-0 overflow-y-auto px-3 pt-4 pb-24"
+    #messagesContainer
+    (scroll)="onMessagesScroll($event)"
+  >
+        <!-- Loading Indicator -->
+        <div *ngIf="loadingMessages" class="flex justify-center py-2">
+          <div
+            class="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"
+          ></div>
+        </div>
+
+        <!-- Messages -->
+        <div class="space-y-3">
+          <ng-container
+            *ngFor="let message of selectedNotification.messages; let i = index"
+          >
+            <!-- Date Separator -->
+            <div
+              *ngIf="getMessageDateSeparator(message, i) as dateSep"
+              class="flex items-center justify-center my-4"
+            >
+              <div class="flex-1 h-px bg-gray-200"></div>
+              <span class="mx-3 text-xs font-medium text-gray-400">{{
+                dateSep
+              }}</span>
+              <div class="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            <!-- Message -->
+            <div class="flex" [class.justify-end]="message.isCurrentUser">
+              <!-- Avatar for tps -->
+              <div *ngIf="!message.isCurrentUser" class="flex-shrink-0 mr-2">
+                <div
+                  class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                  [style.backgroundColor]="getAvatarColor(message.senderName)"
+                >
+                  {{ message.senderAvatar }}
+                </div>
+              </div>
+
+              <!-- Message Bubble -->
+              <div class="max-w-[75%]">
+                <!-- Sender Name -->
+                <div
+                  *ngIf="!message.isCurrentUser"
+                  class="flex items-center space-x-2 mb-1 ml-1"
+                >
+                  <span class="text-xs font-medium text-gray-700">{{
+                    message.senderName
+                  }}</span>
+                  <span
+                    *ngIf="message.senderRole"
+                    class="text-[10px] px-1.5 py-0.5 bg-gray-100 rounded-full"
+                  >
+                    {{ getRoleBadgeLabel(message.senderRole) }}
+                  </span>
+                  <span class="text-[10px] text-gray-400">{{
+                    message.time
+                  }}</span>
+                </div>
+
+                <!-- Text Message -->
+                <div
+                  *ngIf="message.type === 'text'"
+                  [class]="
+                    message.isCurrentUser
+                      ? 'bg-indigo-600 text-white rounded-2xl rounded-br-sm'
+                      : 'bg-gray-100 text-gray-800 rounded-2xl rounded-bl-sm'
+                  "
+                  class="px-4 py-2.5 text-sm"
+                >
+                  <p class="whitespace-pre-wrap break-words">
+                    {{ message.text }}
+                  </p>
+                </div>
+
+                <!-- Image Message -->
+                <div
+                  *ngIf="message.type === 'image'"
+                  class="max-w-[250px] rounded-2xl overflow-hidden border border-gray-200 cursor-pointer"
+                  (click)="
+                    openMediaViewer(message.mediaUrl, message.text, 'image')
+                  "
+                >
+                  <img
+                    [src]="message.mediaUrl"
+                    class="w-full h-auto object-cover"
+                    loading="lazy"
+                  />
+                  <div
+                    *ngIf="message.text"
+                    class="p-2 text-xs bg-white border-t border-gray-100"
+                  >
+                    {{ message.text }}
+                  </div>
+                </div>
+
+                <!-- Video Message -->
+                <div
+                  *ngIf="message.type === 'video'"
+                  class="max-w-[250px] rounded-2xl overflow-hidden border border-gray-200"
+                >
+                  <video
+                    [src]="message.mediaUrl"
+                    controls
+                    class="w-full"
+                  ></video>
+                  <div
+                    *ngIf="message.text"
+                    class="p-2 text-xs bg-white border-t border-gray-100"
+                  >
+                    {{ message.text }}
+                  </div>
+                </div>
+
+                <!-- Audio Message -->
+                <div
+                  *ngIf="message.type === 'audio'"
+                  class="p-3 rounded-2xl bg-white border border-gray-200"
+                >
+                  <audio
+                    [src]="message.mediaUrl"
+                    controls
+                    class="w-full h-8"
+                  ></audio>
+                  <p *ngIf="message.text" class="text-xs mt-1 text-gray-600">
+                    {{ message.text }}
+                  </p>
+                </div>
+
+                <!-- File Message -->
+                <div
+                  *ngIf="message.type === 'file'"
+                  class="p-3 rounded-2xl bg-white border border-gray-200 flex items-center space-x-3 cursor-pointer"
+                  (click)="
+                    openMediaViewer(message.mediaUrl, message.text, 'file')
+                  "
+                >
+                  <div
+                    class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center"
+                  >
+                    <span class="material-icons text-xl text-orange-600"
+                      >insert_drive_file</span
+                    >
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium truncate">
+                      {{ message.text || "Attachment" }}
+                    </p>
+                    <p class="text-xs text-gray-400">
+                      {{ getFileExtension(message.mediaUrl) }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Time for current user -->
+                <div
+                  *ngIf="message.isCurrentUser"
+                  class="flex justify-end mt-1 mr-1"
+                >
+                  <span class="text-[10px] text-gray-400">{{
+                    message.time
+                  }}</span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Empty Messages -->
+        <div
+          *ngIf="
+            !loadingMessages &&
+            (!selectedNotification.messages ||
+              selectedNotification.messages.length === 0)
+          "
+          class="flex flex-col items-center justify-center py-16"
+        >
+          <div
+            class="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center mb-3"
+          >
+            <span class="material-icons text-4xl text-indigo-300"
+              >chat_bubble_outline</span
+            >
+          </div>
+          <p class="text-gray-600 font-medium">No messages yet</p>
+          <p class="text-sm text-gray-400">Start the conversation</p>
+        </div>
+      </div>
+
+      <!-- Unified Input Area - FIXED VERSION -->
+        <div
+  class="sticky bottom-0 z-20 px-3 py-3 bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.04)]"
+>
+        <!-- File Preview -->
+        <div
+          *ngIf="selectedUploadFile"
+          class="mb-3 flex items-center space-x-3 bg-gray-50 rounded-xl p-2"
+        >
+          <div class="flex-shrink-0">
+            <div
+              *ngIf="uploadPreviewUrl"
+              class="w-12 h-12 rounded-lg overflow-hidden"
+            >
+              <img
+                [src]="uploadPreviewUrl"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div
+              *ngIf="!uploadPreviewUrl"
+              class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center"
+            >
+              <span class="material-icons text-2xl text-orange-500"
+                >insert_drive_file</span
+              >
+            </div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium truncate">
+              {{ getShortFileName(selectedUploadFile.name) }}
+            </p>
+            <p class="text-xs text-gray-400">
+              {{ formatFileSize(selectedUploadFile.size) }}
+            </p>
+          </div>
+          <button (click)="removeInlineFile()" class="p-1">
+            <span class="material-icons text-base text-gray-400">close</span>
+          </button>
+        </div>
+
+        <!-- Upload Error -->
+        <div
+          *ngIf="uploadError"
+          class="mb-3 flex items-center space-x-2 bg-red-50 rounded-xl p-2"
+        >
+          <span class="material-icons text-base text-red-500"
+            >error_outline</span
+          >
+          <span class="text-xs text-red-600 flex-1">{{ uploadError }}</span>
+          <button (click)="uploadError = null" class="text-red-400">
+            <span class="material-icons text-base">close</span>
+          </button>
+        </div>
+
+        <!-- Selected Question Indicator (for Head/Branch) -->
+        <div
+          *ngIf="isHeadOrBranchRole() && selectedQuestion"
+          class="mb-2 px-3 py-2 bg-indigo-50 rounded-lg flex items-center justify-between"
+        >
+          <div class="flex items-center space-x-2 flex-1 min-w-0">
+            <span class="material-icons text-base text-indigo-600">check</span>
+            <span class="text-sm text-indigo-700 font-medium truncate"
+              >Question: {{ selectedQuestion.messageText }}</span
+            >
+          </div>
+          <button
+            (click)="clearSelectedQuestion()"
+            class="text-indigo-400 hover:text-indigo-600 flex-shrink-0 ml-2"
+          >
+            <span class="material-icons text-base">close</span>
+          </button>
+        </div>
+
+        <!-- Message Input Area - FIXED EMOJI & SEND -->
+        <div
+          class="flex items-end space-x-2 question-dropdown-container relative"
+        >
+          <!-- Questions Dropdown -->
+          <div
+            *ngIf="showQuestionDropDown && filteredQuestions.length > 0"
+            class="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"
+          >
+            <div
+              *ngFor="let q of filteredQuestions"
+              (click)="selectQuestion(q)"
+              class="p-3 border-b border-gray-100 cursor-pointer hover:bg-indigo-50"
+            >
+              <p class="text-sm font-medium">{{ q.messageText }}</p>
+              <p *ngIf="q.category" class="text-xs text-gray-400 mt-1">
+                {{ q.category }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Message Input with proper binding -->
+          <div class="flex-1 relative">
+            <textarea
+              #messageInput
+              rows="1"
+              [(ngModel)]="newMessage"
+              (input)="onMessageInput()"
+              (focus)="showQuestionDropDown = false"
+              (keydown.enter)="sendMessage($event)"
+              placeholder="Type a message..."
+              data-model="message"
+              class="w-full pl-11 pr-4 py-3 text-sm bg-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none max-h-32"
+            ></textarea>
+
+            <!-- Attachment Button -->
+            <label class="absolute left-3 bottom-3 cursor-pointer">
+              <input
+                type="file"
+                class="hidden"
+                (change)="onInlineFileSelected($event)"
+                accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+              />
+              <span
+                class="material-icons text-base text-gray-400 hover:text-indigo-600 transition-colors"
+                >attach_file</span
+              >
+            </label>
+          </div>
+
+          <!-- Emoji Button - FIXED: Proper click handler -->
+          <button
+            type="button"
+            (click)="toggleEmojiPicker(); $event.stopPropagation()"
+            class="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            [class.bg-indigo-50]="showEmojiPicker"
+          >
+            <span class="text-xl">😊</span>
+          </button>
+
+          <!-- Send Button - FIXED: Proper disabled state -->
+          <button
+            type="button"
+            (click)="sendMessage($event)"
+            [disabled]="!canSend()"
+            class="p-3 rounded-full transition-all"
+            [class.bg-indigo-600]="canSend()"
+            [class.bg-gray-300]="!canSend()"
+            [class.text-white]="canSend()"
+            [class.text-gray-500]="!canSend()"
+            [class.cursor-pointer]="canSend()"
+            [class.cursor-not-allowed]="!canSend()"
+          >
+            <span class="material-icons text-base">send</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thread Info Side Sheet -->
+    <div
+      *ngIf="selectedNotification && showThreadInfo"
+      class="fixed inset-0 bg-white z-[100] transition-all duration-300 overflow-hidden flex flex-col"
+      [class.translate-y-0]="showThreadInfo"
+      [class.translate-y-full]="!showThreadInfo"
+    >
+      <!-- Header -->
+      <div
+        class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0"
+      >
+        <h3 class="font-semibold">Thread Info</h3>
+        <button (click)="showThreadInfo = false" class="p-2">
+          <span class="material-icons text-base text-gray-500">close</span>
+        </button>
+      </div>
+
+      <!-- Info Tabs -->
+      <div class="flex border-b border-gray-200 flex-shrink-0">
+        <button
+          *ngFor="let tab of detailTabs"
+          (click)="onDetailTabChange(tab)"
+          [class]="
+            detailTab === tab
+              ? 'flex-1 py-3 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600'
+              : 'flex-1 py-3 text-sm font-medium text-gray-500'
+          "
+        >
+          {{ tab | titlecase }}
+        </button>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="flex-1 overflow-y-auto p-4">
+        <!-- Details Tab -->
+        <div *ngIf="detailTab === 'details'" class="space-y-4">
+          <div
+            *ngIf="!selectedNotification._raw"
+            class="flex justify-center py-8"
+          >
+            <div
+              class="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"
+            ></div>
+          </div>
+
+          <div *ngIf="selectedNotification._raw" class="space-y-4">
+            <!-- Avatar -->
+            <div class="flex flex-col items-center py-4">
+              <div
+                class="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-bold text-white mb-3"
+                [style.backgroundColor]="
+                  getAvatarColor(
+                    selectedNotification.name || selectedNotification.groupName
+                  )
+                "
+              >
+                {{ selectedNotification.avatar }}
+              </div>
+              <h4 class="font-semibold text-center">
+                {{
+                  selectedNotification.name || selectedNotification.groupName
+                }}
+              </h4>
+              <span
+                [class]="
+                  getStatusColorClass(
+                    getStatusFromNotification(selectedNotification)
+                  )
+                "
+                class="mt-2 px-3 py-1 text-xs rounded-full"
+              >
+                {{ getStatusFromNotification(selectedNotification) }}
+              </span>
+            </div>
+
+            <!-- Info Items -->
+            <div class="space-y-3">
+              <!-- Thread ID -->
+              <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-xl">
+                <div
+                  class="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0"
+                >
+                  <span class="material-icons text-base text-gray-600"
+                    >tag</span
+                  >
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs text-gray-400">Thread ID</p>
+                  <p class="text-sm font-mono break-all">
+                    ...{{ selectedNotification.id.slice(-5) || "—" }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Fund Type -->
+              <div
+                *ngIf="selectedNotification.fundType"
+                class="flex items-start space-x-3 p-3 bg-gray-50 rounded-xl"
+              >
+                <div
+                  class="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0"
+                >
+                  <span class="material-icons text-base text-gray-600"
+                    >payments</span
+                  >
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400">Fund Type</p>
+                  <span
+                    [class]="getStatusBadgeClass(selectedNotification.fundType)"
+                    class="px-2 py-1 text-xs rounded-lg inline-block"
+                  >
+                    {{ selectedNotification.fundType }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Amount -->
+              <div
+                *ngIf="selectedNotification._raw?.amount"
+                class="flex items-start space-x-3 p-3 bg-gray-50 rounded-xl"
+              >
+                <div
+                  class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0"
+                >
+                  <span class="material-icons text-base text-emerald-600"
+                    >currency_rupee</span
+                  >
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400">Amount</p>
+                  <p class="text-lg font-bold">
+                    ₹{{ selectedNotification._raw?.amount }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Source -->
+              <div
+                *ngIf="selectedNotification._raw?.source"
+                class="flex items-start space-x-3 p-3 bg-gray-50 rounded-xl"
+              >
+                <div
+                  class="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0"
+                >
+                  <span class="material-icons text-base text-gray-600"
+                    >source</span
+                  >
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400">Source</p>
+                  <p class="text-sm">{{ selectedNotification._raw?.source }}</p>
+                </div>
+              </div>
+
+              <!-- Created -->
+              <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-xl">
+                <div
+                  class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0"
+                >
+                  <span class="material-icons text-base text-blue-600"
+                    >event</span
+                  >
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400">Created</p>
+                  <p class="text-sm">
+                    {{
+                      getFormattedDateTime(selectedNotification._raw?.createdAt)
+                    }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Last Activity -->
+              <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-xl">
+                <div
+                  class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0"
+                >
+                  <span class="material-icons text-base text-amber-600"
+                    >access_time</span
+                  >
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400">Last Activity</p>
+                  <p class="text-sm">
+                    {{
+                      getFormattedDateTime(selectedNotification._raw?.updatedAt)
+                    }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Note -->
+              <div *ngIf="selectedNotification._raw?.note" class="mt-3">
+                <p class="text-xs text-gray-400 mb-2">Note</p>
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                  <p class="text-sm text-amber-900">
+                    {{ selectedNotification._raw?.note }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Members Tab -->
+        <div *ngIf="detailTab === 'members'" class="space-y-2">
+          <div *ngIf="loadingMembers" class="flex justify-center py-8">
+            <div
+              class="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"
+            ></div>
+          </div>
+
+          <div
+            *ngIf="
+              !loadingMembers &&
+              selectedNotification?.participants?.length === 0
+            "
+            class="text-center py-8 text-gray-400"
+          >
+            No members found
+          </div>
+
+          <div
+            *ngFor="let member of selectedNotification.participants"
+            class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl"
+          >
+            <div class="relative">
+              <div
+                class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                [style.backgroundColor]="getAvatarColor(member.userName)"
+              >
+                {{ member.avatar }}
+              </div>
+              <div
+                class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white"
+                [class.bg-emerald-400]="member.online"
+                [class.bg-gray-300]="!member.online"
+              ></div>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center space-x-2">
+                <p class="font-medium">{{ member.userName }}</p>
+                <span
+                  *ngIf="member.role"
+                  class="text-[10px] px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded-full"
+                >
+                  {{ getRoleBadgeLabel(member.role) }}
+                </span>
+              </div>
+              <p class="text-xs text-gray-400">
+                {{ member.online ? "Online" : "Offline" }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attachments Tab -->
+        <div *ngIf="detailTab === 'attachments'">
+          <div
+            *ngIf="mediaGallery.length === 0"
+            class="flex flex-col items-center py-12"
+          >
+            <div
+              class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-3"
+            >
+              <span class="material-icons text-3xl text-gray-400"
+                >attach_file</span
+              >
+            </div>
+            <p class="text-gray-500">No attachments yet</p>
+          </div>
+
+          <!-- Image Grid -->
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <ng-container *ngFor="let media of mediaGallery">
+              <div
+                *ngIf="media.type === 'image'"
+                class="aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer"
+                (click)="
+                  openMediaViewer(media.mediaUrl, media.text, media.type)
+                "
+              >
+                <img
+                  [src]="media.mediaUrl"
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- File List -->
+          <div class="space-y-2">
+            <ng-container *ngFor="let media of mediaGallery">
+              <div
+                *ngIf="media.type !== 'image'"
+                class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl cursor-pointer"
+                (click)="
+                  openMediaViewer(media.mediaUrl, media.text, media.type)
+                "
+              >
+                <div
+                  class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  [class.bg-purple-100]="media.type === 'audio'"
+                  [class.bg-blue-100]="media.type === 'video'"
+                  [class.bg-orange-100]="media.type === 'file'"
+                >
+                  <span class="text-lg">{{ getFileIcon(media.type) }}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium truncate">
+                    {{ media.text || "Attachment" }}
+                  </p>
+                  <p class="text-xs text-gray-400">
+                    {{ getFileExtension(media.mediaUrl) }}
+                  </p>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emoji Picker (Bottom Sheet) - FIXED -->
+  <div
+    *ngIf="showEmojiPicker"
+    class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl z-[100] transform transition-transform duration-300"
+    style="max-height: 400px"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+      <h4 class="font-semibold">Emojis</h4>
+      <button (click)="showEmojiPicker = false" class="p-2">
+        <span class="material-icons text-base text-gray-500">close</span>
+      </button>
+    </div>
+
+    <!-- Categories -->
+    <div class="flex overflow-x-auto p-2 space-x-2 border-b border-gray-200">
+      <button
+        *ngFor="let cat of emojiCategories"
+        (click)="switchEmojiCategory(cat.name)"
+        [class]="
+          activeEmojiCategory === cat.name
+            ? 'px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded-full'
+            : 'px-3 py-1 text-sm bg-gray-100 rounded-full'
+        "
+      >
+        {{ cat.name }}
+      </button>
+    </div>
+
+    <!-- Emoji Grid -->
+    <div class="p-3 overflow-y-auto" style="max-height: 250px">
+      <div class="grid grid-cols-6 gap-2">
+        <button
+          *ngFor="let emoji of emojis"
+          (click)="insertEmoji(emoji)"
+          class="w-10 h-10 flex items-center justify-center text-2xl hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          {{ emoji }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backdrop for overlays - FIXED -->
+  <div
+    *ngIf="showEmojiPicker"
+    class="fixed inset-0 bg-black/50 z-[55]"
+    (click)="closeAllOverlays()"
+  ></div>
+</div>
+
+<!-- Media Viewer -->
+<div *ngIf="showMediaViewer" class="fixed inset-0 z-50 bg-black flex flex-col">
+  <div class="flex items-center justify-between p-4 text-white">
+    <button (click)="closeMediaViewer()" class="p-2">
+      <span class="material-icons text-2xl">close</span>
+    </button>
+    <span class="text-sm truncate flex-1 text-center">{{
+      currentMediaName
+    }}</span>
+    <button
+      (click)="downloadFile(currentMediaUrl, currentMediaName)"
+      class="p-2"
+    >
+      <span class="material-icons text-2xl">file_download</span>
+    </button>
+  </div>
+
+  <div class="flex-1 flex items-center justify-center p-4">
+    <ng-container [ngSwitch]="currentMediaType">
+      <img
+        *ngSwitchCase="'image'"
+        [src]="currentMediaUrl"
+        (error)="currentMediaType = 'file'"
+        class="max-w-full max-h-[90vh] object-contain rounded-lg"
+      />
+      <video
+        *ngSwitchCase="'video'"
+        [src]="currentMediaUrl"
+        controls
+        class="max-w-full max-h-full"
+      ></video>
+      <div *ngSwitchCase="'audio'" class="w-full">
+        <audio [src]="currentMediaUrl" controls class="w-full"></audio>
+      </div>
+      <div *ngSwitchCase="'file'" class="text-white text-center">
+        <div
+          class="w-24 h-24 mx-auto bg-orange-500 rounded-2xl flex items-center justify-center mb-4"
+        >
+          <span class="material-icons text-4xl text-white"
+            >insert_drive_file</span
+          >
+        </div>
+        <p class="text-lg font-medium">{{ currentMediaName }}</p>
+        <p class="text-sm text-gray-400 mt-2">
+          {{ getFileExtension(currentMediaUrl) }} file
+        </p>
+      </div>
+    </ng-container>
+  </div>
+</div>
