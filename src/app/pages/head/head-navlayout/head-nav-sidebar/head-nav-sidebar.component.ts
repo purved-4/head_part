@@ -417,7 +417,7 @@ export class HeadNavSidebarComponent implements OnInit {
   }
 
   openSubmenu(item: MenuItem, isExplicit: boolean = false) {
-    // ❌ Do not open secondary panel on mobile
+    //  Do not open secondary panel on mobile
     if (this.isMobileView) return;
     this.activeSubmenuItem = item;
 
@@ -619,7 +619,18 @@ handleMenuItemClick(item: MenuItem) {
 
     // Desktop behavior
     this.toggleCurrentSubmenu();
+      this.explicitlyOpened = !this.explicitlyOpened;
+
   }
+
+@HostListener('document:click', ['$event'])
+onClickOutside(event: Event) {
+  const target = event.target as HTMLElement;
+
+  if (!target.closest('.profile-dropdown')) {
+    this.explicitlyOpened = false;
+  }
+}
 }
 
 

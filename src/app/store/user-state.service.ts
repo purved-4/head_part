@@ -1,32 +1,51 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable } from "rxjs";
 import { CurrentUser } from "./current-user-model";
+import { SubjectRegistryService } from "../registery/subject-registry.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class UserStateService {
-  private currentUserSubject = new BehaviorSubject<CurrentUser | null>(null);
-  currentUser$ = this.currentUserSubject.asObservable();
+  private readonly USER_KEY = "currentUser";
+  private readonly LOGIN_KEY = "isLoggedIn";
 
-  private isLoggedInSubject = new BehaviorSubject<boolean>(false);
-  isLoggedIn$ = this.isLoggedInSubject.asObservable();
+  constructor(
+    private registry: SubjectRegistryService,
+  ) {
+    this.registry.register(
+      this.USER_KEY,
+      () => new BehaviorSubject<CurrentUser | null>(null),
+      null
+    );
 
-  setCurrentUser(user: CurrentUser | null) {
-    this.currentUserSubject.next(user);
-    this.isLoggedInSubject.next(!!user);
+    this.registry.register(
+      this.LOGIN_KEY,
+      () => new BehaviorSubject<boolean>(false),
+      false
+    );
   }
 
-  getCurrentUser(): Observable<CurrentUser | null> {
-    return this.currentUser$;
+  get currentUser$(): Observable<CurrentUser | null> {
+    return this.registry.getSubject(this.USER_KEY)!;
+  }
+
+  get isLoggedIn$(): Observable<boolean> {
+    return this.registry.getSubject(this.LOGIN_KEY)!;
+  }
+
+  setCurrentUser(user: CurrentUser | null) {
+    this.registry.setValue(this.USER_KEY, user);
+    this.registry.setValue(this.LOGIN_KEY, !!user);
+
   }
 
   get currentUserValue(): CurrentUser | null {
-    return this.currentUserSubject.value;
+    return this.registry.getSubject(this.USER_KEY)?.value ?? null;
   }
 
   getIsLoggedIn(): boolean {
-    return this.currentUserValue !== null;
+    return !!this.currentUserValue;
   }
 
   getUserName(): string | null {
@@ -37,7 +56,7 @@ export class UserStateService {
     return this.currentUserValue?.userId || null;
   }
 
-  getRole(): string | null {
+  getRole(): any {
     const roles = this.currentUserValue?.role;
     if (!roles || roles.length === 0) return null;
     return roles[0]?.name ?? null;

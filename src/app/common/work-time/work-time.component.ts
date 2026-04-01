@@ -69,6 +69,8 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   branchId: any;
   userId: any;
   userRole: any;
+  private readonly DIRECT_LOGOUT_ROLES = ['OWNER', 'MANAGER', 'CHIEF', 'COM_PAR'];
+
 
   constructor(
     private authService: AuthService,
@@ -88,7 +90,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
     // If there's an active pending logout, don't load sessions
     if (this.logoutPendingEvent) {
-      console.log("Pending logout found, skipping session loading");
+      // console.log("Pending logout found, skipping session loading");
       // Listen for storage events from tp tabs
       window.addEventListener("storage", this.onStorageChange.bind(this));
       return;
@@ -128,11 +130,11 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
       try {
         const state: PendingLogoutState = JSON.parse(event.newValue);
         this.logoutPendingEvent = state.event;
-        if (this.isUserRole) {
-          this.startPendingTimer(state.event);
+if (this.isPendingLogoutRole) {
+            this.startPendingTimer(state.event);
         }
       } catch (e) {
-        console.error("Failed to parse pending logout state from storage", e);
+        
       }
     }
   }
@@ -143,6 +145,14 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     return role === "BRANCH" || role === "HEAD";
   }
 
+  get isDirectLogoutRole(): boolean {
+  const role = String(this.userRole || '').toUpperCase();
+  return this.DIRECT_LOGOUT_ROLES.includes(role);
+}
+
+get isPendingLogoutRole(): boolean {
+  return !this.isDirectLogoutRole;
+}
   // ---------- storage helpers ----------
   loadSessions(): void {
     const data = localStorage.getItem(this.SESSIONS_KEY);
@@ -192,7 +202,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
         // Check if the pending timeout has already expired
         if (state.targetTs <= now) {
-          console.log("Pending logout expired, clearing and redirecting");
+          // console.log("Pending logout expired, clearing and redirecting");
           // Timeout expired, clear and redirect
           this.clearPendingLogoutStateOnly();
           this.clearAllSessions();
@@ -202,13 +212,13 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
         // Restore the pending logout state
         this.logoutPendingEvent = state.event;
-        console.log("Restored pending logout event", this.logoutPendingEvent);
+        // console.log("Restored pending logout event", this.logoutPendingEvent);
 
-        if (this.isUserRole) {
-          this.startPendingTimer(state.event);
+if (this.isPendingLogoutRole) {
+            this.startPendingTimer(state.event);
         }
       } catch (e) {
-        console.error("Failed to restore pending logout state", e);
+        
         this.clearPendingLogoutStateOnly();
       }
     }
@@ -224,13 +234,13 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   }
 
   private clearPendingLogoutStateOnly(): void {
-    console.log("Clearing pending logout state from storage");
+    // console.log("Clearing pending logout state from storage");
     localStorage.removeItem(this.PENDING_LOGOUT_KEY);
   }
 
   // ---------- Clear only sessions, not pending logout ----------
   private clearAllSessions(): void {
-    console.log("Clearing sessions and events");
+    // console.log("Clearing sessions and events");
     localStorage.removeItem(this.SESSIONS_KEY);
     localStorage.removeItem(this.EVENTS_KEY);
     this.sessions = [];
@@ -242,7 +252,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
   // ---------- Complete clear (only when logout is confirmed) ----------
   private completeLogout(): void {
-    console.log("Complete logout - clearing everything");
+    // console.log("Complete logout - clearing everything");
     localStorage.removeItem(this.SESSIONS_KEY);
     localStorage.removeItem(this.EVENTS_KEY);
     localStorage.removeItem(this.PENDING_LOGOUT_KEY);
@@ -297,8 +307,8 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     } else if (ev.eventType === "LOGOUT_PENDING") {
       this.logoutPendingEvent = ev;
 
-      if (this.isUserRole) {
-        this.startPendingTimer(ev);
+if (this.isPendingLogoutRole) {
+          this.startPendingTimer(ev);
       } else {
         this.clearAllSessions();
         this.clearPendingLogoutStateOnly();
@@ -348,76 +358,59 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ---------- logout / pending behavior ----------
+  // ---------- logout / pending behavior ---------- 
 clockOutAndStartPending(): void {
-  if (!this.isUserRole) {
-    this.authService.logoutForUserTime();
-    if (this.activeSession && !this.activeSession.clockOut) {
-      this.activeSession.clockOut = Date.now();
-      this.saveSessions();
-    }
-    this.completeLogout();
-    this.router.navigateByUrl("/login");
-    return;
-  }
 
-  if (this.logoutPendingEvent) {
-    console.log("Logout already pending, ignoring duplicate request");
-    return;
-  }
-
-  // Clock out the active session immediately when user clicks logout
+  // Always clock out local session first
   if (this.activeSession && !this.activeSession.clockOut) {
     this.activeSession.clockOut = Date.now();
     this.saveSessions();
   }
 
-  this.authService.logoutForUserTime().subscribe({
-    next: (res: any) => {
-      console.log("Logout response received:", res);
+  // ✅ Direct logout roles → immediate logout
+  if (this.isDirectLogoutRole) {
+    this.authService.logout().subscribe(() => {
+      this.completeLogout();
+window.location.href = '/login';    });
+    return;
+  }
 
+  // ❗ Prevent duplicate pending
+  if (this.logoutPendingEvent) return;
+
+  // ⏳ Pending logout flow
+  this.authService.logout().subscribe({
+    next: (res: any) => {
       const futureTime = res.message;
       const futureTs = futureTime ? Date.parse(futureTime) : NaN;
 
-      console.log("Future timestamp from backend:", futureTs);
-
-      // Only proceed if backend returned a valid timestamp
+      // If backend didn’t send valid time → logout directly
       if (Number.isNaN(futureTs)) {
-        console.error("Backend returned invalid timestamp, logging out immediately");
         this.completeLogout();
-        this.router.navigateByUrl("/login");
-        return;
+window.location.href = '/login';        return;
       }
-
-      const targetTs = futureTs;
-
-      console.log("Target timestamp for logout:", targetTs);
 
       const pendingEvent: UserEvent = {
         eventType: "LOGOUT_PENDING",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date(targetTs).toISOString(),
+        updatedAt: new Date(futureTs).toISOString(),
         processed: false,
         event_id: `local-${Date.now()}`,
         message: futureTime,
       };
 
-      // Save pending logout state to localStorage - THIS PERSISTS
-      this.savePendingLogoutState(pendingEvent, targetTs);
+      this.savePendingLogoutState(pendingEvent, futureTs);
 
-      // Add to events for tracking
       this.events.push(pendingEvent);
       this.saveEvents();
 
-      // Set the pending event and start timer
       this.logoutPendingEvent = pendingEvent;
       this.startPendingTimer(pendingEvent);
-      this.snack.show("Logout Success", res.error.status)
 
+      this.snack.show("Logout scheduled", 200);
     },
-    error: (error:any) => {
-      console.log(error)
-      this.snack.show(error.error.error, error.error.status)
+    error: (err: any) => {
+      this.snack.show(err.error.error, err.error.status);
     },
   });
 }
@@ -441,7 +434,7 @@ clockOutAndStartPending(): void {
       const remainingMs = targetTs - now;
 
       if (remainingMs <= 0) {
-        console.log("Pending logout timer expired");
+        // console.log("Pending logout timer expired");
         this.pendingRemaining = this.formatDuration(0);
         this.stopPendingTimer();
         // Only clear pending logout, navigate to login

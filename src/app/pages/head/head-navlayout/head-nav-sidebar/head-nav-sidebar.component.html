@@ -5,43 +5,37 @@
     <div
       class="primary-sidebar fixed left-0 top-0 h-screen z-50 flex flex-col shadow-sm bg-[var(--color-hover)] overflow-hidden transition-transform duration-300 ease-in-out"
       [ngClass]="{
-        'translate-x-0 w-64 [@media(min-width:800px)]:w-20': isMobileOpen,
-        '-translate-x-full [@media(min-width:800px)]:translate-x-0 [@media(min-width:800px)]:w-20': !isMobileOpen
+        'translate-x-0 w-64 md:w-20': isMobileOpen,
+        '-translate-x-full md:translate-x-0 md:w-20': !isMobileOpen
       }"
     >
       <!-- Mobile Header with Close Button -->
-      <div class="[@media(min-width:800px)]:hidden flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-hover)]">
-        <div class="flex items-center space-x-3">
-          <div
-            class="w-10 h-10 rounded-xl bg-[var(--color-primary)] flex items-center justify-center shadow-md"
-          >
-            <svg
-              class="w-5 h-5 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-              />
-            </svg>
-          </div>
-          <span class="font-semibold text-[var(--color-font)]">Menu</span>
-        </div>
-        <button
-          (click)="closeMobileMenu.emit()"
-          class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[var(--color-hover)]/80 transition-colors duration-200"
-        >
-          <span class="material-symbols-outlined text-[20px]">close</span>
-        </button>
-      </div>
+     <div class="md:hidden flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-hover)]">
+
+  <!-- LEFT -->
+  <div class="flex items-center space-x-3">
+    <div class="w-10 h-10 rounded-xl bg-[var(--color-primary)] flex items-center justify-center shadow-md">
+      <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    </div>
+    <span class="font-semibold text-[var(--color-font)]">Menu</span>
+  </div>
+
+  <!-- RIGHT (ONLY CLOSE BUTTON) -->
+  <button
+    (click)="closeMobileMenu.emit()"
+    class="w-9 h-9 rounded-full flex items-center justify-center bg-white shadow hover:bg-gray-100"
+  >
+    <span class="material-symbols-outlined text-[20px]">close</span>
+  </button>
+
+</div>
 
       <!-- Logo/Brand Area - Desktop only -->
       <div
-        class="brand-section px-4 py-3 border-b border-[var(--color-border)]  hidden [@media(min-width:800px)]:block"
+        class="brand-section px-4 py-3 border-b border-[var(--color-border)]  hidden md:block"
       >
         <div class="logo-container flex flex-col items-center">
           <div
@@ -65,7 +59,7 @@
       </div>
 
       <!-- Navigation Menu -->
-      <!-- <nav class="nav-menu flex-1 py-5 px-2 [@media(min-width:800px)]:px-2 overflow-y-auto overflow-x-hidden">
+      <!-- <nav class="nav-menu flex-1 py-5 px-2 md:px-2 overflow-y-auto overflow-x-hidden">
         <ul class="space-y-1.5">
           <li
             *ngFor="let item of menuItems"
@@ -74,15 +68,15 @@
           >
             <button
               (click)="handleMenuItemClick(item)"
-              class="w-full [@media(min-width:800px)]:w-12 h-12 rounded-xl flex items-center [@media(min-width:800px)]:justify-center justify-start px-3 [@media(min-width:800px)]:px-0 relative transition-all duration-200"
+              class="w-full md:w-12 h-12 rounded-xl flex items-center md:justify-center justify-start px-3 md:px-0 relative transition-all duration-200"
               [ngClass]="{
                 'bg-[var(--color-primary)] text-white shadow-md': isParentActive(item),
                 'bg-white text-[var(--color-muted)] hover:bg-[var(--color-hover)] hover:text-[var(--color-primary)] border border-[var(--color-border)]': !isParentActive(item)
               }"
             >
-              <div class="relative flex items-center [@media(min-width:800px)]:justify-center w-full">
+              <div class="relative flex items-center md:justify-center w-full">
                 <span
-                  class="material-symbols-outlined text-[18px] leading-none mr-3 [@media(min-width:800px)]:mr-0"
+                  class="material-symbols-outlined text-[18px] leading-none mr-3 md:mr-0"
                   [ngClass]="{
                     'text-white': isParentActive(item),
                     'text-[var(--color-muted)]': !isParentActive(item)
@@ -90,14 +84,14 @@
                 >
                   {{ getMenuIcon(item.icon) }}
                 </span>
-                <span class="[@media(min-width:800px)]:hidden text-sm font-medium text-[var(--color-font)]">
+                <span class="md:hidden text-sm font-medium text-[var(--color-font)]">
                   {{ item.label }}
                 </span>
               </div>
             </button>
 
 ]            <div
-              class="hidden [@media(min-width:800px)]:block absolute left-full top-1/2 transform -translate-y-1/2 ml-3 px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
+              class="hidden md:block absolute left-full top-1/2 transform -translate-y-1/2 ml-3 px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
             >
               {{ item.label }}
             </div>
@@ -105,7 +99,7 @@
         </ul>
       </nav> -->
 <!-- Navigation Menu -->
-<nav class="nav-menu flex-1 py-5 px-2 [@media(min-width:800px)]:px-2 overflow-y-auto overflow-x-hidden">  <ul class="space-y-1.5">
+<nav class="nav-menu flex-1 py-5 px-2 md:px-2 overflow-y-auto overflow-x-hidden">  <ul class="space-y-1.5">
     <li
       *ngFor="let item of menuItems"
       class="relative group"
@@ -116,16 +110,16 @@
       <button
         type="button"
         (click)="handleMenuItemClick(item)"
-        class="w-full [@media(min-width:800px)]:w-12 h-12 rounded-xl flex items-center [@media(min-width:800px)]:justify-center justify-start px-3 [@media(min-width:800px)]:px-0 relative transition-all duration-200 cursor-pointer"
+        class="w-full md:w-12 h-12 rounded-xl flex items-center md:justify-center justify-start px-3 md:px-0 relative transition-all duration-200 cursor-pointer"
         [ngClass]="{
           'bg-[var(--color-primary)] text-white shadow-md': isParentActive(item),
           'bg-white text-[var(--color-muted)] hover:bg-[var(--color-hover)] hover:text-[var(--color-primary)] border border-[var(--color-border)]': !isParentActive(item)
         }"
       >
 
-        <div class="relative flex items-center [@media(min-width:800px)]:justify-center w-full">
+        <div class="relative flex items-center md:justify-center w-full">
           <span
-            class="material-symbols-outlined text-[18px] leading-none mr-3 [@media(min-width:800px)]:mr-0"
+            class="material-symbols-outlined text-[18px] leading-none mr-3 md:mr-0"
             [ngClass]="{
               'text-white': isParentActive(item),
               'text-[var(--color-muted)]': !isParentActive(item)
@@ -134,14 +128,14 @@
             {{ getMenuIcon(item.icon) }}
           </span>
           <!-- Label for mobile view -->
-<span class="[@media(min-width:800px)]:hidden text-sm font-medium text-[var(--color-font)]">
+<span class="md:hidden text-sm font-medium text-[var(--color-font)]">
               {{ item.label }}
           </span>
         </div>
       </button>
 
         <!-- ✅ ADD THIS MOBILE DROPDOWN RIGHT HERE -->
-  <div *ngIf="item.expanded && isMobileOpen" class="[@media(min-width:800px)]:hidden pl-10 mt-2 space-y-1">
+  <div *ngIf="item.expanded && isMobileOpen" class="md:hidden pl-10 mt-2 space-y-1">
    
       <div
       *ngFor="let child of item.children"
@@ -159,7 +153,7 @@ class="py-2 px-3 text-sm rounded-lg cursor-pointer transition-colors duration-20
 
       <!-- Desktop tooltip -->
       <div
-        class="hidden [@media(min-width:800px)]:block  absolute left-full top-1/2 transform -translate-y-1/2 ml-3 px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
+        class="hidden md:block  absolute left-full top-1/2 transform -translate-y-1/2 ml-3 px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
       >
         {{ item.label }}
       </div>
@@ -168,9 +162,9 @@ class="py-2 px-3 text-sm rounded-lg cursor-pointer transition-colors duration-20
 </nav>
       <!-- User & Settings -->
       <div class="user-section p-3 border-t border-[var(--color-border)]">
-        <div class="flex [@media(min-width:800px)]:flex-col items-center [@media(min-width:800px)]:space-y-3 space-x-3 [@media(min-width:800px)]:space-x-0">
+        <div class="flex md:flex-col items-center md:space-y-3 space-x-3 md:space-x-0">
           <!-- Mobile User Info -->
-<div class="[@media(min-width:800px)]:hidden flex-1 flex items-center space-x-3">
+<div class="md:hidden flex-1 flex items-center space-x-3">
               <div
               class="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white font-semibold"
             >
@@ -207,7 +201,7 @@ class="py-2 px-3 text-sm rounded-lg cursor-pointer transition-colors duration-20
     <!-- Secondary Panel -->
     <div
       #secondaryPanel
-      class="secondary-panel fixed left-20 top-0 h-screen z-40 transition-all duration-300 ease-out [@media(min-width:800px)]:block"
+      class="secondary-panel fixed left-20 top-0 h-screen z-40 transition-all duration-300 ease-out md:block"
       [ngClass]="{
         'w-80 opacity-100 visible': activeSubmenu,
         'w-0 opacity-0 invisible': !activeSubmenu
@@ -395,7 +389,7 @@ class="py-2 px-3 text-sm rounded-lg cursor-pointer transition-colors duration-20
         </div>
 
         <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <app-user-profile></app-user-profile>
+        <app-user-profile (closeProfile)="isMobileProfileOpen = false"></app-user-profile>
         </div>
 
         <div
@@ -446,8 +440,8 @@ class="py-2 px-3 text-sm rounded-lg cursor-pointer transition-colors duration-20
 
     <!-- Profile Component -->
     <div class="h-full overflow-y-auto">
-      <app-user-profile></app-user-profile>
-    </div>
+<app-user-profile (closeProfile)="isMobileProfileOpen = false"></app-user-profile>   
+ </div>
   </div>
 </div>
 </div>

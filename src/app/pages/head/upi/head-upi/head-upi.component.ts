@@ -1311,7 +1311,7 @@ export class HeadUpiComponent implements OnInit {
 
   // Click handler
   openUpiToggleConfirm(upi: any, event: Event) {
-    event.preventDefault(); // ❌ prevent immediate toggle
+    event.preventDefault(); //  prevent immediate toggle
     this.toggleCandidateUpi = upi;
     this.isToggleConfirmVisible = true;
   }

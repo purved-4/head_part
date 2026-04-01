@@ -199,6 +199,26 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         });
       }
 
+  if (w.fttsTimeStrength) {
+        this.rewards.push({
+          portalId: w.portalId,
+          portalDomain: domain,
+          type: "ftt",
+          timeRanges: Array.isArray(w.fttsTimeStrength)
+            ? w.fttsTimeStrength
+            : w.fttsTimeStrength?.timeRanges || [],
+          amountRanges: w._raw?.fttsAmountRanges || [],
+        });
+      } else if (w._raw?.fttsTimeStrength) {
+        this.rewards.push({
+          portalId: w.portalId,
+          portalDomain: domain,
+          type: "ftt",
+          timeRanges: w._raw?.fttsTimeStrength?.timeRanges || [],
+          amountRanges: w._raw?.ftts_amount_ranges || [],
+        });
+      }
+
       if (w.payoutsTimeStrength) {
         this.payouts.push({
           portalId: w.portalId,
@@ -258,6 +278,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         portalId: w.id ?? w.webId ?? w.portalId ?? null,
         portalDomain:
           w.name ?? w.portalDomain ?? w.domain ?? w._raw?.name ?? "unknown",
+ fttPercentage: w.fttPercentage ?? w.ftt_percentage ??  w.firstTopupPercentage ??  null,
         topupPercentage: w.topupPercentage ?? w.topup_percentage ?? null,
         payoutPercentage: w.payoutPercentage ?? w.payout_percentage ?? null,
         payoutsTimeStrength:
@@ -271,6 +292,12 @@ export class UserProfileComponent implements OnInit, OnDestroy {
           w.topups_time_strength ??
           w.topupTimeStrength ??
           w.topup_time_strength ??
+          null,
+ fttsTimeStrength:
+          w.fttsTimeStrength ??
+          w.ftts_time_strength ??
+          w.fttTimeStrength ??
+          w.ftt_time_strength ??
           null,
         processingTime: processingTime.map((d: any) => ({
           id: d?.id,
@@ -439,6 +466,16 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   closeMobileProfile() {
     this.closeProfile.emit();  // Parent component ko batao ki profile band karo
   }
+
+// Add these properties to your component class
+isNavbarCollapsed = false;
+
+// Add this method to toggle navbar visibility
+toggleNavbar() {
+  this.isNavbarCollapsed = !this.isNavbarCollapsed;
+}
+
+
 }
 
 

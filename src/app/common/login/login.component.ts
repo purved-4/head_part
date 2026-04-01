@@ -5,13 +5,15 @@ import { AuthService } from "../../pages/services/auth.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { UserStateService } from "../../store/user-state.service";
 import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
+import { SubjectRegistryService } from "../../registery/subject-registry.service";
+import { AuthMemoryService } from "../../pages/services/auth-memory.service";
 
 @Component({
   selector: "app-login",
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.css"],
 })
-export class LoginComponent implements OnInit{
+export class LoginComponent implements OnInit {
   loginData = {
     email: "",
     password: "",
@@ -20,35 +22,23 @@ export class LoginComponent implements OnInit{
   showPassword = false;
 
   constructor(
-    private login: AuthService,
+    private authService: AuthService,
     private router: Router,
     private http: HttpClient,
     private snackbarService: SnackbarService,
     private userStateService: UserStateService,
-    private socketConfigService: SocketConfigService
-  ) {}
+    private socketConfigService: SocketConfigService,
+    private memoryService: AuthMemoryService,
+    private subjectService:SubjectRegistryService
+  ) { }
 
- ngOnInit(): void {
-  this.socketConfigService.destroyAll()
-  // this.login.getCurrentUser().subscribe({
-  //   next: (user: any) => {
-  //     if (user && user.role?.length) {
-  //       const role = user.role[0].name.toLowerCase();
-
-  //       document.documentElement.setAttribute("data-role", role);
-
-  //       // this.navigateToRoleHome(role);
-  //     } else {
-  //       // No valid user → destroy sockets
-  //       this.socketConfigService.destroyAll();
-  //     }
-  //   },
-  //   error: (err) => {
-  //     // API failed / not logged in → destroy sockets
-  //     this.socketConfigService.destroyAll();
-  //   }
-  // });
-}
+  ngOnInit(): void {
+    this.socketConfigService.destroyAll()
+    this.memoryService.setAccessToken(null)
+    this.userStateService.setCurrentUser(null)
+    console.log("comming login here");
+    
+  }
 
   formSubmit() {
     if (!this.loginData.email || this.loginData.email.trim() === "") {
@@ -61,30 +51,12 @@ export class LoginComponent implements OnInit{
       return;
     }
 
-    this.login.generateToken(this.loginData).subscribe({
+    this.authService.loginAndLoadUser(this.loginData).subscribe({
       next: (res: any) => {
-        // success true
-        if (res?.success) {
-          this.snackbarService.show(res.message, true, 4000);
-
-          this.login.getCurrentUser().subscribe((user: any) => {
-            const role = user.role[0].name.toLowerCase();
-
-            document.documentElement.setAttribute("data-role", role);
-
-          this.navigateToRoleHome(role)
-          });
-        }
-        // success false but status 200
-        else {
-          const msg = res?.message || res?.error || "Login failed";
-          this.snackbarService.show(msg, false, 5000);
-        }
+        this.navigateToRoleHome(res?.role[0]?.name)
+        this.snackbarService.show(res.message, true, 4000);
       },
-
       error: (err) => {
-        console.log("FULL ERROR:", err);
-
         const msg =
           err?.error?.message ||
           err?.error?.error ||
@@ -104,9 +76,8 @@ export class LoginComponent implements OnInit{
     this.snackbarService.show("Form cleared", "success", 4000);
   }
 
-   private navigateToRoleHome(role: any): void {
+  private navigateToRoleHome(role: any): void {
     const r = (role ?? "").toUpperCase();
-
     switch (r) {
       case "OWNER":
         this.router.navigate(["/owner"]);

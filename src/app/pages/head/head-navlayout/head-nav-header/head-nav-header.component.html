@@ -138,7 +138,7 @@
 
         <app-notification></app-notification>
 
-<div class="relative hidden  [@media(min-width:800px)]:block" #portalContainer>
+<!-- <div class="relative hidden  [@media(min-width:800px)]:block" #portalContainer>
   <button
     (click)="togglePortalPopup()"
     class="mt-2 p-2 rounded-full hover:bg-[var(--color-hover)] transition focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -164,11 +164,11 @@
              border border-gray-200 overflow-visible"
     >
       <div class="p-3">
-        <!-- <app-portal-selector></app-portal-selector> -->
+        <app-portal-selector></app-portal-selector>
       </div>
     </div>
   </div>
-</div>
+</div> -->
 
 
 <!-- Wallet / Limits -->
@@ -255,7 +255,7 @@
             >
               <!-- Scrollable Content -->
               <div class="flex-1 overflow-y-auto">
-                <app-user-profile></app-user-profile>
+<app-user-profile (closeProfile)="closeProfile()"></app-user-profile>
               </div>
             </div>
           </div>

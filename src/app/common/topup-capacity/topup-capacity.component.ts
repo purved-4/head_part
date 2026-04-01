@@ -54,7 +54,7 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
     });
 
     if (!this.entityId || !this.portalId || !this.topupId) {
-      console.warn("❌ Missing params");
+      console.warn(" Missing params");
       return;
     }
 
@@ -86,7 +86,7 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
           this.isLoading = false;
         },
         error: (err) => {
-          console.error("❌ Fetch error", err);
+          console.error(" Fetch error", err);
           this.isLoading = false;
         },
       });
@@ -181,7 +181,7 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
         this.fetchCapacity();
       },
       error: (err: any) => {
-        console.error("❌ Save error", err);
+        console.error(" Save error", err);
         this.isLoading = false;
       },
     });

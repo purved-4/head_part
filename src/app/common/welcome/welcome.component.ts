@@ -9,7 +9,7 @@ import { CurrentUser } from "../../store/current-user-model";
   templateUrl: "./welcome.component.html",
   styleUrls: ["./welcome.component.css"],
 })
-export class WelcomeComponent implements  OnDestroy {
+export class WelcomeComponent implements OnDestroy {
   currentUser$: Observable<CurrentUser | null>;
 
   // Mobile menu
@@ -35,7 +35,6 @@ export class WelcomeComponent implements  OnDestroy {
   username = "";
   password = "";
 
-  // Additional properties from branch login
   chiefId: any;
   autoEnabled: boolean = true;
 
@@ -43,9 +42,8 @@ export class WelcomeComponent implements  OnDestroy {
     private userStateService: UserStateService,
     private chiefAutoService: ChiefManualService,
   ) {
-    this.currentUser$ = this.userStateService.getCurrentUser();
+    this.currentUser$ = this.userStateService.currentUser$;
   }
-
 
   ngOnDestroy() {
     if (this.intervalId) clearInterval(this.intervalId);
@@ -69,6 +67,4 @@ export class WelcomeComponent implements  OnDestroy {
   goToImage(index: number) {
     this.currentIndex = index;
   }
-
- 
 }

@@ -7,6 +7,11 @@ import { UserStateService } from "../../../store/user-state.service";
 import { fileBaseUrl } from "../../services/helper";
 import { HeadService } from "../../services/head.service";
 
+interface Portal {
+  id: string;
+  domain: string;
+}
+
 @Component({
   selector: "app-head-approved-funds",
   templateUrl: "./head-approved-funds.component.html",
@@ -39,21 +44,21 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
   upiPortalFilter = "";
   upiDateFrom = "";
   upiDateTo = "";
-  upiPortals: any[] = [];
+upiPortals: Portal[] = [];
 
   // Bank filters
   bankSearchQuery = "";
   bankPortalFilter = "";
   bankDateFrom = "";
   bankDateTo = "";
-  bankPortals: any[] = [];
+bankPortals: Portal[] = [];
 
   // Payout filters
   payoutSearchQuery = "";
   payoutPortalFilter = "";
   payoutDateFrom = "";
   payoutDateTo = "";
-  payoutPortals: any[] = [];
+payoutPortals: Portal[] = [];
 
   // ========== PAGINATION ==========
   upiPage = 0;
@@ -225,6 +230,7 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
         this.upiPage,
         this.upiPageSize,
         this.upiSearchQuery,
+        
       )
       .pipe(
         catchError((err) => {
@@ -297,12 +303,14 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
     if (!this.branchId) return;
 
     this.fundService
-      .getAllBankFundWithBranchIdPaginated(
+      .getAllBankFundWithEntityAndPortalId(
         this.branchId,
+        this.bankPortalFilter ,
         "ACCEPTED",
         this.bankPage,
         this.bankPageSize,
         this.bankSearchQuery,
+      
       )
       .pipe(
         catchError((err) => {
@@ -401,41 +409,77 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
       });
   }
 
-  loadPortalOptions(): void {
-    if (!this.branchId) return;
+  // loadPortalOptions(): void {
+  //   if (!this.branchId) return;
 
-    this.headServices.getAllHeadsWithPortalsById(this.branchId).subscribe({
-      next: (res: any) => {
-        const source = Array.isArray(res)
-          ? res
-          : Array.isArray(res?.data)
-            ? res.data
-            : [];
+  //   this.headServices.getAllHeadsWithPortalsById(this.branchId).subscribe({
+  //     next: (res: any) => {
+  //       const source = Array.isArray(res)
+  //         ? res
+  //         : Array.isArray(res?.data)
+  //           ? res.data
+  //           : [];
 
-        const portals = Array.from(
-          new Set(
-            source
-              .map((item: any) => String(item?.portalDomain ?? "").trim())
-              .filter((site: string) => site.length > 0),
-          ),
-        );
+  //       const portals = Array.from(
+  //         new Set(
+  //           source
+  //             .map((item: any) => String(item?.portalDomain ?? "").trim())
+  //             .filter((site: string) => site.length > 0),
+  //         ),
+  //       );
 
-        this.upiPortals = [...portals];
-        this.bankPortals = [...portals];
-        this.payoutPortals = [...portals];
+  //       this.upiPortals = [...portals];
+  //       this.bankPortals = [...portals];
+  //       this.payoutPortals = [...portals];
 
-        console.log("Loaded portals:", portals);
-      },
-      error: (err) => {
-        console.error("Failed to load portals", err);
-        this.upiPortals = [];
-        this.bankPortals = [];
-        this.payoutPortals = [];
-      },
-    });
-  }
+  //       console.log("Loaded portals:", portals);
+  //     },
+  //     error: (err) => {
+  //       console.error("Failed to load portals", err);
+  //       this.upiPortals = [];
+  //       this.bankPortals = [];
+  //       this.payoutPortals = [];
+  //     },
+  //   });
+  // }
 
   // Helper to parse various response shapes
+ loadPortalOptions(): void {
+  if (!this.branchId) return;
+
+  this.headServices.getAllHeadsWithPortalsById(this.branchId).subscribe({
+    next: (res: any) => {
+
+      const source = (Array.isArray(res?.data) ? res.data : []) as any[];
+
+      const portals: Portal[] = source
+        .filter((item) => item.portalId && item.portalDomain)
+        .map((item) => ({
+          id: item.portalId,
+          domain: item.portalDomain,
+        }));
+
+      // remove duplicates
+      const uniquePortals: Portal[] = Array.from(
+        new Map(portals.map(p => [p.id, p])).values()
+      );
+
+      this.upiPortals = uniquePortals;
+      this.bankPortals = uniquePortals;
+      this.payoutPortals = uniquePortals;
+
+      console.log("Loaded portals:", uniquePortals);
+    },
+
+    error: (err) => {
+      console.error("Failed to load portals", err);
+      this.upiPortals = [];
+      this.bankPortals = [];
+      this.payoutPortals = [];
+    },
+  });
+}
+  
   private parseResponse(response: any): {
     list: any[];
     total: number;
@@ -549,7 +593,7 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
       // Portal filter
       if (
         this.upiPortalFilter &&
-        item.raw?.portalDomain !== this.upiPortalFilter &&
+        // item.raw?.portalDomain !== this.upiPortalFilter &&
         item.portalId !== this.upiPortalFilter
       ) {
         return false;
@@ -776,23 +820,44 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectPortal(view: "upi" | "bank" | "payout", site: string) {
-    if (view === "upi") {
-      this.upiPortalFilter = site;
-      this.upiPortalDropdownOpen = false;
-      this.upiPage = 0;
-    } else if (view === "bank") {
-      this.bankPortalFilter = site;
-      this.bankPortalDropdownOpen = false;
-      this.bankPage = 0;
-    } else if (view === "payout") {
-      this.payoutPortalFilter = site;
-      this.payoutPortalDropdownOpen = false;
-      this.payoutApprovedPage = 0;
-    }
-  }
+  // selectPortal(view: "upi" | "bank" | "payout", site: string) {
+  //   if (view === "upi") {
+  //     this.upiPortalFilter = site;
+  //     this.upiPortalDropdownOpen = false;
+  //     this.upiPage = 0;
+  //   } else if (view === "bank") {
+  //     this.bankPortalFilter = site;
+  //     this.bankPortalDropdownOpen = false;
+  //     this.bankPage = 0;
+  //   } else if (view === "payout") {
+  //     this.payoutPortalFilter = site;
+  //     this.payoutPortalDropdownOpen = false;
+  //     this.payoutApprovedPage = 0;
+  //   }
+  // }
 
   // ============ FILTER TRIGGERS ============
+selectPortal(view: "upi" | "bank" | "payout", portal: any) {
+  if (view === "upi") {
+    this.upiPortalFilter = portal.id;   
+    this.upiPortalDropdownOpen = false;
+    this.upiPage = 0;
+    this.fetchUpiTopups();
+  } 
+  else if (view === "bank") {
+    this.bankPortalFilter = portal.id;  
+    this.bankPortalDropdownOpen = false;
+    this.bankPage = 0;
+    this.fetchBankTopups();
+  } 
+  else if (view === "payout") {
+    this.payoutPortalFilter = portal.id; 
+    this.payoutPortalDropdownOpen = false;
+    this.payoutApprovedPage = 0;
+    this.fetchApprovedPayouts();
+  }
+}
+  
   applyUpiFilters() {
     this.upiPage = 0;
   }
@@ -1054,4 +1119,11 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
       this.routeSub = null;
     }
   }
+
+  getPortalName(portalId: string, portals: Portal[]): string {
+  if (!portalId) return "All Portals";
+
+  const found = portals.find(p => p.id === portalId);
+  return found ? found.domain : "All Portals";
+}
 }

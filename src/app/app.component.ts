@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from "@angular/core";
+import { Component, Inject, OnInit, PLATFORM_ID } from "@angular/core";
 import { isPlatformBrowser } from "@angular/common";
 import { AuthService } from "./pages/services/auth.service";
 import { UserStateService } from "./store/user-state.service";
@@ -22,23 +22,37 @@ export class AppComponent implements OnInit {
     private userStateService: UserStateService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router,
-    private socketConfigService: SocketConfigService,
+    private socketConfigService: SocketConfigService
   ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.initializeApp();
+
+      this.userStateService.currentUser$.subscribe((user) => {
+        console.log(user);
+        
+        const role = user?.role?.[0]?.name || null;
+
+        if (role) {
+          const normalizedRole = role.toLowerCase();
+          document.documentElement.setAttribute("data-role", normalizedRole);
+
+          this.socketConfigService.connect();
+        } else {
+          document.documentElement.removeAttribute("data-role");
+
+          this.socketConfigService.destroyAll();
+        }
+      });
     }
   }
-//   ngOnDestroy() {
-//   this.socketConfigService.destroyAll();
-// }
 
   private initializeApp(): void {
     const currentUrl = window.location.pathname;
 
     const isPublicRoute = this.publicRoutes.some((route) =>
-      currentUrl.startsWith(route),
+      currentUrl.startsWith(route)
     );
 
     if (isPublicRoute) return;
@@ -49,23 +63,16 @@ export class AppComponent implements OnInit {
 
         if (this.userStateService.getIsLoggedIn()) {
           const role = this.userStateService.getRole();
-          const normalizedRole = (role ?? "").toLowerCase();
 
-          // ✅ Set role attribute for layout styling
-          document.documentElement.setAttribute("data-role", normalizedRole);
-
-          // ✅ Redirect ONLY if user is on root "/"
-          if (currentUrl === "/") {
+          if (currentUrl === "/" || currentUrl === "/login") {
             this.navigateToRoleHome(role);
           }
 
-          // ✅ Connect socket after login
-          this.socketConfigService.connect();
         }
       },
       error: () => {
         this.userStateService.setCurrentUser(null);
-        this.socketConfigService.destroyAll()
+
         this.router.navigate(["/"]);
       },
     });
@@ -97,6 +104,4 @@ export class AppComponent implements OnInit {
         this.router.navigate(["/"]);
     }
   }
-
-  
 }
