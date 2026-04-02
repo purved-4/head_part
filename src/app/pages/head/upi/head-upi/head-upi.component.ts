@@ -698,15 +698,16 @@ export class HeadUpiComponent implements OnInit {
       this.snack.show("Please generate QR code first.", false);
       return;
     }
-    const validRanges = this.capacityRanges.filter(
-      (r) =>
-        r.minRange != null &&
-        r.maxRange != null &&
-        r.quantity != null &&
-        r.minRange > 0 &&
-        r.maxRange > 0 &&
-        r.quantity > 0,
-    );
+    // const validRanges = this.capacityRanges.filter(
+    //   (r) =>
+    //     r.minRange != null &&
+    //     r.maxRange != null &&
+    //     r.quantity != null &&
+    //     r.minRange > 0 &&
+    //     r.maxRange > 0 &&
+    //     r.quantity > 0,
+    // );
+    const validRanges = this.capacityRanges;
 
     const payload = {
       portal: selectedPortal.portalId,
@@ -719,11 +720,17 @@ export class HeadUpiComponent implements OnInit {
       userId: this.userId,
       active: true,
       createdAt: new Date().toISOString(),
+      // ranges: validRanges.map((r) => ({
+      //   minRange: Number(r.minRange),
+      //   maxRange: Number(r.maxRange),
+      //   quantity: Number(r.quantity), // User ne jo quantity di hai wahi bhejo
+      // })),
+
       ranges: validRanges.map((r) => ({
-        minRange: Number(r.minRange),
-        maxRange: Number(r.maxRange),
-        quantity: Number(r.quantity), // User ne jo quantity di hai wahi bhejo
-      })),
+  minRange: r.minRange ?? null,
+  maxRange: r.maxRange ?? null,
+  quantity: r.quantity ?? null,
+}))
     };
     console.log(payload);
 
@@ -754,7 +761,12 @@ export class HeadUpiComponent implements OnInit {
       error: (error: any) => {
         console.error("Error adding UPI:", error);
         this.isAddingUpi = false;
-        this.snack.show(
+
+          const errorMsg =
+    error?.error?.message ||  
+    error?.error?.error ||    
+    "Failed to add UPI";
+        this.snack.show(errorMsg ||
           "Failed to add UPI. Please check your connection and try again.",
           false,
         );
@@ -1180,7 +1192,7 @@ export class HeadUpiComponent implements OnInit {
 
   //   const id = this.editingUpi.id;
 
-  //   console.log("SENDING ID 👉", id);
+  //   console.log("SENDING ID ", id);
 
   //   this.upiService.setLimitTime(id, payload).subscribe({
   //     next: () => {
@@ -1215,7 +1227,7 @@ export class HeadUpiComponent implements OnInit {
 
     const id = this.editingUpi.id;
 
-    console.log("SENDING ID 👉", id);
+    console.log("SENDING ID ", id);
 
     this.upiService.setLimitTime(id, payload).subscribe({
       next: () => {
@@ -1245,8 +1257,8 @@ export class HeadUpiComponent implements OnInit {
     const value = Number(event.target.value);
     this.capacityRanges[index].maxRange = isNaN(value) ? null : value;
 
-    // 🔥 always re-chain after change
-    this.recalculateRanges();
+ 
+    // this.recalculateRanges();
   }
   updateQuantity(index: number, event: any) {
     const value = Number(event.target.value);
@@ -1256,8 +1268,14 @@ export class HeadUpiComponent implements OnInit {
   addRange() {
     const last = this.capacityRanges[this.capacityRanges.length - 1];
 
-    this.capacityRanges.push({
-      minRange: last?.maxRange || null,
+    // this.capacityRanges.push({
+    //   minRange: last?.maxRange || null,
+    //   maxRange: null,
+    //   quantity: null,
+    // });
+
+      this.capacityRanges.push({
+      minRange: null,
       maxRange: null,
       quantity: null,
     });
@@ -1265,18 +1283,18 @@ export class HeadUpiComponent implements OnInit {
 
   removeRange(index: number) {
     this.capacityRanges.splice(index, 1);
-    this.recalculateRanges();
+    // this.recalculateRanges();
   }
 
   recalculateRanges() {
-    for (let i = 1; i < this.capacityRanges.length; i++) {
-      const prev = this.capacityRanges[i - 1];
-      const current = this.capacityRanges[i];
+    // for (let i = 1; i < this.capacityRanges.length; i++) {
+    //   const prev = this.capacityRanges[i - 1];
+    //   const current = this.capacityRanges[i];
 
-      if (prev?.maxRange != null) {
-        current.minRange = prev.maxRange;
-      }
-    }
+    //   if (prev?.maxRange != null) {
+    //     current.minRange = prev.maxRange;
+    //   }
+    // }
   }
 
   selectedId!: string;

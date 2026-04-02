@@ -778,18 +778,18 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const invalid = this.capacityRanges.some(
-      (r) =>
-        r.minRange === null ||
-        r.maxRange === null ||
-        r.quantity === null ||
-        r.maxRange <= r.minRange,
-    );
+const invalid = this.capacityRanges.some(
+  (r) =>
+    r.minRange === null ||
+    r.maxRange === null ||
+    r.quantity === null ||
+    Number(r.maxRange) <= Number(r.minRange)
+);
 
-    if (invalid) {
-      this.snack.show("Please enter valid capacity ranges", false);
-      return;
-    }
+if (invalid) {
+  this.snack.show("Max range should be greater than min range", false);
+  return;
+}
 
     this.isAdding = true;
 
@@ -1194,7 +1194,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
 
   //   const id = this.editingAccount.id;
 
-  //   console.log("SENDING ID 👉", id);
+  //   console.log("SENDING ID ", id);
 
   //   this.bankService.setLimitTime(id, payload).subscribe({
   //     next: () => {
@@ -1229,7 +1229,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
 
     const id = this.editingAccount.id;
 
-    console.log("SENDING ID 👉", id);
+    console.log("SENDING ID ", id);
 
     this.bankService.setLimitTime(id, payload).subscribe({
       next: () => {
@@ -1256,11 +1256,16 @@ export class HeadBankComponent implements OnInit, OnDestroy {
   addRange() {
     const last = this.capacityRanges[this.capacityRanges.length - 1];
 
+    // if (
+    //   last.maxRange === null ||
+    //   last.maxRange === undefined ||
+    //   last.quantity === null
+    // )
     if (
-      last.maxRange === null ||
-      last.maxRange === undefined ||
-      last.quantity === null
-    ) {
+  last.minRange === null ||
+  last.maxRange === null ||
+  last.quantity === null
+) {
       this.snack.show("Please fill 'To' and Quantity first", false);
       return;
     }
@@ -1271,51 +1276,55 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // this.capacityRanges.push({
+    //   minRange: last.maxRange,
+    //   maxRange: null,
+    //   quantity: null,
+    // });
     this.capacityRanges.push({
-      minRange: last.maxRange,
-      maxRange: null,
-      quantity: null,
-    });
+  minRange: null,
+  maxRange: null,
+  quantity: null,
+});
   }
 
   removeRange(index: number) {
     this.capacityRanges.splice(index, 1);
 
-    // 🔥 FIX: re-chain all ranges
-    this.recalculateRanges();
+    // this.recalculateRanges();
   }
 
   recalculateRanges() {
-    for (let i = 1; i < this.capacityRanges.length; i++) {
-      const prev = this.capacityRanges[i - 1];
-      const current = this.capacityRanges[i];
+    // for (let i = 1; i < this.capacityRanges.length; i++) {
+    //   const prev = this.capacityRanges[i - 1];
+    //   const current = this.capacityRanges[i];
 
-      current.minRange = prev.maxRange;
-    }
+    //   current.minRange = prev.maxRange;
+    // }
   }
 
-  onRangeChange(index: number) {
-    const current = this.capacityRanges[index];
+  // onRangeChange(index: number) {
+  //   const current = this.capacityRanges[index];
 
-    // 🔥 FORCE NUMBER
-    current.maxRange =
-      current.maxRange !== null ? Number(current.maxRange) : null;
-    current.minRange =
-      current.minRange !== null ? Number(current.minRange) : null;
+    
+  //   current.maxRange =
+  //     current.maxRange !== null ? Number(current.maxRange) : null;
+  //   current.minRange =
+  //     current.minRange !== null ? Number(current.minRange) : null;
 
-    if (
-      current.maxRange &&
-      current.minRange &&
-      current.maxRange <= current.minRange
-    ) {
-      current.maxRange = null;
-      return;
-    }
+  //   if (
+  //     current.maxRange &&
+  //     current.minRange &&
+  //     current.maxRange <= current.minRange
+  //   ) {
+  //     current.maxRange = null;
+  //     return;
+  //   }
 
-    if (this.capacityRanges[index + 1]) {
-      this.capacityRanges[index + 1].minRange = current.maxRange;
-    }
-  }
+  //   if (this.capacityRanges[index + 1]) {
+  //     this.capacityRanges[index + 1].minRange = current.maxRange;
+  //   }
+  // }
 
   updateFrom(index: number, event: any) {
     const value = Number(event.target.value);
@@ -1326,8 +1335,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     const value = Number(event.target.value);
     this.capacityRanges[index].maxRange = isNaN(value) ? null : value;
 
-    // 🔥 always re-chain after change
-    this.recalculateRanges();
+    // this.recalculateRanges();
   }
 
   updateQuantity(index: number, event: any) {
@@ -1364,7 +1372,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
             quantity: r.quantity,
           }));
 
-          console.log("CAPACITY 👉", this.capacityRanges);
+          console.log("CAPACITY ", this.capacityRanges);
         },
         error: () => {
           this.isLoadingCapacity = false;
@@ -1407,7 +1415,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       })),
     };
 
-    console.log("PAYLOAD 👉", payload);
+    console.log("PAYLOAD ", payload);
 
     this.bankService.addTopupCapacity(payload).subscribe({
       next: () => {

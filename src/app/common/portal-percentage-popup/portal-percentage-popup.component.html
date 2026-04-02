@@ -1,0 +1,47 @@
+<div *ngIf="visible" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+  <div class="bg-white rounded-lg shadow-lg p-4 w-64 relative">
+
+    <!-- Close -->
+    <button
+      (click)="close()"
+      class="absolute top-2 right-2 text-gray-500 hover:text-red-500"
+    >
+      ✕
+    </button>
+
+    <!-- Title -->
+    <h3 class="text-sm font-semibold mb-3">
+      {{ portal?.name || portal?.domain }}
+    </h3>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-xs text-gray-500 text-center py-4">
+      Loading...
+    </div>
+
+    <!-- Data -->
+    <div *ngIf="!loading && portalDetails" class="space-y-2 text-xs">
+      <div class="flex justify-between">
+        <span>FTT</span>
+        <span class="font-medium">
+          {{ portalDetails.firstTopupPercentage || 0 }}%
+        </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span>Topup</span>
+        <span class="font-medium">
+          {{ portalDetails.topupPercentage || 0 }}%
+        </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span>Payout</span>
+        <span class="font-medium">
+          {{ portalDetails.payoutPercentage || 0 }}%
+        </span>
+      </div>
+    </div>
+
+  </div>
+</div>

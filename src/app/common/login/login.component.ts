@@ -54,7 +54,11 @@ export class LoginComponent implements OnInit {
     this.authService.loginAndLoadUser(this.loginData).subscribe({
       next: (res: any) => {
         this.navigateToRoleHome(res?.role[0]?.name)
-        this.snackbarService.show(res.message, true, 4000);
+          const msg =
+          res?.response?.message ||
+          res?.message ||
+          "Login Successfully";
+        this.snackbarService.show(msg, true, 4000);
       },
       error: (err) => {
         const msg =
@@ -63,7 +67,7 @@ export class LoginComponent implements OnInit {
           err?.message ||
           "Server error";
 
-        this.snackbarService.show(msg, false, 5000);
+        this.snackbarService.show(msg || "Failed", false, 5000);
       },
     });
   }

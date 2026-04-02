@@ -575,32 +575,58 @@
             </div>
           </td> -->
 <td class="px-4 py-3 whitespace-nowrap">
-  <div class="flex items-center gap-2">
-    <span
-      class="material-icons text-sm"
-      [ngClass]="
-        account.limitTime && isFutureLimitTime(account.limitTime)
-          ? 'text-green-500'
-          : 'text-red-500'
-      "
-    >
-      schedule
-    </span>
+  <div class="flex items-center justify-between gap-2">
+    
+    <!-- LEFT: ICON + TIME -->
+    <div class="flex items-center gap-2">
+      <span
+        class="material-icons text-sm"
+        [ngClass]="
+          account.limitTime && isFutureLimitTime(account.limitTime)
+            ? 'text-green-500'
+            : 'text-red-500'
+        "
+      >
+        schedule
+      </span>
 
-    <span
-      class="text-xs font-medium"
-      [ngClass]="
-        account.limitTime && isFutureLimitTime(account.limitTime)
-          ? 'text-green-600'
-          : 'text-red-500'
-      "
-    >
-      {{
-        account.limitTime
-          ? (account.limitTime | date: "short")
-          : "Not Set"
-      }}
-    </span>
+      <span
+        class="text-xs font-medium"
+        [ngClass]="
+          account.limitTime && isFutureLimitTime(account.limitTime)
+            ? 'text-green-600'
+            : 'text-red-500'
+        "
+      >
+        {{
+          account.limitTime
+            ? (account.limitTime | date: "short")
+            : "Not Set"
+        }}
+      </span>
+    </div>
+
+    <!-- RIGHT: ICON BUTTON WITH HOVER TEXT -->
+    <div class="relative group">
+      <button
+        (click)="openLimitModal(account)"
+        class="p-1.5 rounded hover:bg-[var(--color-hover)]"
+      >
+      <span
+                    class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-sm"
+                  >
+                    calendar_clock
+                  </span>
+      </button>
+
+      <!-- Hover Tooltip -->
+      <div
+        class="absolute right-0 bottom-full mb-1 px-2 py-1 text-[10px] bg-gray-900 text-white rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none"
+      >
+        Set Limit Time
+      </div>
+    </div>
+
   </div>
 </td>
 
@@ -668,13 +694,13 @@
         Delete
       </button>
 
-      <button
+      <!-- <button
         (click)="openLimitModal(account); activeActionDropdown = null"
         class="w-full flex items-center px-3 py-2 text-xs text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 transition-colors"
       >
         <span class="material-icons text-base mr-2">schedule</span>
         <span>Set Limit Time</span>
-      </button>
+      </button> -->
 
       <button
         (click)="openCapacity(account, 'BANK'); activeActionDropdown = null"
@@ -1500,7 +1526,7 @@
               <input
                 type="number"
                 [value]="range.minRange"
-                [readonly]="i !== 0"
+             
                 (input)="updateFrom(i, $event)"
                 class="w-full px-3 py-2 border rounded-lg text-sm"
                 placeholder="From"

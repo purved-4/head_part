@@ -31,8 +31,9 @@ export class AddBranchComponent implements OnInit{
   showDropdown = false;
   availableSearchTerm: string = "";
   selectedSearchTerm: string = "";
-
-
+currentBranchId: string = '';
+selectedPortalForPopup: any = null;
+showPopup: boolean = false;
 countryCodes = COUNTRY_CODES;
 selectedCountry = this.countryCodes.find(c => c.code === 'IN') || this.countryCodes[0];
   constructor(
@@ -409,5 +410,14 @@ const fullMobile = this.selectedCountry.dialCode + mobileNumber;
       this.selectedSearchTerm = value;
     }
   }
+
+openPopup(portal: any) {
+  this.selectedPortalForPopup = portal;
+
+  // ✅ IMPORTANT: pass correct branchId
+  this.currentBranchId = this.currentUserId as string;
+
+  this.showPopup = true;
+}
 }
 

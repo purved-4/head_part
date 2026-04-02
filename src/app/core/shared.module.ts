@@ -31,6 +31,7 @@ import { RecycleBankComponent } from "../common/recycle-bank/recycle-bank.compon
 import { TopupCapacityComponent } from "../common/topup-capacity/topup-capacity.component";
 // import { AcceptRejectChatComponent } from "../pages/comPart/accept-reject-chat/accept-reject-chat.component";
 import { PlaceholderPipe } from "../pipes/placeholder.pipe";
+import { PortalPercentagePopupComponent } from "../common/portal-percentage-popup/portal-percentage-popup.component";
 
 // shared.module.ts
 @NgModule({
@@ -62,7 +63,8 @@ import { PlaceholderPipe } from "../pipes/placeholder.pipe";
     RecycleBankComponent,
     RecycleUpiComponent,
     TopupCapacityComponent,
-    PlaceholderPipe
+    PlaceholderPipe,
+    PortalPercentagePopupComponent
   ],
   exports: [
     WebhookDataComponent,
@@ -91,7 +93,8 @@ import { PlaceholderPipe } from "../pipes/placeholder.pipe";
     RecycleBankComponent,
     RecycleUpiComponent,
     TopupCapacityComponent,
-    PlaceholderPipe
+    PlaceholderPipe,
+    PortalPercentagePopupComponent
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeComponent],
 })

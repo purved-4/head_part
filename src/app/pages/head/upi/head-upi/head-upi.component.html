@@ -217,13 +217,12 @@
       >
         Max Limit (₹):
       </label>
-      <input
-        type="number"
-        [(ngModel)]="maxLimit"
-        (ngModelChange)="onFilterChange()"
-        placeholder="e.g. 50000"
-        min="0"
-        step="1"
+     <input
+  type="number"
+  [(ngModel)]="maxLimit"
+  (ngModelChange)="onFilterChange()"
+  placeholder="e.g. 50000"
+  step="any"
         class="w-40 sm:w-40 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
       />
       <!-- <span class="text-xs text-[var(--color-muted)]">
@@ -280,8 +279,7 @@
                   [(ngModel)]="transactionMinAmount"
                   (ngModelChange)="onFilterChange()"
                   placeholder="Min ₹"
-                  min="0"
-                  step="1"
+                step="any"
                   class="flex-1 sm:flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-bg)] transition-colors duration-200 text-sm"
                 />
                 <!-- <span class="text-[var(--color-muted)]">to</span> -->
@@ -293,8 +291,7 @@
                   [(ngModel)]="transactionMaxAmount"
                   (ngModelChange)="onFilterChange()"
                   placeholder="Max ₹"
-                  min="0"
-                  step="1"
+                 step="any"
                   class="flex-1 sm:flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-bg)] transition-colors duration-200 text-sm"
                 />
               </div>
@@ -573,31 +570,57 @@
               >₹{{ upi.limitAmount || "0" }}</span
             >
           </td>
-            <td class="px-4 py-4 whitespace-nowrap">
-      <div class="flex items-center gap-2">
-        <span
-          class="material-icons text-[18px]"
-          [ngClass]="
-            upi.limitTime && isFutureLimitTime(upi.limitTime)
-              ? 'text-green-500'
-              : 'text-red-500'
-          "
-        >
-          schedule
-        </span>
+         <td class="px-4 py-4 whitespace-nowrap">
+  <div class="flex items-center justify-between gap-2">
+    
+    <!-- LEFT: ICON + TIME -->
+    <div class="flex items-center gap-2">
+      <span
+        class="material-icons text-[18px]"
+        [ngClass]="
+          upi.limitTime && isFutureLimitTime(upi.limitTime)
+            ? 'text-green-500'
+            : 'text-red-500'
+        "
+      >
+        schedule
+      </span>
 
-        <span
-          class="text-sm font-semibold"
-          [ngClass]="
-            upi.limitTime && isFutureLimitTime(upi.limitTime)
-              ? 'text-green-600'
-              : 'text-red-500'
-          "
-        >
-          {{ upi.limitTime ? (upi.limitTime | date: "short") : "Not Set" }}
-        </span>
+      <span
+        class="text-sm font-semibold"
+        [ngClass]="
+          upi.limitTime && isFutureLimitTime(upi.limitTime)
+            ? 'text-green-600'
+            : 'text-red-500'
+        "
+      >
+        {{ upi.limitTime ? (upi.limitTime | date: "short") : "Not Set" }}
+      </span>
+    </div>
+
+    <!-- RIGHT: ICON BUTTON WITH HOVER TEXT -->
+    <div class="relative group">
+      <button
+        (click)="openLimitModal(upi)"
+        class="p-1.5 rounded hover:bg-[var(--color-hover)]"
+      >
+       <span
+                    class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-sm"
+                  >
+                    calendar_clock
+                  </span>
+      </button>
+
+      <!-- Tooltip -->
+      <div
+        class="absolute right-0 bottom-full mb-1 px-2 py-1 text-[10px] bg-gray-900 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
+      >
+        Set Limit Time
       </div>
-    </td>
+    </div>
+
+  </div>
+</td>
           <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center">
               <div
@@ -678,13 +701,13 @@
                   <span class="material-icons">edit</span>
                   <span>Edit</span>
                 </button>
-                <button
+                <!-- <button
                   (click)="openLimitModal(upi); activeDropdownUpiId = null"
                   class="w-full px-4 py-3 text-left text-sm hover:bg-[var(--color-hover)] flex items-center gap-3"
                 >
                   <span class="material-icons">schedule</span>
                   <span>Set Limit Time</span>
-                </button>
+                </button> -->
                 <button
                   (click)="openCapacity(upi, 'UPI')"
                   class="w-full px-4 py-3 text-left text-sm hover:bg-[var(--color-hover)] flex items-center gap-3"
@@ -1278,8 +1301,7 @@
                 <input
                   formControlName="limitAmount"
                   type="number"
-                  min="1"
-                  step="1"
+                 step="any"
                   class="pl-8 w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
                   placeholder="Limit"
                 />
@@ -1310,7 +1332,7 @@
               <input
                 type="number"
                 [value]="range.minRange"
-                [readonly]="i !== 0"
+               
                 (input)="updateFrom(i, $event)"
                 class="w-full px-3 py-2 border rounded-lg text-sm"
                 placeholder="From"
@@ -1553,8 +1575,7 @@
                   type="number"
                   [(ngModel)]="updateForm.limitAmount"
                   name="limitAmount"
-                  min="1"
-                  step="1"
+                 step="any"
                   class="pl-8 w-full px-3 py-2 border border-[var(--color-border)] rounded-lg"
                   placeholder="Limit"
                 />
