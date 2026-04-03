@@ -15,10 +15,10 @@ import { UpiService } from "../../pages/services/upi.service";
   styleUrls: ["./topup-capacity.component.css"],
 })
 export class TopupCapacityComponent implements OnChanges, OnInit {
-  // 🔥 CONTROL
+  //  CONTROL
   @Input() show: boolean = false;
 
-  // 🔥 API PARAMS (IMPORTANT)
+  //  API PARAMS (IMPORTANT)
   @Input() entityId!: string;
   @Input() entityType!: string;
   @Input() portalId!: string;
@@ -27,8 +27,9 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
 
   @Output() close = new EventEmitter<void>();
 
-  // 🔥 STATE
+  //  STATE
   capacityRanges: any[] = [];
+  limitAmount: number | null = null;
   isLoading: boolean = false;
   isEditing: boolean = false;
 
@@ -45,7 +46,7 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
 
   // ================= FETCH =================
   fetchCapacity() {
-    console.log("🔥 INPUTS:", {
+    console.log(" INPUTS:", {
       entityId: this.entityId,
       portalId: this.portalId,
       topupId: this.topupId,
@@ -54,7 +55,6 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
     });
 
     if (!this.entityId || !this.portalId || !this.topupId) {
-      console.warn(" Missing params");
       return;
     }
 
@@ -70,23 +70,14 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
       )
       .subscribe({
         next: (res: any) => {
-          console.log("🔥 API RESPONSE:", res);
 
-          // ✅ FIX (IMPORTANT)
-          if (Array.isArray(res)) {
-            this.capacityRanges = res;
-          } else if (res?.data && Array.isArray(res.data)) {
-            this.capacityRanges = Array.isArray(res) ? res : res?.data || [];
-          } else {
-            this.capacityRanges = [];
-          }
+            this.capacityRanges = res.capacities || [];
 
-          console.log("✅ UI DATA:", this.capacityRanges);
+          this.limitAmount = res.limitAmount || null;
 
           this.isLoading = false;
         },
         error: (err) => {
-          console.error(" Fetch error", err);
           this.isLoading = false;
         },
       });
@@ -168,8 +159,6 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
       })),
     };
 
-    console.log("🚀 SAVE PAYLOAD:", payload);
-
     this.isLoading = true;
 
     this.upiService.addTopupCapacity(payload).subscribe({
@@ -177,11 +166,10 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
         this.isLoading = false;
         this.isEditing = false;
 
-        // 🔥 refresh after save
+        //  refresh after save
         this.fetchCapacity();
       },
       error: (err: any) => {
-        console.error(" Save error", err);
         this.isLoading = false;
       },
     });

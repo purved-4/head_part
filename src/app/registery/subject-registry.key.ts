@@ -1,0 +1,13 @@
+export const ACCESS_TOKEN_KEY = "accessToken"
+export const CURRENT_USER_KEY = "userKey"
+export const IS_LOGIN_KEY = "isLoggedIn"
+export const SOCKET_PENDING_DATA_KEY = "socket.pendingData";
+export const SOCKET_THREADS_KEY = "socket.threads";
+export const SOCKET_NOTIFICATION_KEY = "socket.notification";
+export const SOCKET_THREADS_USER_KEY = "socket.threadsUser";
+export const SOCKET_MESSAGE_PAGE_KEY = "socket.messagePage";
+export const SOCKET_NEW_MESSAGE_KEY = "socket.newMessage";
+export const SOCKET_LATEST_BALANCE_KEY = "socket.latestBalance";
+export const SOCKET_BANK_KEY = "socket.bank";
+export const SOCKET_UPI_KEY = "socket.upi"
+export const BALANCE_SHARING_KEY = "socket.upi"

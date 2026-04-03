@@ -31,6 +31,7 @@ import { fileBaseUrl } from "../../services/helper";
 //   PortalInfo,
 // } from "../../services/portal-sharing.service";
 import { SnackbarService } from "../../../common/snackbar/snackbar.service";
+import { MultimediaService } from "../../services/multimedia.service";
 // import { PoolingService } from "../../services/pooling.service"; // not used directly here
 
 Chart.register(...registerables);
@@ -196,10 +197,10 @@ export class HeadDashboardComponent
     private upiService: UpiService,
     private snackbar: SnackbarService,
     private headService: HeadService,
+    private multimediaService:MultimediaService
   ) {}
 
   ngOnInit(): void {
-    console.log("Branch Dashboard Init");
     this.headId = this.userStateService.getCurrentEntityId();
     this.role = this.userStateService.getRole();
     this.getTopupStatus();
@@ -207,8 +208,6 @@ export class HeadDashboardComponent
     this.fundService
       .broadcast(this.headId, this.role)
       .subscribe((data: any) => {
-        console.log(data);
-
         this.lastBroadcastData = data;
         this.processIncomingEvent(data);
       });
@@ -216,8 +215,6 @@ export class HeadDashboardComponent
     this.fundService
       .broadcast(this.headId, this.role)
       .subscribe((data: any) => {
-        console.log(data);
-
         this.processIncomingEvent(data);
       });
 
@@ -228,7 +225,7 @@ export class HeadDashboardComponent
 
     this.sse = this.socketConfigService.getPendingData().subscribe((data) => {
       if (!data) return;
-      console.log(data);
+
       this.lastBroadcastData = data;
       this.processIncomingEvent(data);
     });
@@ -318,103 +315,143 @@ export class HeadDashboardComponent
         this.clampPages();
         this.ensureProcessingTimerState();
       },
-      (err) => {
-        console.error("Error refreshing funds", err);
-      },
+      (err) => {},
     );
   }
 
   private mapFundsArray(
-    funds: any[],
-    mode: "bank" | "upi",
-    settledFlag: boolean,
-  ): void {
-    if (!Array.isArray(funds) || funds.length === 0) return;
+  funds: any[],
+  mode: "bank" | "upi",
+  settledFlag: boolean,
+): void {
+  if (!Array.isArray(funds) || funds.length === 0) return;
 
-    for (const fund of funds) {
-      try {
-        const tx = {
-          id: fund.id || null,
-          fundId: fund.id || null,
-          type: "topup",
-          portal:
-            fund.portalName || fund.portalDomain || fund.portalId || "Portal",
-          amount: Number(fund.amount) || 0,
-          date: fund.createdAt
-            ? new Date(fund.createdAt)
-            : fund.dateTime
-              ? new Date(fund.dateTime)
-              : new Date(),
-          utrNumber: fund.transactionId || fund.utr || null,
-          mode: mode,
-          accountNo: fund.accountNo || null,
-          bankId: fund.bankId || null,
-          bankName: fund.bankName || fund.bank || null,
-          filePath: fund.filePath
-            ? `${fileBaseUrl}/${fund.filePath}`
-            : fund.filePath || null,
-          remarks: fund.remarks || null,
-          settled: !!fund.settled,
-          raw: fund,
-          upiId: fund.vpa,
-        };
+  for (const fund of funds) {
+    try {
+      const rawPath = fund.filePath || null;
 
-        if (settledFlag || tx.settled) {
-          const approvedTx = { ...tx, status: "completed" };
-          this.approvedTransactions.unshift(approvedTx);
-          this.approvedtopups.unshift(approvedTx);
-        } else {
-          // place into per-section pending arrays
-          if (mode === "upi") {
-            this.pendingUpi.unshift(tx);
-          } else {
-            this.pendingBank.unshift(tx);
-          }
-        }
-      } catch (err) {
-        console.error("Error mapping fund record", err, fund);
+      const tx = {
+        id: fund.id || null,
+        fundId: fund.id || null,
+        type: "topup",
+        portal:
+          fund.portalName || fund.portalDomain || fund.portalId || "Portal",
+        amount: Number(fund.amount) || 0,
+        date: fund.createdAt
+          ? new Date(fund.createdAt)
+          : fund.dateTime
+          ? new Date(fund.dateTime)
+          : new Date(),
+        utrNumber: fund.transactionId || fund.utr || null,
+        mode: mode,
+        accountNo: fund.accountNo || null,
+        bankId: fund.bankId || null,
+        bankName: fund.bankName || fund.bank || null,
+
+        // ❌ old remove
+        // filePath: ...
+
+        // ✅ NEW
+        filePath: rawPath,        // backend path
+        fileUrl: '',            // blob URL later
+
+        remarks: fund.remarks || null,
+        settled: !!fund.settled,
+        raw: fund,
+        upiId: fund.vpa,
+      };
+
+      // ✅ LOAD IMAGE (IMPORTANT)
+      if (tx.filePath) {
+        this.multimediaService.getPrivateImage(tx.filePath).subscribe({
+          next: (url) => {
+            tx.fileUrl = url;
+          },
+          error: () => {
+            tx.fileUrl = '';
+          },
+        });
       }
-    }
-  }
 
+      if (settledFlag || tx.settled) {
+        const approvedTx = { ...tx, status: "completed" };
+        this.approvedTransactions.unshift(approvedTx);
+        this.approvedtopups.unshift(approvedTx);
+      } else {
+        if (mode === "upi") {
+          this.pendingUpi.unshift(tx);
+        } else {
+          this.pendingBank.unshift(tx);
+        }
+      }
+    } catch (err) {}
+  }
+}
   private mappayoutsArray(payouts: any[]): void {
-    if (!Array.isArray(payouts) || payouts.length === 0) return;
+  if (!Array.isArray(payouts) || payouts.length === 0) return;
 
-    for (const w of payouts) {
-      try {
-        const tx = {
-          id: w.id || null,
-          fundId: w.id || null,
-          type: "payout",
-          portal: w.portalName || w.portalDomain || w.portalId || null,
-          amount: Number(w.amount) || 0,
-          date: w.createdAt ? new Date(w.createdAt) : new Date(),
-          utrNumber: w.transactionId || w.utr || null,
-          mode: "bank",
-          accountNo: w.accountNo || w.accountNumber || null,
-          bankId: w.bankId || null,
-          bankName: w.bankName || w.bank || w.bankName || null,
-          filePath: w.filePath
-            ? `${fileBaseUrl}/${w.filePath}`
-            : w.filePath || null,
-          remarks: w.remarks || w.message || null,
-          settled: !!w.settled,
-          raw: w,
-          holderName: w.holderName || w.accountHolderName || null,
-        };
+  for (const w of payouts) {
+    try {
+      const rawPath = w.filePath || null;
 
-        if (tx.settled) {
-          const approvedTx = { ...tx, status: "completed" };
-          this.approvedTransactions.unshift(approvedTx);
-          this.approvedpayouts.unshift(approvedTx);
+      const tx = {
+        id: w.id || null,
+        fundId: w.id || null,
+        type: "payout",
+
+        portal: w.portalName || w.portalDomain || w.portalId || null,
+
+        amount: Number(w.amount) || 0,
+
+        date: w.createdAt ? new Date(w.createdAt) : new Date(),
+
+        utrNumber: w.transactionId || w.utr || null,
+
+        mode: "bank",
+
+        accountNo: w.accountNo || w.accountNumber || null,
+        bankId: w.bankId || null,
+        bankName: w.bankName || w.bank || w.bankName || null,
+
+        // ❌ REMOVE direct URL
+        // filePath: `${fileBaseUrl}/${w.filePath}`
+
+        // ✅ NEW
+        filePath: rawPath,   // backend raw path
+        fileUrl: '',       // blob URL later
+
+        remarks: w.remarks || w.message || null,
+
+        settled: !!w.settled,
+        raw: w,
+
+        holderName: w.holderName || w.accountHolderName || null,
+      };
+
+      // ✅ LOAD IMAGE (IMPORTANT)
+      if (tx.filePath) {
+        if (tx.filePath.startsWith("http")) {
+          // ✅ public URL
+          tx.fileUrl = tx.filePath;
         } else {
-          this.pendingpayouts.unshift(tx);
+          // ✅ private (token via interceptor)
+          this.multimediaService.getPrivateImage(tx.filePath).subscribe({
+            next: (url) => (tx.fileUrl = url),
+            error: () => (tx.fileUrl = ''),
+          });
         }
-      } catch (err) {
-        console.error("Error mapping payout record", err, w);
       }
-    }
+
+      if (tx.settled) {
+        const approvedTx = { ...tx, status: "completed" };
+        this.approvedTransactions.unshift(approvedTx);
+        this.approvedpayouts.unshift(approvedTx);
+      } else {
+        this.pendingpayouts.unshift(tx);
+      }
+    } catch (err) {}
   }
+}
 
   private extractPortalsFromFetched(allFunds: any[]): void {
     if (!Array.isArray(allFunds)) return;
@@ -706,7 +743,6 @@ export class HeadDashboardComponent
     const ctx =
       this.topupMethodChartRef?.nativeElement?.getContext &&
       this.topupMethodChartRef.nativeElement.getContext("2d");
-    console.log(ctx);
 
     if (!ctx) return;
     this.topupMethodChart = new Chart(ctx, {
@@ -850,7 +886,6 @@ export class HeadDashboardComponent
       }
     } catch (e) {
       // don't break the app if chart init fails; will attempt again on next update
-      console.warn("Chart init failed, will retry on next update", e);
     }
   }
 
@@ -868,9 +903,7 @@ export class HeadDashboardComponent
         try {
           this.topupMethodChart.data.datasets[0].data = [upiSum, bankSum];
           this.topupMethodChart.update();
-        } catch (e) {
-          console.warn("topupMethodChart update failed", e);
-        }
+        } catch (e) {}
       }
 
       const payoutsAll = [...this.approvedpayouts, ...this.pendingpayouts];
@@ -892,9 +925,7 @@ export class HeadDashboardComponent
           this.payoutBankChart.data.labels = bankLabels;
           (this.payoutBankChart.data.datasets[0].data as any) = bankValues;
           this.payoutBankChart.update();
-        } catch (e) {
-          console.warn("payoutBankChart update failed", e);
-        }
+        } catch (e) {}
       }
 
       const labels = this.getLastNDatesLabels(this.selectedTimeRange);
@@ -924,9 +955,7 @@ export class HeadDashboardComponent
           (this.trendChart.data.datasets[0].data as any) = topupArr;
           (this.trendChart.data.datasets[1].data as any) = payoutArr;
           this.trendChart.update();
-        } catch (e) {
-          console.warn("trendChart update failed", e);
-        }
+        } catch (e) {}
       }
     });
   }
@@ -1249,7 +1278,6 @@ export class HeadDashboardComponent
       this.clampPages();
       this.ensureProcessingTimerState();
     } catch (err: any) {
-      console.error("Error approving transaction", err);
       const message =
         err?.error?.message || err?.error?.error || "Approval failed";
       this.snackbar.show(message, false);
@@ -1292,7 +1320,6 @@ export class HeadDashboardComponent
 
   saveEditedAmount(): void {
     if (!this.editAmountData.newAmount || this.editAmountData.newAmount <= 0) {
-      console.error("Please enter a valid amount");
       return;
     }
 
@@ -1306,13 +1333,9 @@ export class HeadDashboardComponent
       updatedBy: this.headId, // Replace with actual user ID
     };
 
-    console.log("Updating amount:", updateData);
-
     this.fundService
       .updateAmount(updateData, this.editAmountData.file)
-      .subscribe((res) => {
-        console.log(res);
-      });
+      .subscribe((res) => {});
 
     // Update transaction in UI
     this.selectedTransaction.amount = this.editAmountData.newAmount;
@@ -1326,7 +1349,6 @@ export class HeadDashboardComponent
 
   onProcessingClick(fundId: any) {
     if (!fundId) return;
-    console.log("data", fundId);
 
     this.fundService.updateProcessingStatus(fundId.id, this.headId).subscribe(
       (res) => {
@@ -1433,7 +1455,6 @@ export class HeadDashboardComponent
     const maxSize = 5 * 1024 * 1024; // 5MB in bytes
 
     if (file.size > maxSize) {
-      console.error("File size exceeds 5MB limit");
       // You can show a toast notification here
       return;
     }
@@ -1449,7 +1470,6 @@ export class HeadDashboardComponent
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      console.error("File type not supported");
       // You can show a toast notification here
       return;
     }
@@ -1538,7 +1558,6 @@ export class HeadDashboardComponent
       this.clampPages();
       this.ensureProcessingTimerState();
     } catch (err: any) {
-      console.error("Error rejecting transaction", err);
       const message =
         err?.error?.message || err?.error?.error || "Rejection failed";
       this.snackbar.show(message, false);
@@ -1559,7 +1578,6 @@ export class HeadDashboardComponent
   }
 
   openApproveConfirm(transaction: any) {
-    console.log(transaction);
     const portalId = transaction.raw.portalId;
 
     if (this.banks == null) {
@@ -1631,13 +1649,12 @@ export class HeadDashboardComponent
   }
   get rejectionReason(): string {
     if (!this.reason) return "";
-    return this.reason === "other" 
+    return this.reason === "other"
       ? (this.customReason || "").trim()
       : this.reason;
   }
 
   async confirmReject() {
-    console.log("commmiot");
     if (this.isPayoutActionBlocked(this.confirmTransaction)) {
       this.snackbar.show(
         "Processing complete hone ke baad reject kar sakte ho",
@@ -1657,7 +1674,7 @@ export class HeadDashboardComponent
       return;
     }
 
-    // ✅ File optional – agar file hai to pass karo, nahi to undefined pass karo
+    //  File optional – agar file hai to pass karo, nahi to undefined pass karo
     await this.rejectTransaction(
       this.confirmTransaction,
       finalReason,
@@ -1738,81 +1755,121 @@ export class HeadDashboardComponent
   }
 
   // Process incoming SSE/broadcast event and update local pending lists
-  private normalizeIncomingFund(
-    fund: any,
-    guessedMode?: "bank" | "upi" | "payout",
-  ) {
-    if (!fund) return null;
-    const mode = guessedMode
-      ? guessedMode
-      : fund.type === "payout" ||
-          fund.transactionType === "payout" ||
-          fund.reviewStatus === "WITHDRAWAL"
+ private normalizeIncomingFund(
+  fund: any,
+  guessedMode?: "bank" | "upi" | "payout",
+) {
+  if (!fund) return null;
+
+  const mode = guessedMode
+    ? guessedMode
+    : fund.type === "payout" ||
+      fund.transactionType === "payout" ||
+      fund.reviewStatus === "WITHDRAWAL"
+    ? "payout"
+    : fund.type === "bank" || fund.bankId || fund.accountNo
+    ? "bank"
+    : fund.type === "upi" || fund.vpa
+    ? "upi"
+    : "bank";
+
+  const filePathRaw = fund.filePath || fund.snapshot || fund.qrImage || null;
+
+  const tx = {
+    id: fund.id || fund._id || null,
+    fundId: fund.id || fund.fundId || fund._id || null,
+
+    type:
+      fund.type === "payout"
         ? "payout"
-        : fund.type === "bank" || fund.bankId || fund.accountNo
-          ? "bank"
-          : fund.type === "upi" || fund.vpa
-            ? "upi"
-            : "bank";
+        : fund.type === "bank" || fund.type === "upi"
+        ? "topup"
+        : fund.transactionType === "payout"
+        ? "payout"
+        : "topup",
 
-    const filePathRaw = fund.filePath || fund.snapshot || fund.qrImage || null;
-    const filePath = filePathRaw
-      ? filePathRaw.startsWith("http")
-        ? filePathRaw
-        : `${fileBaseUrl}/${filePathRaw}`
-      : null;
+    portal: fund.portalName || fund.portalDomain || fund.portalId || null,
 
-    const tx = {
-      id: fund.id || fund._id || null,
-      fundId: fund.id || fund.fundId || fund._id || null,
-      type:
-        fund.type === "payout"
-          ? "payout"
-          : fund.type === "bank" || fund.type === "upi"
-            ? "topup"
-            : fund.transactionType === "payout"
-              ? "payout"
-              : "topup",
-      portal: fund.portalName || fund.portalDomain || fund.portalId || null,
-      currency: fund.currency,
-      currencyRate: fund.currencyRate,
-      amount: Number(fund.amount) || 0,
-      currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,
-      date: fund.createdAt
-        ? new Date(fund.createdAt)
-        : fund.dateTime
-          ? new Date(fund.dateTime)
-          : fund.updatedAt
-            ? new Date(fund.updatedAt)
-            : new Date(),
-      utrNumber: fund.transactionId || fund.utr || null,
-      mode: mode,
-      accountNo: fund.accountNo || fund.accountNumber || null,
-      bankId: fund.bankId || null,
-      bankName: fund.bankName || fund.bank || fund.bank_name || null,
-      filePath: filePath,
-      rejectionPath: `${fileBaseUrl}/${fund.rejectionFilePath}` || null,
+    currency: fund.currency,
+    currencyRate: fund.currencyRate,
 
-      remarks: fund.remarks || fund.message || null,
-      settled: !!fund.settled,
-      raw: fund,
-      processing: fund.processing,
-      upiId: fund.vpa || fund.upiId || null,
-      holderName:
-        fund.bankAccountHolderName ||
-        fund.bankHolderName ||
-        fund.holderName ||
-        fund.accountHolderName ||
-        fund.name ||
-        null,
-      ifscCode:
-        fund.ifscCode || fund.ifsc || (fund.raw && fund.raw.ifsc) || null,
-      fundDisplayId: fund.displayId,
-      ftt: fund.firstTopup ? true : false,
-    };
+    amount: Number(fund.amount) || 0,
+    currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,
 
-    return tx;
+    date: fund.createdAt
+      ? new Date(fund.createdAt)
+      : fund.dateTime
+      ? new Date(fund.dateTime)
+      : fund.updatedAt
+      ? new Date(fund.updatedAt)
+      : new Date(),
+
+    utrNumber: fund.transactionId || fund.utr || null,
+
+    mode: mode,
+
+    accountNo: fund.accountNo || fund.accountNumber || null,
+    bankId: fund.bankId || null,
+    bankName: fund.bankName || fund.bank || fund.bank_name || null,
+
+    // ❌ REMOVE direct URL logic
+    // filePath: filePath,
+
+    // ✅ NEW
+    filePath: filePathRaw,   // raw path
+    fileUrl: '',           // blob URL later
+
+    rejectionPath: fund.rejectionFilePath || null,
+    rejectionUrl: '',      // (optional same handling)
+
+    remarks: fund.remarks || fund.message || null,
+    settled: !!fund.settled,
+    raw: fund,
+    processing: fund.processing,
+
+    upiId: fund.vpa || fund.upiId || null,
+
+    holderName:
+      fund.bankAccountHolderName ||
+      fund.bankHolderName ||
+      fund.holderName ||
+      fund.accountHolderName ||
+      fund.name ||
+      null,
+
+    ifscCode:
+      fund.ifscCode || fund.ifsc || (fund.raw && fund.raw.ifsc) || null,
+
+    fundDisplayId: fund.displayId,
+    ftt: fund.firstTopup ? true : false,
+  };
+
+  // ✅ LOAD FILE IMAGE (TOKEN via interceptor)
+  if (tx.filePath) {
+    this.multimediaService.getPrivateImage(tx.filePath).subscribe({
+      next: (url) => {
+        tx.fileUrl = url;
+      },
+      error: () => {
+        tx.fileUrl = '';
+      },
+    });
   }
+
+  // ✅ OPTIONAL: rejection file bhi secure hai to
+  if (tx.rejectionPath) {
+    this.multimediaService.getPrivateImage(tx.rejectionPath).subscribe({
+      next: (url) => {
+        tx.rejectionUrl = url;
+      },
+      error: () => {
+        tx.rejectionUrl = '';
+      },
+    });
+  }
+
+  return tx;
+}
 
   private normalizeTransaction(tx: any) {
     if (!tx) return tx;
@@ -1910,7 +1967,7 @@ export class HeadDashboardComponent
 
     if (file.size > maxSize) {
       // Show error message (you can implement your own notification system)
-      console.error("File size exceeds 5MB limit");
+
       return;
     }
 
@@ -1925,7 +1982,6 @@ export class HeadDashboardComponent
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      console.error("File type not supported");
       return;
     }
 
@@ -2017,8 +2073,6 @@ export class HeadDashboardComponent
   }
 
   reloadDashboard(): void {
-    console.log("Manual reload triggered");
-
     if (this.lastBroadcastData) {
       this.processIncomingEvent(this.lastBroadcastData);
     }

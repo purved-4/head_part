@@ -12,9 +12,9 @@ export class DynamicTimeSetupService {
   constructor(private http: HttpClient) {}
 
   createSetup(data: any): Observable<any> {
-    return this.http.post(`${this.api}`, data).pipe(
-      catchError(this.handleError)
-    );
+    return this.http
+      .post(`${this.api}`, data)
+      .pipe(catchError(this.handleError));
   }
 
   getByOwnerId(ownerId: string): Observable<any> {
@@ -26,26 +26,25 @@ export class DynamicTimeSetupService {
 
   getAllSetups(): Observable<any> {
     return this.http.get<any>(`${this.api}`).pipe(
-       map((res) => res.data),
-      catchError(this.handleError)
+      map((res) => res.data),
+      catchError(this.handleError),
     );
   }
 
   getByCnfId(cnfId: string): Observable<any> {
     return this.http.get<any>(`${this.api}/cnf/${cnfId}`).pipe(
-       map((res) => res.data),
-      catchError(this.handleError)
+      map((res) => res.data),
+      catchError(this.handleError),
     );
   }
 
   updateSetup(id: string, data: any): Observable<any> {
-    return this.http.put(`${this.api}/${id}`, data).pipe(
-      catchError(this.handleError)
-    );
+    return this.http
+      .put(`${this.api}/${id}`, data)
+      .pipe(catchError(this.handleError));
   }
 
   private handleError(error: any) {
-    console.error("API Error:", error);
     return throwError(() => error);
   }
 }

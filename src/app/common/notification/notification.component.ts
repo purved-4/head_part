@@ -276,19 +276,19 @@ export class NotificationComponent implements OnInit, OnDestroy {
 
   //   return !rejectTypes.includes(type);
   // }
-canRedirectToChat(notification: BackendThread): boolean {
-  if (!notification) return false;
+  canRedirectToChat(notification: BackendThread): boolean {
+    if (!notification) return false;
 
-  const type = (notification.type || "").toUpperCase();
+    const type = (notification.type || "").toUpperCase();
 
-  const chatRedirectTypes = [
-    "BANK_FUND_REJECT",
-    "UPI_FUND_REJECT",
-    "PAYOUT_FUND_REJECT",
-  ];
+    const chatRedirectTypes = [
+      "BANK_FUND_REJECT",
+      "UPI_FUND_REJECT",
+      "PAYOUT_FUND_REJECT",
+    ];
 
-  return chatRedirectTypes.includes(type);
-}
+    return chatRedirectTypes.includes(type);
+  }
 
   openChat(notification: BackendThread) {
     if (!notification) return;
@@ -327,7 +327,7 @@ canRedirectToChat(notification: BackendThread): boolean {
     //   .SendNotificationAsRead(notificationId)
     //   .subscribe({
     //     next: () => {
-    //       console.log("Notification marked as read on server");
+
     //     },
     //     error: (err) => console.error("Failed to mark notification read", err),
     //   });
@@ -366,7 +366,7 @@ canRedirectToChat(notification: BackendThread): boolean {
     //   .SendNotificationAsRead(notificationId)
     //   .subscribe({
     //     next: () => {
-    //       console.log("Notification marked as read on server from View button");
+
     //     },
     //     error: (err) =>
     //       console.error(

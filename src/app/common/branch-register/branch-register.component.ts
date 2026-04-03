@@ -61,7 +61,6 @@ export class BranchRegisterComponent implements OnInit {
         this.loading = false;
       },
       error: (err: any) => {
-        console.error("getManualStatus error:", err);
         // consider false on error (you may want different behaviour)
         this.autoEnabled = false;
         this.loading = false;
@@ -93,7 +92,6 @@ export class BranchRegisterComponent implements OnInit {
         this.onClear();
       },
       error: (err: any) => {
-        console.error(err);
         alert("Submission failed");
       },
     });

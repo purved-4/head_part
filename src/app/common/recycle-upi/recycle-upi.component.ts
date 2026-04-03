@@ -10,21 +10,20 @@ import { fileBaseUrl } from "../../pages/services/helper";
   styleUrls: ["./recycle-upi.component.css"],
 })
 export class RecycleUpiComponent implements OnInit {
-
   upis: any[] = [];
   currentRoleId: any;
-Math = Math
+  Math = Math;
   currentPage = 1;
   pageSize = 10;
 
   totalElements = 0;
   totalPagesCount = 0;
-  viewMode: 'table' | 'grid' = 'table';
-  loading = false; 
+  viewMode: "table" | "grid" = "table";
+  loading = false;
   constructor(
     private upiService: UpiService,
     private userStateService: UserStateService,
-    private snack: SnackbarService
+    private snack: SnackbarService,
   ) {}
 
   ngOnInit(): void {
@@ -32,47 +31,42 @@ Math = Math
     this.fetchDeletedUpis();
   }
 
-   setView(mode: 'table' | 'grid') {
+  setView(mode: "table" | "grid") {
     this.viewMode = mode;
   }
 
-fetchDeletedUpis(): void {
- this.loading = true;
-  const options = {
-    page: this.currentPage - 1,
-    size: this.pageSize
-  };
+  fetchDeletedUpis(): void {
+    this.loading = true;
+    const options = {
+      page: this.currentPage - 1,
+      size: this.pageSize,
+    };
 
-  this.upiService
-    .getByEntityIdAndDeactivePaginated(this.currentRoleId, options)
-    .subscribe({
-      next: (res: any) => {
+    this.upiService
+      .getByEntityIdAndDeactivePaginated(this.currentRoleId, options)
+      .subscribe({
+        next: (res: any) => {
+          const rows = res?.content || [];
 
-        console.log("Recycle API response:", res);
+          this.upis = rows.map((r: any) => ({
+            ...r,
+            qrImagePath: r.qrImagePath
+              ? `${fileBaseUrl}/${r.qrImagePath}`
+              : null,
+          }));
 
-        const rows = res?.content || [];
-
-        this.upis = rows.map((r: any) => ({
-          ...r,
-          qrImagePath: r.qrImagePath
-            ? `${fileBaseUrl}/${r.qrImagePath}`
-            : null,
-        }));
-
-        this.totalElements = res?.totalElements || 0;
-        this.totalPagesCount = res?.totalPages || 0;
+          this.totalElements = res?.totalElements || 0;
+          this.totalPagesCount = res?.totalPages || 0;
           this.loading = false;
-      },
-      error: (err) => {
-        console.error("Error loading recycle UPIs:", err);
-        this.upis = [];
-         this.loading = false;
-      },
-    });
-}
+        },
+        error: (err) => {
+          this.upis = [];
+          this.loading = false;
+        },
+      });
+  }
 
   reactivateUpi(upi: any) {
-
     this.upiService.toogleUpiStatus(upi.id).subscribe({
       next: () => {
         this.snack.show("UPI reactivated successfully!", true);
@@ -82,11 +76,9 @@ fetchDeletedUpis(): void {
         this.snack.show("Failed to reactivate UPI", false);
       },
     });
-
   }
 
-
-    prevPage() {
+  prevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
       this.fetchDeletedUpis();
@@ -100,33 +92,26 @@ fetchDeletedUpis(): void {
     }
   }
 
-
   getPageNumbers(): number[] {
+    const total = this.totalPagesCount;
+    const current = this.currentPage;
 
-  const total = this.totalPagesCount;
-  const current = this.currentPage;
+    const pages: number[] = [];
 
-  const pages: number[] = [];
+    const start = Math.max(1, current - 1);
+    const end = Math.min(total, current + 1);
 
-  const start = Math.max(1, current - 1);
-  const end = Math.min(total, current + 1);
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
 
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
+    return pages;
   }
 
-  return pages;
-}
-
-goToPage(page: number) {
-
-  if (page !== this.currentPage) {
-    this.currentPage = page;
-    this.fetchDeletedUpis()
+  goToPage(page: number) {
+    if (page !== this.currentPage) {
+      this.currentPage = page;
+      this.fetchDeletedUpis();
+    }
   }
-
 }
-}
-
-
-

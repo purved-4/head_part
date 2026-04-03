@@ -1,18 +1,19 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 import { SubjectRegistryService } from "../../registery/subject-registry.service";
+import { ACCESS_TOKEN_KEY } from "../../registery/subject-registry.key";
 
 @Injectable({
   providedIn: "root",
 })
 export class AuthMemoryService {
-  private readonly accessTokenKey = "accessToken";
+  private readonly accessTokenKey = ACCESS_TOKEN_KEY;
 
   constructor(private subjectRegistry: SubjectRegistryService) {
     this.subjectRegistry.register(
       this.accessTokenKey,
       () => new BehaviorSubject<string | null>(null),
-      null
+      null,
     );
   }
 
@@ -21,8 +22,6 @@ export class AuthMemoryService {
   }
 
   setAccessToken(token: string | null) {
-    console.log("calls");
-
     this.subjectRegistry.setValue(this.accessTokenKey, token);
   }
 

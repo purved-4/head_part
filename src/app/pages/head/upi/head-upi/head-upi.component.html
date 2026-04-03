@@ -624,22 +624,22 @@
           <td class="px-4 py-3 whitespace-nowrap">
             <div class="flex items-center">
               <div
-                *ngIf="upi.qrImagePath"
+                *ngIf="upi.qrImageUrl"
                 class="relative cursor-pointer"
-                (click)="openImageModal(upi.qrImagePath)"
+                (click)="openImageModal(upi.qrImageUrl)"
               >
                 <div
                   class="w-12 h-12 bg-[var(--color-bg)] rounded border border-[var(--color-border)] flex items-center justify-center overflow-hidden"
                 >
                   <img
-                    [src]="upi.qrImagePath"
+                    [src]="upi.qrImageUrl"
                     alt="QR Code"
                     class="w-10 h-10 object-contain"
                   />
                 </div>
               </div>
               <div
-                *ngIf="!upi.qrImagePath"
+                *ngIf="!upi.qrImageUrl"
                 class="flex items-center text-[var(--color-muted)] text-sm"
               >
                 <span class="material-icons mr-1"> image_not_supported </span>
@@ -1015,16 +1015,16 @@
   <div class="flex flex-col items-center">
     <div
       class="w-20 h-20 bg-[var(--color-bg)] rounded-lg border flex items-center justify-center overflow-hidden shadow-sm"
-      (click)="openImageModal(upi.qrImagePath)"
+     
     >
       <img
-        *ngIf="upi.qrImagePath"
-        [src]="upi.qrImagePath"
+        *ngIf="upi.qrImageUrl"
+        [src]="upi.qrImageUrl"
         class="w-16 h-16 object-contain"
       />
 
       <span
-        *ngIf="!upi.qrImagePath"
+        *ngIf="!upi.qrImageUrl"
         class="material-icons text-2xl text-[var(--color-muted)]"
       >
         image_not_supported
@@ -1032,7 +1032,7 @@
     </div>
 
     <span
-      *ngIf="upi.qrImagePath"
+      *ngIf="upi.qrImageUrl"
       class="text-xs text-[var(--color-primary)] mt-1"
     >
       View
@@ -1079,338 +1079,406 @@
     </div>
   </div>
   <!-- ========== ADD UPI MODAL – SEARCH‑BASED ========== -->
+<div
+  *ngIf="showAddModal"
+  class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+>
   <div
-    *ngIf="showAddModal"
-    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+    class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg border border-[var(--color-border)]"
+    (click)="$event.stopPropagation()"
   >
     <div
-      class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg border border-[var(--color-border)]"
-      (click)="$event.stopPropagation()"
+      class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
     >
-      <div
-        class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+      <h3
+        class="text-lg font-semibold text-[var(--color-font)] flex items-center"
       >
-        <h3
-          class="text-lg font-semibold text-[var(--color-font)] flex items-center"
-        >
-          <span class="material-icons mr-2 text-[var(--color-primary)]">
-            add_circle
-          </span>
-          Add New UPI
-        </h3>
-        <button
-          (click)="closeAddModal()"
-          class="p-1 hover:bg-[var(--color-hover)] rounded transition-colors"
-        >
-          <span class="material-icons text-[var(--color-muted)]"> close </span>
-        </button>
-      </div>
-
-      <div class="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
-        <form
-          [formGroup]="addUpiForm"
-          (ngSubmit)="submitAddUpi()"
-          class="space-y-4"
-        >
-          <!-- Portal Selection – SEARCH BASED -->
-       <!-- Portal Selection – SEARCH BASED -->
-<div class="space-y-1">
-  <label
-    class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
-  >
-    <span
-      class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
-      >public</span
-    >
-    Portal <span class="text-[var(--color-danger)] ml-1">*</span>
-  </label>
-  <div
-    class="relative modal-portal-container"
-    #upiPortalContainer
-  >
-    <div class="relative">
-      <span
-        class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
-        >search</span
-      >
-      <input
-        type="text"
-        [(ngModel)]="upiPortalSearch"
-        (ngModelChange)="onUpiPortalSearch()"
-        (click)="openUpiPortalDropdown($event)"
-        (focus)="onUpiPortalFocus()"
-        placeholder="Search and select portal..."
-        class="w-full pl-10 pr-10 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
-        [class.border-[var(--color-danger)]]="
-          addUpiForm.get('portalId')?.touched &&
-          addUpiForm.get('portalId')?.invalid
-        "
-        [ngModelOptions]="{ standalone: true }"
-      />
+        <span class="material-symbols-outlined mr-2 text-[var(--color-primary)]">
+          add_circle
+        </span>
+        Add New UPI
+      </h3>
       <button
-        *ngIf="selectedUpiPortal"
-        type="button"
-        (click)="clearUpiPortalSelection()"
-        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-danger)]"
+        (click)="closeAddModal()"
+        class="p-1 hover:bg-[var(--color-hover)] rounded-full transition-colors"
       >
-        <span class="material-symbols-outlined text-sm">close</span>
+        <span class="material-symbols-outlined text-[var(--color-muted)]">close</span>
       </button>
     </div>
-    
-    <!-- Dropdown -->
-    <div
-      *ngIf="showUpiPortalDropdown"
-      class="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
-    >
-      <div
-        *ngIf="upiFilteredPortals.length === 0"
-        class="px-3 py-2 text-sm text-[var(--color-muted)] italic"
-      >
-        No portals found
-      </div>
-      <div
-        *ngFor="let site of upiFilteredPortals"
-        class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-sm text-[var(--color-font)] border-b border-[var(--color-border)] last:border-b-0 flex justify-between items-center"
-        (click)="selectUpiPortal(site)"
-      >
-        <span>{{ site.domain }}</span>
-        <span class="text-xs text-[var(--color-muted)]">{{
-          site.currency
-        }}</span>
-      </div>
-    </div>
-  </div>
 
-  <!-- Validation Message -->
-  <div
-    *ngIf="
-      addUpiForm.get('portalId')?.invalid &&
-      addUpiForm.get('portalId')?.touched
-    "
-    class="text-[var(--color-danger)] text-xs mt-1 flex items-center"
+    <div class="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+      <form
+        [formGroup]="addUpiForm"
+        (ngSubmit)="submitAddUpi()"
+        class="space-y-4"
+      >
+        <!-- Portal Selection – SEARCH BASED -->
+        <div class="space-y-1">
+          <label
+            class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+          >
+            <span class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base">
+              public
+            </span>
+            Portal <span class="text-[var(--color-danger)] ml-1">*</span>
+          </label>
+          <div class="relative modal-portal-container" #upiPortalContainer>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] text-base">
+                search
+              </span>
+              <input
+                type="text"
+                [(ngModel)]="upiPortalSearch"
+                (ngModelChange)="onUpiPortalSearch()"
+                (click)="openUpiPortalDropdown($event)"
+                (focus)="onUpiPortalFocus()"
+                placeholder="Search and select portal..."
+                class="w-full pl-10 pr-10 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-font)]"
+                [class.border-[var(--color-danger)]]="
+                  addUpiForm.get('portalId')?.touched &&
+                  addUpiForm.get('portalId')?.invalid
+                "
+                [ngModelOptions]="{ standalone: true }"
+              />
+              <button
+                *ngIf="selectedUpiPortal"
+                type="button"
+                (click)="clearUpiPortalSelection()"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors"
+              >
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+            
+            <!-- Dropdown -->
+            <div
+              *ngIf="showUpiPortalDropdown"
+              class="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
+            >
+              <div
+                *ngIf="upiFilteredPortals.length === 0"
+                class="px-3 py-2 text-sm text-[var(--color-muted)] italic"
+              >
+                No portals found
+              </div>
+              <div
+                *ngFor="let site of upiFilteredPortals"
+                class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-sm text-[var(--color-font)] border-b border-[var(--color-border)] last:border-b-0 flex justify-between items-center transition-colors"
+                (click)="selectUpiPortal(site)"
+              >
+                <span>{{ site.domain }}</span>
+                <span class="text-xs text-[var(--color-muted)]">{{
+                  site.currency
+                }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Validation Message -->
+          <div
+            *ngIf="
+              addUpiForm.get('portalId')?.invalid &&
+              addUpiForm.get('portalId')?.touched
+            "
+            class="text-[var(--color-danger)] text-xs mt-1 flex items-center"
+          >
+            <span class="material-symbols-outlined mr-1 text-sm">error</span>
+            Please select a portal
+          </div>
+        </div>
+
+        <!-- UPI ID with QR Generate and Manual Upload side by side -->
+        <div>
+          <label
+            class="block text-sm font-medium text-[var(--color-font)] mb-1"
+          >
+            UPI ID (VPA) <span class="text-[var(--color-danger)]">*</span>
+          </label>
+          <div class="flex gap-2">
+            <input
+              formControlName="vpa"
+              type="text"
+              placeholder="username@paytm"
+              class="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-font)]"
+              [class.border-[var(--color-danger)]]="
+                addUpiForm.get('vpa')?.touched &&
+                addUpiForm.get('vpa')?.invalid
+              "
+            />
+            
+            <!-- Button Group: Generate QR + Manual Upload -->
+           <div class="flex gap-1">
+  <!-- QR BUTTON -->
+  <button
+    type="button"
+    (click)="setQrMode('generate'); generateQrFromVpa()"
+    [class.bg-[var(--color-primary)]]="qrMode === 'generate'"
+    [class.text-white]="qrMode === 'generate'"
+    class="px-3 py-2 border rounded-lg"
   >
-    <span class="material-symbols-outlined mr-1 text-sm">error</span>
-    Please select a portal
+    QR
+  </button>
+
+  <!-- UPLOAD BUTTON -->
+  <button
+    type="button"
+    (click)="setQrMode('upload')"
+    [class.bg-[var(--color-primary)]]="qrMode === 'upload'"
+    [class.text-white]="qrMode === 'upload'"
+    class="px-3 py-2 border rounded-lg"
+  >
+    Upload
+  </button>
+
+</div>
+          </div>
+          
+          <div
+            *ngIf="
+              addUpiForm.get('vpa')?.touched && addUpiForm.get('vpa')?.invalid
+            "
+            class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
+          >
+            <span class="material-symbols-outlined mr-1 text-sm">error</span>
+            Valid UPI ID required
+          </div>
+
+      <div *ngIf="qrMode === 'upload' && !selectedImage">
+  <label class="text-sm font-semibold text-[var(--color-font)] flex items-center gap-1 mb-2">
+    <span class="material-symbols-outlined text-[var(--color-primary)]">upload</span>
+    Upload QR Code
+  </label>
+
+  <!-- Upload Box -->
+  <div
+    class="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition hover:bg-[var(--color-hover)]"
+    (click)="fileInput.click()"
+  >
+    <span class="material-symbols-outlined text-3xl text-[var(--color-muted)] mb-2">
+      cloud_upload
+    </span>
+
+    <div class="text-sm text-[var(--color-font)]">
+      Click to upload QR image
+    </div>
+
+    <div class="text-xs text-[var(--color-muted)] mt-1">
+      PNG, JPG supported
+    </div>
+
+    <!-- Hidden Input -->
+    <input
+      #fileInput
+      type="file"
+      accept="image/*"
+      (change)="onQrFileSelected($event)"
+      class="hidden"
+    />
+  </div>
+</div>
+        </div>
+
+        <!-- QR Display Section -->
+        <div
+          *ngIf="qrData || selectedImage"
+          class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)]"
+        >
+          <div class="flex justify-between items-center mb-2">
+            <label class="text-sm font-medium text-[var(--color-font)] flex items-center gap-1">
+              <span class="material-symbols-outlined text-base">qr_code_scanner</span>
+              QR Code
+            </label>
+            <div class="flex gap-1">
+              <button
+                type="button"
+                (click)="downloadQr()"
+                *ngIf="generatedFile "
+                class="px-2 py-1 text-xs bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-primary-dark)] flex items-center gap-1 transition-colors"
+              >
+                <span class="material-symbols-outlined text-sm">download</span>
+                Save
+              </button>
+              <button
+                type="button"
+               (click)="removeQr()"
+                class="px-2 py-1 text-xs bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] rounded hover:bg-[var(--color-hover)] flex items-center gap-1 transition-colors"
+              >
+                <span class="material-symbols-outlined text-sm">delete</span>
+                Remove
+              </button>
+            </div>
+          </div>
+          
+          <!-- QR Code Display - Shows either generated QR or uploaded image -->
+       <div class="flex justify-center">
+  <div class="p-2 bg-white rounded border border-[var(--color-border)]">
+
+    <!-- MANUAL IMAGE -->
+    <img
+      *ngIf="selectedImage"
+      [src]="selectedImage"
+      class="w-[120px] h-[120px] object-contain"
+    />
+
+    <div *ngIf="manualQrFile"
+     class="text-green-600 text-xs mt-2 text-center flex items-center justify-center gap-1">
+
+  <span class="material-symbols-outlined text-sm">check_circle</span>
+  QR uploaded successfully
+</div>
+
+
+    <!-- GENERATED QR -->
+    <qrcode
+      *ngIf="qrData && !selectedImage"
+      #qrcodeElem
+      [qrdata]="qrData"
+      [width]="120"
+    ></qrcode>
+
   </div>
 </div>
 
-          <!-- UPI ID -->
-          <div>
-            <label
-              class="block text-sm font-medium text-[var(--color-font)] mb-1"
-            >
-              UPI ID (VPA) <span class="text-[var(--color-danger)]">*</span>
-            </label>
-            <div class="flex gap-2">
-              <input
-                formControlName="vpa"
-                type="text"
-                placeholder="username@paytm"
-                class="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
-                [class.border-[var(--color-danger)]]="
-                  addUpiForm.get('vpa')?.touched &&
-                  addUpiForm.get('vpa')?.invalid
-                "
-              />
-              <button
-                type="button"
-                (click)="generateQrFromVpa()"
-                [disabled]="addUpiForm.get('vpa')?.invalid || generatingQr"
-                class="px-3 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span *ngIf="!generatingQr" class="flex items-center">
-                  <span class="material-icons mr-1">qr_code</span>
-                  QR
-                </span>
-                <span *ngIf="generatingQr" class="flex items-center">
-                  <span class="material-icons animate-spin mr-1"
-                    >autorenew</span
-                  >
-                </span>
-              </button>
-            </div>
-            <div
-              *ngIf="
-                addUpiForm.get('vpa')?.touched && addUpiForm.get('vpa')?.invalid
-              "
-              class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
-            >
-              <span class="material-icons mr-1 text-sm">error</span>
-              Valid UPI ID required
-            </div>
-          </div>
 
-          <!-- QR Display -->
-          <div
-            *ngIf="qrData"
-            class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)]"
+          
+          <!-- File name indicator for manual upload -->
+          <div *ngIf="manualQrFile" class="text-xs text-[var(--color-muted)] mt-2 text-center">
+            <span class="material-symbols-outlined text-xs align-middle">check_circle</span>
+            Uploaded: {{ manualQrFile.name }}
+          </div>
+        </div>
+
+        <!-- Amount Field -->
+        <div>
+          <label
+            class="block text-sm font-medium text-[var(--color-font)] mb-1"
           >
-            <div class="flex justify-between items-center mb-2">
-              <label class="text-sm font-medium text-[var(--color-font)]">
-                Generated QR Code
-              </label>
-              <div class="flex gap-1">
-                <button
-                  type="button"
-                  (click)="downloadQr()"
-                  class="px-2 py-1 text-xs bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-primary-dark)] flex items-center"
-                >
-                  <span class="material-icons mr-1 text-sm">download</span>
-                  Save
-                </button>
-                <button
-                  type="button"
-                  (click)="removeGeneratedQr()"
-                  class="px-2 py-1 text-xs bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] rounded hover:bg-[var(--color-hover)]"
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-            <div class="flex justify-center">
-              <div
-                class="p-2 bg-white rounded border border-[var(--color-border)]"
-              >
-                <qrcode
-                  #qrcodeElem
-                  [qrdata]="qrData"
-                  [width]="120"
-                  [errorCorrectionLevel]="'H'"
-                  [margin]="1"
-                  [colorDark]="'#000000'"
-                  [colorLight]="'#ffffff'"
-                ></qrcode>
-              </div>
-            </div>
+            Limit Amount (₹) <span class="text-[var(--color-danger)]">*</span>
+          </label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] text-base">
+              currency_rupee
+            </span>
+            <input
+              formControlName="limitAmount"
+              type="number"
+              step="any"
+              class="pl-10 w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-font)]"
+              placeholder="Enter limit amount"
+            />
           </div>
-
-          <!-- Amount Fields -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label
-                class="block text-sm font-medium text-[var(--color-font)] mb-1"
-              >
-                Limit Amount (₹)
-                <span class="text-[var(--color-danger)]">*</span>
-              </label>
-              <div class="relative">
-                <span
-                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
-                  >₹</span
-                >
-                <input
-                  formControlName="limitAmount"
-                  type="number"
-                 step="any"
-                  class="pl-8 w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
-                  placeholder="Limit"
-                />
-              </div>
-            </div>
-            <!-- ✅ Capacity Ranges -->
+          <div
+            *ngIf="
+              addUpiForm.get('limitAmount')?.touched && 
+              addUpiForm.get('limitAmount')?.invalid
+            "
+            class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
+          >
+            <span class="material-symbols-outlined mr-1 text-sm">error</span>
+            Valid limit amount required
           </div>
+        </div>
 
-          <!-- ✅ CAPACITY RANGES - Add Modal -->
-          <div class="space-y-2">
-            <label
-              class="text-sm font-semibold text-[var(--color-font)] flex items-center"
+        <!-- CAPACITY RANGES - Add Modal -->
+        <div class="space-y-2">
+          <label
+            class="text-sm font-semibold text-[var(--color-font)] flex items-center"
+          >
+            <span class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base">
+              sync_alt
+            </span>
+            Capacity Range
+            <span class="text-[var(--color-danger)] ml-1">*</span>
+          </label>
+
+          <div
+            *ngFor="let range of capacityRanges; let i = index"
+            class="flex gap-2 items-center"
+          >
+            <!-- FROM -->
+            <input
+              type="number"
+              [value]="range.minRange"
+              (input)="updateFrom(i, $event)"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-surface)] text-[var(--color-font)] focus:ring-1 focus:ring-[var(--color-primary)]"
+              placeholder="From"
+            />
+
+            <!-- TO -->
+            <input
+              type="number"
+              [value]="range.maxRange"
+              (input)="updateTo(i, $event)"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-surface)] text-[var(--color-font)] focus:ring-1 focus:ring-[var(--color-primary)]"
+              placeholder="To"
+            />
+
+            <!-- QUANTITY -->
+            <input
+              type="number"
+              [value]="range.quantity"
+              (input)="updateQuantity(i, $event)"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-surface)] text-[var(--color-font)] focus:ring-1 focus:ring-[var(--color-primary)]"
+              placeholder="Qty"
+            />
+
+            <!-- ADD Button -->
+            <button
+              type="button"
+              *ngIf="i === capacityRanges.length - 1"
+              (click)="addRange()"
+              class="p-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors flex items-center justify-center"
+            >
+              <span class="material-symbols-outlined text-base">add</span>
+            </button>
+
+            <!-- REMOVE Button -->
+            <button
+              type="button"
+              *ngIf="capacityRanges.length > 1"
+              (click)="removeRange(i)"
+              class="p-2 bg-[var(--color-danger)] text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center"
+            >
+              <span class="material-symbols-outlined text-base">remove</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-3 border-t border-[var(--color-border)]">
+          <div class="flex gap-3">
+            <button
+              type="submit"
+              [disabled]="isAddingUpi || addUpiForm.invalid"
+              class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <span
-                class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
+                *ngIf="isAddingUpi"
+                class="material-symbols-outlined animate-spin mr-2"
               >
-                sync_alt
+                autorenew
               </span>
-              Capacity Range
-              <span class="text-[var(--color-danger)] ml-1">*</span>
-            </label>
-
-            <div
-              *ngFor="let range of capacityRanges; let i = index"
-              class="flex gap-2 items-center"
+              <span *ngIf="!isAddingUpi" class="material-symbols-outlined mr-2">
+                add_circle
+              </span>
+              {{ isAddingUpi ? "Adding..." : "Add UPI" }}
+            </button>
+            <button
+              type="button"
+              (click)="closeAddModal()"
+              [disabled]="isAddingUpi"
+              class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] disabled:opacity-50 border border-[var(--color-border)] transition-colors"
             >
-              <!-- FROM -->
-              <input
-                type="number"
-                [value]="range.minRange"
-               
-                (input)="updateFrom(i, $event)"
-                class="w-full px-3 py-2 border rounded-lg text-sm"
-                placeholder="From"
-              />
-
-              <!-- TO -->
-              <input
-                type="number"
-                [value]="range.maxRange"
-                (input)="updateTo(i, $event)"
-                class="w-full px-3 py-2 border rounded-lg text-sm"
-                placeholder="To"
-              />
-
-              <!-- 🔥 QUANTITY -->
-              <input
-                type="number"
-                [value]="range.quantity"
-                (input)="updateQuantity(i, $event)"
-                class="w-full px-3 py-2 border rounded-lg text-sm"
-                placeholder="Qty"
-              />
-
-              <!-- ADD -->
-              <button
-                type="button"
-                *ngIf="i === capacityRanges.length - 1"
-                (click)="addRange()"
-                class="p-2 bg-[var(--color-primary)] text-white rounded"
-              >
-                +
-              </button>
-
-              <!-- REMOVE -->
-              <button
-                type="button"
-                *ngIf="capacityRanges.length > 1"
-                (click)="removeRange(i)"
-                class="p-2 bg-[var(--color-danger)] text-white rounded"
-              >
-                -
-              </button>
-            </div>
+              <span class="material-symbols-outlined mr-2">cancel</span>
+              Cancel
+            </button>
           </div>
-          <!-- Action Buttons -->
-          <div class="pt-3 border-t border-[var(--color-border)]">
-            <div class="flex gap-3">
-              <button
-                type="submit"
-                [disabled]="isAddingUpi || addUpiForm.invalid || !generatedFile"
-                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span
-                  *ngIf="isAddingUpi"
-                  class="material-icons animate-spin mr-2"
-                >
-                  autorenew
-                </span>
-                <span *ngIf="!isAddingUpi" class="material-icons mr-2">
-                  add_circle
-                </span>
-                {{ isAddingUpi ? "Adding..." : "Add UPI" }}
-              </button>
-              <button
-                type="button"
-                (click)="closeAddModal()"
-                [disabled]="isAddingUpi"
-                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] disabled:opacity-50 border border-[var(--color-border)]"
-              >
-                <span class="material-icons mr-2">cancel</span>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   </div>
+</div>
 
   <!-- ========== UPDATE UPI MODAL ========== -->
   <div
@@ -1445,7 +1513,7 @@
         <form (ngSubmit)="submitUpdate()" class="space-y-4">
           <!-- Current QR Display -->
           <div
-            *ngIf="editingUpi?.qrImagePath"
+            *ngIf="editingUpi?.qrImageUrl"
             class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)]"
           >
             <label
@@ -1458,7 +1526,7 @@
                 class="w-20 h-20 bg-white rounded border border-[var(--color-border)] flex items-center justify-center overflow-hidden"
               >
                 <img
-                  [src]="editingUpi.qrImagePath"
+                  [src]="editingUpi.qrImageUrl"
                   alt="Current QR"
                   class="w-16 h-16 object-contain"
                 />
@@ -1484,9 +1552,64 @@
             </div>
           </div>
 
+          <!-- 🔥 QR / UPLOAD TOGGLE -->
+<div class="flex gap-2 mt-3">
+
+  <button
+    type="button"
+    (click)="setUpdateQrMode('generate'); generateQrForUpdate()"
+    [class.bg-[var(--color-primary)]]="updateQrMode === 'generate'"
+    [class.text-white]="updateQrMode === 'generate'"
+    class="px-3 py-2 border rounded-lg"
+  >
+    QR
+  </button>
+
+  <button
+    type="button"
+    (click)="setUpdateQrMode('upload')"
+    [class.bg-[var(--color-primary)]]="updateQrMode === 'upload'"
+    [class.text-white]="updateQrMode === 'upload'"
+    class="px-3 py-2 border rounded-lg"
+  >
+    Upload
+  </button>
+
+</div>
+
+<!-- 🔥 UPLOAD UI -->
+<div *ngIf="updateQrMode === 'upload' && !updateSelectedImage" class="mt-3">
+
+  <div
+    class="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer hover:bg-[var(--color-hover)]"
+    (click)="updateFileInput.click()"
+  >
+    <span class="material-symbols-outlined text-3xl text-[var(--color-muted)]">
+      cloud_upload
+    </span>
+
+    <div class="text-sm mt-2">
+      Click to upload QR image
+    </div>
+
+    <div class="text-xs text-[var(--color-muted)]">
+      PNG, JPG supported
+    </div>
+
+    <input
+      #updateFileInput
+      type="file"
+      accept="image/*"
+      (change)="onUpdateQrFileSelected($event)"
+      class="hidden"
+    />
+  </div>
+
+</div>
+
           <!-- NEW QR DISPLAY -->
           <div
-            *ngIf="updateQrData"
+            *ngIf="updateQrData || updateSelectedImage"
             class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)]"
           >
             <div class="flex justify-between items-center mb-2">
@@ -1495,27 +1618,44 @@
               </label>
               <button
                 type="button"
-                (click)="removeGeneratedUpdateQr()"
+               (click)="removeUpdateQr()"
                 class="px-2 py-1 text-xs bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] rounded hover:bg-[var(--color-hover)]"
               >
                 Remove
               </button>
             </div>
-            <div class="flex justify-center">
-              <div
-                class="p-2 bg-white rounded border border-[var(--color-border)]"
-              >
-                <qrcode
-                  #updateQrcodeElem
-                  [qrdata]="updateQrData"
-                  [width]="120"
-                  [errorCorrectionLevel]="'H'"
-                  [margin]="1"
-                  [colorDark]="'#000000'"
-                  [colorLight]="'#ffffff'"
-                ></qrcode>
-              </div>
-            </div>
+           <div class="flex justify-center">
+  <div class="p-2 bg-white rounded border">
+
+    <!-- Uploaded Image -->
+    <img
+      *ngIf="updateSelectedImage"
+      [src]="updateSelectedImage"
+      class="w-[120px] h-[120px] object-contain"
+    />
+    <div *ngIf="updateManualQrFile"
+     class="text-green-600 text-xs mt-2 text-center flex items-center justify-center gap-1">
+
+  <span class="material-symbols-outlined text-sm">check_circle</span>
+  QR uploaded successfully
+</div>
+
+<div *ngIf="updateManualQrFile"
+     class="text-xs text-gray-500 text-center mt-1">
+
+  {{ updateManualQrFile.name }}
+</div>
+
+    <!-- Generated QR -->
+  <qrcode
+  *ngIf="updateQrData && !updateSelectedImage"
+  #updateQrcodeElem
+  [qrdata]="updateQrData"
+  [width]="120"
+></qrcode>
+
+  </div>
+</div>
           </div>
 
           <!-- UPI ID with inline validation -->
@@ -1542,7 +1682,7 @@
               <span class="material-icons mr-1 text-sm">error</span> Please
               enter a valid UPI ID
             </div>
-            <!-- ✅ Warning message -->
+            <!--  Warning message -->
             <div
               *ngIf="vpaChanged && !newQrGenerated"
               class="text-xs text-[var(--color-warning)] mt-1 flex items-center"
@@ -1607,11 +1747,11 @@
               </button> -->
               <button
                 type="submit"
-                [disabled]="
-                  isSubmitting ||
-                  !isValidUpiId(updateForm.vpa) ||
-                  (vpaChanged && !newQrGenerated)
-                "
+              [disabled]="
+  isSubmitting ||
+  !isValidUpiId(updateForm.vpa) ||
+  (vpaChanged && !newQrGenerated && !updateManualQrFile)
+"
                 class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50"
               >
                 Save Changes
@@ -1634,7 +1774,7 @@
 
   <!-- ========== IMAGE MODAL ========== -->
   <div
-    *ngIf="selectedImage"
+   *ngIf="previewImage"
     class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
     (click)="closeImageModal()"
   >
@@ -1665,7 +1805,7 @@
           class="mb-4 p-3 bg-white rounded border border-[var(--color-border)]"
         >
           <img
-            [src]="selectedImage"
+            [src]="previewImage"
             alt="QR Code"
             class="w-48 h-48 object-contain"
           />
@@ -1690,7 +1830,7 @@
     </div>
   </div>
 
-  <!-- 🔥 LIMIT TIME MODAL -->
+  <!--  LIMIT TIME MODAL -->
   <div
     *ngIf="showLimitModal"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
@@ -1784,6 +1924,5 @@
     (close)="showCapacityModal = false"
   ></app-topup-capacity>
 </div>
-
 
 

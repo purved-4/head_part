@@ -1,153 +1,135 @@
 <!-- profile-dashboard.component.html -->
 <div
-  class="relative  min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100"
+  class="relative h-auto bg-gradient-to-br from-neutral-50 via-white to-neutral-100"
   [attr.data-role]="role"
 >
 
-
   <!-- ========= MAIN TOP NAVBAR (ALWAYS VISIBLE) ========= -->
-<div class="sticky top-0 z-50 bg-white border-b shadow-sm relative">
-  <div class="max-w-7xl mx-auto flex items-center px-4 py-2 gap-3">
+  <div class="sticky top-0 z-50 bg-white border-b shadow-sm relative">
+<div class="max-w-7xl mx-auto flex items-center px-3 py-2 gap-2">
 
-  <!--  CLOSE BUTTON AT START -->
-  <button
-    (click)="closeMobileProfile()"
-    class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 shrink-0"
-  >
-    ✕
-  </button>
+      <!-- CLOSE BUTTON AT START -->
+      <button
+        (click)="closeMobileProfile()"
+        class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 shrink-0 text-xs"
+      >
+        ✕
+      </button>
 
-  <!-- LEFT TABS -->
-  <div class="flex items-center bg-gray-100 p-1.5 rounded-full gap-2 overflow-hidden">
+      <!-- LEFT TABS -->
+      <div class="flex items-center bg-gray-100 p-1 rounded-full gap-1 overflow-hidden">
 
+        <!-- USER -->
+        <button
+          (click)="selectSection('user')"
+          class="group relative flex items-center justify-center sm:justify-start gap-1 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-all duration-200"
+          [class.bg-white]="selectedSection === 'user'"
+          [class.text-blue-600]="selectedSection === 'user'"
+          [class.shadow-sm]="selectedSection === 'user'"
+          [class.text-gray-600]="selectedSection !== 'user'"
+          [class.hover:bg-gray-200]="selectedSection !== 'user'"
+        >
+          <span class="material-icons text-sm">person</span>
+          <span class="hidden sm:inline">User Profile</span>
+          <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap">
+            User Profile
+          </span>
+        </button>
 
-  <!-- USER -->
-  <button
-    (click)="selectSection('user')"
-    class="group relative flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-5 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all duration-200"
-    [class.bg-white]="selectedSection === 'user'"
-    [class.text-blue-600]="selectedSection === 'user'"
-    [class.shadow-sm]="selectedSection === 'user'"
-    [class.text-gray-600]="selectedSection !== 'user'"
-    [class.hover:bg-gray-200]="selectedSection !== 'user'"
-  >
-    <span class="material-icons text-[18px]">person</span>
-    <span class="hidden sm:inline">User Profile</span>
+        <!-- ENTITY -->
+        <button
+          (click)="selectSection('entity')"
+          class="group relative flex items-center justify-center sm:justify-start gap-1 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-all duration-200"
+          [class.bg-white]="selectedSection === 'entity'"
+          [class.text-blue-600]="selectedSection === 'entity'"
+          [class.shadow-sm]="selectedSection === 'entity'"
+          [class.text-gray-600]="selectedSection !== 'entity'"
+          [class.hover:bg-gray-200]="selectedSection !== 'entity'"
+        >
+          <span class="material-icons text-sm">business</span>
+          <span class="hidden sm:inline">Entity</span>
+          <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap">
+            Entity
+          </span>
+        </button>
 
-    <!-- Tooltip -->
-    <span class="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap">
-      User Profile
-    </span>
-  </button>
+        <!-- PORTALS -->
+        <button
+          *ngIf="role === 'HEAD' || role === 'BRANCH'"
+          (click)="selectSection('portal')"
+          class="group relative flex items-center justify-center sm:justify-start gap-1 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-all duration-200"
+          [class.bg-white]="selectedSection === 'portal'"
+          [class.text-blue-600]="selectedSection === 'portal'"
+          [class.shadow-sm]="selectedSection === 'portal'"
+          [class.text-gray-600]="selectedSection !== 'portal'"
+          [class.hover:bg-gray-200]="selectedSection !== 'portal'"
+        >
+          <span class="material-icons text-sm">language</span>
+          <span class="hidden sm:inline">Portals</span>
+          <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap">
+            Portals
+          </span>
+        </button>
 
-  <!-- ENTITY -->
-  <button
-    (click)="selectSection('entity')"
-    class="group relative flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-5 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all duration-200"
-    [class.bg-white]="selectedSection === 'entity'"
-    [class.text-blue-600]="selectedSection === 'entity'"
-    [class.shadow-sm]="selectedSection === 'entity'"
-    [class.text-gray-600]="selectedSection !== 'entity'"
-    [class.hover:bg-gray-200]="selectedSection !== 'entity'"
-  >
-    <span class="material-icons text-[18px]">business</span>
-    <span class="hidden sm:inline">Entity</span>
+        <!-- SECURITY -->
+        <button
+          (click)="selectSection('password')"
+          class="group relative flex items-center justify-center sm:justify-start gap-1 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-all duration-200"
+          [class.bg-white]="selectedSection === 'password'"
+          [class.text-blue-600]="selectedSection === 'password'"
+          [class.shadow-sm]="selectedSection === 'password'"
+          [class.text-gray-600]="selectedSection !== 'password'"
+          [class.hover:bg-gray-200]="selectedSection !== 'password'"
+        >
+          <span class="material-icons text-sm">lock</span>
+          <span class="hidden sm:inline">Security</span>
+          <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap">
+            Security
+          </span>
+        </button>
+      </div>
 
-    <!-- Tooltip -->
-    <span class="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap">
-      Entity
-    </span>
-  </button>
-
-  <!-- PORTALS -->
-  <button
-    *ngIf="role === 'HEAD' || role === 'BRANCH'"
-    (click)="selectSection('portal')"
-    class="group relative flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-5 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all duration-200"
-    [class.bg-white]="selectedSection === 'portal'"
-    [class.text-blue-600]="selectedSection === 'portal'"
-    [class.shadow-sm]="selectedSection === 'portal'"
-    [class.text-gray-600]="selectedSection !== 'portal'"
-    [class.hover:bg-gray-200]="selectedSection !== 'portal'"
-  >
-    <span class="material-icons text-[18px]">language</span>
-    <span class="hidden sm:inline">Portals</span>
-
-    <!-- Tooltip -->
-    <span class="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap">
-      Portals
-    </span>
-  </button>
-
-  <!-- SECURITY -->
-  <button
-    (click)="selectSection('password')"
-    class="group relative flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-5 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all duration-200"
-    [class.bg-white]="selectedSection === 'password'"
-    [class.text-blue-600]="selectedSection === 'password'"
-    [class.shadow-sm]="selectedSection === 'password'"
-    [class.text-gray-600]="selectedSection !== 'password'"
-    [class.hover:bg-gray-200]="selectedSection !== 'password'"
-  >
-    <span class="material-icons text-[18px]">lock</span>
-    <span class="hidden sm:inline">Security</span>
-
-    <!-- Tooltip -->
-    <span class="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap">
-      Security
-    </span>
-  </button>
-
-</div>
-
-    <!-- RIGHT: USER + ROLE -->
-<div class="flex items-center gap-3 ml-auto">
- 
-
-  <!-- USER TEXT -->
-  <div class="text-right leading-tight hidden sm:block">
-    <div class="text-sm font-semibold text-gray-800">
-      {{ user?.name || 'User' }}
-    </div>
-    <div class="text-xs text-gray-500">
-      {{ user?.role?.toUpperCase() || 'USER' }}
+      <!-- RIGHT: USER + ROLE -->
+      <div class="flex items-center gap-2 ml-auto">
+        <div class="text-right leading-tight hidden sm:block">
+          <div class="text-xs font-semibold text-gray-800">
+            {{ user?.name || 'User' }}
+          </div>
+          <div class="text-[9px] text-gray-500">
+            {{ user?.role?.toUpperCase() || 'USER' }}
+          </div>
+        </div>
+        <div class="relative">
+          <div
+            class="w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold shadow-sm text-xs"
+            [style.background]="'var(--color-primary)'"
+          >
+            {{ user?.name?.charAt(0) || 'U' }}
+          </div>
+          <span
+            class="absolute bottom-0 right-0 w-2 h-2 rounded-full border border-white"
+            [style.background]="user?.active ? '#22c55e' : '#ef4444'"
+          ></span>
+        </div>
+      </div>
     </div>
   </div>
-
-  <!-- AVATAR -->
-  <div class="relative">
-    <div
-      class="w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold shadow-sm"
-      [style.background]="'var(--color-primary)'"
-    >
-      {{ user?.name?.charAt(0) || 'U' }}
-    </div>
-
-    <span
-      class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-white"
-      [style.background]="user?.active ? '#22c55e' : '#ef4444'"
-    ></span>
-  </div>
-
-</div>
-</div>
-
-
 
   <!-- Main Content Area -->
-  <main class="p-4 md:p-6 lg:p-8 overflow-x-hidden">
+<main class="p-2 lg:p-3 overflow-x-hidden">
     <div class="max-w-7xl mx-auto">
-      <!-- USER PROFILE Section -->
+
+      <!-- ==================== USER PROFILE Section ==================== -->
       <div *ngIf="selectedSection === 'user'" class="animate-fade-in">
-        <div class="mb-4 md:mb-6">
+        <div class="mb-2">
           <h1
-            class="text-2xl md:text-3xl font-bold mb-1 md:mb-2"
+            class="text-lg md:text-2xl font-bold mb-0.5 md:mb-1"
             [style.color]="'var(--color-font)'"
           >
             Personal Information
           </h1>
           <p
-            class="text-sm md:text-base"
+            class="text-xs md:text-xs"
             [style.color]="'var(--color-muted)'"
           >
             Manage your account details and preferences
@@ -155,18 +137,18 @@
         </div>
 
         <div
-          class="bg-white rounded-2xl border shadow-xl overflow-hidden"
+          class="bg-white rounded-lg border shadow-md overflow-hidden"
           [style.borderColor]="'var(--color-border)'"
         >
-          <div class="p-4 md:p-8">
+          <div class="p-2 md:p-3">
             <!-- Status Bar -->
             <div
-              class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-8 pb-4 md:pb-6 border-b gap-3"
+              class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 pb-2 border-b gap-2"
               [style.borderColor]="'var(--color-border)'"
             >
-              <div class="flex items-center space-x-3">
+              <div class="flex items-center gap-2">
                 <div
-                  class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl font-semibold text-white shadow-md text-sm md:text-base"
+                  class="px-2 py-1 md:px-3 md:py-1.5 rounded-lg font-semibold text-white shadow-sm text-xs md:text-xs"
                   [style.background]="'var(--color-primary)'"
                 >
                   {{
@@ -175,7 +157,7 @@
                   }}
                 </div>
                 <div
-                  class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl border-2 text-sm md:text-base"
+                  class="px-2 py-1 md:px-3 md:py-1.5 rounded-lg border text-xs md:text-xs"
                   [style.background]="
                     user?.active
                       ? 'var(--color-success-light)'
@@ -188,7 +170,7 @@
                   "
                 >
                   <span
-                    class="flex items-center font-semibold"
+                    class="flex items-center font-semibold gap-1"
                     [style.color]="
                       user?.active
                         ? 'var(--color-success)'
@@ -196,7 +178,7 @@
                     "
                   >
                     <span
-                      class="w-2 h-2 rounded-full mr-2 animate-pulse"
+                      class="w-1.5 h-1.5 rounded-full animate-pulse"
                       [style.background]="
                         user?.active
                           ? 'var(--color-success)'
@@ -211,13 +193,13 @@
               </div>
               <div class="text-left sm:text-right">
                 <p
-                  class="text-xs md:text-sm"
+                  class="text-[9px] md:text-xs"
                   [style.color]="'var(--color-muted)'"
                 >
                   Last Active
                 </p>
                 <p
-                  class="font-bold text-sm md:text-base"
+                  class="font-semibold text-xs md:text-xs"
                   [style.color]="'var(--color-font)'"
                 >
                   {{
@@ -230,31 +212,31 @@
             </div>
 
             <!-- Info Cards Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <!-- Card 1: Full Name -->
               <div
-                class="group p-4 md:p-6 rounded-2xl border-2 hover:shadow-lg transition-all duration-300"
+                class="group p-2 rounded-lg border hover:shadow-md transition-all duration-300"
                 [style.borderColor]="'var(--color-border)'"
               >
-                <div class="flex items-start space-x-3 md:space-x-4">
+                <div class="flex items-start gap-2 md:gap-3">
                   <div
-                    class="p-3 md:p-4 rounded-xl shadow-sm"
+                    class="p-1.5 rounded-lg shadow-sm"
                     [style.background]="'var(--color-bg)'"
                   >
                     <span
-                      class="material-icons"
+                      class="material-icons text-sm md:text-base"
                       [style.color]="'var(--color-primary)'"
                       >person</span
                     >
                   </div>
                   <div class="flex-1 min-w-0">
                     <label
-                      class="text-xs font-bold uppercase tracking-wider block mb-1 md:mb-2"
+                      class="text-[9px] font-bold uppercase tracking-wider block mb-0.5"
                       [style.color]="'var(--color-muted)'"
                       >Full Name</label
                     >
                     <p
-                      class="text-base md:text-xl font-bold truncate"
+                      class="text-xs md:text-sm font-semibold truncate"
                       [style.color]="'var(--color-font)'"
                     >
                       {{ user?.name || "Not specified" }}
@@ -265,28 +247,28 @@
 
               <!-- Card 2: Email Address -->
               <div
-                class="group p-4 md:p-6 rounded-2xl border-2 hover:shadow-lg transition-all duration-300"
+                class="group p-2 rounded-lg border hover:shadow-md transition-all duration-300"
                 [style.borderColor]="'var(--color-border)'"
               >
-                <div class="flex items-start space-x-3 md:space-x-4">
+                <div class="flex items-start gap-2 md:gap-3">
                   <div
-                    class="p-3 md:p-4 rounded-xl shadow-sm"
+                    class="p-1.5 rounded-lg shadow-sm"
                     [style.background]="'var(--color-bg)'"
                   >
                     <span
-                      class="material-icons"
+                      class="material-icons text-sm md:text-base"
                       [style.color]="'var(--color-primary)'"
                       >email</span
                     >
                   </div>
                   <div class="flex-1 min-w-0">
                     <label
-                      class="text-xs font-bold uppercase tracking-wider block mb-1 md:mb-2"
+                      class="text-[9px] font-bold uppercase tracking-wider block mb-0.5"
                       [style.color]="'var(--color-muted)'"
                       >Email Address</label
                     >
                     <p
-                      class="text-sm md:text-xl font-bold break-all"
+                      class="text-xs md:text-xs font-semibold break-all"
                       [style.color]="'var(--color-font)'"
                     >
                       {{ user?.email || "Not specified" }}
@@ -297,28 +279,28 @@
 
               <!-- Card 3: Phone Number -->
               <div
-                class="group p-4 md:p-6 rounded-2xl border-2 hover:shadow-lg transition-all duration-300"
+                class="group p-2 rounded-lg border hover:shadow-md transition-all duration-300"
                 [style.borderColor]="'var(--color-border)'"
               >
-                <div class="flex items-start space-x-3 md:space-x-4">
+                <div class="flex items-start gap-2 md:gap-3">
                   <div
-                    class="p-3 md:p-4 rounded-xl shadow-sm"
+                    class="p-1.5 rounded-lg shadow-sm"
                     [style.background]="'var(--color-bg)'"
                   >
                     <span
-                      class="material-icons"
+                      class="material-icons text-sm md:text-base"
                       [style.color]="'var(--color-primary)'"
                       >phone</span
                     >
                   </div>
                   <div class="flex-1 min-w-0">
                     <label
-                      class="text-xs font-bold uppercase tracking-wider block mb-1 md:mb-2"
+                      class="text-[9px] font-bold uppercase tracking-wider block mb-0.5"
                       [style.color]="'var(--color-muted)'"
                       >Phone Number</label
                     >
                     <p
-                      class="text-base md:text-xl font-bold truncate"
+                      class="text-xs md:text-sm font-semibold truncate"
                       [style.color]="'var(--color-font)'"
                     >
                       {{ user?.phone || "Not specified" }}
@@ -331,17 +313,17 @@
         </div>
       </div>
 
-      <!-- ENTITY DETAILS Section -->
+      <!-- ==================== ENTITY DETAILS Section ==================== -->
       <div *ngIf="selectedSection === 'entity'" class="animate-fade-in">
-        <div class="mb-4 md:mb-6">
+        <div class="mb-2">
           <h1
-            class="text-2xl md:text-3xl font-bold mb-1 md:mb-2"
+            class="text-lg md:text-2xl font-bold mb-0.5 md:mb-1"
             [style.color]="'var(--color-font)'"
           >
             Entity Configuration
           </h1>
           <p
-            class="text-sm md:text-base"
+            class="text-xs md:text-xs"
             [style.color]="'var(--color-muted)'"
           >
             Account settings and linked resources
@@ -349,24 +331,24 @@
         </div>
 
         <div
-          class="bg-white rounded-2xl border shadow-xl overflow-hidden mb-6"
+          class="bg-white rounded-lg border shadow-md overflow-hidden mb-4"
           [style.borderColor]="'var(--color-border)'"
         >
-          <div class="p-4 md:p-8">
+          <div class="p-2 md:p-3">
             <!-- Balance Header -->
             <div
-              class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 md:mb-8 pb-4 md:pb-6 border-b gap-4"
+              class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 pb-2 border-b gap-3"
               [style.borderColor]="'var(--color-border)'"
             >
               <div>
                 <p
-                  class="text-xs md:text-sm font-semibold uppercase tracking-wider mb-1"
+                  class="text-[9px] md:text-xs font-semibold uppercase tracking-wider mb-0.5"
                   [style.color]="'var(--color-muted)'"
                 >
                   Available Balance
                 </p>
                 <p
-                  class="text-2xl md:text-4xl font-bold"
+                  class="text-lg md:text-xl font-bold"
                   [style.color]="'var(--color-primary)'"
                 >
                   ₹
@@ -378,50 +360,50 @@
                 </p>
               </div>
               <div
-                class="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center shadow-lg"
+                class="w-12 h-12 md:w-16 md:h-16 rounded-lg flex items-center justify-center shadow-md"
                 [style.background]="'var(--color-primary)'"
               >
-                <span class="material-icons text-white text-4xl md:text-5xl"
+                <span class="material-icons text-white text-2xl md:text-xl"
                   >account_balance_wallet</span
                 >
               </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <!-- Entity Info Card -->
               <div
-                class="p-4 md:p-6 rounded-2xl border-2 hover:shadow-lg transition-all duration-300"
+                class="p-2 rounded-lg border hover:shadow-md transition-all duration-300"
                 [style.borderColor]="'var(--color-border)'"
               >
-                <div class="flex items-center mb-4 md:mb-6">
+                <div class="flex items-center mb-2">
                   <div
-                    class="p-2 md:p-3 rounded-xl mr-3 md:mr-4"
+                    class="p-1.5 md:p-2 rounded-lg mr-2 md:mr-3"
                     [style.background]="'var(--color-bg)'"
                   >
                     <span
-                      class="material-icons"
+                      class="material-icons text-sm md:text-base"
                       [style.color]="'var(--color-primary)'"
                       >business</span
                     >
                   </div>
                   <h4
-                    class="text-lg md:text-xl font-bold"
+                    class="text-sm md:text-base font-semibold"
                     [style.color]="'var(--color-font)'"
                   >
                     Entity Details
                   </h4>
                 </div>
-                <div class="space-y-3 md:space-y-4">
+                <div class="space-y-2 md:space-y-3">
                   <div
-                    class="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 md:p-4 rounded-xl hover:bg-neutral-50 transition-colors duration-200 gap-2"
+                    class="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2 md:p-3 rounded-lg gap-1"
                   >
                     <span
-                      class="text-sm md:text-base font-medium"
+                      class="text-xs md:text-xs font-medium"
                       [style.color]="'var(--color-muted)'"
                       >Entity Name</span
                     >
                     <span
-                      class="font-bold text-sm md:text-base break-words"
+                      class="font-semibold text-xs md:text-xs break-words"
                       [style.color]="'var(--color-font)'"
                       >{{ entityInfo?.name || "Not specified" }}</span
                     >
@@ -431,30 +413,30 @@
 
               <!-- Linked Portals Card -->
               <div
-                class="p-4 md:p-6 rounded-2xl border-2 hover:shadow-lg transition-all duration-300"
+                class="p-2 rounded-lg border hover:shadow-md transition-all duration-300"
                 [style.borderColor]="'var(--color-border)'"
               >
-                <div class="flex items-center justify-between mb-4 md:mb-6">
+                <div class="flex items-center justify-between mb-2">
                   <div class="flex items-center">
                     <div
-                      class="p-2 md:p-3 rounded-xl mr-3 md:mr-4"
+                      class="p-1.5 md:p-2 rounded-lg mr-2 md:mr-3"
                       [style.background]="'var(--color-bg)'"
                     >
                       <span
-                        class="material-icons"
+                        class="material-icons text-sm md:text-base"
                         [style.color]="'var(--color-primary)'"
                         >language</span
                       >
                     </div>
                     <div>
                       <h4
-                        class="text-lg md:text-xl font-bold"
+                        class="text-sm md:text-base font-semibold"
                         [style.color]="'var(--color-font)'"
                       >
                         Portals
                       </h4>
                       <p
-                        class="text-xs md:text-sm"
+                        class="text-[9px] md:text-xs"
                         [style.color]="'var(--color-muted)'"
                       >
                         Connected domains
@@ -462,7 +444,7 @@
                     </div>
                   </div>
                   <div
-                    class="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center font-bold text-white text-base md:text-lg shadow-md"
+                    class="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center font-bold text-white text-xs md:text-sm shadow-sm"
                     [style.background]="'var(--color-primary)'"
                   >
                     {{ (portalInfo || []).length }}
@@ -471,63 +453,61 @@
 
                 <div
                   *ngIf="(portalInfo || []).length === 0"
-                  class="text-center py-6 md:py-8 rounded-xl"
+                  class="text-center py-4 md:py-6 rounded-lg"
                   [style.background]="'var(--color-bg)'"
                 >
                   <span
-                    class="material-icons text-6xl md:text-7xl mb-3 md:mb-4 opacity-40"
+                    class="material-icons text-4xl md:text-5xl mb-2 md:mb-3 opacity-40"
                     [style.color]="'var(--color-primary)'"
                     >language</span
                   >
                   <p
-                    class="text-sm md:text-base font-semibold"
+                    class="text-xs md:text-xs font-semibold"
                     [style.color]="'var(--color-font)'"
                   >
                     No portals configured
                   </p>
                 </div>
 
-                <div
-                  class="space-y-3 max-h-[300px] overflow-hidden pr-2 custom-scrollbar"
-                >
+                <div class="space-y-2 max-h-[260px] overflow-hidden pr-1 custom-scrollbar">
                   <div
                     *ngFor="let w of portalInfo"
-                    class="p-3 md:p-4 rounded-xl border-2 hover:shadow-md transition-all duration-300 group"
+                    class="p-2 md:p-3 rounded-lg border hover:shadow-sm transition-all duration-300"
                     [style.borderColor]="'var(--color-border)'"
                   >
                     <div
-                      class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
+                      class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2"
                     >
                       <div class="flex items-center flex-1 min-w-0">
                         <div
-                          class="p-2 rounded-lg mr-3"
+                          class="p-1.5 rounded-md mr-2"
                           [style.background]="'var(--color-bg)'"
                         >
                           <span
-                            class="material-icons"
+                            class="material-icons text-xs md:text-sm"
                             [style.color]="'var(--color-primary)'"
                             >language</span
                           >
                         </div>
                         <div class="min-w-0">
                           <p
-                            class="font-bold text-sm md:text-base truncate"
+                            class="font-semibold text-xs md:text-xs truncate"
                             [style.color]="'var(--color-font)'"
                           >
                             {{ w.portalDomain }}
                           </p>
                         </div>
                       </div>
-                      <div class="flex items-center space-x-3 ml-0 sm:ml-4">
+                      <div class="flex items-center gap-2 ml-0 sm:ml-3">
                         <div class="text-center">
                           <p
-                            class="text-xs mb-1"
+                            class="text-[9px] md:text-[9px] mb-0.5"
                             [style.color]="'var(--color-muted)'"
                           >
                             Topup
                           </p>
                           <p
-                            class="font-bold text-sm"
+                            class="font-semibold text-xs"
                             [style.color]="'var(--color-success)'"
                           >
                             {{ w.topupPercentage || 0 }}%
@@ -535,27 +515,27 @@
                         </div>
                         <div class="text-center">
                           <p
-                            class="text-xs mb-1"
+                            class="text-[9px] md:text-[9px] mb-0.5"
                             [style.color]="'var(--color-muted)'"
                           >
                             Payout
                           </p>
                           <p
-                            class="font-bold text-sm"
+                            class="font-semibold text-xs"
                             [style.color]="'var(--color-info)'"
                           >
                             {{ w.payoutPercentage || 0 }}%
                           </p>
                         </div>
-                         <div class="text-center">
+                        <div class="text-center">
                           <p
-                            class="text-xs mb-1"
+                            class="text-[9px] md:text-[9px] mb-0.5"
                             [style.color]="'var(--color-muted)'"
                           >
                             FTT
                           </p>
                           <p
-                            class="font-bold text-sm"
+                            class="font-semibold text-xs"
                             [style.color]="'var(--color-success)'"
                           >
                             {{ w.fttPercentage || 0 }}%
@@ -571,21 +551,21 @@
         </div>
       </div>
 
-      <!-- PORTALS Section -->
+      <!-- ==================== PORTALS Section ==================== -->
       <div *ngIf="selectedSection === 'portal'" class="animate-fade-in">
         <!-- Header -->
         <div
-          class="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+          class="mb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
         >
           <div>
             <h1
-              class="text-2xl md:text-3xl font-bold mb-1 md:mb-2"
+              class="text-lg md:text-2xl font-bold mb-0.5 md:mb-1"
               [style.color]="'var(--color-font)'"
             >
               Portal Configurations
             </h1>
             <p
-              class="text-sm md:text-base"
+              class="text-xs md:text-xs"
               [style.color]="'var(--color-muted)'"
             >
               Manage settings for each connected portal
@@ -593,7 +573,7 @@
           </div>
           <div class="flex items-center">
             <div
-              class="px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-white font-bold shadow-md text-sm md:text-base"
+              class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-white font-semibold shadow-sm text-xs md:text-xs"
               [style.background]="'var(--color-primary)'"
             >
               {{ (portalInfo || []).length }} Portal{{
@@ -606,28 +586,28 @@
         <!-- Empty State -->
         <div
           *ngIf="(portalInfo || []).length === 0"
-          class="bg-white rounded-2xl border p-8 md:p-16 text-center shadow-xl"
+          class="bg-white rounded-lg border p-6 md:p-12 text-center shadow-md"
           [style.borderColor]="'var(--color-border)'"
         >
           <div class="max-w-md mx-auto">
             <div
-              class="w-20 h-20 md:w-28 md:h-28 rounded-full mx-auto mb-4 md:mb-6 flex items-center justify-center shadow-lg"
+              class="w-10 h-10 md:w-20 md:h-20 rounded-full mx-auto mb-2 flex items-center justify-center shadow-md"
               [style.background]="'var(--color-bg)'"
             >
               <span
-                class="material-icons text-5xl md:text-6xl"
+                class="material-icons text-xl md:text-4xl"
                 [style.color]="'var(--color-primary)'"
                 >language</span
               >
             </div>
             <h3
-              class="text-xl md:text-2xl font-bold mb-2 md:mb-3"
+              class="text-sm font-bold mb-1 md:mb-2"
               [style.color]="'var(--color-font)'"
             >
               No Portals Configured
             </h3>
             <p
-              class="text-sm md:text-base mb-6 md:mb-8"
+              class="text-xs md:text-xs mb-2"
               [style.color]="'var(--color-muted)'"
             >
               Add portals to start configuring processing times, topup
@@ -637,33 +617,33 @@
         </div>
 
         <!-- Portal Cards -->
-        <div class="space-y-4 md:space-y-6">
+        <div class="space-y-3 md:space-y-4">
           <div
             *ngFor="let w of portalInfo; let i = index"
-            class="bg-white rounded-2xl border shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl"
+            class="bg-white rounded-lg border shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg"
             [style.borderColor]="'var(--color-border)'"
           >
             <!-- Portal Header -->
             <div
-              class="p-4 md:p-6 cursor-pointer hover:bg-opacity-90 transition-all duration-300"
+              class="p-2 cursor-pointer transition-all duration-300"
               [style.background]="'var(--color-bg)'"
               (click)="togglePortal(w.portalId)"
             >
               <div
-                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
-                <div class="flex items-center space-x-3 md:space-x-5">
+                <div class="flex items-center gap-2 md:gap-3">
                   <div class="relative flex-shrink-0">
                     <div
-                      class="w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-white shadow-xl transform transition-transform duration-300 hover:scale-105"
+                      class="w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center text-white shadow-md"
                       [style.background]="'var(--color-primary)'"
                     >
-                      <span class="material-icons text-2xl md:text-3xl"
+                      <span class="material-icons text-lg md:text-2xl"
                         >language</span
                       >
                     </div>
                     <div
-                      class="absolute -top-2 -right-2 w-5 h-5 md:w-7 md:h-7 rounded-full border-2 border-white text-xs flex items-center justify-center font-bold shadow-md text-white"
+                      class="absolute -top-1.5 -right-1.5 w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-white text-[9px] md:text-[9px] flex items-center justify-center font-semibold shadow-sm text-white"
                       [style.background]="'var(--color-primary)'"
                     >
                       {{ i + 1 }}
@@ -671,14 +651,14 @@
                   </div>
                   <div>
                     <h3
-                      class="text-lg md:text-2xl font-bold mb-1 break-words"
+                      class="text-sm md:text-base font-bold mb-0.5 break-words"
                       [style.color]="'var(--color-font)'"
                     >
                       {{ w.portalDomain }}
                     </h3>
-                    <div class="flex flex-wrap items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-1">
                       <span
-                        class="px-2 py-0.5 md:px-3 md:py-1 rounded-lg text-xs font-semibold"
+                        class="px-2 py-1 md:px-2 md:py-0.5 rounded-md text-[9px] md:text-[9px] font-semibold"
                         [style.background]="'var(--color-bg)'"
                         [style.color]="'var(--color-primary)'"
                       >
@@ -689,69 +669,70 @@
                 </div>
 
                 <div
-                  class="flex items-center justify-between sm:justify-end space-x-4 md:space-x-6"
+                  class="flex items-center justify-between sm:justify-end gap-2 md:gap-3"
                 >
                   <div
-                    class="text-center px-3 py-2 md:px-4 md:py-3 rounded-xl border-2"
+                    class="text-center px-2 py-1.5 md:px-3 md:py-2 rounded-lg border"
                     [style.borderColor]="'var(--color-success)'"
-                    [style.backgroundColor]="'var(--color-success-light)'"
+                    [style.background]="'var(--color-success-light)'"
                   >
                     <p
-                      class="text-xs font-semibold mb-1"
+                      class="text-[9px] md:text-[9px] font-semibold mb-0.5"
                       [style.color]="'var(--color-success)'"
                     >
                       Topup
                     </p>
                     <p
-                      class="text-lg md:text-2xl font-bold"
+                      class="text-xs md:text-sm font-bold"
                       [style.color]="'var(--color-success)'"
                     >
                       {{ w.topupPercentage || 0 }}%
                     </p>
                   </div>
                   <div
-                    class="text-center px-3 py-2 md:px-4 md:py-3 rounded-xl border-2"
+                    class="text-center px-2 py-1.5 md:px-3 md:py-2 rounded-lg border"
                     [style.borderColor]="'var(--color-info)'"
-                    [style.backgroundColor]="'var(--color-info-light)'"
+                    [style.background]="'var(--color-info-light)'"
                   >
                     <p
-                      class="text-xs font-semibold mb-1"
+                      class="text-[9px] md:text-[9px] font-semibold mb-0.5"
                       [style.color]="'var(--color-info)'"
                     >
                       Payout
                     </p>
                     <p
-                      class="text-lg md:text-2xl font-bold"
+                      class="text-xs md:text-sm font-bold"
                       [style.color]="'var(--color-info)'"
                     >
                       {{ w.payoutPercentage || 0 }}%
                     </p>
                   </div>
-
-                    <div
-                    class="text-center px-3 py-2 md:px-4 md:py-3 rounded-xl border-2"
+                  <div
+                    class="text-center px-2 py-1.5 md:px-3 md:py-2 rounded-lg border"
                     [style.borderColor]="'var(--color-success)'"
-                    [style.backgroundColor]="'var(--color-success-light)'"
+                    [style.background]="'var(--color-success-light)'"
                   >
                     <p
-                      class="text-xs font-semibold mb-1"
+                      class="text-[9px] md:text-[9px] font-semibold mb-0.5"
                       [style.color]="'var(--color-success)'"
                     >
                       FTT
                     </p>
                     <p
-                      class="text-lg md:text-2xl font-bold"
+                      class="text-xs md:text-sm font-bold"
                       [style.color]="'var(--color-success)'"
                     >
                       {{ w.fttPercentage || 0 }}%
                     </p>
                   </div>
                   <div
-                    class="w-8 h-8 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-all duration-300 shadow-md flex-shrink-0"
+                    class="w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center transition-all duration-300 shadow-sm flex-shrink-0"
                     [class.rotate-180]="isPortalExpanded(w.portalId)"
                     [style.background]="'var(--color-primary)'"
                   >
-                    <span class="material-icons text-white">expand_more</span>
+                    <span class="material-icons text-white text-xs md:text-sm"
+                      >expand_more</span
+                    >
                   </div>
                 </div>
               </div>
@@ -760,54 +741,56 @@
             <!-- Expanded Details -->
             <div
               *ngIf="isPortalExpanded(w.portalId)"
-              class="border-t-2"
+              class="border-t"
               [style.borderColor]="'var(--color-border)'"
             >
               <div
-                class="p-4 md:p-8 space-y-6"
+                class="p-2 md:p-3 space-y-4"
                 [style.background]="'var(--color-bg)'"
               >
                 <!-- 1. PROCESSING TIME TABLE -->
                 <div
-                  class="rounded-2xl border-2 overflow-hidden"
+                  class="rounded-lg border overflow-hidden"
                   [style.borderColor]="'var(--color-border)'"
                 >
                   <div
-                    class="px-4 py-3"
+                    class="px-3 py-2"
                     [style.background]="'var(--color-primary)'"
                     [style.color]="'white'"
                   >
                     <h4
-                      class="font-bold text-base md:text-lg flex items-center gap-2"
+                      class="font-semibold text-xs md:text-sm flex items-center gap-1"
                     >
-                      <span class="material-icons">schedule</span> Processing
-                      Time
+                      <span class="material-icons text-sm md:text-base"
+                        >schedule</span
+                      >
+                      Processing Time
                     </h4>
                   </div>
-                  <div class="p-4">
+                  <div class="p-3">
                     <div
                       *ngIf="w.processingTime?.length; else noProcessingTime"
                       class="overflow-x-auto"
                     >
-                      <table class="min-w-full text-sm">
+                      <table class="min-w-full text-xs">
                         <thead>
                           <tr
-                            class="border-b-2"
+                            class="border-b"
                             [style.borderColor]="'var(--color-border)'"
                           >
                             <th
-                              class="py-2 px-3 text-left font-semibold"
+                              class="py-1 px-1.5 text-left font-semibold"
                               [style.color]="'var(--color-font)'"
                             >
                               Amount Range (₹)
                             </th>
                             <th
-                              class="py-2 px-3 text-left font-semibold"
+                              class="py-1 px-1.5 text-left font-semibold"
                               [style.color]="'var(--color-font)'"
                             >
                               Time (mins)
                             </th>
-                           </tr>
+                          </tr>
                         </thead>
                         <tbody>
                           <tr
@@ -819,7 +802,7 @@
                             [style.borderColor]="'var(--color-border)'"
                           >
                             <td
-                              class="py-2 px-3"
+                              class="py-1 px-1.5"
                               [style.color]="'var(--color-font)'"
                             >
                               ₹{{
@@ -835,7 +818,7 @@
                               }}
                             </td>
                             <td
-                              class="py-2 px-3 font-bold"
+                              class="py-1 px-1.5 font-semibold"
                               [style.color]="'var(--color-primary)'"
                             >
                               {{ e.time ?? "-" }}
@@ -846,11 +829,11 @@
                     </div>
                     <ng-template #noProcessingTime>
                       <div
-                        class="text-center py-6 rounded-xl"
+                        class="text-center py-3 rounded-lg"
                         [style.background]="'var(--color-bg)'"
                       >
                         <p
-                          class="text-sm"
+                          class="text-xs"
                           [style.color]="'var(--color-muted)'"
                         >
                           No processing time configured
@@ -861,50 +844,52 @@
                 </div>
 
                 <!-- 2. TOPUP STRENGTHS (UPI + BANK) -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <!-- UPI Topup Table -->
                   <div
-                    class="rounded-2xl border-2 overflow-hidden"
+                    class="rounded-lg border overflow-hidden"
                     [style.borderColor]="'var(--color-success)'"
                   >
                     <div
-                      class="px-4 py-3"
+                      class="px-3 py-2"
                       [style.background]="'var(--color-success)'"
                       [style.color]="'white'"
                     >
                       <h4
-                        class="font-bold text-sm md:text-base flex items-center gap-2"
+                        class="font-semibold text-xs md:text-xs flex items-center gap-1"
                       >
-                        <span class="material-icons">phone_android</span> UPI
-                        Topup Strengths
+                        <span class="material-icons text-xs md:text-sm"
+                          >phone_android</span
+                        >
+                        UPI Topup Strengths
                       </h4>
                     </div>
-                    <div class="p-4">
+                    <div class="p-3">
                       <ng-container
                         *ngIf="
-                          w._raw?.topupsTimeStrength?.upi?.timeRanges ||
-                          w.topupsTimeStrength ||
-                          [] as upiList
+                          (w._raw?.topupsTimeStrength?.upi?.timeRanges ||
+                            w.topupsTimeStrength ||
+                            []) as upiList
                         "
                       >
                         <div
                           *ngIf="upiList.length; else noUpiTopup"
                           class="overflow-x-auto"
                         >
-                          <table class="min-w-full text-sm">
+                          <table class="min-w-full text-xs">
                             <thead>
                               <tr
-                                class="border-b-2"
+                                class="border-b"
                                 [style.borderColor]="'var(--color-border)'"
                               >
                                 <th
-                                  class="py-2 px-3 text-left font-semibold"
+                                  class="py-1 px-1.5 text-left font-semibold"
                                   [style.color]="'var(--color-font)'"
                                 >
                                   Minutes Range
                                 </th>
                                 <th
-                                  class="py-2 px-3 text-left font-semibold"
+                                  class="py-1 px-1.5 text-left font-semibold"
                                   [style.color]="'var(--color-font)'"
                                 >
                                   %
@@ -918,7 +903,7 @@
                                 [style.borderColor]="'var(--color-border)'"
                               >
                                 <td
-                                  class="py-2 px-3"
+                                  class="py-1 px-1.5"
                                   [style.color]="'var(--color-font)'"
                                 >
                                   {{
@@ -934,7 +919,7 @@
                                   }}
                                 </td>
                                 <td
-                                  class="py-2 px-3 font-bold"
+                                  class="py-1 px-1.5 font-semibold"
                                   [style.color]="'var(--color-success)'"
                                 >
                                   {{ t.percentage ?? t.per }}%
@@ -945,11 +930,11 @@
                         </div>
                         <ng-template #noUpiTopup>
                           <div
-                            class="text-center py-4 rounded-xl"
+                            class="text-center py-3 rounded-lg"
                             [style.background]="'var(--color-bg)'"
                           >
                             <p
-                              class="text-xs"
+                              class="text-[9px]"
                               [style.color]="'var(--color-muted)'"
                             >
                               Not configured
@@ -962,48 +947,50 @@
 
                   <!-- Bank Topup Table -->
                   <div
-                    class="rounded-2xl border-2 overflow-hidden"
+                    class="rounded-lg border overflow-hidden"
                     [style.borderColor]="'var(--color-info)'"
                   >
                     <div
-                      class="px-4 py-3"
+                      class="px-3 py-2"
                       [style.background]="'var(--color-info)'"
                       [style.color]="'white'"
                     >
                       <h4
-                        class="font-bold text-sm md:text-base flex items-center gap-2"
+                        class="font-semibold text-xs md:text-xs flex items-center gap-1"
                       >
-                        <span class="material-icons">account_balance</span>
+                        <span class="material-icons text-xs md:text-sm"
+                          >account_balance</span
+                        >
                         Bank Topup Strengths
                       </h4>
                     </div>
-                    <div class="p-4">
+                    <div class="p-3">
                       <ng-container
                         *ngIf="
-                          w._raw?.topupsTimeStrength?.bank?.timeRanges ||
-                          w._raw?.bankTimeStrength ||
-                          w.bankTimeStrength ||
-                          [] as bankList
+                          (w._raw?.topupsTimeStrength?.bank?.timeRanges ||
+                            w._raw?.bankTimeStrength ||
+                            w.bankTimeStrength ||
+                            []) as bankList
                         "
                       >
                         <div
                           *ngIf="bankList.length; else noBankTopup"
                           class="overflow-x-auto"
                         >
-                          <table class="min-w-full text-sm">
+                          <table class="min-w-full text-xs">
                             <thead>
                               <tr
-                                class="border-b-2"
+                                class="border-b"
                                 [style.borderColor]="'var(--color-border)'"
                               >
                                 <th
-                                  class="py-2 px-3 text-left font-semibold"
+                                  class="py-1 px-1.5 text-left font-semibold"
                                   [style.color]="'var(--color-font)'"
                                 >
                                   Minutes Range
                                 </th>
                                 <th
-                                  class="py-2 px-3 text-left font-semibold"
+                                  class="py-1 px-1.5 text-left font-semibold"
                                   [style.color]="'var(--color-font)'"
                                 >
                                   %
@@ -1017,7 +1004,7 @@
                                 [style.borderColor]="'var(--color-border)'"
                               >
                                 <td
-                                  class="py-2 px-3"
+                                  class="py-1 px-1.5"
                                   [style.color]="'var(--color-font)'"
                                 >
                                   {{
@@ -1033,7 +1020,7 @@
                                   }}
                                 </td>
                                 <td
-                                  class="py-2 px-3 font-bold"
+                                  class="py-1 px-1.5 font-semibold"
                                   [style.color]="'var(--color-info)'"
                                 >
                                   {{ t.percentage ?? t.per }}%
@@ -1044,11 +1031,11 @@
                         </div>
                         <ng-template #noBankTopup>
                           <div
-                            class="text-center py-4 rounded-xl"
+                            class="text-center py-3 rounded-lg"
                             [style.background]="'var(--color-bg)'"
                           >
                             <p
-                              class="text-xs"
+                              class="text-[9px]"
                               [style.color]="'var(--color-muted)'"
                             >
                               Not configured
@@ -1060,56 +1047,58 @@
                   </div>
                 </div>
 
-                <!-- 3. PAYOUT CONFIGURATION TABLE -->
+                <!-- 3. PAYOUT CONFIGURATION TABLE (FIXED) -->
                 <div
-                  class="rounded-2xl border-2 overflow-hidden"
+                  class="rounded-lg border overflow-hidden"
                   [style.borderColor]="'var(--color-warning)'"
                 >
                   <div
-                    class="px-4 py-3"
+                    class="px-3 py-2"
                     [style.background]="'var(--color-warning)'"
                     [style.color]="'white'"
                   >
                     <h4
-                      class="font-bold text-base md:text-lg flex items-center gap-2"
+                      class="font-semibold text-xs md:text-sm flex items-center gap-1"
                     >
-                      <span class="material-icons">payments</span> Payout
-                      Configuration
+                      <span class="material-icons text-sm md:text-base"
+                        >payments</span
+                      >
+                      Payout Configuration
                     </h4>
                   </div>
-                  <div class="p-4">
+                  <div class="p-3">
                     <ng-container
                       *ngIf="
-                        w.payoutsTimeStrength?.amountRanges ||
-                        w._raw?.payoutsTimeStrength?.amountRanges ||
-                        w.payoutsTimeStrength ||
-                        [] as amtList
+                        (w.payoutsTimeStrength?.amountRanges ||
+                          w._raw?.payoutsTimeStrength?.amountRanges ||
+                          w.payoutsTimeStrength ||
+                          []) as amtList
                       "
                     >
                       <div
                         *ngIf="amtList.length; else noPayoutConfig"
                         class="overflow-x-auto"
                       >
-                        <table class="min-w-full text-sm">
+                        <table class="min-w-full text-xs">
                           <thead>
                             <tr
-                              class="border-b-2"
+                              class="border-b"
                               [style.borderColor]="'var(--color-border)'"
                             >
                               <th
-                                class="py-2 px-3 text-left font-semibold"
+                                class="py-1 px-1.5 text-left font-semibold"
                                 [style.color]="'var(--color-font)'"
                               >
                                 Amount Range (₹)
                               </th>
                               <th
-                                class="py-2 px-3 text-left font-semibold"
+                                class="py-1 px-1.5 text-left font-semibold"
                                 [style.color]="'var(--color-font)'"
                               >
                                 Minutes Range
                               </th>
                               <th
-                                class="py-2 px-3 text-left font-semibold"
+                                class="py-1 px-1.5 text-left font-semibold"
                                 [style.color]="'var(--color-font)'"
                               >
                                 Percentage
@@ -1137,7 +1126,7 @@
                                   <td
                                     *ngIf="k === 0"
                                     [attr.rowspan]="a.timeRanges.length"
-                                    class="py-2 px-3 font-bold align-top"
+                                    class="py-1 px-1.5 font-semibold align-top"
                                     [style.color]="'var(--color-warning)'"
                                   >
                                     ₹{{
@@ -1153,7 +1142,7 @@
                                     }}
                                   </td>
                                   <td
-                                    class="py-2 px-3"
+                                    class="py-1 px-1.5"
                                     [style.color]="'var(--color-font)'"
                                   >
                                     {{
@@ -1169,7 +1158,7 @@
                                     }}
                                   </td>
                                   <td
-                                    class="py-2 px-3 font-bold"
+                                    class="py-1 px-1.5 font-semibold"
                                     [style.color]="'var(--color-warning)'"
                                   >
                                     {{ tr.percentage ?? tr.per }}%
@@ -1182,7 +1171,7 @@
                                   [style.borderColor]="'var(--color-border)'"
                                 >
                                   <td
-                                    class="py-2 px-3 font-bold"
+                                    class="py-1 px-1.5 font-semibold"
                                     [style.color]="'var(--color-warning)'"
                                   >
                                     ₹{{
@@ -1197,20 +1186,18 @@
                                         : a.maxAmount
                                     }}
                                   </td>
-                                  <td class="py-2 px-3">
+                                  <td class="py-1 px-1.5">
                                     <span
-                                      class="px-2 py-1 text-xs font-bold rounded-full"
+                                      class="px-2 py-1 text-[9px] font-semibold rounded-full text-white"
                                       [style.background]="
                                         'var(--color-warning)'
                                       "
-                                      [style.color]="'white'"
                                     >
                                       {{ a.isUpto ? "Upto" : "Fixed" }}
                                     </span>
                                   </td>
                                   <td
-                                    colspan="2"
-                                    class="py-2 px-3 text-center italic"
+                                    class="py-1 px-1.5 text-center italic"
                                     [style.color]="'var(--color-muted)'"
                                   >
                                     No time ranges
@@ -1223,11 +1210,11 @@
                       </div>
                       <ng-template #noPayoutConfig>
                         <div
-                          class="text-center py-6 rounded-xl"
+                          class="text-center py-4 rounded-lg"
                           [style.background]="'var(--color-bg)'"
                         >
                           <p
-                            class="text-sm"
+                            class="text-xs"
                             [style.color]="'var(--color-muted)'"
                           >
                             No payout configuration
@@ -1243,18 +1230,18 @@
         </div>
       </div>
 
-      <!-- CHANGE PASSWORD Section -->
+      <!-- ==================== CHANGE PASSWORD Section ==================== -->
       <div *ngIf="selectedSection === 'password'" class="animate-fade-in">
         <div class="max-w-2xl mx-auto">
-          <div class="mb-3 md:mb-4">
+          <div class="mb-2 md:mb-3">
             <h1
-              class="text-xl md:text-2xl font-bold mb-0.5"
+              class="text-sm font-bold mb-0.5"
               [style.color]="'var(--color-font)'"
             >
               Security Settings
             </h1>
             <p
-              class="text-xs md:text-sm"
+              class="text-[9px] md:text-xs"
               [style.color]="'var(--color-muted)'"
             >
               Update your password
@@ -1262,42 +1249,42 @@
           </div>
 
           <div
-            class="bg-white rounded-xl border shadow-md overflow-hidden"
+            class="bg-white rounded-lg border shadow-md overflow-hidden"
             [style.borderColor]="'var(--color-border)'"
           >
-            <div class="p-4 md:p-6">
+            <div class="p-2 md:p-3">
               <div
-                class="flex items-center justify-between mb-4 pb-3 border-b"
+                class="flex items-center justify-between mb-3 pb-2 border-b"
                 [style.borderColor]="'var(--color-border)'"
               >
                 <div>
                   <h3
-                    class="text-base md:text-lg font-bold"
+                    class="text-xs md:text-sm font-semibold"
                     [style.color]="'var(--color-font)'"
                   >
                     Change Password
                   </h3>
-                  <p class="text-xs" [style.color]="'var(--color-muted)'">
+                  <p class="text-[9px]" [style.color]="'var(--color-muted)'">
                     Secure your account
                   </p>
                 </div>
                 <div
-                  class="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0"
+                  class="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center text-white shadow-sm flex-shrink-0"
                   [style.background]="'var(--color-primary)'"
                 >
-                  <span class="material-icons">lock</span>
+                  <span class="material-icons text-sm md:text-base">lock</span>
                 </div>
               </div>
 
               <form
                 (ngSubmit)="changePassword()"
-                class="space-y-3 md:space-y-4"
+                class="space-y-2 md:space-y-3"
                 #pwForm="ngForm"
               >
                 <div>
                   <label
                     for="oldPassword"
-                    class="block text-xs font-semibold mb-1"
+                    class="block text-[9px] font-semibold mb-0.5"
                     [style.color]="'var(--color-font)'"
                     >Current Password</label
                   >
@@ -1309,14 +1296,14 @@
                       name="oldPassword"
                       placeholder="Enter current password"
                       required
-                      class="w-full px-3 py-2 md:px-4 md:py-2.5 pl-9 md:pl-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent text-sm"
+                      class="w-full px-3 py-1.5 md:px-4 md:py-2 pl-8 md:pl-9 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent text-xs"
                       [style.borderColor]="'var(--color-border)'"
                     />
                     <div
-                      class="absolute left-3 top-1/2 transform -translate-y-1/2"
+                      class="absolute left-2.5 top-1/2 transform -translate-y-1/2"
                     >
                       <span
-                        class="material-icons text-sm"
+                        class="material-icons text-xs md:text-xs"
                         [style.color]="'var(--color-muted)'"
                         >lock</span
                       >
@@ -1327,7 +1314,7 @@
                 <div>
                   <label
                     for="newPassword"
-                    class="block text-xs font-semibold mb-1"
+                    class="block text-[9px] font-semibold mb-0.5"
                     [style.color]="'var(--color-font)'"
                     >New Password</label
                   >
@@ -1339,14 +1326,14 @@
                       name="newPassword"
                       placeholder="Enter new password"
                       required
-                      class="w-full px-3 py-2 md:px-4 md:py-2.5 pl-9 md:pl-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent text-sm"
+                      class="w-full px-3 py-1.5 md:px-4 md:py-2 pl-8 md:pl-9 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent text-xs"
                       [style.borderColor]="'var(--color-border)'"
                     />
                     <div
-                      class="absolute left-3 top-1/2 transform -translate-y-1/2"
+                      class="absolute left-2.5 top-1/2 transform -translate-y-1/2"
                     >
                       <span
-                        class="material-icons text-sm"
+                        class="material-icons text-xs md:text-xs"
                         [style.color]="'var(--color-muted)'"
                         >lock</span
                       >
@@ -1357,7 +1344,7 @@
                 <div>
                   <label
                     for="confirmPassword"
-                    class="block text-xs font-semibold mb-1"
+                    class="block text-[9px] font-semibold mb-0.5"
                     [style.color]="'var(--color-font)'"
                     >Confirm Password</label
                   >
@@ -1369,14 +1356,14 @@
                       name="confirmPassword"
                       placeholder="Confirm new password"
                       required
-                      class="w-full px-3 py-2 md:px-4 md:py-2.5 pl-9 md:pl-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent text-sm"
+                      class="w-full px-3 py-1.5 md:px-4 md:py-2 pl-8 md:pl-9 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent text-xs"
                       [style.borderColor]="'var(--color-border)'"
                     />
                     <div
-                      class="absolute left-3 top-1/2 transform -translate-y-1/2"
+                      class="absolute left-2.5 top-1/2 transform -translate-y-1/2"
                     >
                       <span
-                        class="material-icons text-sm"
+                        class="material-icons text-xs md:text-xs"
                         [style.color]="'var(--color-muted)'"
                         >lock</span
                       >
@@ -1386,26 +1373,28 @@
 
                 <div
                   *ngIf="errorMessage"
-                  class="p-2 md:p-3 rounded-lg border text-xs md:text-sm"
-                  [style.backgroundColor]="'var(--color-danger-light)'"
+                  class="p-1.5 md:p-2 rounded-lg border text-[9px] md:text-xs"
+                  [style.background]="'var(--color-danger-light)'"
                   [style.borderColor]="'var(--color-danger)'"
                   [style.color]="'var(--color-danger)'"
                 >
-                  <div class="flex items-center">
-                    <span class="material-icons mr-2 text-sm">error</span>
+                  <div class="flex items-center gap-1">
+                    <span class="material-icons text-xs md:text-xs"
+                      >error</span
+                    >
                     <span>{{ errorMessage }}</span>
                   </div>
                 </div>
 
                 <div
                   *ngIf="successMessage"
-                  class="p-2 md:p-3 rounded-lg border text-xs md:text-sm"
-                  [style.backgroundColor]="'var(--color-success-light)'"
+                  class="p-1.5 md:p-2 rounded-lg border text-[9px] md:text-xs"
+                  [style.background]="'var(--color-success-light)'"
                   [style.borderColor]="'var(--color-success)'"
                   [style.color]="'var(--color-success)'"
                 >
-                  <div class="flex items-center">
-                    <span class="material-icons mr-2 text-sm"
+                  <div class="flex items-center gap-1">
+                    <span class="material-icons text-xs md:text-xs"
                       >check_circle</span
                     >
                     <span>{{ successMessage }}</span>
@@ -1415,11 +1404,13 @@
                 <button
                   type="submit"
                   [disabled]="pwForm.invalid"
-                  class="w-full py-2.5 md:py-3 px-4 rounded-lg font-bold text-white shadow-md hover:shadow-lg transform hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+                  class="w-full py-2 md:py-2.5 px-3 rounded-lg font-semibold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs md:text-xs"
                   [style.background]="'var(--color-primary)'"
                 >
-                  <span class="flex items-center justify-center">
-                    <span class="material-icons mr-2">update</span>
+                  <span class="flex items-center justify-center gap-1">
+                    <span class="material-icons text-xs md:text-sm"
+                      >update</span
+                    >
                     Update Password
                   </span>
                 </button>
@@ -1431,3 +1422,4 @@
     </div>
   </main>
 </div>
+

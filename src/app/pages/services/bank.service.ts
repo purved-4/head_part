@@ -6,7 +6,7 @@ import { catchError, map, Observable, throwError } from "rxjs";
 @Injectable({
   providedIn: "root",
 })
-      export class BankService {  
+export class BankService {
   constructor(private http: HttpClient) {}
 
   addBank(upi: any): Observable<any> {
@@ -37,10 +37,7 @@ import { catchError, map, Observable, throwError } from "rxjs";
     );
   }
 
-  getBankDataWithEntityIdAndPortalId(
-    id: any,
-    portalId: any,
-  ): Observable<any> {
+  getBankDataWithEntityIdAndPortalId(id: any, portalId: any): Observable<any> {
     return this.http
       .get<any>(
         `${baseUrl}/banks/getAllByEntityIdAndPortalId/${id}/${portalId}`,
@@ -62,7 +59,7 @@ import { catchError, map, Observable, throwError } from "rxjs";
 
   toogleBankStatus(bankId: any): Observable<any[]> {
     return this.http
-      .patch<any[]>(`${baseUrl}/banks/toggleStatus/${bankId}`,{})
+      .patch<any[]>(`${baseUrl}/banks/toggleStatus/${bankId}`, {})
       .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(() => error)),
@@ -72,100 +69,96 @@ import { catchError, map, Observable, throwError } from "rxjs";
   getBankDataWithSubAdminIdAndActivePaginated(
     id: string,
     options: any = {},
-): Observable<any> {
+  ): Observable<any> {
     let params = new HttpParams()
-     .set("page", options.page?.toString() ?? "0")
-     .set("size", options.size?.toString() ?? "20");
+      .set("page", options.page?.toString() ?? "0")
+      .set("size", options.size?.toString() ?? "20");
 
     if (options.query) params = params.set("query", options.query);
     if (options.minAmount !== undefined && options.maxAmount !== undefined) {
-     params = params.set("minAmount", options.minAmount.toString());
-     params = params.set("maxAmount", options.maxAmount.toString());
+      params = params.set("minAmount", options.minAmount.toString());
+      params = params.set("maxAmount", options.maxAmount.toString());
     }
     if (options.active !== undefined && options.active !== null) {
-     params = params.set("active", options.active.toString());
+      params = params.set("active", options.active.toString());
     }
     if (options.portalId) params = params.set("portalId", options.portalId);
     if (options.limit && options.limit > 0) {
-     params = params.set("limit", options.limit.toString());
+      params = params.set("limit", options.limit.toString());
     }
     if (options.status) {
-     params = params.set("status", options.status);
+      params = params.set("status", options.status);
     }
 
     return this.http.get<any>(
-     `${baseUrl}/banks/getAllActiveByEntityId/paginated/${id}`,
-     {
+      `${baseUrl}/banks/getAllActiveByEntityId/paginated/${id}`,
+      {
         params,
-     },
+      },
     );
-}
-
+  }
 
   getBankDataWithSubAdminIdAndDeactivePaginated(
     id: string,
     options: any = {},
-): Observable<any> {
+  ): Observable<any> {
     let params = new HttpParams()
-     .set("page", options.page?.toString() ?? "0")
-     .set("size", options.size?.toString() ?? "20");
+      .set("page", options.page?.toString() ?? "0")
+      .set("size", options.size?.toString() ?? "20");
 
     if (options.query) params = params.set("query", options.query);
     if (options.minAmount !== undefined && options.maxAmount !== undefined) {
-     params = params.set("minAmount", options.minAmount.toString());
-     params = params.set("maxAmount", options.maxAmount.toString());
+      params = params.set("minAmount", options.minAmount.toString());
+      params = params.set("maxAmount", options.maxAmount.toString());
     }
     if (options.active !== undefined && options.active !== null) {
-     params = params.set("active", options.active.toString());
+      params = params.set("active", options.active.toString());
     }
     if (options.portalId) params = params.set("portalId", options.portalId);
     if (options.limit && options.limit > 0) {
-     params = params.set("limit", options.limit.toString());
+      params = params.set("limit", options.limit.toString());
     }
 
     return this.http.get<any>(
-     `${baseUrl}/banks/getAllDeactiveByEntityId/paginated/${id}`,
-     {
+      `${baseUrl}/banks/getAllDeactiveByEntityId/paginated/${id}`,
+      {
         params,
-     },
+      },
     );
-}
+  }
 
+  // getBankDataWithSubAdminIdPaginated(
+  //     id: string,
+  //     options: any = {},
+  // ): Observable<any> {
+  //     let params = new HttpParams()
+  //      .set("page", options.page?.toString() ?? "0")
+  //      .set("size", options.size?.toString() ?? "20");
 
-// getBankDataWithSubAdminIdPaginated(
-//     id: string,
-//     options: any = {},
-// ): Observable<any> {
-//     let params = new HttpParams()
-//      .set("page", options.page?.toString() ?? "0")
-//      .set("size", options.size?.toString() ?? "20");
+  //     if (options.query) params = params.set("query", options.query);
+  //     if (options.minAmount !== undefined && options.maxAmount !== undefined) {
+  //      params = params.set("minAmount", options.minAmount.toString());
+  //      params = params.set("maxAmount", options.maxAmount.toString());
+  //     }
+  //     if (options.active !== undefined && options.active !== null) {
+  //      params = params.set("active", options.active.toString());
+  //     }
+  //     if (options.portalId) params = params.set("portalId", options.portalId);
+  //     if (options.limit && options.limit > 0) {
+  //      params = params.set("limit", options.limit.toString());
+  //     }
 
-//     if (options.query) params = params.set("query", options.query);
-//     if (options.minAmount !== undefined && options.maxAmount !== undefined) {
-//      params = params.set("minAmount", options.minAmount.toString());
-//      params = params.set("maxAmount", options.maxAmount.toString());
-//     }
-//     if (options.active !== undefined && options.active !== null) {
-//      params = params.set("active", options.active.toString());
-//     }
-//     if (options.portalId) params = params.set("portalId", options.portalId);
-//     if (options.limit && options.limit > 0) {
-//      params = params.set("limit", options.limit.toString());
-//     }
+  //     return this.http.get<any>(
+  //      `${baseUrl}/banks/getAllActiveByEntityId/paginated/${id}`,
+  //      {
+  //         params,
+  //      },
+  //     );
+  // }
 
-//     return this.http.get<any>(
-//      `${baseUrl}/banks/getAllActiveByEntityId/paginated/${id}`,
-//      {
-//         params,
-//      },
-//     );
-// }
-
-setLimitTime(id: any, data: any) {
+  setLimitTime(id: any, data: any) {
     // Convert to ISO instant with seconds + Z
     const instantStr = new Date(data.dateTime).toISOString();
-
-    // console.log("Sending limitTime as Instant:", instantStr);
 
     return this.http.post(
       `${baseUrl}/banks/setLimitTime/${id}?limitTime=${instantStr}`,
@@ -193,7 +186,7 @@ setLimitTime(id: any, data: any) {
       .set("topupId", topupId);
 
     return this.http.get<any>(`${baseUrl}/topup-capacity`, { params });
-  }  
+  }
 
   toggleIsBank(bankId: string): Observable<any> {
     return this.http.patch<any>(`${baseUrl}/banks/${bankId}/toggle-isbank`, {});

@@ -5,8 +5,8 @@ import { AuthService } from "../../pages/services/auth.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { UserStateService } from "../../store/user-state.service";
 import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
-import { SubjectRegistryService } from "../../registery/subject-registry.service";
 import { AuthMemoryService } from "../../pages/services/auth-memory.service";
+import { SubjectRegistryService } from "../../registery/subject-registry.service";
 
 @Component({
   selector: "app-login",
@@ -29,15 +29,13 @@ export class LoginComponent implements OnInit {
     private userStateService: UserStateService,
     private socketConfigService: SocketConfigService,
     private memoryService: AuthMemoryService,
-    private subjectService:SubjectRegistryService
-  ) { }
+    private subjectService: SubjectRegistryService,
+  ) {}
 
   ngOnInit(): void {
-    this.socketConfigService.destroyAll()
-    this.memoryService.setAccessToken(null)
-    this.userStateService.setCurrentUser(null)
-    console.log("comming login here");
-    
+    this.socketConfigService.destroyAll();
+    this.memoryService.setAccessToken(null);
+    this.userStateService.setCurrentUser(null);
   }
 
   formSubmit() {
@@ -53,12 +51,8 @@ export class LoginComponent implements OnInit {
 
     this.authService.loginAndLoadUser(this.loginData).subscribe({
       next: (res: any) => {
-        this.navigateToRoleHome(res?.role[0]?.name)
-          const msg =
-          res?.response?.message ||
-          res?.message ||
-          "Login Successfully";
-        this.snackbarService.show(msg, true, 4000);
+        this.navigateToRoleHome(res?.role[0]?.name);
+        this.snackbarService.show(res.message, true, 4000);
       },
       error: (err) => {
         const msg =
@@ -67,7 +61,7 @@ export class LoginComponent implements OnInit {
           err?.message ||
           "Server error";
 
-        this.snackbarService.show(msg || "Failed", false, 5000);
+        this.snackbarService.show(msg, false, 5000);
       },
     });
   }

@@ -1,30 +1,33 @@
-
-
-
-import { SharedModule } from './../../../../core/shared.module';
-import { Component, OnDestroy, OnInit, ViewChild, ViewContainerRef } from "@angular/core";
+import { SharedModule } from "./../../../../core/shared.module";
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewContainerRef,
+} from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { UserService } from "../../../services/user.service";
 import { HeadService } from "../../../services/head.service";
 import { BranchService } from "../../../services/branch.service";
-import { SnackbarService } from '../../../../common/snackbar/snackbar.service';
-import { HostListener } from '@angular/core';
+import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
+import { HostListener } from "@angular/core";
 @Component({
   selector: "app-manage-branch-user",
   templateUrl: "./manage-branch-user.component.html",
   styleUrls: ["./manage-branch-user.component.css"],
 })
-export class ManageBranchUserComponent implements OnInit,OnDestroy {
-  previousViewMode: string = 'table';
+export class ManageBranchUserComponent implements OnInit, OnDestroy {
+  previousViewMode: string = "table";
   responseData: any[] = [];
   filteredData: any[] = [];
   pagedData: any[] = [];
-showAddUserModal = false;
+  showAddUserModal = false;
   // Separate items per page for each view
   itemsPerPageTable: number = 5;
   itemsPerPageGrid: number = 6;
   itemsPerPage: number = this.itemsPerPageTable; // active value
-Math = Math;
+  Math = Math;
   currentPage: number = 1;
   totalItems: number = 0;
   totalPages: number = 0;
@@ -35,10 +38,10 @@ Math = Math;
   userId: any;
   selectedUser: any = null;
   submitAttempted: boolean = false;
-isMobile: boolean = false;
+  isMobile: boolean = false;
 
-selectedUserDetails: any = null;
-showUserDetailsModal: boolean = false;
+  selectedUserDetails: any = null;
+  showUserDetailsModal: boolean = false;
   // View mode
   viewMode: "table" | "grid" = "table";
 
@@ -52,15 +55,14 @@ showUserDetailsModal: boolean = false;
     private router: Router,
     private headService: HeadService,
     private BranchService: BranchService,
-    private snack : SnackbarService
+    private snack: SnackbarService,
   ) {}
   ngOnDestroy(): void {
- sessionStorage.removeItem("branchViewMode");
+    sessionStorage.removeItem("branchViewMode");
   }
 
   // ngOnInit(): void {
-    
-    
+
   // this.checkScreen();
 
   //   this.activatedRoute.params.subscribe((params) => {
@@ -68,50 +70,47 @@ showUserDetailsModal: boolean = false;
   //     this.headId = params["headId"];
   //     this.loadUsers();
 
-   
   //   });
   // }
 
   // View toggle method
-  
+
   // Update ngOnInit
-// ngOnInit(): void {
-//   this.checkScreen();
-  
-//   // Get the previous view mode from sessionStorage
-//   const savedViewMode = sessionStorage.getItem("branchViewMode");
-//   if (savedViewMode && !this.isMobile) {
-//     // Only restore on desktop
-//     this.viewMode = savedViewMode as "table" | "grid";
-//     this.itemsPerPage = savedViewMode === "table" ? this.itemsPerPageTable : this.itemsPerPageGrid;
-//   }
-  
-//   this.activatedRoute.params.subscribe((params) => {
-//     this.branchId = params["branchId"];
-//     this.headId = params["headId"];
-//     this.loadUsers();
-//   });
-// }
+  // ngOnInit(): void {
+  //   this.checkScreen();
 
-ngOnInit(): void {
+  //   // Get the previous view mode from sessionStorage
+  //   const savedViewMode = sessionStorage.getItem("branchViewMode");
+  //   if (savedViewMode && !this.isMobile) {
+  //     // Only restore on desktop
+  //     this.viewMode = savedViewMode as "table" | "grid";
+  //     this.itemsPerPage = savedViewMode === "table" ? this.itemsPerPageTable : this.itemsPerPageGrid;
+  //   }
 
-  const savedViewMode = sessionStorage.getItem("branchViewMode");
-  if (savedViewMode) {
-    this.viewMode = savedViewMode as "table" | "grid";
-    this.itemsPerPage =
-      savedViewMode === "table"
-        ? this.itemsPerPageTable
-        : this.itemsPerPageGrid;
+  //   this.activatedRoute.params.subscribe((params) => {
+  //     this.branchId = params["branchId"];
+  //     this.headId = params["headId"];
+  //     this.loadUsers();
+  //   });
+  // }
+
+  ngOnInit(): void {
+    const savedViewMode = sessionStorage.getItem("branchViewMode");
+    if (savedViewMode) {
+      this.viewMode = savedViewMode as "table" | "grid";
+      this.itemsPerPage =
+        savedViewMode === "table"
+          ? this.itemsPerPageTable
+          : this.itemsPerPageGrid;
+    }
+
+    this.activatedRoute.params.subscribe((params) => {
+      this.branchId = params["branchId"];
+      this.headId = params["headId"];
+      this.loadUsers();
+    });
   }
 
-  this.activatedRoute.params.subscribe((params) => {
-    this.branchId = params["branchId"];
-    this.headId = params["headId"];
-    this.loadUsers();
-  });
-}
-
-  
   // toggleView(mode: "table" | "grid"): void {
   //   this.viewMode = mode;
   //   this.itemsPerPage =
@@ -121,40 +120,36 @@ ngOnInit(): void {
   //   this.updatePagedData();
   // }
 
-//   toggleView(mode: "table" | "grid"): void {
-//   // Don't allow table view on mobile
-//   if (this.isMobile && mode === "table") {
-//     return;
-//   }
-  
-//   this.viewMode = mode;
-//   this.itemsPerPage = mode === "table" ? this.itemsPerPageTable : this.itemsPerPageGrid;
-//   this.currentPage = 1;
-//   this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
-//   this.updatePagedData();
-  
-//   // Save preference to sessionStorage only on desktop
-//   if (!this.isMobile) {
-//     sessionStorage.setItem("branchViewMode", mode);
-//   }
-// }
+  //   toggleView(mode: "table" | "grid"): void {
+  //   // Don't allow table view on mobile
+  //   if (this.isMobile && mode === "table") {
+  //     return;
+  //   }
 
-toggleView(mode: "table" | "grid"): void {
+  //   this.viewMode = mode;
+  //   this.itemsPerPage = mode === "table" ? this.itemsPerPageTable : this.itemsPerPageGrid;
+  //   this.currentPage = 1;
+  //   this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+  //   this.updatePagedData();
 
-  this.viewMode = mode;
+  //   // Save preference to sessionStorage only on desktop
+  //   if (!this.isMobile) {
+  //     sessionStorage.setItem("branchViewMode", mode);
+  //   }
+  // }
 
-  this.itemsPerPage =
-    mode === "table"
-      ? this.itemsPerPageTable
-      : this.itemsPerPageGrid;
+  toggleView(mode: "table" | "grid"): void {
+    this.viewMode = mode;
 
-  this.currentPage = 1;
-  this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
-  this.updatePagedData();
+    this.itemsPerPage =
+      mode === "table" ? this.itemsPerPageTable : this.itemsPerPageGrid;
 
-  sessionStorage.setItem("branchViewMode", mode);
-}
+    this.currentPage = 1;
+    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+    this.updatePagedData();
 
+    sessionStorage.setItem("branchViewMode", mode);
+  }
 
   loadUsers(): void {
     if (!this.branchId) {
@@ -169,7 +164,6 @@ toggleView(mode: "table" | "grid"): void {
         this.showTable = true;
       },
       error: (err) => {
-        console.error(err);
         this.responseData = [];
         this.filteredData = [];
         this.showTable = false;
@@ -283,15 +277,13 @@ toggleView(mode: "table" | "grid"): void {
 
     this.userService.updateUser(userToUpdate.id, userToUpdate).subscribe({
       next: () => {
+        this.snack.show("User updated successfully", true);
 
-        this.snack.show("User updated successfully",true)
-      
         this.loadUsers();
         this.closeModal();
       },
       error: () => {
-                this.snack.show("Failed to successfully",false)
-
+        this.snack.show("Failed to successfully", false);
       },
     });
   }
@@ -304,9 +296,7 @@ toggleView(mode: "table" | "grid"): void {
       next: () => {
         user.active = !user.active;
       },
-      error: (err) => {
-        console.error("Failed to toggle user status:", err);
-      },
+      error: (err) => {},
     });
   }
 
@@ -320,50 +310,48 @@ toggleView(mode: "table" | "grid"): void {
     this.applyFilter();
   }
 
-// checkScreen(): void {
-//   this.isMobile = window.innerWidth < 768;
-  
-//   if (this.isMobile) {
-//     this.viewMode = "grid";
-//     this.itemsPerPage = this.itemsPerPageGrid;
-//   } else {
-//     // On desktop, restore saved preference
-//     const savedViewMode = sessionStorage.getItem("branchViewMode") as "table" | "grid";
-//     if (savedViewMode) {
-//       this.viewMode = savedViewMode;
-//       this.itemsPerPage = savedViewMode === "table" ? this.itemsPerPageTable : this.itemsPerPageGrid;
-//     }
-//   }
-// }
+  // checkScreen(): void {
+  //   this.isMobile = window.innerWidth < 768;
 
-openAddUserModal(): void {
-  this.showAddUserModal = true;
+  //   if (this.isMobile) {
+  //     this.viewMode = "grid";
+  //     this.itemsPerPage = this.itemsPerPageGrid;
+  //   } else {
+  //     // On desktop, restore saved preference
+  //     const savedViewMode = sessionStorage.getItem("branchViewMode") as "table" | "grid";
+  //     if (savedViewMode) {
+  //       this.viewMode = savedViewMode;
+  //       this.itemsPerPage = savedViewMode === "table" ? this.itemsPerPageTable : this.itemsPerPageGrid;
+  //     }
+  //   }
+  // }
+
+  openAddUserModal(): void {
+    this.showAddUserModal = true;
+  }
+
+  closeAddUserModal(): void {
+    this.showAddUserModal = false;
+  }
+
+  handleUserCreated(event: any): void {
+    this.closeAddUserModal();
+    this.loadUsers(); // reload list after adding
+    this.snack.show("User created successfully", true);
+  }
+
+  openUserDetails(user: any) {
+    this.selectedUserDetails = user;
+    this.showUserDetailsModal = true;
+  }
+
+  closeUserDetails() {
+    this.showUserDetailsModal = false;
+    this.selectedUserDetails = null;
+  }
+
+  // @HostListener("window:resize")
+  // onResize() {
+  //   this.checkScreen();
+  // }
 }
-
-closeAddUserModal(): void {
-  this.showAddUserModal = false;
-}
-
-handleUserCreated(event: any): void {
-  this.closeAddUserModal();
-  this.loadUsers(); // reload list after adding
-  this.snack.show("User created successfully", true);
-}
-
-
-openUserDetails(user: any) {
-  this.selectedUserDetails = user;
-  this.showUserDetailsModal = true;
-}
-
-closeUserDetails() {
-  this.showUserDetailsModal = false;
-  this.selectedUserDetails = null;
-}
-
-// @HostListener("window:resize")
-// onResize() {
-//   this.checkScreen();
-// }
-}
-

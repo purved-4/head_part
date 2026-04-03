@@ -1,5 +1,3 @@
-
-
 import {
   Component,
   Input,
@@ -138,17 +136,17 @@ export class HeadNavSidebarComponent implements OnInit {
       icon: "task_alt",
       children: [
         {
-          label: "UPI Logs",
+          label: "UPI Reports",
           route: "/head/reports/funds/approved/upi",
           notifications: 2,
         },
         {
-          label: "BANK Logs",
+          label: "BANK Reports",
           route: "/head/reports/funds/approved/bank",
           notifications: 2,
         },
         {
-          label: "PAYOUT Logs",
+          label: "PAYOUT Reports",
           route: "/head/reports/funds/approved/payout",
           notifications: 2,
         },
@@ -160,18 +158,18 @@ export class HeadNavSidebarComponent implements OnInit {
       icon: "highlight_off",
       children: [
         {
-          label: "UPI Logs",
+          label: "UPI Reports",
           route: "/head/reports/funds/rejects/upi",
           notifications: 4,
         },
         {
-          label: "BANK Logs",
+          label: "BANK Reports",
           route: "/head/reports/funds/rejects/bank",
           notifications: 4,
         },
 
         {
-          label: "PAYOUT Logs",
+          label: "PAYOUT Reports",
           route: "/head/reports/funds/rejects/payout",
           notifications: 4,
         },
@@ -209,8 +207,6 @@ export class HeadNavSidebarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-  
-
     this.checkMobileView();
     this.secondaryPanelStateChange.emit(false);
 
@@ -237,7 +233,6 @@ export class HeadNavSidebarComponent implements OnInit {
 
     // initialize margin
     this.updateMainMargin();
-    console.log(this.currentUser);
   }
 
   // update mainMargin depending on explicit open state & collapsed
@@ -286,10 +281,8 @@ export class HeadNavSidebarComponent implements OnInit {
   quickAction(action: string) {
     switch (action) {
       case "export":
-        console.log("Exporting data...");
         break;
       case "refresh":
-        console.log("Refreshing cache...");
         break;
       case "help":
         this.router.navigate(["/branch/help"]);
@@ -298,7 +291,6 @@ export class HeadNavSidebarComponent implements OnInit {
   }
 
   saveSettings() {
-    console.log("Saving settings...");
     this.closeSettings();
   }
 
@@ -451,7 +443,6 @@ export class HeadNavSidebarComponent implements OnInit {
     this.secondaryPanelStateChange.emit(false); // emit closed
   }
 
-
   isActive(route: string): boolean {
     if (!route) return false;
     return this.currentRoute === route;
@@ -523,7 +514,6 @@ export class HeadNavSidebarComponent implements OnInit {
     this.openSubmenu(item, true);
   }
 
-
   getChildIcon(child: MenuItem): string {
     const route = child.route;
 
@@ -532,7 +522,7 @@ export class HeadNavSidebarComponent implements OnInit {
       "/head/dashboard": "dashboard",
 
       "/head/payment-management": "payments",
-"/head/recycle-management": "recycling",
+      "/head/recycle-management": "recycling",
 
       // Management
       "/head/upi": "qr_code_scanner", // Manage UPI
@@ -541,9 +531,8 @@ export class HeadNavSidebarComponent implements OnInit {
       "/head/recycle-bank": "restore",
       "/head/capacity": "assignment", // Allocate Capacity
 
-      
       // Chats
-      "/head/chat": "chat",     
+      "/head/chat": "chat",
       "/head/chat/head": "chat",
       "/head/chat/branch": "forum",
 
@@ -581,35 +570,32 @@ export class HeadNavSidebarComponent implements OnInit {
 
   // Add this method
 
-
   // Add this method to handle menu item clicks
-handleMenuItemClick(item: MenuItem) {
+  handleMenuItemClick(item: MenuItem) {
+    // MOBILE BEHAVIOR
+    if (this.isMobileOpen) {
+      // If item has children → toggle dropdown
+      if (item.children && item.children.length > 0) {
+        item.expanded = !item.expanded;
+        return;
+      }
 
-  // MOBILE BEHAVIOR
-  if (this.isMobileOpen) {
-
-    // If item has children → toggle dropdown
-    if (item.children && item.children.length > 0) {
-      item.expanded = !item.expanded;
+      // If no children → navigate and close mobile menu
+      this.router.navigate([item.route]);
+      this.closeMobileMenu.emit();
       return;
     }
 
-    // If no children → navigate and close mobile menu
-    this.router.navigate([item.route]);
-    this.closeMobileMenu.emit();
-    return;
-  }
+    // DESKTOP BEHAVIOR
+    // If item has no children → navigate
+    if (!item.children || item.children.length === 0) {
+      this.router.navigate([item.route]);
+      return;
+    }
 
-  // DESKTOP BEHAVIOR
-  // If item has no children → navigate
-  if (!item.children || item.children.length === 0) {
-    this.router.navigate([item.route]);
-    return;
+    // If item has children → open submenu
+    this.openSubmenu(item, true);
   }
-
-  // If item has children → open submenu
-  this.openSubmenu(item, true);
-}
 
   handleProfileClick() {
     if (this.isMobileOpen) {
@@ -619,18 +605,15 @@ handleMenuItemClick(item: MenuItem) {
 
     // Desktop behavior
     this.toggleCurrentSubmenu();
-      this.explicitlyOpened = !this.explicitlyOpened;
-
+    this.explicitlyOpened = !this.explicitlyOpened;
   }
 
-@HostListener('document:click', ['$event'])
-onClickOutside(event: Event) {
-  const target = event.target as HTMLElement;
+  @HostListener("document:click", ["$event"])
+  onClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
 
-  if (!target.closest('.profile-dropdown')) {
-    this.explicitlyOpened = false;
+    if (!target.closest(".profile-dropdown")) {
+      this.explicitlyOpened = false;
+    }
   }
 }
-}
-
-

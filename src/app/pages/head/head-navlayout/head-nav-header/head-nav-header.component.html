@@ -12,12 +12,14 @@
           (click)="toggleMobileMenu.emit()"
         >
           <span class="material-symbols-outlined text-[24px] text-slate-600">
-            {{ isMobileMenuOpen ? 'close' : 'menu' }}
+            {{ isMobileMenuOpen ? "close" : "menu" }}
           </span>
         </button>
 
         <!-- Breadcrumb (hidden on mobile) -->
-        <div class="hidden [@media(min-width:800px)]:flex items-center space-x-2 text-sm">
+        <div
+          class="hidden [@media(min-width:800px)]:flex items-center space-x-2 text-sm"
+        >
           <span class="text-[var(--color-muted)]">Dashboard</span>
           <span class="text-[var(--color-muted)]">/</span>
           <span class="text-[var(--color-font)] font-medium">{{
@@ -26,7 +28,9 @@
         </div>
       </div>
 
-      <div class="hidden [@media(min-width:800px)]:flex items-center space-x-4 md:space-x-6">
+      <div
+        class="hidden [@media(min-width:800px)]:flex items-center space-x-4 md:space-x-6"
+      >
         <!-- Topup -->
         <div class="stat-item relative group">
           <div class="flex items-center space-x-2 cursor-pointer">
@@ -53,7 +57,7 @@
                 {{ formatFullAmount(upiBalance) }}
               </span>
             </div> -->
-             <div class="flex justify-between mt-1">
+            <div class="flex justify-between">
                <span class="font-medium">
                 {{ formatFullAmount(topupBalance) }}
               </span>
@@ -134,80 +138,81 @@
           </svg>
         </div>
 
-        
-
         <app-notification></app-notification>
 
-<!-- <div class="relative hidden  [@media(min-width:800px)]:block" #portalContainer>
-  <button
-    (click)="togglePortalPopup()"
-    class="mt-2 p-2 rounded-full hover:bg-[var(--color-hover)] transition focus:ring-2 focus:ring-[var(--color-primary)]"
-    [class.bg-[var(--color-hover)]]="isPortalOpen"
-  >
-    <span class="material-symbols-outlined text-[22px] text-slate-600">
-      language
-    </span>
-  </button>
+        <div
+          class="relative hidden [@media(min-width:800px)]:block"
+          #portalContainer
+        >
+          <button
+            (click)="togglePortalPopup()"
+            class="mt-2 p-2 rounded-full hover:bg-[var(--color-hover)] transition focus:ring-2 focus:ring-[var(--color-primary)]"
+            [class.bg-[var(--color-hover)]]="isPortalOpen"
+          >
+            <span class="material-symbols-outlined text-[22px] text-slate-600">
+              language
+            </span>
+          </button>
 
-  <div
-    *ngIf="isPortalOpen"
-    class="fixed [@media(min-width:800px)]:absolute right-4 [@media(min-width:800px)]:right-0 top-[70px] [@media(min-width:800px)]:top-full md:mt-2 
-           w-[320px] max-w-[calc(100vw-32px)] z-45"
-  >
-    <div
-      class="hidden [@media(min-width:800px)]:block absolute right-6 -top-2 w-4 h-4 
-             bg-white border-l border-t border-gray-200 rotate-45"
-    ></div>
+          <div
+            *ngIf="isPortalOpen"
+            class="fixed [@media(min-width:800px)]:absolute right-4 [@media(min-width:800px)]:right-0 top-[70px] [@media(min-width:800px)]:top-full md:mt-2 w-[320px] max-w-[calc(100vw-32px)] z-45"
+          >
+            <div
+              class="hidden [@media(min-width:800px)]:block absolute right-6 -top-2 w-4 h-4 bg-white border-l border-t border-gray-200 rotate-45"
+            ></div>
 
-    <div
-      class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] 
-             border border-gray-200 overflow-visible"
-    >
-      <div class="p-3">
-        <app-portal-selector></app-portal-selector>
-      </div>
-    </div>
-  </div>
-</div> -->
+            <div
+              class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-gray-200 overflow-visible"
+            >
+              <div class="p-3">
+                <!-- <app-portal-selector></app-portal-selector> -->
+              </div>
+            </div>
+          </div>
+        </div>
 
+       <div class="relative inline-block" #limitsContainer>
+          <!-- Button -->
+          <button
+            (click)="toggleLimitsPopup()"
+            class="mt-2 p-2 rounded-full hover:bg-[var(--color-hover)] transition"
+            [class.bg-[var(--color-hover)]]="isLimitsOpen"
+          >
+            <span class="material-symbols-outlined text-[22px] text-slate-600">
+              account_balance_wallet
+            </span>
+          </button>
 
-<!-- Wallet / Limits -->
-<div class="relative" #limitsContainer>
-  <!-- Button -->
-  <button
-    (click)="toggleLimitsPopup()"
-    class="mt-2 p-2 rounded-full hover:bg-[var(--color-hover)] transition focus:ring-2 focus:ring-[var(--color-primary)]"
-    [class.bg-[var(--color-hover)]]="isLimitsOpen"
-  >
-    <span class="material-symbols-outlined text-[22px] text-slate-600">
-      account_balance_wallet
-    </span>
-  </button>
+          <!-- Popup -->
+          <div
+            *ngIf="isLimitsOpen"
+            class="absolute right-0 mt-2 z-50 w-[750px]"
+            style="top: calc(100% + 6px); max-width: 95vw"
+          >
+            <!-- Arrow -->
+            <div
+              class="absolute right-8 -top-2 w-3 h-3 bg-white border-l border-t border-gray-200 rotate-45"
+            ></div>
 
-  <!-- Popup -->
-  <div
-    *ngIf="isLimitsOpen"
-    class="fixed [@media(min-width:800px)]:absolute right-4 md:right-0 top-[70px] [@media(min-width:800px)]:top-full md:mt-2 
-           w-[500px] max-w-[calc(100vw-32px)] max-h-[80vh] z-50"
-    [@slideInOut]
-  >
-    <!-- Arrow -->
-    <div
-      class="hidden [@media(min-width:800px)]:block absolute right-6 -top-2 w-4 h-4 
-             bg-white border-l border-t border-gray-200 rotate-45"
-    ></div>
-
-    <!-- Card -->
-    <div
-      class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] 
-             border border-gray-200 overflow-hidden"
-    >
-      <div class="max-h-[75vh] overflow-y-auto p-4">
-        <app-user-dashboard-upi-bank-limit></app-user-dashboard-upi-bank-limit>
-      </div>
-    </div>
-  </div>
-</div>
+            <!-- Container -->
+            <div
+              class="bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden"
+            >
+              <!-- <div class="max-h-[80vh] overflow-y-auto p-3">
+                <app-user-dashboard-upi-bank-limit
+                  (closePopup)="closeLimitsPopup()"
+                ></app-user-dashboard-upi-bank-limit>
+              </div> -->
+                <div class="max-h-[80vh] overflow-y-auto p-3">
+                <app-user-dashboard-upi-bank-limit
+                
+                ></app-user-dashboard-upi-bank-limit>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <!-- Profile -->
 <div class="relative hidden [@media(min-width:800px)]:block" #profileContainer>
             <!-- Avatar Button -->
@@ -241,7 +246,7 @@
           <!-- Dropdown -->
           <div
             *ngIf="isProfileOpen"
-            class="fixed [@media(min-width:800px)]:absolute right-4 md:right-0 top-[70px] md:top-full md:mt-2 w-[920px] max-w-[calc(100vw-32px)] h-[620px] max-h-[80vh] z-50"
+            class="fixed [@media(min-width:800px)]:absolute right-4 md:right-0 top-[70px] md:top-full md:mt-2 w-[700px] max-w-[95vw] max-w-[calc(100vw-32px)] max-h-[85vh] max-h-[80vh] z-50"
             [@slideInOut]
           >
             <!-- Arrow -->
@@ -251,10 +256,10 @@
 
             <!-- Card -->
             <div
-              class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-gray-200 h-full flex flex-col overflow-hidden"
+              class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-gray-200 flex flex-col overflow-hidden"
             >
               <!-- Scrollable Content -->
-              <div class="flex-1 overflow-y-auto">
+              <div class="flex-1 overflow-y-auto max-h-[85vh]">
 <app-user-profile (closeProfile)="closeProfile()"></app-user-profile>
               </div>
             </div>

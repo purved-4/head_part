@@ -68,7 +68,6 @@ export class WebhookDataComponent implements OnDestroy {
             this.latestPayload = first.payload;
           }
         } catch (parseErr) {
-          console.error("Failed to parse payload JSON:", parseErr);
           // fallback to raw payload string
           this.latestPayload = first.payload;
         }
@@ -89,7 +88,6 @@ export class WebhookDataComponent implements OnDestroy {
       .pipe(
         tap((resp) => console.log(resp)),
         catchError((err) => {
-          console.error("Manual refresh error:", err);
           this.errorMessage = err?.message || JSON.stringify(err);
           return of([]);
         }),

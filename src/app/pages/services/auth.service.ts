@@ -2,7 +2,7 @@ import { HttpBackend, HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable, Inject, PLATFORM_ID } from "@angular/core";
 import { Subject, Observable, of, throwError } from "rxjs";
 import { map, catchError, tap, switchMap } from "rxjs/operators";
-import { Router } from "@angular/router";
+import { Route, Router } from "@angular/router";
 import { isPlatformBrowser } from "@angular/common";
 import { SnackbarService } from "../../common/snackbar/snackbar.service";
 import baseUrl from "./helper";
@@ -19,12 +19,12 @@ export class AuthService {
   public loginStatusSubject = new Subject<boolean>();
   private refreshHttp: HttpClient;
 
-
   constructor(
     private http: HttpClient,
     private subjectRegistryService: SubjectRegistryService,
     private memoryService: AuthMemoryService,
     private userStateService: UserStateService,
+    private router: Router,
     handler: HttpBackend,
   ) {
     this.refreshHttp = new HttpClient(handler);
@@ -37,24 +37,24 @@ export class AuthService {
     }
   }
 
-
   public login(loginData: any): Observable<any> {
-    return this.http.post(`${baseUrl}/login`, loginData, { withCredentials: true }).pipe(
-      tap((res: any) => this.saveAuthToken(res)),
-      catchError((err) => {
-        this.isAuthenticated = false;
-        return throwError(() => err);
-      })
-    );
+    return this.http
+      .post(`${baseUrl}/login`, loginData, { withCredentials: true })
+      .pipe(
+        tap((res: any) => this.saveAuthToken(res)),
+        catchError((err) => {
+          this.isAuthenticated = false;
+          return throwError(() => err);
+        }),
+      );
   }
 
   public getCurrentUser(): Observable<any> {
-
     return this.http.get(`${baseUrl}/current-user`).pipe(
       map((user: any) => {
-        return user?.data || null
+        return user?.data || null;
       }),
-      catchError(() => of(null))
+      catchError(() => of(null)),
     );
   }
 
@@ -65,14 +65,14 @@ export class AuthService {
       }),
       tap((user) => {
         this.userStateService.setCurrentUser(user);
-      })
+      }),
     );
   }
 
   public logout(): any {
     let token = this.memoryService.getAccessToken();
     const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     });
 
     return this.http
@@ -80,25 +80,28 @@ export class AuthService {
       .pipe(
         tap(() => {
           this.subjectRegistryService.destroyAll();
-          
-          token = null
-          
+
+          token = null;
         }),
         map((res) => res),
         catchError((err) => {
           this.subjectRegistryService.destroyAll();
           // window.location.href = "/login"
           return throwError(() => err);
-        })
+        }),
       );
   }
 
-
   refreshToken(): Observable<any> {
-    return this.refreshHttp.post(`${baseUrl}/refresh-token`, {}, { withCredentials: true }).pipe(
-      tap((res: any) => this.saveAuthToken(res))
-      
-    );
+    return this.refreshHttp
+      .post(`${baseUrl}/refresh-token`, {}, { withCredentials: true })
+      .pipe(
+        tap((res: any) => this.saveAuthToken(res)),
+        catchError((err) => {
+          this.router.navigate(["/login"]);
+          this.memoryService.setAccessToken(null);
+          return throwError(() => err);
+        }),
+      );
   }
-
 }

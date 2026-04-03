@@ -393,47 +393,47 @@
               <span class="material-icons text-sm">edit</span>
             </button>
           </div> -->
-     <div
-  class="flex flex-nowrap gap-1.5 pt-4 border-t border-gray-100 mt-auto overflow-x-auto pb-1"
->
-  <!-- Toggle -->
-  <button
-    (click)="toggleStatus(agent)"
-    class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
-    title="Toggle Status"
-  >
-    <span class="material-icons text-sm">swap_horiz</span>
-  </button>
+          <div
+            class="flex flex-nowrap gap-1.5 pt-4 border-t border-gray-100 mt-auto overflow-x-auto pb-1"
+          >
+            <!-- Toggle -->
+            <button
+              (click)="toggleStatus(agent)"
+              class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              title="Toggle Status"
+            >
+              <span class="material-icons text-sm">swap_horiz</span>
+            </button>
 
-  <!-- Limits -->
-  <button
-    *ngIf="agent.id"
-    (click)="openLimitPopup(agent); $event.stopPropagation()"
-    class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
-    title="Limits"
-  >
-    <span class="material-icons text-sm">account_balance_wallet</span>
-  </button>
+            <!-- Limits -->
+            <button
+              *ngIf="agent.id"
+              (click)="openLimitPopup(agent); $event.stopPropagation()"
+              class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              title="Limits"
+            >
+              <span class="material-icons text-sm">account_balance_wallet</span>
+            </button>
 
-  <!-- View Users -->
-  <button
-    *ngIf="agent.id"
-    [routerLink]="['/head/branch-user/manage', agent.id]"
-    class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
-    title="View Users"
-  >
-    <span class="material-icons text-sm">visibility</span>
-  </button>
+            <!-- View Users -->
+            <button
+              *ngIf="agent.id"
+              [routerLink]="['/head/branch-user/manage', agent.id]"
+              class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              title="View Users"
+            >
+              <span class="material-icons text-sm">visibility</span>
+            </button>
 
-  <!-- Edit -->
-  <button
-    (click)="openEditModal(agent)"
-    class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
-    title="Edit"
-  >
-    <span class="material-icons text-sm">edit_square</span>
-  </button>
-</div>
+            <!-- Edit -->
+            <button
+              (click)="openEditModal(agent)"
+              class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              title="Edit"
+            >
+              <span class="material-icons text-sm">edit_square</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -505,50 +505,57 @@
                   </td>
 
                   <!-- Portal -->
-                <td class="px-4 py-2">
-  <!-- No portal -->
-  <span
-    *ngIf="!agent.portalsWithRange?.length"
-    class="text-gray-400"
-  >
-    No portal
-  </span>
+                  <td class="px-4 py-2">
+                    <!-- No portal -->
+                    <span
+                      *ngIf="!agent.portalsWithRange?.length"
+                      class="text-gray-400"
+                    >
+                      No portal
+                    </span>
 
-  <!-- One or more portals -->
-  <div
-    *ngIf="agent.portalsWithRange?.length > 0"
-    class="flex flex-col gap-1"
-  >
-    <!-- First portal clickable -->
-    <div class="flex items-center gap-2">
-      <div
-        class="w-2 h-2 rounded-full"
-        [ngClass]="
-          agent.portalsWithRange[0].active ? 'bg-green-500' : 'bg-red-500'
-        "
-      ></div>
+                    <!-- One or more portals -->
+                    <div
+                      *ngIf="agent.portalsWithRange?.length > 0"
+                      class="flex flex-col gap-1"
+                    >
+                      <!-- First portal clickable -->
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="w-2 h-2 rounded-full"
+                          [ngClass]="
+                            agent.portalsWithRange[0].active
+                              ? 'bg-green-500'
+                              : 'bg-red-500'
+                          "
+                        ></div>
 
-      <button
-        type="button"
-        (click)="openPortalPopup(agent, agent.portalsWithRange[0]); $event.stopPropagation()"
-        class="text-[var(--color-primary)] font-medium hover:underline text-left truncate max-w-[180px]"
-        [title]="getPortalDomain(agent.portalsWithRange[0])"
-      >
-        {{ getPortalDomain(agent.portalsWithRange[0]) }}
-      </button>
-    </div>
+                        <button
+                          type="button"
+                          (click)="
+                            openPortalPopup(agent, agent.portalsWithRange[0]);
+                            $event.stopPropagation()
+                          "
+                          class="text-[var(--color-primary)] font-medium hover:underline text-left truncate max-w-[180px]"
+                          [title]="getPortalDomain(agent.portalsWithRange[0])"
+                        >
+                          {{ getPortalDomain(agent.portalsWithRange[0]) }}
+                        </button>
+                      </div>
 
-    <!-- More portals -->
-    <button
-      *ngIf="agent.portalsWithRange.length > 1"
-      type="button"
-      (click)="openAllPortalsPopup(agent); $event.stopPropagation()"
-      class="text-xs text-[var(--color-primary)] hover:underline text-left"
-    >
-      +{{ agent.portalsWithRange.length - 1 }} more
-    </button>
-  </div>
-</td>
+                      <!-- More portals -->
+                      <button
+                        *ngIf="agent.portalsWithRange.length > 1"
+                        type="button"
+                        (click)="
+                          openAllPortalsPopup(agent); $event.stopPropagation()
+                        "
+                        class="text-xs text-[var(--color-primary)] hover:underline text-left"
+                      >
+                        +{{ agent.portalsWithRange.length - 1 }} more
+                      </button>
+                    </div>
+                  </td>
 
                   <!-- Status Toggle -->
                   <td class="px-4 py-2 text-center">
@@ -567,35 +574,43 @@
                   </td>
 
                   <!-- Actions -->
-          <td class="px-4 py-2">
-  <div class="flex items-center justify-end gap-2">
-    <button
-      *ngIf="agent.id"
-      (click)="openLimitPopup(agent); $event.stopPropagation()"
-      class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
-      title="Limits"
-    >
-      <span class="material-icons text-[16px]">account_balance_wallet</span>
-    </button>
+                  <td class="px-4 py-2">
+                    <div class="flex items-center justify-end gap-2">
+                      <button
+                        *ngIf="agent.id"
+                        (click)="
+                          openLimitPopup(agent); $event.stopPropagation()
+                        "
+                        class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
+                        title="Limits"
+                      >
+                        <span class="material-icons text-[16px]"
+                          >account_balance_wallet</span
+                        >
+                      </button>
 
-    <button
-      *ngIf="agent.id"
-      [routerLink]="['/head/branch-user/manage', agent.id]"
-      class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
-      title="View Users"
-    >
-      <span class="material-icons text-[16px]">visibility</span>
-    </button>
+                      <button
+                        *ngIf="agent.id"
+                        [routerLink]="['/head/branch-user/manage', agent.id]"
+                        class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
+                        title="View Users"
+                      >
+                        <span class="material-icons text-[16px]"
+                          >visibility</span
+                        >
+                      </button>
 
-    <button
-      (click)="openEditModal(agent)"
-      class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
-      title="Edit"
-    >
-      <span class="material-icons text-[16px]">edit_square</span>
-    </button>
-  </div>
-</td>
+                      <button
+                        (click)="openEditModal(agent)"
+                        class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
+                        title="Edit"
+                      >
+                        <span class="material-icons text-[16px]"
+                          >edit_square</span
+                        >
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -703,9 +718,7 @@
               </div>
               <button
                 (click)="togglePortalStatus(selectedAgent, portal)"
-                [disabled]="
-                  isPortalToggling(selectedAgent.id, portal.portalId)
-                "
+                [disabled]="isPortalToggling(selectedAgent.id, portal.portalId)"
                 class="relative inline-flex items-center h-5 rounded-full w-9 flex-shrink-0 border border-transparent transition-colors duration-200 ease-in-out"
                 [ngClass]="portal.active ? 'bg-green-500' : 'bg-gray-300'"
               >
@@ -718,7 +731,7 @@
               </button>
             </div>
             <div class="flex gap-3 text-sm mt-2 pt-2 border-t border-gray-200">
-                <div class="flex-1">
+              <div class="flex-1">
                 <div class="text-xs text-gray-500">Ftt</div>
                 <div class="font-semibold text-green-600">
                   {{ portal.fttPercentage || 0 }}%
@@ -803,7 +816,7 @@
             </div>
           </div>
           <div class="grid grid-cols-3 gap-2">
-             <div class="p-3 bg-gray-50 rounded-lg">
+            <div class="p-3 bg-gray-50 rounded-lg">
               <div class="text-xs text-gray-500 mb-1">Ftt</div>
               <div class="text-lg font-semibold text-green-600">
                 {{ selectedPortal.fttPercentage || 0 }}%
@@ -822,7 +835,6 @@
               </div>
             </div>
           </div>
-        
         </div>
       </div>
     </div>
@@ -984,387 +996,389 @@
   </div>
 
   <!-- Edit Branch Modal (Fixed Version) -->
-<div
-  *ngIf="showEditModal"
-  class="fixed inset-0 z-50 flex items-center justify-center p-4"
-  aria-modal="true"
-  role="dialog"
->
-  <!-- Backdrop -->
   <div
-    class="absolute inset-0 bg-black/40 backdrop-blur-sm"
-(click)="closeEditModal()"
-    aria-hidden="true"
-  ></div>
-
-  <!-- Modal Panel -->
-  <div
-  class="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-xl md:rounded-2xl shadow-2xl"
-  (click)="$event.stopPropagation()"
->
-    <!-- Modal Header -->
+    *ngIf="showEditModal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    aria-modal="true"
+    role="dialog"
+  >
+    <!-- Backdrop -->
     <div
-      class="p-4 md:p-6 border-b border-gray-100 sticky top-0 bg-white z-10"
+      class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+      (click)="closeEditModal()"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Modal Panel -->
+    <div
+      class="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-xl md:rounded-2xl shadow-2xl"
+      (click)="$event.stopPropagation()"
     >
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div
-            class="w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[var(--color-primary)] flex items-center justify-center"
-          >
-            <span class="material-icons text-white">edit</span>
-          </div>
-          <div>
-            <h2 class="text-lg md:text-xl font-bold text-gray-900">
-              Branch Details
-            </h2>
-            <p class="text-sm text-gray-500">
-              View branch information and portal assignments
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <!-- Edit Toggle Button -->
-          <button
-            *ngIf="!isEditMode"
-            (click)="enableEditMode()"
-            class="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] flex items-center justify-center transition-colors"
-            aria-label="Edit branch"
-          >
-            <span class="material-icons text-white">edit</span>
-          </button>
-          
-          <!-- Close Button -->
-          <button
-           (click)="closeEditModal()"
-            class="w-7 h-7 md:w-8 md:h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors"
-            aria-label="Close modal"
-          >
-            <span class="material-icons text-gray-400">close</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Edit Mode Indicator -->
+      <!-- Modal Header -->
       <div
-        *ngIf="isEditMode"
-        class="mt-3 flex items-center gap-2 text-sm text-[var(--color-primary)] bg-[#F0F7FF] px-3 py-2 rounded-lg"
+        class="p-4 md:p-6 border-b border-gray-100 sticky top-0 bg-white z-10"
       >
-        <span class="material-icons text-sm">edit</span>
-        <span>You are in edit mode. Make your changes and click Update.</span>
-      </div>
-    </div>
-
-    <!-- Modal Body -->
-    <div class="p-4 md:p-6">
-      <form (ngSubmit)="updateBranch()" class="space-y-5 md:space-y-6">
-        <!-- Personal Information Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          <!-- Name -->
-          <div>
-            <label
-              class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
-              >Full Name <span class="text-red-500 ml-0.5">*</span></label
-            >
-            <div class="relative">
-              <input
-                type="text"
-                [(ngModel)]="editForm.name"
-                name="name"
-                [readonly]="!isEditMode"
-                [class.bg-gray-50]="!isEditMode"
-                [class.cursor-default]="!isEditMode"
-                class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200"
-                placeholder="Enter full name"
-                required
-              />
-            </div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
             <div
-              *ngIf="!editForm.name && isEditMode"
-              class="text-red-500 text-xs mt-1 flex items-center font-medium"
+              class="w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[var(--color-primary)] flex items-center justify-center"
             >
-              <span class="material-icons text-xs mr-0.5">error</span>
-              Name is required
+              <span class="material-icons text-white">edit</span>
             </div>
-          </div>
-
-          <!-- Email -->
-          <div>
-            <label
-              class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
-              >Email Address</label
-            >
-            <input
-              type="email"
-              [(ngModel)]="editForm.email"
-              name="email"
-              [readonly]="!isEditMode"
-              [class.bg-gray-50]="!isEditMode"
-              [class.cursor-default]="!isEditMode"
-              (input)="validateEmail()"
-              [class.border-red-500]="emailError"
-              class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200"
-              placeholder="Enter email"
-            />
-            <div
-              *ngIf="emailError && isEditMode"
-              class="text-red-500 text-xs mt-1 flex items-center font-medium"
-            >
-              <span class="material-icons text-xs mr-0.5">error</span>
-              {{ emailError }}
-            </div>
-          </div>
-
-          <!-- Mobile -->
-        <div>
-  <label class="block text-sm font-medium text-gray-700 mb-2">
-    Mobile Number
-  </label>
-
-  <div class="flex border border-gray-200 rounded-xl overflow-hidden">
-
-    <!-- Country Select -->
-    <select
-      [(ngModel)]="selectedCountry"
-      name="country"
-      [disabled]="!isEditMode"
-      class="bg-gray-50 px-3 border-r border-gray-200 focus:outline-none text-sm"
-    >
-      <option *ngFor="let c of countryCodes" [ngValue]="c">
-        {{ c.flag }} {{ c.dialCode }}
-      </option>
-    </select>
-
-    <!-- Mobile -->
-    <input
-      type="tel"
-      [(ngModel)]="editForm.mobile"
-      name="mobile"
-      [readonly]="!isEditMode"
-      class="flex-1 px-4 py-2 focus:outline-none"
-      placeholder="Enter mobile number"
-    />
-  </div>
-
-</div>
-
-        
-        </div>
-
-        <!-- Additional Info -->
-        <div>
-          <label
-            class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
-            >Additional Information</label
-          >
-          <textarea
-            [(ngModel)]="editForm.info"
-            name="info"
-            rows="2"
-            [readonly]="!isEditMode"
-            [class.bg-gray-50]="!isEditMode"
-            [class.cursor-default]="!isEditMode"
-            class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200 resize-none"
-            placeholder="Add any notes or additional information..."
-          ></textarea>
-        </div>
-
-        <!-- Portals Section -->
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-base md:text-lg font-semibold text-gray-900">
-                Portal Assignment
-              </h3>
-              <p class="text-xs md:text-sm text-gray-500 mt-0.5">
-                {{ isEditMode ? 'Select portals and set commission percentages' : 'View assigned portals and commission percentages' }}
+              <h2 class="text-lg md:text-xl font-bold text-gray-900">
+                Branch Details
+              </h2>
+              <p class="text-sm text-gray-500">
+                View branch information and portal assignments
               </p>
             </div>
-            <span
-              class="text-xs font-medium px-2.5 py-1 bg-[#F0F7FF] text-[var(--color-primary)] rounded-full"
-            >
-              {{ getSelectedPortalCount() }} selected
-            </span>
           </div>
 
-          <!-- Loading -->
-          <div
-            *ngIf="loadingPortals"
-            class="p-4 md:p-6 bg-gray-50 rounded-lg md:rounded-xl border border-gray-100"
-          >
-            <div class="flex items-center justify-center gap-2.5 md:gap-3">
-              <div
-                class="w-4 h-4 md:w-5 md:h-5 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"
-              ></div>
-              <span class="text-sm text-gray-600">Loading portals...</span>
-            </div>
-          </div>
-
-          <!-- Portals Grid -->
-          <div
-            *ngIf="!loadingPortals"
-            class="grid grid-cols-1 gap-3 max-h-[40vh] overflow-y-auto pr-1"
-          >
-            <div
-              *ngFor="let portal of portalOptions"
-              class="bg-white rounded-lg border border-gray-200 p-3 md:p-4 hover:border-[var(--color-primary)] transition-colors"
-            >
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2.5 flex-1 min-w-0">
-                  <input
-                    type="checkbox"
-                    [id]="'edit-portal-' + portal.portalId"
-                    [checked]="isPortalSelected(portal.portalId)"
-                    (change)="
-                      onPortalSelectionChange($event, portal.portalId)
-                    "
-                    [disabled]="!isEditMode"
-                    class="h-4 w-4 md:h-5 md:w-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-gray-300 rounded transition-all duration-200 flex-shrink-0"
-                  />
-                  <div class="min-w-0">
-                    <label
-                      [for]="'edit-portal-' + portal.portalId"
-                      class="font-medium text-gray-900 text-sm truncate block cursor-pointer"
-                    >
-                      {{ portal.portalDomain }}
-                    </label>
-                  </div>
-                </div>
-                <span
-                  *ngIf="isInitialPortal(portal.portalId)"
-                  class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full flex-shrink-0"
-                >
-                  Assigned
-                </span>
-              </div>
-
-              <!-- Percentage Fields - Only show if portal is selected -->
-              <div
-                *ngIf="isPortalSelected(portal.portalId)"
-                class="grid grid-cols-3 gap-3 mt-3"
-              >
-                <div>
-                  <label
-                    class="block text-xs font-medium text-gray-700 mb-1.5"
-                    >FTT(%)</label
-                  >
-                  <div class="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      [(ngModel)]="
-                        getPortalPercentage(portal.portalId).fttPercentage
-                      "
-                      [name]="'ftt_' + portal.portalId"
-                      [readonly]="!isEditMode"
-                      [class.bg-gray-50]="!isEditMode"
-                      [class.cursor-default]="!isEditMode"
-                      class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-sm"
-                      placeholder="0-100"
-                    />
-                    <span class="text-gray-500 text-sm">%</span>
-                  </div>
-                </div>
-                <div>
-                  <label
-                    class="block text-xs font-medium text-gray-700 mb-1.5"
-                    >Topup (%)</label
-                  >
-                  <div class="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      [(ngModel)]="
-                        getPortalPercentage(portal.portalId).topupPercentage
-                      "
-                      [name]="'topup_' + portal.portalId"
-                      [readonly]="!isEditMode"
-                      [class.bg-gray-50]="!isEditMode"
-                      [class.cursor-default]="!isEditMode"
-                      class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-sm"
-                      placeholder="0-100"
-                    />
-                    <span class="text-gray-500 text-sm">%</span>
-                  </div>
-                </div>
-                <div>
-                  <label
-                    class="block text-xs font-medium text-gray-700 mb-1.5"
-                    >Payout (%)</label
-                  >
-                  <div class="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      [(ngModel)]="
-                        getPortalPercentage(portal.portalId).payoutPercentage
-                      "
-                      [name]="'payout_' + portal.portalId"
-                      [readonly]="!isEditMode"
-                      [class.bg-gray-50]="!isEditMode"
-                      [class.cursor-default]="!isEditMode"
-                      class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-sm"
-                      placeholder="0-100"
-                    />
-                    <span class="text-gray-500 text-sm">%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Load More Portals -->
-          <div
-            *ngIf="portalPage + 1 < portalTotalPages && isEditMode"
-            class="text-center py-2"
-          >
+          <div class="flex items-center gap-2">
+            <!-- Edit Toggle Button -->
             <button
-              type="button"
-              (click)="loadMorePortalsForEdit()"
-              class="px-4 py-2 text-xs font-medium bg-gray-100 hover:bg-[var(--color-primary)] hover:text-white rounded-lg transition-all"
+              *ngIf="!isEditMode"
+              (click)="enableEditMode()"
+              class="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] flex items-center justify-center transition-colors"
+              aria-label="Edit branch"
             >
-              <span *ngIf="!loadingMorePortals">Load More Portals</span>
-              <span *ngIf="loadingMorePortals">Loading...</span>
+              <span class="material-icons text-white">edit</span>
+            </button>
+
+            <!-- Close Button -->
+            <button
+              (click)="closeEditModal()"
+              class="w-7 h-7 md:w-8 md:h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors"
+              aria-label="Close modal"
+            >
+              <span class="material-icons text-gray-400">close</span>
             </button>
           </div>
         </div>
 
-        <!-- Form Actions -->
-        <div class="flex gap-2.5 md:gap-3 pt-5 border-t border-gray-100">
-          <button
-            type="button"
-            (click)="closeEditModal()"
-            class="flex-1 px-4 md:px-6 py-2.5 md:py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg md:rounded-xl font-medium transition-colors text-sm"
-          >
-            {{ isEditMode ? 'Cancel' : 'Close' }}
-          </button>
-          
-          <!-- Update Button - Only shown in edit mode -->
-          <button
-            *ngIf="isEditMode"
-            type="submit"
-            [disabled]="!editForm.name"
-            class="flex-1 px-4 md:px-6 py-2.5 md:py-3 bg-[var(--color-primary)] text-white font-semibold rounded-lg md:rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-          >
-            {{ loading ? "Updating..." : "Update Branch" }}
-          </button>
-           <!-- <button
+        <!-- Edit Mode Indicator -->
+        <div
+          *ngIf="isEditMode"
+          class="mt-3 flex items-center gap-2 text-sm text-[var(--color-primary)] bg-[#F0F7FF] px-3 py-2 rounded-lg"
+        >
+          <span class="material-icons text-sm">edit</span>
+          <span>You are in edit mode. Make your changes and click Update.</span>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-4 md:p-6">
+        <form (ngSubmit)="updateBranch()" class="space-y-5 md:space-y-6">
+          <!-- Personal Information Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <!-- Name -->
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
+                >Full Name <span class="text-red-500 ml-0.5">*</span></label
+              >
+              <div class="relative">
+                <input
+                  type="text"
+                  [(ngModel)]="editForm.name"
+                  name="name"
+                  [readonly]="!isEditMode"
+                  [class.bg-gray-50]="!isEditMode"
+                  [class.cursor-default]="!isEditMode"
+                  class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200"
+                  placeholder="Enter full name"
+                  required
+                />
+              </div>
+              <div
+                *ngIf="!editForm.name && isEditMode"
+                class="text-red-500 text-xs mt-1 flex items-center font-medium"
+              >
+                <span class="material-icons text-xs mr-0.5">error</span>
+                Name is required
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
+                >Email Address</label
+              >
+              <input
+                type="email"
+                [(ngModel)]="editForm.email"
+                name="email"
+                [readonly]="!isEditMode"
+                [class.bg-gray-50]="!isEditMode"
+                [class.cursor-default]="!isEditMode"
+                (input)="validateEmail()"
+                [class.border-red-500]="emailError"
+                class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200"
+                placeholder="Enter email"
+              />
+              <div
+                *ngIf="emailError && isEditMode"
+                class="text-red-500 text-xs mt-1 flex items-center font-medium"
+              >
+                <span class="material-icons text-xs mr-0.5">error</span>
+                {{ emailError }}
+              </div>
+            </div>
+
+            <!-- Mobile -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Mobile Number
+              </label>
+
+              <div
+                class="flex border border-gray-200 rounded-xl overflow-hidden"
+              >
+                <!-- Country Select -->
+                <select
+                  [(ngModel)]="selectedCountry"
+                  name="country"
+                  [disabled]="!isEditMode"
+                  class="bg-gray-50 px-3 border-r border-gray-200 focus:outline-none text-sm"
+                >
+                  <option *ngFor="let c of countryCodes" [ngValue]="c">
+                    {{ c.flag }} {{ c.dialCode }}
+                  </option>
+                </select>
+
+                <!-- Mobile -->
+                <input
+                  type="tel"
+                  [(ngModel)]="editForm.mobile"
+                  name="mobile"
+                  [readonly]="!isEditMode"
+                  class="flex-1 px-4 py-2 focus:outline-none"
+                  placeholder="Enter mobile number"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Additional Info -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
+              >Additional Information</label
+            >
+            <textarea
+              [(ngModel)]="editForm.info"
+              name="info"
+              rows="2"
+              [readonly]="!isEditMode"
+              [class.bg-gray-50]="!isEditMode"
+              [class.cursor-default]="!isEditMode"
+              class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200 resize-none"
+              placeholder="Add any notes or additional information..."
+            ></textarea>
+          </div>
+
+          <!-- Portals Section -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-base md:text-lg font-semibold text-gray-900">
+                  Portal Assignment
+                </h3>
+                <p class="text-xs md:text-sm text-gray-500 mt-0.5">
+                  {{
+                    isEditMode
+                      ? "Select portals and set commission percentages"
+                      : "View assigned portals and commission percentages"
+                  }}
+                </p>
+              </div>
+              <span
+                class="text-xs font-medium px-2.5 py-1 bg-[#F0F7FF] text-[var(--color-primary)] rounded-full"
+              >
+                {{ getSelectedPortalCount() }} selected
+              </span>
+            </div>
+
+            <!-- Loading -->
+            <div
+              *ngIf="loadingPortals"
+              class="p-4 md:p-6 bg-gray-50 rounded-lg md:rounded-xl border border-gray-100"
+            >
+              <div class="flex items-center justify-center gap-2.5 md:gap-3">
+                <div
+                  class="w-4 h-4 md:w-5 md:h-5 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"
+                ></div>
+                <span class="text-sm text-gray-600">Loading portals...</span>
+              </div>
+            </div>
+
+            <!-- Portals Grid -->
+            <div
+              *ngIf="!loadingPortals"
+              class="grid grid-cols-1 gap-3 max-h-[40vh] overflow-y-auto pr-1"
+            >
+              <div
+                *ngFor="let portal of portalOptions"
+                class="bg-white rounded-lg border border-gray-200 p-3 md:p-4 hover:border-[var(--color-primary)] transition-colors"
+              >
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                    <input
+                      type="checkbox"
+                      [id]="'edit-portal-' + portal.portalId"
+                      [checked]="isPortalSelected(portal.portalId)"
+                      (change)="
+                        onPortalSelectionChange($event, portal.portalId)
+                      "
+                      [disabled]="!isEditMode"
+                      class="h-4 w-4 md:h-5 md:w-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-gray-300 rounded transition-all duration-200 flex-shrink-0"
+                    />
+                    <div class="min-w-0">
+                      <label
+                        [for]="'edit-portal-' + portal.portalId"
+                        class="font-medium text-gray-900 text-sm truncate block cursor-pointer"
+                      >
+                        {{ portal.portalDomain }}
+                      </label>
+                    </div>
+                  </div>
+                  <span
+                    *ngIf="isInitialPortal(portal.portalId)"
+                    class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full flex-shrink-0"
+                  >
+                    Assigned
+                  </span>
+                </div>
+
+                <!-- Percentage Fields - Only show if portal is selected -->
+                <div
+                  *ngIf="isPortalSelected(portal.portalId)"
+                  class="grid grid-cols-3 gap-3 mt-3"
+                >
+                  <div>
+                    <label
+                      class="block text-xs font-medium text-gray-700 mb-1.5"
+                      >FTT(%)</label
+                    >
+                    <div class="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        [(ngModel)]="
+                          getPortalPercentage(portal.portalId).fttPercentage
+                        "
+                        [name]="'ftt_' + portal.portalId"
+                        [readonly]="!isEditMode"
+                        [class.bg-gray-50]="!isEditMode"
+                        [class.cursor-default]="!isEditMode"
+                        class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-sm"
+                        placeholder="0-100"
+                      />
+                      <span class="text-gray-500 text-sm">%</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      class="block text-xs font-medium text-gray-700 mb-1.5"
+                      >Topup (%)</label
+                    >
+                    <div class="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        [(ngModel)]="
+                          getPortalPercentage(portal.portalId).topupPercentage
+                        "
+                        [name]="'topup_' + portal.portalId"
+                        [readonly]="!isEditMode"
+                        [class.bg-gray-50]="!isEditMode"
+                        [class.cursor-default]="!isEditMode"
+                        class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-sm"
+                        placeholder="0-100"
+                      />
+                      <span class="text-gray-500 text-sm">%</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      class="block text-xs font-medium text-gray-700 mb-1.5"
+                      >Payout (%)</label
+                    >
+                    <div class="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        [(ngModel)]="
+                          getPortalPercentage(portal.portalId).payoutPercentage
+                        "
+                        [name]="'payout_' + portal.portalId"
+                        [readonly]="!isEditMode"
+                        [class.bg-gray-50]="!isEditMode"
+                        [class.cursor-default]="!isEditMode"
+                        class="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-sm"
+                        placeholder="0-100"
+                      />
+                      <span class="text-gray-500 text-sm">%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Load More Portals -->
+            <div
+              *ngIf="portalPage + 1 < portalTotalPages && isEditMode"
+              class="text-center py-2"
+            >
+              <button
+                type="button"
+                (click)="loadMorePortalsForEdit()"
+                class="px-4 py-2 text-xs font-medium bg-gray-100 hover:bg-[var(--color-primary)] hover:text-white rounded-lg transition-all"
+              >
+                <span *ngIf="!loadingMorePortals">Load More Portals</span>
+                <span *ngIf="loadingMorePortals">Loading...</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="flex gap-2.5 md:gap-3 pt-5 border-t border-gray-100">
+            <button
+              type="button"
+              (click)="closeEditModal()"
+              class="flex-1 px-4 md:px-6 py-2.5 md:py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg md:rounded-xl font-medium transition-colors text-sm"
+            >
+              {{ isEditMode ? "Cancel" : "Close" }}
+            </button>
+
+            <!-- Update Button - Only shown in edit mode -->
+            <button
+              *ngIf="isEditMode"
+              type="submit"
+              [disabled]="!editForm.name"
+              class="flex-1 px-4 md:px-6 py-2.5 md:py-3 bg-[var(--color-primary)] text-white font-semibold rounded-lg md:rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            >
+              {{ loading ? "Updating..." : "Update Branch" }}
+            </button>
+            <!-- <button
               type="submit"
             class="flex-1 px-4 md:px-6 py-2.5 md:py-3 bg-[var(--color-primary)] text-white font-semibold rounded-lg md:rounded-xl hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             >
               {{ loading ? "Updating..." : "Update Branch" }}
             </button> -->
-        </div>
-      </form>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 
   <!-- Add User Modal -->
   <div
@@ -1401,11 +1415,8 @@
         [entityType]="'BRANCH'"
         (onClose)="closeLimitPopup()"
       >
-        <!-- ✅ onClose use kiya -->
+        <!--  onClose use kiya -->
       </app-add-limit-popup>
     </div>
   </div>
 </div>
-
-
-

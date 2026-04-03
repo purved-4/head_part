@@ -1,6 +1,6 @@
 import { TestBed } from "@angular/core/testing";
 
-import { ComPartService } from "./third-party.service";
+import { ComPartService } from "./com-part.service";
 
 describe("ComPartService", () => {
   let service: ComPartService;

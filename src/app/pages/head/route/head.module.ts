@@ -13,6 +13,7 @@ import { ManageBranchUserComponent } from "../branch/manage-branch-user/manage-b
 import { HeadUpiComponent } from "../upi/head-upi/head-upi.component";
 import { HeadBankComponent } from "../bank/head-bank/head-bank.component";
 import { QRCodeComponent } from "angularx-qrcode";
+// import {HeadChatComponent} from "../../../trash/head-chat/head-chat.component";
 import { HeadNavSidebarComponent } from "../head-navlayout/head-nav-sidebar/head-nav-sidebar.component";
 import { HeadNavHeaderComponent } from "../head-navlayout/head-nav-header/head-nav-header.component";
 import { HeadNavDashboardLayoutComponent } from "../head-navlayout/head-nav-dashboard-layout/head-nav-dashboard-layout.component";
@@ -31,6 +32,7 @@ import { RecycleManagementComponent } from "../recycle-management/recycle-manage
    ManageBranchUserComponent,
    HeadUpiComponent,
    HeadBankComponent,
+      // HeadChatComponent,
     HeadNavSidebarComponent,
     HeadNavHeaderComponent,
     HeadNavDashboardLayoutComponent,

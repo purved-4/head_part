@@ -7,7 +7,7 @@ import { PortalService } from "../pages/services/portal.service";
 import { HeadService } from "../pages/services/head.service";
 import { BranchService } from "../pages/services/branch.service";
 import { ChiefService } from "../pages/services/chief.service";
-import { ComPartService } from "../pages/services/third-party.service";
+import { ComPartService } from "../pages/services/com-part.service";
 
 @Injectable({
   providedIn: "root",

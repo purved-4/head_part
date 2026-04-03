@@ -1,7 +1,7 @@
-import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, NgZone } from "@angular/core";
+import { BehaviorSubject } from "rxjs";
 
-export type SnackbarType = 'success' | false | 'warning';
+export type SnackbarType = "success" | false | "warning";
 
 export interface SnackbarPayload {
   message: string;
@@ -10,7 +10,7 @@ export interface SnackbarPayload {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class SnackbarService {
   private queue: SnackbarPayload[] = [];
@@ -28,17 +28,14 @@ export class SnackbarService {
    * @param duration how long to show in ms (default 4000)
    */
   show(message: string, type: any, duration = 4000) {
-    if(type === true){
-      type = 'success';
-    }
-    else{
+    if (type === true) {
+      type = "success";
+    } else {
       type = false;
     }
     this.queue.push({ message, type, duration });
     this.processQueue();
   }
-
- 
 
   private processQueue() {
     // if a snackbar is currently visible, wait

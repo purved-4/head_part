@@ -17,7 +17,7 @@ import { ViewChild, ElementRef } from "@angular/core";
   templateUrl: "./add-branch.component.html",
   styleUrls: ["./add-branch.component.scss"],
 })
-export class AddBranchComponent implements OnInit{
+export class AddBranchComponent implements OnInit {
   chiefForm: FormGroup;
   loading = false;
   portals: any[] = [];
@@ -31,11 +31,14 @@ export class AddBranchComponent implements OnInit{
   showDropdown = false;
   availableSearchTerm: string = "";
   selectedSearchTerm: string = "";
-currentBranchId: string = '';
-selectedPortalForPopup: any = null;
-showPopup: boolean = false;
-countryCodes = COUNTRY_CODES;
-selectedCountry = this.countryCodes.find(c => c.code === 'IN') || this.countryCodes[0];
+
+  countryCodes = COUNTRY_CODES;
+  selectedCountry =
+    this.countryCodes.find((c) => c.code === "IN") || this.countryCodes[0];
+
+
+showPercentageModal = false;
+  selectedWebsiteId: any = null;
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -49,8 +52,8 @@ selectedCountry = this.countryCodes.find(c => c.code === 'IN') || this.countryCo
       // mobile: ["", [Validators.required, Validators.pattern(/^[0-9]{15}$/)]],
       mobile: ["", [Validators.required, Validators.maxLength(15)]],
       email: ["", [Validators.required, Validators.email]],
-       userEmail: ["", [Validators.required, Validators.email]],  
-  userPassword: ["", Validators.required],        
+      userEmail: ["", [Validators.required, Validators.email]],
+      userPassword: ["", Validators.required],
       info: [""],
       isActive: [true],
       portalIds: [[], Validators.required],
@@ -72,7 +75,6 @@ selectedCountry = this.countryCodes.find(c => c.code === 'IN') || this.countryCo
         this.filterPortals(); // initial filter (empty)
       },
       error: (err) => {
-        console.error("Error loading portals:", err);
         this.snackService.show(
           "Failed to load portals. Please try again.",
           false,
@@ -127,8 +129,6 @@ selectedCountry = this.countryCodes.find(c => c.code === 'IN') || this.countryCo
     return selectedIds.includes(portalId);
   }
 
-
-
   getAvailablePortals(): any[] {
     const selectedIds: string[] = this.chiefForm.get("portalIds")?.value || [];
 
@@ -140,7 +140,6 @@ selectedCountry = this.countryCodes.find(c => c.code === 'IN') || this.countryCo
           .includes(this.availableSearchTerm),
       );
   }
-
 
   getSelectedPortals(): any[] {
     const selectedIds: string[] = this.chiefForm.get("portalIds")?.value || [];
@@ -251,106 +250,106 @@ selectedCountry = this.countryCodes.find(c => c.code === 'IN') || this.countryCo
     });
   }
 
- onSubmit(): void {
-  if (this.loading) return;
+  onSubmit(): void {
+    if (this.loading) return;
 
-  const portalIds: string[] = this.chiefForm.get("portalIds")?.value || [];
+    const portalIds: string[] = this.chiefForm.get("portalIds")?.value || [];
 
-const mobileNumber = this.chiefForm.value.mobile;
-const fullMobile = this.selectedCountry.dialCode + mobileNumber;
+    const mobileNumber = this.chiefForm.value.mobile;
+    const fullMobile = this.selectedCountry.dialCode + mobileNumber;
 
-  // Portal validation
-  if (portalIds.length === 0) {
-    this.snackService.show("Please select at least one portal", false, 3000);
-    return;
-  }
+    // Portal validation
+    if (portalIds.length === 0) {
+      this.snackService.show("Please select at least one portal", false, 3000);
+      return;
+    }
 
-  for (const portalId of portalIds) {
-    const fttCtrl = this.chiefForm.get(`first_topup_${portalId}`);
-    const topupCtrl = this.chiefForm.get(`topup_${portalId}`);
-    const payoutCtrl = this.chiefForm.get(`payout_${portalId}`);
+    for (const portalId of portalIds) {
+      const fttCtrl = this.chiefForm.get(`first_topup_${portalId}`);
+      const topupCtrl = this.chiefForm.get(`topup_${portalId}`);
+      const payoutCtrl = this.chiefForm.get(`payout_${portalId}`);
 
-    const ftt = fttCtrl?.value;
-    const topup = topupCtrl?.value;
-    const payout = payoutCtrl?.value;
+      const ftt = fttCtrl?.value;
+      const topup = topupCtrl?.value;
+      const payout = payoutCtrl?.value;
 
-    fttCtrl?.markAsTouched();
-    topupCtrl?.markAsTouched();
-    payoutCtrl?.markAsTouched();
+      fttCtrl?.markAsTouched();
+      topupCtrl?.markAsTouched();
+      payoutCtrl?.markAsTouched();
 
+      if (
+        !this.isValidPercentage(ftt) ||
+        !this.isValidPercentage(topup) ||
+        !this.isValidPercentage(payout)
+      ) {
+        this.snackService.show(
+          "Please enter valid Topup, Payout & FTT percentages for all selected portals",
+          false,
+          4000,
+        );
+        return;
+      }
+    }
+
+    // Form validation
     if (
-      !this.isValidPercentage(ftt) ||
-      !this.isValidPercentage(topup) ||
-      !this.isValidPercentage(payout)
+      this.chiefForm.get("name")?.invalid ||
+      this.chiefForm.get("mobile")?.invalid ||
+      this.chiefForm.get("email")?.invalid ||
+      this.chiefForm.get("userEmail")?.invalid ||
+      this.chiefForm.get("userPassword")?.invalid
     ) {
       this.snackService.show(
-        "Please enter valid Topup, Payout & FTT percentages for all selected portals",
+        "Please fill all required fields correctly",
         false,
-        4000
+        3000,
       );
       return;
     }
-  }
 
-  // Form validation
-  if (
-    this.chiefForm.get("name")?.invalid ||
-    this.chiefForm.get("mobile")?.invalid ||
-    this.chiefForm.get("email")?.invalid ||
-    this.chiefForm.get("userEmail")?.invalid ||
-    this.chiefForm.get("userPassword")?.invalid
-  ) {
-    this.snackService.show(
-      "Please fill all required fields correctly",
-      false,
-      3000
-    );
-    return;
-  }
+    // Portal percentages payload
+    const portalPercentages: Record<string, any> = {};
+    portalIds.forEach((id) => {
+      portalPercentages[String(id)] = {
+        fttPercentage: Number(this.chiefForm.get(`first_topup_${id}`)?.value),
+        topupPercentage: Number(this.chiefForm.get(`topup_${id}`)?.value),
+        payoutPercentage: Number(this.chiefForm.get(`payout_${id}`)?.value),
+      };
+    });
 
-  // Portal percentages payload
-  const portalPercentages: Record<string, any> = {};
-  portalIds.forEach((id) => {
-    portalPercentages[String(id)] = {
-      fttPercentage: Number(this.chiefForm.get(`first_topup_${id}`)?.value),
-      topupPercentage: Number(this.chiefForm.get(`topup_${id}`)?.value),
-      payoutPercentage: Number(this.chiefForm.get(`payout_${id}`)?.value),
+    // Final payload
+    const payload: any = {
+      name: this.chiefForm.value.name,
+      mobile: fullMobile,
+      email: this.chiefForm.value.email,
+      userEmail: this.chiefForm.value.userEmail,
+      userPassword: this.chiefForm.value.userPassword,
+      info: this.chiefForm.value.info,
+      active: this.chiefForm.value.isActive,
+      balance: 0,
+      portalPercentages,
+      createdByEntityId: this.currentUserId,
+      createdByEntityType: this.role,
     };
-  });
 
-  // Final payload
-  const payload: any = {
-    name: this.chiefForm.value.name,
-      mobile: fullMobile,  
-    email: this.chiefForm.value.email,
-    userEmail: this.chiefForm.value.userEmail,
-    userPassword: this.chiefForm.value.userPassword,
-    info: this.chiefForm.value.info,
-    active: this.chiefForm.value.isActive,
-    balance: 0,
-    portalPercentages,
-    createdByEntityId: this.currentUserId,
-    createdByEntityType: this.role,
-  };
+    this.loading = true;
 
-  this.loading = true;
-
-  this.branchService.addBranch(payload).subscribe({
-    next: () => {
-      this.loading = false;
-      this.snackService.show("Branch created successfully", true, 3000);
-      this.clearForm();
-    },
-    error: (err) => {
-      this.loading = false;
-      this.snackService.show(
-        err?.error?.message || "Failed to create branch",
-        false,
-        3000
-      );
-    },
-  });
-}
+    this.branchService.addBranch(payload).subscribe({
+      next: () => {
+        this.loading = false;
+        this.snackService.show("Branch created successfully", true, 3000);
+        this.clearForm();
+      },
+      error: (err) => {
+        this.loading = false;
+        this.snackService.show(
+          err?.error?.message || "Failed to create branch",
+          false,
+          3000,
+        );
+      },
+    });
+  }
 
   private isValidPercentage(value: any): boolean {
     const num = Number(value);
@@ -362,8 +361,8 @@ const fullMobile = this.selectedCountry.dialCode + mobileNumber;
       name: "",
       mobile: "",
       email: "",
-        userEmail: "",    
-  userPassword: "", 
+      userEmail: "",
+      userPassword: "",
       info: "",
       isActive: true,
       portalIds: [],
@@ -411,13 +410,14 @@ const fullMobile = this.selectedCountry.dialCode + mobileNumber;
     }
   }
 
-openPopup(portal: any) {
-  this.selectedPortalForPopup = portal;
+  openPercentageModal( website: any) {
 
-  // ✅ IMPORTANT: pass correct branchId
-  this.currentBranchId = this.currentUserId as string;
+    this.selectedWebsiteId = website;
 
-  this.showPopup = true;
+    this.showPercentageModal = true;
+  }
+
+  closeModal() {
+    this.showPercentageModal = false;
+  }
 }
-}
-

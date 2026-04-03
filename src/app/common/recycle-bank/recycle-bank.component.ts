@@ -61,7 +61,6 @@ export class RecycleBankComponent implements OnInit {
           this.totalPagesCount = res?.data?.totalPages || 0;
         },
         error: (err) => {
-          console.error(err);
           this.loading = false;
         },
       });

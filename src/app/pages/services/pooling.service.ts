@@ -44,7 +44,6 @@ export class PoolingService {
       eventSource.addEventListener("keep-alive", () => {});
 
       eventSource.onerror = (error) => {
-        console.warn("Funds SSE: Reconnecting automatically...");
         // ❌ No close, no observer.error
       };
 
@@ -74,7 +73,6 @@ export class PoolingService {
         this.eventSource.addEventListener("keep-alive", () => {});
 
         this.eventSource.onerror = () => {
-          console.warn("Pending SSE: Auto reconnecting...");
           // ❌ Neither close nor error.emit
         };
       };
@@ -108,7 +106,6 @@ export class PoolingService {
 
         // Auto retry forever
         this.eventSource.onerror = (error: any) => {
-          console.warn("SSE lost — retrying automatically...", error);
           // ❌ DO NOT close
           // ❌ DO NOT increment attempt
           // ❌ DO NOT observer.error()
@@ -145,7 +142,6 @@ export class PoolingService {
         this.eventSource.addEventListener("keep-alive", () => {});
 
         this.eventSource.onerror = () => {
-          console.warn("Pending SSE: Auto reconnecting...");
           // ❌ Neither close nor error.emit
         };
       };

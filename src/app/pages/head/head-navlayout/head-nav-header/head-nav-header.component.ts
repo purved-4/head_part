@@ -81,42 +81,20 @@ export class HeadNavHeaderComponent implements OnInit {
     private headServices: HeadService,
     // private portalState: PortalSharingService,
     private snack: SnackbarService,
-      private ngZone: NgZone
-
+    private ngZone: NgZone,
   ) {}
 
   ngOnInit(): void {
-  this.currentRoleId = this.userStateService.getCurrentEntityId();
-  this.currentUserRole = this.userStateService.getRole();
+    this.currentRoleId = this.userStateService.getCurrentEntityId();
+    this.currentUserRole = this.userStateService.getRole();
 
-  this.socketService.subscribeLatestBalance(
-    this.currentUserRole,
-    this.currentRoleId
-  );
-
-  // 🔥 SOCKET REAL-TIME
-  this.socketService.getLatestBalance().subscribe((res) => {
-    console.log("WS RES:", res);
-
-    this.ngZone.run(() => {
-      this.limitRemainingAmount = res?.entityBalance ?? 0;
-      this.topupBalance = res?.totalTopup ?? 0;
-      this.payoutBalance = res?.totalPayout ?? 0;
-      this.rewards = res?.reward ?? 0;
-
-      this.emitBalances();
-    });
-  });
-
-  // 🔥 INITIAL API
-  this.limitService
-    .getLatestLimitsByEntityAndType(
+    this.socketService.subscribeLatestBalance(
+      this.currentUserRole,
       this.currentRoleId,
-      this.currentUserRole
-    )
-    .subscribe((res) => {
-      console.log("API RES:", res);
+    );
 
+    //  SOCKET REAL-TIME
+    this.socketService.getLatestBalance().subscribe((res) => {
       this.ngZone.run(() => {
         this.limitRemainingAmount = res?.entityBalance ?? 0;
         this.topupBalance = res?.totalTopup ?? 0;
@@ -126,7 +104,21 @@ export class HeadNavHeaderComponent implements OnInit {
         this.emitBalances();
       });
     });
-}
+
+    //  INITIAL API
+    this.limitService
+      .getLatestLimitsByEntityAndType(this.currentRoleId, this.currentUserRole)
+      .subscribe((res) => {
+        this.ngZone.run(() => {
+          this.limitRemainingAmount = res?.entityBalance ?? 0;
+          this.topupBalance = res?.totalTopup ?? 0;
+          this.payoutBalance = res?.totalPayout ?? 0;
+          this.rewards = res?.reward ?? 0;
+
+          this.emitBalances();
+        });
+      });
+  }
 
   toggleLimitsPopup() {
     this.isLimitsOpen = !this.isLimitsOpen;
@@ -136,7 +128,6 @@ export class HeadNavHeaderComponent implements OnInit {
     this.currentRoleId = this.userStateService.getCurrentEntityId();
 
     if (!this.currentRoleId) {
-      console.warn("RoleId not ready yet");
       return;
     }
 
@@ -167,7 +158,6 @@ export class HeadNavHeaderComponent implements OnInit {
         this.loadingPortalPercent = false;
       },
       error: (err) => {
-        console.error("API ERROR:", err);
         this.portalPercentages = [];
         this.loadingPortalPercent = false;
       },

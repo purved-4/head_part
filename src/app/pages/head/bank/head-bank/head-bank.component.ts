@@ -8,7 +8,7 @@ import { UserStateService } from "../../../../store/user-state.service";
 import { HeadService } from "../../../services/head.service";
 import { ViewChild, ElementRef } from "@angular/core";
 // import {
- 
+
 //   PortalInfo,
 // } from "../../../services/portal-sharing.service";
 import { Subject } from "rxjs";
@@ -153,7 +153,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     return count;
   }
 
-  selectedPortals:  [] = [];
+  selectedPortals: [] = [];
 
   viewMode: "table" | "grid" = "table";
   capacityRanges: {
@@ -186,7 +186,6 @@ export class HeadBankComponent implements OnInit, OnDestroy {
 
     this.fetchBankAccounts();
     this.loadPortals();
-   
 
     // this.portalService.selectedPortals$.subscribe((sites) => {
     //   this.selectedPortals = sites;
@@ -236,7 +235,6 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, options)
       .pipe(
         catchError((err) => {
-          console.error("Error fetching bank accounts", err);
           this.loading = false;
           return of({ data: [], totalElements: 0, totalPages: 0 });
         }),
@@ -489,7 +487,6 @@ export class HeadBankComponent implements OnInit, OnDestroy {
             this.modalFilteredPortals = [...this.portals];
           },
           error: (err) => {
-            console.error("Error loading portals", err);
             this.portals = [];
             this.modalFilteredPortals = [];
           },
@@ -754,7 +751,6 @@ export class HeadBankComponent implements OnInit, OnDestroy {
         this.snack.show(`Account status updated to ${status}`, true);
       },
       error: (err) => {
-        console.error("Error updating account status:", err);
         this.isUpdatingStatus[accountId] = false;
         // alert("Error updating account status. Please try again.");
         this.snack.show(
@@ -778,18 +774,18 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       return;
     }
 
-const invalid = this.capacityRanges.some(
-  (r) =>
-    r.minRange === null ||
-    r.maxRange === null ||
-    r.quantity === null ||
-    Number(r.maxRange) <= Number(r.minRange)
-);
+    const invalid = this.capacityRanges.some(
+      (r) =>
+        r.minRange === null ||
+        r.maxRange === null ||
+        r.quantity === null ||
+        Number(r.maxRange) <= Number(r.minRange),
+    );
 
-if (invalid) {
-  this.snack.show("Max range should be greater than min range", false);
-  return;
-}
+    if (invalid) {
+      this.snack.show("Max range should be greater than min range", false);
+      return;
+    }
 
     this.isAdding = true;
 
@@ -822,7 +818,6 @@ if (invalid) {
         this.snack.show("Bank account added successfully!", true);
       },
       error: (err) => {
-        console.error("Error adding bank account:", err);
         this.isAdding = false;
         this.snack.show("Error adding bank account. Please try again.", false);
       },
@@ -883,7 +878,6 @@ if (invalid) {
         this.snack.show("Bank account updated successfully!", true);
       },
       error: (err) => {
-        console.error("Error updating bank account:", err);
         this.isSubmitting = false;
         alert("Error updating bank account. Please try again.");
         this.snack.show(
@@ -990,7 +984,6 @@ if (invalid) {
         // this.showUpdateSuccess('Bank status toggled successfully!');
       },
       error: (err) => {
-        console.error("Error toggling bank status:", err);
         // Optional: show error message to user
         // alert('Failed to toggle status. Please try again.');
       },
@@ -1194,8 +1187,6 @@ if (invalid) {
 
   //   const id = this.editingAccount.id;
 
-  //   console.log("SENDING ID ", id);
-
   //   this.bankService.setLimitTime(id, payload).subscribe({
   //     next: () => {
   //       this.snack.show("Limit time set successfully", true);
@@ -1229,15 +1220,13 @@ if (invalid) {
 
     const id = this.editingAccount.id;
 
-    console.log("SENDING ID ", id);
-
     this.bankService.setLimitTime(id, payload).subscribe({
       next: () => {
         this.snack.show("Limit time set successfully", true);
         this.closeLimitModal();
         this.isSubmittingLimit = false;
 
-        // 🔥 reload table/grid data
+        //  reload table/grid data
         this.fetchBankAccounts();
       },
       error: () => {
@@ -1262,15 +1251,15 @@ if (invalid) {
     //   last.quantity === null
     // )
     if (
-  last.minRange === null ||
-  last.maxRange === null ||
-  last.quantity === null
-) {
+      last.minRange === null ||
+      last.maxRange === null ||
+      last.quantity === null
+    ) {
       this.snack.show("Please fill 'To' and Quantity first", false);
       return;
     }
 
-    // 🔥 MAIN VALIDATION HERE ONLY
+    //  MAIN VALIDATION HERE ONLY
     if (last.maxRange <= (last.minRange ?? 0)) {
       this.snack.show("'To' must be greater than 'From'", false);
       return;
@@ -1282,10 +1271,10 @@ if (invalid) {
     //   quantity: null,
     // });
     this.capacityRanges.push({
-  minRange: null,
-  maxRange: null,
-  quantity: null,
-});
+      minRange: null,
+      maxRange: null,
+      quantity: null,
+    });
   }
 
   removeRange(index: number) {
@@ -1298,7 +1287,6 @@ if (invalid) {
     // for (let i = 1; i < this.capacityRanges.length; i++) {
     //   const prev = this.capacityRanges[i - 1];
     //   const current = this.capacityRanges[i];
-
     //   current.minRange = prev.maxRange;
     // }
   }
@@ -1306,7 +1294,6 @@ if (invalid) {
   // onRangeChange(index: number) {
   //   const current = this.capacityRanges[index];
 
-    
   //   current.maxRange =
   //     current.maxRange !== null ? Number(current.maxRange) : null;
   //   current.minRange =
@@ -1365,14 +1352,12 @@ if (invalid) {
           const res2 = res?.data;
           this.capacityData = Array.isArray(res2) ? res2 : [];
 
-          // 🔥 FIX: map to UI array
+          //  FIX: map to UI array
           this.capacityRanges = this.capacityData.map((r: any) => ({
             minRange: r.minRange,
             maxRange: r.maxRange,
             quantity: r.quantity,
           }));
-
-          console.log("CAPACITY ", this.capacityRanges);
         },
         error: () => {
           this.isLoadingCapacity = false;
@@ -1407,7 +1392,7 @@ if (invalid) {
       mode: "BANK",
       topupId: account.id,
 
-      // 🔥 IMPORTANT
+      //  IMPORTANT
       ranges: this.capacityRanges.map((r) => ({
         minRange: Number(r.minRange),
         maxRange: Number(r.maxRange),
@@ -1415,14 +1400,12 @@ if (invalid) {
       })),
     };
 
-    console.log("PAYLOAD ", payload);
-
     this.bankService.addTopupCapacity(payload).subscribe({
       next: () => {
         this.snack.show("Capacity saved successfully", true);
         this.closeCapacityModal();
 
-        // 🔥 refresh view
+        //  refresh view
         this.openCapacityModal(account);
       },
       error: () => {
@@ -1441,8 +1424,6 @@ if (invalid) {
   selectedMode!: "UPI" | "BANK";
 
   openCapacity(item: any, mode: "UPI" | "BANK") {
-    console.log("🔥 CLICK ITEM:", item);
-
     this.selectedId = item.id;
 
     this.selectedPortalId = item.portalId || item.portal || item.portalID;
@@ -1451,7 +1432,7 @@ if (invalid) {
 
     this.selectedMode = mode;
 
-    console.log("🔥 FINAL PASS:", {
+    console.log(" FINAL PASS:", {
       entityId: this.selectedId,
       portalId: this.selectedPortalId,
       topupId: this.selectedTopupId,
@@ -1494,7 +1475,7 @@ if (invalid) {
   //       this.closeBankToggleConfirm();
   //     },
   //     error: (err) => {
-  //       console.error("Bank toggle failed", err);
+
   //       this.closeBankToggleConfirm();
   //     },
   //   });
@@ -1506,13 +1487,11 @@ if (invalid) {
 
     this.bankService.toggleIsBank(bank.id).subscribe({
       next: (res: any) => {
-        console.log("TOGGLE RESPONSE =>", res);
         this.closeBankToggleConfirm();
         this.fetchBankAccounts();
         this.snack.show(res?.message || "Failed...", true);
       },
       error: (err) => {
-        console.error("Bank toggle failed", err);
         this.closeBankToggleConfirm();
         this.snack.show(err?.message || "Failed...", false);
       },

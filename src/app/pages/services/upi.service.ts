@@ -72,94 +72,93 @@ export class UpiService {
   getByEntityIdAndActivePaginated(
     entityId: string,
     options: any = {},
-): Observable<any> {
+  ): Observable<any> {
     let params = new HttpParams()
-     .set("page", options.page?.toString() ?? "0")
-     .set("size", options.size?.toString() ?? "20");
+      .set("page", options.page?.toString() ?? "0")
+      .set("size", options.size?.toString() ?? "20");
 
     if (options.query) params = params.set("query", options.query);
     if (options.minAmount !== undefined && options.maxAmount !== undefined) {
-     params = params.set("minAmount", options.minAmount.toString());
-     params = params.set("maxAmount", options.maxAmount.toString());
+      params = params.set("minAmount", options.minAmount.toString());
+      params = params.set("maxAmount", options.maxAmount.toString());
     }
     if (options.active !== undefined && options.active !== null) {
-     params = params.set("active", options.active.toString());
+      params = params.set("active", options.active.toString());
     }
     if (options.portalId) params = params.set("portalId", options.portalId);
     if (options.limit && options.limit > 0) {
-     params = params.set("limit", options.limit.toString());
+      params = params.set("limit", options.limit.toString());
     }
 
     if (options.status) {
-     params = params.set("status", options.status);
+      params = params.set("status", options.status);
     }
 
     return this.http
-     .get<any>(`${baseUrl}/upi/getAllActiveByEntityId/paginated/${entityId}`, {
+      .get<any>(`${baseUrl}/upi/getAllActiveByEntityId/paginated/${entityId}`, {
         params,
-     })
-     .pipe(map((res) => res.data));
-}
+      })
+      .pipe(map((res) => res.data));
+  }
 
-// getByBranchIdPaginated(
-//     entityId: string,
-//     options: UpiFilterOptions = {},
-// ): Observable<any> {
-//     let params = new HttpParams()
-//      .set("page", options.page?.toString() ?? "0")
-//      .set("size", options.size?.toString() ?? "20");
+  // getByBranchIdPaginated(
+  //     entityId: string,
+  //     options: UpiFilterOptions = {},
+  // ): Observable<any> {
+  //     let params = new HttpParams()
+  //      .set("page", options.page?.toString() ?? "0")
+  //      .set("size", options.size?.toString() ?? "20");
 
-//     if (options.query) params = params.set("query", options.query);
-//     if (options.minAmount !== undefined && options.maxAmount !== undefined) {
-//      params = params.set("minAmount", options.minAmount.toString());
-//      params = params.set("maxAmount", options.maxAmount.toString());
-//     }
-//     if (options.active !== undefined && options.active !== null) {
-//      params = params.set("active", options.active.toString());
-//     }
-//     if (options.portalId) params = params.set("portalId", options.portalId);
-//     if (options.limit && options.limit > 0) {
-//      params = params.set("limit", options.limit.toString());
-//     }
+  //     if (options.query) params = params.set("query", options.query);
+  //     if (options.minAmount !== undefined && options.maxAmount !== undefined) {
+  //      params = params.set("minAmount", options.minAmount.toString());
+  //      params = params.set("maxAmount", options.maxAmount.toString());
+  //     }
+  //     if (options.active !== undefined && options.active !== null) {
+  //      params = params.set("active", options.active.toString());
+  //     }
+  //     if (options.portalId) params = params.set("portalId", options.portalId);
+  //     if (options.limit && options.limit > 0) {
+  //      params = params.set("limit", options.limit.toString());
+  //     }
 
-//     return this.http
-//      .get<any>(`${baseUrl}/upi/getAllActiveByEntityId/paginated/${entityId}`, {
-//         params,
-//      })
-//      .pipe(map((res) => res.data));
-// }
+  //     return this.http
+  //      .get<any>(`${baseUrl}/upi/getAllActiveByEntityId/paginated/${entityId}`, {
+  //         params,
+  //      })
+  //      .pipe(map((res) => res.data));
+  // }
 
-getByEntityIdAndDeactivePaginated(
+  getByEntityIdAndDeactivePaginated(
     entityId: string,
     options: any = {},
-): Observable<any> {
+  ): Observable<any> {
     let params = new HttpParams()
-     .set("page", options.page?.toString() ?? "0")
-     .set("size", options.size?.toString() ?? "20");
+      .set("page", options.page?.toString() ?? "0")
+      .set("size", options.size?.toString() ?? "20");
 
     if (options.query) params = params.set("query", options.query);
     if (options.minAmount !== undefined && options.maxAmount !== undefined) {
-     params = params.set("minAmount", options.minAmount.toString());
-     params = params.set("maxAmount", options.maxAmount.toString());
+      params = params.set("minAmount", options.minAmount.toString());
+      params = params.set("maxAmount", options.maxAmount.toString());
     }
     if (options.portalId) params = params.set("portalId", options.portalId);
     if (options.limit && options.limit > 0) {
-     params = params.set("limit", options.limit.toString());
+      params = params.set("limit", options.limit.toString());
     }
 
     return this.http
-     .get<any>(`${baseUrl}/upi/getAllDeactiveByEntityId/paginated/${entityId}`, {
-        params,
-     })
-     .pipe(map((res) => res.data));
-}
+      .get<any>(
+        `${baseUrl}/upi/getAllDeactiveByEntityId/paginated/${entityId}`,
+        {
+          params,
+        },
+      )
+      .pipe(map((res) => res.data));
+  }
 
- 
-
-setLimitTime(id: string, data: any) {
+  setLimitTime(id: string, data: any) {
     const instantStr = new Date(data.dateTime).toISOString();
-
-    // console.log("Sending limitTime as Instant:", instantStr);
 
     return this.http.post(
       `${baseUrl}/upi/setLimitTime/${id}?limitTime=${instantStr}`,
@@ -193,7 +192,7 @@ setLimitTime(id: string, data: any) {
 
   addTopupCapacity(payload: any): Observable<any> {
     return this.http.post<any>(`${baseUrl}/topup-capacity/add`, payload);
-  }  
+  }
 
   toggleIsUpi(id: string): Observable<any> {
     return this.http.patch<any>(`${baseUrl}/upi/${id}/toggle-isupi`, {});

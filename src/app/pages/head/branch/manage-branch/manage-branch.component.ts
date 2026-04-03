@@ -242,7 +242,6 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
         this.loading = false;
       },
       error: (err) => {
-        console.error("Error loading branches:", err);
         this.error =
           err.error?.message || "Failed to load branches. Please try again.";
         this.agents = [];
@@ -438,9 +437,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error("Failed to load portal percentages", err);
-      },
+      error: (err) => {},
     });
   }
 
@@ -500,9 +497,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error("Failed to load portal percentages", err);
-      },
+      error: (err) => {},
     });
   }
 
@@ -533,7 +528,6 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
   toggleStatus(agent: Agent): void {
     const targetId = agent?.id || agent?.headId || this.currentRoleId;
     if (!targetId) {
-      console.error("No agent id available to toggle status");
       return;
     }
     if (this.togglingAgent[targetId]) return;
@@ -557,7 +551,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
           err?.error?.message || "Failed to update branch status",
           false,
         );
-        console.error("Failed to toggle status", err);
+
         this.snack.show("Failed to update branch status", false);
       },
     });
@@ -864,7 +858,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
   // Close limit popup
   closeLimitPopup(): void {
-    console.log("closeLimitPopup called"); // debug ke liye
+    // console.log("closeLimitPopup called"); // debug ke liye
     this.showLimitPopup = false;
     this.selectedBranchForLimit = null;
     this.cdr.detectChanges(); // UI update force
@@ -963,8 +957,6 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
       },
 
       error: (err) => {
-        console.error("Failed to update branch:", err);
-
         this.updatingbranch = false;
         this.loading = false;
 
@@ -1220,7 +1212,6 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
         this.loadingMorePortals = false;
       },
       error: (err) => {
-        console.error("Error loading portals:", err);
         this.loadingPortals = false;
         this.loadingMorePortals = false;
       },
@@ -1388,7 +1379,6 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
           },
           error: (err) => {
-            console.error("Failed to load portal percentages", err);
             this.loadingPortals = false;
             this.snack.show("Failed to load portal percentages", false);
             this.cdr.detectChanges();
@@ -1396,7 +1386,6 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
         });
       },
       error: (err) => {
-        console.error("Error loading portals:", err);
         this.portalOptions = [];
         this.loadingPortals = false;
         this.snack.show("Failed to load portals", false);
@@ -1420,7 +1409,6 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
         this.loadingPortals = false;
       },
       error: (err: any) => {
-        console.error("Error loading portals:", err);
         this.portalOptions = [];
         this.loadingPortals = false;
         this.snack.show("Failed to load portals", false);

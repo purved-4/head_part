@@ -428,6 +428,16 @@
                   >
                     +
                   </button>
+                   <button
+                    type="button"
+  (click)="openPercentageModal(
+                            portal.id
+                          )"
+                    class="opacity-0 group-hover:opacity-100 text-[var(--color-primary)] text-sm transition w-5 h-5 flex items-center justify-center hover:bg-[var(--color-primary)]/10 rounded"
+                  >
+                                            <i class="material-symbols-outlined text-sm">captive_portal</i>
+
+                  </button>
                 </div>
               </div>
 
@@ -445,42 +455,27 @@
                   class="border border-[var(--color-border)] rounded-lg p-2 bg-[var(--color-bg)]"
                 >
                   <!-- Header Row -->
-               <div class="flex items-center justify-between mb-1.5">
-  <div class="flex items-center gap-1.5 min-w-0">
-    <div
-      class="w-5 h-5 rounded bg-[var(--color-primary)]/15 flex items-center justify-center text-[var(--color-primary)] text-xs"
-    >
-      🌐
-    </div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                      <div
+                        class="w-5 h-5 rounded bg-[var(--color-primary)]/15 flex items-center justify-center text-[var(--color-primary)] text-xs"
+                      >
+                        🌐
+                      </div>
 
-    <span class="text-xs font-medium truncate max-w-[100px]">
-      {{ portal.domain || portal.portalDomain }}
-    </span>
-  </div>
+                      <span class="text-xs font-medium truncate max-w-[100px]">
+                        {{ portal.domain || portal.portalDomain }}
+                      </span>
+                    </div>
 
-  <!-- RIGHT SIDE BUTTONS -->
-  <div class="flex items-center gap-1">
-
-    <!-- ⚙ TOGGLE BUTTON -->
-    <button
-      type="button"
-      (click)="openPopup(portal)"
-      class="text-[var(--color-primary)] text-xs w-5 h-5 flex items-center justify-center hover:bg-[var(--color-primary)]/10 rounded"
-    >
-      ⚙
-    </button>
-
-    <!-- REMOVE BUTTON -->
-    <button
-      type="button"
-      (click)="removePortal(portal.portalId || portal.id)"
-      class="text-[var(--color-muted)] hover:text-red-500 text-sm w-5 h-5 flex items-center justify-center"
-    >
-      ×
-    </button>
-
-  </div>
-</div>
+                    <button
+                      type="button"
+                      (click)="removePortal(portal.portalId || portal.id)"
+                      class="text-[var(--color-muted)] hover:text-red-500 text-sm w-5 h-5 flex items-center justify-center"
+                    >
+                      ×
+                    </button>
+                  </div>
 
                   <!-- Percentage Controls - Compact Grid -->
                   <div class="grid grid-cols-3 gap-1 text-xs">
@@ -538,9 +533,14 @@
     </form>
   </div>
 </div>
-<app-portal-percentage-popup
-  [portal]="selectedPortalForPopup"
-  [visible]="showPopup"
 
-></app-portal-percentage-popup>
 
+<!-- 
+<app-website-percentage-model
+  *ngIf="showPercentageModal"
+  [entityId]="currentUserId"
+  [entityType]="role"
+  [websiteId]="selectedWebsiteId"
+  (closed)="closeModal()"
+>
+</app-website-percentage-model> -->

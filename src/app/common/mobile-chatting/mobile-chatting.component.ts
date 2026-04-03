@@ -73,7 +73,6 @@ export class MobileChattingComponent
 {
   @ViewChild("messagesContainer") messagesContainer!: ElementRef<HTMLElement>;
   @ViewChild("threadsContainer") threadsContainer!: ElementRef<HTMLElement>;
-
   notifications: Notification[] = [];
   selectedNotification: Notification | null = null;
   newMessage = "";
@@ -154,7 +153,8 @@ export class MobileChattingComponent
   /* media viewer extras */
   isZoomed = false;
   zoomLevel = 1;
-
+  showScrollTopBtn = false;
+  showScrollBottomBtn = false;
   /* socket / sse */
   sse: any;
   subscribedThreadId: any;
@@ -238,8 +238,6 @@ export class MobileChattingComponent
 
     // default mode based on role
     this.chatMode = this.role === "HEAD" ? "head" : "branch";
-
-    console.log(this.chatMode);
 
     if (this.branchId) {
       this.loadThreads();
@@ -571,20 +569,43 @@ export class MobileChattingComponent
      THREAD LOADING & PAGINATION
      ════════════════════════════════════════════ */
 
+  // onThreadsScroll(event: Event): void {
+  //   if (
+  //     !this.threadsContainer ||
+  //     this.loadingMoreThreads ||
+  //     !this.hasMoreThreads
+  //   )
+  //     return;
+  //   const el = event.target as HTMLElement;
+  //   if (el.scrollHeight - el.scrollTop - el.clientHeight <= 100) {
+  //     this.loadMoreThreads();
+  //   }
+  //   this.threadLastScrollTop = el.scrollTop;
+  // }
+
   onThreadsScroll(event: Event): void {
-    if (
-      !this.threadsContainer ||
-      this.loadingMoreThreads ||
-      !this.hasMoreThreads
-    )
-      return;
+    if (!this.threadsContainer) return;
+
     const el = event.target as HTMLElement;
-    if (el.scrollHeight - el.scrollTop - el.clientHeight <= 100) {
-      this.loadMoreThreads();
+
+    //  SHOW / HIDE SCROLL BUTTON
+    this.showScrollTopBtn = el.scrollTop > 200;
+
+    //  LOAD MORE (keep your logic)
+    if (!this.loadingMoreThreads && this.hasMoreThreads) {
+      if (el.scrollHeight - el.scrollTop - el.clientHeight <= 100) {
+        this.loadMoreThreads();
+      }
     }
+
     this.threadLastScrollTop = el.scrollTop;
   }
-
+  scrollToTop() {
+    this.threadsContainer.nativeElement.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
   loadMoreThreads(): void {
     if (this.loadingMoreThreads || !this.hasMoreThreads) return;
     this.loadingMoreThreads = true;
@@ -627,7 +648,6 @@ export class MobileChattingComponent
         )
         .subscribe({
           next: (res: any) => {
-            console.log(res);
             this.processPaginatedThreadResponse(res.content, this.activeTab);
           },
           error: () => this.onThreadLoadError(),
@@ -644,7 +664,6 @@ export class MobileChattingComponent
   // FIX: processPaginatedThreadResponse - removed auto-selection
   private processPaginatedThreadResponse(res: any, tab: string): void {
     const threads = Array.isArray(res) ? res : Array.isArray(res) ? res : [];
-    console.log(threads);
 
     const mapped = threads.map((t: any) => this.mapThreadToNotification(t));
 
@@ -653,8 +672,6 @@ export class MobileChattingComponent
     this.hasMoreThreads = threads.length === this.threadPageSize;
 
     if (this.threadPage === 0) {
-      console.log(tab);
-
       if (tab === "all") this.allNotifications = mapped;
       else if (tab === "accepted") this.resolvedNotifications = mapped;
       else if (tab === "pending") this.unresolvedNotifications = mapped;
@@ -920,7 +937,7 @@ export class MobileChattingComponent
      ════════════════════════════════════════════ */
 
   private mapThreadToNotification(t: any): Notification {
-    const rawName = t.queryMessage || t.title || t.fundsType || "Thread";
+    const rawName = t.displayId || t.title || t.fundsType || "Thread";
     const groupName =
       rawName.length > 30 ? rawName.slice(0, 30) + "…" : rawName;
 
@@ -1158,20 +1175,53 @@ export class MobileChattingComponent
       });
   }
 
+  // onMessagesScroll(event: Event): void {
+  //   if (!this.messagesContainer) return;
+  //   const el = event.target as HTMLElement;
+  //   const scrollTop = el.scrollTop;
+  //   const isUpward = scrollTop < this.lastScrollTop;
+  //   this.lastScrollTop = scrollTop;
+  //   if (!isUpward) return;
+  //   if (
+  //     scrollTop <= 80 &&
+  //     !this.loadingMessages &&
+  //     !this.noMoreMessages &&
+  //     this.selectedNotification
+  //   ) {
+  //     this.loadMessages(this.selectedNotification.id, this.currentPage + 1);
+  //   }
+  // }
   onMessagesScroll(event: Event): void {
     if (!this.messagesContainer) return;
+
     const el = event.target as HTMLElement;
-    const scrollTop = el.scrollTop;
-    const isUpward = scrollTop < this.lastScrollTop;
-    this.lastScrollTop = scrollTop;
-    if (!isUpward) return;
+
+    //  SHOW / HIDE SCROLL TO BOTTOM BUTTON
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+
+    this.showScrollBottomBtn = !isNearBottom;
+
+    //  KEEP YOUR OLD PAGINATION LOGIC
+    const isUpward = el.scrollTop < this.lastScrollTop;
+    this.lastScrollTop = el.scrollTop;
+
     if (
-      scrollTop <= 80 &&
+      isUpward &&
+      el.scrollTop <= 80 &&
       !this.loadingMessages &&
       !this.noMoreMessages &&
       this.selectedNotification
     ) {
       this.loadMessages(this.selectedNotification.id, this.currentPage + 1);
+    }
+  }
+
+  scrollToBottom(): void {
+    if (this.messagesContainer) {
+      this.messagesContainer.nativeElement.scrollTo({
+        top: this.messagesContainer.nativeElement.scrollHeight,
+        behavior: "smooth",
+      });
     }
   }
 
@@ -1446,8 +1496,6 @@ export class MobileChattingComponent
       event.stopPropagation();
     }
 
-    console.log("Sending message...");
-
     if (!this.selectedNotification) {
       this.snackBar.show("No conversation selected", false);
       return;
@@ -1530,26 +1578,25 @@ export class MobileChattingComponent
           setTimeout(() => this.scrollToBottom(), 80);
         },
         error: (err) => {
-          console.error("Upload error:", err);
           this.uploadingFile = false;
           this.uploadError = "Upload failed. Please try again.";
         },
       });
   }
 
-  // FIX: Improved scrollToBottom method
-  private scrollToBottom(): void {
-    try {
-      const el = this.messagesContainer?.nativeElement;
-      if (el) {
-        setTimeout(() => {
-          el.scrollTop = el.scrollHeight;
-        }, 100);
-      }
-    } catch (error) {
-      console.error("Error scrolling to bottom:", error);
-    }
-  }
+  // // FIX: Improved scrollToBottom method
+  // private scrollToBottom(): void {
+  //   try {
+  //     const el = this.messagesContainer?.nativeElement;
+  //     if (el) {
+  //       setTimeout(() => {
+  //         el.scrollTop = el.scrollHeight;
+  //       }, 100);
+  //     }
+  //   } catch (error) {
+
+  //   }
+  // }
 
   // FIX: Improved sendTextMessage method
   private sendTextMessage(threadId: string, text: string): void {
@@ -1567,17 +1614,14 @@ export class MobileChattingComponent
       roleId: this.branchId,
     };
 
-    console.log("Sending payload:", payload);
-
     try {
       this.socketConfigService.sendMessage(threadId, payload);
 
       this.newMessage = "";
 
-      this.snackBar.show("Message sent", true);
+      // this.snackBar.show("Message sent", true);
       setTimeout(() => this.scrollToBottom(), 80);
     } catch (error) {
-      console.error("Error sending message:", error);
       this.snackBar.show("Failed to send message. Try again.", false);
     }
   }
@@ -1586,6 +1630,32 @@ export class MobileChattingComponent
      MEDIA VIEWER
      ════════════════════════════════════════════ */
 
+  // openMediaViewer(
+  //   mediaUrl: any,
+  //   name: string = "",
+  //   type: string = "file",
+  // ): void {
+  //   if (!mediaUrl) {
+  //     this.snackBar.show("No media to preview", false);
+  //     return;
+  //   }
+  //   this.currentMediaUrl = mediaUrl;
+  //   this.currentMediaName = name || "";
+
+  //   if (type === "image" || this.isImage(String(mediaUrl))) {
+  //     this.currentMediaType = "image";
+  //   } else if (type === "video" || this.isVideo(String(mediaUrl))) {
+  //     this.currentMediaType = "video";
+  //   } else if (type === "audio" || this.isAudio(String(mediaUrl))) {
+  //     this.currentMediaType = "audio";
+  //   } else {
+  //     this.currentMediaType = "file";
+  //   }
+
+  //   this.isZoomed = false;
+  //   this.zoomLevel = 1;
+  //   this.showMediaViewer = true;
+  // }
   openMediaViewer(
     mediaUrl: any,
     name: string = "",
@@ -1595,18 +1665,23 @@ export class MobileChattingComponent
       this.snackBar.show("No media to preview", false);
       return;
     }
+
     this.currentMediaUrl = mediaUrl;
     this.currentMediaName = name || "";
+    this.currentMediaType = "file"; // default
 
-    if (type === "image" || this.isImage(String(mediaUrl))) {
-      this.currentMediaType = "image";
-    } else if (type === "video" || this.isVideo(String(mediaUrl))) {
-      this.currentMediaType = "video";
-    } else if (type === "audio" || this.isAudio(String(mediaUrl))) {
-      this.currentMediaType = "audio";
-    } else {
-      this.currentMediaType = "file";
-    }
+    //  TRY TO DETECT IMAGE EVEN WITHOUT EXTENSION
+    this.isImageByContent(mediaUrl).then((isImg) => {
+      if (isImg) {
+        this.currentMediaType = "image";
+      } else if (type === "video") {
+        this.currentMediaType = "video";
+      } else if (type === "audio") {
+        this.currentMediaType = "audio";
+      } else {
+        this.currentMediaType = "file";
+      }
+    });
 
     this.isZoomed = false;
     this.zoomLevel = 1;
@@ -1735,7 +1810,6 @@ export class MobileChattingComponent
 
   // FIX: Improved toggleEmojiPicker
   toggleEmojiPicker(): void {
-    console.log("Toggling emoji picker, current state:", this.showEmojiPicker);
     this.showEmojiPicker = !this.showEmojiPicker;
     if (this.showEmojiPicker) {
       this.loadEmojis();
@@ -1756,8 +1830,6 @@ export class MobileChattingComponent
 
   // FIX: Improved insertEmoji method
   insertEmoji(emoji: string): void {
-    console.log("Inserting emoji:", emoji);
-
     const messageInput = document.querySelector(
       'textarea[data-model="message"]',
     ) as HTMLTextAreaElement;
@@ -2033,15 +2105,40 @@ export class MobileChattingComponent
     this.showResendModal = true;
   }
 
-  confirmResend(): void {
-    const confirmAction = confirm(
-      "Are you sure you want to resend this thread?",
-    );
-    if (!confirmAction) return;
+  // confirmResend(): void {
+  //   const confirmAction = confirm(
+  //     "Are you sure you want to resend this thread?",
+  //   );
+  //   if (!confirmAction) return;
+
+  //   this.isLoading = true;
+  //   this.resendThread(this.selectedThread);
+  //   this.closeModals();
+  // }
+
+  confirmResend() {
+    if (!this.selectedThread) return;
 
     this.isLoading = true;
-    this.resendThread(this.selectedThread);
-    this.closeModals();
+
+    this.fundService
+      .acceptRejectThread(this.selectedThread.id, "ACCEPT")
+      .subscribe({
+        next: () => {
+          this.snackBar.show("Thread resolved successfully", true);
+
+          this.closeModals();
+
+          //  RELOAD THREAD LIST
+          this.loadThreads();
+
+          this.isLoading = false;
+        },
+        error: () => {
+          this.snackBar.show("Failed to resolve thread", false);
+          this.isLoading = false;
+        },
+      });
   }
 
   private resendThread(thread: any): void {
@@ -2061,11 +2158,9 @@ export class MobileChattingComponent
 
     call?.subscribe({
       next: (res: any) => {
-        console.log("Thread resent successfully", res);
         this.isLoading = false;
       },
       error: (err: any) => {
-        console.error("Error resending thread", err);
         this.isLoading = false;
       },
     });
@@ -2076,15 +2171,39 @@ export class MobileChattingComponent
     this.showRejectModal = true;
   }
 
-  confirmRejection(): void {
-    const confirmAction = confirm(
-      "Are you sure you want to reject this thread?",
-    );
-    if (!confirmAction) return;
+  // confirmRejection(): void {
+  //   const confirmAction = confirm(
+  //     "Are you sure you want to reject this thread?",
+  //   );
+  //   if (!confirmAction) return;
+
+  //   this.isLoading = true;
+  //   this.performReject(this.selectedThread);
+  //   this.closeModals();
+  // }
+  confirmReject() {
+    if (!this.selectedThread || this.isLoading) return;
 
     this.isLoading = true;
-    this.performReject(this.selectedThread);
-    this.closeModals();
+
+    this.fundService
+      .acceptRejectThread(this.selectedThread.id, "REJECT")
+      .subscribe({
+        next: () => {
+          this.snackBar.show("Thread rejected successfully", true);
+
+          this.closeModals();
+
+          //  RELOAD THREAD LIST
+          this.loadThreads();
+
+          this.isLoading = false;
+        },
+        error: () => {
+          this.snackBar.show("Failed to reject thread", false);
+          this.isLoading = false;
+        },
+      });
   }
 
   private performReject(thread: any): void {
@@ -2105,11 +2224,9 @@ export class MobileChattingComponent
 
     rejectCall?.subscribe({
       next: (response: any) => {
-        console.log("Thread rejected successfully", response);
         this.isLoading = false;
       },
       error: (error: any) => {
-        console.error("Error rejecting thread", error);
         this.isLoading = false;
       },
     });
@@ -2132,17 +2249,22 @@ export class MobileChattingComponent
 
     this.sentPayoutThreadUpdateToSameUser(threadId, payload).subscribe({
       next: (res: any) => {
-        console.log("Payout update sent to user", res);
         this.isLoading = false;
         this.closeModals();
       },
       error: (err: any) => {
-        console.error("Error sending payout update", err);
         this.isLoading = false;
       },
     });
   }
 
+  // closeModals(): void {
+  //   this.showResendModal = false;
+  //   this.showRejectModal = false;
+  //   this.showPayoutModal = false;
+  //   this.selectedThread = null;
+  //   this.resetPayoutForm();
+  // }
   closeModals(): void {
     this.showResendModal = false;
     this.showRejectModal = false;
@@ -2191,5 +2313,101 @@ export class MobileChattingComponent
   clearSelectedQuestion(): void {
     this.selectedQuestion = null;
     this.questionSearchTerm = "";
+  }
+
+  //   showResendConfirmation(notification: any) {
+  //   this.selectedThread = notification;
+  //   this.showResendModal = true;
+  // }
+
+  // showRejectConfirmation(notification: any) {
+  //   this.selectedThread = notification;
+  //   this.showRejectModal = true;
+  // }
+
+  // showPayoutModel(notification: any) {
+  //   this.selectedThread = notification;
+  //   this.showPayoutModal = true;
+  // }
+
+  // Add to your component class
+
+  getFileIconMaterial(type: string): string {
+    switch (type) {
+      case "audio":
+        return "audiotrack";
+      case "video":
+        return "videocam";
+      case "file":
+        return "insert_drive_file";
+      default:
+        return "attachment";
+    }
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(
+      this.searchTerm ||
+      this.activeTab !== "pending" ||
+      this.fundTypeFilter !== "all"
+    );
+  }
+
+  clearAllFilters(): void {
+    this.searchTerm = "";
+    this.activeTab = "pending";
+    this.fundTypeFilter = "all";
+    this.applyFilters();
+  }
+
+  // Define filter arrays
+  statusFilters = [
+    { id: "pending", label: "Pending", icon: "schedule", color: "amber" },
+    { id: "accepted", label: "Resolved", icon: "check_circle", color: "green" },
+  ];
+
+  typeFilters = [
+    { id: "all", label: "All", icon: "apps", color: "gray" },
+    { id: "upi", label: "UPI", icon: "payment", color: "violet" },
+    { id: "bank", label: "Bank", icon: "account_balance", color: "violet" },
+    { id: "payout", label: "Payout", icon: "payments", color: "violet" },
+  ];
+
+  getFilterButtonClass(isActive: boolean, color: string): string {
+    if (isActive) {
+      const colorMap: any = {
+        amber: "bg-amber-50 text-amber-700",
+        green: "bg-green-50 text-green-700",
+        violet: "bg-violet-50 text-violet-700",
+        gray: "bg-gray-100 text-gray-700",
+      };
+      return `${colorMap[color] || "bg-indigo-50 text-indigo-700"} rounded-lg`;
+    }
+    return "bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200";
+  }
+
+  isImageUrl(url: string | null | undefined): boolean {
+    if (!url) return false;
+
+    const lower = url.toLowerCase();
+
+    return (
+      lower.endsWith(".jpg") ||
+      lower.endsWith(".jpeg") ||
+      lower.endsWith(".png") ||
+      lower.endsWith(".gif") ||
+      lower.endsWith(".webp") ||
+      lower.endsWith(".bmp") ||
+      lower.endsWith(".svg")
+    );
+  }
+
+  isImageByContent(url: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
   }
 }

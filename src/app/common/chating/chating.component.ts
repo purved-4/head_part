@@ -19,7 +19,7 @@ import { ActivatedRoute } from "@angular/router";
 import { emojiCategories } from "../../utils/constants";
 import { fileBaseUrl } from "../../pages/services/helper";
 import { no } from "intl-tel-input/i18n";
-import { ComPartService } from "../../pages/services/third-party.service";
+import { ComPartService } from "../../pages/services/com-part.service";
 
 interface GroupMessage {
   id: string;
@@ -214,7 +214,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     private socketConfigService: SocketConfigService,
     private fundService: FundsService,
     private route: ActivatedRoute,
-    private tpService: ComPartService,
+    private comPartService: ComPartService,
   ) {}
 
   ngOnInit(): void {
@@ -627,8 +627,6 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
         )
         .subscribe({
           next: (res: any) => {
-            console.log(res);
-
             this.processPaginatedThreadResponse(res.content, this.activeTab);
           },
           error: () => this.onThreadLoadError(),
@@ -666,7 +664,6 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private processPaginatedThreadResponse(res: any, tab: string): void {
     const threads = Array.isArray(res) ? res : Array.isArray(res) ? res : [];
-    console.log(threads);
 
     const mapped = threads.map((t: any) => this.mapThreadToNotification(t));
 
@@ -675,8 +672,6 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.hasMoreThreads = threads.length === this.threadPageSize;
 
     if (this.threadPage === 0) {
-      console.log(tab);
-
       if (tab === "all") this.allNotifications = mapped;
       else if (tab === "accept") this.resolvedNotifications = mapped;
       else if (tab === "pending") this.unresolvedNotifications = mapped;
@@ -870,7 +865,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.questions = [];
       return;
     }
-    this.tpService.getAllQuestions().subscribe({
+    this.comPartService.getAllQuestions().subscribe({
       next: (res: any) => {
         this.questions = res.content;
       },
@@ -1973,8 +1968,6 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getTextClass(textType: any) {
-    console.log();
-
     if (textType) {
       return "bg-indigo-600 text-white rounded-2xl rounded-br-sm px-5 py-1.5 shadow-lg shadow-indigo-500/20 min-w-[80px]";
     }
@@ -2114,12 +2107,10 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     call?.subscribe({
       next: (res: any) => {
-        console.log("Thread resent successfully", res);
         this.isLoading = false;
         this.loadThreads();
       },
       error: (err: any) => {
-        console.error("Error resending thread", err);
         this.isLoading = false;
       },
     });
@@ -2127,7 +2118,6 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   showRejectConfirmation(thread: any): void {
     this.selectedThread = thread;
-    console.log(this.selectedThread);
 
     this.showRejectModal = true;
   }
@@ -2140,7 +2130,6 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private performReject(thread: any): void {
     let rejectCall;
-    console.log(thread);
 
     switch (thread?.fundsType) {
       case "BANK":
@@ -2158,12 +2147,10 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     rejectCall?.subscribe({
       next: (response: any) => {
-        console.log("Thread rejected successfully", response);
         this.isLoading = false;
         this.loadThreads();
       },
       error: (error: any) => {
-        console.error("Error rejecting thread", error);
         this.isLoading = false;
       },
     });
@@ -2191,12 +2178,10 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.sentPayoutThreadUpdateToSameUser(threadId, payload).subscribe({
       next: (res: any) => {
-        console.log("Payout update sent to user", res);
         this.isLoading = false;
         this.closeModals();
       },
       error: (err: any) => {
-        console.error("Error sending payout update", err);
         this.isLoading = false;
       },
     });

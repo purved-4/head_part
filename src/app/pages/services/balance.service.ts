@@ -1,12 +1,13 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 import { SubjectRegistryService } from "../../registery/subject-registry.service";
+import { BALANCE_SHARING_KEY } from "../../registery/subject-registry.key";
 
 @Injectable({
   providedIn: "root",
 })
 export class BalanceService {
-  private readonly key = "balance";
+  private readonly key = BALANCE_SHARING_KEY;
 
   constructor(private subjectRegistry: SubjectRegistryService) {
     this.subjectRegistry.register(

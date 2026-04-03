@@ -1,0 +1,58 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+  <div class="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+    <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+     
+
+      <button
+        type="button"
+        (click)="closeModal()"
+        class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-slate-200 hover:text-slate-900"
+      >
+        <span class="text-2xl leading-none">&times;</span>
+      </button>
+    </div>
+
+    <div class="px-6 py-5">
+      <div *ngIf="loading" class="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+        Loading percentage details...
+      </div>
+
+      <div *ngIf="errorMessage && !loading" class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+        {{ errorMessage }}
+      </div>
+
+      <div *ngIf="!loading && !errorMessage" class="grid gap-4">
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div class="text-sm font-medium text-slate-500">Topup Percentage</div>
+          <div class="mt-1 text-2xl font-semibold text-slate-800">
+            {{ formatValue(percentages.topupPercentage) }}
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div class="text-sm font-medium text-slate-500">FTT Percentage</div>
+          <div class="mt-1 text-2xl font-semibold text-slate-800">
+            {{ formatValue(percentages.fttPercentage) }}
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div class="text-sm font-medium text-slate-500">Payout Percentage</div>
+          <div class="mt-1 text-2xl font-semibold text-slate-800">
+            {{ formatValue(percentages.payoutPercentage) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3 border-t border-slate-200 px-6 py-4">
+      <button
+        type="button"
+        (click)="closeModal()"
+        class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</div>

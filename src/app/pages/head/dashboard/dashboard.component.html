@@ -551,52 +551,47 @@
               <!-- Content -->
               <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-start">
-                  <div>
-                    <!-- <p class="text-sm font-bold text-[var(--color-font)]">
-                  {{
-                    transaction.type === 'payout'
-                      ? 'Payout'
-                      : transaction.mode === 'upi'
-                      ? 'UPI Topup'
-                      : 'Bank Topup'
-                  }}
-                </p> -->
-                    <p
-                      class="text-sm font-bold text-[var(--color-font)] flex items-center gap-2"
-                    >
-                      {{
-                        transaction.type === "payout"
-                          ? "Payout"
-                          : transaction.mode === "upi"
-                            ? transaction.firstTopup
-                              ? "UPI First Topup"
-                              : "UPI Topup"
-                            : transaction.firstTopup
-                              ? "Bank First Topup"
-                              : "Bank Topup"
-                      }}
+              <div>
+  <!-- TITLE (ID + TYPE) -->
+  <p class="text-sm font-bold text-[var(--color-font)] truncate">
+    {{ transaction.fundDisplayId }} -
+    {{
+      transaction.type === 'payout'
+        ? 'Payout'
+        : transaction.mode === 'upi'
+        ? 'UPI'
+        : 'Bank'
+    }}
+  </p>
 
-                      <span
-                        *ngIf="
-                          transaction.firstTopup &&
-                          transaction.type !== 'payout'
-                        "
-                        class="text-[9px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-300 font-semibold"
-                      >
-                        FIRST
-                      </span>
-                    </p>
+  <!-- PORTAL + CURRENCY -->
+  <p class="text-xs text-[var(--color-muted)] truncate mt-0.5">
+    {{ transaction.portal }} - {{ transaction.currency }}
+  </p>
 
-                    <p class="text-xs text-[var(--color-muted)] truncate">
-                      {{
-                        transaction.portal ||
-                          transaction.accountNo ||
-                          transaction.upiId ||
-                          transaction.holderName ||
-                          "—"
-                      }}
-                    </p>
-                  </div>
+  <!-- UPI / ACCOUNT / HOLDER -->
+  <p class="text-xs text-[var(--color-muted)] truncate mt-0.5">
+    {{
+      transaction.upiId ||
+      transaction.accountNo ||
+      transaction.holderName ||
+      "—"
+    }}
+  </p>
+
+  <!-- DATE + FTT -->
+  <div class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]">
+    <span>{{ transaction.date | date: "short" }}</span>
+
+<span
+  *ngIf="transaction.ftt && transaction.type !== 'payout'"
+  class="px-2 py-0.5 rounded-full text-xs font-semibold 
+         bg-blue-50 text-blue-600 border border-blue-300"
+>
+  FTT
+</span>
+  </div>
+</div>
 
                   <span
                     class="text-base font-bold"
@@ -617,9 +612,6 @@
                   </span>
                 </div>
 
-                <div class="text-xs text-[var(--color-muted)] mt-2">
-                  {{ transaction.date | date: "short" }}
-                </div>
 
                 <!-- Actions -->
                 <div class="flex items-center justify-between mt-3 gap-2">
@@ -1549,22 +1541,22 @@
 
           <!-- If snapshot exists -->
           <div *ngIf="
-              selectedTransaction.filePath || selectedTransaction.qrImage;
+              selectedTransaction.fileUrl || selectedTransaction.qrImage;
               else noSnapshot
             " class="flex items-start gap-3">
             <!-- Image -->
             <img [src]="
-                selectedTransaction.filePath || selectedTransaction.qrImage
+                selectedTransaction.fileUrl || selectedTransaction.qrImage
               " alt="Snapshot"
               class="w-48 h-48 object-cover border-2 border-slate-200 rounded-xl shadow-md cursor-pointer" (click)="
                 openImagePopup(
-                  selectedTransaction.filePath || selectedTransaction.qrImage
+                  selectedTransaction.fileUrl || selectedTransaction.qrImage
                 )
               " />
 
             <!-- Download Icon -->
             <a [href]="
-                selectedTransaction.filePath || selectedTransaction.qrImage
+                selectedTransaction.fileUrl || selectedTransaction.qrImage
               " download="transaction-snapshot" target="_blank"
               class="flex items-center justify-center w-10 h-10 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 transition"
               title="Download Image">

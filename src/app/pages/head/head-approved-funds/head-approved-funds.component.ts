@@ -7,11 +7,6 @@ import { UserStateService } from "../../../store/user-state.service";
 import { fileBaseUrl } from "../../services/helper";
 import { HeadService } from "../../services/head.service";
 
-interface Portal {
-  id: string;
-  domain: string;
-}
-
 @Component({
   selector: "app-head-approved-funds",
   templateUrl: "./head-approved-funds.component.html",
@@ -44,21 +39,21 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
   upiPortalFilter = "";
   upiDateFrom = "";
   upiDateTo = "";
-upiPortals: Portal[] = [];
+  upiPortals: any[] = [];
 
   // Bank filters
   bankSearchQuery = "";
   bankPortalFilter = "";
   bankDateFrom = "";
   bankDateTo = "";
-bankPortals: Portal[] = [];
+  bankPortals: any[] = [];
 
   // Payout filters
   payoutSearchQuery = "";
   payoutPortalFilter = "";
   payoutDateFrom = "";
   payoutDateTo = "";
-payoutPortals: Portal[] = [];
+  payoutPortals: any[] = [];
 
   // ========== PAGINATION ==========
   upiPage = 0;
@@ -89,7 +84,7 @@ payoutPortals: Portal[] = [];
 
   // Colors based on role (already in template via data-role)
   colors: any = null;
-
+portalOptions: { id: string; domain: string }[] = [];
   constructor(
     private route: ActivatedRoute,
     private fundService: FundsService,
@@ -102,14 +97,10 @@ payoutPortals: Portal[] = [];
     this.userId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
     this.setColorsByRole();
-    console.log("branchId:", this.branchId);
-    console.log("userId:", this.userId);
-    console.log("role:", this.role);
 
     if (this.branchId) {
       this.loadPortalOptions();
     } else {
-      console.warn("branchId is missing, portal options will not load");
     }
     this.routeSub = this.route.paramMap.subscribe((params) => {
       const type = params.get("type") as "upi" | "bank" | "payout" | null;
@@ -177,7 +168,7 @@ payoutPortals: Portal[] = [];
   //       )
   //       .pipe(
   //         catchError((err) => {
-  //           console.error("UPI fetch error", err);
+  //
   //           return of({ data: [], total: 0 });
   //         }),
   //       )
@@ -209,10 +200,9 @@ payoutPortals: Portal[] = [];
   //     this.bankPortals = [...portals];
   //     this.payoutPortals = [...portals];
 
-  //     console.log("Loaded portals:", portals);
   //   },
   //   error: (err) => {
-  //     console.error("Failed to load portals", err);
+  //
   //     this.upiPortals = [];
   //     this.bankPortals = [];
   //     this.payoutPortals = [];
@@ -224,17 +214,16 @@ payoutPortals: Portal[] = [];
     if (!this.branchId) return;
 
     this.fundService
-      .getAllUpiFundWithBranchIdPaginated(
+      .getAllUpiFundWithEntityAndPortalId(
         this.branchId,
+       this.upiPortalFilter,
         "ACCEPTED",
         this.upiPage,
         this.upiPageSize,
-        this.upiSearchQuery,
-        
+        // this.upiSearchQuery,
       )
       .pipe(
         catchError((err) => {
-          console.error("UPI fetch error", err);
           return of({ data: [], total: 0 });
         }),
       )
@@ -257,10 +246,9 @@ payoutPortals: Portal[] = [];
         //       )
         //     );
 
-        //     console.log("UPI portals:", this.upiPortals);
         //   },
         //   error: (err) => {
-        //     console.error("Failed to load UPI portals", err);
+        //
         //     this.upiPortals = [];
         //   },
         // });
@@ -280,7 +268,7 @@ payoutPortals: Portal[] = [];
   //     )
   //     .pipe(
   //       catchError((err) => {
-  //         console.error("Bank fetch error", err);
+  //
   //         return of({ data: [], total: 0 });
   //       }),
   //     )
@@ -305,16 +293,14 @@ payoutPortals: Portal[] = [];
     this.fundService
       .getAllBankFundWithEntityAndPortalId(
         this.branchId,
-        this.bankPortalFilter ,
+        this.bankPortalFilter,
         "ACCEPTED",
         this.bankPage,
         this.bankPageSize,
         this.bankSearchQuery,
-      
       )
       .pipe(
         catchError((err) => {
-          console.error("Bank fetch error", err);
           return of({ data: [], total: 0 });
         }),
       )
@@ -341,7 +327,7 @@ payoutPortals: Portal[] = [];
   //       )
   //       .pipe(
   //         catchError((err) => {
-  //           console.error("Payout fetch error", err);
+  //
   //           return of({ data: [], total: 0 });
   //         }),
   //       )
@@ -371,10 +357,9 @@ payoutPortals: Portal[] = [];
   //     this.bankPortals = [...portals];
   //     this.payoutPortals = [...portals];
 
-  //     console.log("Loaded portals:", portals);
   //   },
   //   error: (err) => {
-  //     console.error("Failed to load portals", err);
+  //
   //     this.upiPortals = [];
   //     this.bankPortals = [];
   //     this.payoutPortals = [];
@@ -387,8 +372,9 @@ payoutPortals: Portal[] = [];
     if (!this.branchId) return;
 
     this.fundService
-      .getAllpayoutTrueFalseBybranchIdPaginate(
+      .getAllPayoutFundWithEntityAndPortalId(
         this.branchId,
+        this.payoutPortalFilter,
         "ACCEPTED",
         this.payoutApprovedPage,
         this.payoutApprovedPageSize,
@@ -396,7 +382,6 @@ payoutPortals: Portal[] = [];
       )
       .pipe(
         catchError((err) => {
-          console.error("Payout fetch error", err);
           return of({ data: [], total: 0 });
         }),
       )
@@ -423,7 +408,7 @@ payoutPortals: Portal[] = [];
   //       const portals = Array.from(
   //         new Set(
   //           source
-  //             .map((item: any) => String(item?.portalDomain ?? "").trim())
+  //             .map((item: any) => String(item?.portalId ?? "").trim())
   //             .filter((site: string) => site.length > 0),
   //         ),
   //       );
@@ -431,11 +416,8 @@ payoutPortals: Portal[] = [];
   //       this.upiPortals = [...portals];
   //       this.bankPortals = [...portals];
   //       this.payoutPortals = [...portals];
-
-  //       console.log("Loaded portals:", portals);
   //     },
   //     error: (err) => {
-  //       console.error("Failed to load portals", err);
   //       this.upiPortals = [];
   //       this.bankPortals = [];
   //       this.payoutPortals = [];
@@ -443,43 +425,48 @@ payoutPortals: Portal[] = [];
   //   });
   // }
 
-  // Helper to parse various response shapes
- loadPortalOptions(): void {
+  loadPortalOptions(): void {
   if (!this.branchId) return;
 
   this.headServices.getAllHeadsWithPortalsById(this.branchId).subscribe({
     next: (res: any) => {
+      const source = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res)
+        ? res
+        : [];
 
-      const source = (Array.isArray(res?.data) ? res.data : []) as any[];
+      const uniqueMap = new Map<string, any>();
 
-      const portals: Portal[] = source
-        .filter((item) => item.portalId && item.portalDomain)
-        .map((item) => ({
-          id: item.portalId,
-          domain: item.portalDomain,
-        }));
+      source.forEach((item: any) => {
+        if (item?.portalId && item?.portalDomain) {
+          uniqueMap.set(item.portalId, {
+            id: item.portalId,
+            domain: item.portalDomain,
+          });
+        }
+      });
 
-      // remove duplicates
-      const uniquePortals: Portal[] = Array.from(
-        new Map(portals.map(p => [p.id, p])).values()
-      );
+      const portals = Array.from(uniqueMap.values());
 
-      this.upiPortals = uniquePortals;
-      this.bankPortals = uniquePortals;
-      this.payoutPortals = uniquePortals;
+      // ✅ store for UI
+      this.portalOptions = portals;
 
-      console.log("Loaded portals:", uniquePortals);
+      // optional (if still used somewhere)
+      this.upiPortals = portals;
+      this.bankPortals = portals;
+      this.payoutPortals = portals;
     },
-
-    error: (err) => {
-      console.error("Failed to load portals", err);
+    error: () => {
+      this.portalOptions = [];
       this.upiPortals = [];
       this.bankPortals = [];
       this.payoutPortals = [];
     },
   });
 }
-  
+
+  // Helper to parse various response shapes
   private parseResponse(response: any): {
     list: any[];
     total: number;
@@ -593,7 +580,7 @@ payoutPortals: Portal[] = [];
       // Portal filter
       if (
         this.upiPortalFilter &&
-        // item.raw?.portalDomain !== this.upiPortalFilter &&
+        item.raw?.portalDomain !== this.upiPortalFilter &&
         item.portalId !== this.upiPortalFilter
       ) {
         return false;
@@ -820,44 +807,28 @@ payoutPortals: Portal[] = [];
     }
   }
 
-  // selectPortal(view: "upi" | "bank" | "payout", site: string) {
-  //   if (view === "upi") {
-  //     this.upiPortalFilter = site;
-  //     this.upiPortalDropdownOpen = false;
-  //     this.upiPage = 0;
-  //   } else if (view === "bank") {
-  //     this.bankPortalFilter = site;
-  //     this.bankPortalDropdownOpen = false;
-  //     this.bankPage = 0;
-  //   } else if (view === "payout") {
-  //     this.payoutPortalFilter = site;
-  //     this.payoutPortalDropdownOpen = false;
-  //     this.payoutApprovedPage = 0;
-  //   }
-  // }
+  selectPortal(view: "upi" | "bank" | "payout", portal: any) {
+      const portalId = portal?.id || "";
+
+    if (view === "upi") {
+      this.upiPortalFilter = portalId;
+      this.upiPortalDropdownOpen = false;
+      this.upiPage = 0;
+     if (this.upiPortalFilter) this.fetchUpiTopups();
+    } else if (view === "bank") {
+      this.bankPortalFilter = portalId;
+      this.bankPortalDropdownOpen = false;
+      this.bankPage = 0;
+       if (this.bankPortalFilter)   this.fetchBankTopups(); 
+    } else if (view === "payout") {
+      this.payoutPortalFilter = portalId;
+      this.payoutPortalDropdownOpen = false;
+      this.payoutApprovedPage = 0;
+          if (this.payoutPortalFilter)    this.fetchApprovedPayouts();
+    }
+  }
 
   // ============ FILTER TRIGGERS ============
-selectPortal(view: "upi" | "bank" | "payout", portal: any) {
-  if (view === "upi") {
-    this.upiPortalFilter = portal.id;   
-    this.upiPortalDropdownOpen = false;
-    this.upiPage = 0;
-    this.fetchUpiTopups();
-  } 
-  else if (view === "bank") {
-    this.bankPortalFilter = portal.id;  
-    this.bankPortalDropdownOpen = false;
-    this.bankPage = 0;
-    this.fetchBankTopups();
-  } 
-  else if (view === "payout") {
-    this.payoutPortalFilter = portal.id; 
-    this.payoutPortalDropdownOpen = false;
-    this.payoutApprovedPage = 0;
-    this.fetchApprovedPayouts();
-  }
-}
-  
   applyUpiFilters() {
     this.upiPage = 0;
   }
@@ -1120,10 +1091,14 @@ selectPortal(view: "upi" | "bank" | "payout", portal: any) {
     }
   }
 
-  getPortalName(portalId: string, portals: Portal[]): string {
-  if (!portalId) return "All Portals";
+  getSelectedPortalDomain(view: 'upi' | 'bank' | 'payout'): string {
+  let selectedId = '';
 
-  const found = portals.find(p => p.id === portalId);
-  return found ? found.domain : "All Portals";
+  if (view === 'upi') selectedId = this.upiPortalFilter;
+  else if (view === 'bank') selectedId = this.bankPortalFilter;
+  else selectedId = this.payoutPortalFilter;
+
+  const found = this.portalOptions.find(p => p.id === selectedId);
+  return found ? found.domain : 'All Portals';
 }
 }

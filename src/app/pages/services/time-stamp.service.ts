@@ -14,7 +14,7 @@ export class TimeStampService {
       .post<any[]>(`${baseUrl}/api/owner/reward/topup`, data)
       .pipe(
         map((response: any) => response),
-        catchError((error) => throwError(error))
+        catchError((error) => throwError(error)),
       );
   }
 
@@ -23,29 +23,41 @@ export class TimeStampService {
       .post<any[]>(`${baseUrl}/api/owner/reward/payout`, data)
       .pipe(
         map((response: any) => response),
-        catchError((error) => throwError(error))
+        catchError((error) => throwError(error)),
       );
   }
 
-  getByPortalIdAndbranchIdTypeAndMode(portalId: any, entityId: any,entityType:any,type:any,mode:any): Observable<any[]> {
+  getByPortalIdAndbranchIdTypeAndMode(
+    portalId: any,
+    entityId: any,
+    entityType: any,
+    type: any,
+    mode: any,
+  ): Observable<any[]> {
     return this.http
-      .get<any[]>(
-        `${baseUrl}/api/owner/reward/reward`,{ params: { portalId, entityId ,entityType,type,mode} }
-      )
+      .get<
+        any[]
+      >(`${baseUrl}/api/owner/reward/reward`, { params: { portalId, entityId, entityType, type, mode } })
       .pipe(
         map((response: any) => response),
-        catchError((error) => throwError(error))
+        catchError((error) => throwError(error)),
       );
   }
 
-    getByChiefIdTypeAndMode( entityId: any,entityType:any, portalId:any, type:any,mode:any): Observable<any[]> {
+  getByChiefIdTypeAndMode(
+    entityId: any,
+    entityType: any,
+    portalId: any,
+    type: any,
+    mode: any,
+  ): Observable<any[]> {
     return this.http
-      .get<any[]>(
-        `${baseUrl}/api/owner/reward/reward`,{ params: {  entityId ,entityType,portalId,type,mode} }
-      )
+      .get<
+        any[]
+      >(`${baseUrl}/api/owner/reward/reward`, { params: { entityId, entityType, portalId, type, mode } })
       .pipe(
         map((response: any) => response),
-        catchError((error) => throwError(error))
+        catchError((error) => throwError(error)),
       );
   }
 
@@ -54,20 +66,16 @@ export class TimeStampService {
       .patch<any[]>(`${baseUrl}/api/reward-percentages/update/${id}`, data)
       .pipe(
         map((response: any) => response),
-        catchError((error) => throwError(error))
+        catchError((error) => throwError(error)),
       );
   }
-
 
   addTimeStampBulk(data: any): Observable<any[]> {
     return this.http
       .post<any[]>(`${baseUrl}/api/commission-percentages/add/bulk`, data)
       .pipe(
         map((response: any) => response),
-        catchError((error) => throwError(error))
+        catchError((error) => throwError(error)),
       );
   }
-
-
-  
 }

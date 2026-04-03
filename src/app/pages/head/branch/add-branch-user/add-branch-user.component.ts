@@ -149,7 +149,7 @@ export class AddBranchUserComponent implements OnInit {
   //           false,
   //           4000,
   //         );
-  //         console.error("Error creating user:", err);
+  //
   //       },
   //     );
   // }
@@ -217,8 +217,6 @@ export class AddBranchUserComponent implements OnInit {
           false,
           4000,
         );
-
-        console.error("Error creating user:", err);
       },
     });
   }

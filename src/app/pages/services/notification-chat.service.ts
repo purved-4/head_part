@@ -110,7 +110,7 @@ export class NotificationChatService {
           params: {
             page: page.toString(),
             size: size.toString(),
-            sort: "updatedAt,desc"
+            sort: "updatedAt,desc",
           },
         },
       )
@@ -185,9 +185,8 @@ export class NotificationChatService {
         catchError((err) => throwError(err)),
       );
   }
-
-
-  getAllThreadCombinedPaginate(
+  
+getAllThreadCombinedPaginate(
     branchId: string,
     entityType: any,
     isResolved: any,
@@ -197,6 +196,12 @@ export class NotificationChatService {
   ): Observable<any> {
     if (type === undefined || type === null) {
       type = "all";
+    }
+    if(isResolved === "accepted"){
+      isResolved = "accept"
+    }
+      if(isResolved === "rejected"){
+      isResolved = "reject"
     }
 
     return this.http

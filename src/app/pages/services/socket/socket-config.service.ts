@@ -4,6 +4,9 @@ import { Client, IMessage, StompSubscription } from "@stomp/stompjs";
 import baseUrl from "../helper";
 import { AuthMemoryService } from "../auth-memory.service";
 import { AuthService } from "../auth.service";
+import { SubjectRegistryService } from "../../../registery/subject-registry.service";
+import { SOCKET_BANK_KEY, SOCKET_LATEST_BALANCE_KEY, SOCKET_MESSAGE_PAGE_KEY, SOCKET_NEW_MESSAGE_KEY, SOCKET_NOTIFICATION_KEY, SOCKET_PENDING_DATA_KEY, SOCKET_THREADS_KEY, SOCKET_THREADS_USER_KEY, SOCKET_UPI_KEY } from "../../../registery/subject-registry.key";
+
 
 @Injectable({
   providedIn: "root",
@@ -12,22 +15,21 @@ export class SocketConfigService {
   private stompClient!: Client | any;
   private connected = false;
 
-  private pendingSubject = new BehaviorSubject<any>(null);
-  public threads$ = new BehaviorSubject<any>(null);
-  public notification$ = new BehaviorSubject<any>(null);
-  public threadsUser$ = new BehaviorSubject<any>(null);
-  public messagePage$ = new BehaviorSubject<any>(null);
-  public newMessage$ = new BehaviorSubject<any>(null);
-  public latestBalance$ = new BehaviorSubject<any>(null);
-  private bank$ = new BehaviorSubject<any>(null);
-  private upi$ = new BehaviorSubject<any>(null);
+  private pendingSubject!: BehaviorSubject<any>;
+  public threads$!: BehaviorSubject<any>;
+  public notification$!: BehaviorSubject<any>;
+  public threadsUser$!: BehaviorSubject<any>;
+  public messagePage$!: BehaviorSubject<any>;
+  public newMessage$!: BehaviorSubject<any>;
+  public latestBalance$!: BehaviorSubject<any>;
+  private bank$!: BehaviorSubject<any>;
+  private upi$!: BehaviorSubject<any>;
 
   private subscriptions = new Map<string, StompSubscription | null>();
   private pendingSubscribeTasks: (() => void)[] = [];
 
   private branchId?: string;
 
-  // Keep separate ids so one socket stream does not overwrite another
   private threadsEntityId?: string;
   private unreadThreadsEntityId?: string;
   private latestBalanceEntityId?: string;
@@ -35,9 +37,70 @@ export class SocketConfigService {
   private refreshInFlight: Promise<string> | null = null;
 
   private reconnectInProgress = false;
-  private activeTopics = new Map<string, { destination: string; handler: (msg: IMessage) => void }>();
-  constructor(private memoryService: AuthMemoryService, private authService: AuthService) { }
+  private activeTopics = new Map<
+    string,
+    { destination: string; handler: (msg: IMessage) => void }
+  >();
 
+  constructor(
+    private memoryService: AuthMemoryService,
+    private authService: AuthService,
+    private subjectRegistry: SubjectRegistryService
+  ) {
+    this.pendingSubject = this.subjectRegistry.register(
+      SOCKET_PENDING_DATA_KEY,
+      () => new BehaviorSubject<any>(null),
+      null
+    );
+
+    this.threads$ = this.subjectRegistry.register(
+      SOCKET_THREADS_KEY,
+      () => new BehaviorSubject<any>(null),
+      null
+    );
+
+    this.notification$ = this.subjectRegistry.register(
+      SOCKET_NOTIFICATION_KEY,
+      () => new BehaviorSubject<any>(null),
+      null
+    );
+
+    this.threadsUser$ = this.subjectRegistry.register(
+      SOCKET_THREADS_USER_KEY,
+      () => new BehaviorSubject<any>(null),
+      null
+    );
+
+    this.messagePage$ = this.subjectRegistry.register(
+      SOCKET_MESSAGE_PAGE_KEY,
+      () => new BehaviorSubject<any>(null),
+      null
+    );
+
+    this.newMessage$ = this.subjectRegistry.register(
+      SOCKET_NEW_MESSAGE_KEY,
+      () => new BehaviorSubject<any>(null),
+      null
+    );
+
+    this.latestBalance$ = this.subjectRegistry.register(
+      SOCKET_LATEST_BALANCE_KEY,
+      () => new BehaviorSubject<any>(null),
+      null
+    );
+
+    this.bank$ = this.subjectRegistry.register(
+      SOCKET_BANK_KEY,
+      () => new BehaviorSubject<any>(null),
+      null
+    );
+
+    this.upi$ = this.subjectRegistry.register(
+      SOCKET_UPI_KEY,
+      () => new BehaviorSubject<any>(null),
+      null
+    );
+  }
 
   private ensureConnected() {
     if (!this.stompClient?.active) {
@@ -49,16 +112,16 @@ export class SocketConfigService {
     if (this.stompClient?.active || this.reconnectInProgress) return;
 
     const httpUrl = baseUrl;
-   const wsUrl = baseUrl.startsWith("https")
-             ? baseUrl.replace(/^https/, "wss")
-             : baseUrl.replace(/^http/, "ws");
+    const wsUrl = httpUrl.startsWith("https")
+      ? httpUrl.replace(/^https/, "wss")
+      : httpUrl.replace(/^http/, "ws");
 
     this.stompClient = new Client({
       brokerURL: `${wsUrl}/socket-process`,
-      reconnectDelay: 0, // prevent double reconnect loop
+      reconnectDelay: 0,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
-      debug: () => { },
+      debug: () => {},
     });
 
     this.stompClient.beforeConnect = async () => {
@@ -69,14 +132,16 @@ export class SocketConfigService {
     this.stompClient.onConnect = () => {
       this.connected = true;
 
-      // reconnect all previous subscriptions
       this.subscriptions.clear();
       for (const [key, item] of this.activeTopics.entries()) {
-        const sub: StompSubscription = this.stompClient.subscribe(item.destination, (msg: IMessage) => {
-          try {
-            item.handler(msg);
-          } catch { }
-        });
+        const sub: StompSubscription = this.stompClient.subscribe(
+          item.destination,
+          (msg: IMessage) => {
+            try {
+              item.handler(msg);
+            } catch {}
+          }
+        );
         this.subscriptions.set(key, sub);
       }
 
@@ -86,11 +151,8 @@ export class SocketConfigService {
       }
     };
 
-    this.stompClient.onStompError = async (frame: any) => {
-      // console.log(msg, " ", body);
+    this.stompClient.onStompError = async (_frame: any) => {
       await this.handleAuthFailureAndReconnect();
-      // reconnect only for auth-related errors
-      
     };
 
     this.stompClient.onWebSocketClose = () => {
@@ -100,11 +162,9 @@ export class SocketConfigService {
     this.stompClient.activate();
   }
 
-
   private async getFreshAccessToken(forceRefresh = false): Promise<string> {
     const cached = this.memoryService.getAccessToken();
 
-    // Use cached token only when it is still valid and we are NOT forcing refresh
     if (cached && !forceRefresh) return cached;
 
     if (!this.refreshInFlight) {
@@ -132,7 +192,7 @@ export class SocketConfigService {
       this.memoryService.resetAccessToken();
       await this.getFreshAccessToken(true);
 
-      this.reconnectInProgress = false; // allow connect()
+      this.reconnectInProgress = false;
       this.connect();
     } catch (e) {
       this.memoryService.resetAccessToken();
@@ -155,7 +215,7 @@ export class SocketConfigService {
     this.subscriptions.forEach((s) => {
       try {
         s?.unsubscribe();
-      } catch { }
+      } catch {}
     });
 
     this.subscriptions.clear();
@@ -170,7 +230,7 @@ export class SocketConfigService {
   private subscribeTopic(
     key: string,
     destination: string,
-    handler: (msg: IMessage) => void,
+    handler: (msg: IMessage) => void
   ): void {
     this.activeTopics.set(key, { destination, handler });
 
@@ -178,11 +238,14 @@ export class SocketConfigService {
       const existing = this.subscriptions.get(key);
       if (existing) return;
 
-      const sub: StompSubscription = this.stompClient.subscribe(destination, (msg: IMessage) => {
-        try {
-          handler(msg);
-        } catch { }
-      });
+      const sub: StompSubscription = this.stompClient.subscribe(
+        destination,
+        (msg: IMessage) => {
+          try {
+            handler(msg);
+          } catch {}
+        }
+      );
 
       this.subscriptions.set(key, sub);
     };
@@ -206,15 +269,14 @@ export class SocketConfigService {
 
     try {
       sub.unsubscribe();
-    } catch (e) { }
+    } catch (e) {}
 
     this.subscriptions.delete(key);
   }
 
   subscribeToPendingData(branchId?: string) {
     if (branchId) this.branchId = branchId;
-    if (!this.branchId)
-      throw new Error("branchId required for pendingData topic");
+    if (!this.branchId) throw new Error("branchId required for pendingData topic");
 
     const key = `pendingData:${this.branchId}`;
     const dest = `/topic/pendingData/${this.branchId}`;
@@ -223,7 +285,7 @@ export class SocketConfigService {
       try {
         const data = JSON.parse(msg.body);
         this.pendingSubject.next(data);
-      } catch (e) { }
+      } catch (e) {}
     });
   }
 
@@ -248,7 +310,7 @@ export class SocketConfigService {
       try {
         const data = JSON.parse(msg.body);
         this.threads$.next(data);
-      } catch (e) { }
+      } catch (e) {}
     });
   }
 
@@ -274,7 +336,7 @@ export class SocketConfigService {
       try {
         const data = JSON.parse(msg.body);
         this.threadsUser$.next(data);
-      } catch (e) { }
+      } catch (e) {}
     });
   }
 
@@ -296,7 +358,7 @@ export class SocketConfigService {
       try {
         const data = JSON.parse(msg.body);
         this.messagePage$.next(data);
-      } catch (e) { }
+      } catch (e) {}
     });
   }
 
@@ -321,7 +383,7 @@ export class SocketConfigService {
   loadMessagePage(threadId: string, page = 0, size = 15) {
     if (!this.stompClient || !this.stompClient.active) {
       this.pendingSubscribeTasks.push(() =>
-        this.loadMessagePage(threadId, page, size),
+        this.loadMessagePage(threadId, page, size)
       );
       this.ensureConnected();
       return;
@@ -333,7 +395,7 @@ export class SocketConfigService {
   sendMessage(threadId: string, message: any) {
     if (!this.stompClient || !this.stompClient.active) {
       this.pendingSubscribeTasks.push(() =>
-        this.sendMessage(threadId, message),
+        this.sendMessage(threadId, message)
       );
       this.ensureConnected();
       return;
@@ -349,7 +411,6 @@ export class SocketConfigService {
 
     if (!id) throw new Error("entityId required for latest balance topic");
 
-    // key includes type so same entityId across types won't collide
     const key = `latestBalance:${type}:${id}`;
     const dest = `/topic/entity/latest-balance/${type}/${id}`;
 
@@ -357,7 +418,7 @@ export class SocketConfigService {
       try {
         const data = JSON.parse(msg.body);
         this.latestBalance$.next(data);
-      } catch (e) { }
+      } catch (e) {}
     });
   }
 
@@ -378,7 +439,6 @@ export class SocketConfigService {
     const id = entityId ?? this.notificationEntityId;
     if (!id) return;
 
-    // fixed: dedicated notification key instead of reusing threads:list
     const key = `notifications:${id}`;
     const dest = `/topic/notifications/${id}`;
 
@@ -386,7 +446,7 @@ export class SocketConfigService {
       try {
         const data = JSON.parse(msg.body);
         this.notification$.next(data);
-      } catch (e) { }
+      } catch (e) {}
     });
   }
 
@@ -415,7 +475,7 @@ export class SocketConfigService {
         } else if (type === "upi") {
           this.upi$.next(data);
         }
-      } catch (e) { }
+      } catch (e) {}
     });
   }
 
@@ -434,15 +494,14 @@ export class SocketConfigService {
 
   destroyAll(): void {
     try {
-      this.subscriptions.forEach((sub, key) => {
+      this.subscriptions.forEach((sub) => {
         try {
           sub?.unsubscribe();
-        } catch (e) { }
+        } catch (e) {}
       });
 
       this.subscriptions.clear();
-      this.activeTopics.clear(); // IMPORTANT
-
+      this.activeTopics.clear();
       this.pendingSubscribeTasks = [];
 
       this.pendingSubject.next(null);
@@ -460,7 +519,7 @@ export class SocketConfigService {
       }
 
       this.connected = false;
-    } catch (e) { }
+    } catch (e) {}
   }
 
   private publishWithAuth(destination: string, body: any) {

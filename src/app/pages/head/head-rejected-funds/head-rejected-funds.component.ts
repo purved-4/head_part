@@ -70,7 +70,7 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
   payoutApprovedPage = 0;
   payoutApprovedPageSize = 10;
   payoutApprovedPageSizes = [10, 20, 25, 50];
-
+portalOptions: { id: string; domain: string }[] = [];
   // ========== FILTER DROPDOWN STATE ==========
   filterDropdownOpen: string | null = null; // 'upi' | 'bank' | 'payout' | null
 
@@ -129,43 +129,86 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
     });
   }
 
+  // loadAllPortals(): void {
+  //   if (!this.branchId) return;
+
+  //   this.headServices
+  //     .getAllHeadsWithPortalsById(this.branchId)
+  //     .pipe(
+  //       catchError((err) => {
+  //         this.headPortals = [];
+  //         this.upiPortals = [];
+  //         this.bankPortals = [];
+  //         this.payoutPortals = [];
+  //         return of([]);
+  //       }),
+  //     )
+  //     .subscribe((response: any) => {
+  //       const portalsData = Array.isArray(response?.data)
+  //         ? response.data
+  //         : Array.isArray(response)
+  //           ? response
+  //           : [];
+
+  //       this.headPortals = portalsData;
+
+  //       const portals = [
+  //         ...new Set(
+  //           portalsData
+  //             .map((item: any) => item.portalId)
+  //             .filter((site: string) => !!site?.trim()),
+  //         ),
+  //       ];
+
+  //       this.upiPortals = portals;
+  //       this.bankPortals = portals;
+  //       this.payoutPortals = portals;
+  //     });
+  // }
   loadAllPortals(): void {
-    if (!this.branchId) return;
+  if (!this.branchId) return;
 
-    this.headServices
-      .getAllHeadsWithPortalsById(this.branchId)
-      .pipe(
-        catchError((err) => {
-          console.error("Portal fetch error", err);
-          this.headPortals = [];
-          this.upiPortals = [];
-          this.bankPortals = [];
-          this.payoutPortals = [];
-          return of([]);
-        }),
-      )
-      .subscribe((response: any) => {
-        const portalsData = Array.isArray(response?.data)
-          ? response.data
-          : Array.isArray(response)
-            ? response
-            : [];
+  this.headServices
+    .getAllHeadsWithPortalsById(this.branchId)
+    .pipe(
+      catchError((err) => {
+        this.portalOptions = [];
+        this.upiPortals = [];
+        this.bankPortals = [];
+        this.payoutPortals = [];
+        return of([]);
+      }),
+    )
+    .subscribe((response: any) => {
+      const portalsData = Array.isArray(response?.data)
+        ? response.data
+        : Array.isArray(response)
+        ? response
+        : [];
 
-        this.headPortals = portalsData;
+      // ✅ Create object with id + domain
+      const uniqueMap = new Map<string, any>();
 
-        const portals = [
-          ...new Set(
-            portalsData
-              .map((item: any) => item.portalDomain)
-              .filter((site: string) => !!site?.trim()),
-          ),
-        ];
-
-        this.upiPortals = portals;
-        this.bankPortals = portals;
-        this.payoutPortals = portals;
+      portalsData.forEach((item: any) => {
+        if (item?.portalId && item?.portalDomain) {
+          uniqueMap.set(item.portalId, {
+            id: item.portalId,
+            domain: item.portalDomain,
+          });
+        }
       });
-  }
+
+      const portals = Array.from(uniqueMap.values());
+
+      // ✅ MAIN VARIABLE (use this in HTML)
+      this.portalOptions = portals;
+
+      // ✅ Filters store only ID
+      this.upiPortals = portals;
+      this.bankPortals = portals;
+      this.payoutPortals = portals;
+    });
+}
 
   fetchAllUpiTopups(): void {
     if (!this.branchId) return;
@@ -175,8 +218,9 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
 
     const fetchPage = () => {
       this.fundService
-        .getAllUpiFundWithBranchIdPaginated(
+        .getAllUpiFundWithEntityAndPortalId(
           this.branchId,
+          this.upiPortalFilter,
           "REJECTED",
           page,
           pageSize,
@@ -184,7 +228,6 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
         )
         .pipe(
           catchError((err) => {
-            console.error("UPI fetch error", err);
             return of({ data: [], total: 0 });
           }),
         )
@@ -211,9 +254,7 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
             this.headServices
               .getAllHeadsWithPortalsById(this.branchId)
               .subscribe({
-                next: (res: any) => {
-                  console.log(res);
-                },
+                next: (res: any) => {},
               });
           }
         });
@@ -229,8 +270,9 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
 
     const fetchPage = () => {
       this.fundService
-        .getAllBankFundWithBranchIdPaginated(
+        .getAllBankFundWithEntityAndPortalId(
           this.branchId,
+          this.bankPortalFilter,
           "REJECTED",
           page,
           pageSize,
@@ -238,7 +280,6 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
         )
         .pipe(
           catchError((err) => {
-            console.error("Bank fetch error", err);
             return of({ data: [], total: 0 });
           }),
         )
@@ -275,8 +316,9 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
 
     const fetchPage = () => {
       this.fundService
-        .getAllpayoutTrueFalseBybranchIdPaginate(
+        .getAllPayoutFundWithEntityAndPortalId(
           this.branchId,
+          this.payoutPortalFilter,
           "REJECTED",
           page,
           pageSize,
@@ -284,7 +326,6 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
         )
         .pipe(
           catchError((err) => {
-            console.error("Payout fetch error", err);
             return of({ data: [], total: 0 });
           }),
         )
@@ -441,7 +482,6 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
       )
       .pipe(
         catchError((err) => {
-          console.error("UPI fetch error", err);
           return of({ data: [], total: 0 });
         }),
       )
@@ -467,7 +507,6 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
       )
       .pipe(
         catchError((err) => {
-          console.error("Bank fetch error", err);
           return of({ data: [], total: 0 });
         }),
       )
@@ -493,7 +532,6 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
       )
       .pipe(
         catchError((err) => {
-          console.error("Payout fetch error", err);
           return of({ data: [], total: 0 });
         }),
       )
@@ -740,19 +778,24 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectPortal(view: "upi" | "bank" | "payout", site: string) {
+  selectPortal(view: "upi" | "bank" | "payout", portal: any) {
+    const portalId = portal?.id || "";
+    
     if (view === "upi") {
-      this.upiPortalFilter = site;
+      this.upiPortalFilter = portalId;
       this.upiPortalDropdownOpen = false;
       this.applyUpiFilters();
+      this.fetchAllUpiTopups();
     } else if (view === "bank") {
-      this.bankPortalFilter = site;
+      this.bankPortalFilter = portalId;
       this.bankPortalDropdownOpen = false;
       this.applyBankFilters();
+      this.fetchAllBankTopups();
     } else if (view === "payout") {
-      this.payoutPortalFilter = site;
+      this.payoutPortalFilter = portalId;
       this.payoutPortalDropdownOpen = false;
       this.applyPayoutFilters();
+       this.fetchAllRejectedPayouts();
     }
   }
 
@@ -778,11 +821,17 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
           ? new Date(it.date)
           : null;
 
-      const itemPortal = String(
-        it.portalDomain || it.portalId || "",
-      ).toLowerCase();
+      // const itemPortal = String(
+      //   it.portalDomain || it.portalId || "",
+      // ).toLowerCase();
 
-      const matchesPortal = !portal || itemPortal === portal;
+      // const matchesPortal = !portal || itemPortal === portal;
+
+      const portalId = this.upiPortalFilter.trim().toLowerCase();
+
+const itemPortalId = String(it.portalId || "").toLowerCase();
+
+const matchesPortal = !portalId || itemPortalId === portalId;
 
       const matchesSearch =
         !search ||
@@ -857,11 +906,16 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
           ? new Date(it.date)
           : null;
 
-      const itemPortal = String(
-        it.portalDomain || it.portalId || "",
-      ).toLowerCase();
+      // const itemPortal = String(
+      //   it.portalDomain || it.portalId || "",
+      // ).toLowerCase();
 
-      const matchesPortal = !portal || itemPortal === portal;
+      // const matchesPortal = !portal || itemPortal === portal;
+      const portalId = this.bankPortalFilter.trim().toLowerCase();
+
+const itemPortalId = String(it.portalId || "").toLowerCase();
+
+const matchesPortal = !portalId || itemPortalId === portalId;
 
       const matchesSearch =
         !search ||
@@ -1204,4 +1258,16 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
     const totalPages = this.payoutApprovedTotalPages();
     this.payoutApprovedPage = Math.max(0, Math.min(page, totalPages - 1));
   }
+
+  getSelectedPortalDomain(view: 'upi' | 'bank' | 'payout'): string {
+  let selectedId = '';
+  
+  if (view === 'upi') selectedId = this.upiPortalFilter;
+  else if (view === 'bank') selectedId = this.bankPortalFilter;
+  else selectedId = this.payoutPortalFilter;
+
+  const found = this.portalOptions.find(p => p.id === selectedId);
+
+  return found ? found.domain : 'All Portals';
+}
 }

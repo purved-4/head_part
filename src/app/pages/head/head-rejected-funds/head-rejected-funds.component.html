@@ -45,9 +45,9 @@
                   (click)="togglePortalDropdown('upi')"
                   class="w-full text-sm border-0 rounded-2xl pl-10 pr-4 py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
                 >
-                  <span class="truncate">{{
-                    upiPortalFilter || "All Portals"
-                  }}</span>
+                  <span class="truncate">
+                {{ getSelectedPortalDomain('upi') }}
+                  </span>
                   <span class="material-symbols-outlined text-lg"
                     >arrow_drop_down</span
                   >
@@ -70,11 +70,11 @@
                     All Portals
                   </button>
                   <button
-                    *ngFor="let site of upiPortals"
-                    (click)="selectPortal('upi', site)"
+                    *ngFor="let portal  of upiPortals"
+                    (click)="selectPortal('upi', portal )"
                     class="w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-hover)] transition-colors text-[var(--color-font)] truncate"
                   >
-                    {{ site }}
+                    {{ portal.domain }}
                   </button>
                   <div
                     *ngIf="upiPortals.length === 0"
@@ -531,9 +531,12 @@
                   (click)="togglePortalDropdown('bank')"
                   class="w-full text-sm border-0 rounded-2xl pl-10 pr-4 py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
                 >
-                  <span class="truncate">{{
-                    bankPortalFilter || "All Portals"
-                  }}</span>
+                  <span class="truncate">
+                    
+                                  {{ getSelectedPortalDomain('bank') }}
+
+                  
+                </span>
                   <span class="material-symbols-outlined text-lg"
                     >arrow_drop_down</span
                   >
@@ -554,11 +557,11 @@
                     All Portals
                   </button>
                   <button
-                    *ngFor="let site of bankPortals"
-                    (click)="selectPortal('bank', site)"
+                    *ngFor="let portal  of bankPortals"
+                    (click)="selectPortal('bank', portal )"
                     class="w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)] truncate"
                   >
-                    {{ site }}
+                    {{ portal.domain }}
                   </button>
                   <div
                     *ngIf="bankPortals.length === 0"
@@ -1014,9 +1017,12 @@
                   (click)="togglePortalDropdown('payout')"
                   class="w-full text-sm border-0 rounded-2xl pl-10 pr-4 py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
                 >
-                  <span class="truncate">{{
-                    payoutPortalFilter || "All Portals"
-                  }}</span>
+                  <span class="truncate">
+                    
+                                   {{ getSelectedPortalDomain('payout') }}
+
+                  
+                </span>
                   <span class="material-symbols-outlined text-lg"
                     >arrow_drop_down</span
                   >
@@ -1037,11 +1043,11 @@
                     All Portals
                   </button>
                   <button
-                    *ngFor="let site of payoutPortals"
-                    (click)="selectPortal('payout', site)"
+                    *ngFor="let portal  of payoutPortals"
+                    (click)="selectPortal('payout', portal )"
                     class="w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)] truncate"
                   >
-                    {{ site }}
+                    {{ portal.domain }}
                   </button>
                   <div
                     *ngIf="payoutPortals.length === 0"

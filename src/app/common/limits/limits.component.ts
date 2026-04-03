@@ -1,4 +1,3 @@
-
 import { Component, OnInit } from "@angular/core";
 import { LimitsService } from "../../pages/services/reports/limits.service";
 import { UserStateService } from "../../store/user-state.service";
@@ -8,6 +7,7 @@ import { AuthService } from "../../pages/services/auth.service";
 import { UtilsServiceService } from "../../utils/utils-service.service";
 import { forkJoin } from "rxjs";
 import { ChiefService } from "../../pages/services/chief.service";
+import { log } from "node:util";
 
 @Component({
   selector: "app-limits",
@@ -27,7 +27,7 @@ export class LimitsComponent implements OnInit {
   // CHIEF role specific data
   managersData: any[] = [];
   branchesData: any[] = [];
-  activeTab: "manager" | "branch" = "manager";
+  activeTab = "manager";
 
   // Add TransactionAmount Modal
   showAddTransactionAmountModal = false;
@@ -76,6 +76,11 @@ export class LimitsComponent implements OnInit {
     if (this.role === "CHIEF") {
       this.chiefService.getChiefsById(this.currentRoleId).subscribe((res) => {
         this.chiefBuisnessType = res.businessType;
+        if (this.chiefBuisnessType === "B2C") {
+          this.activeTab = "branch";
+        } else {
+          this.activeTab = "manager";
+        }
         this.loadDownlevelData();
       });
     } else {
@@ -98,7 +103,6 @@ export class LimitsComponent implements OnInit {
           this.loadingCurrentUserLimits = false;
         },
         error: (err) => {
-          console.error("Error fetching current user limits:", err);
           this.currentUserLimits = null;
           this.loadingCurrentUserLimits = false;
         },
@@ -110,8 +114,6 @@ export class LimitsComponent implements OnInit {
     this.error = null;
 
     if (this.currentRoleId && this.role) {
-      console.log(this.chiefBuisnessType);
-
       if (this.role === "CHIEF") {
         // Make separate API calls for managers and branches
         this.utilSerivce
@@ -122,8 +124,6 @@ export class LimitsComponent implements OnInit {
           )
           .subscribe({
             next: (res: any) => {
-              // console.log(res);
-
               // if (this.chiefBuisnessType === "B2C") {
               //   this.branchesData = Array.isArray(res)
               //     ? res
@@ -142,9 +142,6 @@ export class LimitsComponent implements OnInit {
               // this.updatePagination();
               // this.loading = false;
 
-              // console.log(this.branchesData);
-              // console.log(this.managersData);
-
               this.downlevelData = Array.isArray(res) ? res : [res];
               this.currentPage = 0;
               this.updatePagination();
@@ -156,8 +153,6 @@ export class LimitsComponent implements OnInit {
             },
           });
       } else {
-        console.log("commin in the chief");
-
         // For non-CHIEF roles, make single API call
         this.utilSerivce
           .getDataWithEntityTypeAndId(
@@ -265,7 +260,6 @@ export class LimitsComponent implements OnInit {
         this.loadCurrentUserLimits(); // Add this line
       },
       error: (err) => {
-        console.error("Error adding transactionAmount:", err);
         // this.snackBar.showError('Failed to add transactionAmount. Please try again.');
         this.addingTransactionAmount = false;
       },
@@ -311,7 +305,6 @@ export class LimitsComponent implements OnInit {
         this.loadCurrentUserLimits(); // Add this line
       },
       error: (err) => {
-        console.error("Error adding admin transactionAmount:", err);
         // this.snackBar.showError('Failed to add transactionAmount. Please try again.');
         this.addingAdminTransactionAmount = false;
       },
@@ -335,7 +328,7 @@ export class LimitsComponent implements OnInit {
     );
 
     this.limitService
-      .getLimitsByEntityAndType(this.selectedEntity.id, entityType)
+      .getLimitsByEntityAndType(this.selectedEntity.id, this.activeTab)
       .subscribe({
         next: (res: any) => {
           // Handle both array response and single object
@@ -343,7 +336,6 @@ export class LimitsComponent implements OnInit {
           this.loadingLimits = false;
         },
         error: (err) => {
-          console.error("Error fetching limits data:", err);
           // this.snackBar.showError('Failed to load limit data');
           this.loadingLimits = false;
         },
@@ -392,7 +384,6 @@ export class LimitsComponent implements OnInit {
           this.loadingAdminLimits = false;
         },
         error: (err) => {
-          console.error("Error fetching admin limits data:", err);
           // this.snackBar.showError('Failed to load admin limit data');
           this.loadingAdminLimits = false;
         },

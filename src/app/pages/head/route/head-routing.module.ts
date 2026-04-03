@@ -16,10 +16,12 @@ import { ManageBranchUserComponent } from "../branch/manage-branch-user/manage-b
 // import { BranchChatComponent } from "../../../common/head-branch-chat/head-branch-chat.component";
 import { HeadUpiComponent } from "../upi/head-upi/head-upi.component";
 import { HeadBankComponent } from "../bank/head-bank/head-bank.component";
+// import { HeadChatComponent } from "../../../trash/head-chat/head-chat.component";
 // import { ApprovedFundsComponent } from "../../branch/approved-funds/approved-funds.component";
 // import { RejectedFundsComponent } from "../../branch/rejected-funds/rejected-funds.component";
 import { HeadBranchCapacityComponent } from "../../../components/head-branch-capacity/head-branch-capacity.component";
 import { HeadNavDashboardLayoutComponent } from "../head-navlayout/head-nav-dashboard-layout/head-nav-dashboard-layout.component";
+// import { BranchChatComponent } from "../../../trash/branch-chat/branch-chat.component";
 import { HeadApprovedFundsComponent } from "../head-approved-funds/head-approved-funds.component";
 import { HeadRejectedFundsComponent } from "../head-rejected-funds/head-rejected-funds.component";
 import {ChatingComponent} from "../../../common/chating/chating.component";
