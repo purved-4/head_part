@@ -36,7 +36,7 @@ export class HeadUpiComponent implements OnInit {
 
   filterStatus = ""; // 'active', 'inactive', or ''
   selectedPortal: any = null;
-  maxLimit: number | null = null; // 👈 NEW: max limit filter
+  maxLimit: number | null = null; //  NEW: max limit filter
   transactionMinAmount: number | null = null;
   transactionMaxAmount: number | null = null;
 
@@ -179,7 +179,7 @@ updateSelectedImage: string | null = null;
  
   private initAddUpiForm() {
     this.addUpiForm = this.formBuilder.group({
-      portalId: ["", Validators.required],
+      // portalId: ["", Validators.required],
       vpa: [
         "",
         [
@@ -192,6 +192,10 @@ updateSelectedImage: string | null = null;
         "",
         [Validators.required, Validators.min(1), Validators.max(10000000)],
       ],
+       min_tran_count: [null],
+  max_tran_count: [null],
+  min_total_tran_amount: [null],
+  max_total_tran_amount: [null],
     });
   }
 
@@ -222,7 +226,7 @@ updateSelectedImage: string | null = null;
   //       query: this.searchTerm.trim() || undefined,
   //       minAmount: this.transactionMinAmount ?? undefined,
   //       maxAmount: this.transactionMaxAmount ?? undefined,
-  //       limit: this.maxLimit ?? undefined, // 👈 NEW: send max limit
+  //       limit: this.maxLimit ?? undefined, //  NEW: send max limit
   //       portalId: this.selectedPortal?.portalId || undefined,
   //     };
 
@@ -320,7 +324,10 @@ updateSelectedImage: string | null = null;
           return {
             ...r,
             status: this.normalizeStatus(r),
-
+min_tran_count: r.minTranCount ?? null,
+max_tran_count: r.maxTranCount ?? null,
+min_total_tran_amount: r.minTotalTranAmount ?? null,
+max_total_tran_amount: r.maxTotalTranAmount ?? null,
             portalDomain:
               r.portalDomain || r.portalName || r.portal || r.portalId || "",
 
@@ -456,7 +463,7 @@ updateSelectedImage: string | null = null;
     this.filterStatus = "";
     this.selectedPortal = null;
     this.portalSearchTerm = "";
-    this.maxLimit = null; // 👈 NEW: reset max limit
+    this.maxLimit = null; //  NEW: reset max limit
     this.transactionMinAmount = null;
     this.transactionMaxAmount = null;
     this.showPortalDropdown = false;
@@ -684,13 +691,14 @@ this.manualQrFile = null;
   return;
 }
 
-    const selectedPortal = this.portals.find(
-      (site) => String(site.id) === String(this.addUpiForm.value.portalId),
-    );
-    if (!selectedPortal) {
-      this.snack.show("Selected portal not found.", false);
-      return;
-    }
+    // const selectedPortal = this.portals.find(
+    //   (site) => String(site.id) === String(this.addUpiForm.value.portalId),
+    // );
+    const selectedPortal = this.portals?.[0];
+    // if (!selectedPortal) {
+    //   this.snack.show("Selected portal not found.", false);
+    //   return;
+    // }
     // if (this.addUpiForm.value.minAmount === 0) {
     // }
 
@@ -711,7 +719,7 @@ this.manualQrFile = null;
 
     const payload = {
       portal: selectedPortal.portalId,
-      portalId: selectedPortal.id,
+      // portalId: selectedPortal.id,
       vpa: this.addUpiForm.value.vpa,
       limitAmount: this.addUpiForm.value.limitAmount,
       agent_id: this.currentRoleId,
@@ -719,6 +727,10 @@ this.manualQrFile = null;
       entityType: this.role,
       userId: this.userId,
       active: true,
+       minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
+  maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
+  minTotalTranAmount: Number(this.addUpiForm.value.min_total_tran_amount) || 0,
+  maxTotalTranAmount: Number(this.addUpiForm.value.max_total_tran_amount) || 0,
       createdAt: new Date().toISOString(),
       // ranges: validRanges.map((r) => ({
       //   minRange: Number(r.minRange),
@@ -752,7 +764,7 @@ this.manualQrFile = null;
         if (response.success || response.id || response._id) {
           this.snack.show("UPI added successfully!", true);
           this.closeAddModal();
-          this.fetchUpis(); // 👈 refresh list
+          this.fetchUpis(); //  refresh list
         } else {
           this.snack.show(response.message || "Failed to add UPI.", false);
         }
@@ -771,38 +783,64 @@ this.manualQrFile = null;
     });
   }
 
+  // openUpdateModal(upi: any): void {
+  //   this.editingUpi = upi;
+  //   this.updateForm = {
+  //     vpa: upi.vpa || "",
+  //     limitAmount: upi.limitAmount || "",
+  //     status: upi.status || "active",
+  //     maxAmount: upi.maxAmount || "",
+  //     minAmount: upi.minAmount || "",
+  //   };
+
+  //   // //  Validation for minAmount (allow 0)
+  //   // if (this.updateForm.minAmount < 0) {
+  //   //   this.snack.show("Min amount cannot be negative", false);
+  //   //   return;
+  //   // }
+
+  //   // //  Check if min > max
+  //   // if (this.updateForm.minAmount > this.updateForm.maxAmount) {
+  //   //   this.snack.show("Min amount cannot be greater than Max amount", false);
+  //   //   return;
+  //   // }
+
+  //   this.originalVpa = (upi.vpa || "").trim().toLowerCase();
+  //   this.vpaChanged = false;
+  //   this.newQrGenerated = false;
+  //   this.updateQrData = null;
+  //   this.generatedUpdateFile = null;
+  //   this.updateQrError = "";
+  //   this.showUpdateModal = true;
+  //   document.body.style.overflow = "hidden";
+  // }
+
+
   openUpdateModal(upi: any): void {
-    this.editingUpi = upi;
-    this.updateForm = {
-      vpa: upi.vpa || "",
-      limitAmount: upi.limitAmount || "",
-      status: upi.status || "active",
-      maxAmount: upi.maxAmount || "",
-      minAmount: upi.minAmount || "",
-    };
+  this.editingUpi = upi;
 
-    // //  Validation for minAmount (allow 0)
-    // if (this.updateForm.minAmount < 0) {
-    //   this.snack.show("Min amount cannot be negative", false);
-    //   return;
-    // }
+  this.updateForm = {
+    vpa: upi.vpa || "",
+    limitAmount: upi.limitAmount || "",
+    status: upi.status || "active",
+    maxAmount: upi.maxAmount || "",
+    minAmount: upi.minAmount || "",
 
-    // //  Check if min > max
-    // if (this.updateForm.minAmount > this.updateForm.maxAmount) {
-    //   this.snack.show("Min amount cannot be greater than Max amount", false);
-    //   return;
-    // }
+    min_tran_count: upi.min_tran_count ?? null,
+    max_tran_count: upi.max_tran_count ?? null,
+    min_total_tran_amount: upi.min_total_tran_amount ?? null,
+    max_total_tran_amount: upi.max_total_tran_amount ?? null,
+  };
 
-    this.originalVpa = (upi.vpa || "").trim().toLowerCase();
-    this.vpaChanged = false;
-    this.newQrGenerated = false;
-    this.updateQrData = null;
-    this.generatedUpdateFile = null;
-    this.updateQrError = "";
-    this.showUpdateModal = true;
-    document.body.style.overflow = "hidden";
-  }
-
+  this.originalVpa = (upi.vpa || "").trim().toLowerCase();
+  this.vpaChanged = false;
+  this.newQrGenerated = false;
+  this.updateQrData = null;
+  this.generatedUpdateFile = null;
+  this.updateQrError = "";
+  this.showUpdateModal = true;
+  document.body.style.overflow = "hidden";
+}
   closeUpdateModal(): void {
     this.showUpdateModal = false;
     this.editingUpi = null;
@@ -913,7 +951,7 @@ this.updateQrMode = 'generate';
       next: () => {
         this.isSubmitting = false;
         this.closeUpdateModal();
-        this.fetchUpis(); // 👈 refresh
+        this.fetchUpis(); //  refresh
         this.snack.show("UPI updated successfully!", true);
       },
       error: (err: any) => {

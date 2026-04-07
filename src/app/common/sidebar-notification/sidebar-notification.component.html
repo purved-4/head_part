@@ -1,18 +1,18 @@
 <!-- Overlay -->
 <div 
   *ngIf="isOpen"
-  class="fixed inset-0 bg-black/50 z-[60] transition-opacity duration-300"
+  class="fixed inset-0 bg-[var(--color-overlay)] z-[60] transition-opacity duration-300"
   (click)="closeSidebar()"
 ></div>
 
 <!-- Sidebar Panel -->
 <div 
-  class="fixed top-0 right-0 h-full w-full sm:w-96 lg:w-[480px] bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-out flex flex-col"
+  class="fixed top-0 right-0 h-full w-[85%] sm:w-80 lg:w-[400px] bg-[var(--color-surface)] shadow-2xl z-[70] transform transition-transform duration-300 ease-out flex flex-col"
   [class.translate-x-0]="isOpen"
   [class.translate-x-full]="!isOpen"
 >
   <!-- Header -->
-  <div class="flex-shrink-0 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white px-4 py-4">
+  <div class="flex-shrink-0 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] text-white px-4 py-4">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="relative">
@@ -26,9 +26,17 @@
         </div>
         <div>
           <h2 class="text-lg font-semibold">Notifications</h2>
-          <p class="text-xs text-indigo-200">{{ getTotalCount() }} total • {{ getUnreadCount() }} unread</p>
+          <p class="text-xs text-[var(--color-primary-light)]">{{ getTotalCount() }} total • {{ getUnreadCount() }} unread</p>
         </div>
       </div>
+        <button
+
+    (click)="markAllAsRead()"
+    class="p-2 rounded-lg hover:bg-white/20 transition-colors flex items-center gap-1 text-xs"
+    title="Mark all as read"
+  >
+    <span class="material-icons text-sm">done_all</span>
+  </button>
       <button 
         (click)="closeSidebar()"
         class="p-2 rounded-lg hover:bg-white/20 transition-colors"
@@ -39,15 +47,15 @@
   </div>
 
   <!-- Actions Bar -->
-  <div class="flex-shrink-0 px-4 py-3 border-b border-gray-200 bg-gray-50">
+  <div class="flex-shrink-0 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-bg)]">
     <div class="flex items-center justify-between">
       <!-- Category Filters -->
       <div class="flex gap-2 overflow-x-auto pb-1">
         <button
           (click)="filterByCategory('all')"
           [class]="activeCategory === 'all' 
-            ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-indigo-600 text-white shadow-sm'
-            : 'px-3 py-1.5 text-xs font-medium rounded-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'"
+            ? 'px-3 py-1.5 text-xs font-medium rounded-full bg-[var(--color-primary)] text-white shadow-sm'
+            : 'px-3 py-1.5 text-xs font-medium rounded-full bg-white text-[var(--color-font)] border border-[var(--color-border)] hover:bg-[var(--color-bg-hover)]'"
         >
           All
         </button>
@@ -81,33 +89,58 @@
       </div>
 
       <!-- Mark All Read Button -->
-      <button
+      <!-- <button
         *ngIf="getUnreadCount() > 0"
         (click)="markAllAsRead()"
-        class="text-xs font-semibold px-2 py-1 rounded-md text-indigo-600 hover:bg-indigo-50 transition-colors flex items-center gap-1"
+        class="text-xs font-semibold px-2 py-1 rounded-md text-[var(--color-primary)] hover:bg-[var(--color-primary-light)]/10 transition-colors flex items-center gap-1"
         title="Mark all as read"
       >
         <span class="material-icons text-sm">done_all</span>
         <span class="hidden sm:inline">Mark all read</span>
-      </button>
+      </button> -->
+      <!-- Right Side Actions -->
+<div class="flex items-center gap-2">
+
+  <!-- ✅ ADD THIS (Refresh button) -->
+  <button
+    (click)="refreshNotifications()"
+    class="text-xs font-semibold px-2 py-1 rounded-md text-[var(--color-primary)] hover:bg-[var(--color-primary-light)]/10 transition-colors flex items-center gap-1"
+    title="Refresh"
+  >
+    <span class="material-icons text-sm">refresh</span>
+    <span class="hidden sm:inline">Refresh</span>
+  </button>
+
+  <!-- Existing Mark All Read -->
+  <button
+    *ngIf="getUnreadCount() > 0"
+    (click)="markAllAsRead()"
+    class="text-xs font-semibold px-2 py-1 rounded-md text-[var(--color-primary)] hover:bg-[var(--color-primary-light)]/10 transition-colors flex items-center gap-1"
+    title="Mark all as read"
+  >
+    <span class="material-icons text-sm">done_all</span>
+    <span class="hidden sm:inline">Mark all read</span>
+  </button>
+
+</div>
     </div>
   </div>
 
-  <!-- Main Content Area (Split View) - Using responsive grid instead of window width check -->
+  <!-- Main Content Area (Split View) -->
   <div class="flex-1 flex overflow-hidden">
-    <!-- Notifications List - Always visible on mobile, conditional on desktop -->
+    <!-- Notifications List -->
     <div class="flex-1 overflow-y-auto" [class.hidden]="showDetailsPanel">
       <!-- Loading State -->
       <div *ngIf="isLoading" class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary)]"></div>
       </div>
 
       <!-- Notifications Content -->
-      <div *ngIf="!isLoading" class="divide-y divide-gray-100">
+      <div *ngIf="!isLoading" class="divide-y divide-[var(--color-border)]">
         <ng-container *ngFor="let cat of ['upi', 'bank', 'payout', 'other']">
           <div *ngIf="shouldShowCategory(cat)" class="py-2">
             <!-- Category Header -->
-            <div class="px-4 py-2 bg-gray-50 sticky top-0 z-10">
+            <div class="px-4 py-2 bg-[var(--color-bg)] sticky top-0 z-10">
               <div class="flex items-center gap-2">
                 <span 
                   class="material-icons text-sm"
@@ -122,106 +155,106 @@
                     cat === 'payout' ? 'payments' : 'notifications'
                   }}
                 </span>
-                <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <span class="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">
                   {{ cat }}
                 </span>
-                <span class="text-xs font-bold text-white bg-gray-400 px-1.5 py-0.5 rounded-full">
+                <span class="text-xs font-bold text-white bg-[var(--color-muted)] px-1.5 py-0.5 rounded-full">
                   {{ groupedNotifications.data[cat].length }}
                 </span>
               </div>
             </div>
 
             <!-- Notification Items -->
-            <!-- Notification Items - Add a View Details button -->
-<div
+     <div
   *ngFor="let notification of groupedNotifications.data[cat]"
   (click)="onNotificationSelect(notification)"
-  class="relative px-4 py-3 cursor-pointer transition-all duration-200 hover:bg-gray-50 group"
-  [class.bg-indigo-50]="notification.isSelected"
-  [class.border-l-4]="notification.isSelected"
-  [class.border-indigo-500]="notification.isSelected"
+  class="relative px-4 py-3 cursor-pointer transition-all duration-200 hover:bg-[var(--color-bg-hover)] group"
+  [ngClass]="{
+    'bg-[var(--color-primary-light)]/10': notification.isSelected,
+    'border-l-4': notification.isSelected,
+    'border-[var(--color-primary)]': notification.isSelected
+  }"
 >
-  <div class="flex items-start gap-3">
-    <!-- Unread Indicator -->
-    <div class="relative flex-shrink-0">
-      <div 
-        class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
-        [class.bg-gradient-to-br]="!notification.isRead"
-        [class.from-indigo-500]="!notification.isRead"
-        [class.to-indigo-400]="!notification.isRead"
-        [class.bg-gray-100]="notification.isRead"
-      >
-        <span 
-          class="material-icons text-lg"
-          [class.text-white]="!notification.isRead"
-          [class.text-gray-500]="notification.isRead"
-        >
-          {{ getMaterialIcon(notification.fundsType) }}
-        </span>
-      </div>
-      <div 
-        *ngIf="!notification.isRead"
-        class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"
-      ></div>
-    </div>
+              <div class="flex items-start gap-3">
+                <!-- Unread Indicator -->
+                <div class="relative flex-shrink-0">
+                  <div 
+                    class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                    [class.bg-gradient-to-br]="!notification.isRead"
+                    [class.from-[var(--color-primary)]]="!notification.isRead"
+                    [class.to-[var(--color-primary-dark)]]="!notification.isRead"
+                    [class.bg-[var(--color-bg-hover)]]="notification.isRead"
+                  >
+                    <span 
+                      class="material-icons text-lg"
+                      [class.text-white]="!notification.isRead"
+                      [class.text-[var(--color-muted)]]="notification.isRead"
+                    >
+                      {{ getMaterialIcon(notification.fundsType) }}
+                    </span>
+                  </div>
+                  <div 
+                    *ngIf="!notification.isRead"
+                    class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"
+                  ></div>
+                </div>
 
-    <!-- Content -->
-    <div class="flex-1 min-w-0">
-      <div class="flex items-center justify-between gap-2">
-        <p 
-          class="text-sm font-medium truncate"
-          [class.text-gray-900]="!notification.isRead"
-          [class.text-gray-700]="notification.isRead"
-        >
-          {{ notification.message || notification.queryMessage || 'New notification' }}
-        </p>
-        <span class="text-xs text-gray-400 whitespace-nowrap">
-          {{ (notification.createdAt || notification.updatedAt) | date: 'shortTime' }}
-        </span>
-      </div>
-      <div class="flex items-center justify-between mt-1">
-        <p class="text-xs text-gray-500 truncate">
-          {{ notification.type || notification.fundsType || 'Notification' }}
-        </p>
-        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <!-- ADD THIS VIEW DETAILS BUTTON -->
-          <button
-            (click)="openDetailsPopupFromButton(notification, $event)"
-            class="p-1 rounded hover:bg-gray-200 transition-colors"
-            title="View Details"
-          >
-            <span class="material-icons text-sm text-indigo-500">visibility</span>
-          </button>
-          <button
-            *ngIf="canRedirectToChat(notification)"
-            (click)="openChat(notification, $event)"
-            class="p-1 rounded hover:bg-gray-200 transition-colors"
-            title="Open in Chat"
-          >
-            <span class="material-icons text-sm text-indigo-500">chat</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-2">
+                    <p 
+                      class="text-sm font-medium truncate"
+                      [class.text-[var(--color-font)]]="!notification.isRead"
+                      [class.text-[var(--color-muted)]]="notification.isRead"
+                    >
+                      {{ notification.message || notification.queryMessage || 'New notification' }}
+                    </p>
+                    <span class="text-xs text-[var(--color-muted)] whitespace-nowrap">
+                      {{ (notification.createdAt || notification.updatedAt) | date: 'shortTime' }}
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between mt-1">
+                    <p class="text-xs text-[var(--color-muted)] truncate">
+                      {{ notification.type || notification.fundsType || 'Notification' }}
+                    </p>
+                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        (click)="openDetailsPopupFromButton(notification, $event)"
+                        class="p-1 rounded hover:bg-[var(--color-bg-hover)] transition-colors"
+                        title="View Details"
+                      >
+                        <span class="material-icons text-sm text-[var(--color-primary)]">visibility</span>
+                      </button>
+                      <button
+                        *ngIf="canRedirectToChat(notification)"
+                        (click)="openChatAndMarkRead(notification, $event)"
+                        class="p-1 rounded hover:bg-[var(--color-bg-hover)] transition-colors"
+                        title="Open in Chat"
+                      >
+                        <span class="material-icons text-sm text-[var(--color-primary)]">chat</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </ng-container>
 
         <!-- Empty State -->
         <div *ngIf="getTotalCount() === 0 && !isLoading" class="py-16 text-center">
-          <div class="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span class="material-icons text-4xl text-gray-400">notifications_off</span>
+          <div class="w-20 h-20 bg-[var(--color-bg-hover)] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span class="material-icons text-4xl text-[var(--color-muted)]">notifications_off</span>
           </div>
-          <p class="text-gray-600 font-medium">No notifications</p>
-          <p class="text-sm text-gray-400 mt-1">You're all caught up!</p>
+          <p class="text-[var(--color-font)] font-medium">No notifications</p>
+          <p class="text-sm text-[var(--color-muted)] mt-1">You're all caught up!</p>
         </div>
       </div>
     </div>
 
-    <!-- Details Panel - Replaces list on mobile when visible, sits beside on desktop -->
+    <!-- Details Panel -->
     <div 
-      class="w-full lg:w-96 border-l border-gray-200 bg-white flex flex-col transition-all duration-300"
+      class="w-full lg:w-80 border-l border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col transition-all duration-300"
       [class.absolute]="showDetailsPanel"
       [class.inset-0]="showDetailsPanel"
       [class.z-20]="showDetailsPanel"
@@ -229,44 +262,48 @@
       [class.hidden]="!showDetailsPanel"
     >
       <!-- Details Header -->
-      <div class="flex-shrink-0 px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+      <div class="flex-shrink-0 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-bg)] flex items-center justify-between">
         <div class="flex items-center gap-2">
           <button 
             *ngIf="showDetailsPanel"
             (click)="closeDetailsPanel()"
-            class="p-1 rounded hover:bg-gray-200 transition-colors lg:hidden"
+            class="p-1 rounded hover:bg-[var(--color-bg-hover)] transition-colors lg:hidden"
           >
-            <span class="material-icons text-gray-500">arrow_back</span>
+            <span class="material-icons text-[var(--color-muted)]">arrow_back</span>
           </button>
-          <h3 class="font-semibold text-gray-900">Notification Details</h3>
+          <h3 class="font-semibold text-[var(--color-font)]">Notification Details</h3>
         </div>
         <button 
           (click)="closeDetailsPanel()"
-          class="p-1 rounded hover:bg-gray-200 transition-colors hidden lg:block"
+          class="p-1 rounded hover:bg-[var(--color-bg-hover)] transition-colors hidden lg:block"
         >
-          <span class="material-icons text-gray-500">close</span>
+          <span class="material-icons text-[var(--color-muted)]">close</span>
         </button>
       </div>
 
       <!-- Details Content -->
       <div class="flex-1 overflow-y-auto p-4" *ngIf="selectedNotification">
         <!-- Header Info -->
-        <div 
-          class="p-4 rounded-xl mb-4"
-          [class.bg-gradient-to-r]="selectedNotification.type?.toUpperCase().includes('REJECT')"
-          [class.from-red-50]="selectedNotification.type?.toUpperCase().includes('REJECT')"
-          [class.to-red-100]="selectedNotification.type?.toUpperCase().includes('REJECT')"
-          [class.bg-gradient-to-r]="selectedNotification.type?.toUpperCase().includes('APPROVED')"
-          [class.from-green-50]="selectedNotification.type?.toUpperCase().includes('APPROVED')"
-          [class.to-green-100]="selectedNotification.type?.toUpperCase().includes('APPROVED')"
-          [class.bg-indigo-50]="!selectedNotification.type?.toUpperCase().includes('REJECT') && !selectedNotification.type?.toUpperCase().includes('APPROVED')"
-        >
+      <div
+  class="p-4 rounded-xl mb-4"
+  [ngClass]="{
+    'bg-gradient-to-r from-red-50 to-red-100':
+      selectedNotification.type?.toUpperCase().includes('REJECT'),
+
+    'bg-gradient-to-r from-green-50 to-green-100':
+      selectedNotification.type?.toUpperCase().includes('APPROVED'),
+
+    'bg-[var(--color-primary-light)]/10':
+      !selectedNotification.type?.toUpperCase().includes('REJECT') &&
+      !selectedNotification.type?.toUpperCase().includes('APPROVED')
+  }"
+>
           <div class="flex items-center gap-3">
             <div 
               class="w-12 h-12 rounded-xl flex items-center justify-center"
               [class.bg-red-500]="selectedNotification.type?.toUpperCase().includes('REJECT')"
               [class.bg-green-500]="selectedNotification.type?.toUpperCase().includes('APPROVED')"
-              [class.bg-indigo-500]="!selectedNotification.type?.toUpperCase().includes('REJECT') && !selectedNotification.type?.toUpperCase().includes('APPROVED')"
+              [class.bg-[var(--color-primary)]]="!selectedNotification.type?.toUpperCase().includes('REJECT') && !selectedNotification.type?.toUpperCase().includes('APPROVED')"
             >
               <span class="material-icons text-white text-xl">
                 {{
@@ -277,29 +314,29 @@
               </span>
             </div>
             <div>
-              <p class="font-semibold text-gray-900">{{ selectedNotification.type || 'Notification' }}</p>
-              <p class="text-xs text-gray-500">{{ selectedNotification.createdAt | date: 'medium' }}</p>
+              <p class="font-semibold text-[var(--color-font)]">{{ selectedNotification.type || 'Notification' }}</p>
+              <p class="text-xs text-[var(--color-muted)]">{{ selectedNotification.createdAt | date: 'medium' }}</p>
             </div>
           </div>
         </div>
 
         <!-- Message -->
-        <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-          <p class="text-sm text-gray-700">{{ selectedNotification.message || selectedNotification.queryMessage }}</p>
+        <div class="mb-4 p-3 bg-[var(--color-bg)] rounded-lg">
+          <p class="text-sm text-[var(--color-font)]">{{ selectedNotification.message || selectedNotification.queryMessage }}</p>
         </div>
 
         <!-- Details Grid -->
         <div class="space-y-3">
           <div 
             *ngFor="let field of getDisplayFields(selectedNotification)"
-            class="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50"
+            class="flex items-start gap-3 p-2 rounded-lg hover:bg-[var(--color-bg-hover)]"
           >
-            <span class="material-icons text-gray-400 text-sm mt-0.5">
+            <span class="material-icons text-[var(--color-muted)] text-sm mt-0.5">
               {{ getFieldIcon(field.key) }}
             </span>
             <div class="flex-1 min-w-0">
-              <p class="text-xs text-gray-500 uppercase tracking-wide">{{ field.key }}</p>
-              <p class="text-sm text-gray-800 font-medium break-words">{{ field.value }}</p>
+              <p class="text-xs text-[var(--color-muted)] uppercase tracking-wide">{{ field.key }}</p>
+              <p class="text-sm text-[var(--color-font)] font-medium break-words">{{ field.value }}</p>
             </div>
           </div>
         </div>
@@ -309,14 +346,14 @@
           <div class="flex items-center gap-2 mb-3">
             <div class="w-1 h-5 bg-blue-500 rounded-full"></div>
             <span class="material-icons text-blue-500 text-sm">account_balance</span>
-            <span class="text-sm font-semibold text-gray-700">Bank Funds</span>
+            <span class="text-sm font-semibold text-[var(--color-font)]">Bank Funds</span>
           </div>
           <div class="space-y-2 pl-2">
             <div *ngFor="let field of getDisplayFields(selectedNotification.bankFunds)" class="flex items-start gap-2">
-              <span class="material-icons text-gray-400 text-xs">chevron_right</span>
+              <span class="material-icons text-[var(--color-muted)] text-xs">chevron_right</span>
               <div>
-                <p class="text-xs text-gray-500">{{ field.key }}</p>
-                <p class="text-sm text-gray-800">{{ field.value }}</p>
+                <p class="text-xs text-[var(--color-muted)]">{{ field.key }}</p>
+                <p class="text-sm text-[var(--color-font)]">{{ field.value }}</p>
               </div>
             </div>
           </div>
@@ -327,14 +364,14 @@
           <div class="flex items-center gap-2 mb-3">
             <div class="w-1 h-5 bg-purple-500 rounded-full"></div>
             <span class="material-icons text-purple-500 text-sm">smartphone</span>
-            <span class="text-sm font-semibold text-gray-700">UPI Funds</span>
+            <span class="text-sm font-semibold text-[var(--color-font)]">UPI Funds</span>
           </div>
           <div class="space-y-2 pl-2">
             <div *ngFor="let field of getDisplayFields(selectedNotification.upiFunds)" class="flex items-start gap-2">
-              <span class="material-icons text-gray-400 text-xs">chevron_right</span>
+              <span class="material-icons text-[var(--color-muted)] text-xs">chevron_right</span>
               <div>
-                <p class="text-xs text-gray-500">{{ field.key }}</p>
-                <p class="text-sm text-gray-800">{{ field.value }}</p>
+                <p class="text-xs text-[var(--color-muted)]">{{ field.key }}</p>
+                <p class="text-sm text-[var(--color-font)]">{{ field.value }}</p>
               </div>
             </div>
           </div>
@@ -342,11 +379,11 @@
       </div>
 
       <!-- Details Footer -->
-      <div class="flex-shrink-0 p-4 border-t border-gray-200" *ngIf="selectedNotification">
+      <div class="flex-shrink-0 p-4 border-t border-[var(--color-border)]" *ngIf="selectedNotification">
         <button
           *ngIf="canRedirectToChat(selectedNotification)"
-          (click)="openChat(selectedNotification, $event)"
-          class="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-colors flex items-center justify-center gap-2"
+          (click)="openChatAndMarkRead(selectedNotification, $event)"
+          class="w-full py-2 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold transition-colors flex items-center justify-center gap-2"
         >
           <span class="material-icons text-sm">chat</span>
           <span>Open in Chat</span>
@@ -363,7 +400,7 @@
   (click)="closeDetailsPopup()"
 >
   <div
-    class="bg-[var(--color-surface)] rounded-2xl shadow-2xl w-full max-w-lg sm:max-w-2xl h-[90vh] sm:max-h-[90vh] overflow-hidden border border-[var(--color-border)] transform transition-all animate-slideUp flex flex-col"
+    class="bg-[var(--color-surface)] rounded-2xl shadow-2xl w-full max-w-lg sm:max-w-xl h-[90vh] sm:max-h-[90vh] overflow-hidden border border-[var(--color-border)] transform transition-all animate-slideUp flex flex-col"
     (click)="$event.stopPropagation()"
   >
     <!-- Modal Header -->
@@ -512,7 +549,7 @@
     >
       <button
         (click)="closeDetailsPopup()"
-        class="w-full sm:w-auto px-6 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold transition-colors flex items-center justify-center gap-2"
+        class="w-full sm:w-auto px-6 py-2 rounded-lg bg-[var(--color-bg-hover)] hover:bg-gray-300 text-[var(--color-font)] font-semibold transition-colors flex items-center justify-center gap-2"
       >
         <span class="material-symbols-outlined text-sm">close</span>
         <span>Close</span>
@@ -520,7 +557,7 @@
 
       <button
         *ngIf="canRedirectToChat(selectedNotification)"
-        (click)="openChat(selectedNotification, $event); closeDetailsPopup()"
+        (click)="openChatAndMarkRead(selectedNotification, $event); closeDetailsPopup()"
         class="w-full sm:w-auto px-6 py-2 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold transition-colors flex items-center justify-center gap-2"
       >
         <span class="material-symbols-outlined text-sm">chat</span>

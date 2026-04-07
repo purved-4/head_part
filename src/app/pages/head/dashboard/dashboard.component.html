@@ -1581,46 +1581,38 @@
         </div>
 
         <!-- Existing image block (inside transaction details) -->
-        <div class="mb-6">
+        <!-- <div class="mb-6">
           <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">
             Transaction Snapshot
           </p>
 
-          <!-- If snapshot exists -->
-          <div *ngIf="
-              selectedTransaction.fileUrl || selectedTransaction.qrImage;
-              else noSnapshot
-            " class="flex items-start gap-3">
-            <!-- Image -->
-            <img [src]="
-                selectedTransaction.fileUrl || selectedTransaction.qrImage
-              " alt="Snapshot"
-              class="w-48 h-48 object-cover border-2 border-slate-200 rounded-xl shadow-md cursor-pointer" (click)="
-                openImagePopup(
-                  selectedTransaction.fileUrl || selectedTransaction.qrImage
-                )
-              " />
+         <div *ngIf="selectedTransaction.fileUrl; else noSnapshot" class="flex items-start gap-3">
 
-            <!-- Download Icon -->
-            <a [href]="
-                selectedTransaction.fileUrl || selectedTransaction.qrImage
-              " download="transaction-snapshot" target="_blank"
-              class="flex items-center justify-center w-10 h-10 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 transition"
-              title="Download Image">
-              <span class="material-symbols-outlined text-slate-600 text-[20px]">
-                download
-              </span>
-            </a>
-          </div>
+  <img
+    [src]="selectedTransaction.fileUrl"
+    alt="Snapshot"
+    class="w-48 h-48 object-cover border-2 border-slate-200 rounded-xl shadow-md cursor-pointer"
+    (click)="openImagePopup(selectedTransaction.fileUrl)"
+  />
 
-          <!-- If snapshot NOT exists -->
+  <a
+    [href]="selectedTransaction.fileUrl"
+    download
+    target="_blank"
+    class="flex items-center justify-center w-10 h-10 rounded-lg border border-slate-200 bg-white hover:bg-slate-100"
+  >
+    <span class="material-symbols-outlined">download</span>
+  </a>
+
+</div>
+
           <ng-template #noSnapshot>
             <div
               class="w-48 h-32 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm">
               No Snapshot Available
             </div>
           </ng-template>
-        </div>
+        </div> -->
 
         <!-- Image Popup Modal – add this at the end of the template (just before closing the component's root element) -->
         <div *ngIf="showImagePopup" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
@@ -1714,7 +1706,7 @@
             {{ selectedTransaction.bankName }}
           </p>
         </div>
-        <div class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200">
+        <!-- <div class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200">
           <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2">
             File Path
           </p>
@@ -1722,8 +1714,44 @@
               selectedTransaction.rejectionFilePath ||
               selectedTransaction.qrImage
             " alt="" class="w-48 h-48 object-cover border-2 border-slate-200 rounded-xl shadow-md" />
-        </div>
+        </div> -->
       </div>
+
+
+      <div class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <p
+            class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
+          >
+            Transaction Image
+          </p>
+          <div
+            *ngIf="selectedTransaction.fileUrl"
+            class="flex items-start gap-3"
+          >
+            <img
+              [src]="selectedTransaction.fileUrl"
+              alt="Transaction Image"
+              class="w-48 h-48 object-cover border-2 border-slate-200 rounded-xl shadow-md cursor-pointer"
+              (click)="openImagePopup(selectedTransaction.fileUrl)"
+            />
+            <a
+              [href]="selectedTransaction.fileUrl"
+              download="transaction-snapshot"
+              target="_blank"
+              class="flex items-center justify-center w-10 h-10 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 transition"
+            >
+              <span class="material-symbols-outlined text-slate-600 text-[20px]"
+                >download</span
+              >
+            </a>
+          </div>
+          <div
+            *ngIf="!selectedTransaction.fileUrl"
+            class="w-48 h-32 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm"
+          >
+            No Image Available
+          </div>
+        </div>
 
       <div class="flex justify-end gap-4 pt-6 border-t border-slate-200">
         <!-- Reject Button -->
@@ -1742,5 +1770,39 @@
         </button>
       </div>
     </div>
+  </div>
+</div>
+<div
+  *ngIf="showImagePopup"
+  class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75"
+  (click)="closeImagePopup()"
+>
+  <div
+    class="relative max-w-4xl max-h-full p-4"
+    (click)="$event.stopPropagation()"
+  >
+    <button
+      (click)="closeImagePopup()"
+      class="absolute top-2 right-2 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 z-10"
+    >
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+    <img
+      [src]="popupImageUrl"
+      alt="Transaction snapshot"
+      class="max-w-full max-h-[90vh] object-contain rounded-lg"
+    />
   </div>
 </div>

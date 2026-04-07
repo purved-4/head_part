@@ -38,6 +38,10 @@ interface BankAccount {
   limitTime?: string | null;
   isBankActive?: boolean;
   currency?: string;
+  min_tran_count?: number;
+max_tran_count?: number;
+min_total_tran_amount?: number;
+max_total_tran_amount?: number;
 }
 
 interface Portal {
@@ -112,6 +116,10 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     minAmount: "",
     maxAmount: "",
     bankName: "",
+    min_tran_count: null,
+  max_tran_count: null,
+  min_total_tran_amount: null,
+  max_total_tran_amount: null
   };
   isSubmitting = false;
 
@@ -226,6 +234,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       limit: this.maxLimit ?? undefined,
       portalId: this.selectedPortal?.portalId || undefined,
       status: this.statusFilter || undefined,
+      
     };
 
     // if (this.filterStatus === "active") options.active = true;
@@ -294,6 +303,10 @@ export class HeadBankComponent implements OnInit, OnDestroy {
               limitAmount: r.limitAmount ?? "",
               currency: r.portalCurrency || "",
               limitTime: r.limitTime ?? null,
+         min_tran_count: r.minTranCount ?? null,
+max_tran_count: r.maxTranCount ?? null,
+min_total_tran_amount: r.minTotalTranAmount ?? null,
+max_total_tran_amount: r.maxTotalTranAmount ?? null,
               // minAmount: r.minAmount ?? "",
               // maxAmount: r.maxAmount ?? "",
               isBankActive,
@@ -443,7 +456,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
   private createAddBankForm(): FormGroup {
     return this.fb.group(
       {
-        portal: ["", Validators.required],
+        // portal: ["", Validators.required],
         bankName: ["", Validators.required], // Add this line
         accountNumber: [
           "",
@@ -459,6 +472,10 @@ export class HeadBankComponent implements OnInit, OnDestroy {
           "",
           [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)],
         ],
+        min_tran_count: [null],
+max_tran_count: [null],
+min_total_tran_amount: [null],
+max_total_tran_amount: [null],
       },
       // { validators: this.accountNumberMatchValidator },
     );
@@ -673,6 +690,10 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       limitAmount: account.limitAmount || "",
       accountType: account.accountType || "saving",
       status: account.status || "active",
+       min_tran_count: account.min_tran_count || null,
+  max_tran_count: account.max_tran_count || null,
+  min_total_tran_amount: account.min_total_tran_amount || null,
+  max_total_tran_amount: account.max_total_tran_amount || null
       // minAmount: account.minAmount,
       // maxAmount: account.maxAmount,
     };
@@ -692,6 +713,10 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       limitAmount: "",
       accountType: "saving",
       status: "active",
+       min_tran_count: null,
+  max_tran_count: null,
+  min_total_tran_amount: null,
+  max_total_tran_amount: null
       // minAmount: "",
       // maxAmount: "",
     };
@@ -802,7 +827,10 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       accountType: formData.accountType,
       limitAmount: formData.limitAmount,
       status: "active",
-
+  minTranCount: Number(formData.min_tran_count) || 0,
+  maxTranCount: Number(formData.max_tran_count) || 0,
+  minTotalTranAmount: Number(formData.min_total_tran_amount) || 0,
+  maxTotalTranAmount: Number(formData.max_total_tran_amount) || 0,
       // ranges stays same
       ranges: this.capacityRanges.map((r) => ({
         minRange: Number(r.minRange),
@@ -867,6 +895,10 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       limitAmount: this.updateForm.limitAmount,
       accountType: this.updateForm.accountType,
       status: this.updateForm.status,
+minTranCount: Number(this.updateForm.min_tran_count) || 0,
+maxTranCount: Number(this.updateForm.max_tran_count) || 0,
+minTotalTranAmount: Number(this.updateForm.min_total_tran_amount) || 0,
+maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
       // minAmount: this.updateForm.minAmount,
       // maxAmount: this.updateForm.maxAmount,
     };

@@ -1113,7 +1113,7 @@
         class="space-y-4"
       >
         <!-- Portal Selection – SEARCH BASED -->
-        <div class="space-y-1">
+        <!-- <div class="space-y-1">
           <label
             class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
           >
@@ -1151,7 +1151,6 @@
               </button>
             </div>
             
-            <!-- Dropdown -->
             <div
               *ngIf="showUpiPortalDropdown"
               class="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
@@ -1175,7 +1174,6 @@
             </div>
           </div>
 
-          <!-- Validation Message -->
           <div
             *ngIf="
               addUpiForm.get('portalId')?.invalid &&
@@ -1186,9 +1184,8 @@
             <span class="material-symbols-outlined mr-1 text-sm">error</span>
             Please select a portal
           </div>
-        </div>
+        </div> -->
 
-        <!-- UPI ID with QR Generate and Manual Upload side by side -->
         <div>
           <label
             class="block text-sm font-medium text-[var(--color-font)] mb-1"
@@ -1207,7 +1204,6 @@
               "
             />
             
-            <!-- Button Group: Generate QR + Manual Upload -->
            <div class="flex gap-1">
   <!-- QR BUTTON -->
   <button
@@ -1379,6 +1375,55 @@
             Valid limit amount required
           </div>
         </div>
+
+        <!-- Transaction Limits -->
+<div class="grid grid-cols-2 gap-3">
+
+  <!-- Min Tran Count -->
+  <div>
+    <label class="text-sm font-medium">Min Tran Count</label>
+    <input
+      type="number"
+      formControlName="min_tran_count"
+      class="w-full px-3 py-2 border rounded-lg text-sm"
+      placeholder="Min count"
+    />
+  </div>
+
+  <!-- Max Tran Count -->
+  <div>
+    <label class="text-sm font-medium">Max Tran Count</label>
+    <input
+      type="number"
+      formControlName="max_tran_count"
+      class="w-full px-3 py-2 border rounded-lg text-sm"
+      placeholder="Max count"
+    />
+  </div>
+
+  <!-- Min Total Amount -->
+  <div>
+    <label class="text-sm font-medium">Min Total Amount</label>
+    <input
+      type="number"
+      formControlName="min_total_tran_amount"
+      class="w-full px-3 py-2 border rounded-lg text-sm"
+      placeholder="Min amount"
+    />
+  </div>
+
+  <!-- Max Total Amount -->
+  <div>
+    <label class="text-sm font-medium">Max Total Amount</label>
+    <input
+      type="number"
+      formControlName="max_total_tran_amount"
+      class="w-full px-3 py-2 border rounded-lg text-sm"
+      placeholder="Max amount"
+    />
+  </div>
+
+</div>
 
         <!-- CAPACITY RANGES - Add Modal -->
         <div class="space-y-2">
@@ -1723,6 +1768,55 @@
             </div>
           
           </div>
+
+          <!-- Transaction Limits -->
+<div class="grid grid-cols-2 gap-3">
+
+  <!-- Min Tran Count -->
+  <div>
+    <label class="text-sm font-medium">Min Tran Count</label>
+    <input
+      type="number"
+      [(ngModel)]="updateForm.min_tran_count"
+      name="min_tran_count"
+      class="w-full px-3 py-2 border rounded-lg text-sm"
+    />
+  </div>
+
+  <!-- Max Tran Count -->
+  <div>
+    <label class="text-sm font-medium">Max Tran Count</label>
+    <input
+      type="number"
+      [(ngModel)]="updateForm.max_tran_count"
+      name="max_tran_count"
+      class="w-full px-3 py-2 border rounded-lg text-sm"
+    />
+  </div>
+
+  <!-- Min Total Amount -->
+  <div>
+    <label class="text-sm font-medium">Min Total Amount</label>
+    <input
+      type="number"
+      [(ngModel)]="updateForm.min_total_tran_amount"
+      name="min_total_tran_amount"
+      class="w-full px-3 py-2 border rounded-lg text-sm"
+    />
+  </div>
+
+  <!-- Max Total Amount -->
+  <div>
+    <label class="text-sm font-medium">Max Total Amount</label>
+    <input
+      type="number"
+      [(ngModel)]="updateForm.max_total_tran_amount"
+      name="max_total_tran_amount"
+      class="w-full px-3 py-2 border rounded-lg text-sm"
+    />
+  </div>
+
+</div>
 
           <!-- Status -->
 

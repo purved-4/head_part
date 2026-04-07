@@ -50,13 +50,12 @@ interface SidebarNotification extends BackendThread {
   selector: "app-sidebar-notification",
   templateUrl: "./sidebar-notification.component.html",
   styleUrls: ["./sidebar-notification.component.css"],
-  // No ChangeDetectionStrategy - using default
 })
 export class SidebarNotificationComponent implements OnInit, OnDestroy {
   @Input() isOpen = false;
   @Output() close = new EventEmitter<void>();
   @Output() notificationClick = new EventEmitter<BackendThread>();
-
+@Output() unreadCountChange = new EventEmitter<number>();
   notifications: SidebarNotification[] = [];
   groupedNotifications: {
     data: Record<string, SidebarNotification[]>;
@@ -186,6 +185,8 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     });
 
     this.sortNotificationsByDate();
+      this.unreadCountChange.emit(this.getUnreadCount());
+
     this.cdr.detectChanges();
   }
 
@@ -269,31 +270,66 @@ onNotificationSelect(notification: SidebarNotification) {
   this.cdr.detectChanges();
 }
 
+  // private markAsRead(notificationId: string) {
+  //   this.notificationChatService.SendNotificationAsRead(notificationId).subscribe({
+  //     next: () => {},
+  //     error: (err) => console.error("Failed to mark notification read", err),
+  //   });
+  // }
+
   private markAsRead(notificationId: string) {
-    this.notificationChatService.SendNotificationAsRead(notificationId).subscribe({
-      next: () => {},
-      error: (err) => console.error("Failed to mark notification read", err),
-    });
-  }
+  if (!notificationId) return;
+  
+  this.notificationChatService.SendNotificationAsRead(notificationId).subscribe({
+    next: () => {
+      // Update local state
+      this.unreadCountChange.emit(this.getUnreadCount());
+      this.getUnreadCount();
+      this.cdr.detectChanges();
+    },
+    error: (err) => console.error("Failed to mark notification read", err),
+  });
+}
 
-  openChat(notification: BackendThread, event: Event) {
-    event.stopPropagation();
+  // openChat(notification: BackendThread, event: Event) {
+  //   event.stopPropagation();
     
-    if (!this.canRedirectToChat(notification)) {
-      this.onNotificationSelect(notification as SidebarNotification);
-      return;
-    }
+  //   if (!this.canRedirectToChat(notification)) {
+  //     this.onNotificationSelect(notification as SidebarNotification);
+  //     return;
+  //   }
 
-    const threadId = notification.relatedEntityId || "";
-    const entity = (notification.createdByEntityType || "BRANCH").toLowerCase();
-    const role = (this.currentRoleName || "branch").toLowerCase();
+  //   const threadId = notification.relatedEntityId || "";
+  //   const entity = (notification.createdByEntityType || "BRANCH").toLowerCase();
+  //   const role = (this.currentRoleName || "branch").toLowerCase();
 
-    this.router.navigate([`/${role}/chat`], {
-      queryParams: { threadId: threadId, chatType: entity },
-    });
+  //   this.router.navigate([`/${role}/chat`], {
+  //     queryParams: { threadId: threadId, chatType: entity },
+  //   });
 
-    this.closeSidebar();
+  //   this.closeSidebar();
+  // }
+openChat(notification: BackendThread, event?: Event) {
+  if (event) {
+    event.stopPropagation();
   }
+  
+  if (!this.canRedirectToChat(notification)) {
+    this.onNotificationSelect(notification as SidebarNotification);
+    return;
+  }
+
+  const threadId = notification.relatedEntityId || "";
+  const entity = (notification.createdByEntityType || "BRANCH").toLowerCase();
+  const role = (this.currentRoleName || "branch").toLowerCase();
+
+  this.router.navigate([`/${role}/chat`], {
+    queryParams: { threadId: threadId, chatType: entity },
+  });
+
+  this.closeSidebar();
+}
+
 
   markAllAsRead() {
     this.notificationChatService.markNotificationAsRead(this.currentRoleId).subscribe({
@@ -302,6 +338,7 @@ onNotificationSelect(notification: SidebarNotification) {
           n.isRead = true;
           n.unreadCount = 0;
         });
+              this.unreadCountChange.emit(0);
         this.cdr.detectChanges();
       },
     });
@@ -560,5 +597,25 @@ closeDetailsPopup() {
 openDetailsPopupFromButton(notification: any, event: Event) {
   event.stopPropagation(); // Prevent triggering the parent div click
   this.openDetailsPopup(notification);
+}
+
+openChatAndMarkRead(notification: any, event?: Event) {
+  if (event) {
+    event.stopPropagation();
+  }
+  
+  // Mark notification as read first
+  if (!notification.isRead) {
+    notification.isRead = true;
+    notification.unreadCount = 0;
+    this.markAsRead(notification.id || notification.fundsId || "");
+  }
+  
+  // Then open the chat - pass event as optional
+  this.openChat(notification, event);
+}
+
+refreshNotifications() {
+  this.getAllNotifications();
 }
 }

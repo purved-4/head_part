@@ -1167,9 +1167,7 @@
           (ngSubmit)="submitAddBankForm()"
           class="space-y-4"
         >
-          <!-- Portal selection -->
-          <!-- Portal selection -->
-          <div class="space-y-1">
+          <!-- <div class="space-y-1">
             <label
               class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
             >
@@ -1209,7 +1207,6 @@
                 </button>
               </div>
 
-              <!-- Dropdown -->
               <div
                 *ngIf="showModalPortalDropdown"
                 class="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
@@ -1233,7 +1230,6 @@
               </div>
             </div>
 
-            <!-- Validation Message -->
             <div
               *ngIf="
                 addBankForm.get('portal')?.invalid &&
@@ -1244,7 +1240,7 @@
               <span class="material-symbols-outlined mr-1 text-sm">error</span>
               Please select a portal
             </div>
-          </div>
+          </div> -->
 
           <!-- Account Number & Confirm Account Number -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1511,6 +1507,64 @@
               </div>
             </div>
           </div>
+
+
+          <!-- Transaction Limits -->
+<div class="grid grid-cols-2 gap-3">
+  
+  <!-- Min Tran Count -->
+  <div>
+    <label class="text-sm font-semibold text-[var(--color-font)] mb-1">
+      Min Tran Count
+    </label>
+    <input
+      type="number"
+      formControlName="min_tran_count"
+      class="w-full px-3 py-2 border rounded-lg text-sm"
+      placeholder="Min count"
+    />
+  </div>
+
+  <!-- Max Tran Count -->
+  <div>
+    <label class="text-sm font-semibold text-[var(--color-font)] mb-1">
+      Max Tran Count
+    </label>
+    <input
+      type="number"
+      formControlName="max_tran_count"
+      class="w-full px-3 py-2 border rounded-lg text-sm"
+      placeholder="Max count"
+    />
+  </div>
+
+  <!-- Min Total Amount -->
+  <div>
+    <label class="text-sm font-semibold text-[var(--color-font)] mb-1">
+      Min Total Amount
+    </label>
+    <input
+      type="number"
+      formControlName="min_total_tran_amount"
+      class="w-full px-3 py-2 border rounded-lg text-sm"
+      placeholder="Min amount"
+    />
+  </div>
+
+  <!-- Max Total Amount -->
+  <div>
+    <label class="text-sm font-semibold text-[var(--color-font)] mb-1">
+      Max Total Amount
+    </label>
+    <input
+      type="number"
+      formControlName="max_total_tran_amount"
+      class="w-full px-3 py-2 border rounded-lg text-sm"
+      placeholder="Max amount"
+    />
+  </div>
+
+</div>
 
           <!-- Capacity Range -->
           <!--  Capacity Range with Quantity -->
@@ -1793,7 +1847,66 @@
               placeholder="Enter limit amount"
             />
           </div>
+<!-- Transaction Limits -->
+<div class="grid grid-cols-2 gap-3">
+  
+  <!-- Min Transaction Count -->
+  <div>
+    <label class="block text-sm font-semibold text-[var(--color-font)] mb-1">
+      Min Tran Count
+    </label>
+    <input
+      type="number"
+      [(ngModel)]="updateForm.min_tran_count"
+      name="min_tran_count"
+      class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm"
+      placeholder="Min count"
+    />
+  </div>
 
+  <!-- Max Transaction Count -->
+  <div>
+    <label class="block text-sm font-semibold text-[var(--color-font)] mb-1">
+      Max Tran Count
+    </label>
+    <input
+      type="number"
+      [(ngModel)]="updateForm.max_tran_count"
+      name="max_tran_count"
+      class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm"
+      placeholder="Max count"
+    />
+  </div>
+
+  <!-- Min Total Amount -->
+  <div>
+    <label class="block text-sm font-semibold text-[var(--color-font)] mb-1">
+      Min Total Amount
+    </label>
+    <input
+      type="number"
+      [(ngModel)]="updateForm.min_total_tran_amount"
+      name="min_total_tran_amount"
+      class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm"
+      placeholder="Min amount"
+    />
+  </div>
+
+  <!-- Max Total Amount -->
+  <div>
+    <label class="block text-sm font-semibold text-[var(--color-font)] mb-1">
+      Max Total Amount
+    </label>
+    <input
+      type="number"
+      [(ngModel)]="updateForm.max_total_tran_amount"
+      name="max_total_tran_amount"
+      class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm"
+      placeholder="Max amount"
+    />
+  </div>
+
+</div>
           <div>
             <label
               class="block text-sm font-semibold text-[var(--color-font)] mb-1"

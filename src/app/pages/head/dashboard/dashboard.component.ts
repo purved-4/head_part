@@ -356,10 +356,10 @@ pendingPayoutPageSize = 5;
         bankId: fund.bankId || null,
         bankName: fund.bankName || fund.bank || null,
 
-        // ❌ old remove
+        //  old remove
         // filePath: ...
 
-        // ✅ NEW
+        //  NEW
         filePath: rawPath,        // backend path
         fileUrl: '',            // blob URL later
 
@@ -369,17 +369,32 @@ pendingPayoutPageSize = 5;
         upiId: fund.vpa,
       };
 
-      // ✅ LOAD IMAGE (IMPORTANT)
+      //  LOAD IMAGE (IMPORTANT)
+      // if (tx.filePath) {
+      //   this.multimediaService.getPrivateImage(tx.filePath).subscribe({
+      //     next: (url) => {
+      //       tx.fileUrl = url;
+      //     },
+      //     error: () => {
+      //       tx.fileUrl = '';
+      //     },
+      //   });
+      // }
       if (tx.filePath) {
-        this.multimediaService.getPrivateImage(tx.filePath).subscribe({
-          next: (url) => {
-            tx.fileUrl = url;
-          },
-          error: () => {
-            tx.fileUrl = '';
-          },
-        });
+  this.multimediaService.getPrivateImage(tx.filePath).subscribe({
+    next: (url) => {
+      tx.fileUrl = url;
+
+      //  ADD THIS (VERY IMPORTANT)
+      if (this.selectedTransaction?.id === tx.id) {
+        this.selectedTransaction = { ...tx };
       }
+    },
+    error: () => {
+      tx.fileUrl = '';
+    },
+  });
+}
 
       if (settledFlag || tx.settled) {
         const approvedTx = { ...tx, status: "completed" };
@@ -402,49 +417,77 @@ pendingPayoutPageSize = 5;
     try {
       const rawPath = w.filePath || null;
 
+      // const tx = {
+      //   id: w.id || null,
+      //   fundId: w.id || null,
+      //   type: "payout",
+
+      //   portal: w.portalName || w.portalDomain || w.portalId || null,
+
+      //   amount: Number(w.amount) || 0,
+
+      //   date: w.createdAt ? new Date(w.createdAt) : new Date(),
+
+      //   utrNumber: w.transactionId || w.utr || null,
+
+      //   mode: "bank",
+
+      //   accountNo: w.accountNo || w.accountNumber || null,
+      //   bankId: w.bankId || null,
+      //   bankName: w.bankName || w.bank || w.bankName || null,
+
+      //   //  REMOVE direct URL
+      //   // filePath: `${fileBaseUrl}/${w.filePath}`
+
+      //   //  NEW
+      //   filePath: rawPath,   // backend raw path
+      //   fileUrl: '',       // blob URL later
+
+      //   remarks: w.remarks || w.message || null,
+
+      //   settled: !!w.settled,
+      //   raw: w,
+
+      //   holderName: w.holderName || w.accountHolderName || null,
+      // };
+
       const tx = {
-        id: w.id || null,
-        fundId: w.id || null,
-        type: "payout",
+  id: w.id || null,
+  fundId: w.id || null,
+  type: "payout",
+  portal: w.portalName || w.portalDomain || w.portalId || null,
+  amount: Number(w.amount) || 0,
+  date: w.createdAt ? new Date(w.createdAt) : new Date(),
+  utrNumber: w.transactionId || w.utr || null,
+  mode: "bank",
+  accountNo: w.accountNo || w.accountNumber || null,
+  bankId: w.bankId || null,
+  bankName: w.bankName || w.bank || null,
+  filePath: rawPath,
+  fileUrl: '',
+  remarks: w.remarks || w.message || null,
+  settled: !!w.settled,
+  raw: w,
+  holderName: w.holderName || w.accountHolderName || null,
+};
 
-        portal: w.portalName || w.portalDomain || w.portalId || null,
-
-        amount: Number(w.amount) || 0,
-
-        date: w.createdAt ? new Date(w.createdAt) : new Date(),
-
-        utrNumber: w.transactionId || w.utr || null,
-
-        mode: "bank",
-
-        accountNo: w.accountNo || w.accountNumber || null,
-        bankId: w.bankId || null,
-        bankName: w.bankName || w.bank || w.bankName || null,
-
-        // ❌ REMOVE direct URL
-        // filePath: `${fileBaseUrl}/${w.filePath}`
-
-        // ✅ NEW
-        filePath: rawPath,   // backend raw path
-        fileUrl: '',       // blob URL later
-
-        remarks: w.remarks || w.message || null,
-
-        settled: !!w.settled,
-        raw: w,
-
-        holderName: w.holderName || w.accountHolderName || null,
-      };
-
-      // ✅ LOAD IMAGE (IMPORTANT)
+      //  LOAD IMAGE (IMPORTANT)
       if (tx.filePath) {
         if (tx.filePath.startsWith("http")) {
-          // ✅ public URL
+          //  public URL
           tx.fileUrl = tx.filePath;
         } else {
-          // ✅ private (token via interceptor)
+          //  private (token via interceptor)
           this.multimediaService.getPrivateImage(tx.filePath).subscribe({
-            next: (url) => (tx.fileUrl = url),
+            // next: (url) => (tx.fileUrl = url),
+            next: (url) => {
+  tx.fileUrl = url;
+
+  //  ADD THIS
+  if (this.selectedTransaction?.id === tx.id) {
+    this.selectedTransaction = { ...tx };
+  }
+},
             error: () => (tx.fileUrl = ''),
           });
         }
@@ -1046,9 +1089,30 @@ pendingPayoutPageSize = 5;
   }
 
   viewTransactionDetails(transaction: any): void {
+console.log(transaction.filePath);
+
+  //    if (transaction.filePath) {
+  //   this.multimediaService.getPrivateImage(transaction.filePath).subscribe({
+  //     next: (url) => {
+  //       console.log(url);
+        
+  //       transaction.fileUrl = url;
+  //     },
+  //     error: () => {
+  //       transaction.fileUrl = '';
+  //     },
+  //   });
+  // }
+
+  // console.log(tr);
+  
+
     if (!transaction) return;
     // Normalize the incoming object so modal bindings (utrNumber, upiId, accountNo, holderName, filePath, bankName, date etc.) are always present
     this.selectedTransaction = this.normalizeTransaction(transaction);
+
+    // console.log(this.selectedTransaction);
+    
   }
 
   filteredPending(): any[] {
@@ -1917,7 +1981,7 @@ onChangePendingPayoutPageSize(size: number) {
     // ❌ REMOVE direct URL logic
     // filePath: filePath,
 
-    // ✅ NEW
+    //  NEW
     filePath: filePathRaw,   // raw path
     fileUrl: '',           // blob URL later
 
@@ -1946,7 +2010,7 @@ onChangePendingPayoutPageSize(size: number) {
     ftt: fund.firstTopup ? true : false,
   };
 
-  // ✅ LOAD FILE IMAGE (TOKEN via interceptor)
+  //  LOAD FILE IMAGE (TOKEN via interceptor)
   if (tx.filePath) {
     this.multimediaService.getPrivateImage(tx.filePath).subscribe({
       next: (url) => {
@@ -1958,7 +2022,26 @@ onChangePendingPayoutPageSize(size: number) {
     });
   }
 
-  // ✅ OPTIONAL: rejection file bhi secure hai to
+  console.log(tx);
+  
+
+//   if (tx.filePath) {
+//   this.multimediaService.getPrivateImage(tx.filePath).subscribe({
+//     next: (url) => {
+//       tx.fileUrl = url;
+
+//       //  🔥 THIS IS THE FIX
+//       if (this.selectedTransaction?.id === tx.id) {
+//         this.selectedTransaction = { ...tx };
+//       }
+//     },
+//     error: () => {
+//       tx.fileUrl = '';
+//     },
+//   });
+// }
+
+  //  OPTIONAL: rejection file bhi secure hai to
   if (tx.rejectionPath) {
     this.multimediaService.getPrivateImage(tx.rejectionPath).subscribe({
       next: (url) => {
