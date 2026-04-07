@@ -437,43 +437,113 @@ export class FundsService {
       );
   }
 
+  // getAllUpiFundWithEntityAndPortalId(
+  //   entityId: any,
+  //   portalId: any,
+  //   status: any,
+  //   page: number = 0,
+  //   pageSize: number = 10,
+  //   category?: any,
+  // ): Observable<any> {
+  //   let params = new HttpParams()
+  //     .set("page", page.toString())
+  //     .set("size", pageSize.toString())
+  //     .set("status", status);
+
+  //   if (category !== null && category !== undefined) {
+  //     params = params.set("category", category.toString());
+  //   }
+
+  //   return this.http
+  //     .get<any>(
+  //       `${baseUrl}/funds/getUpiFundWithPortalIdAndEntityId/${portalId}/${entityId}`,
+  //       {
+  //         params,
+  //       },
+  //     )
+  //     .pipe(
+  //       map((response: any) => response.data),
+  //       catchError((error) => throwError(error)),
+  //     );
+  // }
   getAllUpiFundWithEntityAndPortalId(
-    entityId: any,
-    portalId: any,
-    status: any,
-    page: number = 0,
-    pageSize: number = 10,
-    category?: any,
-  ): Observable<any> {
-    let params = new HttpParams()
-      .set("page", page.toString())
-      .set("size", pageSize.toString())
-      .set("status", status);
+  entityId: any,
+  portalId: any,
+  status: any,
+  page: number = 0,
+  pageSize: number = 10,
+  category?: any,
+  fromDate?: string,
+  toDate?: string
+): Observable<any> {
+  let params = new HttpParams()
+    .set("page", page.toString())
+    .set("size", pageSize.toString())
+    .set("status", status);
 
-    if (category !== null && category !== undefined) {
-      params = params.set("category", category.toString());
-    }
-
-    return this.http
-      .get<any>(
-        `${baseUrl}/funds/getUpiFundWithPortalIdAndEntityId/${portalId}/${entityId}`,
-        {
-          params,
-        },
-      )
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(error)),
-      );
+  if (category !== null && category !== undefined) {
+    params = params.set("category", category.toString());
   }
 
-  getAllBankFundWithEntityAndPortalId(
+  //  ADD THIS
+  if (fromDate) {
+    params = params.set("fromDate", fromDate);
+  }
+
+  if (toDate) {
+    params = params.set("toDate", toDate);
+  }
+
+  return this.http
+    .get<any>(
+      `${baseUrl}/funds/getUpiFundWithPortalIdAndEntityId/${portalId}/${entityId}`,
+      { params }
+    )
+    .pipe(
+      map((response: any) => response.data),
+      catchError((error) => throwError(error))
+    );
+}
+
+  // getAllBankFundWithEntityAndPortalId(
+  //   entityId: any,
+  //   portalId: any,
+  //   status: any,
+  //   page: number = 0,
+  //   pageSize: number = 10,
+  //   category?: any,
+  // ): Observable<any> {
+  //   let params = new HttpParams()
+  //     .set("page", page.toString())
+  //     .set("size", pageSize.toString())
+  //     .set("status", status);
+
+  //   if (category !== null && category !== undefined) {
+  //     params = params.set("category", category.toString());
+  //   }
+
+  //   return this.http
+  //     .get<any>(
+  //       `${baseUrl}/funds/getBankFundWithPortalIdAndEntityId/${portalId}/${entityId}`,
+  //       {
+  //         params,
+  //       },
+  //     )
+  //     .pipe(
+  //       map((response: any) => response.data),
+  //       catchError((error) => throwError(error)),
+  //     );
+  // }
+
+    getAllBankFundWithEntityAndPortalId(
     entityId: any,
     portalId: any,
     status: any,
     page: number = 0,
     pageSize: number = 10,
     category?: any,
+      fromDate?: string,
+  toDate?: string
   ): Observable<any> {
     let params = new HttpParams()
       .set("page", page.toString())
@@ -483,6 +553,14 @@ export class FundsService {
     if (category !== null && category !== undefined) {
       params = params.set("category", category.toString());
     }
+
+    if (fromDate) {
+  params = params.set("fromDate", fromDate);
+}
+
+if (toDate) {
+  params = params.set("toDate", toDate);
+}
 
     return this.http
       .get<any>(
@@ -497,13 +575,44 @@ export class FundsService {
       );
   }
 
-  getAllPayoutFundWithEntityAndPortalId(
+  // getAllPayoutFundWithEntityAndPortalId(
+  //   entityId: any,
+  //   portalId: any,
+  //   status: any,
+  //   page: number = 0,
+  //   pageSize: number = 10,
+  //   category?: any,
+  // ): Observable<any> {
+  //   let params = new HttpParams()
+  //     .set("page", page.toString())
+  //     .set("size", pageSize.toString())
+  //     .set("status", status);
+
+  //   if (category !== null && category !== undefined) {
+  //     params = params.set("category", category.toString());
+  //   }
+
+  //   return this.http
+  //     .get<any>(
+  //       `${baseUrl}/funds/getPayoutFundWithPortalIdAndEntityId/${portalId}/${entityId}`,
+  //       {
+  //         params,
+  //       },
+  //     )
+  //     .pipe(
+  //       map((response: any) => response.data),
+  //       catchError((error) => throwError(error)),
+  //     );
+  // }
+    getAllPayoutFundWithEntityAndPortalId(
     entityId: any,
     portalId: any,
     status: any,
     page: number = 0,
     pageSize: number = 10,
     category?: any,
+      fromDate?: string,
+  toDate?: string
   ): Observable<any> {
     let params = new HttpParams()
       .set("page", page.toString())
@@ -513,6 +622,14 @@ export class FundsService {
     if (category !== null && category !== undefined) {
       params = params.set("category", category.toString());
     }
+
+    if (fromDate) {
+  params = params.set("fromDate", fromDate);
+}
+
+if (toDate) {
+  params = params.set("toDate", toDate);
+}
 
     return this.http
       .get<any>(

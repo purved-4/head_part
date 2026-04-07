@@ -18,6 +18,7 @@ import { FundsService } from "../../pages/services/funds.service";
 import { ActivatedRoute } from "@angular/router";
 import { emojiCategories } from "../../utils/constants";
 import { fileBaseUrl } from "../../pages/services/helper";
+import { ComPartService } from "../../pages/services/com-part.service";
 
 interface GroupMessage {
   id: string;
@@ -224,6 +225,7 @@ export class MobileChattingComponent
     private portalService: PortalService,
     private fundService: FundsService,
     private route: ActivatedRoute,
+    private compartServices : ComPartService
   ) {}
 
   /* ════════════════════════════════════════════
@@ -840,24 +842,48 @@ export class MobileChattingComponent
      QUESTIONS (HEAD / BRANCH ONLY)
      ════════════════════════════════════════════ */
 
-  loadQuestion(portalId?: string): void {
-    if (!this.isHeadOrBranchRole()) {
-      this.questions = [];
-      return;
-    }
-    if (!portalId) {
-      this.questions = [];
-      return;
-    }
-    this.portalService.getQuestionWithPortalId(portalId).subscribe({
-      next: (res: any) => {
-        this.questions = res;
-      },
-      error: () => {
-        this.questions = [];
-      },
-    });
+  // loadQuestion(): void {
+  //   if (!this.isHeadOrBranchRole()) {
+  //     this.questions = [];
+  //     return;
+  //   }
+  //   // if (!portalId) {
+  //   //   this.questions = [];
+  //   //   return;
+  //   // }
+  //       this.compartServices.getAllQuestions().subscribe({
+
+  //   // this.portalService.getQuestionWithPortalId(portafgelId).subscribe({
+  //     next: (res: any) => {
+  //       this.questions = res;
+  //     },
+  //     error: () => {
+  //       this.questions = [];
+  //     },
+  //   });
+  // }
+
+  loadQuestion(): void {
+  if (!this.isHeadOrBranchRole()) {
+    this.questions = [];
+    return;
   }
+
+  this.compartServices.getAllQuestions().subscribe({
+    next: (res: any) => {
+      console.log("API Response:", res); // DEBUG
+
+      this.questions = res?.content || [];   // ✅ FIX
+      this.filteredQuestions = this.questions.slice(0, 6); // ✅ IMPORTANT
+
+      console.log("Questions:", this.questions); // DEBUG
+    },
+    error: () => {
+      this.questions = [];
+      this.filteredQuestions = [];
+    },
+  });
+}
 
   filterQuestion(): void {
     const term = (this.questionSearchTerm || "").toString().trim();
@@ -1048,7 +1074,7 @@ export class MobileChattingComponent
     // this.loadChatMembers(threadId);
 
     if (this.isHeadOrBranchRole()) {
-      this.loadQuestion(notification.portalId);
+      this.loadQuestion();
     }
 
     this.subscribeToRealTimeMessages(threadId);
@@ -1490,43 +1516,85 @@ export class MobileChattingComponent
   }
 
   // FIX: Improved sendMessage method
+  // sendMessage(event?: any): void {
+  //   if (event) {
+  //     event.preventDefault();
+  //     event.stopPropagation();
+  //   }
+
+  //   if (!this.selectedNotification) {
+  //     this.snackBar.show("No conversation selected", false);
+  //     return;
+  //   }
+
+  //   const text = (this.newMessage || "").toString().trim();
+  //   const hasFile = !!this.selectedUploadFile;
+
+  //   // Role-based validation
+  //   if (this.isHeadOrBranchRole()) {
+  //     // Head/Branch must have either question OR file
+  //     if (!this.selectedQuestion && !hasFile && !text) {
+  //       this.snackBar.show("Please select a question or attach a file", false);
+  //       return;
+  //     }
+  //   } else {
+  //     // Commerce Partner roles must have either text OR file
+  //     if (!text && !hasFile) {
+  //       this.snackBar.show("Please enter a message or attach a file", false);
+  //       return;
+  //     }
+  //   }
+
+  //   const threadId = this.selectedNotification.id;
+
+  //   if (hasFile) {
+  //     this.uploadAndSend(threadId, text);
+  //   } else {
+  //     this.sendTextMessage(threadId, text);
+  //   }
+  // }
+
   sendMessage(event?: any): void {
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    if (!this.selectedNotification) {
-      this.snackBar.show("No conversation selected", false);
-      return;
-    }
-
-    const text = (this.newMessage || "").toString().trim();
-    const hasFile = !!this.selectedUploadFile;
-
-    // Role-based validation
-    if (this.isHeadOrBranchRole()) {
-      // Head/Branch must have either question OR file
-      if (!this.selectedQuestion && !hasFile && !text) {
-        this.snackBar.show("Please select a question or attach a file", false);
-        return;
-      }
-    } else {
-      // Commerce Partner roles must have either text OR file
-      if (!text && !hasFile) {
-        this.snackBar.show("Please enter a message or attach a file", false);
-        return;
-      }
-    }
-
-    const threadId = this.selectedNotification.id;
-
-    if (hasFile) {
-      this.uploadAndSend(threadId, text);
-    } else {
-      this.sendTextMessage(threadId, text);
-    }
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
   }
+
+  if (!this.selectedNotification) {
+    this.snackBar.show("No conversation selected", false);
+    return;
+  }
+
+  if (!this.selectedQuestion) {
+    this.snackBar.show("Please select a question", false);
+    return;
+  }
+
+  const threadId = this.selectedNotification.id;
+
+  const payload = {
+    senderId: this.branchId,
+    message: this.selectedQuestion.id, // ONLY QUESTION ID
+    fileUrl: null,
+    senderType: this.role,
+    roleId: this.branchId,
+  };
+
+  try {
+    this.socketConfigService.sendMessage(threadId, payload);
+
+    // Reset after send
+    this.selectedQuestion = null;
+    this.questionSearchTerm = "";
+    this.newMessage = "";
+
+    this.showQuestionDropDown = false;
+
+    setTimeout(() => this.scrollToBottom(), 80);
+  } catch {
+    this.snackBar.show("Failed to send message", false);
+  }
+}
 
   private uploadAndSend(threadId: string, text: string): void {
     this.uploadingFile = true;

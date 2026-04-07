@@ -32,6 +32,7 @@ import { TopupCapacityComponent } from "../common/topup-capacity/topup-capacity.
 // import { AcceptRejectChatComponent } from "../pages/comPart/accept-reject-chat/accept-reject-chat.component";
 import { PlaceholderPipe } from "../pipes/placeholder.pipe";
 import { PortalPercentagePopupComponent } from "../common/website-percentage-model/website-percentage-model.component";
+import { SidebarNotificationComponent } from "../common/sidebar-notification/sidebar-notification.component";
 
 // shared.module.ts
 @NgModule({
@@ -64,8 +65,8 @@ import { PortalPercentagePopupComponent } from "../common/website-percentage-mod
     RecycleUpiComponent,
     TopupCapacityComponent,
     PlaceholderPipe,
-    PortalPercentagePopupComponent
-    
+    PortalPercentagePopupComponent,
+    SidebarNotificationComponent,
     
   ],
   exports: [
@@ -97,6 +98,7 @@ import { PortalPercentagePopupComponent } from "../common/website-percentage-mod
     TopupCapacityComponent,
     PlaceholderPipe,
     PortalPercentagePopupComponent,
+    SidebarNotificationComponent
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeComponent],
 })

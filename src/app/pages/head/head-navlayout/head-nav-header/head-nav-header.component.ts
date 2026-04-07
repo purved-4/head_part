@@ -39,6 +39,7 @@ export class HeadNavHeaderComponent implements OnInit {
   isProfileOpen = false;
   @ViewChild("profileContainer") profileContainer!: ElementRef;
   @ViewChild("limitsContainer") limitsContainer!: ElementRef;
+@Input() notificationUnreadCount: number = 0;
 
   isLimitsOpen = false;
 
@@ -70,6 +71,7 @@ export class HeadNavHeaderComponent implements OnInit {
   // Add these inputs at the top with tp @Inputs
   @Input() isMobileOpen = false;
   @Output() closeMobileMenu = new EventEmitter<void>();
+  @Output() notificationClick = new EventEmitter<void>();
   @ViewChild("portalContainer") portalContainer!: ElementRef;
   isPortalOpen = false;
   private noDataSnackbarShown = false;
@@ -288,4 +290,18 @@ export class HeadNavHeaderComponent implements OnInit {
       limit: this.limitRemainingAmount,
     });
   }
+
+onNotificationIconClick() {
+  this.notificationClick.emit();
+}
+  
+
+
+
+getUnreadCount(): number {
+  return this.notificationUnreadCount;
+}
+
+
+
 }

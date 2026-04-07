@@ -86,5 +86,37 @@ isMobileView(): boolean {
       this.closeMobileMenu();
     }
   }
+
+  notificationOpen = false;
+
+toggleNotification() {
+  this.notificationOpen = !this.notificationOpen;
+}
+
+closeNotification() {
+  this.notificationOpen = false;
+}
+
+
+// Add these properties with your existing ones
+isNotificationSidebarOpen = false;
+notificationUnreadCount = 0;
+
+// Add these methods
+openNotificationSidebar() {
+  this.isNotificationSidebarOpen = true;
+}
+
+closeNotificationSidebar() {
+  this.isNotificationSidebarOpen = false;
+}
+
+onUnreadCountChange(count: any) {
+  if (count && typeof count === 'object' && count.target) {
+    this.notificationUnreadCount = count.target.value;
+  } else {
+    this.notificationUnreadCount = count;
+  }
+}
 }
 

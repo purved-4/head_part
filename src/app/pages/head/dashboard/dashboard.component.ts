@@ -148,9 +148,17 @@ export class HeadDashboardComponent
   approvedPage = 1;
   approvedPageSize = 5;
   approvedPageSizes = [5, 8, 12];
+// UPI
+pendingUpiPage = 1;
+pendingUpiPageSize = 5;
 
-  pendingPage = 1;
-  pendingPageSize = 5;
+// Bank
+pendingBankPage = 1;
+pendingBankPageSize = 5;
+
+// Payout
+pendingPayoutPage = 1;
+pendingPayoutPageSize = 5;
   pendingPageSizes = [5, 8];
 
   payoutApprovedPage = 1;
@@ -1019,9 +1027,15 @@ export class HeadDashboardComponent
     this.updateChartsFromData();
   }
 
+  // onPendingFilterChange() {
+  //   this.pendingPage = 1;
+  // }
+
   onPendingFilterChange() {
-    this.pendingPage = 1;
-  }
+  this.pendingUpiPage = 1;
+  this.pendingBankPage = 1;
+  this.pendingPayoutPage = 1;
+}
 
   onApprovedtopupsFilterChange() {
     this.approvedPage = 1;
@@ -1075,11 +1089,17 @@ export class HeadDashboardComponent
       return true;
     });
   }
-  pagedPendingUpi(): any[] {
-    const list = this.filteredPendingUpi();
-    const start = (this.pendingPage - 1) * this.pendingPageSize;
-    return list.slice(start, start + this.pendingPageSize);
-  }
+  // pagedPendingUpi(): any[] {
+  //   const list = this.filteredPendingUpi();
+  //   const start = (this.pendingPage - 1) * this.pendingPageSize;
+  //   return list.slice(start, start + this.pendingPageSize);
+  // }
+
+pagedPendingUpi(): any[] {
+  const list = this.filteredPendingUpi();
+  const start = (this.pendingUpiPage - 1) * this.pendingUpiPageSize;
+  return list.slice(start, start + this.pendingUpiPageSize);
+}
 
   // Bank pending
   filteredPendingBank(): any[] {
@@ -1095,11 +1115,17 @@ export class HeadDashboardComponent
       return true;
     });
   }
+  // pagedPendingBank(): any[] {
+  //   const list = this.filteredPendingBank();
+  //   const start = (this.pendingPage - 1) * this.pendingPageSize;
+  //   return list.slice(start, start + this.pendingPageSize);
+  // }
+
   pagedPendingBank(): any[] {
-    const list = this.filteredPendingBank();
-    const start = (this.pendingPage - 1) * this.pendingPageSize;
-    return list.slice(start, start + this.pendingPageSize);
-  }
+  const list = this.filteredPendingBank();
+  const start = (this.pendingBankPage - 1) * this.pendingBankPageSize;
+  return list.slice(start, start + this.pendingBankPageSize);
+}
 
   // payouts pending
   filteredPendingpayouts(): any[] {
@@ -1116,11 +1142,16 @@ export class HeadDashboardComponent
     });
   }
 
+  // pagedPendingpayouts(): any[] {
+  //   const list = this.filteredPendingpayouts();
+  //   const start = (this.pendingPage - 1) * this.pendingPageSize;
+  //   return list.slice(start, start + this.pendingPageSize);
+  // }
   pagedPendingpayouts(): any[] {
-    const list = this.filteredPendingpayouts();
-    const start = (this.pendingPage - 1) * this.pendingPageSize;
-    return list.slice(start, start + this.pendingPageSize);
-  }
+  const list = this.filteredPendingpayouts();
+  const start = (this.pendingPayoutPage - 1) * this.pendingPayoutPageSize;
+  return list.slice(start, start + this.pendingPayoutPageSize);
+}
 
   filteredApprovedtopups(): any[] {
     return this.approvedtopups.filter((d) => {
@@ -1159,12 +1190,33 @@ export class HeadDashboardComponent
     );
   }
 
-  pendingTotalPages(): number {
-    return Math.max(
-      1,
-      Math.ceil(this.filteredPending().length / this.pendingPageSize),
-    );
-  }
+  // pendingTotalPages(): number {
+  //   return Math.max(
+  //     1,
+  //     Math.ceil(this.filteredPending().length / this.pendingPageSize),
+  //   );
+  // }
+
+  pendingUpiTotalPages(): number {
+  return Math.max(
+    1,
+    Math.ceil(this.filteredPendingUpi().length / this.pendingUpiPageSize)
+  );
+}
+
+pendingBankTotalPages(): number {
+  return Math.max(
+    1,
+    Math.ceil(this.filteredPendingBank().length / this.pendingBankPageSize)
+  );
+}
+
+pendingPayoutTotalPages(): number {
+  return Math.max(
+    1,
+    Math.ceil(this.filteredPendingpayouts().length / this.pendingPayoutPageSize)
+  );
+}
 
   payoutApprovedTotalPages(): number {
     return Math.max(
@@ -1178,9 +1230,22 @@ export class HeadDashboardComponent
   setApprovedPage(p: number) {
     this.approvedPage = Math.min(Math.max(1, p), this.approvedTotalPages());
   }
-  setPendingPage(p: number) {
-    this.pendingPage = Math.min(Math.max(1, p), this.pendingTotalPages());
-  }
+  // setPendingPage(p: number) {
+  //   this.pendingPage = Math.min(Math.max(1, p), this.pendingTotalPages());
+  // }
+
+
+  setPendingUpiPage(p: number) {
+  this.pendingUpiPage = Math.min(Math.max(1, p), this.pendingUpiTotalPages());
+}
+
+setPendingBankPage(p: number) {
+  this.pendingBankPage = Math.min(Math.max(1, p), this.pendingBankTotalPages());
+}
+
+setPendingPayoutPage(p: number) {
+  this.pendingPayoutPage = Math.min(Math.max(1, p), this.pendingPayoutTotalPages());
+}
   setpayoutApprovedPage(p: number) {
     this.payoutApprovedPage = Math.min(
       Math.max(1, p),
@@ -1192,23 +1257,60 @@ export class HeadDashboardComponent
     this.approvedPageSize = size;
     this.approvedPage = 1;
   }
-  onChangePendingPageSize(size: number) {
-    this.pendingPageSize = size;
-    this.pendingPage = 1;
-  }
+  // onChangePendingPageSize(size: number) {
+  //   this.pendingPageSize = size;
+  //   this.pendingPage = 1;
+  // }
+
+  onChangePendingUpiPageSize(size: number) {
+  this.pendingUpiPageSize = size;
+  this.pendingUpiPage = 1;
+}
+
+onChangePendingBankPageSize(size: number) {
+  this.pendingBankPageSize = size;
+  this.pendingBankPage = 1;
+}
+
+onChangePendingPayoutPageSize(size: number) {
+  this.pendingPayoutPageSize = size;
+  this.pendingPayoutPage = 1;
+}
   onChangepayoutApprovedPageSize(size: number) {
     this.payoutApprovedPageSize = size;
     this.payoutApprovedPage = 1;
   }
 
+  // private clampPages() {
+  //   if (this.approvedPage > this.approvedTotalPages())
+  //     this.approvedPage = this.approvedTotalPages();
+  //   if (this.pendingPage > this.pendingTotalPages())
+  //     this.pendingPage = this.pendingTotalPages();
+  //   if (this.payoutApprovedPage > this.payoutApprovedTotalPages())
+  //     this.payoutApprovedPage = this.payoutApprovedTotalPages();
+  // }
+
   private clampPages() {
-    if (this.approvedPage > this.approvedTotalPages())
-      this.approvedPage = this.approvedTotalPages();
-    if (this.pendingPage > this.pendingTotalPages())
-      this.pendingPage = this.pendingTotalPages();
-    if (this.payoutApprovedPage > this.payoutApprovedTotalPages())
-      this.payoutApprovedPage = this.payoutApprovedTotalPages();
-  }
+  // approved (keep same)
+  if (this.approvedPage > this.approvedTotalPages())
+    this.approvedPage = this.approvedTotalPages();
+
+  // UPI
+  if (this.pendingUpiPage > this.pendingUpiTotalPages())
+    this.pendingUpiPage = this.pendingUpiTotalPages();
+
+  // Bank
+  if (this.pendingBankPage > this.pendingBankTotalPages())
+    this.pendingBankPage = this.pendingBankTotalPages();
+
+  // Payout
+  if (this.pendingPayoutPage > this.pendingPayoutTotalPages())
+    this.pendingPayoutPage = this.pendingPayoutTotalPages();
+
+  // approved payout (keep same)
+  if (this.payoutApprovedPage > this.payoutApprovedTotalPages())
+    this.payoutApprovedPage = this.payoutApprovedTotalPages();
+}
 
   async approveTransaction(transaction: any): Promise<void> {
     if (!transaction) return;

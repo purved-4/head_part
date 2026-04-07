@@ -52,7 +52,7 @@ export class LoginComponent implements OnInit {
     this.authService.loginAndLoadUser(this.loginData).subscribe({
       next: (res: any) => {
         this.navigateToRoleHome(res?.role[0]?.name);
-        this.snackbarService.show(res.message, true, 4000);
+        this.snackbarService.show(res.message||"Login Successfully", true, 4000);
       },
       error: (err) => {
         const msg =
@@ -71,7 +71,7 @@ export class LoginComponent implements OnInit {
       email: "",
       password: "",
     };
-    this.snackbarService.show("Form cleared", "success", 4000);
+    this.snackbarService.show("Form cleared",true, 4000);
   }
 
   private navigateToRoleHome(role: any): void {

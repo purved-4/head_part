@@ -57,8 +57,16 @@
     (toggleMobileMenu)="toggleMobileMenu()"
       (balanceChange)="onBalanceChange($event)"
     (openSettings)="openSettings()"
-    (search)="onSearch($event)">
+    (search)="onSearch($event)"
+      (notificationClick)="openNotificationSidebar()">
+    
   </app-head-nav-header>
+
+  <app-sidebar-notification
+  [isOpen]="isNotificationSidebarOpen"
+  (close)="closeNotificationSidebar()"
+  (unreadCountChange)="onUnreadCountChange($event)">
+</app-sidebar-notification>
 
   <!-- Main Content -->
   <!-- <main
@@ -74,6 +82,8 @@
   >
     <router-outlet></router-outlet>
   </main>
+
+  
 
   <!-- Mobile Footer (only mobile) -->
 <app-head-mobile-footer

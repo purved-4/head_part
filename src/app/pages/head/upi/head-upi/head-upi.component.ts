@@ -634,7 +634,7 @@ updateSelectedImage: string | null = null;
       next: () => this.fetchUpis(),
       error: (err) => {
         upi.status = upi.status === "active" ? "inactive" : "active";
-        this.snack.show("Failed to update status.", false);
+        this.snack.show(err?.error?.message ||"Failed to update status.", false);
       },
     });
   }

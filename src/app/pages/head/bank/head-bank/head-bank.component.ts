@@ -742,18 +742,19 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     };
 
     const sub = this.bankService.update(payload).subscribe({
-      next: () => {
+      next: (res) => {
         account.status = status;
         this.isUpdatingStatus[accountId] = false;
         this.activeActionDropdown = null;
         this.fetchBankAccounts();
-        // alert(`Account status updated to ${status}`);
-        this.snack.show(`Account status updated to ${status}`, true);
+
+        this.snack.show(res.message||`Account status updated to ${status}`, true);
       },
       error: (err) => {
         this.isUpdatingStatus[accountId] = false;
         // alert("Error updating account status. Please try again.");
         this.snack.show(
+          err?.error?.message||
           "Error updating account status. Please try again.",
           false,
         );
@@ -811,15 +812,15 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     };
 
     const sub = this.bankService.addBank(payload).subscribe({
-      next: () => {
+      next: (res) => {
         this.isAdding = false;
         this.closeAddBankModal();
         this.fetchBankAccounts();
-        this.snack.show("Bank account added successfully!", true);
+        this.snack.show(res.message || "Bank account added successfully!", true);
       },
       error: (err) => {
         this.isAdding = false;
-        this.snack.show("Error adding bank account. Please try again.", false);
+        this.snack.show(err?.error?.message ||"Error adding bank account. Please try again.", false);
       },
     });
     this.subs.add(sub);
@@ -871,16 +872,17 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     };
 
     const sub = this.bankService.update(payload).subscribe({
-      next: () => {
+      next: (res) => {
         this.isSubmitting = false;
         this.closeUpdateModal();
         this.fetchBankAccounts();
-        this.snack.show("Bank account updated successfully!", true);
+        this.snack.show(res.message ||"Bank account updated successfully!", true);
       },
       error: (err) => {
         this.isSubmitting = false;
         alert("Error updating bank account. Please try again.");
         this.snack.show(
+          err?.error?.message ||
           "Error updating bank account. Please try again.",
           false,
         );
@@ -1221,7 +1223,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     const id = this.editingAccount.id;
 
     this.bankService.setLimitTime(id, payload).subscribe({
-      next: () => {
+      next: (res) => {
         this.snack.show("Limit time set successfully", true);
         this.closeLimitModal();
         this.isSubmittingLimit = false;
@@ -1229,8 +1231,8 @@ export class HeadBankComponent implements OnInit, OnDestroy {
         //  reload table/grid data
         this.fetchBankAccounts();
       },
-      error: () => {
-        this.snack.show("Failed to set limit time", false);
+      error: (err) => {
+        this.snack.show(err?.error?.message|| "Failed to set limit time", false);
         this.isSubmittingLimit = false;
       },
     });

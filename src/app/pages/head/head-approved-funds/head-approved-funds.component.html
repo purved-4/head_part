@@ -430,7 +430,7 @@
                         No UPI Topups found
                       </p>
                       <p class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]">
-                        Try adjusting your search criteria
+                        Please Select the portal first or Try adjusting your search criteria
                       </p>
                     </div>
                   </td>
@@ -529,7 +529,7 @@
                 >
                   <span class="truncate">
                     
-                                     {{ getSelectedPortalDomain('payout') }}
+                                     {{ getSelectedPortalDomain('bank') }}
 
                 </span>
                   <span class="material-symbols-outlined text-base sm:text-lg"
@@ -913,7 +913,7 @@
                         No Bank Topups found
                       </p>
                       <p class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]">
-                        Try adjusting your search criteria
+                        Please Select the portal first or Try adjusting your search criteria
                       </p>
                     </div>
                   </td>
@@ -1413,7 +1413,7 @@
                         No Approved Payouts found
                       </p>
                       <p class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]">
-                        Try adjusting your search criteria
+                        Please Select the portal first or Try adjusting your search criteria
                       </p>
                     </div>
                   </td>
@@ -1556,6 +1556,35 @@
             </div>
           </ng-template>
         </div> -->
+
+        
+      <div
+          class="w-full h-32 sm:h-48 rounded-xl sm:rounded-2xl overflow-y-auto border border-[var(--color-border)] bg-[var(--color-bg)] flex flex-col items-center justify-start p-2 gap-2"
+        >
+          <!-- SHOW IMAGE -->
+          <ng-container
+            *ngIf="selectedRecord?.images?.length > 0; else noImage"
+          >
+            <img
+              *ngFor="let img of selectedRecord.images"
+              [src]="img"
+              alt="proof"
+              class="max-h-32 sm:max-h-40 w-auto rounded object-contain cursor-pointer border"
+              (click)="openLightbox(img)"
+              (error)="onImageError($event)"
+            />
+          </ng-container>
+
+          <!-- NO IMAGE -->
+          <ng-template #noImage>
+            <div class="text-center text-[var(--color-muted)]">
+              <span class="material-symbols-outlined text-3xl sm:text-5xl">
+                image_not_supported
+              </span>
+              <div class="text-xs sm:text-sm mt-1">No proof image</div>
+            </div>
+          </ng-template>
+        </div>
 
         <!-- Quick Summary – compact -->
         <div

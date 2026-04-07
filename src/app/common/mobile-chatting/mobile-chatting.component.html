@@ -183,7 +183,8 @@
     <button
       *ngFor="let tab of [
         { id: 'pending', label: 'Pending' },
-        { id: 'accepted', label: 'Resolved' }
+        { id: 'accepted', label: 'Resolved' },
+         { id: 'rejected', label: 'Rejected' }
       ]"
       (click)="switchTab(tab.id)"
       [class]="
@@ -336,12 +337,13 @@
     <!-- Chat View - SIRF TAB DIKHE JAB KOI SELECTED HO -->
       <div
   *ngIf="selectedNotification"
-  class="flex-1 flex flex-col bg-white min-h-0 overflow-hidden"
+  class="flex-1 flex flex-col bg-white min-h-0 overflow-visible"
 >
       <!-- Messages Area -->
     
-        <div
-    class="flex-1 min-h-0 overflow-y-auto px-3 pt-4 pb-24"
+    
+<div
+  class="flex-1 min-h-0 overflow-y-auto px-3 pt-4 pb-40"
     #messagesContainer
     (scroll)="onMessagesScroll($event)"
   >
@@ -631,9 +633,12 @@
             <textarea
               #messageInput
               rows="1"
-              [(ngModel)]="newMessage"
+
+              (input)="filterQuestion()"
+            [value]="selectedQuestion?.messageText || ''"
+  readonly
               (input)="onMessageInput()"
-              (focus)="showQuestionDropDown = false"
+            (focus)="showQuestionDropDown = true"
               (keydown.enter)="sendMessage($event)"
               placeholder="Type a message..."
               data-model="message"

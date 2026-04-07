@@ -6,7 +6,8 @@ import { FundsService } from "../../services/funds.service";
 import { UserStateService } from "../../../store/user-state.service";
 import { fileBaseUrl } from "../../services/helper";
 import { HeadService } from "../../services/head.service";
-
+import { DateTimeUtil } from "../../../utils/date-time.utils";
+import { MultimediaService } from "../../services/multimedia.service";
 @Component({
   selector: "app-head-rejected-funds",
   templateUrl: "./head-rejected-funds.component.html",
@@ -32,7 +33,7 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
 
   // active view
   activeView: "upi" | "bank" | "payout" = "upi";
-
+imageError=false
   // ========== FILTER PROPERTIES ==========
   // UPI filters
   upiSearchQuery = "";
@@ -92,6 +93,7 @@ portalOptions: { id: string; domain: string }[] = [];
     private fundService: FundsService,
     private userStateService: UserStateService,
     private headServices: HeadService,
+    private multimediaService: MultimediaService 
   ) {}
 
   ngOnInit(): void {
@@ -120,11 +122,21 @@ portalOptions: { id: string; domain: string }[] = [];
       // }
 
       if (this.activeView === "upi") {
-        this.fetchAllUpiTopups();
+
+        if (this.upiPortalFilter){
+          this.fetchAllUpiTopups();
+        }
+        // this.fetchAllUpiTopups();
       } else if (this.activeView === "bank") {
-        this.fetchAllBankTopups();
+        // this.fetchAllBankTopups();
+        if (this.bankPortalFilter){
+          this.fetchAllBankTopups();
+        }
       } else {
-        this.fetchAllRejectedPayouts();
+          if (this.payoutPortalFilter){
+          this.fetchAllRejectedPayouts();
+        }
+        // this.fetchAllRejectedPayouts();
       }
     });
   }
@@ -209,6 +221,21 @@ portalOptions: { id: string; domain: string }[] = [];
       this.payoutPortals = portals;
     });
 }
+formatDateWithFixedTime(dateStr: string, type: 'start' | 'end'): string {
+  const date = new Date(dateStr);
+
+  if (type === 'start') {
+    // 00:00:00 IST
+    date.setHours(0, 0, 0, 0);
+  } else {
+    // 23:59:59 IST
+    date.setHours(23, 59, 59, 999);
+  }
+
+  return date.toISOString(); // converts to UTC (your required format)
+}
+
+
 
   fetchAllUpiTopups(): void {
     if (!this.branchId) return;
@@ -217,15 +244,36 @@ portalOptions: { id: string; domain: string }[] = [];
     const allData: any[] = [];
 
     const fetchPage = () => {
-      this.fundService
-        .getAllUpiFundWithEntityAndPortalId(
-          this.branchId,
-          this.upiPortalFilter,
-          "REJECTED",
-          page,
-          pageSize,
-          "", // server search not used
-        )
+      // this.fundService
+      //   .getAllUpiFundWithEntityAndPortalId(
+      //     this.branchId,
+      //     this.upiPortalFilter,
+      //     "REJECTED",
+      //     page,
+      //     pageSize,
+         
+      //   )
+      const fromDate = this.upiDateFrom
+  ? DateTimeUtil.toUtcISOString(
+      new Date(new Date(this.upiDateFrom).setHours(0, 0, 0, 0))
+    )
+  : null;
+
+const toDate = this.upiDateTo
+  ? DateTimeUtil.toUtcISOString(
+      new Date(new Date(this.upiDateTo).setHours(23, 59, 59, 999))
+    )
+  : null;
+      this.fundService.getAllUpiFundWithEntityAndPortalId(
+  this.branchId,
+  this.upiPortalFilter,
+  "REJECTED",
+  page,
+  pageSize,
+  "undefined",
+  fromDate || undefined ,
+toDate || undefined 
+)
         .pipe(
           catchError((err) => {
             return of({ data: [], total: 0 });
@@ -269,15 +317,38 @@ portalOptions: { id: string; domain: string }[] = [];
     const allData: any[] = [];
 
     const fetchPage = () => {
-      this.fundService
-        .getAllBankFundWithEntityAndPortalId(
-          this.branchId,
-          this.bankPortalFilter,
-          "REJECTED",
-          page,
-          pageSize,
-          "",
-        )
+      // this.fundService
+      //   .getAllBankFundWithEntityAndPortalId(
+      //     this.branchId,
+      //     this.bankPortalFilter,
+      //     "REJECTED",
+      //     page,
+      //     pageSize,
+       
+      //   )
+
+           const fromDate = this.bankDateFrom
+  ? DateTimeUtil.toUtcISOString(
+      new Date(new Date(this.bankDateFrom).setHours(0, 0, 0, 0))
+    )
+  : null;
+
+const toDate = this.bankDateTo
+  ? DateTimeUtil.toUtcISOString(
+      new Date(new Date(this.bankDateTo).setHours(23, 59, 59, 999))
+    )
+  : null; 
+
+      this.fundService.getAllBankFundWithEntityAndPortalId(
+  this.branchId,
+  this.bankPortalFilter,
+  "REJECTED",
+  page,
+  pageSize,
+  undefined,
+fromDate || undefined ,
+  toDate || undefined 
+)
         .pipe(
           catchError((err) => {
             return of({ data: [], total: 0 });
@@ -315,15 +386,37 @@ portalOptions: { id: string; domain: string }[] = [];
     const allData: any[] = [];
 
     const fetchPage = () => {
-      this.fundService
-        .getAllPayoutFundWithEntityAndPortalId(
-          this.branchId,
-          this.payoutPortalFilter,
-          "REJECTED",
-          page,
-          pageSize,
-          "",
-        )
+      // this.fundService
+      //   .getAllPayoutFundWithEntityAndPortalId(
+      //     this.branchId,
+      //     this.payoutPortalFilter,
+      //     "REJECTED",
+      //     page,
+      //     pageSize,
+ 
+      //   )
+      
+           const fromDate = this.payoutDateFrom
+  ? DateTimeUtil.toUtcISOString(
+      new Date(new Date(this.payoutDateFrom).setHours(0, 0, 0, 0))
+    )
+  : " ";
+
+const toDate = this.payoutDateTo
+  ? DateTimeUtil.toUtcISOString(
+      new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999))
+    )
+  : null;
+      this.fundService.getAllPayoutFundWithEntityAndPortalId(
+  this.branchId,
+  this.payoutPortalFilter,
+  "REJECTED",
+  page,
+  pageSize,
+  undefined,
+ fromDate || undefined ,
+  toDate || undefined 
+)
         .pipe(
           catchError((err) => {
             return of({ data: [], total: 0 });
@@ -890,8 +983,13 @@ const matchesPortal = !portalId || itemPortalId === portalId;
     this.filterDropdownOpen = null;
   }
   applyBankFilters() {
+  if (this.bankPortalFilter) {
+    this.fetchAllBankTopups();
+    return;
+  }
+
     const search = this.bankSearchQuery.trim().toLowerCase();
-    const portal = this.bankPortalFilter.trim().toLowerCase();
+    // const portal = this.bankPortalFilter.trim().toLowerCase();
     const fromDate = this.bankDateFrom ? new Date(this.bankDateFrom) : null;
     const toDate = this.bankDateTo ? new Date(this.bankDateTo) : null;
 
@@ -977,6 +1075,11 @@ const matchesPortal = !portalId || itemPortalId === portalId;
     this.filterDropdownOpen = null;
   }
   applyPayoutFilters() {
+
+      if (this.payoutPortalFilter) {
+    this.fetchAllRejectedPayouts();
+    return;
+  }
     const search = this.payoutSearchQuery.trim().toLowerCase();
     const portal = this.payoutPortalFilter.trim().toLowerCase();
     const fromDate = this.payoutDateFrom ? new Date(this.payoutDateFrom) : null;
@@ -1068,12 +1171,19 @@ const matchesPortal = !portalId || itemPortalId === portalId;
   openRecordModal(record: any) {
     this.selectedRecord = record;
     this.showRecordModal = true;
+    this.loadImages(record);
   }
 
   closeRecordModal() {
+    if (this.selectedRecord?.images) {
+      this.selectedRecord.images.forEach((url: string) => {
+        URL.revokeObjectURL(url); // 
+      });
+    }
     this.selectedRecord = null;
     this.showRecordModal = false;
     this.closeLightbox();
+
   }
 
   openLightbox(imageUrl: string | null) {
@@ -1117,21 +1227,69 @@ const matchesPortal = !portalId || itemPortalId === portalId;
     return "status-default";
   }
 
-  getImageUrl(rec: any): string | null {
-    if (!rec) return null;
+  // getImageUrl(rec: any): string | null {
+  //   if (!rec) return null;
+  //   const raw = rec.raw || {};
+  //   const fp = `${fileBaseUrl}/${raw.rejectionFilePath}`;
+  //   if (!fp) return null;
+  //   const trimmed = ("" + fp).trim();
+  //   if (!trimmed || trimmed.toLowerCase().includes("null")) return null;
+  //   if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  //   try {
+  //     // return `${window.location.origin}${trimmed.startsWith("/") ? trimmed : "/" + trimmed}`;
+  //     return `${location.origin}${trimmed.startsWith("/") ? trimmed : "/" + trimmed}`;
+  //   } catch (e) {
+  //     return trimmed;
+  //   }
+  // }
+loadImages(rec: any) {
+    if (!rec) return;
+
     const raw = rec.raw || {};
-    const fp = `${fileBaseUrl}/${raw.rejectionFilePath}`;
-    if (!fp) return null;
-    const trimmed = ("" + fp).trim();
-    if (!trimmed || trimmed.toLowerCase().includes("null")) return null;
-    if (/^https?:\/\//i.test(trimmed)) return trimmed;
-    try {
-      // return `${window.location.origin}${trimmed.startsWith("/") ? trimmed : "/" + trimmed}`;
-      return `${location.origin}${trimmed.startsWith("/") ? trimmed : "/" + trimmed}`;
-    } catch (e) {
-      return trimmed;
+
+    rec.images = [];
+    this.imageError = false;
+
+    // ✅ alag-alag handle karo (clear logic)
+    const paths = [];
+
+    if (
+      raw.filePath &&
+      raw.filePath !== "null" &&
+      raw.filePath !== "undefined" &&
+      raw.filePath.trim() !== ""
+    ) {
+      paths.push(raw.filePath);
     }
+
+    if (
+      raw.rejectionFilePath &&
+      raw.rejectionFilePath !== "null" &&
+      raw.rejectionFilePath !== "undefined" &&
+      raw.rejectionFilePath.trim() !== ""
+    ) {
+      paths.push(raw.rejectionFilePath);
+    }
+
+    // ❌ agar dono nahi hai
+    if (paths.length === 0) {
+      rec.images = [];
+      return;
+    }
+
+    // ✅ API call for each
+    paths.forEach((id: string) => {
+      this.multimediaService.getPrivateImage(id).subscribe({
+        next: (url) => {
+          rec.images.push(url);
+        },
+        error: () => {
+          this.imageError = true;
+        },
+      });
+    });
   }
+  
 
   onImageError(ev: any) {
     if (ev && ev.target) {
