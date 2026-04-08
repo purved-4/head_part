@@ -73,18 +73,18 @@
                   <span class="text-[var(--color-danger)]">*</span>
                 </label>
                 <input
-                  formControlName="name"
+                  formControlName="username"
                   type="text"
-                  [class.border-[var(--color-danger)]]="isFieldInvalid('name')"
+                  [class.border-[var(--color-danger)]]="isFieldInvalid('username')"
                   [class.border-[var(--color-primary)]]="
-                    chiefForm.get('name')?.valid &&
-                    chiefForm.get('name')?.touched
+                    chiefForm.get('username')?.valid &&
+                    chiefForm.get('username')?.touched
                   "
                   class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] placeholder-[var(--color-muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30 focus:border-transparent transition-all duration-200"
                   placeholder="Enter branch's full name"
                 />
                 <div
-                  *ngIf="isFieldInvalid('name')"
+                  *ngIf="isFieldInvalid('username')"
                   class="text-[var(--color-danger)] text-xs mt-0.5"
                 >
                   Name is required
@@ -92,14 +92,13 @@
               </div>
 
               <!-- Mobile - Compact -->
-              <div class="space-y-1">
+              <!-- <div class="space-y-1">
                 <label class="text-xs font-semibold text-[var(--color-font)] flex items-center gap-1">
                   Mobile Number
                   <span class="text-[var(--color-danger)]">*</span>
                 </label>
 
                 <div class="flex border border-[var(--color-border)] rounded-[var(--radius-md)] overflow-hidden h-[38px]">
-                  <!-- Country Code -->
                   <select
                     [(ngModel)]="selectedCountry"
                     [ngModelOptions]="{standalone: true}"
@@ -110,7 +109,6 @@
                     </option>
                   </select>
 
-                  <!-- Phone -->
                   <input
                     formControlName="mobile"
                     type="tel"
@@ -126,10 +124,10 @@
                 >
                   Valid phone number is required
                 </div>
-              </div>
+              </div> -->
 
               <!-- Email -->
-              <div class="space-y-1">
+              <!-- <div class="space-y-1">
                 <label
                   class="text-xs font-semibold text-[var(--color-font)] flex items-center gap-1"
                 >
@@ -153,7 +151,7 @@
                 >
                   Valid email is required
                 </div>
-              </div>
+              </div> -->
 
               <!-- Active Status - Compact -->
               <div class="space-y-1">

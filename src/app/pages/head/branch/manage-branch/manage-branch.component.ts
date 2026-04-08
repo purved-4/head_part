@@ -24,7 +24,7 @@ interface PortalRange {
 
 interface Agent {
   id: string;
-  name: string;
+  username: string;
   headId: string;
   email?: string;
   mobile?: string;
@@ -39,7 +39,7 @@ interface Agent {
 
 interface EditForm {
   id: string;
-  name: string;
+  username: string;
   email: string;
   mobile: string;
   info: string;
@@ -81,7 +81,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
   showEditModal = false;
   editForm: EditForm = {
     id: "",
-    name: "",
+    username: "",
     email: "",
     mobile: "",
     info: "",
@@ -219,7 +219,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
           return {
             ...agent,
             id: agent.id || agent.headId || "",
-            name: agent.name || agent.Name || "Unnamed Branch",
+            username: agent.username || agent.username || "Unnamed Branch",
             showAllPortals: false,
             email: email,
             mobile: mobile,
@@ -340,7 +340,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
       const term = this.searchTerm.toLowerCase();
       this.filteredAgents = this.agents.filter(
         (agent) =>
-          (agent.name || "").toLowerCase().includes(term) ||
+          (agent.username || "").toLowerCase().includes(term) ||
           (agent.email || "").toLowerCase().includes(term) ||
           (agent.mobile || "").includes(term) ||
           (agent.info || "").toLowerCase().includes(term) ||
@@ -619,7 +619,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
     this.editForm = {
       id: "",
-      name: "",
+      username: "",
       email: "",
       mobile: "",
       info: "",
@@ -777,7 +777,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
   }
 
   isFormValid(): boolean {
-    if (!this.editForm.name || this.editForm.name.trim() === "") {
+    if (!this.editForm.username || this.editForm.username.trim() === "") {
       return false;
     }
     if (this.editForm.email && this.editForm.email.trim() !== "") {
@@ -869,8 +869,8 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.mobileError = "";
 
     // ---------- VALIDATION ----------
-    if (!this.editForm.name || this.editForm.name.trim() === "") {
-      this.snack.show("Branch name is required", "warning");
+    if (!this.editForm.username || this.editForm.username.trim() === "") {
+      this.snack.show("Branch username is required", "warning");
       return;
     }
 
@@ -922,7 +922,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
     const payload = {
       id: this.editForm.id,
-      name: this.editForm.name.trim(),
+      username: this.editForm.username.trim(),
       email: this.editForm.email.trim() || null,
       // mobile: this.editForm.mobile || null,
       // mobile: this.selectedCountry.dialCode + this.editForm.mobile,
@@ -1006,7 +1006,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
   convertToCSV(agents: Agent[]): string {
     const headers = [
-      "Name",
+      "username",
       "Email",
       "Phone",
       "Info",
@@ -1033,7 +1033,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
           0,
         ) / (agent.portalsWithRange?.length || 1);
       return [
-        agent.name || "",
+        agent.username || "",
         agent.email || "",
         agent.mobile || "",
         agent.info || "",
@@ -1102,8 +1102,8 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
   }
 
   initialLetter(agent: any): string {
-    if (!agent?.name) return "";
-    return agent.name.charAt(0).toUpperCase();
+    if (!agent?.username) return "";
+    return agent.username.charAt(0).toUpperCase();
   }
 
   getActiveCount(): number {
@@ -1247,7 +1247,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
   // openEditModal(agent: Agent): void {
   //   this.editForm = {
   //     id: agent.id,
-  //     name: agent.name,
+  //     username: agent.username,
   //     email: agent.email || "",
   //     mobile: agent.mobile || "",
   //     info: agent.info || "",
@@ -1304,7 +1304,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
     // this.editForm = {
     //   id: agent.id || "",
-    //   name: agent.name || "",
+    //   username: agent.username || "",
     //   email: agent.email || "",
     //   mobile: agent.mobile || "",
     //   info: agent.info || "",
@@ -1322,7 +1322,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
     this.editForm = {
       id: agent.id || "",
-      name: agent.name || "",
+      username: agent.username || "",
       email: agent.email || "",
       mobile: mobileWithoutCode || "",
       info: agent.info || "",

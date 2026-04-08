@@ -119,7 +119,11 @@
                     </div>
 
                     <div class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]">
-                      <span>{{ transaction.date | date: "short" }}</span>
+                      <!-- <span>{{ transaction.date | date: "short" }}</span> -->
+                                           <span class="font-semibold text-red-600">
+  {{ getTimeAgo(transaction.date) }}
+</span>
+
                       <span class="w-1 h-1 rounded-full bg-[var(--color-border)]"></span>
                       <span
                         class="px-2 py-0.5 rounded-md font-medium bg-[var(--color-info)]/20 text-[var(--color-secondary)]"
@@ -280,7 +284,10 @@
                     </div>
 
                     <div class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]">
-                      <span>{{ transaction.date | date: "short" }}</span>
+                      <!-- <span>{{ transaction.date | date: "short" }}</span> -->
+                    <span class="font-semibold text-red-600">
+  {{ getTimeAgo(transaction.date) }}
+</span>
                       <span class="w-1 h-1 rounded-full bg-[var(--color-border)]"></span>
                       <span
                         class="px-2 py-0.5 rounded-md font-medium bg-[var(--color-info)]/20 text-[var(--color-secondary)]"
@@ -428,7 +435,11 @@
                     </div>
 
                     <div class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]">
-                      <span>{{ transaction.date | date: "short" }}</span>
+                      <!-- <span>{{ transaction.date | date: "short" }}</span> -->
+                                           <span class="font-semibold text-red-600">
+  {{ getTimeAgo(transaction.date) }}
+</span>
+
                       <span class="w-1 h-1 rounded-full bg-[var(--color-border)]"></span>
 
                     </div>
@@ -628,7 +639,11 @@
 
   <!-- DATE + FTT -->
   <div class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]">
-    <span>{{ transaction.date | date: "short" }}</span>
+    <!-- <span>{{ transaction.date | date: "short" }}</span> -->
+                         <span class="font-semibold text-red-600">
+  {{ getTimeAgo(transaction.date) }}
+</span>
+
 
 <span
   *ngIf="transaction.ftt && transaction.type !== 'payout'"

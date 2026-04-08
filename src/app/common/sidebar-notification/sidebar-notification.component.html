@@ -138,9 +138,14 @@
       <!-- Notifications Content -->
       <div *ngIf="!isLoading" class="divide-y divide-[var(--color-border)]">
         <ng-container *ngFor="let cat of ['upi', 'bank', 'payout', 'other']">
-          <div *ngIf="shouldShowCategory(cat)" class="py-2">
+          <!-- <div *ngIf="shouldShowCategory(cat)" class="py-2"> -->
+            <div *ngIf="activeCategory === 'all' || shouldShowCategory(cat)" class="py-2">
             <!-- Category Header -->
-            <div class="px-4 py-2 bg-[var(--color-bg)] sticky top-0 z-10">
+            <!-- <div class="px-4 py-2 bg-[var(--color-bg)] sticky top-0 z-10"> -->
+              <div 
+  *ngIf="activeCategory !== 'all'"
+  class="px-4 py-2 bg-[var(--color-bg)] sticky top-0 z-10"
+>
               <div class="flex items-center gap-2">
                 <span 
                   class="material-icons text-sm"

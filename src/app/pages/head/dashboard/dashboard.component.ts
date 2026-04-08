@@ -241,6 +241,10 @@ pendingPayoutPageSize = 5;
     if (this.lastBroadcastData) {
       this.processIncomingEvent(this.lastBroadcastData);
     }
+
+    setInterval(() => {
+  this.processingNow = Date.now(); // trigger change detection
+}, 60000);
   }
 
   private getTopupStatus() {
@@ -2270,4 +2274,29 @@ onChangePendingPayoutPageSize(size: number) {
   }
 
   previewImage: string | null = null;
+
+  getTimeAgo(date: Date | string): string {
+  if (!date) return "";
+
+  const now = new Date().getTime();
+  const inputTime = new Date(date).getTime();
+
+  let diff = Math.floor((now - inputTime) / 1000); // in seconds
+
+  const days = Math.floor(diff / (24 * 3600));
+  diff %= 24 * 3600;
+
+  const hours = Math.floor(diff / 3600);
+  diff %= 3600;
+
+  const minutes = Math.floor(diff / 60);
+
+  let result = "";
+
+  if (days > 0) result += `${days}d `;
+  if (hours > 0) result += `${hours}h `;
+  if (minutes > 0) result += `${minutes}m`;
+
+  return result.trim() || "Just now";
+}
 }

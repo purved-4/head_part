@@ -48,10 +48,10 @@ showPercentageModal = false;
     private headService: HeadService,
   ) {
     this.chiefForm = this.fb.group({
-      name: ["", Validators.required],
+      username: ["", Validators.required],
       // mobile: ["", [Validators.required, Validators.pattern(/^[0-9]{15}$/)]],
-      mobile: ["", [Validators.required, Validators.maxLength(15)]],
-      email: ["", [Validators.required, Validators.email]],
+      // mobile: ["", [Validators.required, Validators.maxLength(15)]],
+      // email: ["", [Validators.required, Validators.email]],
       userEmail: ["", [Validators.required, Validators.email]],
       userPassword: ["", Validators.required],
       info: [""],
@@ -167,7 +167,7 @@ showPercentageModal = false;
     } else {
       this.filteredPortals = available.filter(
         (w) =>
-          (w.portalDomain || w.domain || w.name || "")
+          (w.portalDomain || w.domain || w.username || "")
             .toLowerCase()
             .includes(term) ||
           (w.portalId || w.id || "").toLowerCase().includes(term),
@@ -255,8 +255,8 @@ showPercentageModal = false;
 
     const portalIds: string[] = this.chiefForm.get("portalIds")?.value || [];
 
-    const mobileNumber = this.chiefForm.value.mobile;
-    const fullMobile = this.selectedCountry.dialCode + mobileNumber;
+    // const mobileNumber = this.chiefForm.value.mobile;
+    // const fullMobile = this.selectedCountry.dialCode + mobileNumber;
 
     // Portal validation
     if (portalIds.length === 0) {
@@ -293,9 +293,9 @@ showPercentageModal = false;
 
     // Form validation
     if (
-      this.chiefForm.get("name")?.invalid ||
-      this.chiefForm.get("mobile")?.invalid ||
-      this.chiefForm.get("email")?.invalid ||
+      this.chiefForm.get("username")?.invalid ||
+      // this.chiefForm.get("mobile")?.invalid ||
+      // this.chiefForm.get("email")?.invalid ||
       this.chiefForm.get("userEmail")?.invalid ||
       this.chiefForm.get("userPassword")?.invalid
     ) {
@@ -319,9 +319,9 @@ showPercentageModal = false;
 
     // Final payload
     const payload: any = {
-      name: this.chiefForm.value.name,
-      mobile: fullMobile,
-      email: this.chiefForm.value.email,
+      username: this.chiefForm.value.username,
+      // mobile: fullMobile,
+      // email: this.chiefForm.value.email,
       userEmail: this.chiefForm.value.userEmail,
       userPassword: this.chiefForm.value.userPassword,
       info: this.chiefForm.value.info,
@@ -358,7 +358,7 @@ showPercentageModal = false;
 
   clearForm(): void {
     this.chiefForm.reset({
-      name: "",
+      username: "",
       mobile: "",
       email: "",
       userEmail: "",

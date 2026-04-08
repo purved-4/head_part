@@ -63,7 +63,10 @@ export class HeadBankComponent implements OnInit, OnDestroy {
   totalElements = 0;
   totalPagesCount = 0;
   loading = false;
-
+tooltipVisible = false;
+tooltipX = 0;
+tooltipY = 0;
+tooltipData: any = null;
   showPaymentDropdown = false;
   selectedMethod = "bank";
   statusFilter: string = "all";
@@ -1551,4 +1554,21 @@ maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
   isLastRows(index: number): boolean {
     return index >= this.bankAccounts.length - 2;
   }
+
+
+  
+
+showTooltip(event: MouseEvent, account: any) {
+  const rect = (event.target as HTMLElement).getBoundingClientRect();
+
+  this.tooltipX = rect.left + rect.width / 2 - 120; // center align
+  this.tooltipY = rect.top - 10; // above element
+
+  this.tooltipData = account;
+  this.tooltipVisible = true;
+}
+
+hideTooltip() {
+  this.tooltipVisible = false;
+}
 }

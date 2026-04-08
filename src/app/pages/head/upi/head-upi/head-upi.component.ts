@@ -29,7 +29,10 @@ export class HeadUpiComponent implements OnInit {
   // ---------- DATA ----------
   upis: any[] = [];
   portals: any[] = [];
-
+tooltipVisible = false;
+tooltipX = 0;
+tooltipY = 0;
+tooltipData: any = null;
   // ---------- FILTERS (sent to backend) ----------
   searchTerm = "";
   private searchSubject = new Subject<string>();
@@ -1484,5 +1487,19 @@ removeUpdateQr() {
   this.updateSelectedImage = null;
   this.updateManualQrFile = null;
   this.generatedUpdateFile = null;
+}
+
+
+
+showTooltip(event: MouseEvent, data: any) {
+  this.tooltipVisible = true;
+  this.tooltipData = data;
+
+  this.tooltipX = event.clientX + 15;
+  this.tooltipY = event.clientY + 15;
+}
+
+hideTooltip() {
+  this.tooltipVisible = false;
 }
 }
