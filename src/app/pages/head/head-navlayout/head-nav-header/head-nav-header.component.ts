@@ -1,3 +1,4 @@
+
 import {
   Component,
   Input,
@@ -295,8 +296,6 @@ onNotificationIconClick() {
   this.notificationClick.emit();
 }
   
-
-
 
 getUnreadCount(): number {
   return this.notificationUnreadCount;

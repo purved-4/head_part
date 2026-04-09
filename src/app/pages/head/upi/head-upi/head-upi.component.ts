@@ -1,3 +1,4 @@
+
 import {
   Component,
   OnInit,
@@ -26,14 +27,14 @@ import { MultimediaService } from "../../../services/multimedia.service";
   styleUrls: ["./head-upi.component.css"],
 })
 export class HeadUpiComponent implements OnInit {
-  // ---------- DATA ----------
+// ---------- DATA ----------
   upis: any[] = [];
   portals: any[] = [];
-tooltipVisible = false;
-tooltipX = 0;
-tooltipY = 0;
-tooltipData: any = null;
-  // ---------- FILTERS (sent to backend) ----------
+  tooltipVisible = false;
+  tooltipX = 0;
+  tooltipY = 0;
+  tooltipData: any = null;
+// ---------- FILTERS (sent to backend) ----------
   searchTerm = "";
   private searchSubject = new Subject<string>();
 
@@ -61,10 +62,11 @@ tooltipData: any = null;
   get transactionFilterActive(): boolean {
     return !!(this.transactionMinAmount || this.transactionMaxAmount);
   }
+  topupStatus: any = false;
 
   // Image preview
   selectedImage: string | null = null;
-qrMode: 'generate' | 'upload' = 'generate';
+  qrMode: 'generate' | 'upload' = 'generate';
   vpaChanged: boolean = false;
   newQrGenerated: boolean = false;
 
@@ -88,7 +90,7 @@ qrMode: 'generate' | 'upload' = 'generate';
     status: "active",
   };
   updateManualQrFile: File | null = null;
-updateSelectedImage: string | null = null;
+  updateSelectedImage: string | null = null;
   isSubmitting = false;
   isGeneratingUpdateQr = false;
   updateQrData: string | null = null;
@@ -141,16 +143,16 @@ updateSelectedImage: string | null = null;
   limitDateTime: any;
   isSubmittingLimit: boolean = false;
   constructor(
-    private upiService: UpiService,
-    private branchService: BranchService,
-    private route: ActivatedRoute,
-    private formBuilder: FormBuilder,
-    private userStateService: UserStateService,
-    private userService: UserService,
-    private headService: HeadService,
-    private snack: SnackbarService,
-    private router: Router,
-    private multimediaService:MultimediaService
+      private upiService: UpiService,
+      private branchService: BranchService,
+      private route: ActivatedRoute,
+      private formBuilder: FormBuilder,
+      private userStateService: UserStateService,
+      private userService: UserService,
+      private headService: HeadService,
+      private snack: SnackbarService,
+      private router: Router,
+      private multimediaService:MultimediaService
   ) {}
 
   ngOnInit() {
@@ -158,10 +160,10 @@ updateSelectedImage: string | null = null;
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
-
+this.getTopupStatus();
     if (
-      typeof matchMedia !== "undefined" &&
-      matchMedia("(max-width: 800px)").matches
+        typeof matchMedia !== "undefined" &&
+        matchMedia("(max-width: 800px)").matches
     ) {
       this.viewMode = "grid";
     }
@@ -170,16 +172,16 @@ updateSelectedImage: string | null = null;
     this.loadPortals(this.currentRoleId);
 
     this.searchSubject
-      .pipe(debounceTime(600), distinctUntilChanged())
-      .subscribe((value) => {
-        this.searchTerm = value;
-        this.onSearch();
-      });
+        .pipe(debounceTime(600), distinctUntilChanged())
+        .subscribe((value) => {
+          this.searchTerm = value;
+          this.onSearch();
+        });
 
     this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
   }
 
- 
+
   private initAddUpiForm() {
     this.addUpiForm = this.formBuilder.group({
       // portalId: ["", Validators.required],
@@ -195,10 +197,10 @@ updateSelectedImage: string | null = null;
         "",
         [Validators.required, Validators.min(1), Validators.max(10000000)],
       ],
-       min_tran_count: [null],
-  max_tran_count: [null],
-  min_total_tran_amount: [null],
-  max_total_tran_amount: [null],
+      min_tran_count: [null],
+      max_tran_count: [null],
+      min_total_tran_amount: [null],
+      max_total_tran_amount: [null],
     });
   }
 
@@ -275,128 +277,128 @@ updateSelectedImage: string | null = null;
   //       });
   //   }
 
- fetchUpis(): void {
-  if (!this.currentRoleId) return;
+  fetchUpis(): void {
+    if (!this.currentRoleId) return;
 
-  const options: any = {
-    page: this.currentPage - 1,
-    size: this.pageSize,
-    query: this.searchTerm.trim() || undefined,
-    minAmount: this.transactionMinAmount ?? undefined,
-    maxAmount: this.transactionMaxAmount ?? undefined,
-    limit: this.maxLimit ?? undefined,
-    portalId: this.selectedPortal?.portalId || undefined,
-  };
+    const options: any = {
+      page: this.currentPage - 1,
+      size: this.pageSize,
+      query: this.searchTerm.trim() || undefined,
+      minAmount: this.transactionMinAmount ?? undefined,
+      maxAmount: this.transactionMaxAmount ?? undefined,
+      limit: this.maxLimit ?? undefined,
+      portalId: this.selectedPortal?.portalId || undefined,
+    };
 
-  if (this.filterStatus && this.filterStatus.trim() !== "") {
-    options.status = this.filterStatus;
+    if (this.filterStatus && this.filterStatus.trim() !== "") {
+      options.status = this.filterStatus;
+    }
+
+    this.upiService
+        .getByEntityIdAndActivePaginated(this.currentRoleId, options)
+        .subscribe({
+          next: (res: any) => {
+            const responseData = res.data || res;
+
+            const rows = Array.isArray(responseData.content)
+                ? responseData.content
+                : Array.isArray(responseData)
+                    ? responseData
+                    : [];
+
+            // ✅ STEP 1: MAP (FIXED)
+            this.upis = rows.map((r: any) => {
+              let parsedRanges: any[] = [];
+
+              if (Array.isArray(r.ranges)) {
+                parsedRanges = r.ranges;
+              } else if (typeof r.range === "string") {
+                parsedRanges = r.range.split(",").map((x: string) => {
+                  const [from, to] = x.split("-");
+                  return { from: Number(from), to: Number(to) };
+                });
+              } else if (typeof r.upiRange === "string") {
+                parsedRanges = r.upiRange.split(",").map((x: string) => {
+                  const [from, to] = x.split("-");
+                  return { from: Number(from), to: Number(to) };
+                });
+              }
+
+              const rawImagePath = r.qrImagePath || r.qrImageUrl || null;
+
+              return {
+                ...r,
+                status: this.normalizeStatus(r),
+                min_tran_count: r.minTranCount ?? null,
+                max_tran_count: r.maxTranCount ?? null,
+                min_total_tran_amount: r.minTotalTranAmount ?? null,
+                max_total_tran_amount: r.maxTotalTranAmount ?? null,
+                portalDomain:
+                    r.portalDomain || r.portalName || r.portal || r.portalId || "",
+
+                ranges: parsedRanges,
+
+                qrId: r.qrId || r.qr_id || r.id || "",
+
+                // ❌ REMOVE direct URL
+                // qrImagePath: ...
+
+                // ✅ NEW
+                imagePath: rawImagePath,
+                qrImageUrl: null,
+
+                limitAmount: r.limitAmount,
+                currency: r.portalCurrency || "",
+                vpa: r.vpa || r.upiId || "",
+                isUpiActive: r.upi === true,
+              };
+            });
+
+            // ✅ STEP 2: LOAD IMAGES (IMPORTANT)
+            this.upis.forEach((upi: any) => {
+              if (!upi.imagePath) return;
+
+              // 🔥 smart handling (public vs private)
+              if (upi.imagePath.startsWith("http")) {
+                upi.qrImageUrl = upi.imagePath;
+              } else {
+                this.multimediaService.getPrivateImage(upi.imagePath).subscribe({
+                  next: (url) => (upi.qrImageUrl = url),
+                  error: () => (upi.qrImageUrl = null),
+                });
+              }
+            });
+
+            // ✅ STEP 3: SORT
+            const now = new Date().getTime();
+
+            this.upis.sort((a: any, b: any) => {
+              const timeA = a.limitTime ? new Date(a.limitTime).getTime() : 0;
+              const timeB = b.limitTime ? new Date(b.limitTime).getTime() : 0;
+
+              const isFutureA = timeA > now;
+              const isFutureB = timeB > now;
+
+              if (isFutureA && !isFutureB) return -1;
+              if (!isFutureA && isFutureB) return 1;
+
+              if (isFutureA && isFutureB) return timeB - timeA;
+
+              return timeB - timeA;
+            });
+
+            this.totalElements = responseData.totalElements || this.upis.length;
+            this.totalPagesCount = responseData.totalPages || 1;
+          },
+
+          error: () => {
+            this.upis = [];
+            this.totalElements = 0;
+            this.totalPagesCount = 0;
+            this.snack.show("Failed to load UPIs", false);
+          },
+        });
   }
-
-  this.upiService
-    .getByEntityIdAndActivePaginated(this.currentRoleId, options)
-    .subscribe({
-      next: (res: any) => {
-        const responseData = res.data || res;
-
-        const rows = Array.isArray(responseData.content)
-          ? responseData.content
-          : Array.isArray(responseData)
-          ? responseData
-          : [];
-
-        // ✅ STEP 1: MAP (FIXED)
-        this.upis = rows.map((r: any) => {
-          let parsedRanges: any[] = [];
-
-          if (Array.isArray(r.ranges)) {
-            parsedRanges = r.ranges;
-          } else if (typeof r.range === "string") {
-            parsedRanges = r.range.split(",").map((x: string) => {
-              const [from, to] = x.split("-");
-              return { from: Number(from), to: Number(to) };
-            });
-          } else if (typeof r.upiRange === "string") {
-            parsedRanges = r.upiRange.split(",").map((x: string) => {
-              const [from, to] = x.split("-");
-              return { from: Number(from), to: Number(to) };
-            });
-          }
-
-          const rawImagePath = r.qrImagePath || r.qrImageUrl || null;
-
-          return {
-            ...r,
-            status: this.normalizeStatus(r),
-min_tran_count: r.minTranCount ?? null,
-max_tran_count: r.maxTranCount ?? null,
-min_total_tran_amount: r.minTotalTranAmount ?? null,
-max_total_tran_amount: r.maxTotalTranAmount ?? null,
-            portalDomain:
-              r.portalDomain || r.portalName || r.portal || r.portalId || "",
-
-            ranges: parsedRanges,
-
-            qrId: r.qrId || r.qr_id || r.id || "",
-
-            // ❌ REMOVE direct URL
-            // qrImagePath: ...
-
-            // ✅ NEW
-            imagePath: rawImagePath,
-            qrImageUrl: null,
-
-            limitAmount: r.limitAmount,
-            currency: r.portalCurrency || "",
-            vpa: r.vpa || r.upiId || "",
-            isUpiActive: r.upi === true,
-          };
-        });
-
-        // ✅ STEP 2: LOAD IMAGES (IMPORTANT)
-        this.upis.forEach((upi: any) => {
-          if (!upi.imagePath) return;
-
-          // 🔥 smart handling (public vs private)
-          if (upi.imagePath.startsWith("http")) {
-            upi.qrImageUrl = upi.imagePath;
-          } else {
-            this.multimediaService.getPrivateImage(upi.imagePath).subscribe({
-              next: (url) => (upi.qrImageUrl = url),
-              error: () => (upi.qrImageUrl = null),
-            });
-          }
-        });
-
-        // ✅ STEP 3: SORT
-        const now = new Date().getTime();
-
-        this.upis.sort((a: any, b: any) => {
-          const timeA = a.limitTime ? new Date(a.limitTime).getTime() : 0;
-          const timeB = b.limitTime ? new Date(b.limitTime).getTime() : 0;
-
-          const isFutureA = timeA > now;
-          const isFutureB = timeB > now;
-
-          if (isFutureA && !isFutureB) return -1;
-          if (!isFutureA && isFutureB) return 1;
-
-          if (isFutureA && isFutureB) return timeB - timeA;
-
-          return timeB - timeA;
-        });
-
-        this.totalElements = responseData.totalElements || this.upis.length;
-        this.totalPagesCount = responseData.totalPages || 1;
-      },
-
-      error: () => {
-        this.upis = [];
-        this.totalElements = 0;
-        this.totalPagesCount = 0;
-        this.snack.show("Failed to load UPIs", false);
-      },
-    });
-}
 
   private normalizeStatus(item: any): string {
     if (typeof item.status === "string" && item.status.trim() !== "") {
@@ -415,28 +417,28 @@ max_total_tran_amount: r.maxTotalTranAmount ?? null,
   loadPortals(agentId: string) {
     if (!agentId) return;
     this.headService
-      .getAllHeadsWithPortalsById(agentId, "UPI")
-      .pipe(catchError(() => of([])))
-      .subscribe((res: any) => {
-        let list: any[] = [];
-        if (Array.isArray(res)) list = res;
-        else if (res?.data) list = res.data;
-        else if (res) list = [res];
+        .getAllHeadsWithPortalsById(agentId, "UPI")
+        .pipe(catchError(() => of([])))
+        .subscribe((res: any) => {
+          let list: any[] = [];
+          if (Array.isArray(res)) list = res;
+          else if (res?.data) list = res.data;
+          else if (res) list = [res];
 
-        this.portals = list.map((item) => ({
-          id: item.id || item._id || "",
-          portalId: item.portalId || item.portalID || item.portal_id || "",
-          domain:
-            item.portalDomain ||
-            item.domain ||
-            item.domainName ||
-            "Untitled Portal",
-          currency: item.currency || "INR",
-        }));
+          this.portals = list.map((item) => ({
+            id: item.id || item._id || "",
+            portalId: item.portalId || item.portalID || item.portal_id || "",
+            domain:
+                item.portalDomain ||
+                item.domain ||
+                item.domainName ||
+                "Untitled Portal",
+            currency: item.currency || "INR",
+          }));
 
-        this.filteredPortals = [...this.portals];
-        this.upiFilteredPortals = [];
-      });
+          this.filteredPortals = [...this.portals];
+          this.upiFilteredPortals = [];
+        });
   }
 
   // ---------- FILTER ACTIONS ----------
@@ -486,9 +488,9 @@ max_total_tran_amount: r.maxTotalTranAmount ?? null,
       this.showPortalDropdown = this.portals.length > 0;
     } else {
       this.filteredPortals = this.portals.filter(
-        (site) =>
-          site.domain.toLowerCase().includes(term) ||
-          (site.currency && site.currency.toLowerCase().includes(term)),
+          (site) =>
+              site.domain.toLowerCase().includes(term) ||
+              (site.currency && site.currency.toLowerCase().includes(term)),
       );
       this.showPortalDropdown = this.filteredPortals.length > 0;
     }
@@ -539,9 +541,9 @@ max_total_tran_amount: r.maxTotalTranAmount ?? null,
     }
 
     this.upiFilteredPortals = this.portals.filter(
-      (site) =>
-        site.domain.toLowerCase().includes(term) ||
-        (site.currency && site.currency.toLowerCase().includes(term)),
+        (site) =>
+            site.domain.toLowerCase().includes(term) ||
+            (site.currency && site.currency.toLowerCase().includes(term)),
     );
   }
 
@@ -671,12 +673,12 @@ max_total_tran_amount: r.maxTotalTranAmount ?? null,
     this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
     document.body.style.overflow = "auto";
     this.selectedImage = null;
-this.manualQrFile = null;
+    this.manualQrFile = null;
   }
 
   submitAddUpi(): void {
     Object.keys(this.addUpiForm.controls).forEach((key) =>
-      this.addUpiForm.get(key)?.markAsTouched(),
+        this.addUpiForm.get(key)?.markAsTouched(),
     );
 
     if (this.addUpiForm.invalid) {
@@ -690,9 +692,9 @@ this.manualQrFile = null;
     //   return;
     // }
     if (!this.generatedFile && !this.manualQrFile) {
-  this.snack.show("Please upload or generate QR code.", false);
-  return;
-}
+      this.snack.show("Please upload or generate QR code.", false);
+      return;
+    }
 
     // const selectedPortal = this.portals.find(
     //   (site) => String(site.id) === String(this.addUpiForm.value.portalId),
@@ -730,10 +732,10 @@ this.manualQrFile = null;
       entityType: this.role,
       userId: this.userId,
       active: true,
-       minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
-  maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
-  minTotalTranAmount: Number(this.addUpiForm.value.min_total_tran_amount) || 0,
-  maxTotalTranAmount: Number(this.addUpiForm.value.max_total_tran_amount) || 0,
+      minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
+      maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
+      minTotalTranAmount: Number(this.addUpiForm.value.min_total_tran_amount) || 0,
+      maxTotalTranAmount: Number(this.addUpiForm.value.max_total_tran_amount) || 0,
       createdAt: new Date().toISOString(),
       // ranges: validRanges.map((r) => ({
       //   minRange: Number(r.minRange),
@@ -776,11 +778,11 @@ this.manualQrFile = null;
         this.isAddingUpi = false;
 
         const errorMsg =
-          error?.error?.message || error?.error?.error || "Failed to add UPI";
+            error?.error?.message || error?.error?.error || "Failed to add UPI";
         this.snack.show(
-          errorMsg ||
+            errorMsg ||
             "Failed to add UPI. Please check your connection and try again.",
-          false,
+            false,
         );
       },
     });
@@ -820,30 +822,30 @@ this.manualQrFile = null;
 
 
   openUpdateModal(upi: any): void {
-  this.editingUpi = upi;
+    this.editingUpi = upi;
 
-  this.updateForm = {
-    vpa: upi.vpa || "",
-    limitAmount: upi.limitAmount || "",
-    status: upi.status || "active",
-    maxAmount: upi.maxAmount || "",
-    minAmount: upi.minAmount || "",
+    this.updateForm = {
+      vpa: upi.vpa || "",
+      limitAmount: upi.limitAmount || "",
+      status: upi.status || "active",
+      maxAmount: upi.maxAmount || "",
+      minAmount: upi.minAmount || "",
 
-    min_tran_count: upi.min_tran_count ?? null,
-    max_tran_count: upi.max_tran_count ?? null,
-    min_total_tran_amount: upi.min_total_tran_amount ?? null,
-    max_total_tran_amount: upi.max_total_tran_amount ?? null,
-  };
+      min_tran_count: upi.min_tran_count ?? null,
+      max_tran_count: upi.max_tran_count ?? null,
+      min_total_tran_amount: upi.min_total_tran_amount ?? null,
+      max_total_tran_amount: upi.max_total_tran_amount ?? null,
+    };
 
-  this.originalVpa = (upi.vpa || "").trim().toLowerCase();
-  this.vpaChanged = false;
-  this.newQrGenerated = false;
-  this.updateQrData = null;
-  this.generatedUpdateFile = null;
-  this.updateQrError = "";
-  this.showUpdateModal = true;
-  document.body.style.overflow = "hidden";
-}
+    this.originalVpa = (upi.vpa || "").trim().toLowerCase();
+    this.vpaChanged = false;
+    this.newQrGenerated = false;
+    this.updateQrData = null;
+    this.generatedUpdateFile = null;
+    this.updateQrError = "";
+    this.showUpdateModal = true;
+    document.body.style.overflow = "hidden";
+  }
   closeUpdateModal(): void {
     this.showUpdateModal = false;
     this.editingUpi = null;
@@ -861,8 +863,8 @@ this.manualQrFile = null;
     this.vpaChanged = false;
     this.newQrGenerated = false;
     this.updateManualQrFile = null;
-this.updateSelectedImage = null;
-this.updateQrMode = 'generate';
+    this.updateSelectedImage = null;
+    this.updateQrMode = 'generate';
     document.body.style.overflow = "auto";
   }
 
@@ -942,9 +944,9 @@ this.updateQrMode = 'generate';
     formData.append("dto", dtoBlob);
     if (this.generatedUpdateFile) {
       formData.append(
-        "file",
-        this.generatedUpdateFile,
-        this.generatedUpdateFile.name,
+          "file",
+          this.generatedUpdateFile,
+          this.generatedUpdateFile.name,
       );
     }
 
@@ -1001,8 +1003,8 @@ this.updateQrMode = 'generate';
   private captureQrImage(vpa: string, isForUpdate = false): void {
     try {
       const qrcodeElement = isForUpdate
-        ? this.updateQrcodeElem
-        : this.qrcodeElem;
+          ? this.updateQrcodeElem
+          : this.qrcodeElem;
       if (!qrcodeElement?.nativeElement) {
         this.finishQrGeneration(isForUpdate);
         return;
@@ -1016,24 +1018,24 @@ this.updateQrMode = 'generate';
         }
 
         canvas.toBlob(
-          (blob: Blob | null) => {
-            if (blob) {
-              const filename = `upi_qr_${this.sanitizeFilename(vpa)}_${Date.now()}.png`;
-              if (isForUpdate) {
-                this.generatedUpdateFile = new File([blob], filename, {
-                  type: "image/png",
-                });
-                this.newQrGenerated = true; //  flag set
-              } else {
-                this.generatedFile = new File([blob], filename, {
-                  type: "image/png",
-                });
+            (blob: Blob | null) => {
+              if (blob) {
+                const filename = `upi_qr_${this.sanitizeFilename(vpa)}_${Date.now()}.png`;
+                if (isForUpdate) {
+                  this.generatedUpdateFile = new File([blob], filename, {
+                    type: "image/png",
+                  });
+                  this.newQrGenerated = true; //  flag set
+                } else {
+                  this.generatedFile = new File([blob], filename, {
+                    type: "image/png",
+                  });
+                }
               }
-            }
-            this.finishQrGeneration(isForUpdate);
-          },
-          "image/png",
-          1.0,
+              this.finishQrGeneration(isForUpdate);
+            },
+            "image/png",
+            1.0,
         );
       }, 100);
     } catch (error) {
@@ -1048,9 +1050,9 @@ this.updateQrMode = 'generate';
 
   private sanitizeFilename(filename: string): string {
     return filename
-      .replace(/[^a-z0-9_\-\.@]/gi, "_")
-      .replace(/_{2,}/g, "_")
-      .substring(0, 100);
+        .replace(/[^a-z0-9_\-\.@]/gi, "_")
+        .replace(/_{2,}/g, "_")
+        .substring(0, 100);
   }
 
   downloadQr(): void {
@@ -1077,11 +1079,11 @@ this.updateQrMode = 'generate';
   }
 
   // ---------- IMAGE MODAL ----------
-  previewImage: string | null = null; 
+  previewImage: string | null = null;
   openImageModal(imageUrl: string | null): void {
     if (!imageUrl) return;
     this.selectedImage = imageUrl;
-     this.previewImage = imageUrl;
+    this.previewImage = imageUrl;
     document.body.style.overflow = "hidden";
   }
 
@@ -1118,7 +1120,7 @@ this.updateQrMode = 'generate';
   // ---------- DROPDOWN ----------
   toggleActionsDropdown(upiId: string): void {
     this.activeDropdownUpiId =
-      this.activeDropdownUpiId === upiId ? null : upiId;
+        this.activeDropdownUpiId === upiId ? null : upiId;
   }
 
   toggleView(mode: "table" | "grid") {
@@ -1175,8 +1177,8 @@ this.updateQrMode = 'generate';
     this.showPortalDropdown = false;
 
     if (
-      typeof matchMedia !== "undefined" &&
-      matchMedia("(max-width: 800px)").matches
+        typeof matchMedia !== "undefined" &&
+        matchMedia("(max-width: 800px)").matches
     ) {
       this.viewMode = "grid";
     }
@@ -1198,8 +1200,8 @@ this.updateQrMode = 'generate';
     const now = new Date();
 
     const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-      .toISOString()
-      .slice(0, 16);
+        .toISOString()
+        .slice(0, 16);
 
     this.limitDateTime = local;
     this.minLimitDateTime = local;
@@ -1381,7 +1383,7 @@ this.updateQrMode = 'generate';
       next: () => {
         //  Only update UI after backend success
         this.toggleCandidateUpi.isUpiActive =
-          !this.toggleCandidateUpi.isUpiActive;
+            !this.toggleCandidateUpi.isUpiActive;
 
         this.isToggleConfirmVisible = false;
         this.toggleCandidateUpi = null;
@@ -1397,109 +1399,121 @@ this.updateQrMode = 'generate';
     return new Date(limitTime).getTime() > new Date().getTime();
   }
 
-manualQrFile: File | null = null;
+  manualQrFile: File | null = null;
 
-onQrFileSelected(event: any): void {
-  const file = event.target.files[0];
-  if (!file) return;
+  onQrFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
 
-  this.manualQrFile = file;
+    this.manualQrFile = file;
 
-  // preview
-  const reader = new FileReader();
-  reader.onload = () => {
-    this.selectedImage = reader.result as string;
-  };
-  reader.readAsDataURL(file);
+    // preview
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.selectedImage = reader.result as string;
+    };
+    reader.readAsDataURL(file);
 
-  // IMPORTANT: override generated QR
-  this.generatedFile = file;
-}
-
-// onUpdateQrFileSelected(event: any): void {
-//   const file = event.target.files[0];
-//   if (!file) return;
-
-//   this.updateManualQrFile = file;
-
-//   const reader = new FileReader();
-//   reader.onload = () => {
-//     this.updateSelectedImage = reader.result as string;
-//   };
-//   reader.readAsDataURL(file);
-
-//   this.generatedUpdateFile = file;
-//   this.newQrGenerated = true;
-// }
-onUpdateQrFileSelected(event: any): void {
-  const file = event.target.files[0];
-  if (!file) return;
-
- 
-  const maxSize = 500 * 1024; // 500KB
-
-  if (file.size > maxSize) {
-    this.snack.show("Image size should be less than 500KB", false);
-    return;
+    // IMPORTANT: override generated QR
+    this.generatedFile = file;
   }
 
-  this.updateManualQrFile = file;
+  // onUpdateQrFileSelected(event: any): void {
+  //   const file = event.target.files[0];
+  //   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    this.updateSelectedImage = reader.result as string;
-  };
-  reader.readAsDataURL(file);
+  //   this.updateManualQrFile = file;
 
-  this.generatedUpdateFile = file;
-  this.newQrGenerated = true;
-}
+  //   const reader = new FileReader();
+  //   reader.onload = () => {
+  //     this.updateSelectedImage = reader.result as string;
+  //   };
+  //   reader.readAsDataURL(file);
 
-setUpdateQrMode(mode: 'generate' | 'upload') {
-  this.updateQrMode = mode;
+  //   this.generatedUpdateFile = file;
+  //   this.newQrGenerated = true;
+  // }
+  onUpdateQrFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
 
-  this.updateQrData = null;
-  this.generatedUpdateFile = null;
-  this.updateManualQrFile = null;
-  this.updateSelectedImage = null;
+
+    const maxSize = 500 * 1024; // 500KB
+
+    if (file.size > maxSize) {
+      this.snack.show("Image size should be less than 500KB", false);
+      return;
+    }
+
+    this.updateManualQrFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.updateSelectedImage = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+
+    this.generatedUpdateFile = file;
+    this.newQrGenerated = true;
+  }
+
+  setUpdateQrMode(mode: 'generate' | 'upload') {
+    this.updateQrMode = mode;
+
+    this.updateQrData = null;
+    this.generatedUpdateFile = null;
+    this.updateManualQrFile = null;
+    this.updateSelectedImage = null;
     this.newQrGenerated = false;
-}
+  }
 
-removeQr() {
-  this.qrData = null;
-  this.generatedFile = null;
-  this.manualQrFile = null;
-  this.selectedImage = null;
-}
+  removeQr() {
+    this.qrData = null;
+    this.generatedFile = null;
+    this.manualQrFile = null;
+    this.selectedImage = null;
+  }
 
-setQrMode(mode: 'generate' | 'upload') {
-  this.qrMode = mode;
+  setQrMode(mode: 'generate' | 'upload') {
+    this.qrMode = mode;
 
-  // reset everything when switching
-  this.qrData = null;
-  this.selectedImage = null;
-  this.manualQrFile = null;
-  this.generatedFile = null;
-}
+    // reset everything when switching
+    this.qrData = null;
+    this.selectedImage = null;
+    this.manualQrFile = null;
+    this.generatedFile = null;
+  }
 
-removeUpdateQr() {
-  this.updateQrData = null;
-  this.updateSelectedImage = null;
-  this.updateManualQrFile = null;
-  this.generatedUpdateFile = null;
-}
+  removeUpdateQr() {
+    this.updateQrData = null;
+    this.updateSelectedImage = null;
+    this.updateManualQrFile = null;
+    this.generatedUpdateFile = null;
+  }
 
 
 
-showTooltip(event: MouseEvent, data: any) {
-  this.tooltipVisible = true;
-  this.tooltipData = data;
+  showTooltip(event: MouseEvent, data: any) {
+    this.tooltipVisible = true;
+    this.tooltipData = data;
 
-  this.tooltipX = event.clientX + 15;
-  this.tooltipY = event.clientY + 15;
-}
+    this.tooltipX = event.clientX + 15;
+    this.tooltipY = event.clientY + 15;
+  }
 
-hideTooltip() {
-  this.tooltipVisible = false;
-}
+  hideTooltip() {
+    this.tooltipVisible = false;
+  }
+
+
+    private getTopupStatus() {
+    this.headService.getHeadById(this.currentRoleId).subscribe((res) => {
+      this.topupStatus = res.topup;
+    });
+  }
+    changeTopupStatus() {
+    this.headService.toggleDashbaordTopup(this.currentRoleId).subscribe(() => {
+      this.topupStatus = !this.topupStatus; 
+    });
+  }
 }

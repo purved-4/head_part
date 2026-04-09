@@ -74,6 +74,13 @@ export class ChiefService {
     );
   }
 
+  toggleChiefTransactionStatus(agentId: string): Observable<Agent> {
+    return this.http.patch<Agent>(
+      `${baseUrl}/chief/changeTransaction/${agentId}`,
+      {},
+    );
+  }
+
   toggleChiefUserStatus(agentId: string, userId: any): Observable<Agent> {
     return this.http.patch<Agent>(
       `${baseUrl}/chief/changeStatusByUser/${agentId}/${userId}`,

@@ -1,8 +1,6 @@
+
 import { HeadService } from "./../../services/head.service";
-1326;
-// #----------------------------------#
-// | NOTE:-1326                       |
-// #----------------------------------#
+
 
 import {
   Component,
@@ -42,7 +40,7 @@ Chart.register(...registerables);
   styleUrls: ["./dashboard.component.css"],
 })
 export class HeadDashboardComponent
-  implements OnInit, AfterViewInit, OnDestroy
+    implements OnInit, AfterViewInit, OnDestroy
 {
   @ViewChild("trendChart") trendChartRef!: ElementRef;
   @ViewChild("topupMethodChart") topupMethodChartRef!: ElementRef;
@@ -74,20 +72,20 @@ export class HeadDashboardComponent
   totalpayouts = 0;
   activeAccounts = 0;
 
-  // NEW: UI state flags for toggling topup/payout monitoring
+// NEW: UI state flags for toggling topup/payout monitoring
   topupActive = true;
   payoutActive = true;
   mobilePage = 1;
   mobilePageSize = 6;
   mobilePageSizes = [5, 8, 12];
 
-  // Original mixed lists (kept for compatibility if needed)
+// Original mixed lists (kept for compatibility if needed)
   pendingTransactions: any[] = [];
   approvedTransactions: any[] = [];
   approvedtopups: any[] = [];
   approvedpayouts: any[] = [];
 
-  // NEW: sectioned pending arrays
+// NEW: sectioned pending arrays
   pendingUpi: any[] = [];
   pendingBank: any[] = [];
   pendingpayouts: any[] = [];
@@ -103,7 +101,7 @@ export class HeadDashboardComponent
   processingNow = Date.now();
   private processingTimerId: any = null;
 
-  // Add these properties
+// Add these properties
   previewDocument: boolean = false;
   previewUrl: string | null = null;
 
@@ -117,7 +115,7 @@ export class HeadDashboardComponent
   selectedFile: File | null = null;
   isDragging = false;
 
-  // filters
+// filters
   pendingFilterType: "all" | "topup" | "payout" = "all";
   pendingFilterMethod: "all" | "upi" | "bank" = "all";
   mobileFilter: "all" | "upi" | "bank" | "payout" = "all";
@@ -149,16 +147,16 @@ export class HeadDashboardComponent
   approvedPageSize = 5;
   approvedPageSizes = [5, 8, 12];
 // UPI
-pendingUpiPage = 1;
-pendingUpiPageSize = 5;
+  pendingUpiPage = 1;
+  pendingUpiPageSize = 5;
 
 // Bank
-pendingBankPage = 1;
-pendingBankPageSize = 5;
+  pendingBankPage = 1;
+  pendingBankPageSize = 5;
 
 // Payout
-pendingPayoutPage = 1;
-pendingPayoutPageSize = 5;
+  pendingPayoutPage = 1;
+  pendingPayoutPageSize = 5;
   pendingPageSizes = [5, 8];
 
   payoutApprovedPage = 1;
@@ -198,14 +196,14 @@ pendingPayoutPageSize = 5;
   topupStatus: any = false;
 
   constructor(
-    private fundService: FundsService,
-    private userStateService: UserStateService,
-    private socketConfigService: SocketConfigService,
-    private bankService: BankService,
-    private upiService: UpiService,
-    private snackbar: SnackbarService,
-    private headService: HeadService,
-    private multimediaService:MultimediaService
+      private fundService: FundsService,
+      private userStateService: UserStateService,
+      private socketConfigService: SocketConfigService,
+      private bankService: BankService,
+      private upiService: UpiService,
+      private snackbar: SnackbarService,
+      private headService: HeadService,
+      private multimediaService:MultimediaService
   ) {}
 
   ngOnInit(): void {
@@ -214,20 +212,20 @@ pendingPayoutPageSize = 5;
     this.getTopupStatus();
 
     this.fundService
-      .broadcast(this.headId, this.role)
-      .subscribe((data: any) => {
-        this.lastBroadcastData = data;
-        this.processIncomingEvent(data);
-      });
+        .broadcast(this.headId, this.role)
+        .subscribe((data: any) => {
+          this.lastBroadcastData = data;
+          this.processIncomingEvent(data);
+        });
 
     this.fundService
-      .broadcast(this.headId, this.role)
-      .subscribe((data: any) => {
-        this.processIncomingEvent(data);
-      });
+        .broadcast(this.headId, this.role)
+        .subscribe((data: any) => {
+          this.processIncomingEvent(data);
+        });
 
     this.resetAllLists();
-    // this.refreshAllFunds(this.headId);
+// this.refreshAllFunds(this.headId);
 
     this.socketConfigService.subscribeToPendingData(this.headId);
 
@@ -243,8 +241,8 @@ pendingPayoutPageSize = 5;
     }
 
     setInterval(() => {
-  this.processingNow = Date.now(); // trigger change detection
-}, 60000);
+      this.processingNow = Date.now(); 
+    }, 60000);
   }
 
   private getTopupStatus() {
@@ -255,7 +253,7 @@ pendingPayoutPageSize = 5;
 
   changeTopupStatus() {
     this.headService.toggleDashbaordTopup(this.headId).subscribe(() => {
-      this.topupStatus = !this.topupStatus; // update UI instantly
+      this.topupStatus = !this.topupStatus;
     });
   }
 
@@ -267,246 +265,246 @@ pendingPayoutPageSize = 5;
     this.recenttopups = [];
     this.recentpayouts = [];
 
-    // new per-section pending arrays
+// new per-section pending arrays
     this.pendingUpi = [];
     this.pendingBank = [];
     this.pendingpayouts = [];
   }
 
-  // New: fetch accepted/settled records from APIs to use as ground truth for charts/stats
+// New: fetch accepted/settled records from APIs to use as ground truth for charts/stats
   private refreshAllFunds(headId?: string) {
     if (!headId) headId = this.headId;
     if (!headId) return;
 
-    // clear previously approved lists (we'll refill)
+// clear previously approved lists (we'll refill)
     this.approvedtopups = [];
     this.approvedpayouts = [];
     this.approvedTransactions = [];
 
     const bankObs = this.fundService
-      .getAllBankFundWithBranchId(headId, "ACCEPTED")
-      .pipe(catchError((e) => of([])));
+        .getAllBankFundWithBranchId(headId, "ACCEPTED")
+        .pipe(catchError((e) => of([])));
     const upiObs = this.fundService
-      .getAllUpiFundWithBranchId(headId, "ACCEPTED")
-      .pipe(catchError((e) => of([])));
+        .getAllUpiFundWithBranchId(headId, "ACCEPTED")
+        .pipe(catchError((e) => of([])));
     const withdrawObs = this.fundService
-      .getAllpayoutTrueFalseBybranchId(headId, "ACCEPTED")
-      .pipe(catchError((e) => of([])));
+        .getAllpayoutTrueFalseBybranchId(headId, "ACCEPTED")
+        .pipe(catchError((e) => of([])));
 
     forkJoin({ bank: bankObs, upi: upiObs, payout: withdrawObs }).subscribe(
-      (res: any) => {
-        // bank and upi are accepted topups
-        this.mapFundsArray(res.upi || [], "upi", true);
-        this.mapFundsArray(res.bank || [], "bank", true);
-        // payouts
-        this.mappayoutsArray(res.payout || []);
+        (res: any) => {
+// bank and upi are accepted topups
+          this.mapFundsArray(res.upi || [], "upi", true);
+          this.mapFundsArray(res.bank || [], "bank", true);
+// payouts
+          this.mappayoutsArray(res.payout || []);
 
-        // compute accepted sums (amounts) so UI shows totals even if SSE hasn't provided them
-        const upiArr = Array.isArray(res.upi) ? res.upi : [];
-        const bankArr = Array.isArray(res.bank) ? res.bank : [];
-        const withdrawArr = Array.isArray(res.payout) ? res.payout : [];
+// compute accepted sums (amounts) so UI shows totals even if SSE hasn't provided them
+          const upiArr = Array.isArray(res.upi) ? res.upi : [];
+          const bankArr = Array.isArray(res.bank) ? res.bank : [];
+          const withdrawArr = Array.isArray(res.payout) ? res.payout : [];
 
-        this.acceptedUpi = upiArr.reduce(
-          (s: number, a: any) => s + (Number(a.amount) || 0),
-          0,
-        );
-        this.acceptedBank = bankArr.reduce(
-          (s: number, a: any) => s + (Number(a.amount) || 0),
-          0,
-        );
-        this.acceptedWid = withdrawArr.reduce(
-          (s: number, a: any) => s + (Number(a.amount) || 0),
-          0,
-        );
+          this.acceptedUpi = upiArr.reduce(
+              (s: number, a: any) => s + (Number(a.amount) || 0),
+              0,
+          );
+          this.acceptedBank = bankArr.reduce(
+              (s: number, a: any) => s + (Number(a.amount) || 0),
+              0,
+          );
+          this.acceptedWid = withdrawArr.reduce(
+              (s: number, a: any) => s + (Number(a.amount) || 0),
+              0,
+          );
 
-        this.acceptedDep = this.acceptedBank + this.acceptedUpi;
+          this.acceptedDep = this.acceptedBank + this.acceptedUpi;
 
-        // recompute
-        this.computeStatsFromData();
-        this.updateChartsFromData();
-        this.clampPages();
-        this.ensureProcessingTimerState();
-      },
-      (err) => {},
+// recompute
+          this.computeStatsFromData();
+          this.updateChartsFromData();
+          this.clampPages();
+          this.ensureProcessingTimerState();
+        },
+        (err) => {},
     );
   }
 
   private mapFundsArray(
-  funds: any[],
-  mode: "bank" | "upi",
-  settledFlag: boolean,
-): void {
-  if (!Array.isArray(funds) || funds.length === 0) return;
+      funds: any[],
+      mode: "bank" | "upi",
+      settledFlag: boolean,
+  ): void {
+    if (!Array.isArray(funds) || funds.length === 0) return;
 
-  for (const fund of funds) {
-    try {
-      const rawPath = fund.filePath || null;
+    for (const fund of funds) {
+      try {
+        const rawPath = fund.filePath || null;
 
-      const tx = {
-        id: fund.id || null,
-        fundId: fund.id || null,
-        type: "topup",
-        portal:
-          fund.portalName || fund.portalDomain || fund.portalId || "Portal",
-        amount: Number(fund.amount) || 0,
-        date: fund.createdAt
-          ? new Date(fund.createdAt)
-          : fund.dateTime
-          ? new Date(fund.dateTime)
-          : new Date(),
-        utrNumber: fund.transactionId || fund.utr || null,
-        mode: mode,
-        accountNo: fund.accountNo || null,
-        bankId: fund.bankId || null,
-        bankName: fund.bankName || fund.bank || null,
+        const tx = {
+          id: fund.id || null,
+          fundId: fund.id || null,
+          type: "topup",
+          portal:
+              fund.portalName || fund.portalDomain || fund.portalId || "Portal",
+          amount: Number(fund.amount) || 0,
+          date: fund.createdAt
+              ? new Date(fund.createdAt)
+              : fund.dateTime
+                  ? new Date(fund.dateTime)
+                  : new Date(),
+          utrNumber: fund.transactionId || fund.utr || null,
+          mode: mode,
+          accountNo: fund.accountNo || null,
+          bankId: fund.bankId || null,
+          bankName: fund.bankName || fund.bank || null,
 
-        //  old remove
-        // filePath: ...
+//  old remove
+// filePath: ...
 
-        //  NEW
-        filePath: rawPath,        // backend path
-        fileUrl: '',            // blob URL later
+//  NEW
+          filePath: rawPath,        // backend path
+          fileUrl: '',            // blob URL later
 
-        remarks: fund.remarks || null,
-        settled: !!fund.settled,
-        raw: fund,
-        upiId: fund.vpa,
-      };
+          remarks: fund.remarks || null,
+          settled: !!fund.settled,
+          raw: fund,
+          upiId: fund.vpa,
+        };
 
-      //  LOAD IMAGE (IMPORTANT)
-      // if (tx.filePath) {
-      //   this.multimediaService.getPrivateImage(tx.filePath).subscribe({
-      //     next: (url) => {
-      //       tx.fileUrl = url;
-      //     },
-      //     error: () => {
-      //       tx.fileUrl = '';
-      //     },
-      //   });
-      // }
-      if (tx.filePath) {
-  this.multimediaService.getPrivateImage(tx.filePath).subscribe({
-    next: (url) => {
-      tx.fileUrl = url;
-
-      //  ADD THIS (VERY IMPORTANT)
-      if (this.selectedTransaction?.id === tx.id) {
-        this.selectedTransaction = { ...tx };
-      }
-    },
-    error: () => {
-      tx.fileUrl = '';
-    },
-  });
-}
-
-      if (settledFlag || tx.settled) {
-        const approvedTx = { ...tx, status: "completed" };
-        this.approvedTransactions.unshift(approvedTx);
-        this.approvedtopups.unshift(approvedTx);
-      } else {
-        if (mode === "upi") {
-          this.pendingUpi.unshift(tx);
-        } else {
-          this.pendingBank.unshift(tx);
-        }
-      }
-    } catch (err) {}
-  }
-}
-  private mappayoutsArray(payouts: any[]): void {
-  if (!Array.isArray(payouts) || payouts.length === 0) return;
-
-  for (const w of payouts) {
-    try {
-      const rawPath = w.filePath || null;
-
-      // const tx = {
-      //   id: w.id || null,
-      //   fundId: w.id || null,
-      //   type: "payout",
-
-      //   portal: w.portalName || w.portalDomain || w.portalId || null,
-
-      //   amount: Number(w.amount) || 0,
-
-      //   date: w.createdAt ? new Date(w.createdAt) : new Date(),
-
-      //   utrNumber: w.transactionId || w.utr || null,
-
-      //   mode: "bank",
-
-      //   accountNo: w.accountNo || w.accountNumber || null,
-      //   bankId: w.bankId || null,
-      //   bankName: w.bankName || w.bank || w.bankName || null,
-
-      //   //  REMOVE direct URL
-      //   // filePath: `${fileBaseUrl}/${w.filePath}`
-
-      //   //  NEW
-      //   filePath: rawPath,   // backend raw path
-      //   fileUrl: '',       // blob URL later
-
-      //   remarks: w.remarks || w.message || null,
-
-      //   settled: !!w.settled,
-      //   raw: w,
-
-      //   holderName: w.holderName || w.accountHolderName || null,
-      // };
-
-      const tx = {
-  id: w.id || null,
-  fundId: w.id || null,
-  type: "payout",
-  portal: w.portalName || w.portalDomain || w.portalId || null,
-  amount: Number(w.amount) || 0,
-  date: w.createdAt ? new Date(w.createdAt) : new Date(),
-  utrNumber: w.transactionId || w.utr || null,
-  mode: "bank",
-  accountNo: w.accountNo || w.accountNumber || null,
-  bankId: w.bankId || null,
-  bankName: w.bankName || w.bank || null,
-  filePath: rawPath,
-  fileUrl: '',
-  remarks: w.remarks || w.message || null,
-  settled: !!w.settled,
-  raw: w,
-  holderName: w.holderName || w.accountHolderName || null,
-};
-
-      //  LOAD IMAGE (IMPORTANT)
-      if (tx.filePath) {
-        if (tx.filePath.startsWith("http")) {
-          //  public URL
-          tx.fileUrl = tx.filePath;
-        } else {
-          //  private (token via interceptor)
+//  LOAD IMAGE (IMPORTANT)
+// if (tx.filePath) {
+//   this.multimediaService.getPrivateImage(tx.filePath).subscribe({
+//     next: (url) => {
+//       tx.fileUrl = url;
+//     },
+//     error: () => {
+//       tx.fileUrl = '';
+//     },
+//   });
+// }
+        if (tx.filePath) {
           this.multimediaService.getPrivateImage(tx.filePath).subscribe({
-            // next: (url) => (tx.fileUrl = url),
             next: (url) => {
-  tx.fileUrl = url;
+              tx.fileUrl = url;
 
-  //  ADD THIS
-  if (this.selectedTransaction?.id === tx.id) {
-    this.selectedTransaction = { ...tx };
-  }
-},
-            error: () => (tx.fileUrl = ''),
+//  ADD THIS (VERY IMPORTANT)
+              if (this.selectedTransaction?.id === tx.id) {
+                this.selectedTransaction = { ...tx };
+              }
+            },
+            error: () => {
+              tx.fileUrl = '';
+            },
           });
         }
-      }
 
-      if (tx.settled) {
-        const approvedTx = { ...tx, status: "completed" };
-        this.approvedTransactions.unshift(approvedTx);
-        this.approvedpayouts.unshift(approvedTx);
-      } else {
-        this.pendingpayouts.unshift(tx);
-      }
-    } catch (err) {}
+        if (settledFlag || tx.settled) {
+          const approvedTx = { ...tx, status: "completed" };
+          this.approvedTransactions.unshift(approvedTx);
+          this.approvedtopups.unshift(approvedTx);
+        } else {
+          if (mode === "upi") {
+            this.pendingUpi.unshift(tx);
+          } else {
+            this.pendingBank.unshift(tx);
+          }
+        }
+      } catch (err) {}
+    }
   }
-}
+  private mappayoutsArray(payouts: any[]): void {
+    if (!Array.isArray(payouts) || payouts.length === 0) return;
+
+    for (const w of payouts) {
+      try {
+        const rawPath = w.filePath || null;
+
+// const tx = {
+//   id: w.id || null,
+//   fundId: w.id || null,
+//   type: "payout",
+
+//   portal: w.portalName || w.portalDomain || w.portalId || null,
+
+//   amount: Number(w.amount) || 0,
+
+//   date: w.createdAt ? new Date(w.createdAt) : new Date(),
+
+//   utrNumber: w.transactionId || w.utr || null,
+
+//   mode: "bank",
+
+//   accountNo: w.accountNo || w.accountNumber || null,
+//   bankId: w.bankId || null,
+//   bankName: w.bankName || w.bank || w.bankName || null,
+
+//   //  REMOVE direct URL
+//   // filePath: `${fileBaseUrl}/${w.filePath}`
+
+//   //  NEW
+//   filePath: rawPath,   // backend raw path
+//   fileUrl: '',       // blob URL later
+
+//   remarks: w.remarks || w.message || null,
+
+//   settled: !!w.settled,
+//   raw: w,
+
+//   holderName: w.holderName || w.accountHolderName || null,
+// };
+
+        const tx = {
+          id: w.id || null,
+          fundId: w.id || null,
+          type: "payout",
+          portal: w.portalName || w.portalDomain || w.portalId || null,
+          amount: Number(w.amount) || 0,
+          date: w.createdAt ? new Date(w.createdAt) : new Date(),
+          utrNumber: w.transactionId || w.utr || null,
+          mode: "bank",
+          accountNo: w.accountNo || w.accountNumber || null,
+          bankId: w.bankId || null,
+          bankName: w.bankName || w.bank || null,
+          filePath: rawPath,
+          fileUrl: '',
+          remarks: w.remarks || w.message || null,
+          settled: !!w.settled,
+          raw: w,
+          holderName: w.holderName || w.accountHolderName || null,
+        };
+
+//  LOAD IMAGE (IMPORTANT)
+        if (tx.filePath) {
+          if (tx.filePath.startsWith("http")) {
+//  public URL
+            tx.fileUrl = tx.filePath;
+          } else {
+//  private (token via interceptor)
+            this.multimediaService.getPrivateImage(tx.filePath).subscribe({
+// next: (url) => (tx.fileUrl = url),
+              next: (url) => {
+                tx.fileUrl = url;
+
+//  ADD THIS
+                if (this.selectedTransaction?.id === tx.id) {
+                  this.selectedTransaction = { ...tx };
+                }
+              },
+              error: () => (tx.fileUrl = ''),
+            });
+          }
+        }
+
+        if (tx.settled) {
+          const approvedTx = { ...tx, status: "completed" };
+          this.approvedTransactions.unshift(approvedTx);
+          this.approvedpayouts.unshift(approvedTx);
+        } else {
+          this.pendingpayouts.unshift(tx);
+        }
+      } catch (err) {}
+    }
+  }
 
   private extractPortalsFromFetched(allFunds: any[]): void {
     if (!Array.isArray(allFunds)) return;
@@ -524,12 +522,12 @@ pendingPayoutPageSize = 5;
 
   private computeStatsFromData(): void {
     this.totaltopups = this.approvedtopups.reduce(
-      (s, r) => s + (Number(r.amount) || 0),
-      0,
+        (s, r) => s + (Number(r.amount) || 0),
+        0,
     );
     this.totalpayouts = this.approvedpayouts.reduce(
-      (s, r) => s + (Number(r.amount) || 0),
-      0,
+        (s, r) => s + (Number(r.amount) || 0),
+        0,
     );
 
     // combine pending lists for active accounts calculation (keeps compatibility)
@@ -573,9 +571,9 @@ pendingPayoutPageSize = 5;
   private parseProcessingDeadline(tx: any): Date | null {
     if (!tx) return null;
     const v =
-      tx.processingTimeLimit ||
-      (tx.raw && tx.raw.processingTimeLimit) ||
-      (tx.raw && tx.raw.processingTimeLimit);
+        tx.processingTimeLimit ||
+        (tx.raw && tx.raw.processingTimeLimit) ||
+        (tx.raw && tx.raw.processingTimeLimit);
     if (!v) return null;
     const d = new Date(v);
     return isNaN(d.getTime()) ? null : d;
@@ -682,14 +680,14 @@ pendingPayoutPageSize = 5;
 
   private initTrendChart(): void {
     const ctx =
-      this.trendChartRef?.nativeElement?.getContext &&
-      this.trendChartRef.nativeElement.getContext("2d");
+        this.trendChartRef?.nativeElement?.getContext &&
+        this.trendChartRef.nativeElement.getContext("2d");
     if (!ctx) return;
     this.trendChart = new Chart(ctx, {
       type: "line",
       data: {
         labels: this.getLastNDatesLabels(this.selectedTimeRange).map((l) =>
-          new Date(l).toLocaleDateString(),
+            new Date(l).toLocaleDateString(),
         ),
         datasets: [
           {
@@ -758,7 +756,7 @@ pendingPayoutPageSize = 5;
             callbacks: {
               label: (ctx) => {
                 return `${ctx.dataset.label}: ₹${Number(
-                  ctx.parsed.y,
+                    ctx.parsed.y,
                 ).toLocaleString("en-IN")}`;
               },
             },
@@ -796,8 +794,8 @@ pendingPayoutPageSize = 5;
 
   private inittopupMethodChart(): void {
     const ctx =
-      this.topupMethodChartRef?.nativeElement?.getContext &&
-      this.topupMethodChartRef.nativeElement.getContext("2d");
+        this.topupMethodChartRef?.nativeElement?.getContext &&
+        this.topupMethodChartRef.nativeElement.getContext("2d");
 
     if (!ctx) return;
     this.topupMethodChart = new Chart(ctx, {
@@ -843,7 +841,7 @@ pendingPayoutPageSize = 5;
             },
             callbacks: {
               label: (ctx) =>
-                `${ctx.label}: ₹${Number(ctx.raw).toLocaleString("en-IN")}`,
+                  `${ctx.label}: ₹${Number(ctx.raw).toLocaleString("en-IN")}`,
             },
           },
         },
@@ -853,8 +851,8 @@ pendingPayoutPageSize = 5;
 
   private initpayoutBankChart(): void {
     const ctx =
-      this.payoutBankChartRef?.nativeElement?.getContext &&
-      this.payoutBankChartRef.nativeElement.getContext("2d");
+        this.payoutBankChartRef?.nativeElement?.getContext &&
+        this.payoutBankChartRef.nativeElement.getContext("2d");
     if (!ctx) return;
     this.payoutBankChart = new Chart(ctx, {
       type: "bar",
@@ -888,7 +886,7 @@ pendingPayoutPageSize = 5;
             },
             callbacks: {
               label: (ctx) =>
-                `Amount: ₹${Number(ctx.parsed.y).toLocaleString("en-IN")}`,
+                  `Amount: ₹${Number(ctx.parsed.y).toLocaleString("en-IN")}`,
             },
           },
         },
@@ -969,7 +967,7 @@ pendingPayoutPageSize = 5;
         bankMap.set(key, (bankMap.get(key) || 0) + (Number(f.amount) || 0));
       }
       const sortedBanks = Array.from(bankMap.entries()).sort(
-        (a, b) => b[1] - a[1],
+          (a, b) => b[1] - a[1],
       );
       const topBanks = sortedBanks.slice(0, 10);
       const bankLabels = topBanks.map((x) => x[0]);
@@ -990,14 +988,14 @@ pendingPayoutPageSize = 5;
       for (const f of topupsAll) {
         const dateStr = new Date(f.date).toDateString();
         const idx = labels.findIndex(
-          (lbl) => new Date(lbl).toDateString() === dateStr,
+            (lbl) => new Date(lbl).toDateString() === dateStr,
         );
         if (idx >= 0) topupArr[idx] += Number(f.amount) || 0;
       }
       for (const f of payoutsAll) {
         const dateStr = new Date(f.date).toDateString();
         const idx = labels.findIndex(
-          (lbl) => new Date(lbl).toDateString() === dateStr,
+            (lbl) => new Date(lbl).toDateString() === dateStr,
         );
         if (idx >= 0) payoutArr[idx] += Number(f.amount) || 0;
       }
@@ -1005,7 +1003,7 @@ pendingPayoutPageSize = 5;
       if (this.trendChart) {
         try {
           this.trendChart.data.labels = labels.map((l) =>
-            new Date(l).toLocaleDateString(),
+              new Date(l).toLocaleDateString(),
           );
           (this.trendChart.data.datasets[0].data as any) = topupArr;
           (this.trendChart.data.datasets[1].data as any) = payoutArr;
@@ -1031,12 +1029,12 @@ pendingPayoutPageSize = 5;
 
   getTimePeriodClass(active: boolean): string {
     const baseClass =
-      "px-4 py-2 rounded-xl font-bold transition-all duration-200 text-sm";
+        "px-4 py-2 rounded-xl font-bold transition-all duration-200 text-sm";
     return active
-      ? baseClass +
-          " bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30"
-      : baseClass +
-          " bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+        ? baseClass +
+        " bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30"
+        : baseClass +
+        " bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
   }
 
   getStatusClass(status: string): string {
@@ -1047,7 +1045,7 @@ pendingPayoutPageSize = 5;
       failed: "bg-rose-100 text-rose-800 border border-rose-200",
     };
     return (
-      classes[status] || "bg-slate-100 text-slate-800 border border-slate-200"
+        classes[status] || "bg-slate-100 text-slate-800 border border-slate-200"
     );
   }
 
@@ -1060,11 +1058,11 @@ pendingPayoutPageSize = 5;
 
   getPollingLabel(): string {
     const found = this.pollingIntervals.find(
-      (p) => p.value === this.selectedPollingInterval,
+        (p) => p.value === this.selectedPollingInterval,
     );
     return found
-      ? found.label
-      : `${Math.round(this.selectedPollingInterval / 1000)}s`;
+        ? found.label
+        : `${Math.round(this.selectedPollingInterval / 1000)}s`;
   }
 
   setActiveTimePeriod(period: any): void {
@@ -1079,10 +1077,10 @@ pendingPayoutPageSize = 5;
   // }
 
   onPendingFilterChange() {
-  this.pendingUpiPage = 1;
-  this.pendingBankPage = 1;
-  this.pendingPayoutPage = 1;
-}
+    this.pendingUpiPage = 1;
+    this.pendingBankPage = 1;
+    this.pendingPayoutPage = 1;
+  }
 
   onApprovedtopupsFilterChange() {
     this.approvedPage = 1;
@@ -1093,30 +1091,30 @@ pendingPayoutPageSize = 5;
   }
 
   viewTransactionDetails(transaction: any): void {
-console.log(transaction.filePath);
+    console.log(transaction.filePath);
 
-  //    if (transaction.filePath) {
-  //   this.multimediaService.getPrivateImage(transaction.filePath).subscribe({
-  //     next: (url) => {
-  //       console.log(url);
-        
-  //       transaction.fileUrl = url;
-  //     },
-  //     error: () => {
-  //       transaction.fileUrl = '';
-  //     },
-  //   });
-  // }
+    //    if (transaction.filePath) {
+    //   this.multimediaService.getPrivateImage(transaction.filePath).subscribe({
+    //     next: (url) => {
+    //       console.log(url);
 
-  // console.log(tr);
-  
+    //       transaction.fileUrl = url;
+    //     },
+    //     error: () => {
+    //       transaction.fileUrl = '';
+    //     },
+    //   });
+    // }
+
+    // console.log(tr);
+
 
     if (!transaction) return;
     // Normalize the incoming object so modal bindings (utrNumber, upiId, accountNo, holderName, filePath, bankName, date etc.) are always present
     this.selectedTransaction = this.normalizeTransaction(transaction);
 
     // console.log(this.selectedTransaction);
-    
+
   }
 
   filteredPending(): any[] {
@@ -1133,9 +1131,9 @@ console.log(transaction.filePath);
         if (this.pendingFilterMethod === "upi" && t.mode !== "upi")
           return false;
         if (
-          this.pendingFilterMethod === "bank" &&
-          t.mode !== "bank" &&
-          t.type !== "payout"
+            this.pendingFilterMethod === "bank" &&
+            t.mode !== "bank" &&
+            t.type !== "payout"
         )
           return false;
       }
@@ -1163,11 +1161,11 @@ console.log(transaction.filePath);
   //   return list.slice(start, start + this.pendingPageSize);
   // }
 
-pagedPendingUpi(): any[] {
-  const list = this.filteredPendingUpi();
-  const start = (this.pendingUpiPage - 1) * this.pendingUpiPageSize;
-  return list.slice(start, start + this.pendingUpiPageSize);
-}
+  pagedPendingUpi(): any[] {
+    const list = this.filteredPendingUpi();
+    const start = (this.pendingUpiPage - 1) * this.pendingUpiPageSize;
+    return list.slice(start, start + this.pendingUpiPageSize);
+  }
 
   // Bank pending
   filteredPendingBank(): any[] {
@@ -1190,10 +1188,10 @@ pagedPendingUpi(): any[] {
   // }
 
   pagedPendingBank(): any[] {
-  const list = this.filteredPendingBank();
-  const start = (this.pendingBankPage - 1) * this.pendingBankPageSize;
-  return list.slice(start, start + this.pendingBankPageSize);
-}
+    const list = this.filteredPendingBank();
+    const start = (this.pendingBankPage - 1) * this.pendingBankPageSize;
+    return list.slice(start, start + this.pendingBankPageSize);
+  }
 
   // payouts pending
   filteredPendingpayouts(): any[] {
@@ -1216,10 +1214,10 @@ pagedPendingUpi(): any[] {
   //   return list.slice(start, start + this.pendingPageSize);
   // }
   pagedPendingpayouts(): any[] {
-  const list = this.filteredPendingpayouts();
-  const start = (this.pendingPayoutPage - 1) * this.pendingPayoutPageSize;
-  return list.slice(start, start + this.pendingPayoutPageSize);
-}
+    const list = this.filteredPendingpayouts();
+    const start = (this.pendingPayoutPage - 1) * this.pendingPayoutPageSize;
+    return list.slice(start, start + this.pendingPayoutPageSize);
+  }
 
   filteredApprovedtopups(): any[] {
     return this.approvedtopups.filter((d) => {
@@ -1253,8 +1251,8 @@ pagedPendingUpi(): any[] {
 
   approvedTotalPages(): number {
     return Math.max(
-      1,
-      Math.ceil(this.filteredApprovedtopups().length / this.approvedPageSize),
+        1,
+        Math.ceil(this.filteredApprovedtopups().length / this.approvedPageSize),
     );
   }
 
@@ -1266,32 +1264,32 @@ pagedPendingUpi(): any[] {
   // }
 
   pendingUpiTotalPages(): number {
-  return Math.max(
-    1,
-    Math.ceil(this.filteredPendingUpi().length / this.pendingUpiPageSize)
-  );
-}
+    return Math.max(
+        1,
+        Math.ceil(this.filteredPendingUpi().length / this.pendingUpiPageSize)
+    );
+  }
 
-pendingBankTotalPages(): number {
-  return Math.max(
-    1,
-    Math.ceil(this.filteredPendingBank().length / this.pendingBankPageSize)
-  );
-}
+  pendingBankTotalPages(): number {
+    return Math.max(
+        1,
+        Math.ceil(this.filteredPendingBank().length / this.pendingBankPageSize)
+    );
+  }
 
-pendingPayoutTotalPages(): number {
-  return Math.max(
-    1,
-    Math.ceil(this.filteredPendingpayouts().length / this.pendingPayoutPageSize)
-  );
-}
+  pendingPayoutTotalPages(): number {
+    return Math.max(
+        1,
+        Math.ceil(this.filteredPendingpayouts().length / this.pendingPayoutPageSize)
+    );
+  }
 
   payoutApprovedTotalPages(): number {
     return Math.max(
-      1,
-      Math.ceil(
-        this.filteredApprovedpayouts().length / this.payoutApprovedPageSize,
-      ),
+        1,
+        Math.ceil(
+            this.filteredApprovedpayouts().length / this.payoutApprovedPageSize,
+        ),
     );
   }
 
@@ -1304,20 +1302,20 @@ pendingPayoutTotalPages(): number {
 
 
   setPendingUpiPage(p: number) {
-  this.pendingUpiPage = Math.min(Math.max(1, p), this.pendingUpiTotalPages());
-}
+    this.pendingUpiPage = Math.min(Math.max(1, p), this.pendingUpiTotalPages());
+  }
 
-setPendingBankPage(p: number) {
-  this.pendingBankPage = Math.min(Math.max(1, p), this.pendingBankTotalPages());
-}
+  setPendingBankPage(p: number) {
+    this.pendingBankPage = Math.min(Math.max(1, p), this.pendingBankTotalPages());
+  }
 
-setPendingPayoutPage(p: number) {
-  this.pendingPayoutPage = Math.min(Math.max(1, p), this.pendingPayoutTotalPages());
-}
+  setPendingPayoutPage(p: number) {
+    this.pendingPayoutPage = Math.min(Math.max(1, p), this.pendingPayoutTotalPages());
+  }
   setpayoutApprovedPage(p: number) {
     this.payoutApprovedPage = Math.min(
-      Math.max(1, p),
-      this.payoutApprovedTotalPages(),
+        Math.max(1, p),
+        this.payoutApprovedTotalPages(),
     );
   }
 
@@ -1331,19 +1329,19 @@ setPendingPayoutPage(p: number) {
   // }
 
   onChangePendingUpiPageSize(size: number) {
-  this.pendingUpiPageSize = size;
-  this.pendingUpiPage = 1;
-}
+    this.pendingUpiPageSize = size;
+    this.pendingUpiPage = 1;
+  }
 
-onChangePendingBankPageSize(size: number) {
-  this.pendingBankPageSize = size;
-  this.pendingBankPage = 1;
-}
+  onChangePendingBankPageSize(size: number) {
+    this.pendingBankPageSize = size;
+    this.pendingBankPage = 1;
+  }
 
-onChangePendingPayoutPageSize(size: number) {
-  this.pendingPayoutPageSize = size;
-  this.pendingPayoutPage = 1;
-}
+  onChangePendingPayoutPageSize(size: number) {
+    this.pendingPayoutPageSize = size;
+    this.pendingPayoutPage = 1;
+  }
   onChangepayoutApprovedPageSize(size: number) {
     this.payoutApprovedPageSize = size;
     this.payoutApprovedPage = 1;
@@ -1359,50 +1357,50 @@ onChangePendingPayoutPageSize(size: number) {
   // }
 
   private clampPages() {
-  // approved (keep same)
-  if (this.approvedPage > this.approvedTotalPages())
-    this.approvedPage = this.approvedTotalPages();
+    // approved (keep same)
+    if (this.approvedPage > this.approvedTotalPages())
+      this.approvedPage = this.approvedTotalPages();
 
-  // UPI
-  if (this.pendingUpiPage > this.pendingUpiTotalPages())
-    this.pendingUpiPage = this.pendingUpiTotalPages();
+    // UPI
+    if (this.pendingUpiPage > this.pendingUpiTotalPages())
+      this.pendingUpiPage = this.pendingUpiTotalPages();
 
-  // Bank
-  if (this.pendingBankPage > this.pendingBankTotalPages())
-    this.pendingBankPage = this.pendingBankTotalPages();
+    // Bank
+    if (this.pendingBankPage > this.pendingBankTotalPages())
+      this.pendingBankPage = this.pendingBankTotalPages();
 
-  // Payout
-  if (this.pendingPayoutPage > this.pendingPayoutTotalPages())
-    this.pendingPayoutPage = this.pendingPayoutTotalPages();
+    // Payout
+    if (this.pendingPayoutPage > this.pendingPayoutTotalPages())
+      this.pendingPayoutPage = this.pendingPayoutTotalPages();
 
-  // approved payout (keep same)
-  if (this.payoutApprovedPage > this.payoutApprovedTotalPages())
-    this.payoutApprovedPage = this.payoutApprovedTotalPages();
-}
+    // approved payout (keep same)
+    if (this.payoutApprovedPage > this.payoutApprovedTotalPages())
+      this.payoutApprovedPage = this.payoutApprovedTotalPages();
+  }
 
   async approveTransaction(transaction: any): Promise<void> {
     if (!transaction) return;
 
     const t = this.normalizeTransaction(transaction) || transaction;
     const fundId =
-      t.fundId ||
-      t.id ||
-      (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
-      null;
+        t.fundId ||
+        t.id ||
+        (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
+        null;
 
     try {
       // Call the appropriate API based on transaction type
       if (t.type === "payout") {
         const accountId =
-          this.selectedPayoutMethod === "upi"
-            ? this.selectedUpi
-            : this.selectedPayoutMethod === "bank"
-              ? this.selectedBank
-              : null;
+            this.selectedPayoutMethod === "upi"
+                ? this.selectedUpi
+                : this.selectedPayoutMethod === "bank"
+                    ? this.selectedBank
+                    : null;
 
         if (accountId) {
           await lastValueFrom(
-            (this.fundService as any).acceptPayout(fundId, accountId),
+              (this.fundService as any).acceptPayout(fundId, accountId),
           );
         } else {
           await lastValueFrom((this.fundService as any).acceptPayout(fundId));
@@ -1449,7 +1447,7 @@ onChangePendingPayoutPageSize(size: number) {
       this.ensureProcessingTimerState();
     } catch (err: any) {
       const message =
-        err?.error?.message || err?.error?.error || "Approval failed";
+          err?.error?.message || err?.error?.error || "Approval failed";
       this.snackbar.show(message, false);
 
       // Best-effort: remove from pending and mark as failed
@@ -1504,8 +1502,8 @@ onChangePendingPayoutPageSize(size: number) {
     };
 
     this.fundService
-      .updateAmount(updateData, this.editAmountData.file)
-      .subscribe((res) => {});
+        .updateAmount(updateData, this.editAmountData.file)
+        .subscribe((res) => {});
 
     // Update transaction in UI
     this.selectedTransaction.amount = this.editAmountData.newAmount;
@@ -1521,17 +1519,17 @@ onChangePendingPayoutPageSize(size: number) {
     if (!fundId) return;
 
     this.fundService.updateProcessingStatus(fundId.id, this.headId).subscribe(
-      (res) => {
-        // Start a 1s timer so getRemainingTimeLabel() uses a moving reference (processingNow)
-        // This is safe to call multiple times because startProcessingTimer guards against duplicates.
-        this.startProcessingTimer();
-      },
-      (err) => {
-        const message =
-          err?.error?.message || err?.error?.error || "Processing failed";
+        (res) => {
+          // Start a 1s timer so getRemainingTimeLabel() uses a moving reference (processingNow)
+          // This is safe to call multiple times because startProcessingTimer guards against duplicates.
+          this.startProcessingTimer();
+        },
+        (err) => {
+          const message =
+              err?.error?.message || err?.error?.error || "Processing failed";
 
-        this.snackbar.show(message, false);
-      },
+          this.snackbar.show(message, false);
+        },
     );
   }
 
@@ -1565,8 +1563,8 @@ onChangePendingPayoutPageSize(size: number) {
     ];
 
     const anyProcessing = listsToCheck.some(
-      (list) =>
-        Array.isArray(list) && list.some((item) => item && item.processing),
+        (list) =>
+            Array.isArray(list) && list.some((item) => item && item.processing),
     );
 
     if (anyProcessing) {
@@ -1587,7 +1585,7 @@ onChangePendingPayoutPageSize(size: number) {
 
     // Reset file input
     const fileInput = document.getElementById(
-      "editFileInput",
+        "editFileInput",
     ) as HTMLInputElement;
     if (fileInput) {
       fileInput.value = "";
@@ -1650,25 +1648,25 @@ onChangePendingPayoutPageSize(size: number) {
   removeEditFile(): void {
     this.editAmountData.file = null;
     const fileInput = document.getElementById(
-      "editFileInput",
+        "editFileInput",
     ) as HTMLInputElement;
     if (fileInput) {
       fileInput.value = "";
     }
   }
   async rejectTransaction(
-    transaction: any,
-    reason: any,
-    file?: File | null,
+      transaction: any,
+      reason: any,
+      file?: File | null,
   ): Promise<void> {
     if (!transaction) return;
 
     const t = this.normalizeTransaction(transaction) || transaction;
     const fundId =
-      t.fundId ||
-      t.id ||
-      (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
-      null;
+        t.fundId ||
+        t.id ||
+        (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
+        null;
 
     try {
       let rejectObservable;
@@ -1679,9 +1677,9 @@ onChangePendingPayoutPageSize(size: number) {
         rejectObservable = this.fundService.rejectUpiFund(fundId, reason, file);
       } else if (t.mode === "bank" || t.type === "bank") {
         rejectObservable = this.fundService.rejectBankFund(
-          fundId,
-          reason,
-          file,
+            fundId,
+            reason,
+            file,
         );
       } else {
         this.snackbar.show("Unknown transaction type, cannot reject", false);
@@ -1698,21 +1696,21 @@ onChangePendingPayoutPageSize(size: number) {
       const failedTx = { ...t, status: "failed" };
       if (t.type === "payout") {
         if (
-          !this.recentpayouts.some((x) => this.identifiersMatch(x, failedTx))
+            !this.recentpayouts.some((x) => this.identifiersMatch(x, failedTx))
         ) {
           this.recentpayouts.unshift(failedTx);
         }
         this.approvedpayouts = this.approvedpayouts.filter(
-          (x) => !this.identifiersMatch(x, failedTx),
+            (x) => !this.identifiersMatch(x, failedTx),
         );
       } else {
         if (
-          !this.recenttopups.some((x) => this.identifiersMatch(x, failedTx))
+            !this.recenttopups.some((x) => this.identifiersMatch(x, failedTx))
         ) {
           this.recenttopups.unshift(failedTx);
         }
         this.approvedtopups = this.approvedtopups.filter(
-          (x) => !this.identifiersMatch(x, failedTx),
+            (x) => !this.identifiersMatch(x, failedTx),
         );
       }
 
@@ -1729,7 +1727,7 @@ onChangePendingPayoutPageSize(size: number) {
       this.ensureProcessingTimerState();
     } catch (err: any) {
       const message =
-        err?.error?.message || err?.error?.error || "Rejection failed";
+          err?.error?.message || err?.error?.error || "Rejection failed";
       this.snackbar.show(message, false);
 
       // Optionally, you could still remove from pending here if desired
@@ -1752,30 +1750,30 @@ onChangePendingPayoutPageSize(size: number) {
 
     if (this.banks == null) {
       this.bankService
-        .getBankDataWithEntityIdAndPortalId(this.headId, portalId)
-        .subscribe((res) => {
-          this.banks = res;
-        });
+          .getBankDataWithEntityIdAndPortalId(this.headId, portalId)
+          .subscribe((res) => {
+            this.banks = res;
+          });
     }
 
     if (this.upis == null) {
       this.upiService
-        .getAllByEntityIdAndPortalId(this.headId, portalId)
-        .subscribe((res: any) => {
-          this.upis = res;
-        });
+          .getAllByEntityIdAndPortalId(this.headId, portalId)
+          .subscribe((res: any) => {
+            this.upis = res;
+          });
     }
 
     if (!transaction) return;
     const t = this.normalizeTransaction(transaction) || transaction;
     const src =
-      t.type === "payout"
-        ? "payout"
-        : t.mode === "upi"
-          ? "upi"
-          : t.mode === "bank"
-            ? "bank"
-            : "none";
+        t.type === "payout"
+            ? "payout"
+            : t.mode === "upi"
+                ? "upi"
+                : t.mode === "bank"
+                    ? "bank"
+                    : "none";
 
     this.confirmTransaction = { ...t, section: src };
     this.showApproveConfirm = true;
@@ -1790,13 +1788,13 @@ onChangePendingPayoutPageSize(size: number) {
     if (!tx) return;
     const t = this.normalizeTransaction(tx) || tx;
     const src =
-      t.type === "payout"
-        ? "payout"
-        : t.mode === "upi"
-          ? "upi"
-          : t.mode === "bank"
-            ? "bank"
-            : "none";
+        t.type === "payout"
+            ? "payout"
+            : t.mode === "upi"
+                ? "upi"
+                : t.mode === "bank"
+                    ? "bank"
+                    : "none";
 
     this.confirmTransaction = { ...t, section: src };
     this.showRejectConfirm = true;
@@ -1807,8 +1805,8 @@ onChangePendingPayoutPageSize(size: number) {
   async confirmApprove() {
     if (this.isPayoutActionBlocked(this.confirmTransaction)) {
       this.snackbar.show(
-        "Processing complete hone ke baad approve kar sakte ho",
-        false,
+          "Processing complete hone ke baad approve kar sakte ho",
+          false,
       );
       return;
     }
@@ -1820,15 +1818,15 @@ onChangePendingPayoutPageSize(size: number) {
   get rejectionReason(): string {
     if (!this.reason) return "";
     return this.reason === "other"
-      ? (this.customReason || "").trim()
-      : this.reason;
+        ? (this.customReason || "").trim()
+        : this.reason;
   }
 
   async confirmReject() {
     if (this.isPayoutActionBlocked(this.confirmTransaction)) {
       this.snackbar.show(
-        "Processing complete hone ke baad reject kar sakte ho",
-        false,
+          "Processing complete hone ke baad reject kar sakte ho",
+          false,
       );
       return;
     }
@@ -1838,17 +1836,17 @@ onChangePendingPayoutPageSize(size: number) {
     const finalReason = this.rejectionReason;
     if (!finalReason) {
       this.snackbar.show(
-        "Please select or enter a reason for rejection",
-        false,
+          "Please select or enter a reason for rejection",
+          false,
       );
       return;
     }
 
     //  File optional – agar file hai to pass karo, nahi to undefined pass karo
     await this.rejectTransaction(
-      this.confirmTransaction,
-      finalReason,
-      this.selectedFile ?? undefined, // null/undefined ko undefined banao
+        this.confirmTransaction,
+        finalReason,
+        this.selectedFile ?? undefined, // null/undefined ko undefined banao
     );
 
     this.confirmTransaction = null;
@@ -1894,30 +1892,30 @@ onChangePendingPayoutPageSize(size: number) {
 
   // helper to return css/text for the status small label (not used in template currently but available)
   getActiveSmallLabel(
-    active: boolean,
-    type: "topup" | "payout",
+      active: boolean,
+      type: "topup" | "payout",
   ): {
     label: string;
     classes: string;
   } {
     if (type === "topup") {
       return active
-        ? {
+          ? {
             label: "Active",
             classes:
-              "text-emerald-600 bg-emerald-100 border border-emerald-200",
+                "text-emerald-600 bg-emerald-100 border border-emerald-200",
           }
-        : {
+          : {
             label: "Inactive",
             classes: "text-slate-500 bg-slate-100 border border-slate-200",
           };
     } else {
       return active
-        ? {
+          ? {
             label: "Active",
             classes: "text-rose-600 bg-rose-100 border border-rose-200",
           }
-        : {
+          : {
             label: "Inactive",
             classes: "text-slate-500 bg-slate-100 border border-slate-200",
           };
@@ -1925,140 +1923,140 @@ onChangePendingPayoutPageSize(size: number) {
   }
 
   // Process incoming SSE/broadcast event and update local pending lists
- private normalizeIncomingFund(
-  fund: any,
-  guessedMode?: "bank" | "upi" | "payout",
-) {
-  if (!fund) return null;
+  private normalizeIncomingFund(
+      fund: any,
+      guessedMode?: "bank" | "upi" | "payout",
+  ) {
+    if (!fund) return null;
 
-  const mode = guessedMode
-    ? guessedMode
-    : fund.type === "payout" ||
-      fund.transactionType === "payout" ||
-      fund.reviewStatus === "WITHDRAWAL"
-    ? "payout"
-    : fund.type === "bank" || fund.bankId || fund.accountNo
-    ? "bank"
-    : fund.type === "upi" || fund.vpa
-    ? "upi"
-    : "bank";
+    const mode = guessedMode
+        ? guessedMode
+        : fund.type === "payout" ||
+        fund.transactionType === "payout" ||
+        fund.reviewStatus === "WITHDRAWAL"
+            ? "payout"
+            : fund.type === "bank" || fund.bankId || fund.accountNo
+                ? "bank"
+                : fund.type === "upi" || fund.vpa
+                    ? "upi"
+                    : "bank";
 
-  const filePathRaw = fund.filePath || fund.snapshot || fund.qrImage || null;
+    const filePathRaw = fund.filePath || fund.snapshot || fund.qrImage || null;
 
-  const tx = {
-    id: fund.id || fund._id || null,
-    fundId: fund.id || fund.fundId || fund._id || null,
+    const tx = {
+      id: fund.id || fund._id || null,
+      fundId: fund.id || fund.fundId || fund._id || null,
 
-    type:
-      fund.type === "payout"
-        ? "payout"
-        : fund.type === "bank" || fund.type === "upi"
-        ? "topup"
-        : fund.transactionType === "payout"
-        ? "payout"
-        : "topup",
+      type:
+          fund.type === "payout"
+              ? "payout"
+              : fund.type === "bank" || fund.type === "upi"
+                  ? "topup"
+                  : fund.transactionType === "payout"
+                      ? "payout"
+                      : "topup",
 
-    portal: fund.portalName || fund.portalDomain || fund.portalId || null,
+      portal: fund.portalName || fund.portalDomain || fund.portalId || null,
 
-    currency: fund.currency,
-    currencyRate: fund.currencyRate,
+      currency: fund.currency,
+      currencyRate: fund.currencyRate,
 
-    amount: Number(fund.amount) || 0,
-    currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,
+      amount: Number(fund.amount) || 0,
+      currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,
 
-    date: fund.createdAt
-      ? new Date(fund.createdAt)
-      : fund.dateTime
-      ? new Date(fund.dateTime)
-      : fund.updatedAt
-      ? new Date(fund.updatedAt)
-      : new Date(),
+      date: fund.createdAt
+          ? new Date(fund.createdAt)
+          : fund.dateTime
+              ? new Date(fund.dateTime)
+              : fund.updatedAt
+                  ? new Date(fund.updatedAt)
+                  : new Date(),
 
-    utrNumber: fund.transactionId || fund.utr || null,
+      utrNumber: fund.transactionId || fund.utr || null,
 
-    mode: mode,
+      mode: mode,
 
-    accountNo: fund.accountNo || fund.accountNumber || null,
-    bankId: fund.bankId || null,
-    bankName: fund.bankName || fund.bank || fund.bank_name || null,
+      accountNo: fund.accountNo || fund.accountNumber || null,
+      bankId: fund.bankId || null,
+      bankName: fund.bankName || fund.bank || fund.bank_name || null,
 
-    // ❌ REMOVE direct URL logic
-    // filePath: filePath,
+      // ❌ REMOVE direct URL logic
+      // filePath: filePath,
 
-    //  NEW
-    filePath: filePathRaw,   // raw path
-    fileUrl: '',           // blob URL later
+      //  NEW
+      filePath: filePathRaw,   // raw path
+      fileUrl: '',           // blob URL later
 
-    rejectionPath: fund.rejectionFilePath || null,
-    rejectionUrl: '',      // (optional same handling)
+      rejectionPath: fund.rejectionFilePath || null,
+      rejectionUrl: '',      // (optional same handling)
 
-    remarks: fund.remarks || fund.message || null,
-    settled: !!fund.settled,
-    raw: fund,
-    processing: fund.processing,
+      remarks: fund.remarks || fund.message || null,
+      settled: !!fund.settled,
+      raw: fund,
+      processing: fund.processing,
 
-    upiId: fund.vpa || fund.upiId || null,
+      upiId: fund.vpa || fund.upiId || null,
 
-    holderName:
-      fund.bankAccountHolderName ||
-      fund.bankHolderName ||
-      fund.holderName ||
-      fund.accountHolderName ||
-      fund.name ||
-      null,
+      holderName:
+          fund.bankAccountHolderName ||
+          fund.bankHolderName ||
+          fund.holderName ||
+          fund.accountHolderName ||
+          fund.name ||
+          null,
 
-    ifscCode:
-      fund.ifscCode || fund.ifsc || (fund.raw && fund.raw.ifsc) || null,
+      ifscCode:
+          fund.ifscCode || fund.ifsc || (fund.raw && fund.raw.ifsc) || null,
 
-    fundDisplayId: fund.displayId,
-    ftt: fund.firstTopup ? true : false,
-  };
+      fundDisplayId: fund.displayId,
+      ftt: fund.firstTopup ? true : false,
+    };
 
-  //  LOAD FILE IMAGE (TOKEN via interceptor)
-  if (tx.filePath) {
-    this.multimediaService.getPrivateImage(tx.filePath).subscribe({
-      next: (url) => {
-        tx.fileUrl = url;
-      },
-      error: () => {
-        tx.fileUrl = '';
-      },
-    });
+    //  LOAD FILE IMAGE (TOKEN via interceptor)
+    if (tx.filePath) {
+      this.multimediaService.getPrivateImage(tx.filePath).subscribe({
+        next: (url) => {
+          tx.fileUrl = url;
+        },
+        error: () => {
+          tx.fileUrl = '';
+        },
+      });
+    }
+
+    console.log(tx);
+
+
+    //   if (tx.filePath) {
+    //   this.multimediaService.getPrivateImage(tx.filePath).subscribe({
+    //     next: (url) => {
+    //       tx.fileUrl = url;
+
+    //       //  🔥 THIS IS THE FIX
+    //       if (this.selectedTransaction?.id === tx.id) {
+    //         this.selectedTransaction = { ...tx };
+    //       }
+    //     },
+    //     error: () => {
+    //       tx.fileUrl = '';
+    //     },
+    //   });
+    // }
+
+    //  OPTIONAL: rejection file bhi secure hai to
+    if (tx.rejectionPath) {
+      this.multimediaService.getPrivateImage(tx.rejectionPath).subscribe({
+        next: (url) => {
+          tx.rejectionUrl = url;
+        },
+        error: () => {
+          tx.rejectionUrl = '';
+        },
+      });
+    }
+
+    return tx;
   }
-
-  console.log(tx);
-  
-
-//   if (tx.filePath) {
-//   this.multimediaService.getPrivateImage(tx.filePath).subscribe({
-//     next: (url) => {
-//       tx.fileUrl = url;
-
-//       //  🔥 THIS IS THE FIX
-//       if (this.selectedTransaction?.id === tx.id) {
-//         this.selectedTransaction = { ...tx };
-//       }
-//     },
-//     error: () => {
-//       tx.fileUrl = '';
-//     },
-//   });
-// }
-
-  //  OPTIONAL: rejection file bhi secure hai to
-  if (tx.rejectionPath) {
-    this.multimediaService.getPrivateImage(tx.rejectionPath).subscribe({
-      next: (url) => {
-        tx.rejectionUrl = url;
-      },
-      error: () => {
-        tx.rejectionUrl = '';
-      },
-    });
-  }
-
-  return tx;
-}
 
   private normalizeTransaction(tx: any) {
     if (!tx) return tx;
@@ -2074,43 +2072,43 @@ onChangePendingPayoutPageSize(size: number) {
 
     // Map incoming arrays to normalized transactions so UI bindings work consistently
     this.pendingUpi = Array.isArray(data.PENDING_UPI)
-      ? data.PENDING_UPI.map((f: any) =>
-          this.normalizeIncomingFund(f, "upi"),
+        ? data.PENDING_UPI.map((f: any) =>
+            this.normalizeIncomingFund(f, "upi"),
         ).filter(Boolean)
-      : [];
+        : [];
 
     this.pendingBank = Array.isArray(data.PENDING_BANK)
-      ? data.PENDING_BANK.map((f: any) =>
-          this.normalizeIncomingFund(f, "bank"),
+        ? data.PENDING_BANK.map((f: any) =>
+            this.normalizeIncomingFund(f, "bank"),
         ).filter(Boolean)
-      : [];
+        : [];
 
     this.pendingpayouts = Array.isArray(data.PENDING_PAYOUT)
-      ? data.PENDING_PAYOUT.map((f: any) =>
-          this.normalizeIncomingFund(f, "payout"),
+        ? data.PENDING_PAYOUT.map((f: any) =>
+            this.normalizeIncomingFund(f, "payout"),
         ).filter(Boolean)
-      : [];
+        : [];
 
     // keep accepted counters if provided
     this.acceptedUpi =
-      typeof data.ACCEPTED_CURRENCY_UPI !== "undefined"
-        ? data.ACCEPTED_CURRENCY_UPI
-        : this.acceptedUpi;
+        typeof data.ACCEPTED_CURRENCY_UPI !== "undefined"
+            ? data.ACCEPTED_CURRENCY_UPI
+            : this.acceptedUpi;
     this.acceptedBank =
-      typeof data.ACCEPTED_CURRENCY_BANK !== "undefined"
-        ? data.ACCEPTED_CURRENCY_BANK
-        : this.acceptedBank;
+        typeof data.ACCEPTED_CURRENCY_BANK !== "undefined"
+            ? data.ACCEPTED_CURRENCY_BANK
+            : this.acceptedBank;
 
     this.acceptedWid =
-      typeof data.ACCEPTED_CURRENCY_PAYOUT !== "undefined"
-        ? data.ACCEPTED_CURRENCY_PAYOUT
-        : this.acceptedWid;
+        typeof data.ACCEPTED_CURRENCY_PAYOUT !== "undefined"
+            ? data.ACCEPTED_CURRENCY_PAYOUT
+            : this.acceptedWid;
 
     this.acceptedDep = this.acceptedBank + this.acceptedUpi;
     this.branchCom =
-      typeof data.Branch_Balance !== "undefined"
-        ? data.Branch_Balance
-        : this.branchCom;
+        typeof data.Branch_Balance !== "undefined"
+            ? data.Branch_Balance
+            : this.branchCom;
 
     // rebuild portals list from incoming bank pending (or all funds if you'd prefer)
     this.extractPortalsFromFetched(this.pendingBank.map((p) => p.raw || p));
@@ -2226,8 +2224,8 @@ onChangePendingPayoutPageSize(size: number) {
 
   mobileTotalPages(): number {
     return Math.max(
-      1,
-      Math.ceil(this.getMobileTransactions().length / this.mobilePageSize),
+        1,
+        Math.ceil(this.getMobileTransactions().length / this.mobilePageSize),
     );
   }
 
@@ -2276,27 +2274,28 @@ onChangePendingPayoutPageSize(size: number) {
   previewImage: string | null = null;
 
   getTimeAgo(date: Date | string): string {
-  if (!date) return "";
+    if (!date) return "";
 
-  const now = new Date().getTime();
-  const inputTime = new Date(date).getTime();
+    const now = new Date().getTime();
+    const inputTime = new Date(date).getTime();
 
-  let diff = Math.floor((now - inputTime) / 1000); // in seconds
+    let diff = Math.floor((now - inputTime) / 1000); // in seconds
 
-  const days = Math.floor(diff / (24 * 3600));
-  diff %= 24 * 3600;
+    const days = Math.floor(diff / (24 * 3600));
+    diff %= 24 * 3600;
 
-  const hours = Math.floor(diff / 3600);
-  diff %= 3600;
+    const hours = Math.floor(diff / 3600);
+    diff %= 3600;
 
-  const minutes = Math.floor(diff / 60);
+    const minutes = Math.floor(diff / 60);
 
-  let result = "";
+    let result = "";
 
-  if (days > 0) result += `${days}d `;
-  if (hours > 0) result += `${hours}h `;
-  if (minutes > 0) result += `${minutes}m`;
+    if (days > 0) result += `${days}d `;
+    if (hours > 0) result += `${hours}h `;
+    if (minutes > 0) result += `${minutes}m`;
 
-  return result.trim() || "Just now";
+    return result.trim() || "Just now";
+  }
 }
-}
+

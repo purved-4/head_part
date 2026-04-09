@@ -8,14 +8,34 @@ import { HttpClient } from '@angular/common/http';
 })
 export class MultimediaService {
 
-  constructor( private http: HttpClient) { }
+  constructor(private http: HttpClient) { }
 
   getPrivateImage(fileId: string): Observable<string> {
-  return this.http.get(
-    `${fileBaseUrl}/${fileId}`,
-    { responseType: 'blob' }
-  ).pipe(
-    map(blob => URL.createObjectURL(blob))
-  );
-}
+    return this.http.get(
+      `${fileBaseUrl}/${fileId}`,
+      { responseType: 'blob' }
+    ).pipe(
+      map(blob => URL.createObjectURL(blob))
+    );
+  }
+
+  getImageByUrl(url: string): Observable<string> {
+    return this.http.get(
+      `${url}`,
+      { responseType: 'blob' }
+    ).pipe(
+      map(blob => URL.createObjectURL(blob))
+    );
+  }
+
+
+
+
+  getImageByUrlBlob(url: string): Observable<Blob> {
+    return this.http.get(url, { responseType: 'blob' });
+  }
+
+  revokeObjectUrl(objectUrl: any): void {
+    URL.revokeObjectURL(objectUrl);
+  }
 }

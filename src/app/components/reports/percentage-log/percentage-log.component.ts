@@ -142,7 +142,7 @@ Math: any = Math;
       .set('pageSize', String(this.pageSize));
 
     this.apiSub?.unsubscribe();
-    this.apiSub = this.percentageLog.getChiefsListByUserId(formValue).subscribe({
+    this.apiSub = this.percentageLog.getHistoryWithType(formValue).subscribe({
       next: (res: PageResponse<HistoryDTO>) => {
         const page = res;
         const content = page.content || [];

@@ -1,3 +1,4 @@
+
 import {
   Component,
   OnInit,
@@ -71,13 +72,13 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
   error = "";
   currentUser!: string;
 
-  // route / context ids
+// route / context ids
   headId: string = "";
   userId: string = "";
   routeUserId: string = "";
   currentRoleId: any;
   isMobile = false;
-  // Edit Modal Properties
+// Edit Modal Properties
   showEditModal = false;
   editForm: EditForm = {
     id: "",
@@ -89,7 +90,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     portalsWithRange: [],
   };
 
-  // Portal Selection Properties (for edit modal)
+// Portal Selection Properties (for edit modal)
   portalOptions: Portal[] = [];
   filteredPortals: Portal[] = []; // not used in search-based version, kept for compatibility
   portalsForAdd: Portal[] = [];
@@ -98,24 +99,24 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
   selectedPortalsForAdd: string[] = [];
   loadingPortals = false;
 
-  // Validation errors
+// Validation errors
   emailError: string = "";
   mobileError: string = "";
 
-  // toggles-in-flight
+// toggles-in-flight
   togglingPortal: Record<string, boolean> = {};
   togglingAgent: Record<string, boolean> = {};
 
-  // Helper for template
+// Helper for template
   Math = Math;
 
-  // Statistics
+// Statistics
   activeAgentsCount = 0;
   totalPortalsCount = 0;
   avgTopupPercentage = 0;
   statusFilter: any;
   isEditMode: boolean = false;
-  // Portal Modal Properties
+// Portal Modal Properties
   showSinglePortalModal = false;
   showAllPortalsModal = false;
   selectedAgent: Agent | null = null;
@@ -123,37 +124,37 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
   portalModalSearchTerm: string = "";
   filteredModalPortals: any[] = [];
 
-  // Actions menu
+// Actions menu
   activeActionsMenu: string | null = null;
 
-  // Add User Modal
+// Add User Modal
   showAddUserModal = false;
   selectedAgentForAdd: any = null;
 
-  // Success popup properties
+// Success popup properties
   showUpdateSuccessPopup = false;
   updateSuccessMessage = "";
   private successPopupTimeout: any;
 
-  // Properties for Limit Popup
+// Properties for Limit Popup
   showLimitPopup = false;
   selectedBranchForLimit: { id: string; type: string } | null = null;
 
-  // Add these properties
+// Add these properties
   showInfoModal = false;
   selectedAgentForInfo: any = null;
   viewMode: "grid" | "table" = "table";
   countryCodes = COUNTRY_CODES;
-  // selectedCountry = COUNTRY_CODES.find(c => c.code === 'IN') || COUNTRY_CODES[0];
+// selectedCountry = COUNTRY_CODES.find(c => c.code === 'IN') || COUNTRY_CODES[0];
   selectedCountry: any = null;
   constructor(
-    private route: ActivatedRoute,
-    private managerService: ManagerService,
-    private branchService: BranchService,
-    private headService: HeadService,
-    private userStateService: UserStateService,
-    private cdr: ChangeDetectorRef,
-    private snack: SnackbarService,
+      private route: ActivatedRoute,
+      private managerService: ManagerService,
+      private branchService: BranchService,
+      private headService: HeadService,
+      private userStateService: UserStateService,
+      private cdr: ChangeDetectorRef,
+      private snack: SnackbarService,
   ) {}
   ngOnDestroy(): void {
     sessionStorage.removeItem("branchViewMode");
@@ -165,26 +166,26 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.loadPortalOptions(this.currentRoleId);
 
     const savedMode = sessionStorage.getItem("branchViewMode") as
-      | "grid"
-      | "table";
+        | "grid"
+        | "table";
     this.viewMode = savedMode || "table";
   }
 
-  // Add this method to get view mode based on device
+// Add this method to get view mode based on device
   getViewMode(): "grid" | "table" {
-    // For mobile, always return grid
+// For mobile, always return grid
     if (this.isMobile) {
       return "grid";
     }
 
-    // For desktop, return saved preference or default to table
+// For desktop, return saved preference or default to table
     const savedMode = sessionStorage.getItem("branchViewMode") as
-      | "grid"
-      | "table";
+        | "grid"
+        | "table";
     return savedMode || "table";
   }
 
-  // ---------- LOAD BRANCHES ----------
+// ---------- LOAD BRANCHES ----------
   loadbranchs(headId: any): void {
     this.loading = true;
     this.error = "";
@@ -198,19 +199,19 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
           const info = agent.info || agent.additionalInfo || "";
 
           const portalResponse = Array.isArray(agent.portalResponse)
-            ? agent.portalResponse
-            : [];
+              ? agent.portalResponse
+              : [];
 
           const portalsWithRange = portalResponse.map((w: any) => ({
             portalId: w.portalId ?? w.id ?? "",
             range: w.range ?? "",
             portalDomain: w.portalDomain ?? w.domain ?? "Unknown",
             active:
-              typeof w.active === "boolean"
-                ? w.active
-                : typeof w.isActive === "boolean"
-                  ? w.isActive
-                  : true,
+                typeof w.active === "boolean"
+                    ? w.active
+                    : typeof w.isActive === "boolean"
+                        ? w.isActive
+                        : true,
             fttPercentage: Number(w.fttPercentage) || 0,
             topupPercentage: Number(w.topupPercentage) || 0,
             payoutPercentage: Number(w.payoutPercentage) || 0,
@@ -226,11 +227,11 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
             info: info,
             portalsWithRange: portalsWithRange,
             active:
-              typeof agent.active === "boolean"
-                ? agent.active
-                : typeof agent.isActive === "boolean"
-                  ? agent.isActive
-                  : true,
+                typeof agent.active === "boolean"
+                    ? agent.active
+                    : typeof agent.isActive === "boolean"
+                        ? agent.isActive
+                        : true,
             isVerified: agent.isVerified || false,
             lastUpdated: agent.updatedAt || agent.createdAt,
           } as Agent;
@@ -243,7 +244,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.error =
-          err.error?.message || "Failed to load branches. Please try again.";
+            err.error?.message || "Failed to load branches. Please try again.";
         this.agents = [];
         this.filteredAgents = [];
         this.updatePagination();
@@ -253,14 +254,14 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ---------- HELPER METHODS ----------
+// ---------- HELPER METHODS ----------
   private extractEmail(agent: any): string {
     const possibleFields = ["email"];
     for (const field of possibleFields) {
       if (
-        agent[field] &&
-        typeof agent[field] === "string" &&
-        agent[field].trim()
+          agent[field] &&
+          typeof agent[field] === "string" &&
+          agent[field].trim()
       ) {
         return agent[field].trim();
       }
@@ -290,7 +291,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     return mobileRegex.test(mobile);
   }
 
-  // ---------- PAGINATION ----------
+// ---------- PAGINATION ----------
   getPageNumbers(): number[] {
     const totalPages = Math.ceil(this.filteredAgents.length / this.pageSize);
     const pages: number[] = [];
@@ -313,8 +314,8 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
   updatePagination(): void {
     const start = (this.page - 1) * this.pageSize;
     this.paginatedAgents = this.filteredAgents.slice(
-      start,
-      start + this.pageSize,
+        start,
+        start + this.pageSize,
     );
   }
 
@@ -332,22 +333,22 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ---------- FILTER BRANCHES ----------
+// ---------- FILTER BRANCHES ----------
   filterAgents(): void {
     if (!this.searchTerm) {
       this.filteredAgents = [...this.agents];
     } else {
       const term = this.searchTerm.toLowerCase();
       this.filteredAgents = this.agents.filter(
-        (agent) =>
-          (agent.username || "").toLowerCase().includes(term) ||
-          (agent.email || "").toLowerCase().includes(term) ||
-          (agent.mobile || "").includes(term) ||
-          (agent.info || "").toLowerCase().includes(term) ||
-          agent.portalsWithRange?.some((portal) =>
-            (portal.portalDomain || "").toLowerCase().includes(term),
-          ) ||
-          (agent.id || "").toLowerCase().includes(term),
+          (agent) =>
+              (agent.username || "").toLowerCase().includes(term) ||
+              (agent.email || "").toLowerCase().includes(term) ||
+              (agent.mobile || "").includes(term) ||
+              (agent.info || "").toLowerCase().includes(term) ||
+              agent.portalsWithRange?.some((portal) =>
+                  (portal.portalDomain || "").toLowerCase().includes(term),
+              ) ||
+              (agent.id || "").toLowerCase().includes(term),
       );
     }
     this.page = 1;
@@ -367,27 +368,27 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.updatePagination();
   }
 
-  // ---------- STATISTICS ----------
+// ---------- STATISTICS ----------
   calculateStatistics(): void {
     this.activeAgentsCount = this.agents.filter((agent) => agent.active).length;
     this.totalPortalsCount = this.agents.reduce(
-      (total, agent) => total + (agent.portalsWithRange?.length || 0),
-      0,
+        (total, agent) => total + (agent.portalsWithRange?.length || 0),
+        0,
     );
     const allPercentages = this.agents.flatMap(
-      (agent) =>
-        agent.portalsWithRange?.map((w) => w.topupPercentage || 0) || [],
+        (agent) =>
+            agent.portalsWithRange?.map((w) => w.topupPercentage || 0) || [],
     );
     if (allPercentages.length > 0) {
       this.avgTopupPercentage = parseFloat(
-        (
-          allPercentages.reduce((a, b) => a + b, 0) / allPercentages.length
-        ).toFixed(1),
+          (
+              allPercentages.reduce((a, b) => a + b, 0) / allPercentages.length
+          ).toFixed(1),
       );
     }
   }
 
-  // ---------- PORTAL HELPER METHODS ----------
+// ---------- PORTAL HELPER METHODS ----------
   getPortalDomain(portal: any): string {
     if (typeof portal === "string") return portal;
     return portal?.portalDomain || portal?.domain || "Unknown";
@@ -398,11 +399,11 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     return portal[property] || 0;
   }
 
-  // ---------- MODAL METHODS ----------
+// ---------- MODAL METHODS ----------
   openPortalPopup(agent: Agent, portal: any): void {
     this.selectedAgent = agent;
 
-    // set initial data first
+// set initial data first
     this.selectedPortal = {
       ...portal,
       fttPercentage: Number(portal?.fttPercentage) || 0,
@@ -415,15 +416,15 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.branchService.getBranchPortalPercentage(agent.id).subscribe({
       next: (res: any) => {
         const percentages = Array.isArray(res?.data)
-          ? res.data
-          : Array.isArray(res)
-            ? res
-            : [];
+            ? res.data
+            : Array.isArray(res)
+                ? res
+                : [];
 
         const matched = percentages.find(
-          (p: any) =>
-            p.portalId === portal.portalId ||
-            p.portalName === portal.portalDomain,
+            (p: any) =>
+                p.portalId === portal.portalId ||
+                p.portalName === portal.portalDomain,
         );
 
         if (matched) {
@@ -452,29 +453,29 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.showAllPortalsModal = true;
     this.portalModalSearchTerm = "";
 
-    // show current values first
+// show current values first
     this.filteredModalPortals = (agent.portalsWithRange || []).map(
-      (portal) => ({
-        ...portal,
-        fttPercentage: Number(portal.fttPercentage) || 0,
-        topupPercentage: Number(portal.topupPercentage) || 0,
-        payoutPercentage: Number(portal.payoutPercentage) || 0,
-      }),
+        (portal) => ({
+          ...portal,
+          fttPercentage: Number(portal.fttPercentage) || 0,
+          topupPercentage: Number(portal.topupPercentage) || 0,
+          payoutPercentage: Number(portal.payoutPercentage) || 0,
+        }),
     );
 
     this.branchService.getBranchPortalPercentage(agent.id).subscribe({
       next: (res: any) => {
         const percentages = Array.isArray(res?.data)
-          ? res.data
-          : Array.isArray(res)
-            ? res
-            : [];
+            ? res.data
+            : Array.isArray(res)
+                ? res
+                : [];
 
         const updatedPortals = (agent.portalsWithRange || []).map((portal) => {
           const matched = percentages.find(
-            (p: any) =>
-              p.portalId === portal.portalId ||
-              p.portalName === portal.portalDomain,
+              (p: any) =>
+                  p.portalId === portal.portalId ||
+                  p.portalName === portal.portalDomain,
           );
 
           return {
@@ -487,7 +488,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
         this.filteredModalPortals = updatedPortals;
 
-        // optional: also update selectedAgent data so modal search uses latest values
+// optional: also update selectedAgent data so modal search uses latest values
         if (this.selectedAgent) {
           this.selectedAgent = {
             ...this.selectedAgent,
@@ -512,19 +513,19 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     if (!this.selectedAgent) return;
     const portals = this.selectedAgent.portalsWithRange || [];
     if (
-      !this.portalModalSearchTerm ||
-      this.portalModalSearchTerm.trim() === ""
+        !this.portalModalSearchTerm ||
+        this.portalModalSearchTerm.trim() === ""
     ) {
       this.filteredModalPortals = [...portals];
     } else {
       const searchTerm = this.portalModalSearchTerm.toLowerCase().trim();
       this.filteredModalPortals = portals.filter((portal: any) =>
-        this.getPortalDomain(portal).toLowerCase().includes(searchTerm),
+          this.getPortalDomain(portal).toLowerCase().includes(searchTerm),
       );
     }
   }
 
-  // ---------- TOGGLE STATUS ----------
+// ---------- TOGGLE STATUS ----------
   toggleStatus(agent: Agent): void {
     const targetId = agent?.id || agent?.headId || this.currentRoleId;
     if (!targetId) {
@@ -540,16 +541,16 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
       next: () => {
         this.togglingAgent[targetId] = false;
         this.snack.show(
-          `Branch ${agent.active ? "activated" : "deactivated"} successfully`,
-          true,
+            `Branch ${agent.active ? "activated" : "deactivated"} successfully`,
+            true,
         );
       },
       error: (err) => {
         agent.active = prev;
         this.togglingAgent[targetId] = false;
         this.snack.show(
-          err?.error?.message || "Failed to update branch status",
-          false,
+            err?.error?.message || "Failed to update branch status",
+            false,
         );
 
         this.snack.show("Failed to update branch status", false);
@@ -570,34 +571,34 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.snack.show("Updating portal status...", "warning", 1500);
 
     this.branchService
-      .changeManagerPortalStatus(portal.portalId, agent.id)
-      .subscribe({
-        next: () => {
-          this.togglingPortal[key] = false;
-          this.snack.show(
-            `Portal ${portal.active ? "enabled" : "disabled"} successfully`,
-            true,
-          );
-        },
-        error: (err) => {
-          portal.active = prevState;
-          this.togglingPortal[key] = false;
-          this.snack.show(
-            err?.error?.message || "Failed to update portal status",
-            false,
-          );
-        },
-      });
+        .changeManagerPortalStatus(portal.portalId, agent.id)
+        .subscribe({
+          next: () => {
+            this.togglingPortal[key] = false;
+            this.snack.show(
+                `Portal ${portal.active ? "enabled" : "disabled"} successfully`,
+                true,
+            );
+          },
+          error: (err) => {
+            portal.active = prevState;
+            this.togglingPortal[key] = false;
+            this.snack.show(
+                err?.error?.message || "Failed to update portal status",
+                false,
+            );
+          },
+        });
   }
 
   isPortalToggling(agentId: string, portalId: string): boolean {
     return !!this.togglingPortal[`${agentId}_${portalId}`];
   }
 
-  // ---------- ACTIONS MENU ----------
+// ---------- ACTIONS MENU ----------
   toggleActionsMenu(agentId: string): void {
     this.activeActionsMenu =
-      this.activeActionsMenu === agentId ? null : agentId;
+        this.activeActionsMenu === agentId ? null : agentId;
   }
 
   closeActionsMenu(): void {
@@ -612,7 +613,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ---------- EDIT MODAL ----------
+// ---------- EDIT MODAL ----------
 
   closeEditModal(): void {
     this.showEditModal = false;
@@ -639,14 +640,14 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  // ---------- PORTAL MANAGEMENT IN MODAL (SEARCH-BASED) ----------
+// ---------- PORTAL MANAGEMENT IN MODAL (SEARCH-BASED) ----------
   isPortalAlreadyAssigned(portalId: string): boolean {
     return this.editForm.portalsWithRange.some((w) => w.portalId === portalId);
   }
 
-  // isPortalSelectedForAdd(portalId: string): boolean {
-  //   return this.selectedPortalsForAdd.includes(portalId);
-  // }
+// isPortalSelectedForAdd(portalId: string): boolean {
+//   return this.selectedPortalsForAdd.includes(portalId);
+// }
 
   filterPortalsForAdd(): void {
     const term = (this.addPortalSearchTerm || "").trim().toLowerCase();
@@ -654,9 +655,9 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
       this.portalsForAdd = [];
     } else {
       this.portalsForAdd = this.portalOptions.filter(
-        (portal) =>
-          (portal.portalDomain || "").toLowerCase().includes(term) &&
-          !this.isPortalAlreadyAssigned(portal.portalId),
+          (portal) =>
+              (portal.portalDomain || "").toLowerCase().includes(term) &&
+              !this.isPortalAlreadyAssigned(portal.portalId),
       );
     }
     this.cdr.detectChanges();
@@ -668,7 +669,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     }
     const searchTerm = this.assignedPortalSearch.toLowerCase().trim();
     return this.editForm.portalsWithRange.filter((portal) =>
-      portal.portalDomain.toLowerCase().includes(searchTerm),
+        portal.portalDomain.toLowerCase().includes(searchTerm),
     );
   }
 
@@ -730,7 +731,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.snack.show("Portal removed", "warning", 1500);
   }
 
-  // ---------- VALIDATION ----------
+// ---------- VALIDATION ----------
   validateEmail(): void {
     if (!this.editForm.email) {
       this.emailError = "";
@@ -761,18 +762,18 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
   isPortalValid(portal: any): boolean {
     return (
-      portal.fttPercentage !== null &&
-      portal.fttPercentage !== undefined &&
-      portal.topupPercentage !== null &&
-      portal.topupPercentage !== undefined &&
-      portal.payoutPercentage !== null &&
-      portal.payoutPercentage !== undefined &&
-      portal.fttPercentage >= 0 &&
-      portal.fttPercentage <= 100 &&
-      portal.topupPercentage >= 0 &&
-      portal.topupPercentage <= 100 &&
-      portal.payoutPercentage >= 0 &&
-      portal.payoutPercentage <= 100
+        portal.fttPercentage !== null &&
+        portal.fttPercentage !== undefined &&
+        portal.topupPercentage !== null &&
+        portal.topupPercentage !== undefined &&
+        portal.payoutPercentage !== null &&
+        portal.payoutPercentage !== undefined &&
+        portal.fttPercentage >= 0 &&
+        portal.fttPercentage <= 100 &&
+        portal.topupPercentage >= 0 &&
+        portal.topupPercentage <= 100 &&
+        portal.payoutPercentage >= 0 &&
+        portal.payoutPercentage <= 100
     );
   }
 
@@ -818,7 +819,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  // ---------- PERCENTAGE HANDLING ----------
+// ---------- PERCENTAGE HANDLING ----------
   onPercentageChange(portal: any, field: string, event: any): void {
     const value = event.target.value;
     const numValue = parseFloat(value);
@@ -847,18 +848,18 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     }
     this.cdr.detectChanges();
   }
-  // Open limit popup
+// Open limit popup
   openLimitPopup(branch: Agent): void {
-    //
+//
     const branchType = (branch as any).type || "BRANCH";
     this.selectedBranchForLimit = { id: branch.id, type: branchType };
     this.showLimitPopup = true;
     this.closeActionsMenu();
   }
 
-  // Close limit popup
+// Close limit popup
   closeLimitPopup(): void {
-    // console.log("closeLimitPopup called"); // debug ke liye
+// console.log("closeLimitPopup called"); // debug ke liye
     this.showLimitPopup = false;
     this.selectedBranchForLimit = null;
     this.cdr.detectChanges(); // UI update force
@@ -868,7 +869,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.emailError = "";
     this.mobileError = "";
 
-    // ---------- VALIDATION ----------
+// ---------- VALIDATION ----------
     if (!this.editForm.username || this.editForm.username.trim() === "") {
       this.snack.show("Branch username is required", "warning");
       return;
@@ -894,19 +895,19 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
     if (!this.validatePortalPercentages()) {
       this.snack.show(
-        "Enter valid percentages (0-100) for all portals",
-        "warning",
+          "Enter valid percentages (0-100) for all portals",
+          "warning",
       );
       return;
     }
 
-    // ---------- LOADING ----------
+// ---------- LOADING ----------
     this.updatingbranch = true;
     this.loading = true;
 
     this.snack.show("Updating branch...", "warning", 1200);
 
-    // ---------- BUILD PAYLOAD ----------
+// ---------- BUILD PAYLOAD ----------
     const portalPercentages: any = {};
     this.editForm.portalsWithRange.forEach((portal) => {
       portalPercentages[portal.portalId] = {
@@ -917,18 +918,18 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     });
 
     const portalIds: string[] = this.editForm.portalsWithRange
-      .map((w) => w.portalId)
-      .filter((id) => !!id);
+        .map((w) => w.portalId)
+        .filter((id) => !!id);
 
     const payload = {
       id: this.editForm.id,
       username: this.editForm.username.trim(),
       email: this.editForm.email.trim() || null,
-      // mobile: this.editForm.mobile || null,
-      // mobile: this.selectedCountry.dialCode + this.editForm.mobile,
+// mobile: this.editForm.mobile || null,
+// mobile: this.selectedCountry.dialCode + this.editForm.mobile,
       mobile: this.editForm.mobile
-        ? `${this.selectedCountry?.dialCode || ""}${this.editForm.mobile}`
-        : null,
+          ? `${this.selectedCountry?.dialCode || ""}${this.editForm.mobile}`
+          : null,
 
       info: this.editForm.info?.trim() || null,
       isActive: this.editForm.isActive,
@@ -937,7 +938,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
       portalPercentages: portalPercentages,
     };
 
-    // ---------- API CALL ----------
+// ---------- API CALL ----------
     this.branchService.updateBranch(payload).subscribe({
       next: () => {
         this.loadbranchs(this.currentRoleId);
@@ -948,7 +949,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
         this.snack.show("Branch updated successfully", true);
 
-        // Optional popup (keep if you want animation)
+// Optional popup (keep if you want animation)
         this.updateSuccessMessage = "Branch updated successfully!";
         this.showUpdateSuccessPopup = true;
         this.successPopupTimeout = setTimeout(() => {
@@ -972,7 +973,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.updateSuccessMessage = "";
   }
 
-  // ---------- ADD USER MODAL ----------
+// ---------- ADD USER MODAL ----------
   openAddUserModal(agent: Agent): void {
     this.selectedAgentForAdd = agent;
     this.showAddUserModal = true;
@@ -987,12 +988,12 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.closeAddUserModal();
   }
 
-  // ---------- TOGGLE PORTAL VIEW ----------
+// ---------- TOGGLE PORTAL VIEW ----------
   togglePortalView(agent: Agent): void {
     agent.showAllPortals = !agent.showAllPortals;
   }
 
-  // ---------- EXPORT ----------
+// ---------- EXPORT ----------
   exportToCSV(): void {
     const csvContent = this.convertToCSV(this.filteredAgents);
     const blob = new Blob([csvContent], { type: "text/csv" });
@@ -1018,20 +1019,20 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     ];
     const rows = agents.map((agent) => {
       const avgFtt =
-        agent.portalsWithRange?.reduce(
-          (sum, w) => sum + (w.fttPercentage || 0),
-          0,
-        ) / (agent.portalsWithRange?.length || 1);
+          agent.portalsWithRange?.reduce(
+              (sum, w) => sum + (w.fttPercentage || 0),
+              0,
+          ) / (agent.portalsWithRange?.length || 1);
       const avgTopup =
-        agent.portalsWithRange?.reduce(
-          (sum, w) => sum + (w.topupPercentage || 0),
-          0,
-        ) / (agent.portalsWithRange?.length || 1);
+          agent.portalsWithRange?.reduce(
+              (sum, w) => sum + (w.topupPercentage || 0),
+              0,
+          ) / (agent.portalsWithRange?.length || 1);
       const avgPayout =
-        agent.portalsWithRange?.reduce(
-          (sum, w) => sum + (w.payoutPercentage || 0),
-          0,
-        ) / (agent.portalsWithRange?.length || 1);
+          agent.portalsWithRange?.reduce(
+              (sum, w) => sum + (w.payoutPercentage || 0),
+              0,
+          ) / (agent.portalsWithRange?.length || 1);
       return [
         agent.username || "",
         agent.email || "",
@@ -1051,11 +1052,11 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     return this.editForm.portalsWithRange?.length || 0;
   }
 
-  // ---------- UNUSED METHODS (kept for compatibility) ----------
+// ---------- UNUSED METHODS (kept for compatibility) ----------
   filterPortals(): void {}
-  // isPortalSelected(portalId: string): boolean {
-  //   return false;
-  // }
+// isPortalSelected(portalId: string): boolean {
+//   return false;
+// }
   togglePortal(portalId: string, event?: Event): void {}
   addPortal(portalId: string): void {}
   removeNewPortal(index: any): void {}
@@ -1067,16 +1068,16 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     return [];
   }
 
-  // Update setViewMode to respect mobile constraint
-  // setViewMode(mode: "grid" | "table"): void {
-  //   if (this.isMobile && mode === "table") {
-  //     return;
-  //   }
-  //   this.viewMode = mode;
-  //   if (!this.isMobile) {
-  //     sessionStorage.setItem("branchViewMode", mode);
-  //   }
-  // }
+// Update setViewMode to respect mobile constraint
+// setViewMode(mode: "grid" | "table"): void {
+//   if (this.isMobile && mode === "table") {
+//     return;
+//   }
+//   this.viewMode = mode;
+//   if (!this.isMobile) {
+//     sessionStorage.setItem("branchViewMode", mode);
+//   }
+// }
   setViewMode(mode: "grid" | "table"): void {
     this.viewMode = mode;
     sessionStorage.setItem("branchViewMode", mode);
@@ -1098,7 +1099,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
   toggleActionMenu(agentId: string): void {
     this.activeActionsMenu =
-      this.activeActionsMenu === agentId ? null : agentId;
+        this.activeActionsMenu === agentId ? null : agentId;
   }
 
   initialLetter(agent: any): string {
@@ -1118,35 +1119,35 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.error = "";
   }
 
-  // Add these methods to your component
+// Add these methods to your component
 
-  // For portal pagination in edit modal
+// For portal pagination in edit modal
   portalPage = 0;
   portalTotalPages = 0;
   loadingMorePortals = false;
   initialPortalIds: string[] = [];
 
-  // Add this method to get portals for edit modal
+// Add this method to get portals for edit modal
   getSelectedPortalsForEdit(): any[] {
     return this.portalOptions;
   }
 
-  // Add this method to check if a portal is selected
+// Add this method to check if a portal is selected
   isPortalSelected(portalId: string): boolean {
     return this.editForm.portalsWithRange.some((w) => w.portalId === portalId);
   }
 
-  // Add this method to check if a portal was initially assigned
+// Add this method to check if a portal was initially assigned
   isInitialPortal(portalId: string): boolean {
     return this.initialPortalIds.includes(portalId);
   }
 
-  // Add this method to handle portal selection changes
+// Add this method to handle portal selection changes
   onPortalSelectionChange(event: any, portalId: string): void {
     const isChecked = event.target.checked;
 
     if (isChecked) {
-      // Add portal
+// Add portal
       const portal = this.portalOptions.find((w) => w.portalId === portalId);
       if (portal && !this.isPortalAlreadyAssigned(portalId)) {
         const newPortal: PortalRange = {
@@ -1161,29 +1162,29 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
         this.editForm.portalsWithRange.push(newPortal);
       }
     } else {
-      // Remove portal (only if not initial)
+// Remove portal (only if not initial)
       if (!this.isInitialPortal(portalId)) {
         this.editForm.portalsWithRange = this.editForm.portalsWithRange.filter(
-          (w) => w.portalId !== portalId,
+            (w) => w.portalId !== portalId,
         );
       } else {
-        // Re-check for initial portals
+// Re-check for initial portals
         event.target.checked = true;
       }
     }
     this.cdr.detectChanges();
   }
 
-  // Add this method to load more portals
+// Add this method to load more portals
   loadMorePortalsForEdit(): void {
     if (this.portalPage + 1 >= this.portalTotalPages) return;
     this.portalPage++;
     this.loadingMorePortals = true;
-    // You'll need to implement this method based on your API
+// You'll need to implement this method based on your API
     this.loadPortalsForEdit(false);
   }
 
-  // Add this method to load portals for edit (if not already present)
+// Add this method to load portals for edit (if not already present)
   loadPortalsForEdit(reset: boolean = true): void {
     if (reset) {
       this.portalPage = 0;
@@ -1192,20 +1193,20 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
     this.loadingPortals = true;
 
-    // You need to implement this based on your API
-    // This is a placeholder - adjust according to your actual API
+// You need to implement this based on your API
+// This is a placeholder - adjust according to your actual API
     this.headService.getAllHeadsWithPortalsById(this.currentRoleId).subscribe({
       next: (res: any) => {
         const portals = res || [];
 
-        // Assuming paginated response
+// Assuming paginated response
         this.portalTotalPages = 1; // Set based on your API response
 
         this.portalOptions = [...this.portalOptions, ...portals];
 
-        // Store initial portal IDs for reference
+// Store initial portal IDs for reference
         this.initialPortalIds = this.editForm.portalsWithRange.map(
-          (w) => w.portalId,
+            (w) => w.portalId,
         );
 
         this.loadingPortals = false;
@@ -1218,15 +1219,15 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Add this method to get selected portal count
+// Add this method to get selected portal count
   getSelectedPortalCount(): number {
     return this.editForm.portalsWithRange?.length || 0;
   }
 
-  // Add this method to get portal percentages
+// Add this method to get portal percentages
   getPortalPercentage(portalId: string): any {
     let portal = this.editForm.portalsWithRange.find(
-      (w) => w.portalId === portalId,
+        (w) => w.portalId === portalId,
     );
     if (!portal) {
       portal = {
@@ -1243,41 +1244,41 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     return portal;
   }
 
-  // Update openEditModal to initialize portalOptions and initialPortalIds
-  // openEditModal(agent: Agent): void {
-  //   this.editForm = {
-  //     id: agent.id,
-  //     username: agent.username,
-  //     email: agent.email || "",
-  //     mobile: agent.mobile || "",
-  //     info: agent.info || "",
-  //     isActive: agent.active,
-  //     portalsWithRange: (agent.portalsWithRange || []).map((w) => ({
-  //       ...w,
-  //       fttPercentage: Number(w.fttPercentage) || 0,
-  //       topupPercentage: Number(w.topupPercentage) || 0,
-  //       payoutPercentage: Number(w.payoutPercentage) || 0,
-  //     })),
-  //   };
+// Update openEditModal to initialize portalOptions and initialPortalIds
+// openEditModal(agent: Agent): void {
+//   this.editForm = {
+//     id: agent.id,
+//     username: agent.username,
+//     email: agent.email || "",
+//     mobile: agent.mobile || "",
+//     info: agent.info || "",
+//     isActive: agent.active,
+//     portalsWithRange: (agent.portalsWithRange || []).map((w) => ({
+//       ...w,
+//       fttPercentage: Number(w.fttPercentage) || 0,
+//       topupPercentage: Number(w.topupPercentage) || 0,
+//       payoutPercentage: Number(w.payoutPercentage) || 0,
+//     })),
+//   };
 
-  //   // Store initial portal IDs
-  //   this.initialPortalIds = this.editForm.portalsWithRange.map(
-  //     (w) => w.portalId,
-  //   );
+//   // Store initial portal IDs
+//   this.initialPortalIds = this.editForm.portalsWithRange.map(
+//     (w) => w.portalId,
+//   );
 
-  //   this.selectedPortalsForAdd = [];
-  //   this.addPortalSearchTerm = "";
-  //   this.assignedPortalSearch = "";
-  //   this.emailError = "";
-  //   this.mobileError = "";
-  //   this.portalsForAdd = [];
-  //   this.showEditModal = true;
+//   this.selectedPortalsForAdd = [];
+//   this.addPortalSearchTerm = "";
+//   this.assignedPortalSearch = "";
+//   this.emailError = "";
+//   this.mobileError = "";
+//   this.portalsForAdd = [];
+//   this.showEditModal = true;
 
-  //   // Load portals if needed
-  //   if (this.portalOptions.length === 0) {
-  //     this.loadPortalOptions(this.currentRoleId);
-  //   }
-  // }
+//   // Load portals if needed
+//   if (this.portalOptions.length === 0) {
+//     this.loadPortalOptions(this.currentRoleId);
+//   }
+// }
 
   openEditModal(agent: Agent): void {
     const fullMobile = (agent.mobile || "").trim();
@@ -1286,7 +1287,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     let mobileWithoutCode = fullMobile;
 
     const sortedCountryCodes = [...this.countryCodes].sort(
-      (a, b) => b.dialCode.length - a.dialCode.length,
+        (a, b) => b.dialCode.length - a.dialCode.length,
     );
 
     for (const country of sortedCountryCodes) {
@@ -1302,23 +1303,23 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.isEditMode = false;
     this.loadingPortals = true;
 
-    // this.editForm = {
-    //   id: agent.id || "",
-    //   username: agent.username || "",
-    //   email: agent.email || "",
-    //   mobile: agent.mobile || "",
-    //   info: agent.info || "",
-    //   isActive: !!agent.active,
-    //   portalsWithRange: (agent.portalsWithRange || []).map((w: any) => ({
-    //     portalId: w.portalId ?? "",
-    //     portalDomain: w.portalDomain ?? "Unknown",
-    //     range: w.range ?? "",
-    //     active: typeof w.active === "boolean" ? w.active : true,
-    //     fttPercentage: Number(w.fttPercentage) || 0,
-    //     topupPercentage: Number(w.topupPercentage) || 0,
-    //     payoutPercentage: Number(w.payoutPercentage) || 0,
-    //   })),
-    // };
+// this.editForm = {
+//   id: agent.id || "",
+//   username: agent.username || "",
+//   email: agent.email || "",
+//   mobile: agent.mobile || "",
+//   info: agent.info || "",
+//   isActive: !!agent.active,
+//   portalsWithRange: (agent.portalsWithRange || []).map((w: any) => ({
+//     portalId: w.portalId ?? "",
+//     portalDomain: w.portalDomain ?? "Unknown",
+//     range: w.range ?? "",
+//     active: typeof w.active === "boolean" ? w.active : true,
+//     fttPercentage: Number(w.fttPercentage) || 0,
+//     topupPercentage: Number(w.topupPercentage) || 0,
+//     payoutPercentage: Number(w.payoutPercentage) || 0,
+//   })),
+// };
 
     this.editForm = {
       id: agent.id || "",
@@ -1339,13 +1340,13 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     };
 
     this.initialPortalIds = this.editForm.portalsWithRange.map(
-      (w) => w.portalId,
+        (w) => w.portalId,
     );
 
     this.emailError = "";
     this.mobileError = "";
 
-    // first load all portals for checkbox list
+// first load all portals for checkbox list
     this.headService.getAllHeadsWithPortalsById(this.currentRoleId).subscribe({
       next: (res: any) => {
         const opts = res || [];
@@ -1355,24 +1356,24 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
           active: typeof w.active === "boolean" ? w.active : true,
         }));
 
-        // then load latest percentages for selected branch
+// then load latest percentages for selected branch
         this.branchService.getBranchPortalPercentage(agent.id).subscribe({
           next: (res2: any) => {
             const percentages = Array.isArray(res2) ? res2 : [];
 
             this.editForm.portalsWithRange = this.editForm.portalsWithRange.map(
-              (portal) => {
-                const matched = percentages.find(
-                  (p: any) => p.portalId === portal.portalId,
-                );
+                (portal) => {
+                  const matched = percentages.find(
+                      (p: any) => p.portalId === portal.portalId,
+                  );
 
-                return {
-                  ...portal,
-                  fttPercentage: Number(matched?.fttPercentage) || 0,
-                  topupPercentage: Number(matched?.topupPercentage) || 0,
-                  payoutPercentage: Number(matched?.payoutPercentage) || 0,
-                };
-              },
+                  return {
+                    ...portal,
+                    fttPercentage: Number(matched?.fttPercentage) || 0,
+                    topupPercentage: Number(matched?.topupPercentage) || 0,
+                    payoutPercentage: Number(matched?.payoutPercentage) || 0,
+                  };
+                },
             );
 
             this.loadingPortals = false;
@@ -1394,7 +1395,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Update loadPortalOptions to handle pagination
+// Update loadPortalOptions to handle pagination
   loadPortalOptions(headId: any): void {
     this.loadingPortals = true;
     this.headService.getAllHeadsWithPortalsById(headId).subscribe({
@@ -1416,15 +1417,15 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Add these methods
+// Add these methods
   enableEditMode(): void {
     this.isEditMode = true;
   }
 
-  // Optional: Add a method to handle cancel
+// Optional: Add a method to handle cancel
   cancelEdit(): void {
     this.isEditMode = false;
-    // Optionally reset form to original values here
-    // this.resetFormToOriginalValues();
+// Optionally reset form to original values here
+// this.resetFormToOriginalValues();
   }
 }

@@ -83,13 +83,27 @@ export class ComPartService {
       );
   }
 
+  getAllComPartByEntity(entityId: any, entityType: any): Observable<any> {
+    return this.http
+      .get<any>(
+        `${baseUrl}/comPart/getComPartsByEntityId/${entityId}/${entityType}`,
+      )
+      .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+      );
+  }
+
   getAllComPartByOwnerPaginated(
     id: any,
     page: any = 0,
     size: any = 10,
   ): Observable<any> {
+    let param = new HttpParams()
+    param = param.set("page",page)
+    param = param.set("size",size)
     return this.http
-      .get<any>(`${baseUrl}/comPart/getComPartsListByUserId/paginated/${id}`)
+      .get<any>(`${baseUrl}/comPart/getComPartsListByUserId/paginated/${id}`,{params:param})
       .pipe(
         map((res) => res.data),
         catchError(this.handleError),
@@ -214,25 +228,45 @@ export class ComPartService {
     );
   }
 
-  getUpiDetails(portalId: any, minAmount: any, maxAmount: any) {
+  getUpiDetails(portalId: any, minAmount?: any, maxAmount?: any) {
+    let params = new HttpParams();
+
+    if (minAmount != null && minAmount > 0) {
+      params = params.set("minAmount", minAmount);
+    }
+
+    if (maxAmount != null && maxAmount > 0) {
+      params = params.set("maxAmount", maxAmount);
+    }
+
     return this.http
-      .get(
-        `${baseUrl}/manual/getUpiDetailsByAmountRange/${portalId}?minAmount=${minAmount}&maxAmount=${maxAmount}`,
-      )
+      .get(`${baseUrl}/manual/getUpiDetailsByAmountRange/${portalId}`, {
+        params,
+      })
       .pipe(
         map((response: any) => response.data),
-        catchError((error) => throwError(error)),
+        catchError((error) => throwError(() => error)),
       );
   }
 
-  getBankDetails(portalId: any, minAmount: any, maxAmount: any) {
+  getBankDetails(portalId: any, minAmount?: any, maxAmount?: any) {
+    let params = new HttpParams();
+
+    if (minAmount != null && minAmount > 0) {
+      params = params.set("minAmount", minAmount);
+    }
+
+    if (maxAmount != null && maxAmount > 0) {
+      params = params.set("maxAmount", maxAmount);
+    }
+
     return this.http
-      .get(
-        `${baseUrl}/manual/getBankDetailsByAmountRange/${portalId}?minAmount=${minAmount}&maxAmount=${maxAmount}`,
-      )
+      .get(`${baseUrl}/manual/getBankDetailsByAmountRange/${portalId}`, {
+        params,
+      })
       .pipe(
         map((response: any) => response.data),
-        catchError((error) => throwError(error)),
+        catchError((error) => throwError(() => error)),
       );
   }
 
@@ -284,4 +318,12 @@ export class ComPartService {
       catchError((error) => throwError(() => error)),
     );
   }
+
+  getPercentageByEntityId(entityId: any, entityType: any): Observable<any> {
+    // entityId = "637011a4-6c87-43fa-a163-020c4e35475e";
+    // entityType = "owner";
+    return this.http.get<any>(
+     `${baseUrl}/comPart/getPercentageByEntityId/${entityId}/${entityType}`,
+    );
+}
 }

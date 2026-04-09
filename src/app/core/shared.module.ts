@@ -31,8 +31,10 @@ import { RecycleBankComponent } from "../common/recycle-bank/recycle-bank.compon
 import { TopupCapacityComponent } from "../common/topup-capacity/topup-capacity.component";
 // import { AcceptRejectChatComponent } from "../pages/comPart/accept-reject-chat/accept-reject-chat.component";
 import { PlaceholderPipe } from "../pipes/placeholder.pipe";
-import { PortalPercentagePopupComponent } from "../common/website-percentage-model/website-percentage-model.component";
 import { SidebarNotificationComponent } from "../common/sidebar-notification/sidebar-notification.component";
+import { WebsitePercentageModelComponent } from "../common/website-percentage-model/website-percentage-model.component";
+import { TimeZoneComponent } from "../common/time-zone/time-zone.component";
+import { CompartPercentageModleComponent } from "../common/compart-percentage-modle/compart-percentage-modle.component";
 
 // shared.module.ts
 @NgModule({
@@ -65,8 +67,12 @@ import { SidebarNotificationComponent } from "../common/sidebar-notification/sid
     RecycleUpiComponent,
     TopupCapacityComponent,
     PlaceholderPipe,
-    PortalPercentagePopupComponent,
+    // PortalPercentagePopupComponent,
     SidebarNotificationComponent,
+    WebsitePercentageModelComponent,
+    TimeZoneComponent,
+    CompartPercentageModleComponent
+    
     
   ],
   exports: [
@@ -97,8 +103,11 @@ import { SidebarNotificationComponent } from "../common/sidebar-notification/sid
     RecycleUpiComponent,
     TopupCapacityComponent,
     PlaceholderPipe,
-    PortalPercentagePopupComponent,
-    SidebarNotificationComponent
+    // PortalPercentagePopupComponent,
+    SidebarNotificationComponent,
+    WebsitePercentageModelComponent,
+    TimeZoneComponent,
+    CompartPercentageModleComponent
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeComponent],
 })

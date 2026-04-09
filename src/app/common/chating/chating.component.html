@@ -221,7 +221,7 @@
 
                 <!-- Name -->
                 <span>
-                 - {{ selectedNotification.name || selectedNotification.groupName }}
+                  - {{ selectedNotification.name || selectedNotification.groupName }}
                 </span>
 
               </h2>
@@ -249,14 +249,14 @@
                 <button *ngIf="selectedNotification.threadType === 'payout'"
                   (click)="showPayoutModel(selectedNotification)" [disabled]="isLoading"
                   class="px-3.5 py-2 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 disabled:from-violet-300 disabled:to-fuchsia-300 text-white text-xs font-bold rounded-xl transition-all duration-300 shadow-md shadow-violet-200/50 hover:shadow-lg hover:shadow-violet-200/60 active:scale-95"
-                  title="Edit & Send Payout">
+                  title="Edit & Send Same User">
                   ✎
                 </button>
 
                 <!-- Resend button -->
                 <button (click)="showResendConfirmation(selectedNotification)" [disabled]="isLoading"
                   class="px-3.5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-emerald-300 disabled:to-teal-300 text-white text-xs font-bold rounded-xl transition-all duration-300 shadow-md shadow-emerald-200/50 hover:shadow-lg hover:shadow-emerald-200/60 active:scale-95"
-                  title="Resend Thread">
+                  title="Send to All Users Again">
                   ↻
                 </button>
 
@@ -414,7 +414,7 @@
                 class="shadow-md p-4 cursor-pointer hover:shadow-xl transition-all duration-300 group/file"
                 [ngClass]="message.isCurrentUser ? 'bg-violet-400 text-white rounded-3xl rounded-tr-lg shadow-md shadow-gray-100/60 border border-gray-100/80 px-5 py-3.5' : 'bg-white text-gray-700 rounded-3xl rounded-tl-lg shadow-md shadow-gray-100/60 border border-gray-100/80 px-5 py-3.5' "
                 (click)="
-                  openMediaViewer(message.mediaUrl, message.text, 'file')
+                  openMediaViewer(message.mediaUrl, message.text, 'image')
                 ">
                 <div class="flex items-center space-x-4">
                   <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" [ngClass]="{
@@ -1519,7 +1519,7 @@
       <!-- IMAGE -->
       <div *ngIf="currentMediaType === 'image'"
         class="flex items-center justify-center w-full h-full p-6 overflow-auto">
-        <img [src]="currentMediaUrl" [alt]="currentMediaName || 'Image'"
+        <img [src]="currentMediaUrl"   [alt]="currentMediaName || 'Image'"
           class="max-w-full rounded-2xl shadow-xl shadow-violet-100/20 transition-transform duration-400 cursor-pointer ring-1 ring-violet-100/30"
           [style.transform]="'scale(' + zoomLevel + ')'" [style.max-height]="isZoomed ? 'none' : 'calc(100vh - 200px)'"
           (click)="toggleZoom()" loading="lazy" />

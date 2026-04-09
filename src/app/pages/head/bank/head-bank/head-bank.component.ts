@@ -1,3 +1,5 @@
+
+
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
@@ -39,16 +41,16 @@ interface BankAccount {
   isBankActive?: boolean;
   currency?: string;
   min_tran_count?: number;
-max_tran_count?: number;
-min_total_tran_amount?: number;
-max_total_tran_amount?: number;
+  max_tran_count?: number;
+  min_total_tran_amount?: number;
+  max_total_tran_amount?: number;
 }
 
 interface Portal {
   portalId: string;
   portalDomain: string;
   currency: string;
-  // portal:string;
+// portal:string;
 }
 
 @Component({
@@ -58,21 +60,21 @@ interface Portal {
 })
 export class HeadBankComponent implements OnInit, OnDestroy {
   @ViewChild("portalDropdown") portalDropdown!: ElementRef;
-  // ---------- DATA (server‑paginated) ----------
+// ---------- DATA (server‑paginated) ----------
   bankAccounts: BankAccount[] = [];
   totalElements = 0;
   totalPagesCount = 0;
   loading = false;
-tooltipVisible = false;
-tooltipX = 0;
-tooltipY = 0;
-tooltipData: any = null;
+  tooltipVisible = false;
+  tooltipX = 0;
+  tooltipY = 0;
+  tooltipData: any = null;
   showPaymentDropdown = false;
   selectedMethod = "bank";
   statusFilter: string = "all";
   minLimitDateTime: string = "";
-
-  // ---------- FILTERS (sent to backend) ----------
+  topupStatus: any = false;
+// ---------- FILTERS (sent to backend) ----------
   searchTerm = ""; // unified search (accountNo, holder, IFSC, portal)
   filterStatus = ""; // 'active', 'inactive', '' (empty = all)
   selectedPortal: Portal | null = null;
@@ -80,33 +82,34 @@ tooltipData: any = null;
   maxAmount: number | null = null;
   maxLimit: number | null = null; // max limit filter
 
-  // UI state for portal filter dropdown
+// UI state for portal filter dropdown
   portalSearchTerm = "";
   showPortalDropdown = false;
   filteredPortals: Portal[] = [];
 
-  // UI toggle for amount filter section
+// UI toggle for amount filter section
   showAmountFilter = false;
 
-  // ---------- PAGINATION ----------
+// ---------- PAGINATION ----------
   currentPage = 1;
   pageSize = 6;
   Math = Math;
-
-  // ---------- ADD MODAL ----------
+selectedBankForUpi: any = null;
+openUpiModal = false;
+// ---------- ADD MODAL ----------
   showAddModal = false;
   isAdding = false;
   portals: Portal[] = [];
   addBankForm: FormGroup;
   showDebug = false; // kept for debug, but you can remove
 
-  // Modal portal search
+// Modal portal search
   modalPortalSearch = "";
   modalFilteredPortals: Portal[] = [];
   selectedModalPortal: Portal | null = null;
   showModalPortalDropdown = false;
 
-  // ---------- UPDATE MODAL ----------
+// ---------- UPDATE MODAL ----------
   showUpdateModal = false;
   editingAccount: BankAccount | null = null;
   updateForm: any = {
@@ -120,36 +123,36 @@ tooltipData: any = null;
     maxAmount: "",
     bankName: "",
     min_tran_count: null,
-  max_tran_count: null,
-  min_total_tran_amount: null,
-  max_total_tran_amount: null
+    max_tran_count: null,
+    min_total_tran_amount: null,
+    max_total_tran_amount: null
   };
   isSubmitting = false;
 
   showLimitModal: boolean = false;
   limitDateTime: any;
   isSubmittingLimit: boolean = false;
-  // For update modal bank dropdown
+// For update modal bank dropdown
   updateBankSearchTerm = "";
   updateFilteredBanks: string[] = INDIAN_BANKS;
   updateShowBankDropdown = false;
   updateIsCustomBank = false;
-  // ---------- USER / ROLE ----------
+// ---------- USER / ROLE ----------
   currentRoleId: any;
   currentUserId: any;
   role: any;
 
-  // ---------- ACTION DROPDOWN ----------
+// ---------- ACTION DROPDOWN ----------
   activeActionDropdown: string | null = null;
   isUpdatingStatus: { [key: string]: boolean } = {};
 
-  // Add these properties to your component class
+// Add these properties to your component class
   bankSearchTerm: string = "";
   filteredBanks: string[] = INDIAN_BANKS;
   showBankDropdown: boolean = false;
   isCustomBank: boolean = false;
 
-  // ---------- SUBSCRIPTION MANAGEMENT ----------
+// ---------- SUBSCRIPTION MANAGEMENT ----------
   private subs = new Subscription();
   private searchSubject = new Subject<string>();
   // ---------- COMPUTED: active filters count ----------
@@ -177,15 +180,15 @@ tooltipData: any = null;
   capacityData: any[] = [];
   isLoadingCapacity: boolean = false;
   constructor(
-    private route: ActivatedRoute,
-    private bankService: BankService,
-    private fb: FormBuilder,
-    private userStateService: UserStateService,
-    private headService: HeadService,
-    // private portalService: PortalSharingService,
-    private snack: SnackbarService,
-    private router: Router,
-    private elementRef: ElementRef,
+      private route: ActivatedRoute,
+      private bankService: BankService,
+      private fb: FormBuilder,
+      private userStateService: UserStateService,
+      private headService: HeadService,
+      // private portalService: PortalSharingService,
+      private snack: SnackbarService,
+      private router: Router,
+      private elementRef: ElementRef,
   ) {
     this.addBankForm = this.createAddBankForm();
   }
@@ -196,8 +199,9 @@ tooltipData: any = null;
     this.role = this.userStateService.getRole();
 
     this.fetchBankAccounts();
+    this.getTopupStatus();
     this.loadPortals();
-
+this.initAddUpiForm();
     // this.portalService.selectedPortals$.subscribe((sites) => {
     //   this.selectedPortals = sites;
     //   // Mobile → grid by default
@@ -210,12 +214,12 @@ tooltipData: any = null;
     // });
 
     this.searchSubject
-      .pipe(debounceTime(600), distinctUntilChanged())
-      .subscribe((value) => {
-        this.searchTerm = value;
-        this.currentPage = 1;
-        this.fetchBankAccounts();
-      });
+        .pipe(debounceTime(600), distinctUntilChanged())
+        .subscribe((value) => {
+          this.searchTerm = value;
+          this.currentPage = 1;
+          this.fetchBankAccounts();
+        });
   }
 
   ngOnDestroy() {
@@ -237,94 +241,94 @@ tooltipData: any = null;
       limit: this.maxLimit ?? undefined,
       portalId: this.selectedPortal?.portalId || undefined,
       status: this.statusFilter || undefined,
-      
+
     };
 
     // if (this.filterStatus === "active") options.active = true;
     // if (this.filterStatus === "inactive") options.active = false;
 
     const sub = this.bankService
-      .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, options)
-      .pipe(
-        catchError((err) => {
+        .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, options)
+        .pipe(
+            catchError((err) => {
+              this.loading = false;
+              return of({ data: [], totalElements: 0, totalPages: 0 });
+            }),
+        )
+        .subscribe((res: any) => {
           this.loading = false;
-          return of({ data: [], totalElements: 0, totalPages: 0 });
-        }),
-      )
-      .subscribe((res: any) => {
-        this.loading = false;
 
-        // Handle different possible response structures
-        const rows: any[] = Array.isArray(res.data?.content)
-          ? res.data.content
-          : Array.isArray(res.data)
-            ? res.data
-            : [];
+          // Handle different possible response structures
+          const rows: any[] = Array.isArray(res.data?.content)
+              ? res.data.content
+              : Array.isArray(res.data)
+                  ? res.data
+                  : [];
 
-        this.bankAccounts = rows
-          .map((r: any) => {
-            let status: StatusString = "inactive";
+          this.bankAccounts = rows
+              .map((r: any) => {
+                let status: StatusString = "inactive";
 
-            if (typeof r.status === "string" && r.status.trim() !== "") {
-              status = r.status.toLowerCase() as StatusString;
-            } else if (typeof r.active === "boolean") {
-              status = r.active ? "active" : "inactive";
-            } else if (typeof r.status === "boolean") {
-              status = r.status ? "active" : "inactive";
-            }
+                if (typeof r.status === "string" && r.status.trim() !== "") {
+                  status = r.status.toLowerCase() as StatusString;
+                } else if (typeof r.active === "boolean") {
+                  status = r.active ? "active" : "inactive";
+                } else if (typeof r.status === "boolean") {
+                  status = r.status ? "active" : "inactive";
+                }
 
-            let accountType = r.accountType ?? "";
-            if (accountType.toLowerCase() === "savings") {
-              accountType = "saving";
-            }
+                let accountType = r.accountType ?? "";
+                if (accountType.toLowerCase() === "savings") {
+                  accountType = "saving";
+                }
 
-            const isBankActive =
-              typeof r.bank === "boolean"
-                ? r.bank
-                : typeof r.isBank === "boolean"
-                  ? r.isBank
-                  : typeof r.isBankActive === "boolean"
-                    ? r.isBankActive
-                    : typeof r.bankActive === "boolean"
-                      ? r.bankActive
-                      : status === "active";
+                const isBankActive =
+                    typeof r.bank === "boolean"
+                        ? r.bank
+                        : typeof r.isBank === "boolean"
+                            ? r.isBank
+                            : typeof r.isBankActive === "boolean"
+                                ? r.isBankActive
+                                : typeof r.bankActive === "boolean"
+                                    ? r.bankActive
+                                    : status === "active";
 
-            return {
-              id: r.id,
-              branchId: r.branchId ?? null,
-              portal: r.portalDomain ?? null,
-              portalId: r.portal ?? null,
-              portalDomain: r.portalDomain ?? null,
-              accountHolderName: r.accountHolderName ?? r.name ?? "-",
-              bankName: r.bankName ?? "",
-              accountNo: r.accountNo ?? r.accountNumber ?? "",
-              accountType,
-              status,
-              ifsc: r.ifsc ?? "",
-              bankRange: r.bankRange ?? r.range ?? "",
-              createdAt: r.createdAt ? new Date(r.createdAt) : null,
-              limitAmount: r.limitAmount ?? "",
-              currency: r.portalCurrency || "",
-              limitTime: r.limitTime ?? null,
-         min_tran_count: r.minTranCount ?? null,
-max_tran_count: r.maxTranCount ?? null,
-min_total_tran_amount: r.minTotalTranAmount ?? null,
-max_total_tran_amount: r.maxTotalTranAmount ?? null,
-              // minAmount: r.minAmount ?? "",
-              // maxAmount: r.maxAmount ?? "",
-              isBankActive,
-            } as BankAccount;
-          })
-          .sort((a, b) => {
-            const aTime = a.limitTime ? new Date(a.limitTime).getTime() : 0;
-            const bTime = b.limitTime ? new Date(b.limitTime).getTime() : 0;
-            return bTime - aTime;
-          });
+                return {
+                  id: r.id,
+                  branchId: r.branchId ?? null,
+                  portal: r.portalDomain ?? null,
+                  portalId: r.portal ?? null,
+                  portalDomain: r.portalDomain ?? null,
+                  accountHolderName: r.accountHolderName ?? r.name ?? "-",
+                  bankName: r.bankName ?? "",
+                  accountNo: r.accountNo ?? r.accountNumber ?? "",
+                  accountType,
+                  status,
+                  ifsc: r.ifsc ?? "",
+                  bankRange: r.bankRange ?? r.range ?? "",
+                  createdAt: r.createdAt ? new Date(r.createdAt) : null,
+                  limitAmount: r.limitAmount ?? "",
+                  currency: r.portalCurrency || "",
+                  limitTime: r.limitTime ?? null,
+                  min_tran_count: r.minTranCount ?? null,
+                  max_tran_count: r.maxTranCount ?? null,
+                  min_total_tran_amount: r.minTotalTranAmount ?? null,
+                  max_total_tran_amount: r.maxTotalTranAmount ?? null,
+                  // minAmount: r.minAmount ?? "",
+                  // maxAmount: r.maxAmount ?? "",
+                  isBankActive,
+                } as BankAccount;
+              })
+              .sort((a, b) => {
+                const aTime = a.limitTime ? new Date(a.limitTime).getTime() : 0;
+                const bTime = b.limitTime ? new Date(b.limitTime).getTime() : 0;
+                return bTime - aTime;
+              });
 
-        // Pagination info
-        this.totalElements = res.totalElements ?? res.data?.totalElements ?? 0;
-        this.totalPagesCount = res.totalPages ?? res.data?.totalPages ?? 0;
-      });
+          // Pagination info
+          this.totalElements = res.totalElements ?? res.data?.totalElements ?? 0;
+          this.totalPagesCount = res.totalPages ?? res.data?.totalPages ?? 0;
+        });
 
     this.subs.add(sub);
   }
@@ -378,9 +382,9 @@ max_total_tran_amount: r.maxTotalTranAmount ?? null,
       return;
     }
     this.filteredPortals = this.portals.filter(
-      (site) =>
-        site.portalDomain.toLowerCase().includes(term) ||
-        (site.currency && site.currency.toLowerCase().includes(term)),
+        (site) =>
+            site.portalDomain.toLowerCase().includes(term) ||
+            (site.currency && site.currency.toLowerCase().includes(term)),
     );
     this.showPortalDropdown = this.filteredPortals.length > 0;
   }
@@ -458,29 +462,29 @@ max_total_tran_amount: r.maxTotalTranAmount ?? null,
 
   private createAddBankForm(): FormGroup {
     return this.fb.group(
-      {
-        // portal: ["", Validators.required],
-        bankName: ["", Validators.required], // Add this line
-        accountNumber: [
-          "",
-          [Validators.required, Validators.pattern(/^\d{10,20}$/)],
-        ],
-        accountHolderName: ["", [Validators.required, Validators.minLength(3)]],
-        ifscCode: [
-          "",
-          [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)],
-        ],
-        accountType: ["", Validators.required],
-        limitAmount: [
-          "",
-          [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)],
-        ],
-        min_tran_count: [null],
-max_tran_count: [null],
-min_total_tran_amount: [null],
-max_total_tran_amount: [null],
-      },
-      // { validators: this.accountNumberMatchValidator },
+        {
+          // portal: ["", Validators.required],
+          bankName: ["", Validators.required], // Add this line
+          accountNumber: [
+            "",
+            [Validators.required, Validators.pattern(/^\d{10,20}$/)],
+          ],
+          accountHolderName: ["", [Validators.required, Validators.minLength(3)]],
+          ifscCode: [
+            "",
+            [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)],
+          ],
+          accountType: ["", Validators.required],
+          limitAmount: [
+            "",
+            [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)],
+          ],
+          min_tran_count: [null],
+          max_tran_count: [null],
+          min_total_tran_amount: [null],
+          max_total_tran_amount: [null],
+        },
+        // { validators: this.accountNumberMatchValidator },
     );
   }
 
@@ -500,17 +504,17 @@ max_total_tran_amount: [null],
   loadPortals() {
     if (this.currentRoleId) {
       const sub = this.headService
-        .getAllHeadsWithPortalsById(this.currentRoleId, "BANK")
-        .subscribe({
-          next: (res: any) => {
-            this.portals = Array.isArray(res) ? res : [];
-            this.modalFilteredPortals = [...this.portals];
-          },
-          error: (err) => {
-            this.portals = [];
-            this.modalFilteredPortals = [];
-          },
-        });
+          .getAllHeadsWithPortalsById(this.currentRoleId, "BANK")
+          .subscribe({
+            next: (res: any) => {
+              this.portals = Array.isArray(res) ? res : [];
+              this.modalFilteredPortals = [...this.portals];
+            },
+            error: (err) => {
+              this.portals = [];
+              this.modalFilteredPortals = [];
+            },
+          });
       this.subs.add(sub);
     }
   }
@@ -553,9 +557,9 @@ max_total_tran_amount: [null],
     }
 
     this.modalFilteredPortals = this.portals.filter(
-      (w) =>
-        w.portalDomain.toLowerCase().includes(term) ||
-        (w.currency && w.currency.toLowerCase().includes(term)),
+        (w) =>
+            w.portalDomain.toLowerCase().includes(term) ||
+            (w.currency && w.currency.toLowerCase().includes(term)),
     );
   }
 
@@ -693,10 +697,10 @@ max_total_tran_amount: [null],
       limitAmount: account.limitAmount || "",
       accountType: account.accountType || "saving",
       status: account.status || "active",
-       min_tran_count: account.min_tran_count || null,
-  max_tran_count: account.max_tran_count || null,
-  min_total_tran_amount: account.min_total_tran_amount || null,
-  max_total_tran_amount: account.max_total_tran_amount || null
+      min_tran_count: account.min_tran_count || null,
+      max_tran_count: account.max_tran_count || null,
+      min_total_tran_amount: account.min_total_tran_amount || null,
+      max_total_tran_amount: account.max_total_tran_amount || null
       // minAmount: account.minAmount,
       // maxAmount: account.maxAmount,
     };
@@ -716,10 +720,10 @@ max_total_tran_amount: [null],
       limitAmount: "",
       accountType: "saving",
       status: "active",
-       min_tran_count: null,
-  max_tran_count: null,
-  min_total_tran_amount: null,
-  max_total_tran_amount: null
+      min_tran_count: null,
+      max_tran_count: null,
+      min_total_tran_amount: null,
+      max_total_tran_amount: null
       // minAmount: "",
       // maxAmount: "",
     };
@@ -734,7 +738,7 @@ max_total_tran_amount: [null],
       event.preventDefault();
     }
     this.activeActionDropdown =
-      this.activeActionDropdown === accountId ? null : accountId;
+        this.activeActionDropdown === accountId ? null : accountId;
   }
 
   // @HostListener("document:click")
@@ -782,9 +786,9 @@ max_total_tran_amount: [null],
         this.isUpdatingStatus[accountId] = false;
         // alert("Error updating account status. Please try again.");
         this.snack.show(
-          err?.error?.message||
-          "Error updating account status. Please try again.",
-          false,
+            err?.error?.message||
+            "Error updating account status. Please try again.",
+            false,
         );
       },
     });
@@ -795,7 +799,7 @@ max_total_tran_amount: [null],
 
   submitAddBankForm() {
     Object.keys(this.addBankForm.controls).forEach((key) =>
-      this.addBankForm.get(key)?.markAsTouched(),
+        this.addBankForm.get(key)?.markAsTouched(),
     );
 
     if (this.addBankForm.invalid) {
@@ -804,11 +808,11 @@ max_total_tran_amount: [null],
     }
 
     const invalid = this.capacityRanges.some(
-      (r) =>
-        r.minRange === null ||
-        r.maxRange === null ||
-        r.quantity === null ||
-        Number(r.maxRange) <= Number(r.minRange),
+        (r) =>
+            r.minRange === null ||
+            r.maxRange === null ||
+            r.quantity === null ||
+            Number(r.maxRange) <= Number(r.minRange),
     );
 
     if (invalid) {
@@ -830,10 +834,10 @@ max_total_tran_amount: [null],
       accountType: formData.accountType,
       limitAmount: formData.limitAmount,
       status: "active",
-  minTranCount: Number(formData.min_tran_count) || 0,
-  maxTranCount: Number(formData.max_tran_count) || 0,
-  minTotalTranAmount: Number(formData.min_total_tran_amount) || 0,
-  maxTotalTranAmount: Number(formData.max_total_tran_amount) || 0,
+      minTranCount: Number(formData.min_tran_count) || 0,
+      maxTranCount: Number(formData.max_tran_count) || 0,
+      minTotalTranAmount: Number(formData.min_total_tran_amount) || 0,
+      maxTotalTranAmount: Number(formData.max_total_tran_amount) || 0,
       // ranges stays same
       ranges: this.capacityRanges.map((r) => ({
         minRange: Number(r.minRange),
@@ -898,10 +902,10 @@ max_total_tran_amount: [null],
       limitAmount: this.updateForm.limitAmount,
       accountType: this.updateForm.accountType,
       status: this.updateForm.status,
-minTranCount: Number(this.updateForm.min_tran_count) || 0,
-maxTranCount: Number(this.updateForm.max_tran_count) || 0,
-minTotalTranAmount: Number(this.updateForm.min_total_tran_amount) || 0,
-maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
+      minTranCount: Number(this.updateForm.min_tran_count) || 0,
+      maxTranCount: Number(this.updateForm.max_tran_count) || 0,
+      minTotalTranAmount: Number(this.updateForm.min_total_tran_amount) || 0,
+      maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
       // minAmount: this.updateForm.minAmount,
       // maxAmount: this.updateForm.maxAmount,
     };
@@ -917,9 +921,9 @@ maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
         this.isSubmitting = false;
         alert("Error updating bank account. Please try again.");
         this.snack.show(
-          err?.error?.message ||
-          "Error updating bank account. Please try again.",
-          false,
+            err?.error?.message ||
+            "Error updating bank account. Please try again.",
+            false,
         );
       },
     });
@@ -1041,7 +1045,7 @@ maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
       this.filteredBanks = INDIAN_BANKS;
     } else {
       this.filteredBanks = INDIAN_BANKS.filter((bank) =>
-        bank.toLowerCase().includes(term),
+          bank.toLowerCase().includes(term),
       );
     }
   }
@@ -1064,12 +1068,12 @@ maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
     const term = value.toLowerCase().trim();
 
     this.filteredBanks = INDIAN_BANKS.filter((bank) =>
-      bank.toLowerCase().includes(term),
+        bank.toLowerCase().includes(term),
     );
 
     this.isCustomBank =
-      value.trim() !== "" &&
-      !INDIAN_BANKS.some((bank) => bank.toLowerCase() === value.toLowerCase());
+        value.trim() !== "" &&
+        !INDIAN_BANKS.some((bank) => bank.toLowerCase() === value.toLowerCase());
   }
 
   selectBank(bank: string): void {
@@ -1112,12 +1116,12 @@ maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
 
     const term = value.toLowerCase().trim();
     this.updateFilteredBanks = INDIAN_BANKS.filter((bank) =>
-      bank.toLowerCase().includes(term),
+        bank.toLowerCase().includes(term),
     );
 
     this.updateIsCustomBank =
-      value.trim() !== "" &&
-      !INDIAN_BANKS.some((bank) => bank.toLowerCase() === value.toLowerCase());
+        value.trim() !== "" &&
+        !INDIAN_BANKS.some((bank) => bank.toLowerCase() === value.toLowerCase());
   }
 
   selectUpdateBank(bank: string): void {
@@ -1198,8 +1202,8 @@ maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
     const now = new Date();
 
     const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-      .toISOString()
-      .slice(0, 16);
+        .toISOString()
+        .slice(0, 16);
 
     this.limitDateTime = local;
     this.minLimitDateTime = local;
@@ -1288,9 +1292,9 @@ maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
     //   last.quantity === null
     // )
     if (
-      last.minRange === null ||
-      last.maxRange === null ||
-      last.quantity === null
+        last.minRange === null ||
+        last.maxRange === null ||
+        last.quantity === null
     ) {
       this.snack.show("Please fill 'To' and Quantity first", false);
       return;
@@ -1376,31 +1380,31 @@ maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
     this.capacityRanges = [];
 
     this.bankService
-      .getTopupCapacity(
-        "HEAD",
-        this.currentRoleId,
-        account.portalId,
-        "BANK",
-        account.id,
-      )
-      .subscribe({
-        next: (res: any) => {
-          this.isLoadingCapacity = false;
-          const res2 = res?.data;
-          this.capacityData = Array.isArray(res2) ? res2 : [];
+        .getTopupCapacity(
+            "HEAD",
+            this.currentRoleId,
+            account.portalId,
+            "BANK",
+            account.id,
+        )
+        .subscribe({
+          next: (res: any) => {
+            this.isLoadingCapacity = false;
+            const res2 = res?.data;
+            this.capacityData = Array.isArray(res2) ? res2 : [];
 
-          //  FIX: map to UI array
-          this.capacityRanges = this.capacityData.map((r: any) => ({
-            minRange: r.minRange,
-            maxRange: r.maxRange,
-            quantity: r.quantity,
-          }));
-        },
-        error: () => {
-          this.isLoadingCapacity = false;
-          this.snack.show("Failed to fetch capacity", false);
-        },
-      });
+            //  FIX: map to UI array
+            this.capacityRanges = this.capacityData.map((r: any) => ({
+              minRange: r.minRange,
+              maxRange: r.maxRange,
+              quantity: r.quantity,
+            }));
+          },
+          error: () => {
+            this.isLoadingCapacity = false;
+            this.snack.show("Failed to fetch capacity", false);
+          },
+        });
   }
 
   closeCapacityModal() {
@@ -1410,11 +1414,11 @@ maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
 
   saveCapacity(account: any) {
     const invalid = this.capacityRanges.some(
-      (r) =>
-        r.minRange === null ||
-        r.maxRange === null ||
-        r.quantity === null ||
-        r.maxRange <= r.minRange,
+        (r) =>
+            r.minRange === null ||
+            r.maxRange === null ||
+            r.quantity === null ||
+            r.maxRange <= r.minRange,
     );
 
     if (invalid) {
@@ -1556,19 +1560,96 @@ maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
   }
 
 
-  
 
-showTooltip(event: MouseEvent, account: any) {
-  const rect = (event.target as HTMLElement).getBoundingClientRect();
 
-  this.tooltipX = rect.left + rect.width / 2 - 120; // center align
-  this.tooltipY = rect.top - 10; // above element
+  showTooltip(event: MouseEvent, account: any) {
+    const rect = (event.target as HTMLElement).getBoundingClientRect();
 
-  this.tooltipData = account;
-  this.tooltipVisible = true;
+    this.tooltipX = rect.left + rect.width / 2 - 120; // center align
+    this.tooltipY = rect.top - 10; // above element
+
+    this.tooltipData = account;
+    this.tooltipVisible = true;
+  }
+
+  hideTooltip() {
+    this.tooltipVisible = false;
+  }
+  private getTopupStatus() {
+    this.headService.getHeadById(this.currentRoleId).subscribe((res) => {
+      this.topupStatus = res.topup;
+    });
+  }
+    changeTopupStatus() {
+    this.headService.toggleDashbaordTopup(this.currentRoleId).subscribe(() => {
+      this.topupStatus = !this.topupStatus; 
+    });
+  }
+
+
+viewUpi(account: any) {
+  this.router.navigate(['/upi'], {
+    queryParams: { bankid: account.id }
+  });
+}
+showAddUpiModal = false;
+isAddingUpi = false;
+
+addUpiForm!: FormGroup;
+selectedBank: any = null;
+
+// QR
+qrData: string | null = null;
+generatedFile: File | null = null;
+manualQrFile: File | null = null;
+
+
+initAddUpiForm() {
+  this.addUpiForm = this.fb.group({
+    vpa: ["", [Validators.required]],
+    limitAmount: ["", Validators.required],
+    min_tran_count: [null],
+    max_tran_count: [null],
+    min_total_tran_amount: [null],
+    max_total_tran_amount: [null],
+  });
 }
 
-hideTooltip() {
-  this.tooltipVisible = false;
+openAddUpiFromBank(account: any) {
+  this.selectedBank = account;
+  this.showAddUpiModal = true;
+
+  document.body.style.overflow = "hidden";
+}
+
+closeAddUpiModal() {
+  this.showAddUpiModal = false;
+  this.addUpiForm.reset();
+  this.generatedFile = null;
+  this.manualQrFile = null;
+  this.selectedBank = null;
+
+  document.body.style.overflow = "auto";
+}
+
+submitAddUpi() {
+  if (this.addUpiForm.invalid) return;
+
+  const payload = {
+    vpa: this.addUpiForm.value.vpa,
+    limitAmount: this.addUpiForm.value.limitAmount,
+    bankId: this.selectedBank?.id, // 🔥 MAIN PART
+    accountNo: this.selectedBank?.accountNo,
+    bankName: this.selectedBank?.bankName,
+
+    minTranCount: this.addUpiForm.value.min_tran_count || 0,
+    maxTranCount: this.addUpiForm.value.max_tran_count || 0,
+    minTotalTranAmount: this.addUpiForm.value.min_total_tran_amount || 0,
+    maxTotalTranAmount: this.addUpiForm.value.max_total_tran_amount || 0,
+  };
+
+  console.log("UPI Payload:", payload);
+
+  //  call your API here
 }
 }

@@ -18,8 +18,9 @@ import { FundsService } from "../../pages/services/funds.service";
 import { ActivatedRoute } from "@angular/router";
 import { emojiCategories } from "../../utils/constants";
 import { fileBaseUrl } from "../../pages/services/helper";
-import { no } from "intl-tel-input/i18n";
+import { no, ur } from "intl-tel-input/i18n";
 import { ComPartService } from "../../pages/services/com-part.service";
+import { MultimediaService } from "../../pages/services/multimedia.service";
 
 interface GroupMessage {
   id: string;
@@ -215,6 +216,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     private fundService: FundsService,
     private route: ActivatedRoute,
     private comPartService: ComPartService,
+    private multimediaService: MultimediaService,
   ) {}
 
   ngOnInit(): void {
@@ -984,7 +986,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       avatar: this.getInitials(groupName),
       lastMessage: t.lastMessage || t.message || "",
       lastSender: t.lastSender || t.createdByName || "",
-      time: this.formatTime(t.updatedAt || t.createdAt || ""),
+      time: this.formatTime(t.updatedAt || ""),
       unread: t.unreadCount || unreadFlag,
       participantCount: t.participantCount || 0,
       participants: [],
@@ -1257,8 +1259,8 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       senderAvatar: this.getInitials(senderName),
       senderRole: participant?.role || m.role || m.senderRole || undefined,
       text: m.message || m.text || "",
-      time: this.formatTime(m.createdAt || m.time || ""),
-      rawTime: m.createdAt || m.time || "",
+      time: this.formatTime(m.updatedAt || m.time || ""),
+      rawTime: m.updatedAt || m.time || "",
       type,
       mediaUrl: fileUrl,
       isCurrentUser: senderId === this.currrentEntityId,
@@ -1581,12 +1583,13 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   openMediaViewer(
     mediaUrl: any,
     name: string = "",
-    type: string = "file",
+    type: string = "image",
   ): void {
     if (!mediaUrl) {
       this.snackBar.show("No media to preview", false);
       return;
     }
+    this.loadImage(mediaUrl);
     this.currentMediaUrl = mediaUrl;
     this.currentMediaName = name || "";
 
@@ -1627,25 +1630,38 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.snackBar.show("No file to download", false);
       return;
     }
-    try {
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error("Network error");
-      const blob = await resp.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = filename || "download";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
-    } catch {
-      try {
-        window.open(url, "_blank");
-      } catch {
+
+    this.multimediaService.getImageByUrl(url).subscribe({
+      next: (blobUrl: string) => {
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = filename || "download";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        // Cleanup
+        setTimeout(() => {
+          URL.revokeObjectURL(blobUrl);
+        }, 10000);
+      },
+      error: () => {
         this.snackBar.show("Unable to download file", false);
-      }
-    }
+      },
+    });
+  }
+
+  loadImage(url: string) {
+    if (!url) return;
+
+    this.multimediaService.getImageByUrlBlob(url).subscribe({
+      next: (blob: Blob) => {
+        this.currentMediaUrl = URL.createObjectURL(blob);
+      },
+      error: () => {
+        this.snackBar.show("Image load failed", false);
+      },
+    });
   }
 
   isImage(url: string | null | undefined): boolean {
@@ -2083,6 +2099,9 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   confirmResend(): void {
     this.isLoading = true;
     this.resendThread(this.selectedThread);
+    if (this.selectedNotification) {
+      this.selectedNotification.resolved = !this.selectedNotification.resolved;
+    }
     this.closeModals();
   }
 
@@ -2125,6 +2144,9 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   confirmRejection(): void {
     this.isLoading = true;
     this.performReject(this.selectedThread);
+    if (this.selectedNotification) {
+      this.selectedNotification.resolved = !this.selectedNotification.resolved;
+    }
     this.closeModals();
   }
 
@@ -2168,6 +2190,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const payload = {
+      fundId: this.selectedThread?.fundId,
       accountNumber: this.payoutForm.accountNumber.trim(),
       ifsc: this.payoutForm.ifsc.trim(),
       reason: this.payoutForm.reason?.trim() || null,
@@ -2179,7 +2202,12 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sentPayoutThreadUpdateToSameUser(threadId, payload).subscribe({
       next: (res: any) => {
         this.isLoading = false;
+        if (this.selectedNotification) {
+          this.selectedNotification.resolved =
+            !this.selectedNotification.resolved;
+        }
         this.closeModals();
+        this.loadThreads();
       },
       error: (err: any) => {
         this.isLoading = false;

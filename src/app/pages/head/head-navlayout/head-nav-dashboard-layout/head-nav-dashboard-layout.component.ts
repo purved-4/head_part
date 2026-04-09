@@ -1,3 +1,4 @@
+
 import { Component } from '@angular/core';
 import { HostListener } from '@angular/core';
 @Component({
@@ -7,11 +8,11 @@ import { HostListener } from '@angular/core';
 })
 export class HeadNavDashboardLayoutComponent {
 
-headerTopup = 0;
-headerPayout = 0;
-headerReward = 0;
-headerLimit = 0;
- sidebarCollapsed = false;
+  headerTopup = 0;
+  headerPayout = 0;
+  headerReward = 0;
+  headerLimit = 0;
+  sidebarCollapsed = false;
   secondaryPanelOpen = false;
   mobileMenuOpen = false;
   showSettings = false;
@@ -20,7 +21,8 @@ headerLimit = 0;
 
   readonly PRIMARY_WIDTH = 80;
   readonly PANEL_WIDTH = 320;
-
+ isNotificationSidebarOpen = false;
+  notificationUnreadCount = 0;
   get mainMargin(): number {
     // On mobile, no margin
     if (this.isMobileView()) {
@@ -34,10 +36,10 @@ headerLimit = 0;
   //   return window.innerWidth <= 800;
   // }
 
-isMobileView(): boolean {
-  return typeof matchMedia !== 'undefined' &&
-         matchMedia('(max-width: 800px)').matches;
-}
+  isMobileView(): boolean {
+    return typeof matchMedia !== 'undefined' &&
+      matchMedia('(max-width: 800px)').matches;
+  }
 
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
@@ -74,11 +76,11 @@ isMobileView(): boolean {
   }
 
   onBalanceChange(data: any) {
-  this.headerTopup = data.topup;
-  this.headerPayout = data.payout;
-  this.headerReward = data.reward;
-  this.headerLimit = data.limit;
-}
+    this.headerTopup = data.topup;
+    this.headerPayout = data.payout;
+    this.headerReward = data.reward;
+    this.headerLimit = data.limit;
+  }
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
@@ -89,34 +91,33 @@ isMobileView(): boolean {
 
   notificationOpen = false;
 
-toggleNotification() {
-  this.notificationOpen = !this.notificationOpen;
-}
-
-closeNotification() {
-  this.notificationOpen = false;
-}
-
-
-// Add these properties with your existing ones
-isNotificationSidebarOpen = false;
-notificationUnreadCount = 0;
-
-// Add these methods
-openNotificationSidebar() {
-  this.isNotificationSidebarOpen = true;
-}
-
-closeNotificationSidebar() {
-  this.isNotificationSidebarOpen = false;
-}
-
-onUnreadCountChange(count: any) {
-  if (count && typeof count === 'object' && count.target) {
-    this.notificationUnreadCount = count.target.value;
-  } else {
-    this.notificationUnreadCount = count;
+  toggleNotification() {
+    this.notificationOpen = !this.notificationOpen;
   }
-}
+
+  closeNotification() {
+    this.notificationOpen = false;
+  }
+
+
+  // Add these properties with your existing ones
+ 
+
+  // Add these methods
+  openNotificationSidebar() {
+    this.isNotificationSidebarOpen = true;
+  }
+
+  closeNotificationSidebar() {
+    this.isNotificationSidebarOpen = false;
+  }
+
+  onUnreadCountChange(count: any) {
+    if (count && typeof count === 'object' && count.target) {
+      this.notificationUnreadCount = count.target.value;
+    } else {
+      this.notificationUnreadCount = count;
+    }
+  }
 }
 

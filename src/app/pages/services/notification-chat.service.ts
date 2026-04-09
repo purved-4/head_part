@@ -266,9 +266,4 @@ getAllThreadCombinedPaginate(
       .pipe(map((res: any) => res.data));
   }
 
-  getFileDownloadUrl(fileId: any): Observable<any> {
-    return this.http
-      .get(`${baseUrl}/api/files/private/${fileId}`)
-      .pipe(map((res: any) => res.data));
-  }
 }

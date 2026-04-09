@@ -348,10 +348,6 @@ openChat(notification: BackendThread, event?: Event) {
     return this.notifications.reduce((acc, n) => acc + (n.unreadCount || 0), 0);
   }
 
-  getAllNotificationsFlat(): SidebarNotification[] {
-  return this.notifications; // already sorted
-}
-
   getTotalCount(): number {
     let count = 0;
     for (const cat of ["upi", "bank", "payout", "other"]) {

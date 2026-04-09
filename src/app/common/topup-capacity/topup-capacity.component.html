@@ -31,10 +31,21 @@
             </p>
           </div>
         </div>
-        <div
-          class="text-lg font-bold text-[var(--color-text-main)]"
-        >
-          Limit: {{ limitAmount | currency: "INR" : "symbol" }}
+        <div class="text-lg font-bold text-[var(--color-text-main)]">
+          Limit:
+
+          <!-- VIEW MODE -->
+          <span *ngIf="!isEditing">
+            {{ limitAmount | currency: "INR" : "symbol" }}
+          </span>
+
+          <!-- EDIT MODE -->
+          <input
+            *ngIf="isEditing"
+            type="number"
+            [(ngModel)]="limitAmount"
+            class="border rounded px-2 py-1 w-40 text-black"
+          />
         </div>
         <button
           *ngIf="!isEditing"
@@ -118,11 +129,7 @@
                   <input
                     type="number"
                     [(ngModel)]="capacityRanges[i].minRange"
-                    [readonly]="i !== 0"
                     class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all duration-200 text-sm"
-                    [class.bg-[var(--color-hover)]]="i !== 0"
-                    [class.text-[var(--color-text-muted)]]="i !== 0"
-                    [class.cursor-not-allowed]="i !== 0"
                   />
                 </div>
                 <ng-template #minDisplay>
@@ -138,7 +145,6 @@
                   <input
                     type="number"
                     [(ngModel)]="capacityRanges[i].maxRange"
-                    (ngModelChange)="recalculateRanges()"
                     class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all duration-200 text-sm"
                   />
                 </div>
@@ -242,11 +248,7 @@
               <input
                 type="number"
                 [(ngModel)]="capacityRanges[i].minRange"
-                [readonly]="i !== 0"
                 class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all duration-200 text-sm"
-                [class.bg-[var(--color-hover)]]="i !== 0"
-                [class.text-[var(--color-text-muted)]]="i !== 0"
-                [class.cursor-not-allowed]="i !== 0"
               />
             </div>
             <ng-template #mobileMinDisplay>
@@ -266,7 +268,6 @@
               <input
                 type="number"
                 [(ngModel)]="capacityRanges[i].maxRange"
-                (ngModelChange)="recalculateRanges()"
                 class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all duration-200 text-sm"
               />
             </div>

@@ -164,37 +164,8 @@
   </div>
 </button>
 
-        <div
-          class="relative hidden [@media(min-width:800px)]:block"
-          #portalContainer
-        >
-          <button
-            (click)="togglePortalPopup()"
-            class="mt-2 p-2 rounded-full hover:bg-[var(--color-hover)] transition focus:ring-2 focus:ring-[var(--color-primary)]"
-            [class.bg-[var(--color-hover)]]="isPortalOpen"
-          >
-            <span class="material-symbols-outlined text-[22px] text-slate-600">
-              language
-            </span>
-          </button>
+             <app-time-zone></app-time-zone>
 
-          <div
-            *ngIf="isPortalOpen"
-            class="fixed [@media(min-width:800px)]:absolute right-4 [@media(min-width:800px)]:right-0 top-[70px] [@media(min-width:800px)]:top-full md:mt-2 w-[320px] max-w-[calc(100vw-32px)] z-45"
-          >
-            <div
-              class="hidden [@media(min-width:800px)]:block absolute right-6 -top-2 w-4 h-4 bg-white border-l border-t border-gray-200 rotate-45"
-            ></div>
-
-            <div
-              class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-gray-200 overflow-visible"
-            >
-              <div class="p-3">
-                <!-- <app-portal-selector></app-portal-selector> -->
-              </div>
-            </div>
-          </div>
-        </div>
 
        <div class="relative inline-block" #limitsContainer>
           <!-- Button -->

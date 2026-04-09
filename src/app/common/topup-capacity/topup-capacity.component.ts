@@ -1,3 +1,4 @@
+
 import {
   Component,
   Input,
@@ -70,8 +71,7 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
       )
       .subscribe({
         next: (res: any) => {
-
-            this.capacityRanges = res.capacities || [];
+          this.capacityRanges = res.capacities || [];
 
           this.limitAmount = res.limitAmount || null;
 
@@ -90,6 +90,10 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
     if (this.capacityRanges.length === 0) {
       this.addRange();
     }
+
+    if (this.limitAmount == null) {
+      this.limitAmount = 0;
+    }
   }
 
   // ================= ADD =================
@@ -97,7 +101,7 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
     const last = this.capacityRanges[this.capacityRanges.length - 1];
 
     this.capacityRanges.push({
-      minRange: last?.maxRange != null ? last.maxRange : 1,
+      minRange: null,
       maxRange: null,
       quantity: null,
     });
@@ -106,17 +110,6 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
   // ================= REMOVE =================
   removeRange(index: number) {
     this.capacityRanges.splice(index, 1);
-    this.recalculateRanges();
-  }
-
-  // ================= AUTO FIX =================
-  recalculateRanges() {
-    for (let i = 1; i < this.capacityRanges.length; i++) {
-      const prev = this.capacityRanges[i - 1];
-      if (prev?.maxRange != null) {
-        this.capacityRanges[i].minRange = prev.maxRange;
-      }
-    }
   }
 
   // ================= VALIDATION =================
@@ -142,7 +135,7 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
   // ================= SAVE =================
   save() {
     if (!this.isValidRanges()) {
-      alert("Invalid ranges 😅");
+      alert("Invalid ranges ");
       return;
     }
 
@@ -152,6 +145,9 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
       portalId: this.portalId,
       mode: this.mode,
       topupId: this.topupId,
+
+      limitAmount: Number(this.limitAmount),
+
       ranges: this.capacityRanges.map((r) => ({
         minRange: Number(r.minRange),
         maxRange: Number(r.maxRange),

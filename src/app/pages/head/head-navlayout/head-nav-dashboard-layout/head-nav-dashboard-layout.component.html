@@ -31,42 +31,26 @@
 </div> -->
 
 <div class="owner-layout">
- 
+
   <!-- Mobile Sidebar Overlay -->
-  <div 
-    *ngIf="mobileMenuOpen" 
-    class="fixed inset-0 bg-black/50 z-40 md:hidden"
-    (click)="closeMobileMenu()"
-  ></div>
+  <div *ngIf="mobileMenuOpen" class="fixed inset-0 bg-black/50 z-40 md:hidden" (click)="closeMobileMenu()"></div>
 
   <!-- Sidebar Component -->
-  <app-head-nav-sidebar
-    [collapsed]="sidebarCollapsed"
-    [isMobileOpen]="mobileMenuOpen"
-    (toggleSidebar)="toggleSidebar()"
-    (secondaryPanelStateChange)="onSecondaryPanelChange($event)"
-    (closeMobileMenu)="closeMobileMenu()">
+  <app-head-nav-sidebar [collapsed]="sidebarCollapsed" [isMobileOpen]="mobileMenuOpen" (toggleSidebar)="toggleSidebar()"
+    (secondaryPanelStateChange)="onSecondaryPanelChange($event)" (closeMobileMenu)="closeMobileMenu()">
   </app-head-nav-sidebar>
 
   <!-- Header Component -->
-  <app-head-nav-header
-    [pageTitle]="pageTitle"
-    [userName]="userName"
-    [marginLeft]="mainMargin"
-    [isMobileMenuOpen]="mobileMenuOpen"
-    (toggleMobileMenu)="toggleMobileMenu()"
-      (balanceChange)="onBalanceChange($event)"
-    (openSettings)="openSettings()"
-    (search)="onSearch($event)"
-      (notificationClick)="openNotificationSidebar()">
-    
+  <app-head-nav-header [pageTitle]="pageTitle" [userName]="userName" [marginLeft]="mainMargin"
+    [isMobileMenuOpen]="mobileMenuOpen" (toggleMobileMenu)="toggleMobileMenu()"
+    (balanceChange)="onBalanceChange($event)" (openSettings)="openSettings()" (search)="onSearch($event)"
+    (notificationClick)="openNotificationSidebar()">
+
   </app-head-nav-header>
 
-  <app-sidebar-notification
-  [isOpen]="isNotificationSidebarOpen"
-  (close)="closeNotificationSidebar()"
-  (unreadCountChange)="onUnreadCountChange($event)">
-</app-sidebar-notification>
+  <app-sidebar-notification [isOpen]="isNotificationSidebarOpen" (close)="closeNotificationSidebar()"
+    (unreadCountChange)="onUnreadCountChange($event)">
+  </app-sidebar-notification>
 
   <!-- Main Content -->
   <!-- <main
@@ -75,22 +59,15 @@
     [class.mobile-content]="mobileMenuOpen"
     (click)="mobileMenuOpen ? closeMobileMenu() : null"
   > -->
-  <main
-    class="main-content relative z-18 pt-[72px] overflow-auto transition-all duration-300"
-    [style.marginLeft.px]="mainMargin"
-    [class.mobile-content]="mobileMenuOpen"
-  >
+  <main class="main-content relative z-18 pt-[72px] overflow-auto transition-all duration-300"
+    [style.marginLeft.px]="mainMargin" [class.mobile-content]="mobileMenuOpen">
     <router-outlet></router-outlet>
   </main>
 
-  
+
 
   <!-- Mobile Footer (only mobile) -->
-<app-head-mobile-footer
-  *ngIf="isMobileView()"
-  [topup]="headerTopup"
-  [payout]="headerPayout"
-  [reward]="headerReward"
-  [limit]="headerLimit">
-</app-head-mobile-footer>
+  <app-head-mobile-footer *ngIf="isMobileView()" [topup]="headerTopup" [payout]="headerPayout" [reward]="headerReward"
+    [limit]="headerLimit">
+  </app-head-mobile-footer>
 </div>

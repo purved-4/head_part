@@ -69,20 +69,16 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   branchId: any;
   userId: any;
   userRole: any;
-  private readonly DIRECT_LOGOUT_ROLES = [
-    "OWNER",
-    "MANAGER",
-    "CHIEF",
-    "COM_PART",
-  ];
+  private readonly DIRECT_LOGOUT_ROLES = ['OWNER', 'MANAGER', 'CHIEF', 'COM_PART'];
+
 
   constructor(
     private authService: AuthService,
     private BranchService: BranchService,
     private router: Router,
     private userStateService: UserStateService,
-    private snack: SnackbarService,
-  ) {}
+    private snack: SnackbarService
+  ) { }
 
   ngOnInit(): void {
     const s = this.userStateService.getUserId();
@@ -94,6 +90,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
     // If there's an active pending logout, don't load sessions
     if (this.logoutPendingEvent) {
+
       // Listen for storage events from tp tabs
       window.addEventListener("storage", this.onStorageChange.bind(this));
       return;
@@ -136,7 +133,9 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
         if (this.isPendingLogoutRole) {
           this.startPendingTimer(state.event);
         }
-      } catch (e) {}
+      } catch (e) {
+
+      }
     }
   }
 
@@ -147,7 +146,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   }
 
   get isDirectLogoutRole(): boolean {
-    const role = String(this.userRole || "").toUpperCase();
+    const role = String(this.userRole || '').toUpperCase();
     return this.DIRECT_LOGOUT_ROLES.includes(role);
   }
 
@@ -203,6 +202,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
         // Check if the pending timeout has already expired
         if (state.targetTs <= now) {
+
           // Timeout expired, clear and redirect
           this.clearPendingLogoutStateOnly();
           this.clearAllSessions();
@@ -213,10 +213,12 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
         // Restore the pending logout state
         this.logoutPendingEvent = state.event;
 
+
         if (this.isPendingLogoutRole) {
           this.startPendingTimer(state.event);
         }
       } catch (e) {
+
         this.clearPendingLogoutStateOnly();
       }
     }
@@ -232,11 +234,13 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   }
 
   private clearPendingLogoutStateOnly(): void {
+
     localStorage.removeItem(this.PENDING_LOGOUT_KEY);
   }
 
   // ---------- Clear only sessions, not pending logout ----------
   private clearAllSessions(): void {
+
     localStorage.removeItem(this.SESSIONS_KEY);
     localStorage.removeItem(this.EVENTS_KEY);
     this.sessions = [];
@@ -248,6 +252,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
   // ---------- Complete clear (only when logout is confirmed) ----------
   private completeLogout(): void {
+
     localStorage.removeItem(this.SESSIONS_KEY);
     localStorage.removeItem(this.EVENTS_KEY);
     localStorage.removeItem(this.PENDING_LOGOUT_KEY);
@@ -353,19 +358,21 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ---------- logout / pending behavior ----------
+  // ---------- logout / pending behavior ---------- 
   clockOutAndStartPending(): void {
+
     // Always clock out local session first
     if (this.activeSession && !this.activeSession.clockOut) {
       this.activeSession.clockOut = Date.now();
       this.saveSessions();
     }
 
-    //  Direct logout roles → immediate logout
+    // ✅ Direct logout roles → immediate logout
     if (this.isDirectLogoutRole) {
       this.authService.logout().subscribe(() => {
+        
         this.completeLogout();
-        window.location.href = "/login";
+        window.location.href = '/login';
       });
       return;
     }
@@ -373,17 +380,22 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     // ❗ Prevent duplicate pending
     if (this.logoutPendingEvent) return;
 
-    // ⏳ Pending logout flow
     this.authService.logout().subscribe({
       next: (res: any) => {
-        const futureTime = res.message;
+
+
+        if(!res.success){
+          this.snack.show(res.message,res.success)
+          return;
+        }
+        
+        const futureTime = res.data;
         const futureTs = futureTime ? Date.parse(futureTime) : NaN;
 
         // If backend didn’t send valid time → logout directly
         if (Number.isNaN(futureTs)) {
           this.completeLogout();
-          window.location.href = "/login";
-          return;
+          window.location.href = '/login'; return;
         }
 
         const pendingEvent: UserEvent = {
@@ -406,7 +418,8 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
         this.snack.show("Logout scheduled", 200);
       },
       error: (err: any) => {
-        this.snack.show(err.error.error, err.error.status);
+        console.log(err)
+        this.snack.show(err.error.message, err.error.status);
       },
     });
   }
@@ -430,6 +443,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
       const remainingMs = targetTs - now;
 
       if (remainingMs <= 0) {
+
         this.pendingRemaining = this.formatDuration(0);
         this.stopPendingTimer();
         // Only clear pending logout, navigate to login

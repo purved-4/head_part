@@ -1,3 +1,6 @@
+
+
+
 import {
   Component,
   EventEmitter,
@@ -14,11 +17,11 @@ import { ComPartService } from '../../pages/services/com-part.service';
 import { OwnerService } from '../../pages/services/owner.service';
 
 @Component({
-  selector: 'app-website-percentage-model',
-  templateUrl: './website-percentage-model.component.html',
-  styleUrl: './website-percentage-model.component.css',
+  selector: 'app-compart-percentage-modle',
+  templateUrl: './compart-percentage-modle.component.html',
+  styleUrl: './compart-percentage-modle.component.css'
 })
-export class WebsitePercentageModelComponent implements OnInit, OnChanges {
+export class CompartPercentageModleComponent implements OnInit, OnChanges {
   @Input() entityId: any;
   @Input() entityType: any;
 
@@ -81,6 +84,8 @@ export class WebsitePercentageModelComponent implements OnInit, OnChanges {
     this.portalPercentages = [];
 
     const successHandler = (res: any) => {
+      console.log(res);
+      
       const data = Array.isArray(res) ? res : [res];
 
       this.portalPercentages = data.map((item: any) => ({
@@ -98,40 +103,41 @@ export class WebsitePercentageModelComponent implements OnInit, OnChanges {
       this.errorMessage = 'Unable to load percentage details.';
     };
 
-    switch (this.entityType) {
-      case 'OWNER':
-        this.ownerService.getPortalPercentages(this.entityId).subscribe({
+    this.compartService.getPercentageByEntityId(this.entityId,this.entityType).subscribe({
           next: successHandler,
           error: errorHandler,
         });
-        break;
+    // switch (this.entityType) {
+    //   case 'OWNER':
+    //     this.ownerService.getPortalPercentages(this.entityId)
+    //     break;
 
-      case 'CHIEF':
-        this.chiefService.getChiefPortalPercentage(this.entityId).subscribe({
-          next: successHandler,
-          error: errorHandler,
-        });
-        break;
+    //   case 'CHIEF':
+    //     this.chiefService.getChiefPortalPercentage(this.entityId).subscribe({
+    //       next: successHandler,
+    //       error: errorHandler,
+    //     });
+    //     break;
 
-      case 'MANAGER':
-        this.managerService.getManagerPortalPercentage(this.entityId).subscribe({
-          next: successHandler,
-          error: errorHandler,
-        });
-        break;
+    //   case 'MANAGER':
+    //     this.managerService.getManagerPortalPercentage(this.entityId).subscribe({
+    //       next: successHandler,
+    //       error: errorHandler,
+    //     });
+    //     break;
 
-      case 'HEAD':
-        this.headService.getHeadPortalPercentage(this.entityId).subscribe({
-          next: successHandler,
-          error: errorHandler,
-        });
-        break;
+    //   case 'HEAD':
+    //     this.headService.getHeadPortalPercentage(this.entityId).subscribe({
+    //       next: successHandler,
+    //       error: errorHandler,
+    //     });
+    //     break;
 
-      default:
-        this.loading = false;
-        this.errorMessage = 'Invalid entity type.';
-        break;
-    }
+    //   default:
+    //     this.loading = false;
+    //     this.errorMessage = 'Invalid entity type.';
+    //     break;
+    // }
   }
 
   formatValue(value: number | null): string {

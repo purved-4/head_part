@@ -18,8 +18,8 @@ export class WorkReportsService {
     let params = new HttpParams()
       .set("entityId", payload.entityId)
       .set("entityType", payload.entityType)
-      .set("from", DateTimeUtil.toUtcISOString(payload.from))
-      .set("to", DateTimeUtil.toUtcISOString(payload.to));
+      .set("fromDate", DateTimeUtil.toUtcISOString(payload.from))
+      .set("toDate", DateTimeUtil.toUtcISOString(payload.to));
 
     return this.http.get(`${baseUrl}/work-reports/getByUserIdWithDate`, {
       params,
