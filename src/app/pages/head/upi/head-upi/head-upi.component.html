@@ -100,13 +100,13 @@
       </div>
 
       <!-- ADD BUTTON (FULL WIDTH ON MOBILE) -->
-      <button
+      <!-- <button
               (click)="openAddModal()"
               class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors duration-200"
       >
         <span class="material-icons mr-2">add</span>
         Add New UPI
-      </button>
+      </button> -->
     </div>
   </div>
   <!-- ========== FILTER SECTION ========== -->
@@ -209,6 +209,71 @@
           </span>
         </button>
       </div>
+
+
+      <!-- BANK FILTER -->
+<div class="relative flex-1 max-w-md bank-filter-container">
+  <span
+    class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+  >
+    account_balance
+  </span>
+
+  <input
+    type="text"
+    [(ngModel)]="bankSearchTerm"
+    (ngModelChange)="filterBanks()"
+    (focus)="showBankDropdown = true"
+    (blur)="onBankBlur()"
+    placeholder="Search or select bank..."
+    class="pl-10 pr-10 py-2.5 w-full border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+  />
+
+  <!-- DROPDOWN -->
+  <div
+    *ngIf="showBankDropdown && filteredBanks.length > 0"
+    class="absolute z-30 w-full mt-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg max-h-60 overflow-y-auto"
+  >
+    <div
+      *ngFor="let bank of filteredBanks"
+      (mousedown)="selectBank(bank)"
+      class="px-4 py-2 hover:bg-[var(--color-hover)] cursor-pointer border-b border-[var(--color-border)] last:border-b-0"
+    >
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-[var(--color-font)]">
+          {{ bank.accountHolderName }}
+        </span>
+
+        <!-- Selected Tick -->
+        <span
+          *ngIf="selectedBank?.id === bank.id"
+          class="material-icons text-[var(--color-primary)] text-sm"
+        >
+          check
+        </span>
+      </div>
+    </div>
+
+    <!-- Empty -->
+    <div
+      *ngIf="filteredBanks.length === 0"
+      class="px-4 py-3 text-center text-[var(--color-muted)] text-sm"
+    >
+      No banks found
+    </div>
+  </div>
+
+  <!-- CLEAR BUTTON -->
+  <button
+    *ngIf="selectedBank"
+    (mousedown)="clearBankFilter()"
+    class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-[var(--color-hover)] rounded-full"
+  >
+    <span class="material-icons text-[var(--color-danger)] text-sm">
+      close
+    </span>
+  </button>
+</div>
 
       <!-- Status Filter -->
       <!-- status -->

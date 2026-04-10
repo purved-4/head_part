@@ -94,6 +94,10 @@ export class UpiService {
       params = params.set("status", options.status);
     }
 
+      if (options.bankId) {
+    params = params.set("bankId", options.bankId);
+  }
+
     return this.http
       .get<any>(`${baseUrl}/upi/getAllActiveByEntityId/paginated/${entityId}`, {
         params,

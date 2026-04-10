@@ -137,11 +137,16 @@ export class HeadUpiComponent implements OnInit {
   showCapacityModal = false;
 
   capacityRanges: any[] = [];
-
+banks: any[] = [];
+filteredBanks: any[] = [];
+selectedBank: any = null;
+bankSearchTerm = "";
+showBankDropdown = false;
   selectedUpiForCapacity: any = null;
   showLimitModal: boolean = false;
   limitDateTime: any;
   isSubmittingLimit: boolean = false;
+  preselectedBankId: string | null = null;
   constructor(
       private upiService: UpiService,
       private branchService: BranchService,
@@ -152,34 +157,82 @@ export class HeadUpiComponent implements OnInit {
       private headService: HeadService,
       private snack: SnackbarService,
       private router: Router,
-      private multimediaService:MultimediaService
+      private multimediaService:MultimediaService,
+      private bankServices : BankService,
+      
   ) {}
 
-  ngOnInit() {
-    this.initAddUpiForm();
-    this.currentRoleId = this.userStateService.getCurrentEntityId();
-    this.currentUserId = this.userStateService.getUserId();
-    this.role = this.userStateService.getRole();
-this.getTopupStatus();
-    if (
-        typeof matchMedia !== "undefined" &&
-        matchMedia("(max-width: 800px)").matches
-    ) {
-      this.viewMode = "grid";
-    }
+//   ngOnInit() {
+//     this.route.queryParams.subscribe((params) => {
+//   const bankId = params['bankId'];
 
-    this.fetchUpis();
-    this.loadPortals(this.currentRoleId);
+//   if (bankId) {
+//     this.preselectedBankId = bankId;
+//   }
+// });
+//     this.initAddUpiForm();
+//     this.currentRoleId = this.userStateService.getCurrentEntityId();
+//     this.currentUserId = this.userStateService.getUserId();
+//     this.role = this.userStateService.getRole();
+// this.getTopupStatus();
+//     if (
+//         typeof matchMedia !== "undefined" &&
+//         matchMedia("(max-width: 800px)").matches
+//     ) {
+//       this.viewMode = "grid";
+//     }
 
-    this.searchSubject
-        .pipe(debounceTime(600), distinctUntilChanged())
-        .subscribe((value) => {
-          this.searchTerm = value;
-          this.onSearch();
-        });
+//     this.fetchUpis();
+//     this.loadPortals(this.currentRoleId);
 
-    this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
+//     this.searchSubject
+//         .pipe(debounceTime(600), distinctUntilChanged())
+//         .subscribe((value) => {
+//           this.searchTerm = value;
+//           this.onSearch();
+//         });
+
+//     this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
+
+//     this.loadBanks();
+//   }
+
+
+ngOnInit() {
+  this.initAddUpiForm();
+
+  this.currentRoleId = this.userStateService.getCurrentEntityId();
+  this.currentUserId = this.userStateService.getUserId();
+  this.role = this.userStateService.getRole();
+
+  this.getTopupStatus();
+
+  if (
+    typeof matchMedia !== "undefined" &&
+    matchMedia("(max-width: 800px)").matches
+  ) {
+    this.viewMode = "grid";
   }
+
+  this.route.queryParams.subscribe((params) => {
+    this.preselectedBankId = params['bankId'] || null;
+
+    this.loadBanks();
+  });
+
+
+
+  this.loadPortals(this.currentRoleId);
+
+  this.searchSubject
+    .pipe(debounceTime(600), distinctUntilChanged())
+    .subscribe((value) => {
+      this.searchTerm = value;
+      this.onSearch();
+    });
+
+  this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
+}
 
 
   private initAddUpiForm() {
@@ -290,6 +343,10 @@ this.getTopupStatus();
       portalId: this.selectedPortal?.portalId || undefined,
     };
 
+    if (this.selectedBank?.id) {
+  options.bankId = this.selectedBank.id;
+}
+
     if (this.filterStatus && this.filterStatus.trim() !== "") {
       options.status = this.filterStatus;
     }
@@ -306,7 +363,7 @@ this.getTopupStatus();
                     ? responseData
                     : [];
 
-            // ✅ STEP 1: MAP (FIXED)
+            //  STEP 1: MAP (FIXED)
             this.upis = rows.map((r: any) => {
               let parsedRanges: any[] = [];
 
@@ -340,10 +397,10 @@ this.getTopupStatus();
 
                 qrId: r.qrId || r.qr_id || r.id || "",
 
-                // ❌ REMOVE direct URL
+                //  REMOVE direct URL
                 // qrImagePath: ...
 
-                // ✅ NEW
+                //  NEW
                 imagePath: rawImagePath,
                 qrImageUrl: null,
 
@@ -354,11 +411,11 @@ this.getTopupStatus();
               };
             });
 
-            // ✅ STEP 2: LOAD IMAGES (IMPORTANT)
+            //  STEP 2: LOAD IMAGES (IMPORTANT)
             this.upis.forEach((upi: any) => {
               if (!upi.imagePath) return;
 
-              // 🔥 smart handling (public vs private)
+              //  smart handling (public vs private)
               if (upi.imagePath.startsWith("http")) {
                 upi.qrImageUrl = upi.imagePath;
               } else {
@@ -369,7 +426,7 @@ this.getTopupStatus();
               }
             });
 
-            // ✅ STEP 3: SORT
+            //  STEP 3: SORT
             const now = new Date().getTime();
 
             this.upis.sort((a: any, b: any) => {
@@ -723,13 +780,15 @@ this.getTopupStatus();
     const validRanges = this.capacityRanges;
 
     const payload = {
-      portal: selectedPortal.portalId,
+      // portal: selectedPortal.portalId,
       // portalId: selectedPortal.id,
       vpa: this.addUpiForm.value.vpa,
       limitAmount: this.addUpiForm.value.limitAmount,
-      agent_id: this.currentRoleId,
+      // agent_id: this.currentRoleId,
       entityId: this.currentRoleId,
       entityType: this.role,
+      
+bankId: "5974d3e0-0de0-494e-8a1b-acd4ce6d1dfe",
       userId: this.userId,
       active: true,
       minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
@@ -749,6 +808,7 @@ this.getTopupStatus();
         quantity: r.quantity ?? null,
       })),
     };
+console.log(payload);
 
     const formData = new FormData();
     const dtoBlob = new Blob([JSON.stringify(payload)], {
@@ -757,9 +817,9 @@ this.getTopupStatus();
     formData.append("dto", dtoBlob);
     formData.append("file", this.generatedFile, this.generatedFile.name);
 
-    if (this.currentRoleId) formData.append("agent_id", this.currentRoleId);
-    if (this.currentRoleId) formData.append("branchId", this.currentRoleId);
-    if (this.userId) formData.append("userId", this.userId);
+    // if (this.currentRoleId) formData.append("agent_id", this.currentRoleId);
+    // if (this.currentRoleId) formData.append("branchId", this.currentRoleId);
+    // if (this.userId) formData.append("userId", this.userId);
 
     this.isAddingUpi = true;
 
@@ -1516,4 +1576,65 @@ this.getTopupStatus();
       this.topupStatus = !this.topupStatus; 
     });
   }
+
+loadBanks() {
+  this.bankServices
+    .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, {
+      page: 0,
+      size: 100,
+      active: true,
+    })
+    .subscribe((res: any) => {
+      const data = res.data?.content || [];
+
+      this.banks = data;
+      this.filteredBanks = [...this.banks];
+
+      // ✅ CASE 1: bankId exists → auto select
+      if (this.preselectedBankId) {
+        const matchedBank = this.banks.find(
+          (b) => b.id === this.preselectedBankId
+        );
+
+        if (matchedBank) {
+          this.selectedBank = matchedBank;
+          this.bankSearchTerm = matchedBank.accountHolderName;
+
+          this.fetchUpis(); // 🔥 filtered
+          return;
+        }
+      }
+
+      // ✅ CASE 2: NO bankId → fetch ALL
+      this.fetchUpis();
+    });
+}
+
+filterBanks() {
+  const term = this.bankSearchTerm.toLowerCase();
+
+  this.filteredBanks = this.banks.filter((b) =>
+    b.accountHolderName.toLowerCase().includes(term)
+  );
+}
+
+selectBank(bank: any) {
+  this.selectedBank = bank;
+  this.bankSearchTerm = bank.accountHolderName;
+  this.showBankDropdown = false;
+
+  this.onFilterChange(); // 🔥 trigger API
+}
+
+clearBankFilter() {
+  this.selectedBank = null;
+  this.bankSearchTerm = "";
+  this.filteredBanks = [...this.banks];
+
+  this.onFilterChange();
+}
+
+onBankBlur() {
+  setTimeout(() => (this.showBankDropdown = false), 200);
+}
 }

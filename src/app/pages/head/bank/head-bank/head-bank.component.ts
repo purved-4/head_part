@@ -17,6 +17,7 @@ import { Subject } from "rxjs";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
 import { INDIAN_BANKS } from "../../../../utils/constants";
+import { UpiService } from "../../../services/upi.service";
 
 type StatusString = "active" | "inactive" | "frozen" | string;
 
@@ -60,6 +61,8 @@ interface Portal {
 })
 export class HeadBankComponent implements OnInit, OnDestroy {
   @ViewChild("portalDropdown") portalDropdown!: ElementRef;
+  @ViewChild("qrcodeElem", { static: false }) qrcodeElem!: ElementRef;
+
 // ---------- DATA (server‑paginated) ----------
   bankAccounts: BankAccount[] = [];
   totalElements = 0;
@@ -179,6 +182,16 @@ openUpiModal = false;
   showCapacityModal: boolean = false;
   capacityData: any[] = [];
   isLoadingCapacity: boolean = false;
+
+
+  qrMode: 'generate' | 'upload' = 'generate';
+selectedImage: string | null = null;
+generatingQr = false;
+
+// already present but ensure
+qrData: string | null = null;
+generatedFile: File | null = null;
+manualQrFile: File | null = null;
   constructor(
       private route: ActivatedRoute,
       private bankService: BankService,
@@ -189,6 +202,8 @@ openUpiModal = false;
       private snack: SnackbarService,
       private router: Router,
       private elementRef: ElementRef,
+      private upiService : UpiService,
+
   ) {
     this.addBankForm = this.createAddBankForm();
   }
@@ -1588,8 +1603,10 @@ this.initAddUpiForm();
 
 
 viewUpi(account: any) {
-  this.router.navigate(['/upi'], {
-    queryParams: { bankid: account.id }
+  if (!account?.id) return;
+
+  this.router.navigate(['/head/upi'], {
+    queryParams: { bankId: account.id }
   });
 }
 showAddUpiModal = false;
@@ -1598,16 +1615,31 @@ isAddingUpi = false;
 addUpiForm!: FormGroup;
 selectedBank: any = null;
 
-// QR
-qrData: string | null = null;
-generatedFile: File | null = null;
-manualQrFile: File | null = null;
 
+
+
+// initAddUpiForm() {
+//   this.addUpiForm = this.fb.group({
+//     vpa: ["", [Validators.required]],
+//     limitAmount: ["", Validators.required],
+//     min_tran_count: [null],
+//     max_tran_count: [null],
+//     min_total_tran_amount: [null],
+//     max_total_tran_amount: [null],
+//   });
+// }
 
 initAddUpiForm() {
   this.addUpiForm = this.fb.group({
-    vpa: ["", [Validators.required]],
-    limitAmount: ["", Validators.required],
+    vpa: [
+      "",
+      [
+        Validators.required,
+        Validators.pattern(/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/)
+      ]
+    ],
+    limitAmount: ["", [Validators.required, Validators.min(1)]],
+
     min_tran_count: [null],
     max_tran_count: [null],
     min_total_tran_amount: [null],
@@ -1632,24 +1664,227 @@ closeAddUpiModal() {
   document.body.style.overflow = "auto";
 }
 
-submitAddUpi() {
-  if (this.addUpiForm.invalid) return;
+submitAddUpi(): void {
+  // mark fields touched
+  Object.keys(this.addUpiForm.controls).forEach((key) =>
+    this.addUpiForm.get(key)?.markAsTouched()
+  );
 
-  const payload = {
-    vpa: this.addUpiForm.value.vpa,
-    limitAmount: this.addUpiForm.value.limitAmount,
-    bankId: this.selectedBank?.id, // 🔥 MAIN PART
-    accountNo: this.selectedBank?.accountNo,
-    bankName: this.selectedBank?.bankName,
+  // form validation
+  if (this.addUpiForm.invalid) {
+    this.snack.show("Please fill all required fields correctly.", false);
+    return;
+  }
 
-    minTranCount: this.addUpiForm.value.min_tran_count || 0,
-    maxTranCount: this.addUpiForm.value.max_tran_count || 0,
-    minTotalTranAmount: this.addUpiForm.value.min_total_tran_amount || 0,
-    maxTotalTranAmount: this.addUpiForm.value.max_total_tran_amount || 0,
-  };
+  // QR validation
+  if (!this.generatedFile && !this.manualQrFile) {
+    this.snack.show("Please upload or generate QR code.", false);
+    return;
+  }
 
-  console.log("UPI Payload:", payload);
+  // bank validation
+  if (!this.selectedBank) {
+    this.snack.show("Bank not selected.", false);
+    return;
+  }
 
-  //  call your API here
+  // ranges (reuse existing)
+  const validRanges = this.capacityRanges || [];
+
+  // payload
+const payload = {
+
+  vpa: this.addUpiForm.value.vpa,
+  limitAmount: this.addUpiForm.value.limitAmount,
+
+  entityId: this.currentRoleId,
+  entityType: this.role,
+  userId: this.currentUserId,
+
+  active: true,
+
+  //  ONLY ADD THIS EXTRA FIELD
+  bankId: this.selectedBank?.id,
+
+  minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
+  maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
+  minTotalTranAmount:
+    Number(this.addUpiForm.value.min_total_tran_amount) || 0,
+  maxTotalTranAmount:
+    Number(this.addUpiForm.value.max_total_tran_amount) || 0,
+
+  createdAt: new Date().toISOString(),
+
+  ranges: this.capacityRanges.map((r) => ({
+    minRange: r.minRange ?? null,
+    maxRange: r.maxRange ?? null,
+    quantity: r.quantity ?? null,
+  })),
+};
+console.log(payload);
+
+  // form data
+  const formData = new FormData();
+  formData.append(
+    "dto",
+    new Blob([JSON.stringify(payload)], { type: "application/json" })
+  );
+
+  console.log(formData);
+  
+
+  // file (QR)
+  const fileToSend = this.generatedFile || this.manualQrFile;
+  if (fileToSend) {
+    formData.append("file", fileToSend, fileToSend.name);
+  }
+
+  if (this.currentUserId) {
+    formData.append("userId", this.currentUserId);
+  }
+
+  this.isAddingUpi = true;
+
+  this.upiService.add(formData).subscribe({
+    next: (res: any) => {
+      console.log(res);
+      
+      this.isAddingUpi = false;
+console.log(formData);
+
+      if (res?.success || res?.id || res?._id) {
+        this.snack.show(res?.message || "UPI added successfully!", true);
+
+        this.closeAddUpiModal();
+
+        //  CORRECT REFRESH METHOD
+        this.fetchBankAccounts();
+      } else {
+        this.snack.show(res?.message || "Failed to add UPI.", false);
+      }
+    },
+    error: (err: any) => {
+      this.isAddingUpi = false;
+
+      this.snack.show(
+        err?.error?.message ||
+          err?.error?.error ||
+          "Failed to add UPI",
+        false
+      );
+    },
+  });
 }
+
+generateQrFromVpa(): void {
+  const vpaControl = this.addUpiForm.get("vpa");
+
+  if (!vpaControl || vpaControl.invalid) {
+    vpaControl?.markAsTouched();
+    return;
+  }
+
+  const vpa = String(vpaControl.value).trim();
+
+  const upiIntent = `upi://pay?pa=${encodeURIComponent(vpa)}&cu=INR`;
+
+  this.qrData = upiIntent;
+  this.generatingQr = true;
+
+  setTimeout(() => this.captureQrImage(vpa), 300);
+}
+
+
+private captureQrImage(vpa: string): void {
+  try {
+    const qrcodeElement = this.qrcodeElem;
+
+    if (!qrcodeElement?.nativeElement) {
+      this.generatingQr = false;
+      return;
+    }
+
+    setTimeout(() => {
+      const canvas = qrcodeElement.nativeElement.querySelector("canvas");
+
+      if (!canvas) {
+        this.generatingQr = false;
+        return;
+      }
+
+      canvas.toBlob(
+        (blob: Blob | null) => {
+          if (blob) {
+            const filename = `upi_qr_${Date.now()}.png`;
+
+            this.generatedFile = new File([blob], filename, {
+              type: "image/png",
+            });
+          }
+
+          this.generatingQr = false;
+        },
+        "image/png",
+        1.0
+      );
+    }, 100);
+  } catch (error) {
+    this.generatingQr = false;
+  }
+}
+
+onQrFileSelected(event: any): void {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  this.manualQrFile = file;
+  this.generatedFile = file;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    this.selectedImage = reader.result as string;
+  };
+  reader.readAsDataURL(file);
+}
+
+setQrMode(mode: 'generate' | 'upload') {
+  this.qrMode = mode;
+
+  this.qrData = null;
+  this.generatedFile = null;
+  this.manualQrFile = null;
+  this.selectedImage = null;
+}
+
+removeQr() {
+  this.qrData = null;
+  this.generatedFile = null;
+  this.manualQrFile = null;
+  this.selectedImage = null;
+}
+
+  closeAddModal(): void {
+    this.showAddModal = false;
+    this.addUpiForm.reset();
+    this.qrData = null;
+    this.generatedFile = null;
+    this.isAddingUpi = false;
+    this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
+    document.body.style.overflow = "auto";
+    this.selectedImage = null;
+    this.manualQrFile = null;
+  }
+
+  
+  downloadQr(): void {
+    if (!this.generatedFile) return;
+    const url = URL.createObjectURL(this.generatedFile);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = this.generatedFile.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 }
