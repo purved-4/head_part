@@ -84,7 +84,8 @@ export class HeadBankComponent implements OnInit, OnDestroy {
   minAmount: number | null = null;
   maxAmount: number | null = null;
   maxLimit: number | null = null; // max limit filter
-
+  showTxnModal = false;
+selectedTxnData: any = null;
 // UI state for portal filter dropdown
   portalSearchTerm = "";
   showPortalDropdown = false;
@@ -1887,4 +1888,19 @@ removeQr() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
+
+
+
+
+openTxnModal(account: any) {
+  this.selectedTxnData = account;
+  this.showTxnModal = true;
+  document.body.style.overflow = 'hidden';
+}
+
+closeTxnModal() {
+  this.showTxnModal = false;
+  this.selectedTxnData = null;
+  document.body.style.overflow = 'auto';
+}
 }

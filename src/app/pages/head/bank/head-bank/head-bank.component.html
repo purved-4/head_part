@@ -208,7 +208,7 @@
                   class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
           >search</span
           >
-          Search (Account, Holder, IFSC, Portal)
+          Search (Account, Holder, IFSC)
         </label>
         <input
                 type="text"
@@ -222,7 +222,7 @@
       <!-- Status Filter -->
 
       <!-- Portal Filter with dropdown -->
-      <div class="space-y-1 relative portal-filter-container">
+      <!-- <div class="space-y-1 relative portal-filter-container">
         <label class="block text-xs font-medium text-[var(--color-font)]">
           <span
                   class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
@@ -268,7 +268,7 @@
         >
           <span class="material-symbols-outlined text-sm">close</span>
         </button>
-      </div>
+      </div> -->
 
       <!-- Max Limit Filter -->
       <div class="space-y-1">
@@ -596,6 +596,7 @@
                     class="flex items-center cursor-pointer justify-center"
                     (mouseenter)="showTooltip($event, account)"
                     (mouseleave)="hideTooltip()"
+                      (click)="openTxnModal(account)"
             >
     <span class="material-symbols-outlined text-[var(--color-primary)] text-sm mr-1">
       info
@@ -1143,6 +1144,7 @@
                   class="flex items-center justify-between px-2 py-2 mt-2 bg-[var(--color-bg)] rounded-lg cursor-pointer"
                   (mouseenter)="showTooltip($event, account)"
                   (mouseleave)="hideTooltip()"
+                    (click)="openTxnModal(account)"
           >
             <div class="flex items-center gap-1">
     <span class="material-symbols-outlined text-[14px] text-[var(--color-primary)]">
@@ -2679,6 +2681,65 @@
       </div>
     </div>
   </div>
+
+
+  <!-- TRANSACTION MODAL -->
+<div
+  *ngIf="showTxnModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+>
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+
+    <!-- Close -->
+    <button
+      (click)="closeTxnModal()"
+      class="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+    >
+      <span class="material-icons">close</span>
+    </button>
+
+    <!-- Title -->
+    <h2 class="text-lg font-semibold mb-4">
+      Bank Transaction Details
+    </h2>
+
+    <!-- Content -->
+    <div class="space-y-3 text-sm">
+
+      <div class="flex justify-between">
+        <span class="text-gray-500">Min Txn Count</span>
+        <span class="font-semibold">
+          {{ selectedTxnData?.min_tran_count || 0 }}
+        </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-500">Max Txn Count</span>
+        <span class="font-semibold">
+          {{ selectedTxnData?.max_tran_count || 0 }}
+        </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-500">Min Amount</span>
+        <span class="font-semibold">
+          ₹{{ selectedTxnData?.min_total_tran_amount || 0 }}
+        </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-500">Max Amount</span>
+        <span class="font-semibold">
+          ₹{{ selectedTxnData?.max_total_tran_amount || 0 }}
+        </span>
+      </div>
+
+    </div>
+
+    
+
+  </div>
+</div>
 
 
 

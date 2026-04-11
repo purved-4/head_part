@@ -46,7 +46,6 @@ export class HeadUpiComponent implements OnInit {
 
   showPaymentDropdown = false;
   selectedMethod = "bank";
-  minLimitDateTime: string = "";
 
   // UI state for filters
   portalSearchTerm = "";
@@ -143,9 +142,6 @@ selectedBank: any = null;
 bankSearchTerm = "";
 showBankDropdown = false;
   selectedUpiForCapacity: any = null;
-  showLimitModal: boolean = false;
-  limitDateTime: any;
-  isSubmittingLimit: boolean = false;
   preselectedBankId: string | null = null;
   constructor(
       private upiService: UpiService,
@@ -217,12 +213,16 @@ ngOnInit() {
   this.route.queryParams.subscribe((params) => {
     this.preselectedBankId = params['bankId'] || null;
 
-    this.loadBanks();
+ 
+ this.fetchUpis()
+    
   });
 
+  this.loadBanks();
 
 
-  this.loadPortals(this.currentRoleId);
+
+  // this.loadPortals(this.currentRoleId);
 
   this.searchSubject
     .pipe(debounceTime(600), distinctUntilChanged())
@@ -342,6 +342,10 @@ ngOnInit() {
       limit: this.maxLimit ?? undefined,
       portalId: this.selectedPortal?.portalId || undefined,
     };
+
+    if (this.preselectedBankId) {
+      options.bankId = this.preselectedBankId
+    }
 
     if (this.selectedBank?.id) {
   options.bankId = this.selectedBank.id;
@@ -471,32 +475,32 @@ ngOnInit() {
   }
 
   // ---------- PORTALS LOADING ----------
-  loadPortals(agentId: string) {
-    if (!agentId) return;
-    this.headService
-        .getAllHeadsWithPortalsById(agentId, "UPI")
-        .pipe(catchError(() => of([])))
-        .subscribe((res: any) => {
-          let list: any[] = [];
-          if (Array.isArray(res)) list = res;
-          else if (res?.data) list = res.data;
-          else if (res) list = [res];
+  // loadPortals(agentId: string) {
+  //   if (!agentId) return;
+  //   this.headService
+  //       .getAllHeadsWithPortalsById(agentId, "UPI")
+  //       .pipe(catchError(() => of([])))
+  //       .subscribe((res: any) => {
+  //         let list: any[] = [];
+  //         if (Array.isArray(res)) list = res;
+  //         else if (res?.data) list = res.data;
+  //         else if (res) list = [res];
 
-          this.portals = list.map((item) => ({
-            id: item.id || item._id || "",
-            portalId: item.portalId || item.portalID || item.portal_id || "",
-            domain:
-                item.portalDomain ||
-                item.domain ||
-                item.domainName ||
-                "Untitled Portal",
-            currency: item.currency || "INR",
-          }));
+  //         this.portals = list.map((item) => ({
+  //           id: item.id || item._id || "",
+  //           portalId: item.portalId || item.portalID || item.portal_id || "",
+  //           domain:
+  //               item.portalDomain ||
+  //               item.domain ||
+  //               item.domainName ||
+  //               "Untitled Portal",
+  //           currency: item.currency || "INR",
+  //         }));
 
-          this.filteredPortals = [...this.portals];
-          this.upiFilteredPortals = [];
-        });
-  }
+  //         this.filteredPortals = [...this.portals];
+  //         this.upiFilteredPortals = [];
+  //       });
+  // }
 
   // ---------- FILTER ACTIONS ----------
   onSearch(): void {
@@ -710,7 +714,7 @@ ngOnInit() {
 
   // ---------- ADD MODAL ----------
   openAddModal(): void {
-    if (!this.portals?.length) this.loadPortals(this.currentRoleId);
+    // if (!this.portals?.length) this.loadPortals(this.currentRoleId);
     this.selectedUpiPortal = null;
     this.upiPortalSearch = "";
     this.upiFilteredPortals = [];
@@ -1253,19 +1257,7 @@ console.log(payload);
     });
   }
 
-  openLimitModal(upi: any) {
-    this.editingUpi = upi;
-    this.showLimitModal = true;
 
-    const now = new Date();
-
-    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 16);
-
-    this.limitDateTime = local;
-    this.minLimitDateTime = local;
-  }
 
   // Add this new method for focus event
   onUpiPortalFocus(): void {
@@ -1310,43 +1302,7 @@ console.log(payload);
 
   // }
 
-  submitLimitTime() {
-    if (!this.limitDateTime || !this.editingUpi) return;
 
-    const selectedTime = new Date(this.limitDateTime).getTime();
-    const nowTime = new Date().getTime();
-
-    if (selectedTime < nowTime) {
-      this.snack.show("Please select a future date and time", false);
-      return;
-    }
-
-    this.isSubmittingLimit = true;
-
-    const payload = {
-      dateTime: this.limitDateTime,
-    };
-
-    const id = this.editingUpi.id;
-
-    this.upiService.setLimitTime(id, payload).subscribe({
-      next: () => {
-        this.isSubmittingLimit = false;
-        this.closeLimitModal();
-        this.fetchUpis(); //  reload updated list
-        this.snack.show("Limit time set successfully", true);
-      },
-      error: () => {
-        this.isSubmittingLimit = false;
-        this.snack.show("Failed to set limit time", false);
-      },
-    });
-  }
-  closeLimitModal() {
-    this.showLimitModal = false;
-    this.limitDateTime = "";
-    this.minLimitDateTime = "";
-  }
 
   updateFrom(index: number, event: any) {
     const value = Number(event.target.value);
@@ -1590,23 +1546,23 @@ loadBanks() {
       this.banks = data;
       this.filteredBanks = [...this.banks];
 
-      // ✅ CASE 1: bankId exists → auto select
-      if (this.preselectedBankId) {
-        const matchedBank = this.banks.find(
-          (b) => b.id === this.preselectedBankId
-        );
+      //  CASE 1: bankId exists → auto select
+      // if (this.preselectedBankId) {
+      //   const matchedBank = this.banks.find(
+      //     (b) => b.id === this.preselectedBankId
+      //   );
 
-        if (matchedBank) {
-          this.selectedBank = matchedBank;
-          this.bankSearchTerm = matchedBank.accountHolderName;
+      //   if (matchedBank) {
+      //     this.selectedBank = matchedBank;
+      //     this.bankSearchTerm = matchedBank.accountHolderName;
 
-          this.fetchUpis(); // 🔥 filtered
-          return;
-        }
-      }
+      //     this.fetchUpis(); //  filtered
+      //     return;
+      //   }
+      // }
 
-      // ✅ CASE 2: NO bankId → fetch ALL
-      this.fetchUpis();
+      //  CASE 2: NO bankId → fetch ALL
+      // this.fetchUpis();
     });
 }
 
@@ -1619,11 +1575,12 @@ filterBanks() {
 }
 
 selectBank(bank: any) {
+  this.preselectedBankId = null
   this.selectedBank = bank;
   this.bankSearchTerm = bank.accountHolderName;
   this.showBankDropdown = false;
 
-  this.onFilterChange(); // 🔥 trigger API
+  this.onFilterChange(); //  trigger API
 }
 
 clearBankFilter() {
@@ -1636,5 +1593,33 @@ clearBankFilter() {
 
 onBankBlur() {
   setTimeout(() => (this.showBankDropdown = false), 200);
+}
+
+isLive(upi: any): boolean {
+  const portal = (upi.portalDomain || '').toLowerCase();
+
+  const isReceiving = portal.includes('receiv');
+
+  return (
+    this.topupStatus &&
+    upi.isUpiActive &&
+    isReceiving
+  );
+}
+
+
+showTxnModal = false;
+selectedTxnData: any = null;
+
+openTxnModal(upi: any) {
+  this.selectedTxnData = upi;
+  this.showTxnModal = true;
+  document.body.style.overflow = 'hidden';
+}
+
+closeTxnModal() {
+  this.showTxnModal = false;
+  this.selectedTxnData = null;
+  document.body.style.overflow = 'auto';
 }
 }
