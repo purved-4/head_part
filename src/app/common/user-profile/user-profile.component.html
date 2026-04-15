@@ -37,7 +37,7 @@
         </button>
 
         <!-- ENTITY -->
-        <button
+        <!-- <button
           (click)="selectSection('entity')"
           class="group relative flex items-center justify-center sm:justify-start gap-1 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-all duration-200"
           [class.bg-white]="selectedSection === 'entity'"
@@ -51,7 +51,7 @@
           <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap">
             Entity
           </span>
-        </button>
+        </button> -->
 
         <!-- PORTALS -->
         <button
@@ -120,7 +120,7 @@
     <div class="max-w-7xl mx-auto">
 
       <!-- ==================== USER PROFILE Section ==================== -->
-      <div *ngIf="selectedSection === 'user'" class="animate-fade-in">
+      <!-- <div *ngIf="selectedSection === 'user'" class="animate-fade-in">
         <div class="mb-2">
           <h1
             class="text-lg md:text-2xl font-bold mb-0.5 md:mb-1"
@@ -141,7 +141,7 @@
           [style.borderColor]="'var(--color-border)'"
         >
           <div class="p-2 md:p-3">
-            <!-- Status Bar -->
+         
             <div
               class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 pb-2 border-b gap-2"
               [style.borderColor]="'var(--color-border)'"
@@ -211,9 +211,9 @@
               </div>
             </div>
 
-            <!-- Info Cards Grid -->
+          
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <!-- Card 1: Full Name -->
+            
               <div
                 class="group p-2 rounded-lg border hover:shadow-md transition-all duration-300"
                 [style.borderColor]="'var(--color-border)'"
@@ -245,7 +245,7 @@
                 </div>
               </div>
 
-              <!-- Card 2: Email Address -->
+           
               <div
                 class="group p-2 rounded-lg border hover:shadow-md transition-all duration-300"
                 [style.borderColor]="'var(--color-border)'"
@@ -277,7 +277,7 @@
                 </div>
               </div>
 
-              <!-- Card 3: Phone Number -->
+        
               <div
                 class="group p-2 rounded-lg border hover:shadow-md transition-all duration-300"
                 [style.borderColor]="'var(--color-border)'"
@@ -311,10 +311,96 @@
             </div>
           </div>
         </div>
+      </div> -->
+
+
+      <div *ngIf="selectedSection === 'user'" class="animate-fade-in">
+
+  <!-- 🔹 HEADER -->
+  <div class="mb-2">
+    <h1
+      class="text-lg md:text-2xl font-bold mb-0.5 md:mb-1"
+      [style.color]="'var(--color-font)'"
+    >
+      Profile & Entity
+    </h1>
+    <p class="text-xs" [style.color]="'var(--color-muted)'">
+      User details and entity configuration
+    </p>
+  </div>
+
+  <div
+    class="bg-white rounded-lg border shadow-md overflow-hidden"
+    [style.borderColor]="'var(--color-border)'"
+  >
+    <div class="p-2 md:p-3">
+
+      <!-- 🔹 STATUS + BALANCE -->
+      <div
+        class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 pb-2 border-b gap-2"
+        [style.borderColor]="'var(--color-border)'"
+      >
+        <div class="flex items-center gap-2">
+
+          <!-- ROLE -->
+          <div
+            class="px-2 py-1 rounded-lg font-semibold text-white text-xs"
+            [style.background]="'var(--color-primary)'"
+          >
+            {{ user?.role || "User" }}
+          </div>
+
+          <!-- STATUS -->
+          <div
+            class="px-2 py-1 rounded-lg border text-xs"
+            [style.background]="user?.active ? '#dcfce7' : '#fee2e2'"
+          >
+            {{ user?.active ? "Active" : "Inactive" }}
+          </div>
+
+        </div>
+
+        <!-- BALANCE -->
+        <div class="text-right">
+          <p class="text-[10px] text-gray-400">Balance</p>
+          <p class="font-bold text-sm text-green-600">
+            ₹ {{ entityInfo?.limit || 0 }}
+          </p>
+        </div>
       </div>
 
+      <!-- 🔹 GRID -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+
+        <!-- USER INFO -->
+        <div class="p-2 rounded-lg border">
+          <h4 class="text-xs font-semibold mb-2">User Info</h4>
+
+          <div class="space-y-2 text-xs">
+            <div><b>Name:</b> {{ user?.name }}</div>
+            <div><b>Email:</b> {{ user?.email }}</div>
+            <div><b>Phone:</b> {{ user?.phone }}</div>
+          </div>
+        </div>
+
+        <!-- ENTITY INFO -->
+        <div class="p-2 rounded-lg border">
+          <h4 class="text-xs font-semibold mb-2">Entity Info</h4>
+
+          <div class="space-y-2 text-xs">
+            <div><b>Entity Name:</b> {{ entityInfo?.name }}</div>
+            <div><b>Balance:</b> ₹ {{ entityInfo?.limit }}</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
       <!-- ==================== ENTITY DETAILS Section ==================== -->
-      <div *ngIf="selectedSection === 'entity'" class="animate-fade-in">
+      <!-- <div *ngIf="selectedSection === 'entity'" class="animate-fade-in">
         <div class="mb-2">
           <h1
             class="text-lg md:text-2xl font-bold mb-0.5 md:mb-1"
@@ -335,7 +421,7 @@
           [style.borderColor]="'var(--color-border)'"
         >
           <div class="p-2 md:p-3">
-            <!-- Balance Header -->
+      
             <div
               class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 pb-2 border-b gap-3"
               [style.borderColor]="'var(--color-border)'"
@@ -370,7 +456,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <!-- Entity Info Card -->
+             
               <div
                 class="p-2 rounded-lg border hover:shadow-md transition-all duration-300"
                 [style.borderColor]="'var(--color-border)'"
@@ -411,7 +497,7 @@
                 </div>
               </div>
 
-              <!-- Linked Portals Card -->
+           
               <div
                 class="p-2 rounded-lg border hover:shadow-md transition-all duration-300"
                 [style.borderColor]="'var(--color-border)'"
@@ -549,7 +635,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- ==================== PORTALS Section ==================== -->
       <div *ngIf="selectedSection === 'portal'" class="animate-fade-in">

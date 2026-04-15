@@ -1,4 +1,3 @@
-
 import {
   Component,
   OnInit,
@@ -27,14 +26,14 @@ import { MultimediaService } from "../../../services/multimedia.service";
   styleUrls: ["./head-upi.component.css"],
 })
 export class HeadUpiComponent implements OnInit {
-// ---------- DATA ----------
+  // ---------- DATA ----------
   upis: any[] = [];
   portals: any[] = [];
   tooltipVisible = false;
   tooltipX = 0;
   tooltipY = 0;
   tooltipData: any = null;
-// ---------- FILTERS (sent to backend) ----------
+  // ---------- FILTERS (sent to backend) ----------
   searchTerm = "";
   private searchSubject = new Subject<string>();
 
@@ -65,7 +64,7 @@ export class HeadUpiComponent implements OnInit {
 
   // Image preview
   selectedImage: string | null = null;
-  qrMode: 'generate' | 'upload' = 'generate';
+  qrMode: "generate" | "upload" = "generate";
   vpaChanged: boolean = false;
   newQrGenerated: boolean = false;
 
@@ -94,7 +93,7 @@ export class HeadUpiComponent implements OnInit {
   isGeneratingUpdateQr = false;
   updateQrData: string | null = null;
   generatedUpdateFile: File | null = null;
-  updateQrMode: 'generate' | 'upload' = 'generate';
+  updateQrMode: "generate" | "upload" = "generate";
   originalVpa = "";
   updateQrError = "";
 
@@ -136,104 +135,97 @@ export class HeadUpiComponent implements OnInit {
   showCapacityModal = false;
 
   capacityRanges: any[] = [];
-banks: any[] = [];
-filteredBanks: any[] = [];
-selectedBank: any = null;
-bankSearchTerm = "";
-showBankDropdown = false;
+  banks: any[] = [];
+  filteredBanks: any[] = [];
+  selectedBank: any = null;
+  bankSearchTerm = "";
+  showBankDropdown = false;
   selectedUpiForCapacity: any = null;
   preselectedBankId: string | null = null;
   constructor(
-      private upiService: UpiService,
-      private branchService: BranchService,
-      private route: ActivatedRoute,
-      private formBuilder: FormBuilder,
-      private userStateService: UserStateService,
-      private userService: UserService,
-      private headService: HeadService,
-      private snack: SnackbarService,
-      private router: Router,
-      private multimediaService:MultimediaService,
-      private bankServices : BankService,
-      
+    private upiService: UpiService,
+    private branchService: BranchService,
+    private route: ActivatedRoute,
+    private formBuilder: FormBuilder,
+    private userStateService: UserStateService,
+    private userService: UserService,
+    private headService: HeadService,
+    private snack: SnackbarService,
+    private router: Router,
+    private multimediaService: MultimediaService,
+    private bankServices: BankService,
   ) {}
 
-//   ngOnInit() {
-//     this.route.queryParams.subscribe((params) => {
-//   const bankId = params['bankId'];
+  //   ngOnInit() {
+  //     this.route.queryParams.subscribe((params) => {
+  //   const bankId = params['bankId'];
 
-//   if (bankId) {
-//     this.preselectedBankId = bankId;
-//   }
-// });
-//     this.initAddUpiForm();
-//     this.currentRoleId = this.userStateService.getCurrentEntityId();
-//     this.currentUserId = this.userStateService.getUserId();
-//     this.role = this.userStateService.getRole();
-// this.getTopupStatus();
-//     if (
-//         typeof matchMedia !== "undefined" &&
-//         matchMedia("(max-width: 800px)").matches
-//     ) {
-//       this.viewMode = "grid";
-//     }
+  //   if (bankId) {
+  //     this.preselectedBankId = bankId;
+  //   }
+  // });
+  //     this.initAddUpiForm();
+  //     this.currentRoleId = this.userStateService.getCurrentEntityId();
+  //     this.currentUserId = this.userStateService.getUserId();
+  //     this.role = this.userStateService.getRole();
+  // this.getTopupStatus();
+  //     if (
+  //         typeof matchMedia !== "undefined" &&
+  //         matchMedia("(max-width: 800px)").matches
+  //     ) {
+  //       this.viewMode = "grid";
+  //     }
 
-//     this.fetchUpis();
-//     this.loadPortals(this.currentRoleId);
+  //     this.fetchUpis();
+  //     this.loadPortals(this.currentRoleId);
 
-//     this.searchSubject
-//         .pipe(debounceTime(600), distinctUntilChanged())
-//         .subscribe((value) => {
-//           this.searchTerm = value;
-//           this.onSearch();
-//         });
+  //     this.searchSubject
+  //         .pipe(debounceTime(600), distinctUntilChanged())
+  //         .subscribe((value) => {
+  //           this.searchTerm = value;
+  //           this.onSearch();
+  //         });
 
-//     this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
+  //     this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
 
-//     this.loadBanks();
-//   }
+  //     this.loadBanks();
+  //   }
 
+  ngOnInit() {
+    this.initAddUpiForm();
 
-ngOnInit() {
-  this.initAddUpiForm();
+    this.currentRoleId = this.userStateService.getCurrentEntityId();
+    this.currentUserId = this.userStateService.getUserId();
+    this.role = this.userStateService.getRole();
 
-  this.currentRoleId = this.userStateService.getCurrentEntityId();
-  this.currentUserId = this.userStateService.getUserId();
-  this.role = this.userStateService.getRole();
+    this.getTopupStatus();
 
-  this.getTopupStatus();
+    if (
+      typeof matchMedia !== "undefined" &&
+      matchMedia("(max-width: 800px)").matches
+    ) {
+      this.viewMode = "grid";
+    }
 
-  if (
-    typeof matchMedia !== "undefined" &&
-    matchMedia("(max-width: 800px)").matches
-  ) {
-    this.viewMode = "grid";
-  }
+    this.route.queryParams.subscribe((params) => {
+      this.preselectedBankId = params["bankId"] || null;
 
-  this.route.queryParams.subscribe((params) => {
-    this.preselectedBankId = params['bankId'] || null;
-
- 
- this.fetchUpis()
-    
-  });
-
-  this.loadBanks();
-
-
-
-  // this.loadPortals(this.currentRoleId);
-
-  this.searchSubject
-    .pipe(debounceTime(600), distinctUntilChanged())
-    .subscribe((value) => {
-      this.searchTerm = value;
-      this.onSearch();
+      this.fetchUpis();
     });
 
-  this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
-}
+    this.loadBanks();
 
+    // this.loadPortals(this.currentRoleId);
+
+    this.searchSubject
+      .pipe(debounceTime(600), distinctUntilChanged())
+      .subscribe((value) => {
+        this.searchTerm = value;
+        this.onSearch();
+      });
+
+    this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
+  }
 
   private initAddUpiForm() {
     this.addUpiForm = this.formBuilder.group({
@@ -344,121 +336,121 @@ ngOnInit() {
     };
 
     if (this.preselectedBankId) {
-      options.bankId = this.preselectedBankId
+      options.bankId = this.preselectedBankId;
     }
 
     if (this.selectedBank?.id) {
-  options.bankId = this.selectedBank.id;
-}
+      options.bankId = this.selectedBank.id;
+    }
 
     if (this.filterStatus && this.filterStatus.trim() !== "") {
       options.status = this.filterStatus;
     }
 
     this.upiService
-        .getByEntityIdAndActivePaginated(this.currentRoleId, options)
-        .subscribe({
-          next: (res: any) => {
-            const responseData = res.data || res;
+      .getByEntityIdAndActivePaginated(this.currentRoleId, options)
+      .subscribe({
+        next: (res: any) => {
+          const responseData = res.data || res;
 
-            const rows = Array.isArray(responseData.content)
-                ? responseData.content
-                : Array.isArray(responseData)
-                    ? responseData
-                    : [];
+          const rows = Array.isArray(responseData.content)
+            ? responseData.content
+            : Array.isArray(responseData)
+              ? responseData
+              : [];
 
-            //  STEP 1: MAP (FIXED)
-            this.upis = rows.map((r: any) => {
-              let parsedRanges: any[] = [];
+          //  STEP 1: MAP (FIXED)
+          this.upis = rows.map((r: any) => {
+            let parsedRanges: any[] = [];
 
-              if (Array.isArray(r.ranges)) {
-                parsedRanges = r.ranges;
-              } else if (typeof r.range === "string") {
-                parsedRanges = r.range.split(",").map((x: string) => {
-                  const [from, to] = x.split("-");
-                  return { from: Number(from), to: Number(to) };
-                });
-              } else if (typeof r.upiRange === "string") {
-                parsedRanges = r.upiRange.split(",").map((x: string) => {
-                  const [from, to] = x.split("-");
-                  return { from: Number(from), to: Number(to) };
-                });
-              }
+            if (Array.isArray(r.ranges)) {
+              parsedRanges = r.ranges;
+            } else if (typeof r.range === "string") {
+              parsedRanges = r.range.split(",").map((x: string) => {
+                const [from, to] = x.split("-");
+                return { from: Number(from), to: Number(to) };
+              });
+            } else if (typeof r.upiRange === "string") {
+              parsedRanges = r.upiRange.split(",").map((x: string) => {
+                const [from, to] = x.split("-");
+                return { from: Number(from), to: Number(to) };
+              });
+            }
 
-              const rawImagePath = r.qrImagePath || r.qrImageUrl || null;
+            const rawImagePath = r.qrImagePath || r.qrImageUrl || null;
 
-              return {
-                ...r,
-                status: this.normalizeStatus(r),
-                min_tran_count: r.minTranCount ?? null,
-                max_tran_count: r.maxTranCount ?? null,
-                min_total_tran_amount: r.minTotalTranAmount ?? null,
-                max_total_tran_amount: r.maxTotalTranAmount ?? null,
-                portalDomain:
-                    r.portalDomain || r.portalName || r.portal || r.portalId || "",
+            return {
+              ...r,
+              status: this.normalizeStatus(r),
+              min_tran_count: r.minTranCount ?? null,
+              max_tran_count: r.maxTranCount ?? null,
+              min_total_tran_amount: r.minTotalTranAmount ?? null,
+              max_total_tran_amount: r.maxTotalTranAmount ?? null,
+              portalDomain:
+                r.portalDomain || r.portalName || r.portal || r.portalId || "",
 
-                ranges: parsedRanges,
+              ranges: parsedRanges,
 
-                qrId: r.qrId || r.qr_id || r.id || "",
+              qrId: r.qrId || r.qr_id || r.id || "",
 
-                //  REMOVE direct URL
-                // qrImagePath: ...
+              //  REMOVE direct URL
+              // qrImagePath: ...
 
-                //  NEW
-                imagePath: rawImagePath,
-                qrImageUrl: null,
+              //  NEW
+              imagePath: rawImagePath,
+              qrImageUrl: null,
 
-                limitAmount: r.limitAmount,
-                currency: r.portalCurrency || "",
-                vpa: r.vpa || r.upiId || "",
-                isUpiActive: r.upi === true,
-              };
-            });
+              limitAmount: r.limitAmount,
+              currency: r.portalCurrency || "",
+              vpa: r.vpa || r.upiId || "",
+              isUpiActive: r.upi === true,
+            };
+          });
 
-            //  STEP 2: LOAD IMAGES (IMPORTANT)
-            this.upis.forEach((upi: any) => {
-              if (!upi.imagePath) return;
+          //  STEP 2: LOAD IMAGES (IMPORTANT)
+          this.upis.forEach((upi: any) => {
+            if (!upi.imagePath) return;
 
-              //  smart handling (public vs private)
-              if (upi.imagePath.startsWith("http")) {
-                upi.qrImageUrl = upi.imagePath;
-              } else {
-                this.multimediaService.getPrivateImage(upi.imagePath).subscribe({
-                  next: (url) => (upi.qrImageUrl = url),
-                  error: () => (upi.qrImageUrl = null),
-                });
-              }
-            });
+            //  smart handling (public vs private)
+            if (upi.imagePath.startsWith("http")) {
+              upi.qrImageUrl = upi.imagePath;
+            } else {
+              this.multimediaService.getPrivateImage(upi.imagePath).subscribe({
+                next: (url) => (upi.qrImageUrl = url),
+                error: () => (upi.qrImageUrl = null),
+              });
+            }
+          });
 
-            //  STEP 3: SORT
-            const now = new Date().getTime();
+          //  STEP 3: SORT
+          const now = new Date().getTime();
 
-            this.upis.sort((a: any, b: any) => {
-              const timeA = a.limitTime ? new Date(a.limitTime).getTime() : 0;
-              const timeB = b.limitTime ? new Date(b.limitTime).getTime() : 0;
+          this.upis.sort((a: any, b: any) => {
+            const timeA = a.limitTime ? new Date(a.limitTime).getTime() : 0;
+            const timeB = b.limitTime ? new Date(b.limitTime).getTime() : 0;
 
-              const isFutureA = timeA > now;
-              const isFutureB = timeB > now;
+            const isFutureA = timeA > now;
+            const isFutureB = timeB > now;
 
-              if (isFutureA && !isFutureB) return -1;
-              if (!isFutureA && isFutureB) return 1;
+            if (isFutureA && !isFutureB) return -1;
+            if (!isFutureA && isFutureB) return 1;
 
-              if (isFutureA && isFutureB) return timeB - timeA;
+            if (isFutureA && isFutureB) return timeB - timeA;
 
-              return timeB - timeA;
-            });
+            return timeB - timeA;
+          });
 
-            this.totalElements = responseData.totalElements || this.upis.length;
-            this.totalPagesCount = responseData.totalPages || 1;
-          },
+          this.totalElements = responseData.totalElements || this.upis.length;
+          this.totalPagesCount = responseData.totalPages || 1;
+        },
 
-          error: () => {
-            this.upis = [];
-            this.totalElements = 0;
-            this.totalPagesCount = 0;
-            this.snack.show("Failed to load UPIs", false);
-          },
-        });
+        error: () => {
+          this.upis = [];
+          this.totalElements = 0;
+          this.totalPagesCount = 0;
+          this.snack.show("Failed to load UPIs", false);
+        },
+      });
   }
 
   private normalizeStatus(item: any): string {
@@ -549,9 +541,9 @@ ngOnInit() {
       this.showPortalDropdown = this.portals.length > 0;
     } else {
       this.filteredPortals = this.portals.filter(
-          (site) =>
-              site.domain.toLowerCase().includes(term) ||
-              (site.currency && site.currency.toLowerCase().includes(term)),
+        (site) =>
+          site.domain.toLowerCase().includes(term) ||
+          (site.currency && site.currency.toLowerCase().includes(term)),
       );
       this.showPortalDropdown = this.filteredPortals.length > 0;
     }
@@ -602,9 +594,9 @@ ngOnInit() {
     }
 
     this.upiFilteredPortals = this.portals.filter(
-        (site) =>
-            site.domain.toLowerCase().includes(term) ||
-            (site.currency && site.currency.toLowerCase().includes(term)),
+      (site) =>
+        site.domain.toLowerCase().includes(term) ||
+        (site.currency && site.currency.toLowerCase().includes(term)),
     );
   }
 
@@ -707,7 +699,10 @@ ngOnInit() {
       next: () => this.fetchUpis(),
       error: (err) => {
         upi.status = upi.status === "active" ? "inactive" : "active";
-        this.snack.show(err?.error?.message ||"Failed to update status.", false);
+        this.snack.show(
+          err?.error?.message || "Failed to update status.",
+          false,
+        );
       },
     });
   }
@@ -739,7 +734,7 @@ ngOnInit() {
 
   submitAddUpi(): void {
     Object.keys(this.addUpiForm.controls).forEach((key) =>
-        this.addUpiForm.get(key)?.markAsTouched(),
+      this.addUpiForm.get(key)?.markAsTouched(),
     );
 
     if (this.addUpiForm.invalid) {
@@ -791,14 +786,16 @@ ngOnInit() {
       // agent_id: this.currentRoleId,
       entityId: this.currentRoleId,
       entityType: this.role,
-      
-bankId: "5974d3e0-0de0-494e-8a1b-acd4ce6d1dfe",
+
+      bankId: "5974d3e0-0de0-494e-8a1b-acd4ce6d1dfe",
       userId: this.userId,
       active: true,
       minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
       maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
-      minTotalTranAmount: Number(this.addUpiForm.value.min_total_tran_amount) || 0,
-      maxTotalTranAmount: Number(this.addUpiForm.value.max_total_tran_amount) || 0,
+      minTotalTranAmount:
+        Number(this.addUpiForm.value.min_total_tran_amount) || 0,
+      maxTotalTranAmount:
+        Number(this.addUpiForm.value.max_total_tran_amount) || 0,
       createdAt: new Date().toISOString(),
       // ranges: validRanges.map((r) => ({
       //   minRange: Number(r.minRange),
@@ -812,7 +809,6 @@ bankId: "5974d3e0-0de0-494e-8a1b-acd4ce6d1dfe",
         quantity: r.quantity ?? null,
       })),
     };
-console.log(payload);
 
     const formData = new FormData();
     const dtoBlob = new Blob([JSON.stringify(payload)], {
@@ -842,11 +838,11 @@ console.log(payload);
         this.isAddingUpi = false;
 
         const errorMsg =
-            error?.error?.message || error?.error?.error || "Failed to add UPI";
+          error?.error?.message || error?.error?.error || "Failed to add UPI";
         this.snack.show(
-            errorMsg ||
+          errorMsg ||
             "Failed to add UPI. Please check your connection and try again.",
-            false,
+          false,
         );
       },
     });
@@ -883,7 +879,6 @@ console.log(payload);
   //   this.showUpdateModal = true;
   //   document.body.style.overflow = "hidden";
   // }
-
 
   openUpdateModal(upi: any): void {
     this.editingUpi = upi;
@@ -928,7 +923,7 @@ console.log(payload);
     this.newQrGenerated = false;
     this.updateManualQrFile = null;
     this.updateSelectedImage = null;
-    this.updateQrMode = 'generate';
+    this.updateQrMode = "generate";
     document.body.style.overflow = "auto";
   }
 
@@ -1008,9 +1003,9 @@ console.log(payload);
     formData.append("dto", dtoBlob);
     if (this.generatedUpdateFile) {
       formData.append(
-          "file",
-          this.generatedUpdateFile,
-          this.generatedUpdateFile.name,
+        "file",
+        this.generatedUpdateFile,
+        this.generatedUpdateFile.name,
       );
     }
 
@@ -1067,8 +1062,8 @@ console.log(payload);
   private captureQrImage(vpa: string, isForUpdate = false): void {
     try {
       const qrcodeElement = isForUpdate
-          ? this.updateQrcodeElem
-          : this.qrcodeElem;
+        ? this.updateQrcodeElem
+        : this.qrcodeElem;
       if (!qrcodeElement?.nativeElement) {
         this.finishQrGeneration(isForUpdate);
         return;
@@ -1082,24 +1077,24 @@ console.log(payload);
         }
 
         canvas.toBlob(
-            (blob: Blob | null) => {
-              if (blob) {
-                const filename = `upi_qr_${this.sanitizeFilename(vpa)}_${Date.now()}.png`;
-                if (isForUpdate) {
-                  this.generatedUpdateFile = new File([blob], filename, {
-                    type: "image/png",
-                  });
-                  this.newQrGenerated = true; //  flag set
-                } else {
-                  this.generatedFile = new File([blob], filename, {
-                    type: "image/png",
-                  });
-                }
+          (blob: Blob | null) => {
+            if (blob) {
+              const filename = `upi_qr_${this.sanitizeFilename(vpa)}_${Date.now()}.png`;
+              if (isForUpdate) {
+                this.generatedUpdateFile = new File([blob], filename, {
+                  type: "image/png",
+                });
+                this.newQrGenerated = true; //  flag set
+              } else {
+                this.generatedFile = new File([blob], filename, {
+                  type: "image/png",
+                });
               }
-              this.finishQrGeneration(isForUpdate);
-            },
-            "image/png",
-            1.0,
+            }
+            this.finishQrGeneration(isForUpdate);
+          },
+          "image/png",
+          1.0,
         );
       }, 100);
     } catch (error) {
@@ -1114,9 +1109,9 @@ console.log(payload);
 
   private sanitizeFilename(filename: string): string {
     return filename
-        .replace(/[^a-z0-9_\-\.@]/gi, "_")
-        .replace(/_{2,}/g, "_")
-        .substring(0, 100);
+      .replace(/[^a-z0-9_\-\.@]/gi, "_")
+      .replace(/_{2,}/g, "_")
+      .substring(0, 100);
   }
 
   downloadQr(): void {
@@ -1184,7 +1179,7 @@ console.log(payload);
   // ---------- DROPDOWN ----------
   toggleActionsDropdown(upiId: string): void {
     this.activeDropdownUpiId =
-        this.activeDropdownUpiId === upiId ? null : upiId;
+      this.activeDropdownUpiId === upiId ? null : upiId;
   }
 
   toggleView(mode: "table" | "grid") {
@@ -1241,8 +1236,8 @@ console.log(payload);
     this.showPortalDropdown = false;
 
     if (
-        typeof matchMedia !== "undefined" &&
-        matchMedia("(max-width: 800px)").matches
+      typeof matchMedia !== "undefined" &&
+      matchMedia("(max-width: 800px)").matches
     ) {
       this.viewMode = "grid";
     }
@@ -1256,8 +1251,6 @@ console.log(payload);
       relativeTo: this.route,
     });
   }
-
-
 
   // Add this new method for focus event
   onUpiPortalFocus(): void {
@@ -1286,8 +1279,6 @@ console.log(payload);
 
   //   const id = this.editingUpi.id;
 
-
-
   //   this.upiService.setLimitTime(id, payload).subscribe({
   //     next: () => {
   //       this.snack.show("Limit time set successfully", true);
@@ -1301,8 +1292,6 @@ console.log(payload);
   //   });
 
   // }
-
-
 
   updateFrom(index: number, event: any) {
     const value = Number(event.target.value);
@@ -1399,7 +1388,7 @@ console.log(payload);
       next: () => {
         //  Only update UI after backend success
         this.toggleCandidateUpi.isUpiActive =
-            !this.toggleCandidateUpi.isUpiActive;
+          !this.toggleCandidateUpi.isUpiActive;
 
         this.isToggleConfirmVisible = false;
         this.toggleCandidateUpi = null;
@@ -1453,7 +1442,6 @@ console.log(payload);
     const file = event.target.files[0];
     if (!file) return;
 
-
     const maxSize = 500 * 1024; // 500KB
 
     if (file.size > maxSize) {
@@ -1473,7 +1461,7 @@ console.log(payload);
     this.newQrGenerated = true;
   }
 
-  setUpdateQrMode(mode: 'generate' | 'upload') {
+  setUpdateQrMode(mode: "generate" | "upload") {
     this.updateQrMode = mode;
 
     this.updateQrData = null;
@@ -1490,7 +1478,7 @@ console.log(payload);
     this.selectedImage = null;
   }
 
-  setQrMode(mode: 'generate' | 'upload') {
+  setQrMode(mode: "generate" | "upload") {
     this.qrMode = mode;
 
     // reset everything when switching
@@ -1507,8 +1495,6 @@ console.log(payload);
     this.generatedUpdateFile = null;
   }
 
-
-
   showTooltip(event: MouseEvent, data: any) {
     this.tooltipVisible = true;
     this.tooltipData = data;
@@ -1521,105 +1507,99 @@ console.log(payload);
     this.tooltipVisible = false;
   }
 
-
-    private getTopupStatus() {
+  private getTopupStatus() {
     this.headService.getHeadById(this.currentRoleId).subscribe((res) => {
       this.topupStatus = res.topup;
     });
   }
-    changeTopupStatus() {
+  changeTopupStatus() {
     this.headService.toggleDashbaordTopup(this.currentRoleId).subscribe(() => {
-      this.topupStatus = !this.topupStatus; 
+      this.topupStatus = !this.topupStatus;
     });
   }
 
-loadBanks() {
-  this.bankServices
-    .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, {
-      page: 0,
-      size: 100,
-      active: true,
-    })
-    .subscribe((res: any) => {
-      const data = res.data?.content || [];
+  loadBanks() {
+    this.bankServices
+      .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, {
+        page: 0,
+        size: 100,
+        active: true,
+      })
+      .subscribe((res: any) => {
+        const data = res.data?.content || [];
 
-      this.banks = data;
-      this.filteredBanks = [...this.banks];
+        this.banks = data;
+        this.filteredBanks = [...this.banks];
 
-      //  CASE 1: bankId exists → auto select
-      // if (this.preselectedBankId) {
-      //   const matchedBank = this.banks.find(
-      //     (b) => b.id === this.preselectedBankId
-      //   );
+        //  CASE 1: bankId exists → auto select
+        // if (this.preselectedBankId) {
+        //   const matchedBank = this.banks.find(
+        //     (b) => b.id === this.preselectedBankId
+        //   );
 
-      //   if (matchedBank) {
-      //     this.selectedBank = matchedBank;
-      //     this.bankSearchTerm = matchedBank.accountHolderName;
+        //   if (matchedBank) {
+        //     this.selectedBank = matchedBank;
+        //     this.bankSearchTerm = matchedBank.accountHolderName;
 
-      //     this.fetchUpis(); //  filtered
-      //     return;
-      //   }
-      // }
+        //     this.fetchUpis(); //  filtered
+        //     return;
+        //   }
+        // }
 
-      //  CASE 2: NO bankId → fetch ALL
-      // this.fetchUpis();
-    });
-}
+        //  CASE 2: NO bankId → fetch ALL
+        // this.fetchUpis();
+      });
+  }
 
-filterBanks() {
-  const term = this.bankSearchTerm.toLowerCase();
+  filterBanks() {
+    const term = this.bankSearchTerm.toLowerCase();
 
-  this.filteredBanks = this.banks.filter((b) =>
-    b.accountHolderName.toLowerCase().includes(term)
-  );
-}
+    this.filteredBanks = this.banks.filter((b) =>
+      b.accountHolderName.toLowerCase().includes(term),
+    );
+  }
 
-selectBank(bank: any) {
-  this.preselectedBankId = null
-  this.selectedBank = bank;
-  this.bankSearchTerm = bank.accountHolderName;
-  this.showBankDropdown = false;
+  selectBank(bank: any) {
+    this.preselectedBankId = null;
+    this.selectedBank = bank;
+    this.bankSearchTerm = bank.accountHolderName;
+    this.showBankDropdown = false;
 
-  this.onFilterChange(); //  trigger API
-}
+    this.onFilterChange(); //  trigger API
+  }
 
-clearBankFilter() {
-  this.selectedBank = null;
-  this.bankSearchTerm = "";
-  this.filteredBanks = [...this.banks];
+  clearBankFilter() {
+    this.selectedBank = null;
+    this.bankSearchTerm = "";
+    this.filteredBanks = [...this.banks];
 
-  this.onFilterChange();
-}
+    this.onFilterChange();
+  }
 
-onBankBlur() {
-  setTimeout(() => (this.showBankDropdown = false), 200);
-}
+  onBankBlur() {
+    setTimeout(() => (this.showBankDropdown = false), 200);
+  }
 
-isLive(upi: any): boolean {
-  const portal = (upi.portalDomain || '').toLowerCase();
+  isLive(upi: any): boolean {
+    const portal = (upi.portalDomain || "").toLowerCase();
 
-  const isReceiving = portal.includes('receiv');
+    const isReceiving = portal.includes("receiv");
 
-  return (
-    this.topupStatus &&
-    upi.isUpiActive &&
-    isReceiving
-  );
-}
+    return this.topupStatus && upi.isUpiActive && isReceiving;
+  }
 
+  showTxnModal = false;
+  selectedTxnData: any = null;
 
-showTxnModal = false;
-selectedTxnData: any = null;
+  openTxnModal(upi: any) {
+    this.selectedTxnData = upi;
+    this.showTxnModal = true;
+    document.body.style.overflow = "hidden";
+  }
 
-openTxnModal(upi: any) {
-  this.selectedTxnData = upi;
-  this.showTxnModal = true;
-  document.body.style.overflow = 'hidden';
-}
-
-closeTxnModal() {
-  this.showTxnModal = false;
-  this.selectedTxnData = null;
-  document.body.style.overflow = 'auto';
-}
+  closeTxnModal() {
+    this.showTxnModal = false;
+    this.selectedTxnData = null;
+    document.body.style.overflow = "auto";
+  }
 }

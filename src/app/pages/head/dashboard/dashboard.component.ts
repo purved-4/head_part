@@ -1,6 +1,4 @@
-
 import { HeadService } from "./../../services/head.service";
-
 
 import {
   Component,
@@ -40,7 +38,7 @@ Chart.register(...registerables);
   styleUrls: ["./dashboard.component.css"],
 })
 export class HeadDashboardComponent
-    implements OnInit, AfterViewInit, OnDestroy
+  implements OnInit, AfterViewInit, OnDestroy
 {
   @ViewChild("trendChart") trendChartRef!: ElementRef;
   @ViewChild("topupMethodChart") topupMethodChartRef!: ElementRef;
@@ -72,20 +70,20 @@ export class HeadDashboardComponent
   totalpayouts = 0;
   activeAccounts = 0;
 
-// NEW: UI state flags for toggling topup/payout monitoring
+  // NEW: UI state flags for toggling topup/payout monitoring
   topupActive = true;
   payoutActive = true;
   mobilePage = 1;
   mobilePageSize = 6;
   mobilePageSizes = [5, 8, 12];
 
-// Original mixed lists (kept for compatibility if needed)
+  // Original mixed lists (kept for compatibility if needed)
   pendingTransactions: any[] = [];
   approvedTransactions: any[] = [];
   approvedtopups: any[] = [];
   approvedpayouts: any[] = [];
 
-// NEW: sectioned pending arrays
+  // NEW: sectioned pending arrays
   pendingUpi: any[] = [];
   pendingBank: any[] = [];
   pendingpayouts: any[] = [];
@@ -101,7 +99,7 @@ export class HeadDashboardComponent
   processingNow = Date.now();
   private processingTimerId: any = null;
 
-// Add these properties
+  // Add these properties
   previewDocument: boolean = false;
   previewUrl: string | null = null;
 
@@ -115,7 +113,7 @@ export class HeadDashboardComponent
   selectedFile: File | null = null;
   isDragging = false;
 
-// filters
+  // filters
   pendingFilterType: "all" | "topup" | "payout" = "all";
   pendingFilterMethod: "all" | "upi" | "bank" = "all";
   mobileFilter: "all" | "upi" | "bank" | "payout" = "all";
@@ -146,15 +144,15 @@ export class HeadDashboardComponent
   approvedPage = 1;
   approvedPageSize = 5;
   approvedPageSizes = [5, 8, 12];
-// UPI
+  // UPI
   pendingUpiPage = 1;
   pendingUpiPageSize = 5;
 
-// Bank
+  // Bank
   pendingBankPage = 1;
   pendingBankPageSize = 5;
 
-// Payout
+  // Payout
   pendingPayoutPage = 1;
   pendingPayoutPageSize = 5;
   pendingPageSizes = [5, 8];
@@ -196,14 +194,14 @@ export class HeadDashboardComponent
   topupStatus: any = false;
 
   constructor(
-      private fundService: FundsService,
-      private userStateService: UserStateService,
-      private socketConfigService: SocketConfigService,
-      private bankService: BankService,
-      private upiService: UpiService,
-      private snackbar: SnackbarService,
-      private headService: HeadService,
-      private multimediaService:MultimediaService
+    private fundService: FundsService,
+    private userStateService: UserStateService,
+    private socketConfigService: SocketConfigService,
+    private bankService: BankService,
+    private upiService: UpiService,
+    private snackbar: SnackbarService,
+    private headService: HeadService,
+    private multimediaService: MultimediaService,
   ) {}
 
   ngOnInit(): void {
@@ -212,20 +210,20 @@ export class HeadDashboardComponent
     this.getTopupStatus();
 
     this.fundService
-        .broadcast(this.headId, this.role)
-        .subscribe((data: any) => {
-          this.lastBroadcastData = data;
-          this.processIncomingEvent(data);
-        });
+      .broadcast(this.headId, this.role)
+      .subscribe((data: any) => {
+        this.lastBroadcastData = data;
+        this.processIncomingEvent(data);
+      });
 
     this.fundService
-        .broadcast(this.headId, this.role)
-        .subscribe((data: any) => {
-          this.processIncomingEvent(data);
-        });
+      .broadcast(this.headId, this.role)
+      .subscribe((data: any) => {
+        this.processIncomingEvent(data);
+      });
 
     this.resetAllLists();
-// this.refreshAllFunds(this.headId);
+    // this.refreshAllFunds(this.headId);
 
     this.socketConfigService.subscribeToPendingData(this.headId);
 
@@ -241,7 +239,7 @@ export class HeadDashboardComponent
     }
 
     setInterval(() => {
-      this.processingNow = Date.now(); 
+      this.processingNow = Date.now();
     }, 60000);
   }
 
@@ -265,74 +263,74 @@ export class HeadDashboardComponent
     this.recenttopups = [];
     this.recentpayouts = [];
 
-// new per-section pending arrays
+    // new per-section pending arrays
     this.pendingUpi = [];
     this.pendingBank = [];
     this.pendingpayouts = [];
   }
 
-// New: fetch accepted/settled records from APIs to use as ground truth for charts/stats
+  // New: fetch accepted/settled records from APIs to use as ground truth for charts/stats
   private refreshAllFunds(headId?: string) {
     if (!headId) headId = this.headId;
     if (!headId) return;
 
-// clear previously approved lists (we'll refill)
+    // clear previously approved lists (we'll refill)
     this.approvedtopups = [];
     this.approvedpayouts = [];
     this.approvedTransactions = [];
 
     const bankObs = this.fundService
-        .getAllBankFundWithBranchId(headId, "ACCEPTED")
-        .pipe(catchError((e) => of([])));
+      .getAllBankFundWithBranchId(headId, "ACCEPTED")
+      .pipe(catchError((e) => of([])));
     const upiObs = this.fundService
-        .getAllUpiFundWithBranchId(headId, "ACCEPTED")
-        .pipe(catchError((e) => of([])));
+      .getAllUpiFundWithBranchId(headId, "ACCEPTED")
+      .pipe(catchError((e) => of([])));
     const withdrawObs = this.fundService
-        .getAllpayoutTrueFalseBybranchId(headId, "ACCEPTED")
-        .pipe(catchError((e) => of([])));
+      .getAllpayoutTrueFalseBybranchId(headId, "ACCEPTED")
+      .pipe(catchError((e) => of([])));
 
     forkJoin({ bank: bankObs, upi: upiObs, payout: withdrawObs }).subscribe(
-        (res: any) => {
-// bank and upi are accepted topups
-          this.mapFundsArray(res.upi || [], "upi", true);
-          this.mapFundsArray(res.bank || [], "bank", true);
-// payouts
-          this.mappayoutsArray(res.payout || []);
+      (res: any) => {
+        // bank and upi are accepted topups
+        this.mapFundsArray(res.upi || [], "upi", true);
+        this.mapFundsArray(res.bank || [], "bank", true);
+        // payouts
+        this.mappayoutsArray(res.payout || []);
 
-// compute accepted sums (amounts) so UI shows totals even if SSE hasn't provided them
-          const upiArr = Array.isArray(res.upi) ? res.upi : [];
-          const bankArr = Array.isArray(res.bank) ? res.bank : [];
-          const withdrawArr = Array.isArray(res.payout) ? res.payout : [];
+        // compute accepted sums (amounts) so UI shows totals even if SSE hasn't provided them
+        const upiArr = Array.isArray(res.upi) ? res.upi : [];
+        const bankArr = Array.isArray(res.bank) ? res.bank : [];
+        const withdrawArr = Array.isArray(res.payout) ? res.payout : [];
 
-          this.acceptedUpi = upiArr.reduce(
-              (s: number, a: any) => s + (Number(a.amount) || 0),
-              0,
-          );
-          this.acceptedBank = bankArr.reduce(
-              (s: number, a: any) => s + (Number(a.amount) || 0),
-              0,
-          );
-          this.acceptedWid = withdrawArr.reduce(
-              (s: number, a: any) => s + (Number(a.amount) || 0),
-              0,
-          );
+        this.acceptedUpi = upiArr.reduce(
+          (s: number, a: any) => s + (Number(a.amount) || 0),
+          0,
+        );
+        this.acceptedBank = bankArr.reduce(
+          (s: number, a: any) => s + (Number(a.amount) || 0),
+          0,
+        );
+        this.acceptedWid = withdrawArr.reduce(
+          (s: number, a: any) => s + (Number(a.amount) || 0),
+          0,
+        );
 
-          this.acceptedDep = this.acceptedBank + this.acceptedUpi;
+        this.acceptedDep = this.acceptedBank + this.acceptedUpi;
 
-// recompute
-          this.computeStatsFromData();
-          this.updateChartsFromData();
-          this.clampPages();
-          this.ensureProcessingTimerState();
-        },
-        (err) => {},
+        // recompute
+        this.computeStatsFromData();
+        this.updateChartsFromData();
+        this.clampPages();
+        this.ensureProcessingTimerState();
+      },
+      (err) => {},
     );
   }
 
   private mapFundsArray(
-      funds: any[],
-      mode: "bank" | "upi",
-      settledFlag: boolean,
+    funds: any[],
+    mode: "bank" | "upi",
+    settledFlag: boolean,
   ): void {
     if (!Array.isArray(funds) || funds.length === 0) return;
 
@@ -345,25 +343,25 @@ export class HeadDashboardComponent
           fundId: fund.id || null,
           type: "topup",
           portal:
-              fund.portalName || fund.portalDomain || fund.portalId || "Portal",
+            fund.portalName || fund.portalDomain || fund.portalId || "Portal",
           amount: Number(fund.amount) || 0,
           date: fund.createdAt
-              ? new Date(fund.createdAt)
-              : fund.dateTime
-                  ? new Date(fund.dateTime)
-                  : new Date(),
+            ? new Date(fund.createdAt)
+            : fund.dateTime
+              ? new Date(fund.dateTime)
+              : new Date(),
           utrNumber: fund.transactionId || fund.utr || null,
           mode: mode,
           accountNo: fund.accountNo || null,
           bankId: fund.bankId || null,
           bankName: fund.bankName || fund.bank || null,
 
-//  old remove
-// filePath: ...
+          //  old remove
+          // filePath: ...
 
-//  NEW
-          filePath: rawPath,        // backend path
-          fileUrl: '',            // blob URL later
+          //  NEW
+          filePath: rawPath, // backend path
+          fileUrl: "", // blob URL later
 
           remarks: fund.remarks || null,
           settled: !!fund.settled,
@@ -371,29 +369,29 @@ export class HeadDashboardComponent
           upiId: fund.vpa,
         };
 
-//  LOAD IMAGE (IMPORTANT)
-// if (tx.filePath) {
-//   this.multimediaService.getPrivateImage(tx.filePath).subscribe({
-//     next: (url) => {
-//       tx.fileUrl = url;
-//     },
-//     error: () => {
-//       tx.fileUrl = '';
-//     },
-//   });
-// }
+        //  LOAD IMAGE (IMPORTANT)
+        // if (tx.filePath) {
+        //   this.multimediaService.getPrivateImage(tx.filePath).subscribe({
+        //     next: (url) => {
+        //       tx.fileUrl = url;
+        //     },
+        //     error: () => {
+        //       tx.fileUrl = '';
+        //     },
+        //   });
+        // }
         if (tx.filePath) {
           this.multimediaService.getPrivateImage(tx.filePath).subscribe({
             next: (url) => {
               tx.fileUrl = url;
 
-//  ADD THIS (VERY IMPORTANT)
+              //  ADD THIS (VERY IMPORTANT)
               if (this.selectedTransaction?.id === tx.id) {
                 this.selectedTransaction = { ...tx };
               }
             },
             error: () => {
-              tx.fileUrl = '';
+              tx.fileUrl = "";
             },
           });
         }
@@ -419,39 +417,39 @@ export class HeadDashboardComponent
       try {
         const rawPath = w.filePath || null;
 
-// const tx = {
-//   id: w.id || null,
-//   fundId: w.id || null,
-//   type: "payout",
+        // const tx = {
+        //   id: w.id || null,
+        //   fundId: w.id || null,
+        //   type: "payout",
 
-//   portal: w.portalName || w.portalDomain || w.portalId || null,
+        //   portal: w.portalName || w.portalDomain || w.portalId || null,
 
-//   amount: Number(w.amount) || 0,
+        //   amount: Number(w.amount) || 0,
 
-//   date: w.createdAt ? new Date(w.createdAt) : new Date(),
+        //   date: w.createdAt ? new Date(w.createdAt) : new Date(),
 
-//   utrNumber: w.transactionId || w.utr || null,
+        //   utrNumber: w.transactionId || w.utr || null,
 
-//   mode: "bank",
+        //   mode: "bank",
 
-//   accountNo: w.accountNo || w.accountNumber || null,
-//   bankId: w.bankId || null,
-//   bankName: w.bankName || w.bank || w.bankName || null,
+        //   accountNo: w.accountNo || w.accountNumber || null,
+        //   bankId: w.bankId || null,
+        //   bankName: w.bankName || w.bank || w.bankName || null,
 
-//   //  REMOVE direct URL
-//   // filePath: `${fileBaseUrl}/${w.filePath}`
+        //   //  REMOVE direct URL
+        //   // filePath: `${fileBaseUrl}/${w.filePath}`
 
-//   //  NEW
-//   filePath: rawPath,   // backend raw path
-//   fileUrl: '',       // blob URL later
+        //   //  NEW
+        //   filePath: rawPath,   // backend raw path
+        //   fileUrl: '',       // blob URL later
 
-//   remarks: w.remarks || w.message || null,
+        //   remarks: w.remarks || w.message || null,
 
-//   settled: !!w.settled,
-//   raw: w,
+        //   settled: !!w.settled,
+        //   raw: w,
 
-//   holderName: w.holderName || w.accountHolderName || null,
-// };
+        //   holderName: w.holderName || w.accountHolderName || null,
+        // };
 
         const tx = {
           id: w.id || null,
@@ -466,31 +464,31 @@ export class HeadDashboardComponent
           bankId: w.bankId || null,
           bankName: w.bankName || w.bank || null,
           filePath: rawPath,
-          fileUrl: '',
+          fileUrl: "",
           remarks: w.remarks || w.message || null,
           settled: !!w.settled,
           raw: w,
           holderName: w.holderName || w.accountHolderName || null,
         };
 
-//  LOAD IMAGE (IMPORTANT)
+        //  LOAD IMAGE (IMPORTANT)
         if (tx.filePath) {
           if (tx.filePath.startsWith("http")) {
-//  public URL
+            //  public URL
             tx.fileUrl = tx.filePath;
           } else {
-//  private (token via interceptor)
+            //  private (token via interceptor)
             this.multimediaService.getPrivateImage(tx.filePath).subscribe({
-// next: (url) => (tx.fileUrl = url),
+              // next: (url) => (tx.fileUrl = url),
               next: (url) => {
                 tx.fileUrl = url;
 
-//  ADD THIS
+                //  ADD THIS
                 if (this.selectedTransaction?.id === tx.id) {
                   this.selectedTransaction = { ...tx };
                 }
               },
-              error: () => (tx.fileUrl = ''),
+              error: () => (tx.fileUrl = ""),
             });
           }
         }
@@ -522,12 +520,12 @@ export class HeadDashboardComponent
 
   private computeStatsFromData(): void {
     this.totaltopups = this.approvedtopups.reduce(
-        (s, r) => s + (Number(r.amount) || 0),
-        0,
+      (s, r) => s + (Number(r.amount) || 0),
+      0,
     );
     this.totalpayouts = this.approvedpayouts.reduce(
-        (s, r) => s + (Number(r.amount) || 0),
-        0,
+      (s, r) => s + (Number(r.amount) || 0),
+      0,
     );
 
     // combine pending lists for active accounts calculation (keeps compatibility)
@@ -571,9 +569,9 @@ export class HeadDashboardComponent
   private parseProcessingDeadline(tx: any): Date | null {
     if (!tx) return null;
     const v =
-        tx.processingTimeLimit ||
-        (tx.raw && tx.raw.processingTimeLimit) ||
-        (tx.raw && tx.raw.processingTimeLimit);
+      tx.processingTimeLimit ||
+      (tx.raw && tx.raw.processingTimeLimit) ||
+      (tx.raw && tx.raw.processingTimeLimit);
     if (!v) return null;
     const d = new Date(v);
     return isNaN(d.getTime()) ? null : d;
@@ -680,14 +678,14 @@ export class HeadDashboardComponent
 
   private initTrendChart(): void {
     const ctx =
-        this.trendChartRef?.nativeElement?.getContext &&
-        this.trendChartRef.nativeElement.getContext("2d");
+      this.trendChartRef?.nativeElement?.getContext &&
+      this.trendChartRef.nativeElement.getContext("2d");
     if (!ctx) return;
     this.trendChart = new Chart(ctx, {
       type: "line",
       data: {
         labels: this.getLastNDatesLabels(this.selectedTimeRange).map((l) =>
-            new Date(l).toLocaleDateString(),
+          new Date(l).toLocaleDateString(),
         ),
         datasets: [
           {
@@ -756,7 +754,7 @@ export class HeadDashboardComponent
             callbacks: {
               label: (ctx) => {
                 return `${ctx.dataset.label}: ₹${Number(
-                    ctx.parsed.y,
+                  ctx.parsed.y,
                 ).toLocaleString("en-IN")}`;
               },
             },
@@ -794,8 +792,8 @@ export class HeadDashboardComponent
 
   private inittopupMethodChart(): void {
     const ctx =
-        this.topupMethodChartRef?.nativeElement?.getContext &&
-        this.topupMethodChartRef.nativeElement.getContext("2d");
+      this.topupMethodChartRef?.nativeElement?.getContext &&
+      this.topupMethodChartRef.nativeElement.getContext("2d");
 
     if (!ctx) return;
     this.topupMethodChart = new Chart(ctx, {
@@ -841,7 +839,7 @@ export class HeadDashboardComponent
             },
             callbacks: {
               label: (ctx) =>
-                  `${ctx.label}: ₹${Number(ctx.raw).toLocaleString("en-IN")}`,
+                `${ctx.label}: ₹${Number(ctx.raw).toLocaleString("en-IN")}`,
             },
           },
         },
@@ -851,8 +849,8 @@ export class HeadDashboardComponent
 
   private initpayoutBankChart(): void {
     const ctx =
-        this.payoutBankChartRef?.nativeElement?.getContext &&
-        this.payoutBankChartRef.nativeElement.getContext("2d");
+      this.payoutBankChartRef?.nativeElement?.getContext &&
+      this.payoutBankChartRef.nativeElement.getContext("2d");
     if (!ctx) return;
     this.payoutBankChart = new Chart(ctx, {
       type: "bar",
@@ -886,7 +884,7 @@ export class HeadDashboardComponent
             },
             callbacks: {
               label: (ctx) =>
-                  `Amount: ₹${Number(ctx.parsed.y).toLocaleString("en-IN")}`,
+                `Amount: ₹${Number(ctx.parsed.y).toLocaleString("en-IN")}`,
             },
           },
         },
@@ -967,7 +965,7 @@ export class HeadDashboardComponent
         bankMap.set(key, (bankMap.get(key) || 0) + (Number(f.amount) || 0));
       }
       const sortedBanks = Array.from(bankMap.entries()).sort(
-          (a, b) => b[1] - a[1],
+        (a, b) => b[1] - a[1],
       );
       const topBanks = sortedBanks.slice(0, 10);
       const bankLabels = topBanks.map((x) => x[0]);
@@ -988,14 +986,14 @@ export class HeadDashboardComponent
       for (const f of topupsAll) {
         const dateStr = new Date(f.date).toDateString();
         const idx = labels.findIndex(
-            (lbl) => new Date(lbl).toDateString() === dateStr,
+          (lbl) => new Date(lbl).toDateString() === dateStr,
         );
         if (idx >= 0) topupArr[idx] += Number(f.amount) || 0;
       }
       for (const f of payoutsAll) {
         const dateStr = new Date(f.date).toDateString();
         const idx = labels.findIndex(
-            (lbl) => new Date(lbl).toDateString() === dateStr,
+          (lbl) => new Date(lbl).toDateString() === dateStr,
         );
         if (idx >= 0) payoutArr[idx] += Number(f.amount) || 0;
       }
@@ -1003,7 +1001,7 @@ export class HeadDashboardComponent
       if (this.trendChart) {
         try {
           this.trendChart.data.labels = labels.map((l) =>
-              new Date(l).toLocaleDateString(),
+            new Date(l).toLocaleDateString(),
           );
           (this.trendChart.data.datasets[0].data as any) = topupArr;
           (this.trendChart.data.datasets[1].data as any) = payoutArr;
@@ -1029,12 +1027,12 @@ export class HeadDashboardComponent
 
   getTimePeriodClass(active: boolean): string {
     const baseClass =
-        "px-4 py-2 rounded-xl font-bold transition-all duration-200 text-sm";
+      "px-4 py-2 rounded-xl font-bold transition-all duration-200 text-sm";
     return active
-        ? baseClass +
-        " bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30"
-        : baseClass +
-        " bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+      ? baseClass +
+          " bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30"
+      : baseClass +
+          " bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
   }
 
   getStatusClass(status: string): string {
@@ -1045,7 +1043,7 @@ export class HeadDashboardComponent
       failed: "bg-rose-100 text-rose-800 border border-rose-200",
     };
     return (
-        classes[status] || "bg-slate-100 text-slate-800 border border-slate-200"
+      classes[status] || "bg-slate-100 text-slate-800 border border-slate-200"
     );
   }
 
@@ -1058,11 +1056,11 @@ export class HeadDashboardComponent
 
   getPollingLabel(): string {
     const found = this.pollingIntervals.find(
-        (p) => p.value === this.selectedPollingInterval,
+      (p) => p.value === this.selectedPollingInterval,
     );
     return found
-        ? found.label
-        : `${Math.round(this.selectedPollingInterval / 1000)}s`;
+      ? found.label
+      : `${Math.round(this.selectedPollingInterval / 1000)}s`;
   }
 
   setActiveTimePeriod(period: any): void {
@@ -1091,12 +1089,10 @@ export class HeadDashboardComponent
   }
 
   viewTransactionDetails(transaction: any): void {
-    console.log(transaction.filePath);
-
     //    if (transaction.filePath) {
     //   this.multimediaService.getPrivateImage(transaction.filePath).subscribe({
     //     next: (url) => {
-    //       console.log(url);
+
 
     //       transaction.fileUrl = url;
     //     },
@@ -1106,14 +1102,12 @@ export class HeadDashboardComponent
     //   });
     // }
 
-    // console.log(tr);
 
 
     if (!transaction) return;
     // Normalize the incoming object so modal bindings (utrNumber, upiId, accountNo, holderName, filePath, bankName, date etc.) are always present
     this.selectedTransaction = this.normalizeTransaction(transaction);
 
-    // console.log(this.selectedTransaction);
 
   }
 
@@ -1131,9 +1125,9 @@ export class HeadDashboardComponent
         if (this.pendingFilterMethod === "upi" && t.mode !== "upi")
           return false;
         if (
-            this.pendingFilterMethod === "bank" &&
-            t.mode !== "bank" &&
-            t.type !== "payout"
+          this.pendingFilterMethod === "bank" &&
+          t.mode !== "bank" &&
+          t.type !== "payout"
         )
           return false;
       }
@@ -1251,8 +1245,8 @@ export class HeadDashboardComponent
 
   approvedTotalPages(): number {
     return Math.max(
-        1,
-        Math.ceil(this.filteredApprovedtopups().length / this.approvedPageSize),
+      1,
+      Math.ceil(this.filteredApprovedtopups().length / this.approvedPageSize),
     );
   }
 
@@ -1265,31 +1259,33 @@ export class HeadDashboardComponent
 
   pendingUpiTotalPages(): number {
     return Math.max(
-        1,
-        Math.ceil(this.filteredPendingUpi().length / this.pendingUpiPageSize)
+      1,
+      Math.ceil(this.filteredPendingUpi().length / this.pendingUpiPageSize),
     );
   }
 
   pendingBankTotalPages(): number {
     return Math.max(
-        1,
-        Math.ceil(this.filteredPendingBank().length / this.pendingBankPageSize)
+      1,
+      Math.ceil(this.filteredPendingBank().length / this.pendingBankPageSize),
     );
   }
 
   pendingPayoutTotalPages(): number {
     return Math.max(
-        1,
-        Math.ceil(this.filteredPendingpayouts().length / this.pendingPayoutPageSize)
+      1,
+      Math.ceil(
+        this.filteredPendingpayouts().length / this.pendingPayoutPageSize,
+      ),
     );
   }
 
   payoutApprovedTotalPages(): number {
     return Math.max(
-        1,
-        Math.ceil(
-            this.filteredApprovedpayouts().length / this.payoutApprovedPageSize,
-        ),
+      1,
+      Math.ceil(
+        this.filteredApprovedpayouts().length / this.payoutApprovedPageSize,
+      ),
     );
   }
 
@@ -1300,22 +1296,27 @@ export class HeadDashboardComponent
   //   this.pendingPage = Math.min(Math.max(1, p), this.pendingTotalPages());
   // }
 
-
   setPendingUpiPage(p: number) {
     this.pendingUpiPage = Math.min(Math.max(1, p), this.pendingUpiTotalPages());
   }
 
   setPendingBankPage(p: number) {
-    this.pendingBankPage = Math.min(Math.max(1, p), this.pendingBankTotalPages());
+    this.pendingBankPage = Math.min(
+      Math.max(1, p),
+      this.pendingBankTotalPages(),
+    );
   }
 
   setPendingPayoutPage(p: number) {
-    this.pendingPayoutPage = Math.min(Math.max(1, p), this.pendingPayoutTotalPages());
+    this.pendingPayoutPage = Math.min(
+      Math.max(1, p),
+      this.pendingPayoutTotalPages(),
+    );
   }
   setpayoutApprovedPage(p: number) {
     this.payoutApprovedPage = Math.min(
-        Math.max(1, p),
-        this.payoutApprovedTotalPages(),
+      Math.max(1, p),
+      this.payoutApprovedTotalPages(),
     );
   }
 
@@ -1383,24 +1384,24 @@ export class HeadDashboardComponent
 
     const t = this.normalizeTransaction(transaction) || transaction;
     const fundId =
-        t.fundId ||
-        t.id ||
-        (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
-        null;
+      t.fundId ||
+      t.id ||
+      (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
+      null;
 
     try {
       // Call the appropriate API based on transaction type
       if (t.type === "payout") {
         const accountId =
-            this.selectedPayoutMethod === "upi"
-                ? this.selectedUpi
-                : this.selectedPayoutMethod === "bank"
-                    ? this.selectedBank
-                    : null;
+          this.selectedPayoutMethod === "upi"
+            ? this.selectedUpi
+            : this.selectedPayoutMethod === "bank"
+              ? this.selectedBank
+              : null;
 
         if (accountId) {
           await lastValueFrom(
-              (this.fundService as any).acceptPayout(fundId, accountId),
+            (this.fundService as any).acceptPayout(fundId, accountId),
           );
         } else {
           await lastValueFrom((this.fundService as any).acceptPayout(fundId));
@@ -1447,7 +1448,7 @@ export class HeadDashboardComponent
       this.ensureProcessingTimerState();
     } catch (err: any) {
       const message =
-          err?.error?.message || err?.error?.error || "Approval failed";
+        err?.error?.message || err?.error?.error || "Approval failed";
       this.snackbar.show(message, false);
 
       // Best-effort: remove from pending and mark as failed
@@ -1502,8 +1503,8 @@ export class HeadDashboardComponent
     };
 
     this.fundService
-        .updateAmount(updateData, this.editAmountData.file)
-        .subscribe((res) => {});
+      .updateAmount(updateData, this.editAmountData.file)
+      .subscribe((res) => {});
 
     // Update transaction in UI
     this.selectedTransaction.amount = this.editAmountData.newAmount;
@@ -1519,17 +1520,17 @@ export class HeadDashboardComponent
     if (!fundId) return;
 
     this.fundService.updateProcessingStatus(fundId.id, this.headId).subscribe(
-        (res) => {
-          // Start a 1s timer so getRemainingTimeLabel() uses a moving reference (processingNow)
-          // This is safe to call multiple times because startProcessingTimer guards against duplicates.
-          this.startProcessingTimer();
-        },
-        (err) => {
-          const message =
-              err?.error?.message || err?.error?.error || "Processing failed";
+      (res) => {
+        // Start a 1s timer so getRemainingTimeLabel() uses a moving reference (processingNow)
+        // This is safe to call multiple times because startProcessingTimer guards against duplicates.
+        this.startProcessingTimer();
+      },
+      (err) => {
+        const message =
+          err?.error?.message || err?.error?.error || "Processing failed";
 
-          this.snackbar.show(message, false);
-        },
+        this.snackbar.show(message, false);
+      },
     );
   }
 
@@ -1563,8 +1564,8 @@ export class HeadDashboardComponent
     ];
 
     const anyProcessing = listsToCheck.some(
-        (list) =>
-            Array.isArray(list) && list.some((item) => item && item.processing),
+      (list) =>
+        Array.isArray(list) && list.some((item) => item && item.processing),
     );
 
     if (anyProcessing) {
@@ -1585,7 +1586,7 @@ export class HeadDashboardComponent
 
     // Reset file input
     const fileInput = document.getElementById(
-        "editFileInput",
+      "editFileInput",
     ) as HTMLInputElement;
     if (fileInput) {
       fileInput.value = "";
@@ -1648,25 +1649,25 @@ export class HeadDashboardComponent
   removeEditFile(): void {
     this.editAmountData.file = null;
     const fileInput = document.getElementById(
-        "editFileInput",
+      "editFileInput",
     ) as HTMLInputElement;
     if (fileInput) {
       fileInput.value = "";
     }
   }
   async rejectTransaction(
-      transaction: any,
-      reason: any,
-      file?: File | null,
+    transaction: any,
+    reason: any,
+    file?: File | null,
   ): Promise<void> {
     if (!transaction) return;
 
     const t = this.normalizeTransaction(transaction) || transaction;
     const fundId =
-        t.fundId ||
-        t.id ||
-        (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
-        null;
+      t.fundId ||
+      t.id ||
+      (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
+      null;
 
     try {
       let rejectObservable;
@@ -1677,9 +1678,9 @@ export class HeadDashboardComponent
         rejectObservable = this.fundService.rejectUpiFund(fundId, reason, file);
       } else if (t.mode === "bank" || t.type === "bank") {
         rejectObservable = this.fundService.rejectBankFund(
-            fundId,
-            reason,
-            file,
+          fundId,
+          reason,
+          file,
         );
       } else {
         this.snackbar.show("Unknown transaction type, cannot reject", false);
@@ -1696,21 +1697,21 @@ export class HeadDashboardComponent
       const failedTx = { ...t, status: "failed" };
       if (t.type === "payout") {
         if (
-            !this.recentpayouts.some((x) => this.identifiersMatch(x, failedTx))
+          !this.recentpayouts.some((x) => this.identifiersMatch(x, failedTx))
         ) {
           this.recentpayouts.unshift(failedTx);
         }
         this.approvedpayouts = this.approvedpayouts.filter(
-            (x) => !this.identifiersMatch(x, failedTx),
+          (x) => !this.identifiersMatch(x, failedTx),
         );
       } else {
         if (
-            !this.recenttopups.some((x) => this.identifiersMatch(x, failedTx))
+          !this.recenttopups.some((x) => this.identifiersMatch(x, failedTx))
         ) {
           this.recenttopups.unshift(failedTx);
         }
         this.approvedtopups = this.approvedtopups.filter(
-            (x) => !this.identifiersMatch(x, failedTx),
+          (x) => !this.identifiersMatch(x, failedTx),
         );
       }
 
@@ -1727,7 +1728,7 @@ export class HeadDashboardComponent
       this.ensureProcessingTimerState();
     } catch (err: any) {
       const message =
-          err?.error?.message || err?.error?.error || "Rejection failed";
+        err?.error?.message || err?.error?.error || "Rejection failed";
       this.snackbar.show(message, false);
 
       // Optionally, you could still remove from pending here if desired
@@ -1750,30 +1751,30 @@ export class HeadDashboardComponent
 
     if (this.banks == null) {
       this.bankService
-          .getBankDataWithEntityIdAndPortalId(this.headId, portalId)
-          .subscribe((res) => {
-            this.banks = res;
-          });
+        .getBankDataWithEntityIdAndPortalId(this.headId, portalId)
+        .subscribe((res) => {
+          this.banks = res;
+        });
     }
 
     if (this.upis == null) {
       this.upiService
-          .getAllByEntityIdAndPortalId(this.headId, portalId)
-          .subscribe((res: any) => {
-            this.upis = res;
-          });
+        .getAllByEntityIdAndPortalId(this.headId, portalId)
+        .subscribe((res: any) => {
+          this.upis = res;
+        });
     }
 
     if (!transaction) return;
     const t = this.normalizeTransaction(transaction) || transaction;
     const src =
-        t.type === "payout"
-            ? "payout"
-            : t.mode === "upi"
-                ? "upi"
-                : t.mode === "bank"
-                    ? "bank"
-                    : "none";
+      t.type === "payout"
+        ? "payout"
+        : t.mode === "upi"
+          ? "upi"
+          : t.mode === "bank"
+            ? "bank"
+            : "none";
 
     this.confirmTransaction = { ...t, section: src };
     this.showApproveConfirm = true;
@@ -1788,13 +1789,13 @@ export class HeadDashboardComponent
     if (!tx) return;
     const t = this.normalizeTransaction(tx) || tx;
     const src =
-        t.type === "payout"
-            ? "payout"
-            : t.mode === "upi"
-                ? "upi"
-                : t.mode === "bank"
-                    ? "bank"
-                    : "none";
+      t.type === "payout"
+        ? "payout"
+        : t.mode === "upi"
+          ? "upi"
+          : t.mode === "bank"
+            ? "bank"
+            : "none";
 
     this.confirmTransaction = { ...t, section: src };
     this.showRejectConfirm = true;
@@ -1805,8 +1806,8 @@ export class HeadDashboardComponent
   async confirmApprove() {
     if (this.isPayoutActionBlocked(this.confirmTransaction)) {
       this.snackbar.show(
-          "Processing complete hone ke baad approve kar sakte ho",
-          false,
+        "Processing complete hone ke baad approve kar sakte ho",
+        false,
       );
       return;
     }
@@ -1818,15 +1819,15 @@ export class HeadDashboardComponent
   get rejectionReason(): string {
     if (!this.reason) return "";
     return this.reason === "other"
-        ? (this.customReason || "").trim()
-        : this.reason;
+      ? (this.customReason || "").trim()
+      : this.reason;
   }
 
   async confirmReject() {
     if (this.isPayoutActionBlocked(this.confirmTransaction)) {
       this.snackbar.show(
-          "Processing complete hone ke baad reject kar sakte ho",
-          false,
+        "Processing complete hone ke baad reject kar sakte ho",
+        false,
       );
       return;
     }
@@ -1836,17 +1837,17 @@ export class HeadDashboardComponent
     const finalReason = this.rejectionReason;
     if (!finalReason) {
       this.snackbar.show(
-          "Please select or enter a reason for rejection",
-          false,
+        "Please select or enter a reason for rejection",
+        false,
       );
       return;
     }
 
     //  File optional – agar file hai to pass karo, nahi to undefined pass karo
     await this.rejectTransaction(
-        this.confirmTransaction,
-        finalReason,
-        this.selectedFile ?? undefined, // null/undefined ko undefined banao
+      this.confirmTransaction,
+      finalReason,
+      this.selectedFile ?? undefined, // null/undefined ko undefined banao
     );
 
     this.confirmTransaction = null;
@@ -1892,30 +1893,30 @@ export class HeadDashboardComponent
 
   // helper to return css/text for the status small label (not used in template currently but available)
   getActiveSmallLabel(
-      active: boolean,
-      type: "topup" | "payout",
+    active: boolean,
+    type: "topup" | "payout",
   ): {
     label: string;
     classes: string;
   } {
     if (type === "topup") {
       return active
-          ? {
+        ? {
             label: "Active",
             classes:
-                "text-emerald-600 bg-emerald-100 border border-emerald-200",
+              "text-emerald-600 bg-emerald-100 border border-emerald-200",
           }
-          : {
+        : {
             label: "Inactive",
             classes: "text-slate-500 bg-slate-100 border border-slate-200",
           };
     } else {
       return active
-          ? {
+        ? {
             label: "Active",
             classes: "text-rose-600 bg-rose-100 border border-rose-200",
           }
-          : {
+        : {
             label: "Inactive",
             classes: "text-slate-500 bg-slate-100 border border-slate-200",
           };
@@ -1924,22 +1925,22 @@ export class HeadDashboardComponent
 
   // Process incoming SSE/broadcast event and update local pending lists
   private normalizeIncomingFund(
-      fund: any,
-      guessedMode?: "bank" | "upi" | "payout",
+    fund: any,
+    guessedMode?: "bank" | "upi" | "payout",
   ) {
     if (!fund) return null;
 
     const mode = guessedMode
-        ? guessedMode
-        : fund.type === "payout" ||
-        fund.transactionType === "payout" ||
-        fund.reviewStatus === "WITHDRAWAL"
-            ? "payout"
-            : fund.type === "bank" || fund.bankId || fund.accountNo
-                ? "bank"
-                : fund.type === "upi" || fund.vpa
-                    ? "upi"
-                    : "bank";
+      ? guessedMode
+      : fund.type === "payout" ||
+          fund.transactionType === "payout" ||
+          fund.reviewStatus === "WITHDRAWAL"
+        ? "payout"
+        : fund.type === "bank" || fund.bankId || fund.accountNo
+          ? "bank"
+          : fund.type === "upi" || fund.vpa
+            ? "upi"
+            : "bank";
 
     const filePathRaw = fund.filePath || fund.snapshot || fund.qrImage || null;
 
@@ -1948,13 +1949,13 @@ export class HeadDashboardComponent
       fundId: fund.id || fund.fundId || fund._id || null,
 
       type:
-          fund.type === "payout"
+        fund.type === "payout"
+          ? "payout"
+          : fund.type === "bank" || fund.type === "upi"
+            ? "topup"
+            : fund.transactionType === "payout"
               ? "payout"
-              : fund.type === "bank" || fund.type === "upi"
-                  ? "topup"
-                  : fund.transactionType === "payout"
-                      ? "payout"
-                      : "topup",
+              : "topup",
 
       portal: fund.portalName || fund.portalDomain || fund.portalId || null,
 
@@ -1965,12 +1966,12 @@ export class HeadDashboardComponent
       currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,
 
       date: fund.createdAt
-          ? new Date(fund.createdAt)
-          : fund.dateTime
-              ? new Date(fund.dateTime)
-              : fund.updatedAt
-                  ? new Date(fund.updatedAt)
-                  : new Date(),
+        ? new Date(fund.createdAt)
+        : fund.dateTime
+          ? new Date(fund.dateTime)
+          : fund.updatedAt
+            ? new Date(fund.updatedAt)
+            : new Date(),
 
       utrNumber: fund.transactionId || fund.utr || null,
 
@@ -1984,11 +1985,11 @@ export class HeadDashboardComponent
       // filePath: filePath,
 
       //  NEW
-      filePath: filePathRaw,   // raw path
-      fileUrl: '',           // blob URL later
+      filePath: filePathRaw, // raw path
+      fileUrl: "", // blob URL later
 
       rejectionPath: fund.rejectionFilePath || null,
-      rejectionUrl: '',      // (optional same handling)
+      rejectionUrl: "", // (optional same handling)
 
       remarks: fund.remarks || fund.message || null,
       settled: !!fund.settled,
@@ -1998,15 +1999,15 @@ export class HeadDashboardComponent
       upiId: fund.vpa || fund.upiId || null,
 
       holderName:
-          fund.bankAccountHolderName ||
-          fund.bankHolderName ||
-          fund.holderName ||
-          fund.accountHolderName ||
-          fund.name ||
-          null,
+        fund.bankAccountHolderName ||
+        fund.bankHolderName ||
+        fund.holderName ||
+        fund.accountHolderName ||
+        fund.name ||
+        null,
 
       ifscCode:
-          fund.ifscCode || fund.ifsc || (fund.raw && fund.raw.ifsc) || null,
+        fund.ifscCode || fund.ifsc || (fund.raw && fund.raw.ifsc) || null,
 
       fundDisplayId: fund.displayId,
       ftt: fund.firstTopup ? true : false,
@@ -2019,13 +2020,10 @@ export class HeadDashboardComponent
           tx.fileUrl = url;
         },
         error: () => {
-          tx.fileUrl = '';
+          tx.fileUrl = "";
         },
       });
     }
-
-    console.log(tx);
-
 
     //   if (tx.filePath) {
     //   this.multimediaService.getPrivateImage(tx.filePath).subscribe({
@@ -2050,7 +2048,7 @@ export class HeadDashboardComponent
           tx.rejectionUrl = url;
         },
         error: () => {
-          tx.rejectionUrl = '';
+          tx.rejectionUrl = "";
         },
       });
     }
@@ -2072,43 +2070,43 @@ export class HeadDashboardComponent
 
     // Map incoming arrays to normalized transactions so UI bindings work consistently
     this.pendingUpi = Array.isArray(data.PENDING_UPI)
-        ? data.PENDING_UPI.map((f: any) =>
-            this.normalizeIncomingFund(f, "upi"),
+      ? data.PENDING_UPI.map((f: any) =>
+          this.normalizeIncomingFund(f, "upi"),
         ).filter(Boolean)
-        : [];
+      : [];
 
     this.pendingBank = Array.isArray(data.PENDING_BANK)
-        ? data.PENDING_BANK.map((f: any) =>
-            this.normalizeIncomingFund(f, "bank"),
+      ? data.PENDING_BANK.map((f: any) =>
+          this.normalizeIncomingFund(f, "bank"),
         ).filter(Boolean)
-        : [];
+      : [];
 
     this.pendingpayouts = Array.isArray(data.PENDING_PAYOUT)
-        ? data.PENDING_PAYOUT.map((f: any) =>
-            this.normalizeIncomingFund(f, "payout"),
+      ? data.PENDING_PAYOUT.map((f: any) =>
+          this.normalizeIncomingFund(f, "payout"),
         ).filter(Boolean)
-        : [];
+      : [];
 
     // keep accepted counters if provided
     this.acceptedUpi =
-        typeof data.ACCEPTED_CURRENCY_UPI !== "undefined"
-            ? data.ACCEPTED_CURRENCY_UPI
-            : this.acceptedUpi;
+      typeof data.ACCEPTED_CURRENCY_UPI !== "undefined"
+        ? data.ACCEPTED_CURRENCY_UPI
+        : this.acceptedUpi;
     this.acceptedBank =
-        typeof data.ACCEPTED_CURRENCY_BANK !== "undefined"
-            ? data.ACCEPTED_CURRENCY_BANK
-            : this.acceptedBank;
+      typeof data.ACCEPTED_CURRENCY_BANK !== "undefined"
+        ? data.ACCEPTED_CURRENCY_BANK
+        : this.acceptedBank;
 
     this.acceptedWid =
-        typeof data.ACCEPTED_CURRENCY_PAYOUT !== "undefined"
-            ? data.ACCEPTED_CURRENCY_PAYOUT
-            : this.acceptedWid;
+      typeof data.ACCEPTED_CURRENCY_PAYOUT !== "undefined"
+        ? data.ACCEPTED_CURRENCY_PAYOUT
+        : this.acceptedWid;
 
     this.acceptedDep = this.acceptedBank + this.acceptedUpi;
     this.branchCom =
-        typeof data.Branch_Balance !== "undefined"
-            ? data.Branch_Balance
-            : this.branchCom;
+      typeof data.Branch_Balance !== "undefined"
+        ? data.Branch_Balance
+        : this.branchCom;
 
     // rebuild portals list from incoming bank pending (or all funds if you'd prefer)
     this.extractPortalsFromFetched(this.pendingBank.map((p) => p.raw || p));
@@ -2224,8 +2222,8 @@ export class HeadDashboardComponent
 
   mobileTotalPages(): number {
     return Math.max(
-        1,
-        Math.ceil(this.getMobileTransactions().length / this.mobilePageSize),
+      1,
+      Math.ceil(this.getMobileTransactions().length / this.mobilePageSize),
     );
   }
 
@@ -2298,4 +2296,3 @@ export class HeadDashboardComponent
     return result.trim() || "Just now";
   }
 }
-

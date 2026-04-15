@@ -247,109 +247,7 @@
           </div>
 
           <!-- Portal Summary - Only first portal visible with More button -->
-          <div class="mb-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs text-gray-500"
-              >{{ agent.portalsWithRange?.length || 0 }} portals</span
-              >
-            </div>
-
-            <!-- No Portals -->
-            <div
-                    *ngIf="
-                !agent.portalsWithRange || agent.portalsWithRange.length === 0
-              "
-                    class="p-3 bg-gray-50 rounded-lg border border-gray-100"
-            >
-              <div class="flex items-center gap-3">
-                <div
-                        class="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center"
-                >
-                  <span class="material-icons text-gray-400 text-sm"
-                  >language</span
-                  >
-                </div>
-                <div class="text-sm text-gray-500">No portals assigned</div>
-              </div>
-            </div>
-
-            <!-- Portal Display - Only first portal -->
-            <div
-                    *ngIf="
-                agent.portalsWithRange && agent.portalsWithRange.length > 0
-              "
-                    class="space-y-2"
-            >
-              <!-- First Portal - Only name and status toggle -->
-              <div class="p-2 bg-gray-50 rounded-lg border border-gray-100">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <div
-                            class="w-1.5 h-1.5 rounded-full"
-                            [ngClass]="
-                        agent.portalsWithRange[0].active
-                          ? 'bg-green-500'
-                          : 'bg-red-500'
-                      "
-                    ></div>
-                    <button
-                            type="button"
-                            (click)="
-                        openPortalPopup(agent, agent.portalsWithRange[0])
-                      "
-                            class="text-xs font-medium text-[var(--color-primary)] hover:underline truncate max-w-[180px] text-left"
-                            [title]="getPortalDomain(agent.portalsWithRange[0])"
-                    >
-                      {{ getPortalDomain(agent.portalsWithRange[0]) }}
-                    </button>
-                  </div>
-                  <button
-                          (click)="
-                      togglePortalStatus(agent, agent.portalsWithRange[0])
-                    "
-                          [disabled]="
-                      isPortalToggling(
-                        agent.id,
-                        agent.portalsWithRange[0].portalId
-                      )
-                    "
-                          class="relative inline-flex items-center h-4 rounded-full w-8 flex-shrink-0 border border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:ring-offset-1"
-                          [ngClass]="
-                      agent.portalsWithRange[0].active
-                        ? 'bg-green-500'
-                        : 'bg-gray-300'
-                    "
-                  >
-                    <span
-                            class="inline-block h-3 w-3 transform bg-white rounded-full transition duration-200 ease-in-out shadow"
-                            [ngClass]="
-                        agent.portalsWithRange[0].active
-                          ? 'translate-x-4'
-                          : 'translate-x-0.5'
-                      "
-                    ></span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- More Portals Button (if more than 1) -->
-              <div
-                      *ngIf="agent.portalsWithRange.length > 1"
-                      class="text-center"
-              >
-                <button
-                        type="button"
-                        (click)="openAllPortalsPopup(agent)"
-                        class="inline-flex items-center gap-1 text-[var(--color-primary)] hover:text-[#4F83E8] font-medium bg-[var(--primary-soft-10)] px-3 py-1.5 rounded-lg transition-colors w-full justify-center"
-                >
-                  <span class="material-icons text-sm">more_horiz</span>
-                  View {{ agent.portalsWithRange.length - 1 }} more portal{{
-                  agent.portalsWithRange.length - 1 > 1 ? "s" : ""
-                  }}
-                </button>
-              </div>
-            </div>
-          </div>
+        
 
           <!-- Action Buttons - Icons only with tooltips -->
           <!-- <div
@@ -386,7 +284,7 @@
               <span class="material-icons text-sm">person_add</span>
             </button>
             <button
-              (click)="openEditModal(agent)"
+              (click)="openCompartModal(agent)"
               class="inline-flex items-center justify-center p-2 bg-[var(--color-primary)] text-white text-xs font-medium rounded-lg hover:shadow transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
               [title]="'Edit'"
             >
@@ -427,7 +325,7 @@
 
             <!-- Edit -->
             <button
-                    (click)="openEditModal(agent)"
+                    (click)="openCompartModal(agent)"
                     class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
                     title="Edit"
             >
@@ -457,7 +355,6 @@
                 <th class="px-4 py-2 text-left">Branch</th>
                 <!-- <th class="px-4 py-2 text-left">Email</th>
                 <th class="px-4 py-2 text-left">Phone</th> -->
-                <th class="px-4 py-2 text-left">Portal</th>
                 <th class="px-4 py-2 text-left">Status</th>
                 <th class="px-4 py-2 text-right">Actions</th>
               </tr>
@@ -505,58 +402,7 @@
                 </td> -->
 
                 <!-- Portal -->
-                <td class="px-4 py-2">
-                  <!-- No portal -->
-                  <span
-                          *ngIf="!agent.portalsWithRange?.length"
-                          class="text-gray-400"
-                  >
-                      No portal
-                    </span>
-
-                  <!-- One or more portals -->
-                  <div
-                          *ngIf="agent.portalsWithRange?.length > 0"
-                          class="flex flex-col gap-1"
-                  >
-                    <!-- First portal clickable -->
-                    <div class="flex items-center gap-2">
-                      <div
-                              class="w-2 h-2 rounded-full"
-                              [ngClass]="
-                            agent.portalsWithRange[0].active
-                              ? 'bg-green-500'
-                              : 'bg-red-500'
-                          "
-                      ></div>
-
-                      <button
-                              type="button"
-                              (click)="
-                            openPortalPopup(agent, agent.portalsWithRange[0]);
-                            $event.stopPropagation()
-                          "
-                              class="text-[var(--color-primary)] font-medium hover:underline text-left truncate max-w-[180px]"
-                              [title]="getPortalDomain(agent.portalsWithRange[0])"
-                      >
-                        {{ getPortalDomain(agent.portalsWithRange[0]) }}
-                      </button>
-                    </div>
-
-                    <!-- More portals -->
-                    <button
-                            *ngIf="agent.portalsWithRange.length > 1"
-                            type="button"
-                            (click)="
-                          openAllPortalsPopup(agent); $event.stopPropagation()
-                        "
-                            class="text-xs text-[var(--color-primary)] hover:underline text-left"
-                    >
-                      +{{ agent.portalsWithRange.length - 1 }} more
-                    </button>
-                  </div>
-                </td>
-
+            
                 <!-- Status Toggle -->
                 <td class="px-4 py-2 text-center">
                   <button
@@ -601,7 +447,7 @@
                     </button>
 
                     <button
-                            (click)="openEditModal(agent)"
+                            (click)="openCompartModal(agent)"
                             class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
                             title="Edit"
                     >
@@ -1076,7 +922,7 @@
             <div>
               <label
                       class="block text-sm font-medium text-gray-700 mb-1.5 md:mb-2"
-              >Full Name <span class="text-red-500 ml-0.5">*</span></label
+              >User Name <span class="text-red-500 ml-0.5">*</span></label
               >
               <div class="relative">
                 <input
@@ -1087,7 +933,7 @@
                         [class.bg-gray-50]="!isEditMode"
                         [class.cursor-default]="!isEditMode"
                         class="w-full px-3 md:px-4 py-2.5 md:py-3 border border-gray-200 rounded-lg md:rounded-xl focus:border-[var(--color-primary)] focus:ring-2 focus:ring-2 focus:ring-[var(--primary-soft-20)] transition-all duration-200"
-                        placeholder="Enter full name"
+                        placeholder="Enter User name"
                         required
                 />
               </div>
@@ -1096,7 +942,7 @@
                       class="text-red-500 text-xs mt-1 flex items-center font-medium"
               >
                 <span class="material-icons text-xs mr-0.5">error</span>
-                Name is required
+                User Name is required
               </div>
             </div>
 
@@ -1420,3 +1266,14 @@
 </div>
 
 
+
+
+
+<!-- <app-enity-compart-edit-model
+ *ngIf="showCompartModel"
+  [entityId]="currentRoleId"
+  [entityType]="role"
+  [data]="selectedAgentForInfo"
+  (close)="onCloseCompartModal()"
+  (save)="onSaveCompartData($event)">
+</app-enity-compart-edit-model> -->

@@ -1,5 +1,3 @@
-
-
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
@@ -51,7 +49,7 @@ interface Portal {
   portalId: string;
   portalDomain: string;
   currency: string;
-// portal:string;
+  // portal:string;
 }
 
 @Component({
@@ -63,7 +61,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
   @ViewChild("portalDropdown") portalDropdown!: ElementRef;
   @ViewChild("qrcodeElem", { static: false }) qrcodeElem!: ElementRef;
 
-// ---------- DATA (server‑paginated) ----------
+  // ---------- DATA (server‑paginated) ----------
   bankAccounts: BankAccount[] = [];
   totalElements = 0;
   totalPagesCount = 0;
@@ -77,7 +75,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
   statusFilter: string = "all";
   minLimitDateTime: string = "";
   topupStatus: any = false;
-// ---------- FILTERS (sent to backend) ----------
+  // ---------- FILTERS (sent to backend) ----------
   searchTerm = ""; // unified search (accountNo, holder, IFSC, portal)
   filterStatus = ""; // 'active', 'inactive', '' (empty = all)
   selectedPortal: Portal | null = null;
@@ -85,35 +83,35 @@ export class HeadBankComponent implements OnInit, OnDestroy {
   maxAmount: number | null = null;
   maxLimit: number | null = null; // max limit filter
   showTxnModal = false;
-selectedTxnData: any = null;
-// UI state for portal filter dropdown
+  selectedTxnData: any = null;
+  // UI state for portal filter dropdown
   portalSearchTerm = "";
   showPortalDropdown = false;
   filteredPortals: Portal[] = [];
 
-// UI toggle for amount filter section
+  // UI toggle for amount filter section
   showAmountFilter = false;
 
-// ---------- PAGINATION ----------
+  // ---------- PAGINATION ----------
   currentPage = 1;
   pageSize = 6;
   Math = Math;
-selectedBankForUpi: any = null;
-openUpiModal = false;
-// ---------- ADD MODAL ----------
+  selectedBankForUpi: any = null;
+  openUpiModal = false;
+  // ---------- ADD MODAL ----------
   showAddModal = false;
   isAdding = false;
   portals: Portal[] = [];
   addBankForm: FormGroup;
   showDebug = false; // kept for debug, but you can remove
 
-// Modal portal search
+  // Modal portal search
   modalPortalSearch = "";
   modalFilteredPortals: Portal[] = [];
   selectedModalPortal: Portal | null = null;
   showModalPortalDropdown = false;
 
-// ---------- UPDATE MODAL ----------
+  // ---------- UPDATE MODAL ----------
   showUpdateModal = false;
   editingAccount: BankAccount | null = null;
   updateForm: any = {
@@ -129,34 +127,34 @@ openUpiModal = false;
     min_tran_count: null,
     max_tran_count: null,
     min_total_tran_amount: null,
-    max_total_tran_amount: null
+    max_total_tran_amount: null,
   };
   isSubmitting = false;
 
   showLimitModal: boolean = false;
   limitDateTime: any;
   isSubmittingLimit: boolean = false;
-// For update modal bank dropdown
+  // For update modal bank dropdown
   updateBankSearchTerm = "";
   updateFilteredBanks: string[] = INDIAN_BANKS;
   updateShowBankDropdown = false;
   updateIsCustomBank = false;
-// ---------- USER / ROLE ----------
+  // ---------- USER / ROLE ----------
   currentRoleId: any;
   currentUserId: any;
   role: any;
 
-// ---------- ACTION DROPDOWN ----------
+  // ---------- ACTION DROPDOWN ----------
   activeActionDropdown: string | null = null;
   isUpdatingStatus: { [key: string]: boolean } = {};
 
-// Add these properties to your component class
+  // Add these properties to your component class
   bankSearchTerm: string = "";
   filteredBanks: string[] = INDIAN_BANKS;
   showBankDropdown: boolean = false;
   isCustomBank: boolean = false;
 
-// ---------- SUBSCRIPTION MANAGEMENT ----------
+  // ---------- SUBSCRIPTION MANAGEMENT ----------
   private subs = new Subscription();
   private searchSubject = new Subject<string>();
   // ---------- COMPUTED: active filters count ----------
@@ -184,27 +182,25 @@ openUpiModal = false;
   capacityData: any[] = [];
   isLoadingCapacity: boolean = false;
 
+  qrMode: "generate" | "upload" = "generate";
+  selectedImage: string | null = null;
+  generatingQr = false;
 
-  qrMode: 'generate' | 'upload' = 'generate';
-selectedImage: string | null = null;
-generatingQr = false;
-
-// already present but ensure
-qrData: string | null = null;
-generatedFile: File | null = null;
-manualQrFile: File | null = null;
+  // already present but ensure
+  qrData: string | null = null;
+  generatedFile: File | null = null;
+  manualQrFile: File | null = null;
   constructor(
-      private route: ActivatedRoute,
-      private bankService: BankService,
-      private fb: FormBuilder,
-      private userStateService: UserStateService,
-      private headService: HeadService,
-      // private portalService: PortalSharingService,
-      private snack: SnackbarService,
-      private router: Router,
-      private elementRef: ElementRef,
-      private upiService : UpiService,
-
+    private route: ActivatedRoute,
+    private bankService: BankService,
+    private fb: FormBuilder,
+    private userStateService: UserStateService,
+    private headService: HeadService,
+    // private portalService: PortalSharingService,
+    private snack: SnackbarService,
+    private router: Router,
+    private elementRef: ElementRef,
+    private upiService: UpiService,
   ) {
     this.addBankForm = this.createAddBankForm();
   }
@@ -217,7 +213,7 @@ manualQrFile: File | null = null;
     this.fetchBankAccounts();
     this.getTopupStatus();
     this.loadPortals();
-this.initAddUpiForm();
+    this.initAddUpiForm();
     // this.portalService.selectedPortals$.subscribe((sites) => {
     //   this.selectedPortals = sites;
     //   // Mobile → grid by default
@@ -230,12 +226,12 @@ this.initAddUpiForm();
     // });
 
     this.searchSubject
-        .pipe(debounceTime(600), distinctUntilChanged())
-        .subscribe((value) => {
-          this.searchTerm = value;
-          this.currentPage = 1;
-          this.fetchBankAccounts();
-        });
+      .pipe(debounceTime(600), distinctUntilChanged())
+      .subscribe((value) => {
+        this.searchTerm = value;
+        this.currentPage = 1;
+        this.fetchBankAccounts();
+      });
   }
 
   ngOnDestroy() {
@@ -257,94 +253,93 @@ this.initAddUpiForm();
       limit: this.maxLimit ?? undefined,
       portalId: this.selectedPortal?.portalId || undefined,
       status: this.statusFilter || undefined,
-
     };
 
     // if (this.filterStatus === "active") options.active = true;
     // if (this.filterStatus === "inactive") options.active = false;
 
     const sub = this.bankService
-        .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, options)
-        .pipe(
-            catchError((err) => {
-              this.loading = false;
-              return of({ data: [], totalElements: 0, totalPages: 0 });
-            }),
-        )
-        .subscribe((res: any) => {
+      .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, options)
+      .pipe(
+        catchError((err) => {
           this.loading = false;
+          return of({ data: [], totalElements: 0, totalPages: 0 });
+        }),
+      )
+      .subscribe((res: any) => {
+        this.loading = false;
 
-          // Handle different possible response structures
-          const rows: any[] = Array.isArray(res.data?.content)
-              ? res.data.content
-              : Array.isArray(res.data)
-                  ? res.data
-                  : [];
+        // Handle different possible response structures
+        const rows: any[] = Array.isArray(res.data?.content)
+          ? res.data.content
+          : Array.isArray(res.data)
+            ? res.data
+            : [];
 
-          this.bankAccounts = rows
-              .map((r: any) => {
-                let status: StatusString = "inactive";
+        this.bankAccounts = rows
+          .map((r: any) => {
+            let status: StatusString = "inactive";
 
-                if (typeof r.status === "string" && r.status.trim() !== "") {
-                  status = r.status.toLowerCase() as StatusString;
-                } else if (typeof r.active === "boolean") {
-                  status = r.active ? "active" : "inactive";
-                } else if (typeof r.status === "boolean") {
-                  status = r.status ? "active" : "inactive";
-                }
+            if (typeof r.status === "string" && r.status.trim() !== "") {
+              status = r.status.toLowerCase() as StatusString;
+            } else if (typeof r.active === "boolean") {
+              status = r.active ? "active" : "inactive";
+            } else if (typeof r.status === "boolean") {
+              status = r.status ? "active" : "inactive";
+            }
 
-                let accountType = r.accountType ?? "";
-                if (accountType.toLowerCase() === "savings") {
-                  accountType = "saving";
-                }
+            let accountType = r.accountType ?? "";
+            if (accountType.toLowerCase() === "savings") {
+              accountType = "saving";
+            }
 
-                const isBankActive =
-                    typeof r.bank === "boolean"
-                        ? r.bank
-                        : typeof r.isBank === "boolean"
-                            ? r.isBank
-                            : typeof r.isBankActive === "boolean"
-                                ? r.isBankActive
-                                : typeof r.bankActive === "boolean"
-                                    ? r.bankActive
-                                    : status === "active";
+            const isBankActive =
+              typeof r.bank === "boolean"
+                ? r.bank
+                : typeof r.isBank === "boolean"
+                  ? r.isBank
+                  : typeof r.isBankActive === "boolean"
+                    ? r.isBankActive
+                    : typeof r.bankActive === "boolean"
+                      ? r.bankActive
+                      : status === "active";
 
-                return {
-                  id: r.id,
-                  branchId: r.branchId ?? null,
-                  portal: r.portalDomain ?? null,
-                  portalId: r.portal ?? null,
-                  portalDomain: r.portalDomain ?? null,
-                  accountHolderName: r.accountHolderName ?? r.name ?? "-",
-                  bankName: r.bankName ?? "",
-                  accountNo: r.accountNo ?? r.accountNumber ?? "",
-                  accountType,
-                  status,
-                  ifsc: r.ifsc ?? "",
-                  bankRange: r.bankRange ?? r.range ?? "",
-                  createdAt: r.createdAt ? new Date(r.createdAt) : null,
-                  limitAmount: r.limitAmount ?? "",
-                  currency: r.portalCurrency || "",
-                  limitTime: r.limitTime ?? null,
-                  min_tran_count: r.minTranCount ?? null,
-                  max_tran_count: r.maxTranCount ?? null,
-                  min_total_tran_amount: r.minTotalTranAmount ?? null,
-                  max_total_tran_amount: r.maxTotalTranAmount ?? null,
-                  // minAmount: r.minAmount ?? "",
-                  // maxAmount: r.maxAmount ?? "",
-                  isBankActive,
-                } as BankAccount;
-              })
-              .sort((a, b) => {
-                const aTime = a.limitTime ? new Date(a.limitTime).getTime() : 0;
-                const bTime = b.limitTime ? new Date(b.limitTime).getTime() : 0;
-                return bTime - aTime;
-              });
+            return {
+              id: r.id,
+              branchId: r.branchId ?? null,
+              portal: r.portalDomain ?? null,
+              portalId: r.portal ?? null,
+              portalDomain: r.portalDomain ?? null,
+              accountHolderName: r.accountHolderName ?? r.name ?? "-",
+              bankName: r.bankName ?? "",
+              accountNo: r.accountNo ?? r.accountNumber ?? "",
+              accountType,
+              status,
+              ifsc: r.ifsc ?? "",
+              bankRange: r.bankRange ?? r.range ?? "",
+              createdAt: r.createdAt ? new Date(r.createdAt) : null,
+              limitAmount: r.limitAmount ?? "",
+              currency: r.portalCurrency || "",
+              limitTime: r.limitTime ?? null,
+              min_tran_count: r.minTranCount ?? null,
+              max_tran_count: r.maxTranCount ?? null,
+              min_total_tran_amount: r.minTotalTranAmount ?? null,
+              max_total_tran_amount: r.maxTotalTranAmount ?? null,
+              // minAmount: r.minAmount ?? "",
+              // maxAmount: r.maxAmount ?? "",
+              isBankActive,
+            } as BankAccount;
+          })
+          .sort((a, b) => {
+            const aTime = a.limitTime ? new Date(a.limitTime).getTime() : 0;
+            const bTime = b.limitTime ? new Date(b.limitTime).getTime() : 0;
+            return bTime - aTime;
+          });
 
-          // Pagination info
-          this.totalElements = res.totalElements ?? res.data?.totalElements ?? 0;
-          this.totalPagesCount = res.totalPages ?? res.data?.totalPages ?? 0;
-        });
+        // Pagination info
+        this.totalElements = res.totalElements ?? res.data?.totalElements ?? 0;
+        this.totalPagesCount = res.totalPages ?? res.data?.totalPages ?? 0;
+      });
 
     this.subs.add(sub);
   }
@@ -398,9 +393,9 @@ this.initAddUpiForm();
       return;
     }
     this.filteredPortals = this.portals.filter(
-        (site) =>
-            site.portalDomain.toLowerCase().includes(term) ||
-            (site.currency && site.currency.toLowerCase().includes(term)),
+      (site) =>
+        site.portalDomain.toLowerCase().includes(term) ||
+        (site.currency && site.currency.toLowerCase().includes(term)),
     );
     this.showPortalDropdown = this.filteredPortals.length > 0;
   }
@@ -478,29 +473,29 @@ this.initAddUpiForm();
 
   private createAddBankForm(): FormGroup {
     return this.fb.group(
-        {
-          // portal: ["", Validators.required],
-          bankName: ["", Validators.required], // Add this line
-          accountNumber: [
-            "",
-            [Validators.required, Validators.pattern(/^\d{10,20}$/)],
-          ],
-          accountHolderName: ["", [Validators.required, Validators.minLength(3)]],
-          ifscCode: [
-            "",
-            [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)],
-          ],
-          accountType: ["", Validators.required],
-          limitAmount: [
-            "",
-            [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)],
-          ],
-          min_tran_count: [null],
-          max_tran_count: [null],
-          min_total_tran_amount: [null],
-          max_total_tran_amount: [null],
-        },
-        // { validators: this.accountNumberMatchValidator },
+      {
+        // portal: ["", Validators.required],
+        bankName: ["", Validators.required], // Add this line
+        accountNumber: [
+          "",
+          [Validators.required, Validators.pattern(/^\d{10,20}$/)],
+        ],
+        accountHolderName: ["", [Validators.required, Validators.minLength(3)]],
+        ifscCode: [
+          "",
+          [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)],
+        ],
+        accountType: ["", Validators.required],
+        limitAmount: [
+          "",
+          [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)],
+        ],
+        min_tran_count: [null],
+        max_tran_count: [null],
+        min_total_tran_amount: [null],
+        max_total_tran_amount: [null],
+      },
+      // { validators: this.accountNumberMatchValidator },
     );
   }
 
@@ -520,17 +515,17 @@ this.initAddUpiForm();
   loadPortals() {
     if (this.currentRoleId) {
       const sub = this.headService
-          .getAllHeadsWithPortalsById(this.currentRoleId, "BANK")
-          .subscribe({
-            next: (res: any) => {
-              this.portals = Array.isArray(res) ? res : [];
-              this.modalFilteredPortals = [...this.portals];
-            },
-            error: (err) => {
-              this.portals = [];
-              this.modalFilteredPortals = [];
-            },
-          });
+        .getAllHeadsWithPortalsById(this.currentRoleId, "BANK")
+        .subscribe({
+          next: (res: any) => {
+            this.portals = Array.isArray(res) ? res : [];
+            this.modalFilteredPortals = [...this.portals];
+          },
+          error: (err) => {
+            this.portals = [];
+            this.modalFilteredPortals = [];
+          },
+        });
       this.subs.add(sub);
     }
   }
@@ -573,9 +568,9 @@ this.initAddUpiForm();
     }
 
     this.modalFilteredPortals = this.portals.filter(
-        (w) =>
-            w.portalDomain.toLowerCase().includes(term) ||
-            (w.currency && w.currency.toLowerCase().includes(term)),
+      (w) =>
+        w.portalDomain.toLowerCase().includes(term) ||
+        (w.currency && w.currency.toLowerCase().includes(term)),
     );
   }
 
@@ -716,7 +711,7 @@ this.initAddUpiForm();
       min_tran_count: account.min_tran_count || null,
       max_tran_count: account.max_tran_count || null,
       min_total_tran_amount: account.min_total_tran_amount || null,
-      max_total_tran_amount: account.max_total_tran_amount || null
+      max_total_tran_amount: account.max_total_tran_amount || null,
       // minAmount: account.minAmount,
       // maxAmount: account.maxAmount,
     };
@@ -739,7 +734,7 @@ this.initAddUpiForm();
       min_tran_count: null,
       max_tran_count: null,
       min_total_tran_amount: null,
-      max_total_tran_amount: null
+      max_total_tran_amount: null,
       // minAmount: "",
       // maxAmount: "",
     };
@@ -754,7 +749,7 @@ this.initAddUpiForm();
       event.preventDefault();
     }
     this.activeActionDropdown =
-        this.activeActionDropdown === accountId ? null : accountId;
+      this.activeActionDropdown === accountId ? null : accountId;
   }
 
   // @HostListener("document:click")
@@ -796,15 +791,18 @@ this.initAddUpiForm();
         this.activeActionDropdown = null;
         this.fetchBankAccounts();
 
-        this.snack.show(res.message||`Account status updated to ${status}`, true);
+        this.snack.show(
+          res.message || `Account status updated to ${status}`,
+          true,
+        );
       },
       error: (err) => {
         this.isUpdatingStatus[accountId] = false;
         // alert("Error updating account status. Please try again.");
         this.snack.show(
-            err?.error?.message||
+          err?.error?.message ||
             "Error updating account status. Please try again.",
-            false,
+          false,
         );
       },
     });
@@ -815,7 +813,7 @@ this.initAddUpiForm();
 
   submitAddBankForm() {
     Object.keys(this.addBankForm.controls).forEach((key) =>
-        this.addBankForm.get(key)?.markAsTouched(),
+      this.addBankForm.get(key)?.markAsTouched(),
     );
 
     if (this.addBankForm.invalid) {
@@ -824,11 +822,11 @@ this.initAddUpiForm();
     }
 
     const invalid = this.capacityRanges.some(
-        (r) =>
-            r.minRange === null ||
-            r.maxRange === null ||
-            r.quantity === null ||
-            Number(r.maxRange) <= Number(r.minRange),
+      (r) =>
+        r.minRange === null ||
+        r.maxRange === null ||
+        r.quantity === null ||
+        Number(r.maxRange) <= Number(r.minRange),
     );
 
     if (invalid) {
@@ -867,11 +865,17 @@ this.initAddUpiForm();
         this.isAdding = false;
         this.closeAddBankModal();
         this.fetchBankAccounts();
-        this.snack.show(res.message || "Bank account added successfully!", true);
+        this.snack.show(
+          res.message || "Bank account added successfully!",
+          true,
+        );
       },
       error: (err) => {
         this.isAdding = false;
-        this.snack.show(err?.error?.message ||"Error adding bank account. Please try again.", false);
+        this.snack.show(
+          err?.error?.message || "Error adding bank account. Please try again.",
+          false,
+        );
       },
     });
     this.subs.add(sub);
@@ -931,15 +935,18 @@ this.initAddUpiForm();
         this.isSubmitting = false;
         this.closeUpdateModal();
         this.fetchBankAccounts();
-        this.snack.show(res.message ||"Bank account updated successfully!", true);
+        this.snack.show(
+          res.message || "Bank account updated successfully!",
+          true,
+        );
       },
       error: (err) => {
         this.isSubmitting = false;
         alert("Error updating bank account. Please try again.");
         this.snack.show(
-            err?.error?.message ||
+          err?.error?.message ||
             "Error updating bank account. Please try again.",
-            false,
+          false,
         );
       },
     });
@@ -1061,7 +1068,7 @@ this.initAddUpiForm();
       this.filteredBanks = INDIAN_BANKS;
     } else {
       this.filteredBanks = INDIAN_BANKS.filter((bank) =>
-          bank.toLowerCase().includes(term),
+        bank.toLowerCase().includes(term),
       );
     }
   }
@@ -1084,12 +1091,12 @@ this.initAddUpiForm();
     const term = value.toLowerCase().trim();
 
     this.filteredBanks = INDIAN_BANKS.filter((bank) =>
-        bank.toLowerCase().includes(term),
+      bank.toLowerCase().includes(term),
     );
 
     this.isCustomBank =
-        value.trim() !== "" &&
-        !INDIAN_BANKS.some((bank) => bank.toLowerCase() === value.toLowerCase());
+      value.trim() !== "" &&
+      !INDIAN_BANKS.some((bank) => bank.toLowerCase() === value.toLowerCase());
   }
 
   selectBank(bank: string): void {
@@ -1132,12 +1139,12 @@ this.initAddUpiForm();
 
     const term = value.toLowerCase().trim();
     this.updateFilteredBanks = INDIAN_BANKS.filter((bank) =>
-        bank.toLowerCase().includes(term),
+      bank.toLowerCase().includes(term),
     );
 
     this.updateIsCustomBank =
-        value.trim() !== "" &&
-        !INDIAN_BANKS.some((bank) => bank.toLowerCase() === value.toLowerCase());
+      value.trim() !== "" &&
+      !INDIAN_BANKS.some((bank) => bank.toLowerCase() === value.toLowerCase());
   }
 
   selectUpdateBank(bank: string): void {
@@ -1218,8 +1225,8 @@ this.initAddUpiForm();
     const now = new Date();
 
     const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 16);
+      .toISOString()
+      .slice(0, 16);
 
     this.limitDateTime = local;
     this.minLimitDateTime = local;
@@ -1287,7 +1294,10 @@ this.initAddUpiForm();
         this.fetchBankAccounts();
       },
       error: (err) => {
-        this.snack.show(err?.error?.message|| "Failed to set limit time", false);
+        this.snack.show(
+          err?.error?.message || "Failed to set limit time",
+          false,
+        );
         this.isSubmittingLimit = false;
       },
     });
@@ -1308,9 +1318,9 @@ this.initAddUpiForm();
     //   last.quantity === null
     // )
     if (
-        last.minRange === null ||
-        last.maxRange === null ||
-        last.quantity === null
+      last.minRange === null ||
+      last.maxRange === null ||
+      last.quantity === null
     ) {
       this.snack.show("Please fill 'To' and Quantity first", false);
       return;
@@ -1396,31 +1406,31 @@ this.initAddUpiForm();
     this.capacityRanges = [];
 
     this.bankService
-        .getTopupCapacity(
-            "HEAD",
-            this.currentRoleId,
-            account.portalId,
-            "BANK",
-            account.id,
-        )
-        .subscribe({
-          next: (res: any) => {
-            this.isLoadingCapacity = false;
-            const res2 = res?.data;
-            this.capacityData = Array.isArray(res2) ? res2 : [];
+      .getTopupCapacity(
+        "HEAD",
+        this.currentRoleId,
+        account.portalId,
+        "BANK",
+        account.id,
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.isLoadingCapacity = false;
+          const res2 = res?.data;
+          this.capacityData = Array.isArray(res2) ? res2 : [];
 
-            //  FIX: map to UI array
-            this.capacityRanges = this.capacityData.map((r: any) => ({
-              minRange: r.minRange,
-              maxRange: r.maxRange,
-              quantity: r.quantity,
-            }));
-          },
-          error: () => {
-            this.isLoadingCapacity = false;
-            this.snack.show("Failed to fetch capacity", false);
-          },
-        });
+          //  FIX: map to UI array
+          this.capacityRanges = this.capacityData.map((r: any) => ({
+            minRange: r.minRange,
+            maxRange: r.maxRange,
+            quantity: r.quantity,
+          }));
+        },
+        error: () => {
+          this.isLoadingCapacity = false;
+          this.snack.show("Failed to fetch capacity", false);
+        },
+      });
   }
 
   closeCapacityModal() {
@@ -1430,11 +1440,11 @@ this.initAddUpiForm();
 
   saveCapacity(account: any) {
     const invalid = this.capacityRanges.some(
-        (r) =>
-            r.minRange === null ||
-            r.maxRange === null ||
-            r.quantity === null ||
-            r.maxRange <= r.minRange,
+      (r) =>
+        r.minRange === null ||
+        r.maxRange === null ||
+        r.quantity === null ||
+        r.maxRange <= r.minRange,
     );
 
     if (invalid) {
@@ -1575,9 +1585,6 @@ this.initAddUpiForm();
     return index >= this.bankAccounts.length - 2;
   }
 
-
-
-
   showTooltip(event: MouseEvent, account: any) {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
 
@@ -1596,273 +1603,258 @@ this.initAddUpiForm();
       this.topupStatus = res.topup;
     });
   }
-    changeTopupStatus() {
+  changeTopupStatus() {
     this.headService.toggleDashbaordTopup(this.currentRoleId).subscribe(() => {
-      this.topupStatus = !this.topupStatus; 
+      this.topupStatus = !this.topupStatus;
     });
   }
 
+  viewUpi(account: any) {
+    if (!account?.id) return;
 
-viewUpi(account: any) {
-  if (!account?.id) return;
+    this.router.navigate(["/head/upi"], {
+      queryParams: { bankId: account.id },
+    });
+  }
+  showAddUpiModal = false;
+  isAddingUpi = false;
 
-  this.router.navigate(['/head/upi'], {
-    queryParams: { bankId: account.id }
-  });
-}
-showAddUpiModal = false;
-isAddingUpi = false;
+  addUpiForm!: FormGroup;
+  selectedBank: any = null;
 
-addUpiForm!: FormGroup;
-selectedBank: any = null;
+  // initAddUpiForm() {
+  //   this.addUpiForm = this.fb.group({
+  //     vpa: ["", [Validators.required]],
+  //     limitAmount: ["", Validators.required],
+  //     min_tran_count: [null],
+  //     max_tran_count: [null],
+  //     min_total_tran_amount: [null],
+  //     max_total_tran_amount: [null],
+  //   });
+  // }
 
+  initAddUpiForm() {
+    this.addUpiForm = this.fb.group({
+      vpa: [
+        "",
+        [
+          Validators.required,
+          Validators.pattern(/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/),
+        ],
+      ],
+      limitAmount: ["", [Validators.required, Validators.min(1)]],
 
-
-
-// initAddUpiForm() {
-//   this.addUpiForm = this.fb.group({
-//     vpa: ["", [Validators.required]],
-//     limitAmount: ["", Validators.required],
-//     min_tran_count: [null],
-//     max_tran_count: [null],
-//     min_total_tran_amount: [null],
-//     max_total_tran_amount: [null],
-//   });
-// }
-
-initAddUpiForm() {
-  this.addUpiForm = this.fb.group({
-    vpa: [
-      "",
-      [
-        Validators.required,
-        Validators.pattern(/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/)
-      ]
-    ],
-    limitAmount: ["", [Validators.required, Validators.min(1)]],
-
-    min_tran_count: [null],
-    max_tran_count: [null],
-    min_total_tran_amount: [null],
-    max_total_tran_amount: [null],
-  });
-}
-
-openAddUpiFromBank(account: any) {
-  this.selectedBank = account;
-  this.showAddUpiModal = true;
-
-  document.body.style.overflow = "hidden";
-}
-
-closeAddUpiModal() {
-  this.showAddUpiModal = false;
-  this.addUpiForm.reset();
-  this.generatedFile = null;
-  this.manualQrFile = null;
-  this.selectedBank = null;
-
-  document.body.style.overflow = "auto";
-}
-
-submitAddUpi(): void {
-  // mark fields touched
-  Object.keys(this.addUpiForm.controls).forEach((key) =>
-    this.addUpiForm.get(key)?.markAsTouched()
-  );
-
-  // form validation
-  if (this.addUpiForm.invalid) {
-    this.snack.show("Please fill all required fields correctly.", false);
-    return;
+      min_tran_count: [null],
+      max_tran_count: [null],
+      min_total_tran_amount: [null],
+      max_total_tran_amount: [null],
+    });
   }
 
-  // QR validation
-  if (!this.generatedFile && !this.manualQrFile) {
-    this.snack.show("Please upload or generate QR code.", false);
-    return;
+  openAddUpiFromBank(account: any) {
+    this.selectedBank = account;
+    this.showAddUpiModal = true;
+
+    document.body.style.overflow = "hidden";
   }
 
-  // bank validation
-  if (!this.selectedBank) {
-    this.snack.show("Bank not selected.", false);
-    return;
+  closeAddUpiModal() {
+    this.showAddUpiModal = false;
+    this.addUpiForm.reset();
+    this.generatedFile = null;
+    this.manualQrFile = null;
+    this.selectedBank = null;
+
+    document.body.style.overflow = "auto";
   }
 
-  // ranges (reuse existing)
-  const validRanges = this.capacityRanges || [];
+  submitAddUpi(): void {
+    // mark fields touched
+    Object.keys(this.addUpiForm.controls).forEach((key) =>
+      this.addUpiForm.get(key)?.markAsTouched(),
+    );
 
-  // payload
-const payload = {
-
-  vpa: this.addUpiForm.value.vpa,
-  limitAmount: this.addUpiForm.value.limitAmount,
-
-  entityId: this.currentRoleId,
-  entityType: this.role,
-  userId: this.currentUserId,
-
-  active: true,
-
-  //  ONLY ADD THIS EXTRA FIELD
-  bankId: this.selectedBank?.id,
-
-  minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
-  maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
-  minTotalTranAmount:
-    Number(this.addUpiForm.value.min_total_tran_amount) || 0,
-  maxTotalTranAmount:
-    Number(this.addUpiForm.value.max_total_tran_amount) || 0,
-
-  createdAt: new Date().toISOString(),
-
-  ranges: this.capacityRanges.map((r) => ({
-    minRange: r.minRange ?? null,
-    maxRange: r.maxRange ?? null,
-    quantity: r.quantity ?? null,
-  })),
-};
-console.log(payload);
-
-  // form data
-  const formData = new FormData();
-  formData.append(
-    "dto",
-    new Blob([JSON.stringify(payload)], { type: "application/json" })
-  );
-
-  console.log(formData);
-  
-
-  // file (QR)
-  const fileToSend = this.generatedFile || this.manualQrFile;
-  if (fileToSend) {
-    formData.append("file", fileToSend, fileToSend.name);
-  }
-
-  if (this.currentUserId) {
-    formData.append("userId", this.currentUserId);
-  }
-
-  this.isAddingUpi = true;
-
-  this.upiService.add(formData).subscribe({
-    next: (res: any) => {
-      console.log(res);
-      
-      this.isAddingUpi = false;
-console.log(formData);
-
-      if (res?.success || res?.id || res?._id) {
-        this.snack.show(res?.message || "UPI added successfully!", true);
-
-        this.closeAddUpiModal();
-
-        //  CORRECT REFRESH METHOD
-        this.fetchBankAccounts();
-      } else {
-        this.snack.show(res?.message || "Failed to add UPI.", false);
-      }
-    },
-    error: (err: any) => {
-      this.isAddingUpi = false;
-
-      this.snack.show(
-        err?.error?.message ||
-          err?.error?.error ||
-          "Failed to add UPI",
-        false
-      );
-    },
-  });
-}
-
-generateQrFromVpa(): void {
-  const vpaControl = this.addUpiForm.get("vpa");
-
-  if (!vpaControl || vpaControl.invalid) {
-    vpaControl?.markAsTouched();
-    return;
-  }
-
-  const vpa = String(vpaControl.value).trim();
-
-  const upiIntent = `upi://pay?pa=${encodeURIComponent(vpa)}&cu=INR`;
-
-  this.qrData = upiIntent;
-  this.generatingQr = true;
-
-  setTimeout(() => this.captureQrImage(vpa), 300);
-}
-
-
-private captureQrImage(vpa: string): void {
-  try {
-    const qrcodeElement = this.qrcodeElem;
-
-    if (!qrcodeElement?.nativeElement) {
-      this.generatingQr = false;
+    // form validation
+    if (this.addUpiForm.invalid) {
+      this.snack.show("Please fill all required fields correctly.", false);
       return;
     }
 
-    setTimeout(() => {
-      const canvas = qrcodeElement.nativeElement.querySelector("canvas");
+    // QR validation
+    if (!this.generatedFile && !this.manualQrFile) {
+      this.snack.show("Please upload or generate QR code.", false);
+      return;
+    }
 
-      if (!canvas) {
+    // bank validation
+    if (!this.selectedBank) {
+      this.snack.show("Bank not selected.", false);
+      return;
+    }
+
+    // ranges (reuse existing)
+    const validRanges = this.capacityRanges || [];
+
+    // payload
+    const payload = {
+      vpa: this.addUpiForm.value.vpa,
+      limitAmount: this.addUpiForm.value.limitAmount,
+
+      entityId: this.currentRoleId,
+      entityType: this.role,
+      userId: this.currentUserId,
+
+      active: true,
+
+      //  ONLY ADD THIS EXTRA FIELD
+      bankId: this.selectedBank?.id,
+
+      minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
+      maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
+      minTotalTranAmount:
+        Number(this.addUpiForm.value.min_total_tran_amount) || 0,
+      maxTotalTranAmount:
+        Number(this.addUpiForm.value.max_total_tran_amount) || 0,
+
+      createdAt: new Date().toISOString(),
+
+      ranges: this.capacityRanges.map((r) => ({
+        minRange: r.minRange ?? null,
+        maxRange: r.maxRange ?? null,
+        quantity: r.quantity ?? null,
+      })),
+    };
+
+    // form data
+    const formData = new FormData();
+    formData.append(
+      "dto",
+      new Blob([JSON.stringify(payload)], { type: "application/json" }),
+    );
+
+    // file (QR)
+    const fileToSend = this.generatedFile || this.manualQrFile;
+    if (fileToSend) {
+      formData.append("file", fileToSend, fileToSend.name);
+    }
+
+    if (this.currentUserId) {
+      formData.append("userId", this.currentUserId);
+    }
+
+    this.isAddingUpi = true;
+
+    this.upiService.add(formData).subscribe({
+      next: (res: any) => {
+        this.isAddingUpi = false;
+
+        if (res?.success || res?.id || res?._id) {
+          this.snack.show(res?.message || "UPI added successfully!", true);
+
+          this.closeAddUpiModal();
+
+          //  CORRECT REFRESH METHOD
+          this.fetchBankAccounts();
+        } else {
+          this.snack.show(res?.message || "Failed to add UPI.", false);
+        }
+      },
+      error: (err: any) => {
+        this.isAddingUpi = false;
+
+        this.snack.show(
+          err?.error?.message || err?.error?.error || "Failed to add UPI",
+          false,
+        );
+      },
+    });
+  }
+
+  generateQrFromVpa(): void {
+    const vpaControl = this.addUpiForm.get("vpa");
+
+    if (!vpaControl || vpaControl.invalid) {
+      vpaControl?.markAsTouched();
+      return;
+    }
+
+    const vpa = String(vpaControl.value).trim();
+
+    const upiIntent = `upi://pay?pa=${encodeURIComponent(vpa)}&cu=INR`;
+
+    this.qrData = upiIntent;
+    this.generatingQr = true;
+
+    setTimeout(() => this.captureQrImage(vpa), 300);
+  }
+
+  private captureQrImage(vpa: string): void {
+    try {
+      const qrcodeElement = this.qrcodeElem;
+
+      if (!qrcodeElement?.nativeElement) {
         this.generatingQr = false;
         return;
       }
 
-      canvas.toBlob(
-        (blob: Blob | null) => {
-          if (blob) {
-            const filename = `upi_qr_${Date.now()}.png`;
+      setTimeout(() => {
+        const canvas = qrcodeElement.nativeElement.querySelector("canvas");
 
-            this.generatedFile = new File([blob], filename, {
-              type: "image/png",
-            });
-          }
-
+        if (!canvas) {
           this.generatingQr = false;
-        },
-        "image/png",
-        1.0
-      );
-    }, 100);
-  } catch (error) {
-    this.generatingQr = false;
+          return;
+        }
+
+        canvas.toBlob(
+          (blob: Blob | null) => {
+            if (blob) {
+              const filename = `upi_qr_${Date.now()}.png`;
+
+              this.generatedFile = new File([blob], filename, {
+                type: "image/png",
+              });
+            }
+
+            this.generatingQr = false;
+          },
+          "image/png",
+          1.0,
+        );
+      }, 100);
+    } catch (error) {
+      this.generatingQr = false;
+    }
   }
-}
 
-onQrFileSelected(event: any): void {
-  const file = event.target.files[0];
-  if (!file) return;
+  onQrFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
 
-  this.manualQrFile = file;
-  this.generatedFile = file;
+    this.manualQrFile = file;
+    this.generatedFile = file;
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    this.selectedImage = reader.result as string;
-  };
-  reader.readAsDataURL(file);
-}
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.selectedImage = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
 
-setQrMode(mode: 'generate' | 'upload') {
-  this.qrMode = mode;
+  setQrMode(mode: "generate" | "upload") {
+    this.qrMode = mode;
 
-  this.qrData = null;
-  this.generatedFile = null;
-  this.manualQrFile = null;
-  this.selectedImage = null;
-}
+    this.qrData = null;
+    this.generatedFile = null;
+    this.manualQrFile = null;
+    this.selectedImage = null;
+  }
 
-removeQr() {
-  this.qrData = null;
-  this.generatedFile = null;
-  this.manualQrFile = null;
-  this.selectedImage = null;
-}
+  removeQr() {
+    this.qrData = null;
+    this.generatedFile = null;
+    this.manualQrFile = null;
+    this.selectedImage = null;
+  }
 
   closeAddModal(): void {
     this.showAddModal = false;
@@ -1876,7 +1868,6 @@ removeQr() {
     this.manualQrFile = null;
   }
 
-  
   downloadQr(): void {
     if (!this.generatedFile) return;
     const url = URL.createObjectURL(this.generatedFile);
@@ -1889,18 +1880,15 @@ removeQr() {
     URL.revokeObjectURL(url);
   }
 
+  openTxnModal(account: any) {
+    this.selectedTxnData = account;
+    this.showTxnModal = true;
+    document.body.style.overflow = "hidden";
+  }
 
-
-
-openTxnModal(account: any) {
-  this.selectedTxnData = account;
-  this.showTxnModal = true;
-  document.body.style.overflow = 'hidden';
-}
-
-closeTxnModal() {
-  this.showTxnModal = false;
-  this.selectedTxnData = null;
-  document.body.style.overflow = 'auto';
-}
+  closeTxnModal() {
+    this.showTxnModal = false;
+    this.selectedTxnData = null;
+    document.body.style.overflow = "auto";
+  }
 }

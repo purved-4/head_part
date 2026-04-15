@@ -35,6 +35,7 @@ import { SidebarNotificationComponent } from "../common/sidebar-notification/sid
 import { WebsitePercentageModelComponent } from "../common/website-percentage-model/website-percentage-model.component";
 import { TimeZoneComponent } from "../common/time-zone/time-zone.component";
 import { CompartPercentageModleComponent } from "../common/compart-percentage-modle/compart-percentage-modle.component";
+import { TimeZonePipe } from "../pipes/time-zone.pipe";
 
 // shared.module.ts
 @NgModule({
@@ -71,7 +72,8 @@ import { CompartPercentageModleComponent } from "../common/compart-percentage-mo
     SidebarNotificationComponent,
     WebsitePercentageModelComponent,
     TimeZoneComponent,
-    CompartPercentageModleComponent
+    CompartPercentageModleComponent,
+    TimeZonePipe
     
     
   ],
@@ -107,7 +109,8 @@ import { CompartPercentageModleComponent } from "../common/compart-percentage-mo
     SidebarNotificationComponent,
     WebsitePercentageModelComponent,
     TimeZoneComponent,
-    CompartPercentageModleComponent
+    CompartPercentageModleComponent,
+    TimeZonePipe
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeComponent],
 })

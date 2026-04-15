@@ -40,7 +40,7 @@ import { RecycleManagementComponent } from "../recycle-management/recycle-manage
     HeadRejectedFundsComponent,
      HeadMobileFooterComponent,
     PaymentManagementComponent,
-    RecycleManagementComponent,
+    RecycleManagementComponent
 
   ],
   imports: [

@@ -27,7 +27,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     newPassword: string;
   }>();
 
-  selectedSection: "user" | "entity" | "portal" | "password" = "user";
+  // selectedSection: "user" | "entity" | "portal" | "password" = "user";
+  selectedSection: "user" | "portal" | "password" = "user";
 
   branch: any = null;
   entityInfo: any = null;

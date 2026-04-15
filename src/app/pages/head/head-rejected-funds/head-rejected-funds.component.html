@@ -46,7 +46,7 @@
                   class="w-full text-sm border-0 rounded-2xl pl-10 pr-4 py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
                 >
                   <span class="truncate">
-                {{ getSelectedPortalDomain('upi') }}
+                    {{ getSelectedPortalDomain("upi") }}
                   </span>
                   <span class="material-symbols-outlined text-lg"
                     >arrow_drop_down</span
@@ -70,8 +70,8 @@
                     All Portals
                   </button>
                   <button
-                    *ngFor="let portal  of upiPortals"
-                    (click)="selectPortal('upi', portal )"
+                    *ngFor="let portal of upiPortals"
+                    (click)="selectPortal('upi', portal)"
                     class="w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-hover)] transition-colors text-[var(--color-font)] truncate"
                   >
                     {{ portal.domain }}
@@ -175,7 +175,10 @@
                 >
                 <span class="hidden sm:inline">Clear</span>
               </button>
-                       <app-reload class="bg-white rounded-xl p-1" (reload)="refreshCurrentView()"></app-reload>
+              <app-reload
+                class="bg-white rounded-xl p-1"
+                (reload)="refreshCurrentView()"
+              ></app-reload>
             </div>
           </div>
         </div>
@@ -293,10 +296,10 @@
                   </td>
                   <td class="px-6 py-4">
                     <div class="text-sm font-medium text-[var(--color-font)]">
-                      {{ a.date | date: "MMM d, y" }}
+                      {{ a.date | tz }}
                     </div>
                     <div class="text-xs text-[var(--color-muted)]">
-                      {{ a.date | date: "h:mm a" }}
+                      {{ a.date | tz }}
                     </div>
                   </td>
                   <td class="px-6 py-4">
@@ -329,7 +332,8 @@
                         No UPI topups found
                       </p>
                       <p class="text-sm mt-2 text-[var(--color-muted)]">
-                        Please Select the portal first or Try adjusting your search criteria
+                        Please Select the portal first or Try adjusting your
+                        search criteria
                       </p>
                     </div>
                   </td>
@@ -406,10 +410,10 @@
                 </div>
                 <div class="text-right">
                   <div class="text-sm font-medium">
-                    {{ a.date | date: "MMM d, y" }}
+                    {{ a.date | tz }}
                   </div>
                   <div class="text-xs text-[var(--color-muted)]">
-                    {{ a.date | date: "h:mm a" }}
+                    {{ a.date | tz }}
                   </div>
                 </div>
               </div>
@@ -532,11 +536,8 @@
                   class="w-full text-sm border-0 rounded-2xl pl-10 pr-4 py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
                 >
                   <span class="truncate">
-                    
-                                  {{ getSelectedPortalDomain('bank') }}
-
-                  
-                </span>
+                    {{ getSelectedPortalDomain("bank") }}
+                  </span>
                   <span class="material-symbols-outlined text-lg"
                     >arrow_drop_down</span
                   >
@@ -557,8 +558,8 @@
                     All Portals
                   </button>
                   <button
-                    *ngFor="let portal  of bankPortals"
-                    (click)="selectPortal('bank', portal )"
+                    *ngFor="let portal of bankPortals"
+                    (click)="selectPortal('bank', portal)"
                     class="w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)] truncate"
                   >
                     {{ portal.domain }}
@@ -657,10 +658,11 @@
                   >filter_alt_off</span
                 >
                 <span class="hidden sm:inline">Clear</span>
-
               </button>
-                                                     <app-reload class="bg-white rounded-xl p-1" (reload)="refreshCurrentView()"></app-reload>
-
+              <app-reload
+                class="bg-white rounded-xl p-1"
+                (reload)="refreshCurrentView()"
+              ></app-reload>
             </div>
           </div>
         </div>
@@ -778,10 +780,10 @@
                   </td>
                   <td class="px-6 py-4">
                     <div class="text-sm font-medium text-[var(--color-font)]">
-                      {{ a.date | date: "MMM d, y" }}
+                      {{ a.date | tz }}
                     </div>
                     <div class="text-xs text-[var(--color-muted)]">
-                      {{ a.date | date: "h:mm a" }}
+                      {{ a.date | tz }}
                     </div>
                   </td>
                   <td class="px-6 py-4">
@@ -814,7 +816,8 @@
                         No bank topups found
                       </p>
                       <p class="text-sm mt-2 text-[var(--color-muted)]">
-                        Please Select the portal first or Try adjusting your search criteria
+                        Please Select the portal first or Try adjusting your
+                        search criteria
                       </p>
                     </div>
                   </td>
@@ -893,10 +896,10 @@
                 </div>
                 <div class="text-right">
                   <div class="text-sm font-medium">
-                    {{ a.date | date: "MMM d, y" }}
+                    {{ a.date | tz }}
                   </div>
                   <div class="text-xs text-[var(--color-muted)]">
-                    {{ a.date | date: "h:mm a" }}
+                    {{ a.date | tz }}
                   </div>
                 </div>
               </div>
@@ -1018,11 +1021,8 @@
                   class="w-full text-sm border-0 rounded-2xl pl-10 pr-4 py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
                 >
                   <span class="truncate">
-                    
-                                   {{ getSelectedPortalDomain('payout') }}
-
-                  
-                </span>
+                    {{ getSelectedPortalDomain("payout") }}
+                  </span>
                   <span class="material-symbols-outlined text-lg"
                     >arrow_drop_down</span
                   >
@@ -1043,8 +1043,8 @@
                     All Portals
                   </button>
                   <button
-                    *ngFor="let portal  of payoutPortals"
-                    (click)="selectPortal('payout', portal )"
+                    *ngFor="let portal of payoutPortals"
+                    (click)="selectPortal('payout', portal)"
                     class="w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)] truncate"
                   >
                     {{ portal.domain }}
@@ -1143,10 +1143,11 @@
                   >filter_alt_off</span
                 >
                 <span class="hidden sm:inline">Clear</span>
-
               </button>
-                                                     <app-reload class="bg-white rounded-xl p-1" (reload)="refreshCurrentView()"></app-reload>
-
+              <app-reload
+                class="bg-white rounded-xl p-1"
+                (reload)="refreshCurrentView()"
+              ></app-reload>
             </div>
           </div>
         </div>
@@ -1274,10 +1275,10 @@
                   </td>
                   <td class="px-6 py-4">
                     <div class="text-sm font-medium text-[var(--color-font)]">
-                      {{ w.date | date: "MMM d, y" }}
+                      {{ w.date | tz }}
                     </div>
                     <div class="text-xs text-[var(--color-muted)]">
-                      {{ w.date | date: "h:mm a" }}
+                      {{ w.date | tz }}
                     </div>
                   </td>
                   <td class="px-6 py-4">
@@ -1310,7 +1311,8 @@
                         No rejected payouts found
                       </p>
                       <p class="text-sm mt-2 text-[var(--color-muted)]">
-                        Please Select the portal first or Try adjusting your search criteria
+                        Please Select the portal first or Try adjusting your
+                        search criteria
                       </p>
                     </div>
                   </td>
@@ -1396,10 +1398,10 @@
                 </div>
                 <div class="text-right">
                   <div class="text-sm font-medium">
-                    {{ w.date | date: "MMM d, y" }}
+                    {{ w.date | tz }}
                   </div>
                   <div class="text-xs text-[var(--color-muted)]">
-                    {{ w.date | date: "h:mm a" }}
+                    {{ w.date | tz }}
                   </div>
                 </div>
               </div>
@@ -1658,11 +1660,7 @@
               <span
                 class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
               >
-                {{
-                  selectedRecord?.date
-                    ? (selectedRecord.date | date: "medium")
-                    : "—"
-                }}
+                {{ selectedRecord?.date ? (selectedRecord.date | tz) : "—" }}
               </span>
             </div>
           </div>
@@ -1670,8 +1668,8 @@
       </div>
 
       <!-- RIGHT: Transaction Details – compact grid -->
-<div class="overflow-y-auto h-full max-h-[calc(90vh-160px)] pr-2">
-          <h4
+      <div class="overflow-y-auto h-full max-h-[calc(90vh-160px)] pr-2">
+        <h4
           class="text-sm sm:text-base font-semibold mb-2 sm:mb-4 flex items-center gap-1 sm:gap-2 text-[var(--color-font)]"
         >
           <span class="material-symbols-outlined text-base sm:text-lg"
@@ -1726,4 +1724,3 @@
     </button>
   </div>
 </div>
-

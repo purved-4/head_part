@@ -38,17 +38,20 @@
             </div>
 
             <!-- Filters Row -->
-            <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto">
+            <div
+              class="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto"
+            >
               <!-- Portal dropdown -->
-              <div class="relative min-w-[140px] sm:min-w-[160px] flex-1 xl:flex-none">
+              <div
+                class="relative min-w-[140px] sm:min-w-[160px] flex-1 xl:flex-none"
+              >
                 <button
                   (click)="togglePortalDropdown('upi')"
                   class="w-full text-xs sm:text-sm border-0 rounded-2xl pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
                 >
                   <span class="truncate">
-                   {{ getSelectedPortalDomain('upi') }}
-                  
-                </span>
+                    {{ getSelectedPortalDomain("upi") }}
+                  </span>
                   <span class="material-symbols-outlined text-base sm:text-lg"
                     >arrow_drop_down</span
                   >
@@ -69,8 +72,8 @@
                     All Portals
                   </button>
                   <button
-                    *ngFor="let portal  of upiPortals"
-                    (click)="selectPortal('upi', portal )"
+                    *ngFor="let portal of upiPortals"
+                    (click)="selectPortal('upi', portal)"
                     class="w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)] truncate"
                   >
                     {{ portal.domain }}
@@ -104,7 +107,9 @@
                   *ngIf="filterDropdownOpen === 'upi'"
                   class="absolute right-0 mt-2 w-64 sm:w-72 rounded-2xl shadow-xl z-20 p-3 sm:p-4 bg-[var(--color-surface)] border border-[var(--color-border)]"
                 >
-                  <h4 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 text-[var(--color-font)]">
+                  <h4
+                    class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 text-[var(--color-font)]"
+                  >
                     Select Date Range
                   </h4>
                   <div class="mb-2 sm:mb-3">
@@ -145,7 +150,9 @@
               </div>
 
               <!-- Search input -->
-              <div class="relative min-w-[150px] sm:min-w-[200px] flex-1 xl:flex-none">
+              <div
+                class="relative min-w-[150px] sm:min-w-[200px] flex-1 xl:flex-none"
+              >
                 <input
                   type="text"
                   placeholder="Search UPI..."
@@ -171,7 +178,10 @@
                 >
                 <span class="hidden sm:inline">Clear</span>
               </button>
-              <app-reload class="bg-white rounded-xl p-1" (reload)="refreshCurrentView()"></app-reload>
+              <app-reload
+                class="bg-white rounded-xl p-1"
+                (reload)="refreshCurrentView()"
+              ></app-reload>
             </div>
           </div>
         </div>
@@ -196,7 +206,9 @@
                   <div class="text-xs sm:text-sm font-semibold">
                     {{ a.raw.portalDomain || a.portalId || "-" }}
                   </div>
-                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">Portal</div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                    Portal
+                  </div>
                 </div>
               </div>
 
@@ -205,7 +217,9 @@
                 <div
                   class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center bg-[var(--color-surface)] border border-[var(--color-border)]"
                 >
-                  <span class="material-symbols-outlined text-xs sm:text-sm">qr_code</span>
+                  <span class="material-symbols-outlined text-xs sm:text-sm"
+                    >qr_code</span
+                  >
                 </div>
                 <div class="flex-1">
                   <div class="text-xs sm:text-sm font-medium break-all">
@@ -243,10 +257,10 @@
                 </div>
                 <div class="text-right">
                   <div class="text-xs sm:text-sm font-medium">
-                    {{ a.date | date: "MMM d, y" }}
+                    {{ a.date | tz }}
                   </div>
                   <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
-                    {{ a.date | date: "h:mm a" }}
+                    {{ a.date | tz }}
                   </div>
                 </div>
               </div>
@@ -271,9 +285,13 @@
               <div
                 class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl mx-auto mb-2 sm:mb-3 flex items-center justify-center bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)] border border-[var(--color-border)]"
               >
-                <span class="material-symbols-outlined text-xl sm:text-2xl">payments</span>
+                <span class="material-symbols-outlined text-xl sm:text-2xl"
+                  >payments</span
+                >
               </div>
-              <p class="text-sm sm:text-base font-semibold">No UPI Topups found</p>
+              <p class="text-sm sm:text-base font-semibold">
+                No UPI Topups found
+              </p>
               <p class="text-xs sm:text-sm text-[var(--color-muted)] mt-1">
                 Try adjusting your search
               </p>
@@ -339,7 +357,8 @@
                           class="text-xs sm:text-sm font-semibold block text-[var(--color-font)]"
                           >{{ a.raw.portalDomain || a.portalId || "-" }}</span
                         >
-                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                        <span
+                          class="text-[10px] sm:text-xs text-[var(--color-muted)]"
                           >Portal</span
                         >
                       </div>
@@ -360,7 +379,8 @@
                           class="text-xs sm:text-sm font-medium block text-[var(--color-font)]"
                           >{{ a.vpa || a.upiId || "-" }}</span
                         >
-                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                        <span
+                          class="text-[10px] sm:text-xs text-[var(--color-muted)]"
                           >Virtual Payment Address</span
                         >
                       </div>
@@ -372,7 +392,8 @@
                         class="text-xs sm:text-sm font-mono font-medium block text-[var(--color-font)]"
                         >{{ a.transactionId || "-" }}</span
                       >
-                      <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                      <span
+                        class="text-[10px] sm:text-xs text-[var(--color-muted)]"
                         >Transaction ID</span
                       >
                     </div>
@@ -387,17 +408,22 @@
                           >arrow_upward</span
                         >
                       </div>
-                      <span class="text-sm sm:text-base font-bold text-[var(--color-font)]"
+                      <span
+                        class="text-sm sm:text-base font-bold text-[var(--color-font)]"
                         >+{{ formatCurrency(a.amount) }}</span
                       >
                     </div>
                   </td>
                   <td class="px-4 sm:px-6 py-3 sm:py-4">
-                    <div class="text-xs sm:text-sm font-medium text-[var(--color-font)]">
-                      {{ a.date | date: "MMM d, y" }}
+                    <div
+                      class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
+                    >
+                      {{ a.date | tz }}
                     </div>
-                    <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
-                      {{ a.date | date: "h:mm a" }}
+                    <div
+                      class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                    >
+                      {{ a.date | tz }}
                     </div>
                   </td>
                   <td class="px-4 sm:px-6 py-3 sm:py-4">
@@ -406,7 +432,8 @@
                       class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] text-[var(--color-font)] bg-[var(--color-surface)] shadow-sm"
                       title="View proof & details"
                     >
-                      <span class="material-symbols-outlined text-base sm:text-lg"
+                      <span
+                        class="material-symbols-outlined text-base sm:text-lg"
                         >visibility</span
                       >
                       <span>Details</span>
@@ -429,8 +456,11 @@
                       >
                         No UPI Topups found
                       </p>
-                      <p class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]">
-                        Please Select the portal first or Try adjusting your search criteria
+                      <p
+                        class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]"
+                      >
+                        Please Select the portal first or Try adjusting your
+                        search criteria
                       </p>
                     </div>
                   </td>
@@ -445,7 +475,8 @@
           class="p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
         >
           <div class="flex items-center gap-2 sm:gap-3">
-            <label class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
+            <label
+              class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
               >Rows:</label
             >
             <select
@@ -459,7 +490,9 @@
             </select>
           </div>
           <div class="flex items-center gap-2">
-            <div class="text-xs sm:text-sm mr-2 sm:mr-4 text-[var(--color-font)]">
+            <div
+              class="text-xs sm:text-sm mr-2 sm:mr-4 text-[var(--color-font)]"
+            >
               <span class="hidden xs:inline">Page </span>
               <span class="font-semibold">{{ upiPage + 1 }}</span> of
               <span class="font-semibold">{{ upiTotalPages() }}</span>
@@ -514,24 +547,27 @@
               <div class="text-[var(--color-bg)]">
                 <h3 class="font-bold text-lg sm:text-xl">Bank Topups</h3>
                 <p class="mt-1 text-xs sm:text-sm opacity-80">
-                  {{ filteredBanktopups().length }} records • Secure transactions
+                  {{ filteredBanktopups().length }} records • Secure
+                  transactions
                 </p>
               </div>
             </div>
 
             <!-- Filters Row -->
-            <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto">
+            <div
+              class="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto"
+            >
               <!-- Bank portal dropdown -->
-              <div class="relative min-w-[140px] sm:min-w-[160px] flex-1 xl:flex-none">
+              <div
+                class="relative min-w-[140px] sm:min-w-[160px] flex-1 xl:flex-none"
+              >
                 <button
                   (click)="togglePortalDropdown('bank')"
                   class="w-full text-xs sm:text-sm border-0 rounded-2xl pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
                 >
                   <span class="truncate">
-                    
-                                     {{ getSelectedPortalDomain('bank') }}
-
-                </span>
+                    {{ getSelectedPortalDomain("bank") }}
+                  </span>
                   <span class="material-symbols-outlined text-base sm:text-lg"
                     >arrow_drop_down</span
                   >
@@ -552,8 +588,8 @@
                     All Portals
                   </button>
                   <button
-                    *ngFor="let portal  of bankPortals"
-                    (click)="selectPortal('bank', portal )"
+                    *ngFor="let portal of bankPortals"
+                    (click)="selectPortal('bank', portal)"
                     class="w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)] truncate"
                   >
                     {{ portal.domain }}
@@ -587,7 +623,9 @@
                   *ngIf="filterDropdownOpen === 'bank'"
                   class="absolute right-0 mt-2 w-64 sm:w-72 rounded-2xl shadow-xl z-20 p-3 sm:p-4 bg-[var(--color-surface)] border border-[var(--color-border)]"
                 >
-                  <h4 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 text-[var(--color-font)]">
+                  <h4
+                    class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 text-[var(--color-font)]"
+                  >
                     Select Date Range
                   </h4>
                   <div class="mb-2 sm:mb-3">
@@ -628,7 +666,9 @@
               </div>
 
               <!-- Search input -->
-              <div class="relative min-w-[150px] sm:min-w-[200px] flex-1 xl:flex-none">
+              <div
+                class="relative min-w-[150px] sm:min-w-[200px] flex-1 xl:flex-none"
+              >
                 <input
                   type="text"
                   placeholder="Search bank..."
@@ -654,7 +694,10 @@
                 >
                 <span class="hidden sm:inline">Clear</span>
               </button>
-              <app-reload class="bg-white rounded-xl p-1" (reload)="refreshCurrentView()"></app-reload>
+              <app-reload
+                class="bg-white rounded-xl p-1"
+                (reload)="refreshCurrentView()"
+              ></app-reload>
             </div>
           </div>
         </div>
@@ -679,7 +722,9 @@
                   <div class="text-xs sm:text-sm font-semibold">
                     {{ a.raw.portalDomain || a.portalId || "-" }}
                   </div>
-                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">Portal</div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                    Portal
+                  </div>
                 </div>
               </div>
 
@@ -688,7 +733,9 @@
                 <div
                   class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center bg-[var(--color-surface)] border border-[var(--color-border)]"
                 >
-                  <span class="material-symbols-outlined text-xs sm:text-sm">account_balance</span>
+                  <span class="material-symbols-outlined text-xs sm:text-sm"
+                    >account_balance</span
+                  >
                 </div>
                 <div class="flex-1">
                   <div class="text-xs sm:text-sm font-medium break-all">
@@ -726,10 +773,10 @@
                 </div>
                 <div class="text-right">
                   <div class="text-xs sm:text-sm font-medium">
-                    {{ a.date | date: "MMM d, y" }}
+                    {{ a.date | tz }}
                   </div>
                   <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
-                    {{ a.date | date: "h:mm a" }}
+                    {{ a.date | tz }}
                   </div>
                 </div>
               </div>
@@ -754,9 +801,13 @@
               <div
                 class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl mx-auto mb-2 sm:mb-3 flex items-center justify-center bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)] border border-[var(--color-border)]"
               >
-                <span class="material-symbols-outlined text-xl sm:text-2xl">account_balance</span>
+                <span class="material-symbols-outlined text-xl sm:text-2xl"
+                  >account_balance</span
+                >
               </div>
-              <p class="text-sm sm:text-base font-semibold">No Bank Topups found</p>
+              <p class="text-sm sm:text-base font-semibold">
+                No Bank Topups found
+              </p>
               <p class="text-xs sm:text-sm text-[var(--color-muted)] mt-1">
                 Try adjusting your search
               </p>
@@ -822,7 +873,8 @@
                           class="text-xs sm:text-sm font-semibold block text-[var(--color-font)]"
                           >{{ a.raw.portalDomain || a.portalId || "-" }}</span
                         >
-                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                        <span
+                          class="text-[10px] sm:text-xs text-[var(--color-muted)]"
                           >Portal</span
                         >
                       </div>
@@ -843,9 +895,12 @@
                           class="text-xs sm:text-sm font-medium block text-[var(--color-font)]"
                           >{{ a.accountNo || "-" }}</span
                         >
-                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]">{{
-                          a.raw.bankAccountHolderName || "Account Holder"
-                        }}</span>
+                        <span
+                          class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                          >{{
+                            a.raw.bankAccountHolderName || "Account Holder"
+                          }}</span
+                        >
                       </div>
                     </div>
                   </td>
@@ -855,7 +910,8 @@
                         class="text-xs sm:text-sm font-mono font-medium block text-[var(--color-font)]"
                         >{{ a.transactionId || "-" }}</span
                       >
-                      <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                      <span
+                        class="text-[10px] sm:text-xs text-[var(--color-muted)]"
                         >Transaction ID</span
                       >
                     </div>
@@ -870,17 +926,22 @@
                           >arrow_upward</span
                         >
                       </div>
-                      <span class="text-sm sm:text-base font-bold text-[var(--color-font)]"
+                      <span
+                        class="text-sm sm:text-base font-bold text-[var(--color-font)]"
                         >+{{ formatCurrency(a.amount) }}</span
                       >
                     </div>
                   </td>
                   <td class="px-4 sm:px-6 py-3 sm:py-4">
-                    <div class="text-xs sm:text-sm font-medium text-[var(--color-font)]">
-                      {{ a.date | date: "MMM d, y" }}
+                    <div
+                      class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
+                    >
+                      {{ a.date | tz }}
                     </div>
-                    <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
-                      {{ a.date | date: "h:mm a" }}
+                    <div
+                      class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                    >
+                      {{ a.date | tz }}
                     </div>
                   </td>
                   <td class="px-4 sm:px-6 py-3 sm:py-4">
@@ -889,7 +950,8 @@
                       class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] text-[var(--color-font)] bg-[var(--color-surface)] shadow-sm"
                       title="View proof & details"
                     >
-                      <span class="material-symbols-outlined text-base sm:text-lg"
+                      <span
+                        class="material-symbols-outlined text-base sm:text-lg"
                         >visibility</span
                       >
                       <span>Details</span>
@@ -912,8 +974,11 @@
                       >
                         No Bank Topups found
                       </p>
-                      <p class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]">
-                        Please Select the portal first or Try adjusting your search criteria
+                      <p
+                        class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]"
+                      >
+                        Please Select the portal first or Try adjusting your
+                        search criteria
                       </p>
                     </div>
                   </td>
@@ -928,7 +993,8 @@
           class="p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
         >
           <div class="flex items-center gap-2 sm:gap-3">
-            <label class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
+            <label
+              class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
               >Rows:</label
             >
             <select
@@ -942,7 +1008,9 @@
             </select>
           </div>
           <div class="flex items-center gap-2">
-            <div class="text-xs sm:text-sm mr-2 sm:mr-4 text-[var(--color-font)]">
+            <div
+              class="text-xs sm:text-sm mr-2 sm:mr-4 text-[var(--color-font)]"
+            >
               <span class="hidden xs:inline">Page </span>
               <span class="font-semibold">{{ bankPage + 1 }}</span> of
               <span class="font-semibold">{{ bankTotalPages() }}</span>
@@ -996,25 +1064,27 @@
               <div class="text-[var(--color-bg)]">
                 <h3 class="font-bold text-lg sm:text-xl">Approved Payouts</h3>
                 <p class="mt-1 text-xs sm:text-sm opacity-80">
-                  {{ filteredApprovedpayouts().length }} records • Processed payments
+                  {{ filteredApprovedpayouts().length }} records • Processed
+                  payments
                 </p>
               </div>
             </div>
 
             <!-- Filters Row -->
-            <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto">
+            <div
+              class="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto"
+            >
               <!-- Payout portal dropdown -->
-              <div class="relative min-w-[140px] sm:min-w-[160px] flex-1 xl:flex-none">
+              <div
+                class="relative min-w-[140px] sm:min-w-[160px] flex-1 xl:flex-none"
+              >
                 <button
                   (click)="togglePortalDropdown('payout')"
                   class="w-full text-xs sm:text-sm border-0 rounded-2xl pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
                 >
                   <span class="truncate">
-                    
-                                      {{ getSelectedPortalDomain('payout') }}
-
-                  
-                </span>
+                    {{ getSelectedPortalDomain("payout") }}
+                  </span>
                   <span class="material-symbols-outlined text-base sm:text-lg"
                     >arrow_drop_down</span
                   >
@@ -1035,8 +1105,8 @@
                     All Portals
                   </button>
                   <button
-                    *ngFor="let portal  of payoutPortals"
-                    (click)="selectPortal('payout', portal )"
+                    *ngFor="let portal of payoutPortals"
+                    (click)="selectPortal('payout', portal)"
                     class="w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)] truncate"
                   >
                     {{ portal.domain }}
@@ -1070,7 +1140,9 @@
                   *ngIf="filterDropdownOpen === 'payout'"
                   class="absolute right-0 mt-2 w-64 sm:w-72 rounded-2xl shadow-xl z-20 p-3 sm:p-4 bg-[var(--color-surface)] border border-[var(--color-border)]"
                 >
-                  <h4 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 text-[var(--color-font)]">
+                  <h4
+                    class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 text-[var(--color-font)]"
+                  >
                     Select Date Range
                   </h4>
                   <div class="mb-2 sm:mb-3">
@@ -1111,7 +1183,9 @@
               </div>
 
               <!-- Search input -->
-              <div class="relative min-w-[150px] sm:min-w-[200px] flex-1 xl:flex-none">
+              <div
+                class="relative min-w-[150px] sm:min-w-[200px] flex-1 xl:flex-none"
+              >
                 <input
                   type="text"
                   placeholder="Search payouts..."
@@ -1137,7 +1211,10 @@
                 >
                 <span class="hidden sm:inline">Clear</span>
               </button>
-              <app-reload class="bg-white rounded-xl p-1" (reload)="refreshCurrentView()"></app-reload>
+              <app-reload
+                class="bg-white rounded-xl p-1"
+                (reload)="refreshCurrentView()"
+              ></app-reload>
             </div>
           </div>
         </div>
@@ -1162,7 +1239,9 @@
                   <div class="text-xs sm:text-sm font-semibold">
                     {{ w.portalDomain || "-" }}
                   </div>
-                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">Portal</div>
+                  <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
+                    Portal
+                  </div>
                 </div>
               </div>
 
@@ -1171,7 +1250,9 @@
                 <div
                   class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center bg-[var(--color-surface)] border border-[var(--color-border)]"
                 >
-                  <span class="material-symbols-outlined text-xs sm:text-sm">badge</span>
+                  <span class="material-symbols-outlined text-xs sm:text-sm"
+                    >badge</span
+                  >
                 </div>
                 <div class="flex-1">
                   <div class="text-xs sm:text-sm font-medium break-all">
@@ -1188,7 +1269,9 @@
                 <div
                   class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center bg-[var(--color-surface)] border border-[var(--color-border)]"
                 >
-                  <span class="material-symbols-outlined text-xs sm:text-sm">account_balance</span>
+                  <span class="material-symbols-outlined text-xs sm:text-sm"
+                    >account_balance</span
+                  >
                 </div>
                 <div class="flex-1">
                   <div class="text-xs sm:text-sm font-medium break-all">
@@ -1216,10 +1299,10 @@
                 </div>
                 <div class="text-right">
                   <div class="text-xs sm:text-sm font-medium">
-                    {{ w.date | date: "MMM d, y" }}
+                    {{ w.date | tz }}
                   </div>
                   <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
-                    {{ w.date | date: "h:mm a" }}
+                    {{ w.date | tz }}
                   </div>
                 </div>
               </div>
@@ -1244,9 +1327,13 @@
               <div
                 class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl mx-auto mb-2 sm:mb-3 flex items-center justify-center bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)] border border-[var(--color-border)]"
               >
-                <span class="material-symbols-outlined text-xl sm:text-2xl">savings</span>
+                <span class="material-symbols-outlined text-xl sm:text-2xl"
+                  >savings</span
+                >
               </div>
-              <p class="text-sm sm:text-base font-semibold">No Approved Payouts found</p>
+              <p class="text-sm sm:text-base font-semibold">
+                No Approved Payouts found
+              </p>
               <p class="text-xs sm:text-sm text-[var(--color-muted)] mt-1">
                 Try adjusting your search
               </p>
@@ -1312,7 +1399,8 @@
                           class="text-xs sm:text-sm font-semibold block text-[var(--color-font)]"
                           >{{ w.portalDomain || "-" }}</span
                         >
-                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                        <span
+                          class="text-[10px] sm:text-xs text-[var(--color-muted)]"
                           >Portal</span
                         >
                       </div>
@@ -1333,7 +1421,8 @@
                           class="text-xs sm:text-sm font-medium block text-[var(--color-font)]"
                           >{{ w.accountNo || "-" }}</span
                         >
-                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                        <span
+                          class="text-[10px] sm:text-xs text-[var(--color-muted)]"
                           >Account Number</span
                         >
                       </div>
@@ -1354,9 +1443,10 @@
                           class="text-xs sm:text-sm font-medium block text-[var(--color-font)]"
                           >{{ w.ifscCode || "-" }}</span
                         >
-                        <span class="text-[10px] sm:text-xs text-[var(--color-muted)]">{{
-                          w.holder || "Account Holder"
-                        }}</span>
+                        <span
+                          class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                          >{{ w.holder || "Account Holder" }}</span
+                        >
                       </div>
                     </div>
                   </td>
@@ -1370,17 +1460,22 @@
                           >arrow_downward</span
                         >
                       </div>
-                      <span class="text-sm sm:text-base font-bold text-[var(--color-font)]"
+                      <span
+                        class="text-sm sm:text-base font-bold text-[var(--color-font)]"
                         >-{{ formatCurrency(w.amount) }}</span
                       >
                     </div>
                   </td>
                   <td class="px-4 sm:px-6 py-3 sm:py-4">
-                    <div class="text-xs sm:text-sm font-medium text-[var(--color-font)]">
-                      {{ w.date | date: "MMM d, y" }}
+                    <div
+                      class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
+                    >
+                      {{ w.date | tz }}
                     </div>
-                    <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
-                      {{ w.date | date: "h:mm a" }}
+                    <div
+                      class="text-[10px] sm:text-xs text-[var(--color-muted)]"
+                    >
+                      {{ w.date | tz }}
                     </div>
                   </td>
                   <td class="px-4 sm:px-6 py-3 sm:py-4">
@@ -1389,7 +1484,8 @@
                       class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] text-[var(--color-font)] bg-[var(--color-surface)] shadow-sm"
                       title="View details"
                     >
-                      <span class="material-symbols-outlined text-base sm:text-lg"
+                      <span
+                        class="material-symbols-outlined text-base sm:text-lg"
                         >visibility</span
                       >
                       <span>Details</span>
@@ -1412,8 +1508,11 @@
                       >
                         No Approved Payouts found
                       </p>
-                      <p class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]">
-                        Please Select the portal first or Try adjusting your search criteria
+                      <p
+                        class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]"
+                      >
+                        Please Select the portal first or Try adjusting your
+                        search criteria
                       </p>
                     </div>
                   </td>
@@ -1428,7 +1527,8 @@
           class="p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
         >
           <div class="flex items-center gap-2 sm:gap-3">
-            <label class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
+            <label
+              class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
               >Rows:</label
             >
             <select
@@ -1442,7 +1542,9 @@
             </select>
           </div>
           <div class="flex items-center gap-2">
-            <div class="text-xs sm:text-sm mr-2 sm:mr-4 text-[var(--color-font)]">
+            <div
+              class="text-xs sm:text-sm mr-2 sm:mr-4 text-[var(--color-font)]"
+            >
               <span class="hidden xs:inline">Page </span>
               <span class="font-semibold">{{ payoutApprovedPage + 1 }}</span> of
               <span class="font-semibold">{{
@@ -1557,8 +1659,7 @@
           </ng-template>
         </div> -->
 
-        
-      <div
+        <div
           class="w-full h-32 sm:h-48 rounded-xl sm:rounded-2xl overflow-y-auto border border-[var(--color-border)] bg-[var(--color-bg)] flex flex-col items-center justify-start p-2 gap-2"
         >
           <!-- SHOW IMAGE -->
@@ -1648,11 +1749,7 @@
               <span
                 class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
               >
-                {{
-                  selectedRecord?.date
-                    ? (selectedRecord.date | date: "medium")
-                    : "—"
-                }}
+                {{ selectedRecord?.date ? (selectedRecord.date | tz) : "—" }}
               </span>
             </div>
           </div>
@@ -1664,9 +1761,7 @@
         <h4
           class="text-xs sm:text-base font-semibold mb-2 sm:mb-4 flex items-center gap-1 sm:gap-2 text-[var(--color-font)]"
         >
-          <span class="material-symbols-outlined text-sm sm:text-lg"
-            >info</span
-          >
+          <span class="material-symbols-outlined text-sm sm:text-lg">info</span>
           Transaction Details
         </h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
@@ -1716,4 +1811,3 @@
     </button>
   </div>
 </div>
-
