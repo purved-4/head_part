@@ -22,6 +22,7 @@ import { HeadRejectedFundsComponent } from "../head-rejected-funds/head-rejected
  import { HeadMobileFooterComponent } from "../head-navlayout/head-mobile-footer/head-mobile-footer.component";
 import { PaymentManagementComponent } from "../payment-management/payment-management.component";
 import { RecycleManagementComponent } from "../recycle-management/recycle-management.component";
+import { AllotCurrencyComponent } from "../allot-currency/allot-currency.component";
  
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { RecycleManagementComponent } from "../recycle-management/recycle-manage
     HeadRejectedFundsComponent,
      HeadMobileFooterComponent,
     PaymentManagementComponent,
-    RecycleManagementComponent
+    RecycleManagementComponent,
+    AllotCurrencyComponent
 
   ],
   imports: [

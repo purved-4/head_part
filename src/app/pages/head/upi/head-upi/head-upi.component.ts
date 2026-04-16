@@ -1580,14 +1580,13 @@ export class HeadUpiComponent implements OnInit {
     setTimeout(() => (this.showBankDropdown = false), 200);
   }
 
-  isLive(upi: any): boolean {
-    const portal = (upi.portalDomain || "").toLowerCase();
-
-    const isReceiving = portal.includes("receiv");
-
-    return this.topupStatus && upi.isUpiActive && isReceiving;
-  }
-
+ isLive(upi: any): boolean {
+  return !!(
+    this.topupStatus &&     // Topup toggle ON
+    upi.isUpiActive &&      // Toggle ON
+    upi.status === 'active' // Status active
+  );
+}
   showTxnModal = false;
   selectedTxnData: any = null;
 

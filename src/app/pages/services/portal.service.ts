@@ -142,4 +142,19 @@ export class PortalService {
         catchError((error) => throwError(error)),
       );
   }
+
+     // GET
+getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
+  return this.http
+    .get<any>(`${baseUrl}/chief/currencies`, {
+      params: {
+        entityId: entityId,
+        entityType: entityRole,
+      },
+    })
+    .pipe(
+      map((response) => response),
+      catchError((error) => throwError(() => error))
+    );
+}
 }

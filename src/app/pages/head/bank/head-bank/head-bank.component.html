@@ -465,6 +465,7 @@
             <div class="flex items-center">
               <ng-container
                       *ngIf="
+                       (account.portalId || account.portal) &&
                     account.isBankActive &&
                       account.limitTime &&
                       isFutureLimitTime(account.limitTime);
@@ -500,12 +501,28 @@
                   public
                 </span>
 
-              <span
-                      class="text-xs font-medium text-[var(--color-primary)] truncate max-w-[120px]"
-                      [title]="account.portalDomain || account.portal || '-'"
-              >
-                  {{ account.portalDomain || account.portal || "-" }}
-                </span>
+            <div class="flex items-center gap-2">
+  <!-- Assigned / Unassigned -->
+  <span
+    class="text-xs font-medium"
+    [ngClass]="
+      (account.portalId || account.portal)
+        ? 'text-green-600'
+        : 'text-red-500'
+    "
+  >
+    {{ (account.portalId || account.portal) ? 'Assigned' : 'Unassigned' }}
+  </span>
+
+  <!-- TRIGGER BUTTON -->
+  <button
+    (click)="openCurrencyModal(account)"
+    class="flex items-center gap-1 px-2 py-1 text-[10px] rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition"
+  >
+    <span class="material-symbols-outlined text-xs">tune</span>
+
+  </button>
+</div>
 
               <span
                       *ngIf="account.currency"
@@ -971,6 +988,7 @@
       <div class="flex justify-between items-center mb-3">
         <ng-container
                 *ngIf="
+                 (account.portalId || account.portal) &&
             account.isBankActive &&
               account.limitTime &&
               isFutureLimitTime(account.limitTime);
@@ -1092,7 +1110,8 @@
             >
 
             <span class="text-xs font-medium text-[var(--color-font)] truncate">
-              {{ account.portalDomain || account.portal || "-" }}
+              <!-- {{ account.portalDomain || account.portal || "-" }} -->
+                {{ (account.portalId || account.portal) ? 'Assigned' : 'Unassigned' }}
             </span>
 
             <span
@@ -2743,5 +2762,11 @@
 
 
 
-
+<app-allot-currency
+  *ngIf="showCurrencyModal"
+  [entityId]="currentRoleId"
+  [entityRole]="role"
+  (close)="closeCurrencyModal()"
+>
+</app-allot-currency>
 

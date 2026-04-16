@@ -1891,4 +1891,15 @@ export class HeadBankComponent implements OnInit, OnDestroy {
     this.selectedTxnData = null;
     document.body.style.overflow = "auto";
   }
+
+  showCurrencyModal = false;
+
+openCurrencyModal(portal: any) {
+  this.selectedPortal = portal;
+  this.showCurrencyModal = true;
+}
+
+closeCurrencyModal() {
+  this.showCurrencyModal = false;
+}
 }
