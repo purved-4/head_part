@@ -36,6 +36,9 @@ import { WebsitePercentageModelComponent } from "../common/website-percentage-mo
 import { TimeZoneComponent } from "../common/time-zone/time-zone.component";
 import { CompartPercentageModleComponent } from "../common/compart-percentage-modle/compart-percentage-modle.component";
 import { TimeZonePipe } from "../pipes/time-zone.pipe";
+import { PaymentsMethodsComponent } from "../common/payments-methods/payments-methods.component";
+import { BanksComponent } from "../common/banks/banks.component";
+import { UpisComponent } from "../common/upis/upis.component";
 
 // shared.module.ts
 @NgModule({
@@ -73,7 +76,10 @@ import { TimeZonePipe } from "../pipes/time-zone.pipe";
     WebsitePercentageModelComponent,
     TimeZoneComponent,
     CompartPercentageModleComponent,
-    TimeZonePipe
+    TimeZonePipe,
+    PaymentsMethodsComponent,
+    BanksComponent,
+    UpisComponent
     
     
   ],
@@ -110,7 +116,10 @@ import { TimeZonePipe } from "../pipes/time-zone.pipe";
     WebsitePercentageModelComponent,
     TimeZoneComponent,
     CompartPercentageModleComponent,
-    TimeZonePipe
+    TimeZonePipe,
+    PaymentsMethodsComponent,
+    BanksComponent,
+    UpisComponent
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeComponent],
 })

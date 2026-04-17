@@ -1,0 +1,2129 @@
+<div
+        id="webcrumbs"
+        class="max-w-7xl mx-auto p-6 bg-[var(--color-surface)] rounded-xl shadow-sm border border-[var(--color-border)]"
+>
+  <!-- ========== HEADER ========== -->
+
+  <div
+          class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+  >
+    <!-- LEFT SECTION -->
+    <div class="flex items-center gap-3 w-full sm:w-auto">
+      <div
+              class="w-10 h-10 bg-[var(--color-primary)] rounded-lg flex items-center justify-center flex-shrink-0"
+      >
+        <span class="material-icons text-white text-xl">
+          account_balance_wallet
+        </span>
+      </div>
+
+      <div>
+        <h1 class="text-lg sm:text-xl font-bold text-[var(--color-font)]">
+          Manage UPIs
+        </h1>
+        <p class="text-[var(--color-muted)] text-xs sm:text-sm">
+          Manage UPI QR codes and their status
+        </p>
+      </div>
+    </div>
+
+    <!-- RIGHT SECTION -->
+    <div
+            class="flex flex-col sm:flex-row w-full sm:w-auto gap-3 sm:items-center"
+    >
+      <!-- TOP ROW (Mobile) -->
+      <div class="flex gap-2 w-full sm:w-auto">
+           <!-- Toggle -->
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-medium text-gray-600"> Topup </span>
+
+            <button
+                    (click)="changeTopupStatus()"
+                    class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors duration-300"
+                    [ngClass]="topupStatus ? 'bg-green-500' : 'bg-gray-300'"
+            >
+              <span
+                      class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300"
+                      [ngClass]="topupStatus ? 'translate-x-5' : 'translate-x-1'"
+              ></span>
+            </button>
+
+            <span
+                    class="text-xs font-semibold"
+                    [ngClass]="topupStatus ? 'text-green-600' : 'text-gray-500'"
+            >
+              {{ topupStatus ? "ON" : "OFF" }}
+            </span>
+          </div>
+        <!-- DROPDOWN -->
+        <div class="relative flex-1 sm:flex-none payment-dropdown-wrapper">
+          <button
+                  (click)="showPaymentDropdown = !showPaymentDropdown; $event.stopPropagation()"
+                  class="flex items-center gap-2 w-full sm:w-auto px-3 py-2 border border-[var(--color-border)] rounded-lg hover:bg-gray-100"
+          >
+            <span class="material-icons text-lg">
+              {{ selectedMethod === "bank" ? "account_balance" : "qr_code" }}
+            </span>
+            <span class="capitalize text-sm font-medium flex-1 text-left">
+              {{ selectedMethod === "UPI" ? "Bank" : "UPI" }}
+            </span>
+            <span class="material-icons text-sm">expand_more</span>
+          </button>
+
+          <!-- Dropdown -->
+          <div
+                  *ngIf="showPaymentDropdown"
+                  class="absolute left-0 mt-2 w-full sm:w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+          >
+            <div
+                    (click)="changePaymentType('bank')"
+                    class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            >
+              <span class="material-icons text-lg">account_balance</span>
+              <span>Bank</span>
+            </div>
+
+            <div
+                    (click)="changePaymentType('upi')"
+                    class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            >
+              <span class="material-icons text-lg">qr_code</span>
+              <span>UPI</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RELOAD -->
+        <div class="flex-shrink-0">
+          <app-reload (reload)="fetchUpis()"></app-reload>
+        </div>
+      </div>
+
+      <!-- ADD BUTTON (FULL WIDTH ON MOBILE) -->
+      <!-- <button
+              (click)="openAddModal()"
+              class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors duration-200"
+      >
+        <span class="material-icons mr-2">add</span>
+        Add New UPI
+      </button> -->
+    </div>
+  </div>
+  <!-- ========== FILTER SECTION ========== -->
+  <div
+          class="bg-[var(--color-bg)] rounded-lg p-4 mb-6 border border-[var(--color-border)]"
+  >
+    <h3
+            class="text-base font-semibold text-[var(--color-font)] mb-3 flex items-center"
+    >
+      <span class="material-icons mr-2 text-[var(--color-primary)]">
+        filter_list
+      </span>
+      Filter UPIs
+    </h3>
+
+    <!-- Main Filters Row -->
+    <div
+            class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4"
+    >
+      <!-- Search Input -->
+      <div class="relative flex-1 max-w-md">
+        <span
+                class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+        >
+          search
+        </span>
+        <input
+                type="text"
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="onSearchChange($event)"
+                placeholder="Search by UPI ID..."
+                class="pl-10 pr-4 py-2.5 w-full border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)]"
+        />
+      </div>
+
+      <!-- Portal Filter with Searchable Dropdown -->
+      <!-- <div class="relative flex-1 max-w-md portal-filter-container">
+        <span
+                class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+        >
+          language
+        </span>
+        <input
+                type="text"
+                [(ngModel)]="portalSearchTerm"
+                (ngModelChange)="filterPortals()"
+                (focus)="showPortalDropdown = true"
+                (blur)="onPortalInputBlur()"
+                placeholder="Search or select portal..."
+                class="pl-10 pr-4 py-2.5 w-full border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)]"
+        />
+      
+        <div
+                *ngIf="showPortalDropdown && filteredPortals.length > 0"
+                class="absolute z-30 w-full mt-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg max-h-60 overflow-y-auto"
+        >
+          <div
+                  *ngFor="let portal of filteredPortals"
+                  (mousedown)="selectPortal(portal)"
+                  class="px-4 py-2 hover:bg-[var(--color-hover)] cursor-pointer transition-colors duration-200 border-b border-[var(--color-border)] last:border-b-0"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="font-medium text-[var(--color-font)]">
+                  {{ portal.domain }}
+                </div>
+                <div
+                        class="text-xs text-[var(--color-muted)] flex items-center mt-1"
+                >
+                  <span class="material-icons mr-1 text-xs"
+                  >currency_exchange</span
+                  >
+                  {{ portal.currency }}
+                </div>
+              </div>
+              <span
+                      *ngIf="selectedPortal?.id === portal.id"
+                      class="material-icons text-[var(--color-primary)] text-sm ml-2"
+              >
+                check
+              </span>
+            </div>
+          </div>
+          <div
+                  *ngIf="filteredPortals.length === 0"
+                  class="px-4 py-3 text-center text-[var(--color-muted)] text-sm"
+          >
+            No portals found
+          </div>
+        </div>
+        <button
+                *ngIf="selectedPortal"
+                (mousedown)="clearPortalFilter()"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-[var(--color-hover)] rounded-full transition-colors"
+                title="Clear portal filter"
+        >
+          <span class="material-icons text-[var(--color-danger)] text-sm">
+            close
+          </span>
+        </button>
+      </div> -->
+
+
+      <!-- BANK FILTER -->
+<div class="relative flex-1 max-w-md bank-filter-container">
+  <span
+    class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+  >
+    account_balance
+  </span>
+
+  <input
+    type="text"
+    [(ngModel)]="bankSearchTerm"
+    (ngModelChange)="filterBanks()"
+    (focus)="showBankDropdown = true"
+    (blur)="onBankBlur()"
+    placeholder="Search or select bank..."
+    class="pl-10 pr-10 py-2.5 w-full border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+  />
+
+  <!-- DROPDOWN -->
+  <div
+    *ngIf="showBankDropdown && filteredBanks.length > 0"
+    class="absolute z-30 w-full mt-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg max-h-60 overflow-y-auto"
+  >
+    <div
+      *ngFor="let bank of filteredBanks"
+      (mousedown)="selectBank(bank)"
+      class="px-4 py-2 hover:bg-[var(--color-hover)] cursor-pointer border-b border-[var(--color-border)] last:border-b-0"
+    >
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-[var(--color-font)]">
+          {{ bank.accountHolderName }}
+        </span>
+
+        <!-- Selected Tick -->
+        <span
+          *ngIf="selectedBank?.id === bank.id"
+          class="material-icons text-[var(--color-primary)] text-sm"
+        >
+          check
+        </span>
+      </div>
+    </div>
+
+    <!-- Empty -->
+    <div
+      *ngIf="filteredBanks.length === 0"
+      class="px-4 py-3 text-center text-[var(--color-muted)] text-sm"
+    >
+      No banks found
+    </div>
+  </div>
+
+  <!-- CLEAR BUTTON -->
+  <button
+    *ngIf="selectedBank"
+    (mousedown)="clearBankFilter()"
+    class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-[var(--color-hover)] rounded-full"
+  >
+    <span class="material-icons text-[var(--color-danger)] text-sm">
+      close
+    </span>
+  </button>
+</div>
+
+      <!-- Status Filter -->
+      <!-- status -->
+      <div class="relative w-full sm:w-48">
+  <span
+          class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+  >
+    filter_alt
+  </span>
+
+        <select
+                [(ngModel)]="filterStatus"
+                (change)="onFilterChange()"
+                class="pl-10 pr-4 py-2.5 w-full border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors duration-200 bg-[var(--color-surface)]"
+        >
+          <option value="">All</option>
+          <option value="isUpi">isUpi</option>
+          <option value="isTime">isTime</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ===== MAX LIMIT FILTER (single field) ===== -->
+    <!-- <div class="mb-4 flex items-center gap-4"> -->
+    <div class="mb-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+      <label
+              class="text-sm font-medium text-[var(--color-font)] whitespace-nowrap"
+      >
+        Max Limit (₹):
+      </label>
+      <input
+              type="number"
+              [(ngModel)]="maxLimit"
+              (ngModelChange)="onFilterChange()"
+              placeholder="e.g. 50000"
+              step="any"
+              class="w-40 sm:w-40 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
+      />
+      <!-- <span class="text-xs text-[var(--color-muted)]">
+        (Shows UPIs with Limit ≤ this value)
+      </span> -->
+      <span
+              class="text-xs text-[var(--color-muted)] break-words sm:whitespace-nowrap"
+      >
+        (Shows UPIs with Limit ≤ this value)
+      </span>
+    </div>
+
+
+
+    <!-- Transaction Range Filter Dropdown -->
+    <div class="mb-4">
+      <button
+              type="button"
+              (click)="showAmountFilter = !showAmountFilter"
+              class="inline-flex items-center px-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-hover)] transition-colors duration-200 font-medium text-[var(--color-font)]"
+      >
+        <span class="material-icons mr-2 text-[var(--color-primary)]">
+          filter_alt
+        </span>
+        Transaction Range Filter
+        <span class="material-icons ml-2">
+          {{ showAmountFilter ? "expand_less" : "expand_more" }}
+        </span>
+      </button>
+
+      <!-- Transaction Range Filter Content -->
+      <div
+              *ngIf="showAmountFilter"
+              class="mt-3 p-4 border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)]"
+      >
+        <div class="grid grid-cols-1 gap-6">
+          <div>
+            <label
+                    class="block text-sm font-medium text-[var(--color-font)] mb-2"
+            >
+              Transaction Range (₹)
+              <span class="text-xs text-[var(--color-muted)] ml-1">
+                (Applies to Min & Max amounts)
+              </span>
+            </label>
+            <div class="flex flex-col gap-2">
+              <!-- <div class="flex items-center gap-2"> -->
+
+              <div
+                      class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
+              >
+                <input
+                        type="number"
+                        [(ngModel)]="transactionMinAmount"
+                        (ngModelChange)="onFilterChange()"
+                        placeholder="Min ₹"
+                        step="any"
+                        class="flex-1 sm:flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-bg)] transition-colors duration-200 text-sm"
+                />
+                <!-- <span class="text-[var(--color-muted)]">to</span> -->
+                <span class="text-[var(--color-muted)] text-center sm:text-left"
+                >to</span
+                >
+                <input
+                        type="number"
+                        [(ngModel)]="transactionMaxAmount"
+                        (ngModelChange)="onFilterChange()"
+                        placeholder="Max ₹"
+                        step="any"
+                        class="flex-1 sm:flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-bg)] transition-colors duration-200 text-sm"
+                />
+              </div>
+              <div
+                      *ngIf="transactionFilterActive"
+                      class="text-xs text-[var(--color-muted)]"
+              >
+                Filtering Min/Max: {{ transactionMinAmount || 0 }} -
+                {{ transactionMaxAmount || "∞" }} ₹
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons & Active Filters Display -->
+    <div
+            class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[var(--color-border)]"
+    >
+      <div
+              class="text-sm text-[var(--color-muted)] flex flex-wrap items-center gap-2"
+      >
+        <!-- Active Filters Chips -->
+        <div
+                *ngIf="selectedPortal"
+                class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
+        >
+          <span class="material-icons mr-1 text-sm">language</span>
+          {{ selectedPortal.domain }}
+          <button
+                  (click)="clearPortalFilter()"
+                  class="ml-2 hover:text-[var(--color-danger)] transition-colors"
+          >
+            <span class="material-icons text-sm">close</span>
+          </button>
+        </div>
+
+        <div
+                *ngIf="filterStatus"
+                class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
+        >
+          <span class="material-icons mr-1 text-sm">toggle_on</span>
+          {{ filterStatus === "active" ? "Active" : "Inactive" }}
+          <button
+                  (click)="filterStatus = ''; onFilterChange()"
+                  class="ml-2 hover:text-[var(--color-danger)] transition-colors"
+          >
+            <span class="material-icons text-sm">close</span>
+          </button>
+        </div>
+
+        <div
+                *ngIf="searchTerm"
+                class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
+        >
+          <span class="material-icons mr-1 text-sm">search</span>
+          "{{ searchTerm }}"
+          <button
+                  (click)="searchTerm = ''; onSearch()"
+                  class="ml-2 hover:text-[var(--color-danger)] transition-colors"
+          >
+            <span class="material-icons text-sm">close</span>
+          </button>
+        </div>
+
+        <!-- Max Limit Chip -->
+        <div
+                *ngIf="limitFilterActive"
+                class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
+        >
+          <span class="material-icons mr-1 text-sm">currency_rupee</span>
+          Max Limit: ≤ {{ maxLimit }} ₹
+          <button
+                  (click)="clearLimitFilter()"
+                  class="ml-2 hover:text-[var(--color-danger)] transition-colors"
+          >
+            <span class="material-icons text-sm">close</span>
+          </button>
+        </div>
+
+        <div
+                *ngIf="transactionFilterActive"
+                class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full"
+        >
+          <span class="material-icons mr-1 text-sm">currency_rupee</span>
+          Transaction: {{ transactionMinAmount || "0" }} -
+          {{ transactionMaxAmount || "∞" }} ₹
+          <button
+                  (click)="clearTransactionFilter()"
+                  class="ml-2 hover:text-[var(--color-danger)] transition-colors"
+          >
+            <span class="material-icons text-sm">close</span>
+          </button>
+        </div>
+
+        <span
+                *ngIf="activeFilters > 0"
+                class="text-[var(--color-primary)] font-medium"
+        >
+          {{ activeFilters }} active filter(s)
+        </span>
+        <span *ngIf="activeFilters === 0" class="text-[var(--color-muted)]">
+          No filters applied
+        </span>
+      </div>
+
+      <!-- <div class="flex gap-2">
+        <button
+          (click)="onFilterChange()"
+          class="inline-flex items-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors duration-200 shadow-sm"
+        >
+          <span class="material-icons mr-2">filter_alt</span>
+          Apply 
+        </button>
+        <button
+          (click)="resetFilters()"
+          class="inline-flex items-center px-4 py-2.5 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] transition-colors duration-200 font-medium border border-[var(--color-border)] shadow-sm"
+        >
+          <span class="material-icons mr-2">refresh</span>
+          Reset
+        </button>
+      </div> -->
+      <div class="flex items-center gap-2">
+        <!-- GRID / TABLE TOGGLE -->
+        <div
+                class="hidden md:flex items-center gap-1 border border-[var(--color-border)] rounded-lg p-1 bg-[var(--color-bg)]"
+        >
+          <button
+                  (click)="toggleView('table')"
+                  [class.bg-[var(--color-primary)]]="viewMode === 'table'"
+                  [class.text-white]="viewMode === 'table'"
+                  class="px-3 py-2 rounded flex items-center justify-center"
+                  title="Table View"
+          >
+            <span class="material-icons text-sm">table_rows</span>
+          </button>
+
+          <button
+                  (click)="toggleView('grid')"
+                  [class.bg-[var(--color-primary)]]="viewMode === 'grid'"
+                  [class.text-white]="viewMode === 'grid'"
+                  class="px-3 py-2 rounded flex items-center justify-center"
+                  title="Grid View"
+          >
+            <span class="material-icons text-sm">grid_view</span>
+          </button>
+        </div>
+
+        <!-- APPLY BUTTON -->
+        <button
+                (click)="onFilterChange()"
+                class="inline-flex items-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors duration-200 shadow-sm"
+        >
+          <span class="material-icons mr-2">filter_alt</span>
+          Apply
+        </button>
+
+        <!-- RESET BUTTON -->
+        <button
+                (click)="resetFilters()"
+                class="inline-flex items-center px-4 py-2.5 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] transition-colors duration-200 font-medium border border-[var(--color-border)] shadow-sm"
+        >
+          <span class="material-icons mr-2">refresh</span>
+          Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== UPI TABLE ========== -->
+  <div
+          *ngIf="viewMode === 'table'"
+          class="overflow-x-auto bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]"
+  >
+    <table class="min-w-full divide-y divide-[var(--color-border)]">
+      <thead class="bg-[var(--color-bg)]">
+      <tr>
+        <th
+                class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+        >
+          #
+        </th>
+   
+        <th
+                class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+        >
+          UPI ID
+        </th>
+        <th
+                class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+        >
+          Bank Details
+        </th>
+        <th
+                class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+        >
+          Limit
+        </th>
+    
+
+        <th
+                class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+        >
+          QR
+        </th>
+        <th
+                class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+        >
+          Status
+        </th>
+
+        <th
+                class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+        >
+          Actions
+        </th>
+      </tr>
+      </thead>
+      <tbody
+              class="bg-[var(--color-surface)] divide-y divide-[var(--color-border)]"
+      >
+      <tr
+              *ngFor="let upi of upis; let i = index"
+              class="hover:bg-[var(--color-hover)] transition-colors duration-150"
+      >
+        <td class="px-4 py-3 whitespace-nowrap">
+      <span
+              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold border"
+            [ngClass]="
+  isLive(upi)
+    ? 'bg-green-100 text-green-700 border-green-300'
+    : 'bg-red-100 text-red-700 border-red-300'
+"
+      >
+        <span
+                class="w-2.5 h-2.5 rounded-full"
+                        [ngClass]="
+  isLive(upi)
+    ? 'bg-green-500 blink-dot'
+    : 'bg-red-500'
+"
+        ></span>
+        LIVE
+      </span>
+        </td>
+      
+        <td class="px-4 py-3 whitespace-nowrap">
+          <div class="flex items-center">
+              <span class="material-icons mr-2 text-[var(--color-muted)]">
+                credit_card
+              </span>
+            <span
+                    class="text-sm text-[var(--color-font)] font-mono bg-[var(--color-bg)] px-2 py-1 rounded border border-[var(--color-border)]"
+            >{{ upi.vpa || "-" }}</span
+            >
+          </div>
+        </td>
+
+        <td class="px-4 py-3 whitespace-nowrap">
+          <div
+                  class="flex items-center cursor-pointer justify-right"
+                  (mousemove)="showTooltip($event, upi)"
+                  (mouseleave)="hideTooltip()"
+                  (click)="openTxnModal(upi)"
+          >
+    <span class="material-symbols-outlined text-[var(--color-primary)] text-sm mr-1">
+      info
+    </span>
+            <span class="text-xs text-[var(--color-primary)] font-medium">
+      View
+    </span>
+          </div>
+        </td>
+        <td class="px-4 py-3 whitespace-nowrap">
+            <span class="text-sm text-[var(--color-font)] font-semibold"
+            >₹{{ upi.limitAmount || "0" }}</span
+            >
+        </td>
+        <!-- <td class="px-4 py-4 whitespace-nowrap">
+          <div class="flex items-center justify-between gap-2">
+
+            <div class="flex items-center gap-2">
+      <span
+              class="material-icons text-[18px]"
+              [ngClass]="
+          upi.limitTime && isFutureLimitTime(upi.limitTime)
+            ? 'text-green-500'
+            : 'text-red-500'
+        "
+      >
+        schedule
+      </span>
+
+              <span
+                      class="text-sm font-semibold"
+                      [ngClass]="
+          upi.limitTime && isFutureLimitTime(upi.limitTime)
+            ? 'text-green-600'
+            : 'text-red-500'
+        "
+              >
+        {{ upi.limitTime ? (upi.limitTime | date: "short") : "Not Set" }}
+      </span>
+            </div>
+
+            <div class="relative group">
+              <button
+                      (click)="openLimitModal(upi)"
+                      class="p-1.5 rounded hover:bg-[var(--color-hover)]"
+              >
+       <span
+               class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-sm"
+       >
+                    calendar_clock
+                  </span>
+              </button>
+
+              <div
+                      class="absolute right-0 bottom-full mb-1 px-2 py-1 text-[10px] bg-gray-900 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
+              >
+                Set Limit Time
+              </div>
+            </div>
+
+          </div>
+        </td> -->
+        <td class="px-4 py-3 whitespace-nowrap">
+          <div class="flex items-center">
+            <div
+                    *ngIf="upi.qrImageUrl"
+                    class="relative cursor-pointer"
+                    (click)="openImageModal(upi.qrImageUrl)"
+            >
+              <div
+                      class="w-12 h-12 bg-[var(--color-bg)] rounded border border-[var(--color-border)] flex items-center justify-center overflow-hidden"
+              >
+                <img
+                        [src]="upi.qrImageUrl"
+                        alt="QR Code"
+                        class="w-10 h-10 object-contain"
+                />
+              </div>
+            </div>
+            <div
+                    *ngIf="!upi.qrImageUrl"
+                    class="flex items-center text-[var(--color-muted)] text-sm"
+            >
+              <span class="material-icons mr-1"> image_not_supported </span>
+              No QR
+            </div>
+          </div>
+        </td>
+        <td class="px-4 py-3 whitespace-nowrap">
+          <div class="flex items-center gap-2">
+            <!-- Toggle Switch -->
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                      type="checkbox"
+                      class="sr-only peer"
+                      [checked]="upi.isUpiActive"
+                      (click)="openUpiToggleConfirm(upi, $event)"
+              />
+
+              <div
+                      class="w-11 h-6 rounded-full transition-all duration-300 peer-checked:bg-green-500 bg-red-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"
+              ></div>
+            </label>
+
+            <!-- Status Text -->
+            <span
+                    class="text-xs font-semibold"
+                    [ngClass]="upi.isUpiActive ? 'text-green-600' : 'text-red-500'"
+            >
+                {{ upi.isUpiActive ? "Active" : "Inactive" }}
+              </span>
+          </div>
+        </td>
+
+        <td class="px-4 py-3 whitespace-nowrap">
+          <!-- Actions Dropdown -->
+          <div class="relative action-dropdown-wrapper">
+            <button
+                    (click)="toggleActionsDropdown(upi.id); $event.stopPropagation()"
+                    class="p-2 text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-hover)] rounded-lg transition-colors"
+                    title="Actions"
+            >
+              <span class="material-icons">more_vert</span>
+            </button>
+            <div
+                    *ngIf="activeDropdownUpiId === upi.id"
+                    class="absolute right-0 mt-2 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg z-30"
+            >
+              <button
+                      (click)="toggleUpiStatus(upi); activeDropdownUpiId = null"
+                      class="w-full px-4 py-3 text-left text-sm text-[var(--color-font)] hover:bg-[var(--color-hover)] flex items-center gap-3 border-b border-[var(--color-border)]"
+              >
+                <span class="material-symbols-outlined"> auto_delete </span>
+                <span>Delete</span>
+              </button>
+              <button
+                      (click)="openUpdateModal(upi); activeDropdownUpiId = null"
+                      class="w-full px-4 py-3 text-left text-sm text-[var(--color-font)] hover:bg-[var(--color-hover)] flex items-center gap-3"
+              >
+                <span class="material-icons">edit</span>
+                <span>Edit</span>
+              </button>
+              <!-- <button
+                (click)="openLimitModal(upi); activeDropdownUpiId = null"
+                class="w-full px-4 py-3 text-left text-sm hover:bg-[var(--color-hover)] flex items-center gap-3"
+              >
+                <span class="material-icons">schedule</span>
+                <span>Set Limit Time</span>
+              </button> -->
+              <button
+                      (click)="openCapacity(upi, 'UPI')"
+                      class="w-full px-4 py-3 text-left text-sm hover:bg-[var(--color-hover)] flex items-center gap-3"
+              >
+                <span class="material-icons">info</span>
+                <span>View capacity</span>
+              </button>
+            </div>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="upis.length === 0" class="text-center py-12">
+      <div class="flex flex-col items-center justify-center">
+        <div
+                class="w-16 h-16 bg-[var(--color-bg)] rounded-full flex items-center justify-center mb-4 border border-[var(--color-border)]"
+        >
+          <span class="material-icons text-[var(--color-muted)] text-3xl">
+            search_off
+          </span>
+        </div>
+        <h3 class="text-lg font-semibold text-[var(--color-font)] mb-2">
+          No UPIs found
+        </h3>
+        <p class="text-[var(--color-muted)] max-w-md mb-6 text-sm">
+          {{
+          searchTerm ||
+          filterStatus ||
+          selectedPortal ||
+          limitFilterActive ||
+          transactionFilterActive
+          ? "Try adjusting your search or filters"
+          : "Get started by adding your first UPI"
+          }}
+        </p>
+        <div class="flex gap-3">
+          <button
+                  *ngIf="
+              !searchTerm &&
+              !filterStatus &&
+              !selectedPortal &&
+              !limitFilterActive &&
+              !transactionFilterActive
+            "
+                  (click)="openAddModal()"
+                  class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors duration-200"
+          >
+            <span class="material-icons mr-2">add</span>
+            Add Your First UPI
+          </button>
+          <button
+                  *ngIf="
+              searchTerm ||
+              filterStatus ||
+              selectedPortal ||
+              limitFilterActive ||
+              transactionFilterActive
+            "
+                  (click)="resetFilters()"
+                  class="inline-flex items-center px-4 py-2 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] transition-colors duration-200 font-medium border border-[var(--color-border)]"
+          >
+            <span class="material-icons mr-2">refresh</span>
+            Clear Filters
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div
+            *ngIf="totalElements > 0"
+            class="px-4 py-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
+    >
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="text-sm text-[var(--color-muted)]">
+          Showing {{ (currentPage - 1) * pageSize + 1 }} to
+          {{ Math.min(currentPage * pageSize, totalElements) }} of
+          {{ totalElements }} entries
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-[var(--color-muted)]"
+            >Rows per page:</span
+            >
+            <select
+                    [(ngModel)]="pageSize"
+                    (change)="onPageSizeChange()"
+                    class="text-sm border border-[var(--color-border)] rounded px-2 py-1 bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-primary)]"
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-1">
+            <button
+                    (click)="prevPage()"
+                    [disabled]="currentPage === 1"
+                    class="p-2 rounded border border-[var(--color-border)] hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <span class="material-icons text-[var(--color-font)]">
+                chevron_left
+              </span>
+            </button>
+
+            <div class="flex items-center gap-1">
+              <button
+                      *ngFor="let page of getPageNumbers()"
+                      (click)="goToPage(page)"
+                      [class.bg-[var(--color-primary)]!]="currentPage === page"
+                      [class.text-white!]="currentPage === page"
+                      [class.bg-[var(--color-surface)]!]="currentPage !== page"
+                      [class.text-[var(--color-font)]!]="currentPage !== page"
+                      class="w-8 h-8 rounded border border-[var(--color-border)] flex items-center justify-center text-sm font-medium hover:bg-[var(--color-hover)] transition-colors"
+              >
+                {{ page }}
+              </button>
+            </div>
+
+            <button
+                    (click)="nextPage()"
+                    [disabled]="currentPage >= totalPages()"
+                    class="p-2 rounded border border-[var(--color-border)] hover:bg-[var(--color-surface)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <span class="material-icons text-[var(--color-font)]">
+                chevron_right
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRID VIEW - Optimized with compact amounts and prominent QR -->
+  <div
+          *ngIf="viewMode === 'grid'"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+  >
+    <div
+            *ngFor="let upi of upis; let i = index"
+            class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 shadow-sm hover:shadow-md transition"
+    >
+      <!-- HEADER -->
+      <div class="flex justify-between items-center mb-3">
+       
+
+        <!-- Actions -->
+        <div class="relative flex-shrink-0 action-dropdown-wrapper">
+          <button
+                  (click)="toggleActionsDropdown(upi.id); $event.stopPropagation()"
+                  class="p-2 rounded-lg hover:bg-[var(--color-hover)]"
+          >
+            <span class="material-icons text-[18px]">more_vert</span>
+          </button>
+
+          <div
+                  *ngIf="activeDropdownUpiId === upi.id"
+                  class="absolute right-0 top-10 w-44 bg-white border border-[var(--color-border)] rounded-lg shadow-lg z-50 overflow-hidden"
+          >
+            <button
+                    (click)="toggleUpiStatus(upi); activeDropdownUpiId = null"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-[var(--color-hover)]"
+            >
+              <span class="material-icons text-[18px] text-red-500">delete</span>
+              Delete
+            </button>
+
+            <button
+                    (click)="openUpdateModal(upi); activeDropdownUpiId = null"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-[var(--color-hover)]"
+            >
+              <span class="material-icons text-[18px]">edit</span>
+              Edit
+            </button>
+
+            <!-- <button
+                    (click)="openLimitModal(upi); activeDropdownUpiId = null"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-[var(--color-hover)]"
+            >
+              <span class="material-icons text-[18px]">schedule</span>
+              Set Limit Time
+            </button> -->
+
+            <button
+                    (click)="openCapacity(upi, 'UPI')"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-[var(--color-hover)]"
+            >
+              <span class="material-icons text-[18px]">info</span>
+              View capacity
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPI ID -->
+      <div class="mb-3">
+        <div class="text-xs text-[var(--color-muted)] mb-1">UPI ID</div>
+        <div
+                class="text-sm font-mono bg-[var(--color-bg)] px-3 py-2 rounded-lg border truncate"
+        >
+          {{ upi.vpa || "-" }}
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="flex gap-3 items-center">
+        <!-- LEFT (Details) -->
+        <div class="flex-1 space-y-2">
+          <!-- Limit -->
+          <div
+                  class="bg-[var(--color-bg)] rounded-lg px-3 py-2 flex justify-between"
+          >
+            <span class="text-xs text-[var(--color-muted)]">Limit</span>
+            <span class="font-semibold">₹{{ upi.limitAmount || "0" }}</span>
+          </div>
+
+          <div
+                  class="bg-[var(--color-bg)] rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer"
+                  (mousemove)="showTooltip($event, upi)"
+                  (mouseleave)="hideTooltip()"
+                  (click)="openTxnModal(upi)"
+          >
+  <span class="text-xs text-[var(--color-muted)] flex items-center gap-1">
+    <span class="material-symbols-outlined text-[14px] text-[var(--color-primary)]">
+      info
+    </span>
+    Bank Details
+  </span>
+
+            <span class="text-xs text-[var(--color-primary)] font-medium">
+    View
+  </span>
+          </div>
+
+          <!-- Time -->
+          <!-- <div class="bg-[var(--color-bg)] rounded-lg px-3 py-2">
+            <div class="text-xs text-[var(--color-muted)] mb-0.5">
+              Limit Time
+            </div>
+            <div
+                    class="text-sm font-semibold"
+                    [ngClass]="
+          upi.limitTime && isFutureLimitTime(upi.limitTime)
+            ? 'text-green-600'
+            : 'text-red-500'
+        "
+            >
+              {{ upi.limitTime ? (upi.limitTime | date: "short") : "Not Set" }}
+            </div>
+          </div> -->
+
+          <!-- Status Toggle -->
+          <div
+                  class="bg-[var(--color-bg)] rounded-lg px-3 py-2 flex items-center justify-between"
+          >
+            <span class="text-xs text-[var(--color-muted)]">Status</span>
+
+            <div class="flex items-center gap-2">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                        type="checkbox"
+                        class="sr-only peer"
+                        [checked]="upi.isUpiActive"
+                        (click)="openUpiToggleConfirm(upi, $event)"
+                />
+
+                <div
+                        class="w-11 h-6 rounded-full transition-all duration-300 peer-checked:bg-green-500 bg-red-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"
+                ></div>
+              </label>
+
+              <span
+                      class="text-xs font-semibold"
+                      [ngClass]="upi.isUpiActive ? 'text-green-600' : 'text-red-500'"
+              >
+          {{ upi.isUpiActive ? "Active" : "Inactive" }}
+        </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT (QR) -->
+        <div class="flex flex-col items-center">
+          <div
+                  class="w-20 h-20 bg-[var(--color-bg)] rounded-lg border flex items-center justify-center overflow-hidden shadow-sm"
+
+          >
+            <img
+                    *ngIf="upi.qrImageUrl"
+                    [src]="upi.qrImageUrl"
+                    class="w-16 h-16 object-contain"
+            />
+
+            <span
+                    *ngIf="!upi.qrImageUrl"
+                    class="material-icons text-2xl text-[var(--color-muted)]"
+            >
+        image_not_supported
+      </span>
+          </div>
+
+          <span
+                  *ngIf="upi.qrImageUrl"
+                  class="text-xs text-[var(--color-primary)] mt-1"
+          >
+      View
+    </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRID PAGINATION -->
+  <div
+          *ngIf="viewMode === 'grid' && totalElements > 0"
+          class="px-4 py-4 mt-4 flex justify-center"
+  >
+    <div class="flex items-center gap-2">
+      <!-- Prev -->
+      <button
+              (click)="prevPage()"
+              [disabled]="currentPage === 1"
+              class="px-3 py-1.5 rounded border border-[var(--color-border)] hover:bg-[var(--color-hover)] disabled:opacity-40"
+      >
+        Prev
+      </button>
+
+      <!-- Pages -->
+      <button
+              *ngFor="let page of getPageNumbers()"
+              (click)="goToPage(page)"
+              [class.bg-[var(--color-primary)]]="currentPage === page"
+              [class.text-white]="currentPage === page"
+              class="w-8 h-8 rounded border border-[var(--color-border)] flex items-center justify-center text-sm font-medium hover:bg-[var(--color-hover)]"
+      >
+        {{ page }}
+      </button>
+
+      <!-- Next -->
+      <button
+              (click)="nextPage()"
+              [disabled]="currentPage >= totalPages()"
+              class="px-3 py-1.5 rounded border border-[var(--color-border)] hover:bg-[var(--color-hover)] disabled:opacity-40"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+  <!-- ========== ADD UPI MODAL – SEARCH‑BASED ========== -->
+  <div
+          *ngIf="showAddModal"
+          class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+  >
+    <div
+            class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg border border-[var(--color-border)]"
+            (click)="$event.stopPropagation()"
+    >
+      <div
+              class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+      >
+        <h3
+                class="text-lg font-semibold text-[var(--color-font)] flex items-center"
+        >
+        <span class="material-symbols-outlined mr-2 text-[var(--color-primary)]">
+          add_circle
+        </span>
+          Add New UPI
+        </h3>
+        <button
+                (click)="closeAddModal()"
+                class="p-1 hover:bg-[var(--color-hover)] rounded-full transition-colors"
+        >
+          <span class="material-symbols-outlined text-[var(--color-muted)]">close</span>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <form
+                [formGroup]="addUpiForm"
+                (ngSubmit)="submitAddUpi()"
+                class="space-y-4"
+        >
+          <!-- Portal Selection – SEARCH BASED -->
+          <!-- <div class="space-y-1">
+            <label
+              class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+            >
+              <span class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base">
+                public
+              </span>
+              Portal <span class="text-[var(--color-danger)] ml-1">*</span>
+            </label>
+            <div class="relative modal-portal-container" #upiPortalContainer>
+              <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] text-base">
+                  search
+                </span>
+                <input
+                  type="text"
+                  [(ngModel)]="upiPortalSearch"
+                  (ngModelChange)="onUpiPortalSearch()"
+                  (click)="openUpiPortalDropdown($event)"
+                  (focus)="onUpiPortalFocus()"
+                  placeholder="Search and select portal..."
+                  class="w-full pl-10 pr-10 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-font)]"
+                  [class.border-[var(--color-danger)]]="
+                    addUpiForm.get('portalId')?.touched &&
+                    addUpiForm.get('portalId')?.invalid
+                  "
+                  [ngModelOptions]="{ standalone: true }"
+                />
+                <button
+                  *ngIf="selectedUpiPortal"
+                  type="button"
+                  (click)="clearUpiPortalSelection()"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors"
+                >
+                  <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+
+              <div
+                *ngIf="showUpiPortalDropdown"
+                class="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
+              >
+                <div
+                  *ngIf="upiFilteredPortals.length === 0"
+                  class="px-3 py-2 text-sm text-[var(--color-muted)] italic"
+                >
+                  No portals found
+                </div>
+                <div
+                  *ngFor="let site of upiFilteredPortals"
+                  class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-sm text-[var(--color-font)] border-b border-[var(--color-border)] last:border-b-0 flex justify-between items-center transition-colors"
+                  (click)="selectUpiPortal(site)"
+                >
+                  <span>{{ site.domain }}</span>
+                  <span class="text-xs text-[var(--color-muted)]">{{
+                    site.currency
+                  }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              *ngIf="
+                addUpiForm.get('portalId')?.invalid &&
+                addUpiForm.get('portalId')?.touched
+              "
+              class="text-[var(--color-danger)] text-xs mt-1 flex items-center"
+            >
+              <span class="material-symbols-outlined mr-1 text-sm">error</span>
+              Please select a portal
+            </div>
+          </div> -->
+
+          <div>
+            <label
+                    class="block text-sm font-medium text-[var(--color-font)] mb-1"
+            >
+              UPI ID (VPA) <span class="text-[var(--color-danger)]">*</span>
+            </label>
+            <div class="flex gap-2">
+              <input
+                      formControlName="vpa"
+                      type="text"
+                      placeholder="username@paytm"
+                      class="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-font)]"
+                      [class.border-[var(--color-danger)]]="
+                addUpiForm.get('vpa')?.touched &&
+                addUpiForm.get('vpa')?.invalid
+              "
+              />
+
+              <div class="flex gap-1">
+                <!-- QR BUTTON -->
+                <button
+                        type="button"
+                        (click)="setQrMode('generate'); generateQrFromVpa()"
+                        [class.bg-[var(--color-primary)]]="qrMode === 'generate'"
+                        [class.text-white]="qrMode === 'generate'"
+                        class="px-3 py-2 border rounded-lg"
+                >
+                  QR
+                </button>
+
+                <!-- UPLOAD BUTTON -->
+                <button
+                        type="button"
+                        (click)="setQrMode('upload')"
+                        [class.bg-[var(--color-primary)]]="qrMode === 'upload'"
+                        [class.text-white]="qrMode === 'upload'"
+                        class="px-3 py-2 border rounded-lg"
+                >
+                  Upload
+                </button>
+
+              </div>
+            </div>
+
+            <div
+                    *ngIf="
+              addUpiForm.get('vpa')?.touched && addUpiForm.get('vpa')?.invalid
+            "
+                    class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
+            >
+              <span class="material-symbols-outlined mr-1 text-sm">error</span>
+              Valid UPI ID required
+            </div>
+
+            <div *ngIf="qrMode === 'upload' && !selectedImage">
+              <label class="text-sm font-semibold text-[var(--color-font)] flex items-center gap-1 mb-2">
+                <span class="material-symbols-outlined text-[var(--color-primary)]">upload</span>
+                Upload QR Code
+              </label>
+
+              <!-- Upload Box -->
+              <div
+                      class="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition hover:bg-[var(--color-hover)]"
+                      (click)="fileInput.click()"
+              >
+    <span class="material-symbols-outlined text-3xl text-[var(--color-muted)] mb-2">
+      cloud_upload
+    </span>
+
+                <div class="text-sm text-[var(--color-font)]">
+                  Click to upload QR image
+                </div>
+
+                <div class="text-xs text-[var(--color-muted)] mt-1">
+                  PNG, JPG supported
+                </div>
+
+                <!-- Hidden Input -->
+                <input
+                        #fileInput
+                        type="file"
+                        accept="image/*"
+                        (change)="onQrFileSelected($event)"
+                        class="hidden"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- QR Display Section -->
+          <div
+                  *ngIf="qrData || selectedImage"
+                  class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)]"
+          >
+            <div class="flex justify-between items-center mb-2">
+              <label class="text-sm font-medium text-[var(--color-font)] flex items-center gap-1">
+                <span class="material-symbols-outlined text-base">qr_code_scanner</span>
+                QR Code
+              </label>
+              <div class="flex gap-1">
+                <button
+                        type="button"
+                        (click)="downloadQr()"
+                        *ngIf="generatedFile "
+                        class="px-2 py-1 text-xs bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-primary-dark)] flex items-center gap-1 transition-colors"
+                >
+                  <span class="material-symbols-outlined text-sm">download</span>
+                  Save
+                </button>
+                <button
+                        type="button"
+                        (click)="removeQr()"
+                        class="px-2 py-1 text-xs bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] rounded hover:bg-[var(--color-hover)] flex items-center gap-1 transition-colors"
+                >
+                  <span class="material-symbols-outlined text-sm">delete</span>
+                  Remove
+                </button>
+              </div>
+            </div>
+
+            <!-- QR Code Display - Shows either generated QR or uploaded image -->
+            <div class="flex justify-center">
+              <div class="p-2 bg-white rounded border border-[var(--color-border)]">
+
+                <!-- MANUAL IMAGE -->
+                <img
+                        *ngIf="selectedImage"
+                        [src]="selectedImage"
+                        class="w-[120px] h-[120px] object-contain"
+                />
+
+                <div *ngIf="manualQrFile"
+                     class="text-green-600 text-xs mt-2 text-center flex items-center justify-center gap-1">
+
+                  <span class="material-symbols-outlined text-sm">check_circle</span>
+                  QR uploaded successfully
+                </div>
+
+
+                <!-- GENERATED QR -->
+                <qrcode
+                        *ngIf="qrData && !selectedImage"
+                        #qrcodeElem
+                        [qrdata]="qrData"
+                        [width]="120"
+                ></qrcode>
+
+              </div>
+            </div>
+
+
+
+            <!-- File name indicator for manual upload -->
+            <div *ngIf="manualQrFile" class="text-xs text-[var(--color-muted)] mt-2 text-center">
+              <span class="material-symbols-outlined text-xs align-middle">check_circle</span>
+              Uploaded: {{ manualQrFile.name }}
+            </div>
+          </div>
+
+          <!-- Amount Field -->
+          <div>
+            <label
+                    class="block text-sm font-medium text-[var(--color-font)] mb-1"
+            >
+              Limit Amount (₹) <span class="text-[var(--color-danger)]">*</span>
+            </label>
+            <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] text-base">
+              currency_rupee
+            </span>
+              <input
+                      formControlName="limitAmount"
+                      type="number"
+                      step="any"
+                      class="pl-10 w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-font)]"
+                      placeholder="Enter limit amount"
+              />
+            </div>
+            <div
+                    *ngIf="
+              addUpiForm.get('limitAmount')?.touched &&
+              addUpiForm.get('limitAmount')?.invalid
+            "
+                    class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
+            >
+              <span class="material-symbols-outlined mr-1 text-sm">error</span>
+              Valid limit amount required
+            </div>
+          </div>
+
+          <!-- Transaction Limits -->
+          <div class="grid grid-cols-2 gap-3">
+
+            <!-- Min Tran Count -->
+            <div>
+              <label class="text-sm font-medium">Min Tran Count</label>
+              <input
+                      type="number"
+                      formControlName="min_tran_count"
+                      class="w-full px-3 py-2 border rounded-lg text-sm"
+                      placeholder="Min count"
+              />
+            </div>
+
+            <!-- Max Tran Count -->
+            <div>
+              <label class="text-sm font-medium">Max Tran Count</label>
+              <input
+                      type="number"
+                      formControlName="max_tran_count"
+                      class="w-full px-3 py-2 border rounded-lg text-sm"
+                      placeholder="Max count"
+              />
+            </div>
+
+            <!-- Min Total Amount -->
+            <div>
+              <label class="text-sm font-medium">Min Total Amount</label>
+              <input
+                      type="number"
+                      formControlName="min_total_tran_amount"
+                      class="w-full px-3 py-2 border rounded-lg text-sm"
+                      placeholder="Min amount"
+              />
+            </div>
+
+            <!-- Max Total Amount -->
+            <div>
+              <label class="text-sm font-medium">Max Total Amount</label>
+              <input
+                      type="number"
+                      formControlName="max_total_tran_amount"
+                      class="w-full px-3 py-2 border rounded-lg text-sm"
+                      placeholder="Max amount"
+              />
+            </div>
+
+          </div>
+
+          <!-- CAPACITY RANGES - Add Modal -->
+          <div class="space-y-2">
+            <label
+                    class="text-sm font-semibold text-[var(--color-font)] flex items-center"
+            >
+            <span class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base">
+              sync_alt
+            </span>
+              Capacity Range
+              <span class="text-[var(--color-danger)] ml-1">*</span>
+            </label>
+
+            <div
+                    *ngFor="let range of capacityRanges; let i = index"
+                    class="flex gap-2 items-center"
+            >
+              <!-- FROM -->
+              <input
+                      type="number"
+                      [value]="range.minRange"
+                      (input)="updateFrom(i, $event)"
+                      class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-surface)] text-[var(--color-font)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                      placeholder="From"
+              />
+
+              <!-- TO -->
+              <input
+                      type="number"
+                      [value]="range.maxRange"
+                      (input)="updateTo(i, $event)"
+                      class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-surface)] text-[var(--color-font)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                      placeholder="To"
+              />
+
+              <!-- QUANTITY -->
+              <input
+                      type="number"
+                      [value]="range.quantity"
+                      (input)="updateQuantity(i, $event)"
+                      class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-surface)] text-[var(--color-font)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                      placeholder="Qty"
+              />
+
+              <!-- ADD Button -->
+              <button
+                      type="button"
+                      *ngIf="i === capacityRanges.length - 1"
+                      (click)="addRange()"
+                      class="p-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors flex items-center justify-center"
+              >
+                <span class="material-symbols-outlined text-base">add</span>
+              </button>
+
+              <!-- REMOVE Button -->
+              <button
+                      type="button"
+                      *ngIf="capacityRanges.length > 1"
+                      (click)="removeRange(i)"
+                      class="p-2 bg-[var(--color-danger)] text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center"
+              >
+                <span class="material-symbols-outlined text-base">remove</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="pt-3 border-t border-[var(--color-border)]">
+            <div class="flex gap-3">
+              <button
+                      type="submit"
+                      [disabled]="isAddingUpi || addUpiForm.invalid"
+                      class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+              <span
+                      *ngIf="isAddingUpi"
+                      class="material-symbols-outlined animate-spin mr-2"
+              >
+                autorenew
+              </span>
+                <span *ngIf="!isAddingUpi" class="material-symbols-outlined mr-2">
+                add_circle
+              </span>
+                {{ isAddingUpi ? "Adding..." : "Add UPI" }}
+              </button>
+              <button
+                      type="button"
+                      (click)="closeAddModal()"
+                      [disabled]="isAddingUpi"
+                      class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] disabled:opacity-50 border border-[var(--color-border)] transition-colors"
+              >
+                <span class="material-symbols-outlined mr-2">cancel</span>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== UPDATE UPI MODAL ========== -->
+  <div
+          *ngIf="showUpdateModal"
+          class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          (click)="closeUpdateModal()"
+  >
+    <div
+            class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg border border-[var(--color-border)]"
+            (click)="$event.stopPropagation()"
+    >
+      <div
+              class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+      >
+        <h3
+                class="text-lg font-semibold text-[var(--color-font)] flex items-center"
+        >
+          <span class="material-icons mr-2 text-[var(--color-primary)]">
+            edit
+          </span>
+          Edit UPI Details
+        </h3>
+        <button
+                (click)="closeUpdateModal()"
+                class="p-1 hover:bg-[var(--color-hover)] rounded transition-colors"
+        >
+          <span class="material-icons text-[var(--color-muted)]"> close </span>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <form (ngSubmit)="submitUpdate()" class="space-y-4">
+          <!-- Current QR Display -->
+          <div
+                  *ngIf="editingUpi?.qrImageUrl"
+                  class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)]"
+          >
+            <label
+                    class="block text-sm font-medium text-[var(--color-font)] mb-2"
+            >
+              Current QR Code
+            </label>
+            <div class="flex items-center justify-between">
+              <div
+                      class="w-20 h-20 bg-white rounded border border-[var(--color-border)] flex items-center justify-center overflow-hidden"
+              >
+                <img
+                        [src]="editingUpi.qrImageUrl"
+                        alt="Current QR"
+                        class="w-16 h-16 object-contain"
+                />
+              </div>
+              <button
+                      type="button"
+                      (click)="generateQrForUpdate()"
+                      [disabled]="
+                  !updateForm.vpa ||
+                  isGeneratingUpdateQr ||
+                  !isValidUpiId(updateForm.vpa)
+                "
+                      class="px-3 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span *ngIf="!isGeneratingUpdateQr" class="flex items-center">
+                  <span class="material-icons mr-1">qr_code</span>
+                  New QR
+                </span>
+                <span *ngIf="isGeneratingUpdateQr" class="flex items-center">
+                  <span class="material-icons animate-spin">autorenew</span>
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 🔥 QR / UPLOAD TOGGLE -->
+          <div class="flex gap-2 mt-3">
+
+            <button
+                    type="button"
+                    (click)="setUpdateQrMode('generate'); generateQrForUpdate()"
+                    [class.bg-[var(--color-primary)]]="updateQrMode === 'generate'"
+                    [class.text-white]="updateQrMode === 'generate'"
+                    class="px-3 py-2 border rounded-lg"
+            >
+              QR
+            </button>
+
+            <button
+                    type="button"
+                    (click)="setUpdateQrMode('upload')"
+                    [class.bg-[var(--color-primary)]]="updateQrMode === 'upload'"
+                    [class.text-white]="updateQrMode === 'upload'"
+                    class="px-3 py-2 border rounded-lg"
+            >
+              Upload
+            </button>
+
+          </div>
+
+          <!-- 🔥 UPLOAD UI -->
+          <div *ngIf="updateQrMode === 'upload' && !updateSelectedImage" class="mt-3">
+
+            <div
+                    class="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer hover:bg-[var(--color-hover)]"
+                    (click)="updateFileInput.click()"
+            >
+    <span class="material-symbols-outlined text-3xl text-[var(--color-muted)]">
+      cloud_upload
+    </span>
+
+              <div class="text-sm mt-2">
+                Click to upload QR image
+              </div>
+
+              <div class="text-xs text-[var(--color-muted)]">
+                PNG, JPG supported
+              </div>
+
+              <input
+                      #updateFileInput
+                      type="file"
+                      accept="image/*"
+                      (change)="onUpdateQrFileSelected($event)"
+                      class="hidden"
+              />
+            </div>
+
+          </div>
+
+          <!-- NEW QR DISPLAY -->
+          <div
+                  *ngIf="updateQrData || updateSelectedImage"
+                  class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)]"
+          >
+            <div class="flex justify-between items-center mb-2">
+              <label class="text-sm font-medium text-[var(--color-font)]">
+                New QR Code
+              </label>
+              <button
+                      type="button"
+                      (click)="removeUpdateQr()"
+                      class="px-2 py-1 text-xs bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] rounded hover:bg-[var(--color-hover)]"
+              >
+                Remove
+              </button>
+            </div>
+            <div class="flex justify-center">
+              <div class="p-2 bg-white rounded border">
+
+                <!-- Uploaded Image -->
+                <img
+                        *ngIf="updateSelectedImage"
+                        [src]="updateSelectedImage"
+                        class="w-[120px] h-[120px] object-contain"
+                />
+                <div *ngIf="updateManualQrFile"
+                     class="text-green-600 text-xs mt-2 text-center flex items-center justify-center gap-1">
+
+                  <span class="material-symbols-outlined text-sm">check_circle</span>
+                  QR uploaded successfully
+                </div>
+
+                <div *ngIf="updateManualQrFile"
+                     class="text-xs text-gray-500 text-center mt-1">
+
+                  {{ updateManualQrFile.name }}
+                </div>
+
+                <!-- Generated QR -->
+                <qrcode
+                        *ngIf="updateQrData && !updateSelectedImage"
+                        #updateQrcodeElem
+                        [qrdata]="updateQrData"
+                        [width]="120"
+                ></qrcode>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- UPI ID with inline validation -->
+          <div>
+            <label
+                    class="block text-sm font-medium text-[var(--color-font)] mb-1"
+            >
+              UPI ID (VPA) <span class="text-[var(--color-danger)]">*</span>
+            </label>
+            <input
+                    type="text"
+                    [(ngModel)]="updateForm.vpa"
+                    name="vpa"
+                    required
+                    (input)="onUpdateVpaChange()"
+                    class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+                    placeholder="username@paytm"
+            />
+            <!-- Validation error -->
+            <div
+                    *ngIf="updateForm.vpa && !isValidUpiId(updateForm.vpa)"
+                    class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
+            >
+              <span class="material-icons mr-1 text-sm">error</span> Please
+              enter a valid UPI ID
+            </div>
+            <!--  Warning message -->
+            <div
+                    *ngIf="vpaChanged && !newQrGenerated"
+                    class="text-xs text-[var(--color-warning)] mt-1 flex items-center"
+            >
+              <span class="material-icons mr-1 text-sm">info</span>
+              UPI ID changed. Please click "New QR" to generate a new QR code.
+            </div>
+            <div
+                    *ngIf="updateQrError"
+                    class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
+            >
+              <span class="material-icons mr-1 text-sm">error</span>
+              {{ updateQrError }}
+            </div>
+          </div>
+          <!-- Amount Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label
+                      class="block text-sm font-medium text-[var(--color-font)] mb-1"
+              >
+                Limit Amount (₹)
+              </label>
+              <div class="relative">
+                <span
+                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)]"
+                >₹</span
+                >
+                <input
+                        type="number"
+                        [(ngModel)]="updateForm.limitAmount"
+                        name="limitAmount"
+                        step="any"
+                        class="pl-8 w-full px-3 py-2 border border-[var(--color-border)] rounded-lg"
+                        placeholder="Limit"
+                />
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Transaction Limits -->
+          <div class="grid grid-cols-2 gap-3">
+
+            <!-- Min Tran Count -->
+            <div>
+              <label class="text-sm font-medium">Min Tran Count</label>
+              <input
+                      type="number"
+                      [(ngModel)]="updateForm.min_tran_count"
+                      name="min_tran_count"
+                      class="w-full px-3 py-2 border rounded-lg text-sm"
+              />
+            </div>
+
+            <!-- Max Tran Count -->
+            <div>
+              <label class="text-sm font-medium">Max Tran Count</label>
+              <input
+                      type="number"
+                      [(ngModel)]="updateForm.max_tran_count"
+                      name="max_tran_count"
+                      class="w-full px-3 py-2 border rounded-lg text-sm"
+              />
+            </div>
+
+            <!-- Min Total Amount -->
+            <div>
+              <label class="text-sm font-medium">Min Total Amount</label>
+              <input
+                      type="number"
+                      [(ngModel)]="updateForm.min_total_tran_amount"
+                      name="min_total_tran_amount"
+                      class="w-full px-3 py-2 border rounded-lg text-sm"
+              />
+            </div>
+
+            <!-- Max Total Amount -->
+            <div>
+              <label class="text-sm font-medium">Max Total Amount</label>
+              <input
+                      type="number"
+                      [(ngModel)]="updateForm.max_total_tran_amount"
+                      name="max_total_tran_amount"
+                      class="w-full px-3 py-2 border rounded-lg text-sm"
+              />
+            </div>
+
+          </div>
+
+          <!-- Status -->
+
+          <!-- Action Buttons -->
+          <div class="pt-3 border-t border-[var(--color-border)]">
+            <div class="flex gap-3">
+              <!-- <button
+                type="submit"
+                [disabled]="isSubmitting || !isValidUpiId(updateForm.vpa)"
+                class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50"
+              >
+                <span
+                  *ngIf="isSubmitting"
+                  class="material-icons animate-spin mr-2"
+                >
+                  autorenew
+                </span>
+                <span *ngIf="!isSubmitting" class="material-icons mr-2">
+                  save
+                </span>
+                {{ isSubmitting ? "Saving..." : "Save Changes" }}
+              </button> -->
+              <button
+                      type="submit"
+                      [disabled]="
+  isSubmitting ||
+  !isValidUpiId(updateForm.vpa) ||
+  (vpaChanged && !newQrGenerated && !updateManualQrFile)
+"
+                      class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50"
+              >
+                Save Changes
+              </button>
+              <button
+                      type="button"
+                      (click)="closeUpdateModal()"
+                      [disabled]="isSubmitting"
+                      class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] disabled:opacity-50 border border-[var(--color-border)]"
+              >
+                <span class="material-icons mr-2">cancel</span>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== IMAGE MODAL ========== -->
+  <div
+          *ngIf="previewImage"
+          class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          (click)="closeImageModal()"
+  >
+    <div
+            class="bg-[var(--color-surface)] rounded-xl max-w-sm w-full shadow-lg border border-[var(--color-border)]"
+            (click)="$event.stopPropagation()"
+    >
+      <div
+              class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+      >
+        <h3
+                class="text-lg font-semibold text-[var(--color-font)] flex items-center"
+        >
+          <span class="material-icons mr-2 text-[var(--color-primary)]">
+            qr_code_scanner
+          </span>
+          QR Code
+        </h3>
+        <button
+                (click)="closeImageModal()"
+                class="p-1 hover:bg-[var(--color-hover)] rounded transition-colors"
+        >
+          <span class="material-icons text-[var(--color-muted)]"> close </span>
+        </button>
+      </div>
+      <div class="p-6 flex flex-col items-center">
+        <div
+                class="mb-4 p-3 bg-white rounded border border-[var(--color-border)]"
+        >
+          <img
+                  [src]="previewImage"
+                  alt="QR Code"
+                  class="w-48 h-48 object-contain"
+          />
+        </div>
+        <div class="flex gap-3">
+          <button
+                  (click)="downloadImage()"
+                  class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)]"
+          >
+            <span class="material-icons mr-2">download</span>
+            Download
+          </button>
+          <button
+                  (click)="closeImageModal()"
+                  class="inline-flex items-center px-4 py-2 bg-[var(--color-bg)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-border)] border border-[var(--color-border)]"
+          >
+            <span class="material-icons mr-2">close</span>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div
+          *ngIf="isToggleConfirmVisible"
+          class="fixed inset-0 flex items-center justify-center bg-black/40 z-50"
+  >
+    <div class="bg-white p-6 rounded-xl shadow-xl w-80 text-center">
+      <h2 class="text-lg font-semibold mb-3">Confirm Action</h2>
+
+      <p class="text-sm text-gray-600 mb-5">
+        Are you sure you want to
+        {{ toggleCandidateUpi?.isUpiActive ? "disable" : "enable" }}
+        this UPI?
+      </p>
+
+      <div class="flex justify-center gap-3">
+        <button
+                (click)="closeUpiToggleConfirm()"
+                class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+        >
+          Cancel
+        </button>
+
+        <button
+                (click)="executeUpiToggle()"
+                class="px-4 py-2 rounded bg-[var(--color-primary)] text-white"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div
+          *ngIf="tooltipVisible"
+          [style.top.px]="tooltipY"
+          [style.left.px]="tooltipX"
+          class="fixed z-[999] w-64 p-3 text-xs bg-gray-900 text-white rounded-lg shadow-2xl pointer-events-none"
+  >
+    <div class="space-y-1">
+      <div class="flex justify-between">
+        <span>Min Txn Count:</span>
+        <span class="font-semibold">{{ tooltipData?.min_tran_count || 0 }}</span>
+      </div>
+
+      <div class="flex justify-between">
+        <span>Max Txn Count:</span>
+        <span class="font-semibold">{{ tooltipData?.max_tran_count || 0 }}</span>
+      </div>
+
+      <div class="flex justify-between">
+        <span>Min Amount:</span>
+        <span class="font-semibold">
+        ₹{{ tooltipData?.min_total_tran_amount || 0 }}
+      </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span>Max Amount:</span>
+        <span class="font-semibold">
+        ₹{{ tooltipData?.max_total_tran_amount || "∞" }}
+      </span>
+      </div>
+    </div>
+  </div>
+
+  <app-topup-capacity
+          [show]="showCapacityModal"
+          [entityType]="'HEAD'"
+          [entityId]="currentRoleId"
+          [portalId]="selectedPortalId"
+          [mode]="selectedMode"
+          [topupId]="selectedTopupId"
+          (close)="showCapacityModal = false"
+  ></app-topup-capacity>
+</div>
+
+
+<!-- TRANSACTION MODAL -->
+<div
+  *ngIf="showTxnModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+>
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+
+    <!-- Close -->
+    <button
+      (click)="closeTxnModal()"
+      class="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+    >
+      <span class="material-icons">close</span>
+    </button>
+
+    <!-- Title -->
+    <h2 class="text-lg font-semibold mb-4 text-[var(--color-font)]">
+      Transaction Details
+    </h2>
+
+    <!-- Content -->
+    <div class="space-y-3 text-sm">
+
+      <div class="flex justify-between">
+        <span class="text-gray-500">Min Txn Count</span>
+        <span class="font-semibold">
+          {{ selectedTxnData?.min_tran_count || 0 }}
+        </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-500">Max Txn Count</span>
+        <span class="font-semibold">
+          {{ selectedTxnData?.max_tran_count || 0 }}
+        </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-500">Min Amount</span>
+        <span class="font-semibold">
+          ₹{{ selectedTxnData?.min_total_tran_amount || 0 }}
+        </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-500">Max Amount</span>
+        <span class="font-semibold">
+          ₹{{ selectedTxnData?.max_total_tran_amount || 0 }}
+        </span>
+      </div>
+
+    </div>
+
+
+  </div>
+</div>
+
+

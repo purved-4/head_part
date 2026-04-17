@@ -30,6 +30,7 @@ import { RecycleBankComponent } from "../../../common/recycle-bank/recycle-bank.
 import { ChatResponsiveComponent } from "../../../common/chat-responsive/chat-responsive.component";
 import { PaymentManagementComponent } from "../payment-management/payment-management.component";
 import { RecycleManagementComponent } from "../recycle-management/recycle-management.component";
+import { PaymentsMethodsComponent } from "../../../common/payments-methods/payments-methods.component";
 
 const routes: Routes = [
   {
@@ -48,6 +49,10 @@ const routes: Routes = [
         component: HeadDashboardComponent,
       },
 
+      {
+  path: 'payments-methods',
+  component: PaymentsMethodsComponent
+},
       {
         path: "upi",
         component: HeadUpiComponent,

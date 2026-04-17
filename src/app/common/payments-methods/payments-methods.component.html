@@ -1,0 +1,59 @@
+<div class="p-4">
+
+  <!-- 🔹 Row for both dropdowns -->
+  <div class="flex gap-4">
+
+    <!-- Currency -->
+    <div class="w-1/2">
+      <label class="block text-sm font-medium mb-1">Currency</label>
+
+      <select
+        class="border rounded-lg px-3 py-2 w-full"
+        (change)="onCurrencyChange($event)"
+      >
+        <option value="">Select Currency</option>
+
+        <option *ngFor="let c of currencies" [value]="c.currency">
+          {{ c.currency }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Mode -->
+    <div class="w-1/2" *ngIf="availableModes.length">
+      <label class="block text-sm font-medium mb-1">Mode</label>
+
+      <select
+        class="border rounded-lg px-3 py-2 w-full"
+        (change)="onModeChange($event)"
+      >
+        <option value="">Select Mode</option>
+
+        <option *ngFor="let mode of availableModes" [value]="mode">
+          {{ mode }}
+        </option>
+      </select>
+    </div>
+
+  </div>
+
+  <!-- 🔹 Empty State -->
+  <div *ngIf="selectedCurrency && !availableModes.length" class="text-gray-500 text-sm mt-3">
+    No payment modes available for this currency
+  </div>
+
+  <!-- 🔹 COMPONENT RENDERING -->
+<div *ngIf="selectedMode === 'BANK'" class="mt-4">
+  <app-banks [currency]="selectedCurrency?.currency"></app-banks>
+</div>
+
+  <div *ngIf="selectedMode === 'UPI'" class="mt-4">
+    <app-upis></app-upis>
+    <!-- <app-head-upi></app-head-upi> -->
+  </div>
+
+  <div *ngIf="selectedMode === 'QR'" class="mt-4">
+    <!-- <app-qr></app-qr> -->
+  </div>
+
+</div>

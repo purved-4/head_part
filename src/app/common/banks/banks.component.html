@@ -56,48 +56,7 @@
         <app-reload (reload)="fetchBankAccounts()"></app-reload>
 
         <!-- Dropdown -->
-        <div class="relative flex-1 sm:flex-none payment-dropdown-wrapper">
-          <button
-                  (click)="
-              showPaymentDropdown = !showPaymentDropdown;
-              $event.stopPropagation()
-            "
-                  class="w-full sm:w-auto flex items-center justify-between gap-2 px-3 py-2.5 border border-[var(--color-border)] rounded-lg hover:bg-gray-100"
-          >
-            <div class="flex items-center gap-2">
-              <span class="material-icons text-lg">
-                {{ selectedMethod === "bank" ? "account_balance" : "qr_code" }}
-              </span>
-              <span class="capitalize text-sm font-medium">
-                {{ selectedMethod === "bank" ? "Bank" : "UPI" }}
-              </span>
-            </div>
-
-            <span class="material-icons text-sm">expand_more</span>
-          </button>
-
-          <!-- Dropdown -->
-          <div
-                  *ngIf="showPaymentDropdown"
-                  class="absolute left-0 mt-2 w-full sm:w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
-          >
-            <div
-                    (click)="changePaymentType('bank')"
-                    class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            >
-              <span class="material-icons text-lg">account_balance</span>
-              <span>Bank</span>
-            </div>
-
-            <div
-                    (click)="changePaymentType('upi')"
-                    class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            >
-              <span class="material-icons text-lg">qr_code</span>
-              <span>UPI</span>
-            </div>
-          </div>
-        </div>
+        
       </div>
 
       <!-- Bottom row (mobile only) -->
@@ -515,14 +474,7 @@
     {{ (account.portalId || account.portal) ? 'Assigned' : 'Unassigned' }}
   </span>
 
-  <!-- TRIGGER BUTTON -->
-  <button
-    (click)="openCurrencyModal(account)"
-    class="flex items-center gap-1 px-2 py-1 text-[10px] rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition"
-  >
-    <span class="material-symbols-outlined text-xs">tune</span>
 
-  </button>
 </div>
 
               <span
@@ -2763,11 +2715,4 @@
 
 
 
-<app-allot-currency
-  *ngIf="showCurrencyModal"
-  [entityId]="currentRoleId"
-  [entityRole]="role"
-  (close)="closeCurrencyModal()"
->
-</app-allot-currency>
 

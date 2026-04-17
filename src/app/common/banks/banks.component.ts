@@ -3,9 +3,6 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Subscription, of } from "rxjs";
 import { catchError } from "rxjs/operators";
-import { BankService } from "../../../services/bank.service";
-import { UserStateService } from "../../../../store/user-state.service";
-import { HeadService } from "../../../services/head.service";
 import { ViewChild, ElementRef } from "@angular/core";
 // import {
 
@@ -13,9 +10,13 @@ import { ViewChild, ElementRef } from "@angular/core";
 // } from "../../../services/portal-sharing.service";
 import { Subject } from "rxjs";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
-import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
-import { INDIAN_BANKS } from "../../../../utils/constants";
-import { UpiService } from "../../../services/upi.service";
+import { INDIAN_BANKS } from "../../utils/constants";
+import { BankService } from "../../pages/services/bank.service";
+import { UserStateService } from "../../store/user-state.service";
+import { HeadService } from "../../pages/services/head.service";
+import { SnackbarService } from "../snackbar/snackbar.service";
+import { UpiService } from "../../pages/services/upi.service";
+import { Input } from "@angular/core";
 
 type StatusString = "active" | "inactive" | "frozen" | string;
 
@@ -53,14 +54,14 @@ interface Portal {
 }
 
 @Component({
-  selector: "app-head-bank",
-  templateUrl: "./head-bank.component.html",
-  styleUrls: ["./head-bank.component.css"],
+  selector: 'app-banks',
+  templateUrl: './banks.component.html',
+  styleUrl: './banks.component.css'
 })
-export class HeadBankComponent implements OnInit, OnDestroy {
-  @ViewChild("portalDropdown") portalDropdown!: ElementRef;
+export class BanksComponent implements OnInit, OnDestroy {
+@ViewChild("portalDropdown") portalDropdown!: ElementRef;
   @ViewChild("qrcodeElem", { static: false }) qrcodeElem!: ElementRef;
-
+ @Input() currency: string = ''; // ✅ ADD THIS
   // ---------- DATA (server‑paginated) ----------
   bankAccounts: BankAccount[] = [];
   totalElements = 0;
@@ -841,6 +842,7 @@ export class HeadBankComponent implements OnInit, OnDestroy {
       entityId: this.currentRoleId,
       entityType: this.role,
       portal: formData.portal,
+       currency: this.currency,
       bankName: formData.bankName, // This will now include both selected and custom bank names
       accountNo: formData.accountNumber,
       accountHolderName: formData.accountHolderName,
@@ -1903,3 +1905,4 @@ closeCurrencyModal() {
   this.showCurrencyModal = false;
 }
 }
+

@@ -66,21 +66,37 @@ export class HeadNavSidebarComponent implements OnInit {
       children: [{ label: "Dashboard", route: "/head/dashboard" }],
     },
     //new hai code ke sath mujhe bs yahi dena hai
+    // {
+    //   label: "Payment Management",
+    //   route: "/head/payment-management",
+    //   icon: "account_balance_wallet",
+    //   children: [
+    //     {
+    //       label: "Payment Management",
+    //       route: "/head/payment-management",
+    //     },
+    //     {
+    //       label: "Recycle Management",
+    //       route: "/head/recycle-management",
+    //     },
+    //   ],
+    // },
+
+    {
+  label: "Payment Management",
+  route: "/head/payments-methods", 
+  icon: "account_balance_wallet",
+  children: [
     {
       label: "Payment Management",
-      route: "/head/payment-management",
-      icon: "account_balance_wallet",
-      children: [
-        {
-          label: "Payment Management",
-          route: "/head/payment-management",
-        },
-        {
-          label: "Recycle Management",
-          route: "/head/recycle-management",
-        },
-      ],
+      route: "/head/payments-methods", 
     },
+    {
+      label: "Recycle Management",
+      route: "/head/recycle-management",
+    },
+  ],
+},
     // {
     //   label: "Bank Management",
     //   route: "/head/bank",

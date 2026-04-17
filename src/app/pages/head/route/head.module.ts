@@ -55,6 +55,8 @@ import { AllotCurrencyComponent } from "../allot-currency/allot-currency.compone
 ],
   exports: [
     SharedModule,
+      HeadBankComponent, 
+    HeadUpiComponent 
   ],
 })
 export class HeadModule {}
