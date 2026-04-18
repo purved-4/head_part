@@ -586,7 +586,7 @@
               <div class="flex-1">
                 <div class="text-xs text-gray-500">Topup</div>
                 <div class="font-semibold text-green-600">
-                  {{ portal.topupPercentage || 0 }}%
+                  {{ portal.payinPercentage || 0 }}%
                 </div>
               </div>
               <div class="flex-1">
@@ -671,7 +671,7 @@
             <div class="p-3 bg-gray-50 rounded-lg">
               <div class="text-xs text-gray-500 mb-1">Topup</div>
               <div class="text-lg font-semibold text-green-600">
-                {{ selectedPortal.topupPercentage || 0 }}%
+                {{ selectedPortal.payinPercentage || 0 }}%
               </div>
             </div>
             <div class="p-3 bg-gray-50 rounded-lg">
@@ -1137,7 +1137,7 @@
                               max="100"
                               step="0.01"
                               [(ngModel)]="
-                          getPortalPercentage(portal.portalId).topupPercentage
+                          getPortalPercentage(portal.portalId).payinPercentage
                         "
                               [name]="'topup_' + portal.portalId"
                               [readonly]="!isEditMode"
@@ -1269,11 +1269,11 @@
 
 
 
-<!-- <app-enity-compart-edit-model
+<app-enity-compart-edit-model
  *ngIf="showCompartModel"
   [entityId]="currentRoleId"
   [entityType]="role"
   [data]="selectedAgentForInfo"
   (close)="onCloseCompartModal()"
   (save)="onSaveCompartData($event)">
-</app-enity-compart-edit-model> -->
+</app-enity-compart-edit-model>

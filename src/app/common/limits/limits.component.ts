@@ -1,3 +1,4 @@
+
 import { Component, OnInit } from "@angular/core";
 import { LimitsService } from "../../pages/services/reports/limits.service";
 import { UserStateService } from "../../store/user-state.service";
@@ -8,6 +9,8 @@ import { UtilsServiceService } from "../../utils/utils-service.service";
 import { forkJoin } from "rxjs";
 import { ChiefService } from "../../pages/services/chief.service";
 import { log } from "node:util";
+import { AnyARecord } from "node:dns";
+import { error } from "node:console";
 
 @Component({
   selector: "app-limits",
@@ -27,7 +30,7 @@ export class LimitsComponent implements OnInit {
   // CHIEF role specific data
   managersData: any[] = [];
   branchesData: any[] = [];
-  activeTab = "manager";
+  activeTab: any;
 
   // Add TransactionAmount Modal
   showAddTransactionAmountModal = false;
@@ -66,6 +69,7 @@ export class LimitsComponent implements OnInit {
     private limitService: LimitsService,
     private utilSerivce: UtilsServiceService,
     private chiefService: ChiefService,
+    private snackBar: SnackbarService,
   ) {}
 
   ngOnInit() {
@@ -105,6 +109,7 @@ export class LimitsComponent implements OnInit {
         error: (err) => {
           this.currentUserLimits = null;
           this.loadingCurrentUserLimits = false;
+          this.snackBar.show(err.error?.message, false);
         },
       });
   }
@@ -148,7 +153,7 @@ export class LimitsComponent implements OnInit {
               this.loading = false;
             },
             error: (err: any) => {
-              this.error = "Failed to load entities. Please try again.";
+              this.snackBar.show(err.error?.message, false);
               this.loading = false;
             },
           });
@@ -167,13 +172,13 @@ export class LimitsComponent implements OnInit {
               this.loading = false;
             },
             error: (err: any) => {
-              this.error = "Failed to load entities. Please try again.";
+              this.snackBar.show(err.error?.message, false);
               this.loading = false;
             },
           });
       }
     } else {
-      this.error = "User role information not available";
+      this.snackBar.show("User role information not available", false);
       this.loading = false;
     }
   }
@@ -209,9 +214,10 @@ export class LimitsComponent implements OnInit {
           this.selectedEntityBalances = res;
           this.loadingEntityBalances = false;
         },
-        error: () => {
+        error: (err) => {
           this.selectedEntityBalances = null;
           this.loadingEntityBalances = false;
+          this.snackBar.show(err.error?.message, false);
         },
       });
   }
@@ -246,7 +252,7 @@ export class LimitsComponent implements OnInit {
 
     const payload = {
       entityId: this.selectedEntity.id,
-      entityType: this.role === "CHIEF" ? this.activeTab : entityType,
+      entityType: entityType,
       transactionAmount: this.transactionAmountToAdd,
     };
 
@@ -262,6 +268,7 @@ export class LimitsComponent implements OnInit {
       error: (err) => {
         // this.snackBar.showError('Failed to add transactionAmount. Please try again.');
         this.addingTransactionAmount = false;
+        this.snackBar.show(err.error?.message, false);
       },
     });
   }
@@ -307,6 +314,7 @@ export class LimitsComponent implements OnInit {
       error: (err) => {
         // this.snackBar.showError('Failed to add transactionAmount. Please try again.');
         this.addingAdminTransactionAmount = false;
+        this.snackBar.show(err.error?.message, false);
       },
     });
   }
@@ -326,9 +334,10 @@ export class LimitsComponent implements OnInit {
     const entityType = this.utilSerivce.getRoleForDownLevelWithCurrentRoleId(
       this.selectedEntity.role || this.role,
     );
+    console.log("entity type ", entityType);
 
     this.limitService
-      .getLimitsByEntityAndType(this.selectedEntity.id, this.activeTab)
+      .getLimitsByEntityAndType(this.selectedEntity.id, entityType)
       .subscribe({
         next: (res: any) => {
           // Handle both array response and single object
@@ -338,6 +347,7 @@ export class LimitsComponent implements OnInit {
         error: (err) => {
           // this.snackBar.showError('Failed to load limit data');
           this.loadingLimits = false;
+          this.snackBar.show(err.error?.message, false);
         },
       });
   }
@@ -386,6 +396,7 @@ export class LimitsComponent implements OnInit {
         error: (err) => {
           // this.snackBar.showError('Failed to load admin limit data');
           this.loadingAdminLimits = false;
+          this.snackBar.show(err.error?.message, false);
         },
       });
   }

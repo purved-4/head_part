@@ -11,12 +11,12 @@ import {
   TimeZoneOption,
   TimeZoneServiceService,
   TimeZoneState,
-} from "./time-zone-service.service"; // path adjust karo
+} from "./time-zone-service.service";
 
 @Component({
   selector: "app-time-zone",
   templateUrl: "./time-zone.component.html",
-  styleUrl: "./time-zone.component.css",
+  styleUrls: ["./time-zone.component.css"],
 })
 export class TimeZoneComponent implements OnInit, OnDestroy {
   @ViewChild("dropdownWrap", { static: false })
@@ -28,6 +28,7 @@ export class TimeZoneComponent implements OnInit, OnDestroy {
 
   now = new Date();
   private timerSub?: Subscription;
+  private stateSub?: Subscription;
 
   constructor(public timeZoneService: TimeZoneServiceService) {}
 
@@ -35,7 +36,7 @@ export class TimeZoneComponent implements OnInit, OnDestroy {
     this.zones = this.timeZoneService.getAvailableTimeZones();
     this.currentState = this.timeZoneService.getCurrentState();
 
-    this.timeZoneService.timeZone$.subscribe((state) => {
+    this.stateSub = this.timeZoneService.timeZone$.subscribe((state) => {
       this.currentState = state;
     });
 
@@ -46,6 +47,7 @@ export class TimeZoneComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.timerSub?.unsubscribe();
+    this.stateSub?.unsubscribe();
   }
 
   toggleDropdown(): void {
@@ -70,41 +72,40 @@ export class TimeZoneComponent implements OnInit, OnDestroy {
   }
 
   getSelectedLocalTime(): string {
-  return this.formatNoSeconds(
-    this.now,
-    this.currentState?.iana || this.timeZoneService.getActiveTimeZone()
-  );
-}
+    return this.formatNoSeconds(
+      this.now,
+      this.currentState?.iana || this.timeZoneService.getActiveTimeZone()
+    );
+  }
 
-getUtcTime(): string {
-  return this.formatNoSeconds(this.now, "UTC");
-}
-
+  getUtcTime(): string {
+    return this.formatNoSeconds(this.now, "UTC");
+  }
 
   getZoneLocalTime(zone: TimeZoneOption): string {
-  const iana = zone.mode === "SYSTEM"
-    ? this.timeZoneService.getSystemTimeZone()
-    : zone.iana;
+    const iana =
+      zone.mode === "SYSTEM"
+        ? this.timeZoneService.getSystemTimeZone()
+        : zone.iana;
 
-  return this.formatNoSeconds(this.now, iana);
-}
+    return this.formatNoSeconds(this.now, iana);
+  }
 
- 
-getZoneUtcTime(zone: TimeZoneOption): string {
-  return this.formatNoSeconds(this.now, "UTC");
-}
+  getZoneUtcTime(zone: TimeZoneOption): string {
+    return this.formatNoSeconds(this.now, "UTC");
+  }
 
-   formatNoSeconds(value: Date, timeZone: string): string {
-  return new Intl.DateTimeFormat("en-GB", {
-    timeZone,
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  }).format(value);
-}
+  formatNoSeconds(value: Date, timeZone: string): string {
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone,
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(value);
+  }
 
   @HostListener("document:click", ["$event"])
   onDocumentClick(event: MouseEvent): void {

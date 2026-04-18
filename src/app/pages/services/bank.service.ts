@@ -191,4 +191,32 @@ export class BankService {
   toggleIsBank(bankId: string): Observable<any> {
     return this.http.patch<any>(`${baseUrl}/banks/${bankId}/toggle-isbank`, {});
   }
+
+  assignPortalToBank(bankId: string, portalId: string): Observable<any> {
+    return this.http
+      .patch<any>(`${baseUrl}/banks/${bankId}/assign-portal/${portalId}`, {})
+      .pipe(
+        catchError((error) => {
+          throw error;
+        }),
+      );
+  }
+
+  removePortal(id: string): Observable<any> {
+  return this.http
+    .patch<any>(`${baseUrl}/banks/${id}/remove-portal`, {})
+    .pipe(
+      map((response: any) => response.data),
+      catchError((error) => throwError(() => error))
+    );
+}
+
+getAllByComPartWithPortal(comPartId: string): Observable<any> {
+  return this.http
+    .get<any>(`${baseUrl}/banks/getAllByComPartWithPortal/${comPartId}`)
+    .pipe(
+      map((response: any) => response.data),
+      catchError((error) => throwError(() => error))
+    );
+}
 }

@@ -11,21 +11,21 @@ import { of } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { Subject } from "rxjs";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
-import baseUrl, { fileBaseUrl } from "../../../services/helper";
-import { UpiService } from "../../../services/upi.service";
-import { BranchService } from "../../../services/branch.service";
-import { HeadService } from "../../../services/head.service";
-import { UserStateService } from "../../../../store/user-state.service";
-import { UserService } from "../../../services/user.service";
-import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
-import { BankService } from "../../../services/bank.service";
-import { MultimediaService } from "../../../services/multimedia.service";
+import { UpiService } from "../../../pages/services/upi.service";
+import { BranchService } from "../../../pages/services/branch.service";
+import { UserStateService } from "../../../store/user-state.service";
+import { UserService } from "../../../pages/services/user.service";
+import { HeadService } from "../../../pages/services/head.service";
+import { SnackbarService } from "../../snackbar/snackbar.service";
+import { MultimediaService } from "../../../pages/services/multimedia.service";
+import { BankService } from "../../../pages/services/bank.service";
+
 @Component({
-  selector: "app-head-upi",
-  templateUrl: "./head-upi.component.html",
-  styleUrls: ["./head-upi.component.css"],
+  selector: 'app-upis',
+  templateUrl: './upis.component.html',
+  styleUrl: './upis.component.css'
 })
-export class HeadUpiComponent implements OnInit {
+export class UpisComponent implements OnInit {
   // ---------- DATA ----------
   upis: any[] = [];
   portals: any[] = [];

@@ -1,6 +1,3 @@
-
-
-
 import {
   Component,
   EventEmitter,
@@ -16,6 +13,14 @@ import { HeadService } from '../../pages/services/head.service';
 import { ComPartService } from '../../pages/services/com-part.service';
 import { OwnerService } from '../../pages/services/owner.service';
 
+interface CompartPercentageRow {
+  compartName: string;
+  payinPercentage: number | null;
+  fttPercentage: number | null;
+  payoutPercentage: number | null;
+  compartUsername?:string
+}
+
 @Component({
   selector: 'app-compart-percentage-modle',
   templateUrl: './compart-percentage-modle.component.html',
@@ -30,19 +35,10 @@ export class CompartPercentageModleComponent implements OnInit, OnChanges {
   loading = false;
   errorMessage = '';
 
-  portalPercentages: Array<{
-    portalName: string;
-    topupPercentage: number | null;
-    fttPercentage: number | null;
-    payoutPercentage: number | null;
-  }> = [];
+  portalPercentages: CompartPercentageRow[] = [];
 
   constructor(
-    private chiefService: ChiefService,
-    private managerService: ManagerService,
-    private headService: HeadService,
     private compartService: ComPartService,
-    private ownerService:OwnerService
   ) {}
 
   ngOnInit(): void {
@@ -83,61 +79,55 @@ export class CompartPercentageModleComponent implements OnInit, OnChanges {
     this.errorMessage = '';
     this.portalPercentages = [];
 
-    const successHandler = (res: any) => {
-      console.log(res);
-      
-      const data = Array.isArray(res) ? res : [res];
+    this.compartService.getPercentageByEntityId(this.entityId, this.entityType).subscribe({
+      next: (res: any) => {
+        this.portalPercentages = this.normalizeResponse(res);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.errorMessage = 'Unable to load percentage details.';
+      },
+    });
+  }
 
-      this.portalPercentages = data.map((item: any) => ({
-        portalName: item?.portalName ?? '--',
-        topupPercentage: item?.topupPercentage ?? null,
-        fttPercentage: item?.fttPercentage ?? null,
-        payoutPercentage: item?.payoutPercentage ?? null,
+  private normalizeResponse(res: any): CompartPercentageRow[] {
+    if (!res) {
+      return [];
+    }
+
+    // Case 1: response is already an array
+    if (Array.isArray(res)) {
+      return res.map((item: any) => ({
+        compartName: item?.compartUsername ?? item?.portalName ?? '--',
+        payinPercentage: this.toNumberOrNull(item?.payinPercentage),
+        fttPercentage: this.toNumberOrNull(item?.fttPercentage),
+        payoutPercentage: this.toNumberOrNull(item?.payoutPercentage),
       }));
+    }
 
-      this.loading = false;
-    };
-
-    const errorHandler = () => {
-      this.loading = false;
-      this.errorMessage = 'Unable to load percentage details.';
-    };
-
-    this.compartService.getPercentageByEntityId(this.entityId,this.entityType).subscribe({
-          next: successHandler,
-          error: errorHandler,
-        });
-    // switch (this.entityType) {
-    //   case 'OWNER':
-    //     this.ownerService.getPortalPercentages(this.entityId)
-    //     break;
-
-    //   case 'CHIEF':
-    //     this.chiefService.getChiefPortalPercentage(this.entityId).subscribe({
-    //       next: successHandler,
-    //       error: errorHandler,
-    //     });
-    //     break;
-
-    //   case 'MANAGER':
-    //     this.managerService.getManagerPortalPercentage(this.entityId).subscribe({
-    //       next: successHandler,
-    //       error: errorHandler,
-    //     });
-    //     break;
-
-    //   case 'HEAD':
-    //     this.headService.getHeadPortalPercentage(this.entityId).subscribe({
-    //       next: successHandler,
-    //       error: errorHandler,
-    //     });
-    //     break;
-
-    //   default:
-    //     this.loading = false;
-    //     this.errorMessage = 'Invalid entity type.';
-    //     break;
+    // Case 2: response is an object like:
+    // {
+    //   comchief1: { payinPercentage: 7, fttPercentage: 7, payoutPercentage: 7 }
     // }
+    return Object.keys(res).map((key: string) => {
+      const item = res[key] || {};
+      return {
+        compartName: key,
+        payinPercentage: this.toNumberOrNull(item?.payinPercentage),
+        fttPercentage: this.toNumberOrNull(item?.fttPercentage),
+        payoutPercentage: this.toNumberOrNull(item?.payoutPercentage),
+      };
+    });
+  }
+
+  private toNumberOrNull(value: any): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const num = Number(value);
+    return Number.isNaN(num) ? null : num;
   }
 
   formatValue(value: number | null): string {

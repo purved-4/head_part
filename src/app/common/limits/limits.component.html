@@ -326,7 +326,7 @@
                   ></path>
                 </svg>
                 Last updated:
-                {{ currentUserLimits.updatedAt | date: "shortDate" }}
+                {{ currentUserLimits.updatedAt | tz }}
               </div>
             </div>
 
@@ -437,10 +437,7 @@
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                   ></path>
                 </svg>
-                <span
-                  >Created:
-                  {{ currentUserLimits.createdAt | date: "medium" }}</span
-                >
+                <span>Created: {{ currentUserLimits.createdAt | tz }}</span>
               </div>
               <div
                 class="flex items-center text-sm text-[var(--color-text-muted)]"
@@ -460,7 +457,7 @@
                 </svg>
                 <span
                   >Last Transaction:
-                  {{ currentUserLimits.updatedAt | date: "medium" }}</span
+                  {{ currentUserLimits.updatedAt | tz }}</span
                 >
               </div>
             </div>
@@ -566,12 +563,12 @@
               >
                 Entity Details
               </th>
-              <th
+              <!-- <th
                 scope="col"
                 class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider"
               >
                 Contact Information
-              </th>
+              </th> -->
               <th
                 scope="col"
                 class="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider"
@@ -607,14 +604,14 @@
                       [ngClass]="getEntityAvatarClass(entity)"
                       class="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
                     >
-                      {{ entity.name?.charAt(0) || "E" }}
+                      {{ entity.username?.charAt(0) || "E" }}
                     </div>
                   </div>
                   <div class="ml-4">
                     <div
                       class="text-sm font-medium text-[var(--color-text-main)]"
                     >
-                      {{ entity.name || "Unnamed Entity" }}
+                      {{ entity.username || "Unnamed Entity" }}
                     </div>
                     <!-- <div class="text-sm text-[var(--color-text-muted)]">ID: {{ entity.id }}</div> -->
                     <div class="mt-1">
@@ -628,7 +625,7 @@
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4">
+              <!-- <td class="px-6 py-4">
                 <div class="flex flex-col space-y-1">
                   <div
                     class="flex items-center text-sm text-[var(--color-text-main)]"
@@ -667,7 +664,7 @@
                     {{ entity.mobile || "No mobile" }}
                   </div>
                 </div>
-              </td>
+              </td> -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-[var(--color-text-main)]">
                   {{ getEntityTypeDisplay(entity) }}
@@ -716,7 +713,7 @@
                           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                         ></path>
                       </svg>
-                      Created: {{ entity.createdAt | date: "shortDate" }}
+                      Created: {{ entity.createdAt | tz }}
                     </div>
                   </div>
                 </div>
@@ -792,12 +789,12 @@
                 [ngClass]="getEntityAvatarClass(entity)"
                 class="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold"
               >
-                {{ entity.name?.charAt(0) || "E" }}
+                {{ entity.username?.charAt(0) || "E" }}
               </div>
 
               <div class="ml-3">
                 <div class="font-medium text-[var(--color-text-main)]">
-                  {{ entity.name || "Unnamed Entity" }}
+                  {{ entity.username || "Unnamed Entity" }}
                 </div>
 
                 <span
@@ -823,7 +820,7 @@
           </div>
 
           <!-- Contact Info -->
-          <div class="mt-3 text-sm text-[var(--color-text-muted)] space-y-1">
+          <!-- <div class="mt-3 text-sm text-[var(--color-text-muted)] space-y-1">
             <div class="flex items-center">
               <svg
                 class="w-4 h-4 mr-2"
@@ -857,7 +854,7 @@
               </svg>
               {{ entity.mobile || "No mobile" }}
             </div>
-          </div>
+          </div> -->
 
           <!-- Footer -->
           <div class="flex justify-between items-center mt-4">
@@ -993,7 +990,7 @@
           <div class="flex items-start justify-between mb-5">
             <div>
               <h3 class="text-xl font-semibold text-[var(--color-text-main)]">
-                Add Amount to {{ selectedEntity?.name }}
+                Add Amount to {{ selectedEntity?.username }}
               </h3>
               <p class="text-sm text-[var(--color-text-muted)] mt-1">
                 Enter the amount to allocate to this entity
@@ -1064,7 +1061,7 @@
                 <div class="border-t border-[var(--color-border)] my-2"></div>
 
                 <p class="font-medium text-[var(--color-text-main)]">
-                  Assigning to {{ selectedEntity?.name }}
+                  Assigning to {{ selectedEntity?.username }}
                 </p>
 
                 <div class="grid grid-cols-2 gap-y-2 text-xs">
@@ -1077,10 +1074,10 @@
                   </div>
 
                   <div class="text-[var(--color-text-muted)]">User</div>
-                  <div>{{ selectedEntity?.name || "Unknown User" }}</div>
+                  <div>{{ selectedEntity?.username || "Unknown User" }}</div>
 
-                  <div class="text-[var(--color-text-muted)]">Email</div>
-                  <div>{{ selectedEntity?.email || "No Email" }}</div>
+                  <!-- <div class="text-[var(--color-text-muted)]">Email</div>
+                  <div>{{ selectedEntity?.email || "No Email" }}</div> -->
 
                   <div class="text-[var(--color-text-muted)]">
                     User Remaining
@@ -1212,7 +1209,7 @@
                 class="text-xl font-bold text-[var(--color-text-main)]"
                 id="limits-modal-title"
               >
-                Limits History for {{ selectedEntity?.name }}
+                Limits History for {{ selectedEntity?.username }}
               </h3>
               <p class="text-sm text-[var(--color-text-muted)] mt-1">
                 Complete transaction and balance history
@@ -1263,12 +1260,7 @@
                   Entity
                 </div>
                 <div class="font-mono text-sm text-[var(--color-text-main)]">
-                  {{ selectedEntity?.name }}
-                  {{
-                    selectedEntity?.email
-                      ? "- " + selectedEntity.email
-                      : "No Email"
-                  }}
+                  {{ selectedEntity?.username }}
                 </div>
               </div>
               <div
@@ -1297,7 +1289,7 @@
                   Last Updated
                 </div>
                 <div class="text-sm text-[var(--color-text-main)]">
-                  {{ limitsData[0]?.updatedAt | date: "medium" }}
+                  {{ limitsData[0]?.updatedAt | tz }}
                 </div>
               </div>
             </div>
@@ -1339,10 +1331,10 @@
                   >
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="text-sm text-[var(--color-text-main)]">
-                        {{ limit.createdAt | date: "shortDate" }}
+                        {{ limit.createdAt | tz }}
                       </div>
                       <div class="text-xs text-[var(--color-text-muted)]">
-                        {{ limit.createdAt | date: "shortTime" }}
+                        {{ limit.createdAt | tz }}
                       </div>
                     </td>
                     <td class="px-6 py-4">
@@ -1421,11 +1413,11 @@
                     <div
                       class="text-sm font-semibold text-[var(--color-text-main)]"
                     >
-                      {{ limit.createdAt | date: "mediumDate" }}
+                      {{ limit.createdAt | tz }}
                     </div>
 
                     <div class="text-[10px] text-[var(--color-text-muted)]">
-                      {{ limit.createdAt | date: "shortTime" }}
+                      {{ limit.createdAt | tz }}
                     </div>
                   </div>
 
@@ -1876,10 +1868,10 @@
                     <tr *ngFor="let limit of adminLimitsData">
                       <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm text-[var(--color-text-main)]">
-                          {{ limit.createdAt | date: "shortDate" }}
+                          {{ limit.createdAt | tz }}
                         </div>
                         <div class="text-xs text-[var(--color-text-muted)]">
-                          {{ limit.createdAt | date: "shortTime" }}
+                          {{ limit.createdAt | tz }}
                         </div>
                       </td>
                       <td class="px-6 py-4">
@@ -1958,10 +1950,10 @@
                       <span
                         class="text-[10px] font-medium text-[var(--color-text-main)]"
                       >
-                        {{ limit.createdAt | date: "MMM d" }}
+                        {{ limit.createdAt | tz }}
                       </span>
                       <span class="text-[8px] text-[var(--color-text-muted)]">
-                        {{ limit.createdAt | date: "h:mm a" }}
+                        {{ limit.createdAt | tz }}
                       </span>
                     </div>
                     <span class="text-xs font-bold text-[var(--color-primary)]">

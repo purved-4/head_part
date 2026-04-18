@@ -14,23 +14,20 @@ import { TransactionHistoryReportComponent } from "../../../components/reports/t
 import { AddBranchUserComponent } from "../branch/add-branch-user/add-branch-user.component";
 import { ManageBranchUserComponent } from "../branch/manage-branch-user/manage-branch-user.component";
 // import { BranchChatComponent } from "../../../common/head-branch-chat/head-branch-chat.component";
-import { HeadUpiComponent } from "../upi/head-upi/head-upi.component";
-import { HeadBankComponent } from "../bank/head-bank/head-bank.component";
-// import { HeadChatComponent } from "../../../trash/head-chat/head-chat.component";
 // import { ApprovedFundsComponent } from "../../branch/approved-funds/approved-funds.component";
 // import { RejectedFundsComponent } from "../../branch/rejected-funds/rejected-funds.component";
 import { HeadBranchCapacityComponent } from "../../../components/head-branch-capacity/head-branch-capacity.component";
 import { HeadNavDashboardLayoutComponent } from "../head-navlayout/head-nav-dashboard-layout/head-nav-dashboard-layout.component";
-// import { BranchChatComponent } from "../../../trash/branch-chat/branch-chat.component";
 import { HeadApprovedFundsComponent } from "../head-approved-funds/head-approved-funds.component";
 import { HeadRejectedFundsComponent } from "../head-rejected-funds/head-rejected-funds.component";
 import {ChatingComponent} from "../../../common/chating/chating.component";
 import { RecycleUpiComponent } from "../../../common/recycle-upi/recycle-upi.component";
 import { RecycleBankComponent } from "../../../common/recycle-bank/recycle-bank.component";
 import { ChatResponsiveComponent } from "../../../common/chat-responsive/chat-responsive.component";
-import { PaymentManagementComponent } from "../payment-management/payment-management.component";
 import { RecycleManagementComponent } from "../recycle-management/recycle-management.component";
-import { PaymentsMethodsComponent } from "../../../common/payments-methods/payments-methods.component";
+import { PaymentsMethodsComponent } from "../../../common/head_branch/payments-methods/payments-methods.component";
+import { UpisComponent } from "../../../common/head_branch/upis/upis.component";
+import { BanksComponent } from "../../../common/head_branch/banks/banks.component";
 
 const routes: Routes = [
   {
@@ -53,13 +50,14 @@ const routes: Routes = [
   path: 'payments-methods',
   component: PaymentsMethodsComponent
 },
+
       {
         path: "upi",
-        component: HeadUpiComponent,
+        component: UpisComponent,
       },
       {
         path: "bank",
-        component: HeadBankComponent,
+        component: BanksComponent,
       },
       {
         path: "recycle-upi",
@@ -105,10 +103,10 @@ const routes: Routes = [
         component: LimitsComponent,
       },
 
-      {
-        path: "payment-management",
-        component: PaymentManagementComponent,
-      },
+      // {
+      //   path: "payment-management",
+      //   component: PaymentManagementComponent,
+      // },
 
       {
         path: "recycle-management",

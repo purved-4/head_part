@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { HeadBankComponent } from './head-bank.component';
+import { AutoRefreshComponent } from './auto-refresh.component';
 
-describe('HeadBankComponent', () => {
-  let component: HeadBankComponent;
-  let fixture: ComponentFixture<HeadBankComponent>;
+describe('AutoRefreshComponent', () => {
+  let component: AutoRefreshComponent;
+  let fixture: ComponentFixture<AutoRefreshComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeadBankComponent]
+      imports: [AutoRefreshComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(HeadBankComponent);
+    fixture = TestBed.createComponent(AutoRefreshComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

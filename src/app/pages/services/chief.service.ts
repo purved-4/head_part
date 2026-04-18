@@ -197,4 +197,39 @@ export class ChiefService {
       `${baseUrl}/chief/getChiefBalanceByPortal/${portalId}/${chiefId}`,
     );
   }
+
+ 
+
+  getCurrencies(chieftId: any): Observable<any> {
+    return this.http.get<any>(`${baseUrl}/chief/${chieftId}/currencies`).pipe(
+     map((response) => response),
+     catchError((error) => throwError(() => error)),
+    );
+}
+
+// POST (Add + Update)
+saveCurrencies(chieftId: any, payload: any): Observable<any> {
+    return this.http
+     .post<any>(`${baseUrl}/chief/${chieftId}/currencies`, payload)
+     .pipe(
+        map((response) => response),
+        catchError((error) => throwError(() => error)),
+     );
+}
+
+getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
+  return this.http
+    .get<any>(`${baseUrl}/chief/currencies`, {
+      params: {
+        entityId: entityId,
+        entityType: entityRole,
+      },
+    })
+    .pipe(
+      map((response) => response),
+      catchError((error) => throwError(() => error))
+    );
+}
+
+
 }

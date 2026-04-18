@@ -17,7 +17,7 @@ interface PortalRange {
   range: string;
   portalDomain: string;
   active?: boolean;
-  topupPercentage: number;
+  payinPercentage: number;
   payoutPercentage: number;
   fttPercentage?: number;
 }
@@ -214,7 +214,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
                   ? w.isActive
                   : true,
             fttPercentage: Number(w.fttPercentage) || 0,
-            topupPercentage: Number(w.topupPercentage) || 0,
+            payinPercentage: Number(w.payinPercentage) || 0,
             payoutPercentage: Number(w.payoutPercentage) || 0,
           }));
 
@@ -378,7 +378,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     );
     const allPercentages = this.agents.flatMap(
       (agent) =>
-        agent.portalsWithRange?.map((w) => w.topupPercentage || 0) || [],
+        agent.portalsWithRange?.map((w) => w.payinPercentage || 0) || [],
     );
     if (allPercentages.length > 0) {
       this.avgTopupPercentage = parseFloat(
@@ -408,7 +408,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.selectedPortal = {
       ...portal,
       fttPercentage: Number(portal?.fttPercentage) || 0,
-      topupPercentage: Number(portal?.topupPercentage) || 0,
+      payinPercentage: Number(portal?.payinPercentage) || 0,
       payoutPercentage: Number(portal?.payoutPercentage) || 0,
     };
 
@@ -432,7 +432,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
           this.selectedPortal = {
             ...this.selectedPortal,
             fttPercentage: Number(matched.fttPercentage) || 0,
-            topupPercentage: Number(matched.topupPercentage) || 0,
+            payinPercentage: Number(matched.payinPercentage) || 0,
             payoutPercentage: Number(matched.payoutPercentage) || 0,
           };
         }
@@ -459,7 +459,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
       (portal) => ({
         ...portal,
         fttPercentage: Number(portal.fttPercentage) || 0,
-        topupPercentage: Number(portal.topupPercentage) || 0,
+        payinPercentage: Number(portal.payinPercentage) || 0,
         payoutPercentage: Number(portal.payoutPercentage) || 0,
       }),
     );
@@ -482,7 +482,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
           return {
             ...portal,
             fttPercentage: Number(matched?.fttPercentage) || 0,
-            topupPercentage: Number(matched?.topupPercentage) || 0,
+            payinPercentage: Number(matched?.payinPercentage) || 0,
             payoutPercentage: Number(matched?.payoutPercentage) || 0,
           };
         });
@@ -705,7 +705,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
           range: "",
           fttPercentage: 0,
 
-          topupPercentage: 0,
+          payinPercentage: 0,
           payoutPercentage: 0,
           active: true,
         };
@@ -765,14 +765,14 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     return (
       portal.fttPercentage !== null &&
       portal.fttPercentage !== undefined &&
-      portal.topupPercentage !== null &&
-      portal.topupPercentage !== undefined &&
+      portal.payinPercentage !== null &&
+      portal.payinPercentage !== undefined &&
       portal.payoutPercentage !== null &&
       portal.payoutPercentage !== undefined &&
       portal.fttPercentage >= 0 &&
       portal.fttPercentage <= 100 &&
-      portal.topupPercentage >= 0 &&
-      portal.topupPercentage <= 100 &&
+      portal.payinPercentage >= 0 &&
+      portal.payinPercentage <= 100 &&
       portal.payoutPercentage >= 0 &&
       portal.payoutPercentage <= 100
     );
@@ -805,7 +805,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     for (const portal of this.editForm.portalsWithRange) {
       const ftt = Number(portal.fttPercentage);
 
-      const topup = Number(portal.topupPercentage);
+      const topup = Number(portal.payinPercentage);
       const payout = Number(portal.payoutPercentage);
       if (isNaN(ftt) || ftt < 0 || ftt > 100) {
         return false;
@@ -913,7 +913,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.editForm.portalsWithRange.forEach((portal) => {
       portalPercentages[portal.portalId] = {
         fttPercentage: Number(portal.fttPercentage) || 0,
-        topupPercentage: Number(portal.topupPercentage) || 0,
+        payinPercentage: Number(portal.payinPercentage) || 0,
         payoutPercentage: Number(portal.payoutPercentage) || 0,
       };
     });
@@ -1026,7 +1026,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
         ) / (agent.portalsWithRange?.length || 1);
       const avgTopup =
         agent.portalsWithRange?.reduce(
-          (sum, w) => sum + (w.topupPercentage || 0),
+          (sum, w) => sum + (w.payinPercentage || 0),
           0,
         ) / (agent.portalsWithRange?.length || 1);
       const avgPayout =
@@ -1155,7 +1155,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
           portalId: portal.portalId,
           portalDomain: portal.portalDomain,
           range: "",
-          topupPercentage: 0,
+          payinPercentage: 0,
           payoutPercentage: 0,
           fttPercentage: 0,
           active: true,
@@ -1236,7 +1236,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
         portalDomain: "",
         range: "",
         fttPercentage: 0,
-        topupPercentage: 0,
+        payinPercentage: 0,
         payoutPercentage: 0,
         active: true,
       };
@@ -1257,7 +1257,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
   //     portalsWithRange: (agent.portalsWithRange || []).map((w) => ({
   //       ...w,
   //       fttPercentage: Number(w.fttPercentage) || 0,
-  //       topupPercentage: Number(w.topupPercentage) || 0,
+  //       payinPercentage: Number(w.payinPercentage) || 0,
   //       payoutPercentage: Number(w.payoutPercentage) || 0,
   //     })),
   //   };
@@ -1317,7 +1317,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     //     range: w.range ?? "",
     //     active: typeof w.active === "boolean" ? w.active : true,
     //     fttPercentage: Number(w.fttPercentage) || 0,
-    //     topupPercentage: Number(w.topupPercentage) || 0,
+    //     payinPercentage: Number(w.payinPercentage) || 0,
     //     payoutPercentage: Number(w.payoutPercentage) || 0,
     //   })),
     // };
@@ -1335,7 +1335,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
         range: w.range ?? "",
         active: typeof w.active === "boolean" ? w.active : true,
         fttPercentage: Number(w.fttPercentage) || 0,
-        topupPercentage: Number(w.topupPercentage) || 0,
+        payinPercentage: Number(w.payinPercentage) || 0,
         payoutPercentage: Number(w.payoutPercentage) || 0,
       })),
     };
@@ -1371,7 +1371,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
                 return {
                   ...portal,
                   fttPercentage: Number(matched?.fttPercentage) || 0,
-                  topupPercentage: Number(matched?.topupPercentage) || 0,
+                  payinPercentage: Number(matched?.payinPercentage) || 0,
                   payoutPercentage: Number(matched?.payoutPercentage) || 0,
                 };
               },

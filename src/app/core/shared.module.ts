@@ -36,9 +36,10 @@ import { WebsitePercentageModelComponent } from "../common/website-percentage-mo
 import { TimeZoneComponent } from "../common/time-zone/time-zone.component";
 import { CompartPercentageModleComponent } from "../common/compart-percentage-modle/compart-percentage-modle.component";
 import { TimeZonePipe } from "../pipes/time-zone.pipe";
-import { PaymentsMethodsComponent } from "../common/payments-methods/payments-methods.component";
-import { BanksComponent } from "../common/banks/banks.component";
-import { UpisComponent } from "../common/upis/upis.component";
+import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods/payments-methods.component";
+import { BanksComponent } from "../common/head_branch/banks/banks.component";
+import { UpisComponent } from "../common/head_branch/upis/upis.component";
+import { EnityCompartEditModelComponent } from "../common/enity-compart-edit-model/enity-compart-edit-model.component";
 
 // shared.module.ts
 @NgModule({
@@ -79,7 +80,8 @@ import { UpisComponent } from "../common/upis/upis.component";
     TimeZonePipe,
     PaymentsMethodsComponent,
     BanksComponent,
-    UpisComponent
+    UpisComponent,
+    EnityCompartEditModelComponent
     
     
   ],
@@ -119,7 +121,8 @@ import { UpisComponent } from "../common/upis/upis.component";
     TimeZonePipe,
     PaymentsMethodsComponent,
     BanksComponent,
-    UpisComponent
+    UpisComponent,
+    EnityCompartEditModelComponent
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeComponent],
 })

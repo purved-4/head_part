@@ -59,17 +59,13 @@ export class TimeZoneServiceService {
 
     this.timeZone$ = this.timeZoneSubject.asObservable();
 
-    // Agar registry me subject already hai aur empty hai, to sync kar do
     if (!this.timeZoneSubject.value) {
       this.timeZoneSubject.next(initialState);
     }
   }
 
   getAvailableTimeZones(): TimeZoneOption[] {
-    return [
-      this.getSystemOption(),
-      ...this.commonZones,
-    ];
+    return [this.getSystemOption(), ...this.commonZones];
   }
 
   getCurrentState(): TimeZoneState {
@@ -140,13 +136,13 @@ export class TimeZoneServiceService {
     }
 
     const asUTC = Date.UTC(
-  Number(map["year"]),
-  Number(map["month"]) - 1,
-  Number(map["day"]),
-  Number(map["hour"]),
-  Number(map["minute"]),
-  Number(map["second"])
-);
+      Number(map["year"]),
+      Number(map["month"]) - 1,
+      Number(map["day"]),
+      Number(map["hour"]),
+      Number(map["minute"]),
+      Number(map["second"])
+    );
 
     return (asUTC - date.getTime()) / 60000;
   }
@@ -174,10 +170,6 @@ export class TimeZoneServiceService {
     }).format(date);
   }
 
-  /**
-   * Date/date-string ko selected timezone ke hisab se UTC instant me convert karta hai.
-   * Report filters ke liye useful.
-   */
   getReportRange(
     fromDate: string | Date,
     toDate: string | Date,
@@ -212,9 +204,6 @@ export class TimeZoneServiceService {
     };
   }
 
-  /**
-   * Normal date/time ko selected timezone me formatted text ke form me deta hai.
-   */
   convertDateToSelectedZone(value: string | Date): string {
     return this.formatInTimeZone(value, this.getActiveTimeZone(), {
       dateStyle: "medium",
@@ -240,8 +229,7 @@ export class TimeZoneServiceService {
   }
 
   private getSystemState(): TimeZoneState {
-    const option = this.getSystemOption();
-    return this.toState(option);
+    return this.toState(this.getSystemOption());
   }
 
   private toState(option: TimeZoneOption): TimeZoneState {
@@ -250,10 +238,7 @@ export class TimeZoneServiceService {
     return {
       code: option.code,
       mode: option.mode,
-      label:
-        option.mode === "SYSTEM"
-          ? `System timezone (${iana})`
-          : option.label,
+      label: option.mode === "SYSTEM" ? `System timezone (${iana})` : option.label,
       iana,
       offsetLabel: this.getOffsetLabel(iana),
     };
@@ -263,9 +248,7 @@ export class TimeZoneServiceService {
     const system = this.getSystemOption();
     const all = [system, ...this.commonZones];
 
-    return all.find(
-      (z) => z.code === codeOrIana || z.iana === codeOrIana
-    );
+    return all.find((z) => z.code === codeOrIana || z.iana === codeOrIana);
   }
 
   private createCustomOption(iana: string): TimeZoneOption {
@@ -277,10 +260,6 @@ export class TimeZoneServiceService {
     };
   }
 
-  /**
-   * from/to date string ko target timezone ke wall-clock date me treat karke UTC instant banata hai.
-   * Example: 2026-04-08 + Asia/Dubai => Dubai midnight / end-of-day
-   */
   private buildZonedDate(
     input: string | Date,
     timeZone: string,
@@ -325,7 +304,6 @@ export class TimeZoneServiceService {
 
     const value = String(input).trim();
 
-    // YYYY-MM-DD
     const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (isoMatch) {
       return {

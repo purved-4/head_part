@@ -285,13 +285,13 @@ showCompartModal:boolean = false
 
     const compartPercentages: Record<
       string,
-      { fttPercentage: number; topupPercentage: number; payoutPercentage: number }
+      { fttPercentage: number; payinPercentage: number; payoutPercentage: number }
     > = {};
 
     compartIds.forEach((id) => {
       compartPercentages[id] = {
         fttPercentage: Number(this.chiefForm.get(`first_topup_${id}`)?.value),
-        topupPercentage: Number(this.chiefForm.get(`topup_${id}`)?.value),
+        payinPercentage: Number(this.chiefForm.get(`topup_${id}`)?.value),
         payoutPercentage: Number(this.chiefForm.get(`payout_${id}`)?.value),
       };
     });

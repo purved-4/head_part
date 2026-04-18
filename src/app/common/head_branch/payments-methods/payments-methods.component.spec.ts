@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { HeadUpiComponent } from './head-upi.component';
+import { PaymentsMethodsComponent } from './payments-methods.component';
 
-describe('HeadUpiComponent', () => {
-  let component: HeadUpiComponent;
-  let fixture: ComponentFixture<HeadUpiComponent>;
+describe('PaymentsMethodsComponent', () => {
+  let component: PaymentsMethodsComponent;
+  let fixture: ComponentFixture<PaymentsMethodsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeadUpiComponent]
+      imports: [PaymentsMethodsComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(HeadUpiComponent);
+    fixture = TestBed.createComponent(PaymentsMethodsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

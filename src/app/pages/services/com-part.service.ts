@@ -99,11 +99,13 @@ export class ComPartService {
     page: any = 0,
     size: any = 10,
   ): Observable<any> {
-    let param = new HttpParams()
-    param = param.set("page",page)
-    param = param.set("size",size)
+    let param = new HttpParams();
+    param = param.set("page", page);
+    param = param.set("size", size);
     return this.http
-      .get<any>(`${baseUrl}/comPart/getComPartsListByUserId/paginated/${id}`,{params:param})
+      .get<any>(`${baseUrl}/comPart/getComPartsListByUserId/paginated/${id}`, {
+        params: param,
+      })
       .pipe(
         map((res) => res.data),
         catchError(this.handleError),
@@ -320,10 +322,144 @@ export class ComPartService {
   }
 
   getPercentageByEntityId(entityId: any, entityType: any): Observable<any> {
-    // entityId = "637011a4-6c87-43fa-a163-020c4e35475e";
-    // entityType = "owner";
-    return this.http.get<any>(
-     `${baseUrl}/comPart/getPercentageByEntityId/${entityId}/${entityType}`,
-    );
-}
+    return this.http
+      .get<any>(
+        `${baseUrl}/comPart/getPercentageByEntityId/${entityId}/${entityType}`,
+      )
+      .pipe(
+        map((response) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+  // New Revised Api's
+
+  getBankDetailsByPortalIdAndAmount(portalId: any, amount: any) {
+     let params = new HttpParams();
+
+    if (amount != null && amount > 0) {
+      params = params.set("amount", amount);
+    }
+    return this.http
+      .get<any>(
+        `${baseUrl}/manual/getBankDetailsByAmount/${portalId}`,{params}
+      )
+      .pipe(
+        map((res) => res.data),
+        catchError((err) => throwError(() => err)),
+      );
+  }
+
+  getUpiDetailsByPortalIdAndAmount(portalId: any, amount: any) {
+    let params = new HttpParams();
+
+    if (amount != null && amount > 0) {
+      params = params.set("amount", amount);
+    }
+    return this.http
+      .get<any>(
+        `${baseUrl}/manual/getUpiDetailsByAmount/${portalId}`,{params},
+      )
+      .pipe(
+        map((res) => res.data),
+        catchError((err) => throwError(() => err)),
+      );
+  }
+
+  assignPortal(bankId:any,portalId:any) {
+    return this.http.patch<any>(`${baseUrl}/banks/${bankId}/assign-portal/${portalId}`,{})
+  }
+
+   getAllByComPartWithPortal(compartId: any) {
+    return this.http
+      .get<any>(
+        `${baseUrl}/banks/getAllByComPartWithPortal/${compartId}`,
+      )
+      .pipe(
+        map((res) => res.data),
+        catchError((err) => throwError(() => err)),
+      );
+
+      
+  }
+
+  getAllByComPartWithoutPortal(compartId: any) {
+    return this.http
+      .get<any>(
+        `${baseUrl}/banks/getAllByComPartWithoutPortal/${compartId}`,
+      )
+      .pipe(
+        map((res) => res.data),
+        catchError((err) => throwError(() => err)),
+      );
+    }
+
+    getBankDetailsByAmount(portalId: any, amount?: any) {
+    let params = new HttpParams();
+
+    if (amount != null && amount > 0) {
+      params = params.set("amount", amount);
+    }
+
+  
+    return this.http
+      .get(`${baseUrl}/manual/getBankDetailsByAmount/${portalId}`, {
+        params,
+      })
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+    getUpiDetailsByAmount(portalId: any, amount?: any) {
+    let params = new HttpParams();
+
+    if (amount != null && amount > 0) {
+      params = params.set("amount", amount);
+    }
+    return this.http
+      .get(`${baseUrl}/manual/getUpiDetailsByAmount/${portalId}`, {
+        params,
+      })
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+  getCurrencies(comPartId: any): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/currency/${comPartId}/currencies`)
+      .pipe(
+        map((response) => response),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+  // POST
+  saveCurrencies(comPartId: any, payload: any): Observable<any> {
+    return this.http
+      .post<any>(`${baseUrl}/currency/${comPartId}/currencies`, payload)
+      .pipe(
+        map((response) => response),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+  getPortalByComPartIdAndCurrency(
+    id: any,
+    currenyId : any,
+    page: any = 0,
+    size: any = 10,
+
+  ): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/portals/getAllByComPartIdAndCurrencyId/paginated/${id}/${currenyId}`)
+      .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+      );
+  }
+
 }

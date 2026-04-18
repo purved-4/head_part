@@ -27,8 +27,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     newPassword: string;
   }>();
 
-  // selectedSection: "user" | "entity" | "portal" | "password" = "user";
-  selectedSection: "user" | "portal" | "password" = "user";
+  selectedSection: "user" | "entity" | "portal" | "password" = "user";
 
   branch: any = null;
   entityInfo: any = null;
@@ -277,7 +276,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
           w.name ?? w.portalDomain ?? w.domain ?? w._raw?.name ?? "unknown",
         fttPercentage:
           w.fttPercentage ?? w.ftt_percentage ?? w.firstTopupPercentage ?? null,
-        topupPercentage: w.topupPercentage ?? w.topup_percentage ?? null,
+        payinPercentage: w.payinPercentage ?? w.topup_percentage ?? null,
         payoutPercentage: w.payoutPercentage ?? w.payout_percentage ?? null,
         payoutsTimeStrength:
           w.payoutsTimeStrength ??

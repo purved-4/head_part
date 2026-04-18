@@ -143,7 +143,27 @@ export class PortalService {
       );
   }
 
-     // GET
+  // GET
+  getCurrenciesbyPortal(portalId: any): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/portal/${portalId}/currencies`)
+      .pipe(
+        map((response) => response),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+  // POST (Add + Update)
+  saveCurrenciesByPortal(portalId: any, payload: any): Observable<any> {
+    return this.http
+      .post<any>(`${baseUrl}/portal/${portalId}/currencies`, payload)
+      .pipe(
+        map((response) => response),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+  // GET
 getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
   return this.http
     .get<any>(`${baseUrl}/chief/currencies`, {
@@ -157,4 +177,5 @@ getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
       catchError((error) => throwError(() => error))
     );
 }
+  
 }

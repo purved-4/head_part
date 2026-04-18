@@ -46,15 +46,7 @@ export class FundsService {
       catchError((error) => throwError(error)),
     );
   }
-
-  getAllBankFundWithId(bankId: any): Observable<any> {
-    return this.http
-      .get<any>(`${baseUrl}/funds/getAllBankFunds/${bankId}`)
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(error)),
-      );
-  }
+ 
 
   settleUpiFund(upiSettleId: any): Observable<any> {
     return this.http
@@ -67,7 +59,7 @@ export class FundsService {
 
   settleBankFund(bankSettleId: any): Observable<any> {
     return this.http
-      .patch<any>(`${baseUrl}/funds/bank/${bankSettleId}/accept`, {})
+      .patch<any>(`${baseUrl}/funds/payment/${bankSettleId}/accept`, {})
       .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(error)),
@@ -81,12 +73,7 @@ export class FundsService {
     );
   }
 
-  getAllBankFund(): Observable<any> {
-    return this.http.get<any>(`${baseUrl}/funds/getAllBankFunds`).pipe(
-      map((response: any) => response.data),
-      catchError((error) => throwError(error)),
-    );
-  }
+ 
 
   getAllUpiFund(): Observable<any> {
     return this.http.get<any>(`${baseUrl}/funds/getAllUpiFunds`).pipe(
@@ -98,7 +85,7 @@ export class FundsService {
   getAllBankFundWithBranchId(subAgenId: any, settled: any): Observable<any> {
     return this.http
       .get<any>(
-        `${baseUrl}/funds/getAllBankFundsByBranch/${subAgenId}/${settled}`,
+        `${baseUrl}/funds/getAllPaymentFundsByBranch/${subAgenId}/${settled}`,
       )
       .pipe(
         map((response: any) => response.data),
@@ -122,7 +109,7 @@ export class FundsService {
     }
     return this.http
       .get<any>(
-        `${baseUrl}/funds/getBankFundsByBranch/${subAgenId}/${settled}`,
+        `${baseUrl}/funds/getPaymentFundsByBranch/${subAgenId}/${settled}`,
         { params },
       )
       .pipe(
@@ -269,7 +256,7 @@ export class FundsService {
     formData.append("file", file);
 
     return this.http
-      .patch<any>(`${baseUrl}/funds/bank/${bankSettleId}/reject`, formData)
+      .patch<any>(`${baseUrl}/funds/payment/${bankSettleId}/reject`, formData)
       .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(() => error)),
@@ -398,7 +385,7 @@ export class FundsService {
 
     return this.http
       .get<any>(
-        `${baseUrl}/funds/getBankFundWithPortalID/${portalId}/${status}`,
+        `${baseUrl}/funds/getPaymentFundWithPortalID/${portalId}/${status}`,
         {
           params,
         },
@@ -549,7 +536,7 @@ export class FundsService {
     }
     return this.http
       .get<any>(
-        `${baseUrl}/funds/getBankFundWithPortalIdAndEntityId/${portalId}/${entityId}`,
+        `${baseUrl}/funds/getPaymentFundWithPortalIdAndEntityId/${portalId}/${entityId}`,
         { params },
       )
       .pipe(

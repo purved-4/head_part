@@ -28,7 +28,7 @@ import { fileBaseUrl } from "../../services/helper";
 // } from "../../services/portal-sharing.service";
 import { SnackbarService } from "../../../common/snackbar/snackbar.service";
 import { MultimediaService } from "../../services/multimedia.service";
-import { PortalService } from "../../services/portal.service";
+import { ChiefService } from "../../services/chief.service";
 // import { PoolingService } from "../../services/pooling.service"; // not used directly here
 
 Chart.register(...registerables);
@@ -203,13 +203,16 @@ export class HeadDashboardComponent
     private snackbar: SnackbarService,
     private headService: HeadService,
     private multimediaService: MultimediaService,
-    private portalService : PortalService,
+    private chiefService:ChiefService
   ) {}
 
   ngOnInit(): void {
-   
     this.headId = this.userStateService.getCurrentEntityId();
     this.role = this.userStateService.getRole();
+    this.chiefService.getCurrenciesByEntity(this.headId,this.role).subscribe((res) => {
+      console.log(res);
+      
+    })
     this.getTopupStatus();
 
     this.fundService
@@ -244,8 +247,6 @@ export class HeadDashboardComponent
     setInterval(() => {
       this.processingNow = Date.now();
     }, 60000);
-
-     this.loadCurrencies();
   }
 
   private getTopupStatus() {
@@ -2300,19 +2301,4 @@ export class HeadDashboardComponent
 
     return result.trim() || "Just now";
   }
-
-    loadCurrencies() {
-this.portalService
-  .getCurrenciesByEntity(this.headId, this.role)
-  .subscribe({
-    next: (res: any) => {
-      console.log(res);
-      
-      // const data = Array.isArray(res) ? res : res?.data || [];
-      // this.prepareCurrencies(data);
-    },
-    // error: () => this.prepareCurrencies([]),
-  });
-  }
-  
 }

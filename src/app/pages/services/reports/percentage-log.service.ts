@@ -9,32 +9,29 @@ import { TimeZoneServiceService } from "../../../common/time-zone/time-zone-serv
   providedIn: "root",
 })
 export class PercentageLogService {
-  constructor(private http: HttpClient,  private timeZoneService: TimeZoneServiceService
-) {}
+  constructor(
+    private http: HttpClient,
+    private timeZoneService: TimeZoneServiceService,
+  ) {}
 
-getHistoryWithType(user: any): Observable<any> {
-  const range = this.timeZoneService.getReportRange(
-    user.fromDate,
-    user.toDate
-  );
-
-  console.log(range.fromUtc);
-  console.log(range.toUtc);
-  
-  
-
-  let params = new HttpParams()
-    .set("fromDate", range.fromUtc)   // ✅ converted UTC
-    .set("toDate", range.toUtc)       // ✅ converted UTC
-    .set("entityType", user.entityType);
-
-  return this.http
-    .get(`${baseUrl}/percentage/historyWithType`, { params })
-    .pipe(
-      map((response: any) => response.data),
-      catchError((error) => throwError(error))
+  getHistoryWithType(user: any): Observable<any> {
+    const range = this.timeZoneService.getReportRange(
+      user.fromDate,
+      user.toDate,
     );
-}
+
+    let params = new HttpParams()
+      .set("fromDate", range.fromUtc)
+      .set("toDate", range.toUtc) // ✅ converted UTC
+      .set("entityType", user.entityType);
+
+    return this.http
+      .get(`${baseUrl}/percentage/historyWithType`, { params })
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
 }
 
 // searchPanels(

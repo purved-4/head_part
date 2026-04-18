@@ -29,7 +29,7 @@ export class WebsitePercentageModelComponent implements OnInit, OnChanges {
 
   portalPercentages: Array<{
     portalName: string;
-    topupPercentage: number | null;
+    payinPercentage: number | null;
     fttPercentage: number | null;
     payoutPercentage: number | null;
   }> = [];
@@ -85,7 +85,7 @@ export class WebsitePercentageModelComponent implements OnInit, OnChanges {
 
       this.portalPercentages = data.map((item: any) => ({
         portalName: item?.portalName ?? '--',
-        topupPercentage: item?.topupPercentage ?? null,
+        payinPercentage: item?.payinPercentage ?? null,
         fttPercentage: item?.fttPercentage ?? null,
         payoutPercentage: item?.payoutPercentage ?? null,
       }));

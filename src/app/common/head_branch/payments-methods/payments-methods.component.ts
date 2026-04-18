@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { PortalService } from '../../pages/services/portal.service';
-import { UserStateService } from '../../store/user-state.service';
+import { PortalService } from '../../../pages/services/portal.service';
+import { UserStateService } from '../../../store/user-state.service';
 
 @Component({
   selector: 'app-payments-methods',
