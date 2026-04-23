@@ -30,9 +30,9 @@
                 </span>
               </div>
               <div class="text-[var(--color-bg)]">
-                <h3 class="font-bold text-xl">UPI topups</h3>
+                <h3 class="font-bold text-xl">UPI payins</h3>
                 <p class="mt-1 opacity-80">
-                  {{ filteredUpitopups().length }} records • Real-time updates
+                  {{ filteredUpipayins().length }} records • Real-time updates
                 </p>
               </div>
             </div>
@@ -152,7 +152,7 @@
               <div class="relative min-w-[200px] flex-1 xl:flex-none">
                 <input
                   type="text"
-                  placeholder="Search UPI topups..."
+                  placeholder="Search UPI payins..."
                   [(ngModel)]="upiSearchQuery"
                   (keyup.enter)="applyUpiFilters()"
                   class="text-sm border-0 rounded-2xl pl-12 pr-4 py-3 placeholder-opacity-60 focus:ring-2 transition-all duration-300 w-full shadow-lg bg-white/20 text-[var(--color-bg)]"
@@ -223,7 +223,7 @@
               </thead>
               <tbody class="divide-y divide-[var(--color-border)]">
                 <tr
-                  *ngFor="let a of pagedUpitopups()"
+                  *ngFor="let a of pagedUpipayins()"
                   class="hover:bg-[var(--color-hover)] transition-all duration-300 group"
                 >
                   <td class="px-6 py-4">
@@ -315,7 +315,7 @@
                     </button>
                   </td>
                 </tr>
-                <tr *ngIf="filteredUpitopups().length === 0">
+                <tr *ngIf="filteredUpipayins().length === 0">
                   <td colspan="7" class="px-4 py-12 text-center">
                     <div class="flex flex-col items-center">
                       <div
@@ -329,7 +329,7 @@
                       <p
                         class="text-base font-semibold text-[var(--color-font)]"
                       >
-                        No UPI topups found
+                        No UPI payins found
                       </p>
                       <p class="text-sm mt-2 text-[var(--color-muted)]">
                         Please Select the portal first or Try adjusting your
@@ -347,7 +347,7 @@
         <div class="block min-[800px]:hidden p-4">
           <div class="grid grid-cols-1 gap-4">
             <div
-              *ngFor="let a of pagedUpitopups()"
+              *ngFor="let a of pagedUpipayins()"
               class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-4 shadow-sm"
             >
               <!-- Portal -->
@@ -432,7 +432,7 @@
 
             <!-- Empty state for cards -->
             <div
-              *ngIf="filteredUpitopups().length === 0"
+              *ngIf="filteredUpipayins().length === 0"
               class="text-center py-8"
             >
               <div
@@ -440,7 +440,7 @@
               >
                 <span class="material-symbols-outlined text-2xl">payments</span>
               </div>
-              <p class="text-base font-semibold">No UPI topups found</p>
+              <p class="text-base font-semibold">No UPI payins found</p>
               <p class="text-sm text-[var(--color-muted)] mt-1">
                 Try adjusting your search
               </p>
@@ -519,9 +519,9 @@
                 </span>
               </div>
               <div class="text-[var(--color-bg)]">
-                <h3 class="font-bold text-xl">Bank topups</h3>
+                <h3 class="font-bold text-xl">Bank payins</h3>
                 <p class="mt-1 opacity-80">
-                  {{ filteredBanktopups().length }} records • Secure
+                  {{ filteredBankpayins().length }} records • Secure
                   transactions
                 </p>
               </div>
@@ -637,7 +637,7 @@
               <div class="relative min-w-[200px] flex-1 xl:flex-none">
                 <input
                   type="text"
-                  placeholder="Search bank topups..."
+                  placeholder="Search bank payins..."
                   [(ngModel)]="bankSearchQuery"
                   (keyup.enter)="applyBankFilters()"
                   class="text-sm border-0 rounded-2xl pl-12 pr-4 py-3 placeholder-opacity-60 focus:ring-2 transition-all duration-300 w-full shadow-lg bg-white/20 text-[var(--color-bg)]"
@@ -707,7 +707,7 @@
               </thead>
               <tbody class="divide-y divide-[var(--color-border)]">
                 <tr
-                  *ngFor="let a of pagedBanktopups()"
+                  *ngFor="let a of pagedBankpayins()"
                   class="hover:bg-[var(--color-hover)] transition-all duration-300 group"
                 >
                   <td class="px-6 py-4">
@@ -799,7 +799,7 @@
                     </button>
                   </td>
                 </tr>
-                <tr *ngIf="filteredBanktopups().length === 0">
+                <tr *ngIf="filteredBankpayins().length === 0">
                   <td colspan="7" class="px-4 py-12 text-center">
                     <div class="flex flex-col items-center">
                       <div
@@ -813,7 +813,7 @@
                       <p
                         class="text-base font-semibold text-[var(--color-font)]"
                       >
-                        No bank topups found
+                        No bank payins found
                       </p>
                       <p class="text-sm mt-2 text-[var(--color-muted)]">
                         Please Select the portal first or Try adjusting your
@@ -831,7 +831,7 @@
         <div class="block min-[800px]:hidden p-4">
           <div class="grid grid-cols-1 gap-4">
             <div
-              *ngFor="let a of pagedBanktopups()"
+              *ngFor="let a of pagedBankpayins()"
               class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-4 shadow-sm"
             >
               <!-- Portal -->
@@ -918,7 +918,7 @@
 
             <!-- Empty state -->
             <div
-              *ngIf="filteredBanktopups().length === 0"
+              *ngIf="filteredBankpayins().length === 0"
               class="text-center py-8"
             >
               <div
@@ -928,7 +928,7 @@
                   >account_balance</span
                 >
               </div>
-              <p class="text-base font-semibold">No bank topups found</p>
+              <p class="text-base font-semibold">No bank payins found</p>
               <p class="text-sm text-[var(--color-muted)] mt-1">
                 Try adjusting your search
               </p>

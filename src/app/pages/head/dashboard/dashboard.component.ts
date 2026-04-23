@@ -42,11 +42,11 @@ export class HeadDashboardComponent
   implements OnInit, AfterViewInit, OnDestroy
 {
   @ViewChild("trendChart") trendChartRef!: ElementRef;
-  @ViewChild("topupMethodChart") topupMethodChartRef!: ElementRef;
+  @ViewChild("payinMethodChart") payinMethodChartRef!: ElementRef;
   @ViewChild("payoutBankChart") payoutBankChartRef!: ElementRef;
 
   private trendChart?: Chart;
-  private topupMethodChart?: Chart;
+  private payinMethodChart?: Chart;
   private payoutBankChart?: Chart;
 
   portals: any[] = [];
@@ -67,12 +67,12 @@ export class HeadDashboardComponent
   selectedPollingInterval = 5000000;
   pollIntervalId: any;
 
-  totaltopups = 0;
+  totalpayins = 0;
   totalpayouts = 0;
   activeAccounts = 0;
 
-  // NEW: UI state flags for toggling topup/payout monitoring
-  topupActive = true;
+  // NEW: UI state flags for toggling payin/payout monitoring
+  payinActive = true;
   payoutActive = true;
   mobilePage = 1;
   mobilePageSize = 6;
@@ -81,7 +81,7 @@ export class HeadDashboardComponent
   // Original mixed lists (kept for compatibility if needed)
   pendingTransactions: any[] = [];
   approvedTransactions: any[] = [];
-  approvedtopups: any[] = [];
+  approvedpayins: any[] = [];
   approvedpayouts: any[] = [];
 
   // NEW: sectioned pending arrays
@@ -106,7 +106,7 @@ export class HeadDashboardComponent
 
   acceptedWid: any;
 
-  recenttopups: any[] = [];
+  recentpayins: any[] = [];
   recentpayouts: any[] = [];
 
   selectedTransaction: any = null;
@@ -115,19 +115,19 @@ export class HeadDashboardComponent
   isDragging = false;
 
   // filters
-  pendingFilterType: "all" | "topup" | "payout" = "all";
+  pendingFilterType: "all" | "payin" | "payout" = "all";
   pendingFilterMethod: "all" | "upi" | "bank" = "all";
   mobileFilter: "all" | "upi" | "bank" | "payout" = "all";
 
-  approvedtopupsFilterMethod: "all" | "upi" | "bank" = "all";
+  approvedpayinsFilterMethod: "all" | "upi" | "bank" = "all";
   approvedpayoutsFilterMethod: "all" | "bank" = "all";
 
   selectedTimeRange = 7;
 
   private colorScheme = {
-    topup: "#10b981",
-    topupLight: "#34d399",
-    topupDark: "#059669",
+    payin: "#10b981",
+    payinLight: "#34d399",
+    payinDark: "#059669",
     payout: "#3b82f6",
     payoutLight: "#60a5fa",
     payoutDark: "#2563eb",
@@ -192,7 +192,7 @@ export class HeadDashboardComponent
   selectedUpi: any = null;
   selectedBank: any = null;
 
-  topupStatus: any = false;
+  payinStatus: any = false;
 
   constructor(
     private fundService: FundsService,
@@ -203,17 +203,18 @@ export class HeadDashboardComponent
     private snackbar: SnackbarService,
     private headService: HeadService,
     private multimediaService: MultimediaService,
-    private chiefService:ChiefService
+    private chiefService: ChiefService,
   ) {}
 
   ngOnInit(): void {
     this.headId = this.userStateService.getCurrentEntityId();
     this.role = this.userStateService.getRole();
-    this.chiefService.getCurrenciesByEntity(this.headId,this.role).subscribe((res) => {
-      console.log(res);
-      
-    })
-    this.getTopupStatus();
+    this.chiefService
+      .getCurrenciesByEntity(this.headId, this.role)
+      .subscribe((res) => {
+        console.log(res);
+      });
+    this.getPayinStatus();
 
     this.fundService
       .broadcast(this.headId, this.role)
@@ -249,24 +250,24 @@ export class HeadDashboardComponent
     }, 60000);
   }
 
-  private getTopupStatus() {
+  private getPayinStatus() {
     this.headService.getHeadById(this.headId).subscribe((res) => {
-      this.topupStatus = res.topup;
+      this.payinStatus = res.payin;
     });
   }
 
-  changeTopupStatus() {
-    this.headService.toggleDashbaordTopup(this.headId).subscribe(() => {
-      this.topupStatus = !this.topupStatus;
+  changePayinStatus() {
+    this.headService.toggleDashbaordPayin(this.headId).subscribe(() => {
+      this.payinStatus = !this.payinStatus;
     });
   }
 
   private resetAllLists() {
     this.pendingTransactions = [];
     this.approvedTransactions = [];
-    this.approvedtopups = [];
+    this.approvedpayins = [];
     this.approvedpayouts = [];
-    this.recenttopups = [];
+    this.recentpayins = [];
     this.recentpayouts = [];
 
     // new per-section pending arrays
@@ -281,7 +282,7 @@ export class HeadDashboardComponent
     if (!headId) return;
 
     // clear previously approved lists (we'll refill)
-    this.approvedtopups = [];
+    this.approvedpayins = [];
     this.approvedpayouts = [];
     this.approvedTransactions = [];
 
@@ -297,7 +298,7 @@ export class HeadDashboardComponent
 
     forkJoin({ bank: bankObs, upi: upiObs, payout: withdrawObs }).subscribe(
       (res: any) => {
-        // bank and upi are accepted topups
+        // bank and upi are accepted payins
         this.mapFundsArray(res.upi || [], "upi", true);
         this.mapFundsArray(res.bank || [], "bank", true);
         // payouts
@@ -347,7 +348,7 @@ export class HeadDashboardComponent
         const tx = {
           id: fund.id || null,
           fundId: fund.id || null,
-          type: "topup",
+          type: "payin",
           portal:
             fund.portalName || fund.portalDomain || fund.portalId || "Portal",
           amount: Number(fund.amount) || 0,
@@ -405,7 +406,7 @@ export class HeadDashboardComponent
         if (settledFlag || tx.settled) {
           const approvedTx = { ...tx, status: "completed" };
           this.approvedTransactions.unshift(approvedTx);
-          this.approvedtopups.unshift(approvedTx);
+          this.approvedpayins.unshift(approvedTx);
         } else {
           if (mode === "upi") {
             this.pendingUpi.unshift(tx);
@@ -525,7 +526,7 @@ export class HeadDashboardComponent
   }
 
   private computeStatsFromData(): void {
-    this.totaltopups = this.approvedtopups.reduce(
+    this.totalpayins = this.approvedpayins.reduce(
       (s, r) => s + (Number(r.amount) || 0),
       0,
     );
@@ -621,7 +622,7 @@ export class HeadDashboardComponent
 
   private initCharts(): void {
     this.initTrendChart();
-    this.inittopupMethodChart();
+    this.initpayinMethodChart();
     this.initpayoutBankChart();
   }
 
@@ -695,19 +696,19 @@ export class HeadDashboardComponent
         ),
         datasets: [
           {
-            label: "topups",
+            label: "payins",
             data: new Array(this.selectedTimeRange).fill(0),
-            borderColor: this.colorScheme.topup,
-            backgroundColor: this.hexToRgba(this.colorScheme.topup, 0.1),
+            borderColor: this.colorScheme.payin,
+            backgroundColor: this.hexToRgba(this.colorScheme.payin, 0.1),
             borderWidth: 3,
             tension: 0.4,
             fill: true,
             pointRadius: 4,
             pointHoverRadius: 6,
-            pointBackgroundColor: this.colorScheme.topup,
+            pointBackgroundColor: this.colorScheme.payin,
             pointBorderColor: "#fff",
             pointBorderWidth: 2,
-            pointHoverBackgroundColor: this.colorScheme.topupDark,
+            pointHoverBackgroundColor: this.colorScheme.payinDark,
             pointHoverBorderColor: "#fff",
           },
           {
@@ -796,13 +797,13 @@ export class HeadDashboardComponent
     });
   }
 
-  private inittopupMethodChart(): void {
+  private initpayinMethodChart(): void {
     const ctx =
-      this.topupMethodChartRef?.nativeElement?.getContext &&
-      this.topupMethodChartRef.nativeElement.getContext("2d");
+      this.payinMethodChartRef?.nativeElement?.getContext &&
+      this.payinMethodChartRef.nativeElement.getContext("2d");
 
     if (!ctx) return;
-    this.topupMethodChart = new Chart(ctx, {
+    this.payinMethodChart = new Chart(ctx, {
       type: "doughnut",
       data: {
         labels: ["UPI", "Bank"],
@@ -925,7 +926,7 @@ export class HeadDashboardComponent
 
   private destroyCharts(): void {
     this.trendChart?.destroy();
-    this.topupMethodChart?.destroy();
+    this.payinMethodChart?.destroy();
     this.payoutBankChart?.destroy();
   }
 
@@ -935,8 +936,8 @@ export class HeadDashboardComponent
       if (!this.trendChart && this.trendChartRef?.nativeElement) {
         this.initTrendChart();
       }
-      if (!this.topupMethodChart && this.topupMethodChartRef?.nativeElement) {
-        this.inittopupMethodChart();
+      if (!this.payinMethodChart && this.payinMethodChartRef?.nativeElement) {
+        this.initpayinMethodChart();
       }
       if (!this.payoutBankChart && this.payoutBankChartRef?.nativeElement) {
         this.initpayoutBankChart();
@@ -952,14 +953,14 @@ export class HeadDashboardComponent
 
     // Defer actual chart updates to the next frame so the DOM layout settles
     requestAnimationFrame(() => {
-      const topupsAll = [...this.pendingUpi, ...this.pendingBank];
+      const payinsAll = [...this.pendingUpi, ...this.pendingBank];
       const upiSum = this.acceptedUpi;
       const bankSum = this.acceptedBank;
 
-      if (this.topupMethodChart) {
+      if (this.payinMethodChart) {
         try {
-          this.topupMethodChart.data.datasets[0].data = [upiSum, bankSum];
-          this.topupMethodChart.update();
+          this.payinMethodChart.data.datasets[0].data = [upiSum, bankSum];
+          this.payinMethodChart.update();
         } catch (e) {}
       }
 
@@ -986,15 +987,15 @@ export class HeadDashboardComponent
       }
 
       const labels = this.getLastNDatesLabels(this.selectedTimeRange);
-      const topupArr = new Array(this.selectedTimeRange).fill(0);
+      const payinArr = new Array(this.selectedTimeRange).fill(0);
       const payoutArr = new Array(this.selectedTimeRange).fill(0);
 
-      for (const f of topupsAll) {
+      for (const f of payinsAll) {
         const dateStr = new Date(f.date).toDateString();
         const idx = labels.findIndex(
           (lbl) => new Date(lbl).toDateString() === dateStr,
         );
-        if (idx >= 0) topupArr[idx] += Number(f.amount) || 0;
+        if (idx >= 0) payinArr[idx] += Number(f.amount) || 0;
       }
       for (const f of payoutsAll) {
         const dateStr = new Date(f.date).toDateString();
@@ -1009,7 +1010,7 @@ export class HeadDashboardComponent
           this.trendChart.data.labels = labels.map((l) =>
             new Date(l).toLocaleDateString(),
           );
-          (this.trendChart.data.datasets[0].data as any) = topupArr;
+          (this.trendChart.data.datasets[0].data as any) = payinArr;
           (this.trendChart.data.datasets[1].data as any) = payoutArr;
           this.trendChart.update();
         } catch (e) {}
@@ -1086,7 +1087,7 @@ export class HeadDashboardComponent
     this.pendingPayoutPage = 1;
   }
 
-  onApprovedtopupsFilterChange() {
+  onApprovedpayinsFilterChange() {
     this.approvedPage = 1;
   }
 
@@ -1099,7 +1100,6 @@ export class HeadDashboardComponent
     //   this.multimediaService.getPrivateImage(transaction.filePath).subscribe({
     //     next: (url) => {
 
-
     //       transaction.fileUrl = url;
     //     },
     //     error: () => {
@@ -1108,13 +1108,9 @@ export class HeadDashboardComponent
     //   });
     // }
 
-
-
     if (!transaction) return;
     // Normalize the incoming object so modal bindings (utrNumber, upiId, accountNo, holderName, filePath, bankName, date etc.) are always present
     this.selectedTransaction = this.normalizeTransaction(transaction);
-
-
   }
 
   filteredPending(): any[] {
@@ -1219,17 +1215,17 @@ export class HeadDashboardComponent
     return list.slice(start, start + this.pendingPayoutPageSize);
   }
 
-  filteredApprovedtopups(): any[] {
-    return this.approvedtopups.filter((d) => {
-      if (this.approvedtopupsFilterMethod !== "all") {
-        return d.mode === this.approvedtopupsFilterMethod;
+  filteredApprovedpayins(): any[] {
+    return this.approvedpayins.filter((d) => {
+      if (this.approvedpayinsFilterMethod !== "all") {
+        return d.mode === this.approvedpayinsFilterMethod;
       }
       return true;
     });
   }
 
-  pagedApprovedtopups(): any[] {
-    const list = this.filteredApprovedtopups();
+  pagedApprovedpayins(): any[] {
+    const list = this.filteredApprovedpayins();
     const start = (this.approvedPage - 1) * this.approvedPageSize;
     return list.slice(start, start + this.approvedPageSize);
   }
@@ -1252,7 +1248,7 @@ export class HeadDashboardComponent
   approvedTotalPages(): number {
     return Math.max(
       1,
-      Math.ceil(this.filteredApprovedtopups().length / this.approvedPageSize),
+      Math.ceil(this.filteredApprovedpayins().length / this.approvedPageSize),
     );
   }
 
@@ -1437,8 +1433,8 @@ export class HeadDashboardComponent
         this.recentpayouts = [...this.approvedpayouts];
       } else {
         this.addApprovedUnique(this.approvedTransactions, approvedTx);
-        this.addApprovedUnique(this.approvedtopups, approvedTx);
-        this.recenttopups = [...this.approvedtopups];
+        this.addApprovedUnique(this.approvedpayins, approvedTx);
+        this.recentpayins = [...this.approvedpayins];
       }
 
       // Clear confirm state
@@ -1463,7 +1459,7 @@ export class HeadDashboardComponent
       if (t.type === "payout") {
         this.recentpayouts.unshift(failedTx);
       } else {
-        this.recenttopups.unshift(failedTx);
+        this.recentpayins.unshift(failedTx);
       }
 
       this.computeStatsFromData();
@@ -1562,10 +1558,10 @@ export class HeadDashboardComponent
       this.pendingUpi,
       this.pendingBank,
       this.pendingpayouts,
-      this.approvedtopups,
+      this.approvedpayins,
       this.approvedpayouts,
       this.approvedTransactions,
-      this.recenttopups,
+      this.recentpayins,
       this.recentpayouts,
     ];
 
@@ -1712,11 +1708,11 @@ export class HeadDashboardComponent
         );
       } else {
         if (
-          !this.recenttopups.some((x) => this.identifiersMatch(x, failedTx))
+          !this.recentpayins.some((x) => this.identifiersMatch(x, failedTx))
         ) {
-          this.recenttopups.unshift(failedTx);
+          this.recentpayins.unshift(failedTx);
         }
-        this.approvedtopups = this.approvedtopups.filter(
+        this.approvedpayins = this.approvedpayins.filter(
           (x) => !this.identifiersMatch(x, failedTx),
         );
       }
@@ -1886,10 +1882,10 @@ export class HeadDashboardComponent
   }
 
   // ---------------------------------------------------------------------------
-  // NEW METHODS: toggles for topup/payout "active" state
+  // NEW METHODS: toggles for payin/payout "active" state
   // ---------------------------------------------------------------------------
-  toggletopup(): void {
-    this.topupActive = !this.topupActive;
+  togglepayin(): void {
+    this.payinActive = !this.payinActive;
     // purely UI-only state; no API call
   }
 
@@ -1900,12 +1896,12 @@ export class HeadDashboardComponent
   // helper to return css/text for the status small label (not used in template currently but available)
   getActiveSmallLabel(
     active: boolean,
-    type: "topup" | "payout",
+    type: "payin" | "payout",
   ): {
     label: string;
     classes: string;
   } {
-    if (type === "topup") {
+    if (type === "payin") {
       return active
         ? {
             label: "Active",
@@ -1958,10 +1954,10 @@ export class HeadDashboardComponent
         fund.type === "payout"
           ? "payout"
           : fund.type === "bank" || fund.type === "upi"
-            ? "topup"
+            ? "payin"
             : fund.transactionType === "payout"
               ? "payout"
-              : "topup",
+              : "payin",
 
       portal: fund.portalName || fund.portalDomain || fund.portalId || null,
 
@@ -2016,7 +2012,7 @@ export class HeadDashboardComponent
         fund.ifscCode || fund.ifsc || (fund.raw && fund.raw.ifsc) || null,
 
       fundDisplayId: fund.displayId,
-      ftt: fund.firstTopup ? true : false,
+      ftt: fund.firstPayin ? true : false,
     };
 
     //  LOAD FILE IMAGE (TOKEN via interceptor)

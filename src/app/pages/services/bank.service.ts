@@ -165,27 +165,29 @@ export class BankService {
       {},
     );
   }
-  /** Add / update topup ranges */
-  addTopupCapacity(payload: any): Observable<any> {
-    return this.http.post<any>(`${baseUrl}/topup-capacity/add`, payload);
+  /** Add / update payin ranges */
+  addPayinCapacity(payload: any): Observable<any> {
+    return this.http.post<any>(`${baseUrl}/payin-capacity/add`, payload);
   }
 
-  /** Fetch topup ranges for entity */
-  getTopupCapacity(
+  /** Fetch payin ranges for entity */
+  getPayinCapacity(
     entityType: string,
     entityId: string,
     portalId: string,
     mode: "UPI" | "BANK",
-    topupId: string,
+    payinId: string,
   ): Observable<any> {
     const params = new HttpParams()
       .set("entityType", entityType)
       .set("entityId", entityId)
       .set("portalId", portalId)
       .set("mode", mode)
-      .set("topupId", topupId);
+      .set("payinId", payinId);
 
-    return this.http.get<any>(`${baseUrl}/topup-capacity`, { params });
+    return this.http
+      .get<any>(`${baseUrl}/payin-capacity`, { params })
+      .pipe(map((res) => res.data));
   }
 
   toggleIsBank(bankId: string): Observable<any> {
@@ -203,20 +205,29 @@ export class BankService {
   }
 
   removePortal(id: string): Observable<any> {
-  return this.http
-    .patch<any>(`${baseUrl}/banks/${id}/remove-portal`, {})
-    .pipe(
-      map((response: any) => response.data),
-      catchError((error) => throwError(() => error))
-    );
-}
+    return this.http
+      .patch<any>(`${baseUrl}/banks/${id}/remove-portal`, {})
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 
-getAllByComPartWithPortal(comPartId: string): Observable<any> {
-  return this.http
-    .get<any>(`${baseUrl}/banks/getAllByComPartWithPortal/${comPartId}`)
-    .pipe(
-      map((response: any) => response.data),
-      catchError((error) => throwError(() => error))
-    );
+  getAllByComPartWithPortal(comPartId: string): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/banks/getAllByComPartWithPortal/${comPartId}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+  searchBankAndUpi(query: string, comPartId: string) {
+  return this.http.get<any>(
+    `${baseUrl}/banks/searchBankAndUpi/${comPartId}`,
+    {
+      params: { query }
+    }
+  );
 }
 }

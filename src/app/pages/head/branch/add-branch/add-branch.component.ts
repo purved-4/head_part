@@ -1,8 +1,10 @@
-
-
-
 import { Component, OnInit } from "@angular/core";
-import { FormBuilder, FormGroup, Validators, FormControl } from "@angular/forms";
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormControl,
+} from "@angular/forms";
 import { Router } from "@angular/router";
 import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
 import { UserStateService } from "../../../../store/user-state.service";
@@ -40,8 +42,8 @@ export class AddBranchComponent implements OnInit {
 
   availableSearchTerm = "";
   selectedSearchTerm = "";
-    showPercentageModal:boolean= false
-showCompartModal:boolean = false
+  showPercentageModal: boolean = false;
+  showCompartModal: boolean = false;
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -67,35 +69,40 @@ showCompartModal:boolean = false
   }
 
   loadComparts(): void {
-    this.comPartService.getAllComPartByEntity(this.currentUserId, this.role).subscribe({
-      next: (res: any) => {
-        const data =
-          Array.isArray(res) ? res :
-          Array.isArray(res?.data) ? res.data :
-          Array.isArray(res?.data?.content) ? res.data.content :
-          Array.isArray(res?.content) ? res.content :
-          [];
+    this.comPartService
+      .getAllComPartByEntity(this.currentUserId, this.role)
+      .subscribe({
+        next: (res: any) => {
+          const data = Array.isArray(res)
+            ? res
+            : Array.isArray(res?.data)
+              ? res.data
+              : Array.isArray(res?.data?.content)
+                ? res.data.content
+                : Array.isArray(res?.content)
+                  ? res.content
+                  : [];
 
-        this.comparts = data;
-        this.initializeCompartControls();
-      },
-      error: () => {
-        this.snackService.show(
-          "Failed to load comparts. Please try again.",
-          false,
-          3000,
-        );
-      },
-    });
+          this.comparts = data;
+          this.initializeCompartControls();
+        },
+        error: () => {
+          this.snackService.show(
+            "Failed to load comparts. Please try again.",
+            false,
+            3000,
+          );
+        },
+      });
   }
 
   initializeCompartControls(): void {
     this.comparts.forEach((compart) => {
       const wid = compart.id;
 
-      if (!this.chiefForm.contains(`first_topup_${wid}`)) {
+      if (!this.chiefForm.contains(`first_payin_${wid}`)) {
         this.chiefForm.addControl(
-          `first_topup_${wid}`,
+          `first_payin_${wid}`,
           new FormControl("", [
             Validators.required,
             Validators.min(0),
@@ -104,9 +111,9 @@ showCompartModal:boolean = false
         );
       }
 
-      if (!this.chiefForm.contains(`topup_${wid}`)) {
+      if (!this.chiefForm.contains(`payin_${wid}`)) {
         this.chiefForm.addControl(
-          `topup_${wid}`,
+          `payin_${wid}`,
           new FormControl("", [
             Validators.required,
             Validators.min(0),
@@ -196,8 +203,8 @@ showCompartModal:boolean = false
       ?.setValue(selectedIds.filter((id: string) => id !== compartId));
 
     this.chiefForm.get("compartIds")?.markAsTouched();
-    this.chiefForm.get(`first_topup_${compartId}`)?.setValue("");
-    this.chiefForm.get(`topup_${compartId}`)?.setValue("");
+    this.chiefForm.get(`first_payin_${compartId}`)?.setValue("");
+    this.chiefForm.get(`payin_${compartId}`)?.setValue("");
     this.chiefForm.get(`payout_${compartId}`)?.setValue("");
 
     if (this.getSelectedComparts().length === 0) {
@@ -215,7 +222,7 @@ showCompartModal:boolean = false
     }
   }
 
-  applyToAll(type: "topup" | "payout" | "first_topup"): void {
+  applyToAll(type: "payin" | "payout" | "first_payin"): void {
     const selectedComparts = this.getSelectedComparts();
     if (selectedComparts.length === 0) return;
 
@@ -261,21 +268,21 @@ showCompartModal:boolean = false
     }
 
     for (const compartId of compartIds) {
-      const fttCtrl = this.chiefForm.get(`first_topup_${compartId}`);
-      const topupCtrl = this.chiefForm.get(`topup_${compartId}`);
+      const fttCtrl = this.chiefForm.get(`first_payin_${compartId}`);
+      const payinCtrl = this.chiefForm.get(`payin_${compartId}`);
       const payoutCtrl = this.chiefForm.get(`payout_${compartId}`);
 
       fttCtrl?.markAsTouched();
-      topupCtrl?.markAsTouched();
+      payinCtrl?.markAsTouched();
       payoutCtrl?.markAsTouched();
 
       if (
         !this.isValidPercentage(fttCtrl?.value) ||
-        !this.isValidPercentage(topupCtrl?.value) ||
+        !this.isValidPercentage(payinCtrl?.value) ||
         !this.isValidPercentage(payoutCtrl?.value)
       ) {
         this.snackService.show(
-          "Please enter valid Topup, Payout & FTT percentages for all selected comparts",
+          "Please enter valid Payin, Payout & FTT percentages for all selected comparts",
           false,
           4000,
         );
@@ -285,13 +292,17 @@ showCompartModal:boolean = false
 
     const compartPercentages: Record<
       string,
-      { fttPercentage: number; payinPercentage: number; payoutPercentage: number }
+      {
+        fttPercentage: number;
+        payinPercentage: number;
+        payoutPercentage: number;
+      }
     > = {};
 
     compartIds.forEach((id) => {
       compartPercentages[id] = {
-        fttPercentage: Number(this.chiefForm.get(`first_topup_${id}`)?.value),
-        payinPercentage: Number(this.chiefForm.get(`topup_${id}`)?.value),
+        fttPercentage: Number(this.chiefForm.get(`first_payin_${id}`)?.value),
+        payinPercentage: Number(this.chiefForm.get(`payin_${id}`)?.value),
         payoutPercentage: Number(this.chiefForm.get(`payout_${id}`)?.value),
       };
     });
@@ -339,8 +350,8 @@ showCompartModal:boolean = false
 
     this.comparts.forEach((compart) => {
       const wid = compart.id;
-      this.chiefForm.get(`first_topup_${wid}`)?.setValue("");
-      this.chiefForm.get(`topup_${wid}`)?.setValue("");
+      this.chiefForm.get(`first_payin_${wid}`)?.setValue("");
+      this.chiefForm.get(`payin_${wid}`)?.setValue("");
       this.chiefForm.get(`payout_${wid}`)?.setValue("");
     });
 
@@ -362,27 +373,23 @@ showCompartModal:boolean = false
     return item.id;
   }
 
-
   openPercentageModal() {
-
     // this.selectedWebsiteId = website;
 
     this.showPercentageModal = true;
-}
+  }
 
-closeModal() {
+  closeModal() {
     this.showPercentageModal = false;
-}
+  }
 
-openCompartPercentModal() {
-
+  openCompartPercentModal() {
     // this.selectedWebsiteId = website;
 
     this.showCompartModal = true;
-}
+  }
 
-closeCompartPercentModal() {
+  closeCompartPercentModal() {
     this.showCompartModal = false;
-}
-
+  }
 }

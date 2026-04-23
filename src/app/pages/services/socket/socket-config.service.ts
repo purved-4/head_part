@@ -1,13 +1,22 @@
-import { Injectable } from "@angular/core";
+import { Inject, Injectable, PLATFORM_ID } from "@angular/core";
 import { BehaviorSubject, Observable, filter, firstValueFrom } from "rxjs";
 import { Client, IMessage, StompSubscription } from "@stomp/stompjs";
 import baseUrl from "../helper";
 import { AuthMemoryService } from "../auth-memory.service";
 import { AuthService } from "../auth.service";
 import { SubjectRegistryService } from "../../../registery/subject-registry.service";
-import { SOCKET_BANK_KEY, SOCKET_LATEST_BALANCE_KEY, SOCKET_MESSAGE_PAGE_KEY, SOCKET_NEW_MESSAGE_KEY, SOCKET_NOTIFICATION_KEY, SOCKET_PENDING_DATA_KEY, SOCKET_THREADS_KEY, SOCKET_THREADS_USER_KEY, SOCKET_UPI_KEY } from "../../../registery/subject-registry.key";
-
-
+import {
+  SOCKET_BANK_KEY,
+  SOCKET_LATEST_BALANCE_KEY,
+  SOCKET_MESSAGE_PAGE_KEY,
+  SOCKET_NEW_MESSAGE_KEY,
+  SOCKET_NOTIFICATION_KEY,
+  SOCKET_PENDING_DATA_KEY,
+  SOCKET_THREADS_KEY,
+  SOCKET_THREADS_USER_KEY,
+  SOCKET_UPI_KEY,
+} from "../../../registery/subject-registry.key";
+import { isPlatformBrowser } from "@angular/common";
 
 @Injectable({
   providedIn: "root",
@@ -46,67 +55,93 @@ export class SocketConfigService {
   constructor(
     private memoryService: AuthMemoryService,
     private authService: AuthService,
-    private subjectRegistry: SubjectRegistryService
+    private subjectRegistry: SubjectRegistryService,
+    @Inject(PLATFORM_ID) private platformId: Object,
   ) {
     this.pendingSubject = this.subjectRegistry.register(
       SOCKET_PENDING_DATA_KEY,
       () => new BehaviorSubject<any>(null),
-      null
+      null,
     );
 
     this.threads$ = this.subjectRegistry.register(
       SOCKET_THREADS_KEY,
       () => new BehaviorSubject<any>(null),
-      null
+      null,
     );
 
     this.notification$ = this.subjectRegistry.register(
       SOCKET_NOTIFICATION_KEY,
       () => new BehaviorSubject<any>(null),
-      null
+      null,
     );
 
     this.threadsUser$ = this.subjectRegistry.register(
       SOCKET_THREADS_USER_KEY,
       () => new BehaviorSubject<any>(null),
-      null
+      null,
     );
 
     this.messagePage$ = this.subjectRegistry.register(
       SOCKET_MESSAGE_PAGE_KEY,
       () => new BehaviorSubject<any>(null),
-      null
+      null,
     );
 
     this.newMessage$ = this.subjectRegistry.register(
       SOCKET_NEW_MESSAGE_KEY,
       () => new BehaviorSubject<any>(null),
-      null
+      null,
     );
 
     this.latestBalance$ = this.subjectRegistry.register(
       SOCKET_LATEST_BALANCE_KEY,
       () => new BehaviorSubject<any>(null),
-      null
+      null,
     );
 
     this.bank$ = this.subjectRegistry.register(
       SOCKET_BANK_KEY,
       () => new BehaviorSubject<any>(null),
-      null
+      null,
     );
 
     this.upi$ = this.subjectRegistry.register(
       SOCKET_UPI_KEY,
       () => new BehaviorSubject<any>(null),
-      null
+      null,
     );
+
+    if (isPlatformBrowser(this.platformId)) {
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          this.ensureConnectionHealthy();
+        }
+      });
+    }
   }
 
   private ensureConnected() {
     if (!this.stompClient?.active) {
       this.connect();
     }
+  }
+
+  private ensureConnectionHealthy() {
+    if (!this.stompClient?.active || !this.connected) {
+      this.reconnect();
+    }
+  }
+
+  private reconnect() {
+    if (this.reconnectInProgress) return;
+
+    this.reconnectInProgress = true;
+
+    this.disconnectOnly().then(() => {
+      this.connect();
+      this.reconnectInProgress = false;
+    });
   }
 
   connect(): void {
@@ -119,7 +154,7 @@ export class SocketConfigService {
 
     this.stompClient = new Client({
       brokerURL: `${wsUrl}/socket-process`,
-      reconnectDelay: 0,
+      reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
       debug: () => {},
@@ -141,7 +176,7 @@ export class SocketConfigService {
             try {
               item.handler(msg);
             } catch {}
-          }
+          },
         );
         this.subscriptions.set(key, sub);
       }
@@ -231,7 +266,7 @@ export class SocketConfigService {
   private subscribeTopic(
     key: string,
     destination: string,
-    handler: (msg: IMessage) => void
+    handler: (msg: IMessage) => void,
   ): void {
     this.activeTopics.set(key, { destination, handler });
 
@@ -245,7 +280,7 @@ export class SocketConfigService {
           try {
             handler(msg);
           } catch {}
-        }
+        },
       );
 
       this.subscriptions.set(key, sub);
@@ -277,7 +312,8 @@ export class SocketConfigService {
 
   subscribeToPendingData(branchId?: string) {
     if (branchId) this.branchId = branchId;
-    if (!this.branchId) throw new Error("branchId required for pendingData topic");
+    if (!this.branchId)
+      throw new Error("branchId required for pendingData topic");
 
     const key = `pendingData:${this.branchId}`;
     const dest = `/topic/pendingData/${this.branchId}`;
@@ -384,7 +420,7 @@ export class SocketConfigService {
   loadMessagePage(threadId: string, page = 0, size = 15) {
     if (!this.stompClient || !this.stompClient.active) {
       this.pendingSubscribeTasks.push(() =>
-        this.loadMessagePage(threadId, page, size)
+        this.loadMessagePage(threadId, page, size),
       );
       this.ensureConnected();
       return;
@@ -396,7 +432,7 @@ export class SocketConfigService {
   sendMessage(threadId: string, message: any) {
     if (!this.stompClient || !this.stompClient.active) {
       this.pendingSubscribeTasks.push(() =>
-        this.sendMessage(threadId, message)
+        this.sendMessage(threadId, message),
       );
       this.ensureConnected();
       return;

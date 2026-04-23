@@ -113,7 +113,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
   // Statistics
   activeAgentsCount = 0;
   totalPortalsCount = 0;
-  avgTopupPercentage = 0;
+  avgPayinPercentage = 0;
   statusFilter: any;
   isEditMode: boolean = false;
   // Portal Modal Properties
@@ -381,7 +381,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
         agent.portalsWithRange?.map((w) => w.payinPercentage || 0) || [],
     );
     if (allPercentages.length > 0) {
-      this.avgTopupPercentage = parseFloat(
+      this.avgPayinPercentage = parseFloat(
         (
           allPercentages.reduce((a, b) => a + b, 0) / allPercentages.length
         ).toFixed(1),
@@ -805,12 +805,12 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     for (const portal of this.editForm.portalsWithRange) {
       const ftt = Number(portal.fttPercentage);
 
-      const topup = Number(portal.payinPercentage);
+      const payin = Number(portal.payinPercentage);
       const payout = Number(portal.payoutPercentage);
       if (isNaN(ftt) || ftt < 0 || ftt > 100) {
         return false;
       }
-      if (isNaN(topup) || topup < 0 || topup > 100) {
+      if (isNaN(payin) || payin < 0 || payin > 100) {
         return false;
       }
       if (isNaN(payout) || payout < 0 || payout > 100) {
@@ -1015,7 +1015,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
       "Status",
       "Portals",
       "Avg Ftt %",
-      "Avg Topup %",
+      "Avg Payin %",
       "Avg Payout %",
     ];
     const rows = agents.map((agent) => {
@@ -1024,7 +1024,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
           (sum, w) => sum + (w.fttPercentage || 0),
           0,
         ) / (agent.portalsWithRange?.length || 1);
-      const avgTopup =
+      const avgPayin =
         agent.portalsWithRange?.reduce(
           (sum, w) => sum + (w.payinPercentage || 0),
           0,
@@ -1042,7 +1042,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
         agent.active ? "Active" : "Inactive",
         agent.portalsWithRange?.length || 0,
         avgFtt.toFixed(1),
-        avgTopup.toFixed(1),
+        avgPayin.toFixed(1),
         avgPayout.toFixed(1),
       ].join(",");
     });

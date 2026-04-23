@@ -47,9 +47,14 @@ const routes: Routes = [
       },
 
       {
-  path: 'payments-methods',
-  component: PaymentsMethodsComponent
-},
+        path: "payments-methods",
+        component: PaymentsMethodsComponent,
+        children: [
+          // { path: "", pathMatch: "full" },
+          { path: "upi", component: UpisComponent },
+          { path: "bank", component: BanksComponent },
+        ],
+      },
 
       {
         path: "upi",

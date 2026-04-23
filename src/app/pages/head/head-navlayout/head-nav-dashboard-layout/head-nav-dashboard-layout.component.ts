@@ -1,14 +1,12 @@
-
-import { Component } from '@angular/core';
-import { HostListener } from '@angular/core';
+import { Component } from "@angular/core";
+import { HostListener } from "@angular/core";
 @Component({
-  selector: 'app-head-nav-dashboard-layout',
-  templateUrl: './head-nav-dashboard-layout.component.html',
-  styleUrls: ['./head-nav-dashboard-layout.component.css']
+  selector: "app-head-nav-dashboard-layout",
+  templateUrl: "./head-nav-dashboard-layout.component.html",
+  styleUrls: ["./head-nav-dashboard-layout.component.css"],
 })
 export class HeadNavDashboardLayoutComponent {
-
-  headerTopup = 0;
+  headerPayin = 0;
   headerPayout = 0;
   headerReward = 0;
   headerLimit = 0;
@@ -16,12 +14,12 @@ export class HeadNavDashboardLayoutComponent {
   secondaryPanelOpen = false;
   mobileMenuOpen = false;
   showSettings = false;
-  pageTitle = 'Dashboard';
-  userName = 'John Doe';
+  pageTitle = "Dashboard";
+  userName = "John Doe";
 
   readonly PRIMARY_WIDTH = 80;
   readonly PANEL_WIDTH = 320;
- isNotificationSidebarOpen = false;
+  isNotificationSidebarOpen = false;
   notificationUnreadCount = 0;
   get mainMargin(): number {
     // On mobile, no margin
@@ -29,7 +27,9 @@ export class HeadNavDashboardLayoutComponent {
       return 0;
     }
     // Desktop view
-    return this.PRIMARY_WIDTH + (this.secondaryPanelOpen ? this.PANEL_WIDTH : 0);
+    return (
+      this.PRIMARY_WIDTH + (this.secondaryPanelOpen ? this.PANEL_WIDTH : 0)
+    );
   }
 
   // isMobileView(): boolean {
@@ -37,22 +37,24 @@ export class HeadNavDashboardLayoutComponent {
   // }
 
   isMobileView(): boolean {
-    return typeof matchMedia !== 'undefined' &&
-      matchMedia('(max-width: 800px)').matches;
+    return (
+      typeof matchMedia !== "undefined" &&
+      matchMedia("(max-width: 800px)").matches
+    );
   }
 
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
     if (this.mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
   }
 
   closeMobileMenu(): void {
     this.mobileMenuOpen = false;
-    document.body.style.overflow = '';
+    document.body.style.overflow = "";
   }
 
   toggleSidebar(): void {
@@ -76,13 +78,13 @@ export class HeadNavDashboardLayoutComponent {
   }
 
   onBalanceChange(data: any) {
-    this.headerTopup = data.topup;
+    this.headerPayin = data.payin;
     this.headerPayout = data.payout;
     this.headerReward = data.reward;
     this.headerLimit = data.limit;
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener("window:resize", ["$event"])
   onResize(event: any) {
     if (!this.isMobileView() && this.mobileMenuOpen) {
       this.closeMobileMenu();
@@ -99,9 +101,7 @@ export class HeadNavDashboardLayoutComponent {
     this.notificationOpen = false;
   }
 
-
   // Add these properties with your existing ones
- 
 
   // Add these methods
   openNotificationSidebar() {
@@ -113,11 +113,10 @@ export class HeadNavDashboardLayoutComponent {
   }
 
   onUnreadCountChange(count: any) {
-    if (count && typeof count === 'object' && count.target) {
+    if (count && typeof count === "object" && count.target) {
       this.notificationUnreadCount = count.target.value;
     } else {
       this.notificationUnreadCount = count;
     }
   }
 }
-

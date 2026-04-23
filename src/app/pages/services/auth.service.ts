@@ -26,6 +26,7 @@ export class AuthService {
     private userStateService: UserStateService,
     private router: Router,
     handler: HttpBackend,
+    private snack:SnackbarService
   ) {
     this.refreshHttp = new HttpClient(handler);
   }
@@ -49,14 +50,37 @@ export class AuthService {
       );
   }
 
-  public getCurrentUser(): Observable<any> {
-    return this.http.get(`${baseUrl}/current-user`).pipe(
-      map((user: any) => {
-        return user?.data || null;
-      }),
-      catchError(() => of(null)),
-    );
-  }
+ public getCurrentUser(): Observable<any> {
+  return this.http.get(`${baseUrl}/current-user`).pipe(
+
+    tap((res: any) => {
+      const message =
+        res?.message ||res || "User fetched successfully";
+
+      this.snack.show(message, true); 
+    }),
+
+    map((user: any) => user?.data || null),
+
+    catchError((error) => {
+      console.log("FULL ERROR:", error);
+
+      let message = "Failed to fetch user details";
+
+      if (typeof error?.error === "string") {
+        message = error.error;
+      } else if (error?.error?.message) {
+        message = error.error.message;
+      } else if (error?.message) {
+        message = error.message;
+      }
+
+      this.snack.show(message, false);
+
+      return of(null);
+    })
+  );
+}
 
   loginAndLoadUser(loginData: any): Observable<any> {
     return this.login(loginData).pipe(

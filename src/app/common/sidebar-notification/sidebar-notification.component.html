@@ -12,7 +12,7 @@
   [class.translate-x-full]="!isOpen"
 >
   <!-- Header -->
-  <div
+  <!-- <div
     class="flex-shrink-0 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] text-white px-4 py-4"
   >
     <div class="flex items-center justify-between">
@@ -46,6 +46,29 @@
       >
         <span class="material-icons">close</span>
       </button>
+    </div>
+  </div> -->
+  <div
+    class="flex-shrink-0 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] text-white px-2 py-1"
+  >
+    <div class="grid grid-cols-3 items-center">
+      <!-- LEFT -->
+      <div class="flex items-center justify-start">
+        <span class="material-icons text-sm">notifications</span>
+      </div>
+      <!-- CENTER -->
+      <div class="flex justify-center">
+        <h2 class="text-sm pt-2 font-semibold leading-none">Notifications</h2>
+      </div>
+      <!-- RIGHT -->
+      <div class="flex items-center justify-end gap-1">
+        <button (click)="markAllAsRead()" class="p-1 rounded hover:bg-white/20">
+          <span class="material-icons text-xs">done_all</span>
+        </button>
+        <button (click)="closeSidebar()" class="p-1 rounded hover:bg-white/20">
+          <span class="material-icons text-sm">close</span>
+        </button>
+      </div>
     </div>
   </div>
 

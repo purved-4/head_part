@@ -17,6 +17,10 @@ export class AllotCurrencyComponent implements OnInit {
   selectedCurrency: string | null = null;
   currencyRate: number | null = null;
   selectedModes: string[] = [];
+  payinRate: number | null = null;
+  payoutRate: number | null = null;
+
+  isPortalCurrencyLoaded: boolean = false;
 
   // Existing data store
   existingData: any = {
@@ -69,7 +73,7 @@ export class AllotCurrencyComponent implements OnInit {
         const data = Array.isArray(res) ? res : res?.data || [];
         this.loadExistingData(data);
         this.snackBar.show(res.message || "Data fetched successfully", true);
-        // By default INR select karo agar data hai
+
         this.setDefaultSelection();
       },
       error: (err) => {
@@ -84,39 +88,60 @@ export class AllotCurrencyComponent implements OnInit {
     });
   }
 
+  // loadPortalCurrencies() {
+  //   this.portalService.getCurrenciesbyPortal(this.entityId).subscribe({
+  //     next: (res: any) => {
+  //       const data = Array.isArray(res) ? res : res?.data || [];
+  //       this.loadExistingData(data);
+  //       this.snackBar.show(res.message || "Portal currencies fetched", true);
+
+  //       this.setDefaultSelection();
+  //     },
+  //     error: (err) => {
+  //       console.log("No existing data", err);
+  //       this.snackBar.show(
+  //         err.error?.message || "No portal currency data found",
+  //         false,
+  //       );
+
+  //       this.setDefaultSelection();
+  //     },
+  //   });
+  // }
   loadPortalCurrencies() {
     this.portalService.getCurrenciesbyPortal(this.entityId).subscribe({
       next: (res: any) => {
         const data = Array.isArray(res) ? res : res?.data || [];
+
+        this.isPortalCurrencyLoaded = true;
+
         this.loadExistingData(data);
         this.snackBar.show(res.message || "Portal currencies fetched", true);
-        // By default INR select karo agar data hai
+
         this.setDefaultSelection();
       },
       error: (err) => {
         console.log("No existing data", err);
+
+        this.isPortalCurrencyLoaded = true;
+
         this.snackBar.show(
           err.error?.message || "No portal currency data found",
           false,
         );
-        // Agar error hai toh bhi INR select karo (empty form ke liye)
+
         this.setDefaultSelection();
       },
     });
   }
-
   // Default selection set karne ka method
   setDefaultSelection() {
     // Pehle check karo agar INR ka data hai toh
     if (this.existingData.INR) {
       this.selectCurrency("INR");
-    }
-    // Agar INR ka data nahi hai but USD ka data hai toh USD select karo
-    else if (this.existingData.USD) {
+    } else if (this.existingData.USD) {
       this.selectCurrency("USD");
-    }
-    // Agar koi data nahi hai toh bhi INR select karo (empty form)
-    else {
+    } else {
       this.selectCurrency("INR");
     }
   }
@@ -133,11 +158,15 @@ export class AllotCurrencyComponent implements OnInit {
       if (item.currency === "INR") {
         this.existingData.INR = {
           rate: item.rate,
+          payinRate: item.payinRate,
+          payoutRate: item.payoutRate,
           modes: this.convertModes(item.modes),
         };
       } else if (item.currency === "USD") {
         this.existingData.USD = {
           rate: item.rate,
+          payinRate: item.payinRate,
+          payoutRate: item.payoutRate,
           modes: this.convertModes(item.modes),
         };
       }
@@ -160,9 +189,13 @@ export class AllotCurrencyComponent implements OnInit {
     if (existing) {
       this.currencyRate = existing.rate;
       this.selectedModes = [...existing.modes];
+      this.payinRate = existing.payinRate;
+      this.payoutRate = existing.payoutRate;
     } else {
       this.currencyRate = null;
       this.selectedModes = [];
+      this.payinRate = null;
+      this.payoutRate = null;
     }
   }
 
@@ -170,6 +203,8 @@ export class AllotCurrencyComponent implements OnInit {
     this.selectedCurrency = null;
     this.currencyRate = null;
     this.selectedModes = [];
+    this.payinRate = null;
+    this.payoutRate = null;
   }
 
   getExistingDataForCurrency(currency: string | null): any {
@@ -198,21 +233,40 @@ export class AllotCurrencyComponent implements OnInit {
       return;
     }
 
-    if (!this.currencyRate) {
-      this.snackBar.show("Please enter exchange rate", false);
-      return;
-    }
-
-    if (this.selectedModes.length === 0) {
+    if (this.entityType !== "PORTAL" && this.selectedModes.length === 0) {
       this.snackBar.show("Please select at least one payment mode", false);
       return;
     }
 
-    const payload = {
-      currency: this.selectedCurrency,
-      rate: this.currencyRate,
-      modes: this.selectedModes,
-    };
+    let payload: any;
+
+    if (this.entityType === "PORTAL") {
+      payload = {
+        currency: this.selectedCurrency,
+        modes: this.selectedModes,
+      };
+    } else {
+      if (!this.currencyRate) {
+        this.snackBar.show("Please enter exchange rate", false);
+        return;
+      }
+      if (!this.payinRate) {
+        this.snackBar.show("Please enter Payin rate", false);
+        return;
+      }
+      if (!this.payoutRate) {
+        this.snackBar.show("Please enter Payout rate", false);
+        return;
+      }
+
+      payload = {
+        currency: this.selectedCurrency,
+        rate: this.currencyRate,
+        modes: this.selectedModes,
+        payinRate: this.payinRate,
+        payoutRate: this.payoutRate,
+      };
+    }
 
     let submitObservable;
 
@@ -238,47 +292,29 @@ export class AllotCurrencyComponent implements OnInit {
 
     submitObservable.subscribe({
       next: (res: any) => {
-        this.snackBar.show(
-          res?.message ||
-            `${this.selectedCurrency} ${this.getExistingDataForCurrency(this.selectedCurrency) ? "updated" : "added"} successfully`,
-          true,
-        );
+        this.snackBar.show(res?.message || "Updated successfully", true);
 
-        // Update existing data store
-        if (
-          !this.existingData[
-            this.selectedCurrency as keyof typeof this.existingData
-          ]
-        ) {
-          this.existingData[
-            this.selectedCurrency as keyof typeof this.existingData
-          ] = {
+        const key = this.selectedCurrency as keyof typeof this.existingData;
+
+        if (!this.existingData[key]) {
+          this.existingData[key] = {
             rate: this.currencyRate,
+            payinRate: this.payinRate,
+            payoutRate: this.payoutRate,
             modes: [...this.selectedModes],
           };
         } else {
-          this.existingData[
-            this.selectedCurrency as keyof typeof this.existingData
-          ]!.rate = this.currencyRate;
-          this.existingData[
-            this.selectedCurrency as keyof typeof this.existingData
-          ]!.modes = [...this.selectedModes];
+          this.existingData[key]!.modes = [...this.selectedModes];
         }
 
-        // Clear selection after successful save
         this.clearSelection();
 
-        // Close modal after 1 second
         setTimeout(() => {
           this.closeModal();
         }, 1000);
       },
       error: (err) => {
-        this.snackBar.show(
-          err.error?.message ||
-            `Failed to ${this.getExistingDataForCurrency(this.selectedCurrency) ? "update" : "add"} ${this.selectedCurrency}`,
-          false,
-        );
+        this.snackBar.show(err.error?.message || "Update failed", false);
       },
     });
   }

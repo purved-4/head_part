@@ -31,12 +31,12 @@
       <div
         class="hidden [@media(min-width:800px)]:flex items-center space-x-4 md:space-x-6"
       >
-        <!-- Topup -->
+        <!-- Payin -->
         <div class="stat-item relative group">
           <div class="flex items-center space-x-2 cursor-pointer">
             <div class="w-2 h-2 rounded-full bg-[var(--color-warning)]"></div>
             <span class="text-sm font-medium">
-              Topup: ₹{{ formatIndianAmount(topupBalance) }}
+              Payin: ₹{{ formatIndianAmount(payinBalance) }}
             </span>
           </div>
 
@@ -58,21 +58,21 @@
               </span>
             </div> -->
             <div class="flex justify-between">
-               <span class="font-medium">
-                {{ formatFullAmount(topupBalance) }}
+              <span class="font-medium">
+                {{ formatFullAmount(payinBalance) }}
               </span>
             </div>
           </div>
         </div>
 
-        <!-- Topup -->
+        <!-- Payin -->
         <div class="stat-item relative group">
           <div class="flex items-center space-x-2 cursor-pointer">
             <div class="w-2 h-2 rounded-full bg-[var(--color-warning)]"></div>
             <!-- <span class="text-sm font-medium">
               Payout: ₹{{ formatIndianAmount(payoutBalance) }}
             </span> -->
-              <span class="text-sm font-medium">
+            <span class="text-sm font-medium">
               Payout: ₹{{ payoutBalance }}
             </span>
           </div>
@@ -91,9 +91,7 @@
             <!-- <span class="text-sm font-medium">
               Reward: ₹{{ formatIndianAmount(rewards) }}
             </span> -->
-            <span class="text-sm font-medium">
-              Reward: ₹{{ rewards }}
-            </span>
+            <span class="text-sm font-medium"> Reward: ₹{{ rewards }} </span>
           </div>
 
           <div
@@ -109,7 +107,7 @@
             <!-- <span class="text-sm font-medium">
               Balance: ₹{{ formatIndianAmount(limitRemainingAmount) }}
             </span> -->
-               <span class="text-sm font-medium">
+            <span class="text-sm font-medium">
               Balance: ₹{{ limitRemainingAmount }}
             </span>
           </div>
@@ -149,25 +147,25 @@
 
         <!-- <app-notification></app-notification> -->
 
+        <button
+          (click)="onNotificationIconClick()"
+          class="relative p-2 rounded-lg hover:bg-[var(--color-hover)] transition-colors"
+          title="Notifications"
+        >
+          <span class="material-icons text-[var(--color-muted)] text-xl"
+            >notifications</span
+          >
+          <div
+            *ngIf="getUnreadCount() > 0"
+            class="absolute -top-1 -right-1 text-xs px-1.5 py-0.5 rounded-full bg-red-500 text-white font-semibold animate-pulse"
+          >
+            {{ getUnreadCount() > 99 ? "99+" : getUnreadCount() }}
+          </div>
+        </button>
 
-<button
-  (click)="onNotificationIconClick()"
-  class="relative p-2 rounded-lg hover:bg-[var(--color-hover)] transition-colors"
-  title="Notifications"
->
-  <span class="material-icons text-[var(--color-muted)] text-xl">notifications</span>
-  <div
-    *ngIf="getUnreadCount() > 0"
-    class="absolute -top-1 -right-1 text-xs px-1.5 py-0.5 rounded-full bg-red-500 text-white font-semibold animate-pulse"
-  >
-    {{ getUnreadCount() > 99 ? '99+' : getUnreadCount() }}
-  </div>
-</button>
+        <app-time-zone></app-time-zone>
 
-             <app-time-zone></app-time-zone>
-
-
-       <div class="relative inline-block" #limitsContainer>
+        <div class="relative inline-block" #limitsContainer>
           <!-- Button -->
           <button
             (click)="toggleLimitsPopup()"
@@ -199,18 +197,19 @@
                   (closePopup)="closeLimitsPopup()"
                 ></app-user-dashboard-upi-bank-limit>
               </div> -->
-                <div class="max-h-[80vh] overflow-y-auto p-3">
-                <app-user-dashboard-upi-bank-limit
-                
-                ></app-user-dashboard-upi-bank-limit>
+              <div class="max-h-[80vh] overflow-y-auto p-3">
+                <app-user-dashboard-upi-bank-limit></app-user-dashboard-upi-bank-limit>
               </div>
             </div>
           </div>
         </div>
-        
+
         <!-- Profile -->
-<div class="relative hidden [@media(min-width:800px)]:block" #profileContainer>
-            <!-- Avatar Button -->
+        <div
+          class="relative hidden [@media(min-width:800px)]:block"
+          #profileContainer
+        >
+          <!-- Avatar Button -->
           <button
             (click)="toggleProfile()"
             class="flex items-center space-x-2 p-1 rounded-full hover:bg-[var(--color-hover)] transition-all focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -255,7 +254,9 @@
             >
               <!-- Scrollable Content -->
               <div class="flex-1 overflow-y-auto max-h-[85vh]">
-<app-user-profile (closeProfile)="closeProfile()"></app-user-profile>
+                <app-user-profile
+                  (closeProfile)="closeProfile()"
+                ></app-user-profile>
               </div>
             </div>
           </div>

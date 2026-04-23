@@ -6,7 +6,7 @@ import { Input } from "@angular/core";
   styleUrl: "./head-mobile-footer.component.css",
 })
 export class HeadMobileFooterComponent {
-  @Input() topup = 0;
+  @Input() payin = 0;
   @Input() payout = 0;
   @Input() reward = 0;
   @Input() limit = 0;

@@ -3,11 +3,9 @@
   class="relative h-auto bg-gradient-to-br from-neutral-50 via-white to-neutral-100"
   [attr.data-role]="role"
 >
-
   <!-- ========= MAIN TOP NAVBAR (ALWAYS VISIBLE) ========= -->
   <div class="sticky top-0 z-50 bg-white border-b shadow-sm relative">
-<div class="max-w-7xl mx-auto flex items-center px-3 py-2 gap-2">
-
+    <div class="max-w-7xl mx-auto flex items-center px-3 py-2 gap-2">
       <!-- CLOSE BUTTON AT START -->
       <button
         (click)="closeMobileProfile()"
@@ -17,8 +15,9 @@
       </button>
 
       <!-- LEFT TABS -->
-      <div class="flex items-center bg-gray-100 p-1 rounded-full gap-1 overflow-hidden">
-
+      <div
+        class="flex items-center bg-gray-100 p-1 rounded-full gap-1 overflow-hidden"
+      >
         <!-- USER -->
         <button
           (click)="selectSection('user')"
@@ -31,7 +30,9 @@
         >
           <span class="material-icons text-sm">person</span>
           <span class="hidden sm:inline">User Profile</span>
-          <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap">
+          <span
+            class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap"
+          >
             User Profile
           </span>
         </button>
@@ -66,7 +67,9 @@
         >
           <span class="material-icons text-sm">language</span>
           <span class="hidden sm:inline">Portals</span>
-          <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap">
+          <span
+            class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap"
+          >
             Portals
           </span>
         </button>
@@ -83,7 +86,9 @@
         >
           <span class="material-icons text-sm">lock</span>
           <span class="hidden sm:inline">Security</span>
-          <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap">
+          <span
+            class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap"
+          >
             Security
           </span>
         </button>
@@ -93,10 +98,10 @@
       <div class="flex items-center gap-2 ml-auto">
         <div class="text-right leading-tight hidden sm:block">
           <div class="text-xs font-semibold text-gray-800">
-            {{ user?.name || 'User' }}
+            {{ user?.name || "User" }}
           </div>
           <div class="text-[9px] text-gray-500">
-            {{ user?.role?.toUpperCase() || 'USER' }}
+            {{ user?.role?.toUpperCase() || "USER" }}
           </div>
         </div>
         <div class="relative">
@@ -104,7 +109,7 @@
             class="w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold shadow-sm text-xs"
             [style.background]="'var(--color-primary)'"
           >
-            {{ user?.name?.charAt(0) || 'U' }}
+            {{ user?.name?.charAt(0) || "U" }}
           </div>
           <span
             class="absolute bottom-0 right-0 w-2 h-2 rounded-full border border-white"
@@ -116,9 +121,8 @@
   </div>
 
   <!-- Main Content Area -->
-<main class="p-2 lg:p-3 overflow-x-hidden">
+  <main class="p-2 lg:p-3 overflow-x-hidden">
     <div class="max-w-7xl mx-auto">
-
       <!-- ==================== USER PROFILE Section ==================== -->
       <!-- <div *ngIf="selectedSection === 'user'" class="animate-fade-in">
         <div class="mb-2">
@@ -313,92 +317,83 @@
         </div>
       </div> -->
 
-
       <div *ngIf="selectedSection === 'user'" class="animate-fade-in">
-
-  <!-- 🔹 HEADER -->
-  <div class="mb-2">
-    <h1
-      class="text-lg md:text-2xl font-bold mb-0.5 md:mb-1"
-      [style.color]="'var(--color-font)'"
-    >
-      Profile & Entity
-    </h1>
-    <p class="text-xs" [style.color]="'var(--color-muted)'">
-      User details and entity configuration
-    </p>
-  </div>
-
-  <div
-    class="bg-white rounded-lg border shadow-md overflow-hidden"
-    [style.borderColor]="'var(--color-border)'"
-  >
-    <div class="p-2 md:p-3">
-
-      <!-- 🔹 STATUS + BALANCE -->
-      <div
-        class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 pb-2 border-b gap-2"
-        [style.borderColor]="'var(--color-border)'"
-      >
-        <div class="flex items-center gap-2">
-
-          <!-- ROLE -->
-          <div
-            class="px-2 py-1 rounded-lg font-semibold text-white text-xs"
-            [style.background]="'var(--color-primary)'"
+        <!-- 🔹 HEADER -->
+        <div class="mb-2">
+          <h1
+            class="text-lg md:text-2xl font-bold mb-0.5 md:mb-1"
+            [style.color]="'var(--color-font)'"
           >
-            {{ user?.role || "User" }}
-          </div>
-
-          <!-- STATUS -->
-          <div
-            class="px-2 py-1 rounded-lg border text-xs"
-            [style.background]="user?.active ? '#dcfce7' : '#fee2e2'"
-          >
-            {{ user?.active ? "Active" : "Inactive" }}
-          </div>
-
-        </div>
-
-        <!-- BALANCE -->
-        <div class="text-right">
-          <p class="text-[10px] text-gray-400">Balance</p>
-          <p class="font-bold text-sm text-green-600">
-            ₹ {{ entityInfo?.limit || 0 }}
+            Profile & Entity
+          </h1>
+          <p class="text-xs" [style.color]="'var(--color-muted)'">
+            User details and entity configuration
           </p>
         </div>
-      </div>
 
-      <!-- 🔹 GRID -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div
+          class="bg-white rounded-lg border shadow-md overflow-hidden"
+          [style.borderColor]="'var(--color-border)'"
+        >
+          <div class="p-2 md:p-3">
+            <!-- 🔹 STATUS + BALANCE -->
+            <div
+              class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 pb-2 border-b gap-2"
+              [style.borderColor]="'var(--color-border)'"
+            >
+              <div class="flex items-center gap-2">
+                <!-- ROLE -->
+                <div
+                  class="px-2 py-1 rounded-lg font-semibold text-white text-xs"
+                  [style.background]="'var(--color-primary)'"
+                >
+                  {{ user?.role || "User" }}
+                </div>
 
-        <!-- USER INFO -->
-        <div class="p-2 rounded-lg border">
-          <h4 class="text-xs font-semibold mb-2">User Info</h4>
+                <!-- STATUS -->
+                <div
+                  class="px-2 py-1 rounded-lg border text-xs"
+                  [style.background]="user?.active ? '#dcfce7' : '#fee2e2'"
+                >
+                  {{ user?.active ? "Active" : "Inactive" }}
+                </div>
+              </div>
 
-          <div class="space-y-2 text-xs">
-            <div><b>Name:</b> {{ user?.name }}</div>
-            <div><b>Email:</b> {{ user?.email }}</div>
-            <div><b>Phone:</b> {{ user?.phone }}</div>
+              <!-- BALANCE -->
+              <div class="text-right">
+                <p class="text-[10px] text-gray-400">Balance</p>
+                <p class="font-bold text-sm text-green-600">
+                  ₹ {{ entityInfo?.limit || 0 }}
+                </p>
+              </div>
+            </div>
+
+            <!-- 🔹 GRID -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <!-- USER INFO -->
+              <div class="p-2 rounded-lg border">
+                <h4 class="text-xs font-semibold mb-2">User Info</h4>
+
+                <div class="space-y-2 text-xs">
+                  <div><b>Name:</b> {{ user?.name }}</div>
+                  <div><b>Email:</b> {{ user?.email }}</div>
+                  <div><b>Phone:</b> {{ user?.phone }}</div>
+                </div>
+              </div>
+
+              <!-- ENTITY INFO -->
+              <div class="p-2 rounded-lg border">
+                <h4 class="text-xs font-semibold mb-2">Entity Info</h4>
+
+                <div class="space-y-2 text-xs">
+                  <div><b>Entity Name:</b> {{ entityInfo?.name }}</div>
+                  <div><b>Balance:</b> ₹ {{ entityInfo?.limit }}</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
-        <!-- ENTITY INFO -->
-        <div class="p-2 rounded-lg border">
-          <h4 class="text-xs font-semibold mb-2">Entity Info</h4>
-
-          <div class="space-y-2 text-xs">
-            <div><b>Entity Name:</b> {{ entityInfo?.name }}</div>
-            <div><b>Balance:</b> ₹ {{ entityInfo?.limit }}</div>
-          </div>
-        </div>
-
       </div>
-
-    </div>
-  </div>
-
-</div>
       <!-- ==================== ENTITY DETAILS Section ==================== -->
       <!-- <div *ngIf="selectedSection === 'entity'" class="animate-fade-in">
         <div class="mb-2">
@@ -590,7 +585,7 @@
                             class="text-[9px] md:text-[9px] mb-0.5"
                             [style.color]="'var(--color-muted)'"
                           >
-                            Topup
+                            Payin
                           </p>
                           <p
                             class="font-semibold text-xs"
@@ -650,10 +645,7 @@
             >
               Portal Configurations
             </h1>
-            <p
-              class="text-xs md:text-xs"
-              [style.color]="'var(--color-muted)'"
-            >
+            <p class="text-xs md:text-xs" [style.color]="'var(--color-muted)'">
               Manage settings for each connected portal
             </p>
           </div>
@@ -696,7 +688,7 @@
               class="text-xs md:text-xs mb-2"
               [style.color]="'var(--color-muted)'"
             >
-              Add portals to start configuring processing times, topup
+              Add portals to start configuring processing times, payin
               strengths, and payout rules.
             </p>
           </div>
@@ -766,7 +758,7 @@
                       class="text-[9px] md:text-[9px] font-semibold mb-0.5"
                       [style.color]="'var(--color-success)'"
                     >
-                      Topup
+                      Payin
                     </p>
                     <p
                       class="text-xs md:text-sm font-bold"
@@ -880,10 +872,7 @@
                         </thead>
                         <tbody>
                           <tr
-                            *ngFor="
-                              let e of w.processingTime;
-                              let idx = index
-                            "
+                            *ngFor="let e of w.processingTime; let idx = index"
                             class="border-b"
                             [style.borderColor]="'var(--color-border)'"
                           >
@@ -918,10 +907,7 @@
                         class="text-center py-3 rounded-lg"
                         [style.background]="'var(--color-bg)'"
                       >
-                        <p
-                          class="text-xs"
-                          [style.color]="'var(--color-muted)'"
-                        >
+                        <p class="text-xs" [style.color]="'var(--color-muted)'">
                           No processing time configured
                         </p>
                       </div>
@@ -929,9 +915,9 @@
                   </div>
                 </div>
 
-                <!-- 2. TOPUP STRENGTHS (UPI + BANK) -->
+                <!-- 2. PAYIN STRENGTHS (UPI + BANK) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <!-- UPI Topup Table -->
+                  <!-- UPI Payin Table -->
                   <div
                     class="rounded-lg border overflow-hidden"
                     [style.borderColor]="'var(--color-success)'"
@@ -947,19 +933,19 @@
                         <span class="material-icons text-xs md:text-sm"
                           >phone_android</span
                         >
-                        UPI Topup Strengths
+                        UPI Payin Strengths
                       </h4>
                     </div>
                     <div class="p-3">
                       <ng-container
                         *ngIf="
-                          (w._raw?.topupsTimeStrength?.upi?.timeRanges ||
-                            w.topupsTimeStrength ||
-                            []) as upiList
+                          w._raw?.payinsTimeStrength?.upi?.timeRanges ||
+                          w.payinsTimeStrength ||
+                          [] as upiList
                         "
                       >
                         <div
-                          *ngIf="upiList.length; else noUpiTopup"
+                          *ngIf="upiList.length; else noUpiPayin"
                           class="overflow-x-auto"
                         >
                           <table class="min-w-full text-xs">
@@ -1014,7 +1000,7 @@
                             </tbody>
                           </table>
                         </div>
-                        <ng-template #noUpiTopup>
+                        <ng-template #noUpiPayin>
                           <div
                             class="text-center py-3 rounded-lg"
                             [style.background]="'var(--color-bg)'"
@@ -1031,7 +1017,7 @@
                     </div>
                   </div>
 
-                  <!-- Bank Topup Table -->
+                  <!-- Bank Payin Table -->
                   <div
                     class="rounded-lg border overflow-hidden"
                     [style.borderColor]="'var(--color-info)'"
@@ -1047,20 +1033,20 @@
                         <span class="material-icons text-xs md:text-sm"
                           >account_balance</span
                         >
-                        Bank Topup Strengths
+                        Bank Payin Strengths
                       </h4>
                     </div>
                     <div class="p-3">
                       <ng-container
                         *ngIf="
-                          (w._raw?.topupsTimeStrength?.bank?.timeRanges ||
-                            w._raw?.bankTimeStrength ||
-                            w.bankTimeStrength ||
-                            []) as bankList
+                          w._raw?.payinsTimeStrength?.bank?.timeRanges ||
+                          w._raw?.bankTimeStrength ||
+                          w.bankTimeStrength ||
+                          [] as bankList
                         "
                       >
                         <div
-                          *ngIf="bankList.length; else noBankTopup"
+                          *ngIf="bankList.length; else noBankPayin"
                           class="overflow-x-auto"
                         >
                           <table class="min-w-full text-xs">
@@ -1115,7 +1101,7 @@
                             </tbody>
                           </table>
                         </div>
-                        <ng-template #noBankTopup>
+                        <ng-template #noBankPayin>
                           <div
                             class="text-center py-3 rounded-lg"
                             [style.background]="'var(--color-bg)'"
@@ -1155,10 +1141,10 @@
                   <div class="p-3">
                     <ng-container
                       *ngIf="
-                        (w.payoutsTimeStrength?.amountRanges ||
-                          w._raw?.payoutsTimeStrength?.amountRanges ||
-                          w.payoutsTimeStrength ||
-                          []) as amtList
+                        w.payoutsTimeStrength?.amountRanges ||
+                        w._raw?.payoutsTimeStrength?.amountRanges ||
+                        w.payoutsTimeStrength ||
+                        [] as amtList
                       "
                     >
                       <div
@@ -1196,16 +1182,10 @@
                               *ngFor="let a of amtList; let j = index"
                             >
                               <ng-container
-                                *ngIf="
-                                  a.timeRanges?.length;
-                                  else noTimeRanges
-                                "
+                                *ngIf="a.timeRanges?.length; else noTimeRanges"
                               >
                                 <tr
-                                  *ngFor="
-                                    let tr of a.timeRanges;
-                                    let k = index
-                                  "
+                                  *ngFor="let tr of a.timeRanges; let k = index"
                                   class="border-b"
                                   [style.borderColor]="'var(--color-border)'"
                                 >
@@ -1465,9 +1445,7 @@
                   [style.color]="'var(--color-danger)'"
                 >
                   <div class="flex items-center gap-1">
-                    <span class="material-icons text-xs md:text-xs"
-                      >error</span
-                    >
+                    <span class="material-icons text-xs md:text-xs">error</span>
                     <span>{{ errorMessage }}</span>
                   </div>
                 </div>
@@ -1508,4 +1486,3 @@
     </div>
   </main>
 </div>
-

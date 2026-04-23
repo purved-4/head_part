@@ -1,4 +1,3 @@
-
 import {
   Component,
   Input,
@@ -40,7 +39,7 @@ export class HeadNavHeaderComponent implements OnInit {
   isProfileOpen = false;
   @ViewChild("profileContainer") profileContainer!: ElementRef;
   @ViewChild("limitsContainer") limitsContainer!: ElementRef;
-@Input() notificationUnreadCount: number = 0;
+  @Input() notificationUnreadCount: number = 0;
 
   isLimitsOpen = false;
 
@@ -50,7 +49,7 @@ export class HeadNavHeaderComponent implements OnInit {
     upiLimit: "₹25,000",
     bankLimit: "₹1,00,000",
     payout: "₹1,20,000",
-    topup: "₹50,000",
+    payin: "₹50,000",
     reward: "500 pts",
   };
 
@@ -60,7 +59,7 @@ export class HeadNavHeaderComponent implements OnInit {
   limitRemainingAmount: any = 0;
   currentRoleId: any;
   payoutBalance: any = 0;
-  topupBalance: any = 0;
+  payinBalance: any = 0;
   rewards: any;
   bankBalance: any = 0;
   upiBalance: any = 0;
@@ -100,7 +99,7 @@ export class HeadNavHeaderComponent implements OnInit {
     this.socketService.getLatestBalance().subscribe((res) => {
       this.ngZone.run(() => {
         this.limitRemainingAmount = res?.entityBalance ?? 0;
-        this.topupBalance = res?.totalTopup ?? 0;
+        this.payinBalance = res?.totalPayin ?? 0;
         this.payoutBalance = res?.totalPayout ?? 0;
         this.rewards = res?.reward ?? 0;
 
@@ -114,7 +113,7 @@ export class HeadNavHeaderComponent implements OnInit {
       .subscribe((res) => {
         this.ngZone.run(() => {
           this.limitRemainingAmount = res?.entityBalance ?? 0;
-          this.topupBalance = res?.totalTopup ?? 0;
+          this.payinBalance = res?.totalPayin ?? 0;
           this.payoutBalance = res?.totalPayout ?? 0;
           this.rewards = res?.reward ?? 0;
 
@@ -285,22 +284,18 @@ export class HeadNavHeaderComponent implements OnInit {
 
   private emitBalances() {
     this.balanceChange.emit({
-      topup: this.topupBalance,
+      payin: this.payinBalance,
       payout: this.payoutBalance,
       reward: this.rewards,
       limit: this.limitRemainingAmount,
     });
   }
 
-onNotificationIconClick() {
-  this.notificationClick.emit();
-}
-  
+  onNotificationIconClick() {
+    this.notificationClick.emit();
+  }
 
-getUnreadCount(): number {
-  return this.notificationUnreadCount;
-}
-
-
-
+  getUnreadCount(): number {
+    return this.notificationUnreadCount;
+  }
 }

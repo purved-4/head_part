@@ -21,9 +21,9 @@ import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { BankService } from "../../../pages/services/bank.service";
 
 @Component({
-  selector: 'app-upis',
-  templateUrl: './upis.component.html',
-  styleUrl: './upis.component.css'
+  selector: "app-upis",
+  templateUrl: "./upis.component.html",
+  styleUrl: "./upis.component.css",
 })
 export class UpisComponent implements OnInit {
   // ---------- DATA ----------
@@ -60,7 +60,7 @@ export class UpisComponent implements OnInit {
   get transactionFilterActive(): boolean {
     return !!(this.transactionMinAmount || this.transactionMaxAmount);
   }
-  topupStatus: any = false;
+  payinStatus: any = false;
 
   // Image preview
   selectedImage: string | null = null;
@@ -156,41 +156,6 @@ export class UpisComponent implements OnInit {
     private bankServices: BankService,
   ) {}
 
-  //   ngOnInit() {
-  //     this.route.queryParams.subscribe((params) => {
-  //   const bankId = params['bankId'];
-
-  //   if (bankId) {
-  //     this.preselectedBankId = bankId;
-  //   }
-  // });
-  //     this.initAddUpiForm();
-  //     this.currentRoleId = this.userStateService.getCurrentEntityId();
-  //     this.currentUserId = this.userStateService.getUserId();
-  //     this.role = this.userStateService.getRole();
-  // this.getTopupStatus();
-  //     if (
-  //         typeof matchMedia !== "undefined" &&
-  //         matchMedia("(max-width: 800px)").matches
-  //     ) {
-  //       this.viewMode = "grid";
-  //     }
-
-  //     this.fetchUpis();
-  //     this.loadPortals(this.currentRoleId);
-
-  //     this.searchSubject
-  //         .pipe(debounceTime(600), distinctUntilChanged())
-  //         .subscribe((value) => {
-  //           this.searchTerm = value;
-  //           this.onSearch();
-  //         });
-
-  //     this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
-
-  //     this.loadBanks();
-  //   }
-
   ngOnInit() {
     this.initAddUpiForm();
 
@@ -198,7 +163,7 @@ export class UpisComponent implements OnInit {
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
 
-    this.getTopupStatus();
+    this.getPayinStatus();
 
     if (
       typeof matchMedia !== "undefined" &&
@@ -229,7 +194,7 @@ export class UpisComponent implements OnInit {
 
   private initAddUpiForm() {
     this.addUpiForm = this.formBuilder.group({
-      // portalId: ["", Validators.required],
+      bankId: [""],
       vpa: [
         "",
         [
@@ -256,71 +221,6 @@ export class UpisComponent implements OnInit {
       this.onUpiPortalSearch(); // refresh filtered list
     }
   }
-  // amountRangeValidator(group: FormGroup): { [key: string]: any } | null {
-  //   const min = group.get("minAmount")?.value;
-  //   const max = group.get("maxAmount")?.value;
-
-  //   if (min !== null && max !== null && Number(min) > Number(max)) {
-  //     return { invalidRange: true };
-  //   }
-  //   return null;
-  // }
-
-  // ---------- FETCH UPIs (server‑side pagination & filtering) ----------
-  //   fetchUpis(): void {
-  //     if (!this.currentRoleId) return;
-
-  //     const options: any = {
-  //       page: this.currentPage - 1,
-  //       size: this.pageSize,
-  //       query: this.searchTerm.trim() || undefined,
-  //       minAmount: this.transactionMinAmount ?? undefined,
-  //       maxAmount: this.transactionMaxAmount ?? undefined,
-  //       limit: this.maxLimit ?? undefined, //  NEW: send max limit
-  //       portalId: this.selectedPortal?.portalId || undefined,
-  //     };
-
-  // if (this.filterStatus && this.filterStatus.trim() !== "") {
-  //   options.status = this.filterStatus;
-  // }
-
-  //     this.upiService
-  //       .getByEntityIdAndActivePaginatedWithStatus(this.currentRoleId, options)
-  //       .subscribe({
-  //         next: (res: any) => {
-  //           const rows = Array.isArray(res.content) ? res.content : [];
-  //           this.upis = rows.map((r: any) => ({
-  //             ...r,
-  //             status: this.normalizeStatus(r),
-  //             portalDomain:
-  //               r.portalDomain ||
-  //               r.portalName ||
-  //               r.portal ||
-  //               r.portalId ||
-  //               "",
-  //             upiRange: r.range || r.upiRange || r.bankRange || "",
-  //             qrId: r.qrId || r.qr_id || r.id || "",
-  //             qrImagePath: r.qrImagePath
-  //               ? `${fileBaseUrl}/${r.qrImagePath}`
-  //               : r.qrImageUrl
-  //                 ? `${fileBaseUrl}/${r.qrImageUrl}`
-  //                 : null,
-  //             limitAmount: r.limitAmount,
-  //             vpa: r.vpa || r.upiId || "",
-  //             isUpiActive: r.upi === true,
-  //           }));
-
-  //           this.totalElements = res.totalElements || 0;
-  //           this.totalPagesCount = res.totalPages || 0;
-  //         },
-  //         error: (err: any) => {
-
-  //           this.upis = [];
-  //           this.totalElements = 0;
-  //           this.totalPagesCount = 0;
-  //         },
-  //       });
-  //   }
 
   fetchUpis(): void {
     if (!this.currentRoleId) return;
@@ -332,7 +232,7 @@ export class UpisComponent implements OnInit {
       minAmount: this.transactionMinAmount ?? undefined,
       maxAmount: this.transactionMaxAmount ?? undefined,
       limit: this.maxLimit ?? undefined,
-      portalId: this.selectedPortal?.portalId || undefined,
+      bankId: this.selectedPortal?.bankId || undefined,
     };
 
     if (this.preselectedBankId) {
@@ -387,7 +287,7 @@ export class UpisComponent implements OnInit {
               min_total_tran_amount: r.minTotalTranAmount ?? null,
               max_total_tran_amount: r.maxTotalTranAmount ?? null,
               portalDomain:
-                r.portalDomain || r.portalName || r.portal || r.portalId || "",
+                r.portalDomain || r.portalName || r.portal || r.bankId || "",
 
               ranges: parsedRanges,
 
@@ -465,34 +365,6 @@ export class UpisComponent implements OnInit {
     }
     return "inactive";
   }
-
-  // ---------- PORTALS LOADING ----------
-  // loadPortals(agentId: string) {
-  //   if (!agentId) return;
-  //   this.headService
-  //       .getAllHeadsWithPortalsById(agentId, "UPI")
-  //       .pipe(catchError(() => of([])))
-  //       .subscribe((res: any) => {
-  //         let list: any[] = [];
-  //         if (Array.isArray(res)) list = res;
-  //         else if (res?.data) list = res.data;
-  //         else if (res) list = [res];
-
-  //         this.portals = list.map((item) => ({
-  //           id: item.id || item._id || "",
-  //           portalId: item.portalId || item.portalID || item.portal_id || "",
-  //           domain:
-  //               item.portalDomain ||
-  //               item.domain ||
-  //               item.domainName ||
-  //               "Untitled Portal",
-  //           currency: item.currency || "INR",
-  //         }));
-
-  //         this.filteredPortals = [...this.portals];
-  //         this.upiFilteredPortals = [];
-  //       });
-  // }
 
   // ---------- FILTER ACTIONS ----------
   onSearch(): void {
@@ -602,8 +474,8 @@ export class UpisComponent implements OnInit {
 
   // selectUpiPortal(site: any): void {
   //   this.selectedUpiPortal = site;
-  //   this.addUpiForm.patchValue({ portalId: site.id });
-  //   this.addUpiForm.get("portalId")?.markAsTouched();
+  //   this.addUpiForm.patchValue({ bankId: site.id });
+  //   this.addUpiForm.get("bankId")?.markAsTouched();
   //   this.upiPortalSearch = site.domain;
   //   this.upiFilteredPortals = [];
   // }
@@ -611,12 +483,15 @@ export class UpisComponent implements OnInit {
     this.selectedUpiPortal = site;
 
     this.addUpiForm.patchValue({
-      portalId: site.id,
+      bankId: site.id,
     });
 
-    this.addUpiForm.get("portalId")?.markAsTouched();
+    console.log(this.addUpiForm.value);
+    console.log(this.addUpiForm.get("bankId"));
 
-    this.upiPortalSearch = site.domain;
+    this.addUpiForm.get("bankId")?.markAsTouched();
+
+    this.upiPortalSearch = site.accountHolderName;
 
     this.upiFilteredPortals = [];
     this.showUpiPortalDropdown = false;
@@ -626,18 +501,18 @@ export class UpisComponent implements OnInit {
   //   this.selectedUpiPortal = null;
   //   this.upiPortalSearch = "";
   //   this.upiFilteredPortals = [];
-  //   this.addUpiForm.patchValue({ portalId: "" });
-  //   this.addUpiForm.get("portalId")?.markAsTouched();
+  //   this.addUpiForm.patchValue({ bankId: "" });
+  //   this.addUpiForm.get("bankId")?.markAsTouched();
   // }
   clearUpiPortalSelection(): void {
     this.selectedUpiPortal = null;
     this.upiPortalSearch = "";
     this.upiFilteredPortals = [];
 
-    //  Form se portalId clear karo
-    this.addUpiForm.patchValue({ portalId: "" });
-    this.addUpiForm.get("portalId")?.markAsTouched();
-    this.addUpiForm.get("portalId")?.updateValueAndValidity();
+    //  Form se bankId clear karo
+    this.addUpiForm.patchValue({ bankId: "" });
+    this.addUpiForm.get("bankId")?.markAsTouched();
+    this.addUpiForm.get("bankId")?.updateValueAndValidity();
   }
 
   // ---------- PAGINATION ----------
@@ -753,7 +628,7 @@ export class UpisComponent implements OnInit {
     }
 
     // const selectedPortal = this.portals.find(
-    //   (site) => String(site.id) === String(this.addUpiForm.value.portalId),
+    //   (site) => String(site.id) === String(this.addUpiForm.value.bankId),
     // );
     const selectedPortal = this.portals?.[0];
     // if (!selectedPortal) {
@@ -779,23 +654,23 @@ export class UpisComponent implements OnInit {
     const validRanges = this.capacityRanges;
 
     const payload = {
-      // portal: selectedPortal.portalId,
-      // portalId: selectedPortal.id,
+      // portal: selectedPortal.bankId,
+      // bankId: selectedPortal.id,
       vpa: this.addUpiForm.value.vpa,
       limitAmount: this.addUpiForm.value.limitAmount,
       // agent_id: this.currentRoleId,
       entityId: this.currentRoleId,
       entityType: this.role,
 
-      bankId: "5974d3e0-0de0-494e-8a1b-acd4ce6d1dfe",
+      bankId: this.addUpiForm.value.bankId || this.preselectedBankId,
       userId: this.userId,
       active: true,
-      minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
-      maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
-      minTotalTranAmount:
-        Number(this.addUpiForm.value.min_total_tran_amount) || 0,
-      maxTotalTranAmount:
-        Number(this.addUpiForm.value.max_total_tran_amount) || 0,
+      // minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
+      // maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
+      // minTotalTranAmount:
+      //   Number(this.addUpiForm.value.min_total_tran_amount) || 0,
+      // maxTotalTranAmount:
+      //   Number(this.addUpiForm.value.max_total_tran_amount) || 0,
       createdAt: new Date().toISOString(),
       // ranges: validRanges.map((r) => ({
       //   minRange: Number(r.minRange),
@@ -809,6 +684,8 @@ export class UpisComponent implements OnInit {
         quantity: r.quantity ?? null,
       })),
     };
+
+    console.log(payload);
 
     const formData = new FormData();
     const dtoBlob = new Blob([JSON.stringify(payload)], {
@@ -1342,22 +1219,23 @@ export class UpisComponent implements OnInit {
 
   selectedId!: string;
   selectedPortalId!: string;
-  selectedTopupId!: string;
+  selectedPayinId!: string;
   selectedMode!: "UPI" | "BANK";
 
   openCapacity(item: any, mode: "UPI" | "BANK") {
     this.selectedId = item.id;
+    console.log(item);
 
-    this.selectedPortalId = item.portalId || item.portal || item.portalID;
+    this.selectedPortalId = item.bankId || item.portal || item.portalID;
 
-    this.selectedTopupId = item.topupId || item.id || item.qrId;
+    this.selectedPayinId = item.payinId || item.id || item.qrId;
 
     this.selectedMode = mode;
 
     console.log(" FINAL PASS:", {
       entityId: this.selectedId,
-      portalId: this.selectedPortalId,
-      topupId: this.selectedTopupId,
+      bankId: this.selectedPortalId,
+      payinId: this.selectedPayinId,
     });
 
     this.showCapacityModal = true;
@@ -1507,15 +1385,31 @@ export class UpisComponent implements OnInit {
     this.tooltipVisible = false;
   }
 
-  private getTopupStatus() {
-    this.headService.getHeadById(this.currentRoleId).subscribe((res) => {
-      this.topupStatus = res.topup;
-    });
+  private getPayinStatus() {
+    if (this.role === "HEAD") {
+      this.headService.getHeadById(this.currentRoleId).subscribe((res) => {
+        this.payinStatus = res.payin;
+      });
+    } else if (this.role === "BRANCH") {
+      this.branchService.getBranchById(this.currentRoleId).subscribe((res) => {
+        this.payinStatus = res.payin;
+      });
+    }
   }
-  changeTopupStatus() {
-    this.headService.toggleDashbaordTopup(this.currentRoleId).subscribe(() => {
-      this.topupStatus = !this.topupStatus;
-    });
+  changePayinStatus() {
+    if (this.role === "HEAD") {
+      this.headService
+        .toggleDashbaordPayin(this.currentRoleId)
+        .subscribe(() => {
+          this.payinStatus = !this.payinStatus;
+        });
+    } else if (this.role === "BRANCH") {
+      this.branchService
+        .toggleDashbaordPayin(this.currentRoleId)
+        .subscribe(() => {
+          this.payinStatus = !this.payinStatus;
+        });
+    }
   }
 
   loadBanks() {
@@ -1580,13 +1474,13 @@ export class UpisComponent implements OnInit {
     setTimeout(() => (this.showBankDropdown = false), 200);
   }
 
- isLive(upi: any): boolean {
-  return !!(
-    this.topupStatus &&     // Topup toggle ON
-    upi.isUpiActive &&      // Toggle ON
-    upi.status === 'active' // Status active
-  );
-}
+  isLive(upi: any): boolean {
+    return !!(
+      this.payinStatus && // Payin toggle ON
+      upi.isUpiActive && // Toggle ON
+      upi.status === "active" // Status active
+    );
+  }
   showTxnModal = false;
   selectedTxnData: any = null;
 

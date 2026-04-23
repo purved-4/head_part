@@ -1,4 +1,3 @@
-
 import {
   Component,
   Input,
@@ -9,13 +8,14 @@ import {
   OnInit,
 } from "@angular/core";
 import { UpiService } from "../../pages/services/upi.service";
+import { BankService } from "../../pages/services/bank.service";
 
 @Component({
-  selector: "app-topup-capacity",
-  templateUrl: "./topup-capacity.component.html",
-  styleUrls: ["./topup-capacity.component.css"],
+  selector: "app-payin-capacity",
+  templateUrl: "./payin-capacity.component.html",
+  styleUrls: ["./payin-capacity.component.css"],
 })
-export class TopupCapacityComponent implements OnChanges, OnInit {
+export class PayinCapacityComponent implements OnChanges, OnInit {
   //  CONTROL
   @Input() show: boolean = false;
 
@@ -23,24 +23,32 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
   @Input() entityId!: string;
   @Input() entityType!: string;
   @Input() portalId!: string;
+  @Input() bankId!: any;
+
   @Input() mode!: "UPI" | "BANK";
-  @Input() topupId!: string;
+  @Input() payinId!: string;
 
   @Output() close = new EventEmitter<void>();
 
-  //  STATE
   capacityRanges: any[] = [];
   limitAmount: number | null = null;
   isLoading: boolean = false;
   isEditing: boolean = false;
 
-  constructor(private upiService: UpiService) {}
+  constructor(
+    private bankService: BankService,
+    private upiService: UpiService,
+  ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    console.log("comming in the payin");
+
+    this.fetchCapacity();
+  }
 
   // ================= AUTO FETCH =================
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.show && this.entityId && this.portalId && this.topupId) {
+    if (this.show && this.entityId && this.portalId && this.payinId) {
       this.fetchCapacity();
     }
   }
@@ -50,37 +58,62 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
     console.log(" INPUTS:", {
       entityId: this.entityId,
       portalId: this.portalId,
-      topupId: this.topupId,
+      payinId: this.payinId,
       mode: this.mode,
       entityType: this.entityType,
     });
 
-    if (!this.entityId || !this.portalId || !this.topupId) {
+    console.log(this.entityId, this.portalId, this.payinId);
+
+    if (!this.entityId || !this.portalId || !this.payinId) {
       return;
     }
 
     this.isLoading = true;
 
-    this.upiService
-      .getTopupCapacity(
-        this.entityType || "BRANCH",
-        this.entityId,
-        this.portalId,
-        this.mode,
-        this.topupId,
-      )
-      .subscribe({
-        next: (res: any) => {
-          this.capacityRanges = res.capacities || [];
+    if (this.mode === "BANK") {
+      this.bankService
+        .getPayinCapacity(
+          this.entityType,
+          this.entityId,
+          this.portalId,
+          this.mode,
+          this.payinId,
+        )
+        .subscribe({
+          next: (res: any) => {
+            this.capacityRanges = res.capacities || [];
 
-          this.limitAmount = res.limitAmount || null;
+            this.limitAmount = res.limitAmount || null;
 
-          this.isLoading = false;
-        },
-        error: (err) => {
-          this.isLoading = false;
-        },
-      });
+            this.isLoading = false;
+          },
+          error: (err) => {
+            this.isLoading = false;
+          },
+        });
+    } else if (this.mode === "UPI") {
+      this.upiService
+        .getPayinCapacity(
+          this.entityType,
+          this.entityId,
+          this.portalId,
+          this.mode,
+          this.payinId,
+        )
+        .subscribe({
+          next: (res: any) => {
+            this.capacityRanges = res.capacities || [];
+
+            this.limitAmount = res.limitAmount || null;
+
+            this.isLoading = false;
+          },
+          error: (err) => {
+            this.isLoading = false;
+          },
+        });
+    }
   }
 
   // ================= EDIT =================
@@ -144,7 +177,7 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
       entityId: this.entityId,
       portalId: this.portalId,
       mode: this.mode,
-      topupId: this.topupId,
+      payinId: this.payinId,
 
       limitAmount: Number(this.limitAmount),
 
@@ -157,18 +190,33 @@ export class TopupCapacityComponent implements OnChanges, OnInit {
 
     this.isLoading = true;
 
-    this.upiService.addTopupCapacity(payload).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.isEditing = false;
+    if (this.mode === "BANK") {
+      this.bankService.addPayinCapacity(payload).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.isEditing = false;
 
-        //  refresh after save
-        this.fetchCapacity();
-      },
-      error: (err: any) => {
-        this.isLoading = false;
-      },
-    });
+          //  refresh after save
+          this.fetchCapacity();
+        },
+        error: (err: any) => {
+          this.isLoading = false;
+        },
+      });
+    } else if (this.mode === "UPI") {
+      this.upiService.addPayinCapacity(payload).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.isEditing = false;
+
+          //  refresh after save
+          this.fetchCapacity();
+        },
+        error: (err: any) => {
+          this.isLoading = false;
+        },
+      });
+    }
   }
 
   // ================= CLOSE =================

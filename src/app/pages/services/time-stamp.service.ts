@@ -9,9 +9,9 @@ import baseUrl from "./helper";
 export class TimeStampService {
   constructor(private http: HttpClient) {}
 
-  addtopupTimeStamp(data: any): Observable<any[]> {
+  addpayinTimeStamp(data: any): Observable<any[]> {
     return this.http
-      .post<any[]>(`${baseUrl}/api/owner/reward/topup`, data)
+      .post<any[]>(`${baseUrl}/api/owner/reward/payin`, data)
       .pipe(
         map((response: any) => response),
         catchError((error) => throwError(error)),

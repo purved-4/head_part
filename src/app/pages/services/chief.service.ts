@@ -231,5 +231,19 @@ getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
     );
 }
 
+getChiefsListByUserIdPaginated(
+    user: any,
+    page: number = 0,
+    pageSize: number = 20,
+  ): Observable<any> {
+    return this.http
+      .get<any>(
+        `${baseUrl}/chief/getChiefsListByUserId/paginated/${user}?page=${page}&size=${pageSize}`,
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 
 }

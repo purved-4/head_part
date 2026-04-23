@@ -1,4 +1,3 @@
-
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { of, Subscription } from "rxjs";
@@ -17,8 +16,8 @@ import { MultimediaService } from "../../services/multimedia.service";
 })
 export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
   // Arrays for each type (server returns paginated data)
-  upitopups: any[] = [];
-  banktopups: any[] = [];
+  upipayins: any[] = [];
+  bankpayins: any[] = [];
   approvedpayouts: any[] = [];
 
   // Pagination metadata from server
@@ -32,7 +31,7 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
   role: string | null = "";
 
   private routeSub: Subscription | null = null;
-imageError= false
+  imageError = false;
   // active view
   activeView: "upi" | "bank" | "payout" = "upi";
 
@@ -87,13 +86,13 @@ imageError= false
 
   // Colors based on role (already in template via data-role)
   colors: any = null;
-portalOptions: { id: string; domain: string }[] = [];
+  portalOptions: { id: string; domain: string }[] = [];
   constructor(
     private route: ActivatedRoute,
     private fundService: FundsService,
     private userStateService: UserStateService,
     private headServices: HeadService,
-    private  multimediaService : MultimediaService,
+    private multimediaService: MultimediaService,
   ) {}
 
   ngOnInit(): void {
@@ -114,14 +113,13 @@ portalOptions: { id: string; domain: string }[] = [];
 
       // Fetch data for the current view (server‑side pagination)
       if (this.activeView === "upi") {
-             if (this.upiPortalFilter) this.fetchUpiTopups();
-
+        if (this.upiPortalFilter) this.fetchUpiPayins();
       } else if (this.activeView === "bank") {
-                     if (this.bankPortalFilter) this.fetchBankTopups();
+        if (this.bankPortalFilter) this.fetchBankPayins();
 
-        // this.fetchBankTopups();
+        // this.fetchBankPayins();
       } else {
-                     if (this.payoutPortalFilter) this.fetchApprovedPayouts();
+        if (this.payoutPortalFilter) this.fetchApprovedPayouts();
 
         // this.fetchApprovedPayouts();
       }
@@ -164,7 +162,7 @@ portalOptions: { id: string; domain: string }[] = [];
   }
 
   // ============ FETCH DATA (server‑side paginated) ============
-  //   fetchUpiTopups(): void {
+  //   fetchUpiPayins(): void {
   //     if (!this.branchId) return;
 
   //     this.fundService
@@ -218,30 +216,30 @@ portalOptions: { id: string; domain: string }[] = [];
   //   },
   // });
   //   }
-  
-  fetchUpiTopups(): void {
-    if (!this.branchId) return;
-  const fromDate = this.upiDateFrom
-  ? DateTimeUtil.toUtcISOString(
-      new Date(new Date(this.upiDateFrom).setHours(0, 0, 0, 0))
-    )
-  : null;
 
-const toDate = this.upiDateTo
-  ? DateTimeUtil.toUtcISOString(
-      new Date(new Date(this.upiDateTo).setHours(23, 59, 59, 999))
-    )
-  : null;
+  fetchUpiPayins(): void {
+    if (!this.branchId) return;
+    const fromDate = this.upiDateFrom
+      ? DateTimeUtil.toUtcISOString(
+          new Date(new Date(this.upiDateFrom).setHours(0, 0, 0, 0)),
+        )
+      : null;
+
+    const toDate = this.upiDateTo
+      ? DateTimeUtil.toUtcISOString(
+          new Date(new Date(this.upiDateTo).setHours(23, 59, 59, 999)),
+        )
+      : null;
     this.fundService
       .getAllUpiFundWithEntityAndPortalId(
         this.branchId,
-       this.upiPortalFilter,
+        this.upiPortalFilter,
         "ACCEPTED",
         this.upiPage,
         this.upiPageSize,
-      undefined,
-      fromDate || undefined,
-      toDate || undefined
+        undefined,
+        fromDate || undefined,
+        toDate || undefined,
       )
       .pipe(
         catchError((err) => {
@@ -276,7 +274,7 @@ const toDate = this.upiDateTo
       });
   }
 
-  // fetchBankTopups(): void {
+  // fetchBankPayins(): void {
   //   if (!this.branchId) return;
 
   //   this.fundService
@@ -308,19 +306,19 @@ const toDate = this.upiDateTo
   //     });
   // }
 
-  fetchBankTopups(): void {
+  fetchBankPayins(): void {
     if (!this.branchId) return;
-  const fromDate = this.bankDateFrom
-  ? DateTimeUtil.toUtcISOString(
-      new Date(new Date(this.bankDateFrom).setHours(0, 0, 0, 0))
-    )
-  : null;
+    const fromDate = this.bankDateFrom
+      ? DateTimeUtil.toUtcISOString(
+          new Date(new Date(this.bankDateFrom).setHours(0, 0, 0, 0)),
+        )
+      : null;
 
-const toDate = this.bankDateTo
-  ? DateTimeUtil.toUtcISOString(
-      new Date(new Date(this.bankDateTo).setHours(23, 59, 59, 999))
-    )
-  : null;
+    const toDate = this.bankDateTo
+      ? DateTimeUtil.toUtcISOString(
+          new Date(new Date(this.bankDateTo).setHours(23, 59, 59, 999)),
+        )
+      : null;
     this.fundService
       .getAllBankFundWithEntityAndPortalId(
         this.branchId,
@@ -328,9 +326,9 @@ const toDate = this.bankDateTo
         "ACCEPTED",
         this.bankPage,
         this.bankPageSize,
-       undefined,
-       fromDate || undefined,
-       toDate || undefined,
+        undefined,
+        fromDate || undefined,
+        toDate || undefined,
       )
       .pipe(
         catchError((err) => {
@@ -403,17 +401,17 @@ const toDate = this.bankDateTo
 
   fetchApprovedPayouts(): void {
     if (!this.branchId) return;
-  const fromDate = this.payoutDateFrom
-  ? DateTimeUtil.toUtcISOString(
-      new Date(new Date(this.payoutDateFrom).setHours(0, 0, 0, 0))
-    )
-  : null;
+    const fromDate = this.payoutDateFrom
+      ? DateTimeUtil.toUtcISOString(
+          new Date(new Date(this.payoutDateFrom).setHours(0, 0, 0, 0)),
+        )
+      : null;
 
-const toDate = this.payoutDateTo
-  ? DateTimeUtil.toUtcISOString(
-      new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999))
-    )
-  : null;
+    const toDate = this.payoutDateTo
+      ? DateTimeUtil.toUtcISOString(
+          new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999)),
+        )
+      : null;
     this.fundService
       .getAllPayoutFundWithEntityAndPortalId(
         this.branchId,
@@ -421,9 +419,9 @@ const toDate = this.payoutDateTo
         "ACCEPTED",
         this.payoutApprovedPage,
         this.payoutApprovedPageSize,
-       undefined,
-       fromDate || undefined,
-       toDate || undefined
+        undefined,
+        fromDate || undefined,
+        toDate || undefined,
       )
       .pipe(
         catchError((err) => {
@@ -471,45 +469,45 @@ const toDate = this.payoutDateTo
   // }
 
   loadPortalOptions(): void {
-  if (!this.branchId) return;
+    if (!this.branchId) return;
 
-  this.headServices.getAllHeadsWithPortalsById(this.branchId).subscribe({
-    next: (res: any) => {
-      const source = Array.isArray(res?.data)
-        ? res.data
-        : Array.isArray(res)
-        ? res
-        : [];
+    this.headServices.getAllHeadsWithPortalsById(this.branchId).subscribe({
+      next: (res: any) => {
+        const source = Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res)
+            ? res
+            : [];
 
-      const uniqueMap = new Map<string, any>();
+        const uniqueMap = new Map<string, any>();
 
-      source.forEach((item: any) => {
-        if (item?.portalId && item?.portalDomain) {
-          uniqueMap.set(item.portalId, {
-            id: item.portalId,
-            domain: item.portalDomain,
-          });
-        }
-      });
+        source.forEach((item: any) => {
+          if (item?.portalId && item?.portalDomain) {
+            uniqueMap.set(item.portalId, {
+              id: item.portalId,
+              domain: item.portalDomain,
+            });
+          }
+        });
 
-      const portals = Array.from(uniqueMap.values());
+        const portals = Array.from(uniqueMap.values());
 
-      // ✅ store for UI
-      this.portalOptions = portals;
+        // ✅ store for UI
+        this.portalOptions = portals;
 
-      // optional (if still used somewhere)
-      this.upiPortals = portals;
-      this.bankPortals = portals;
-      this.payoutPortals = portals;
-    },
-    error: () => {
-      this.portalOptions = [];
-      this.upiPortals = [];
-      this.bankPortals = [];
-      this.payoutPortals = [];
-    },
-  });
-}
+        // optional (if still used somewhere)
+        this.upiPortals = portals;
+        this.bankPortals = portals;
+        this.payoutPortals = portals;
+      },
+      error: () => {
+        this.portalOptions = [];
+        this.upiPortals = [];
+        this.bankPortals = [];
+        this.payoutPortals = [];
+      },
+    });
+  }
 
   // Helper to parse various response shapes
   private parseResponse(response: any): {
@@ -549,7 +547,7 @@ const toDate = this.payoutDateTo
 
   // ============ MAPPERS ============
   private mapFundsArray(items: any[], mode: "bank" | "upi") {
-    const targetArray = mode === "bank" ? this.banktopups : this.upitopups;
+    const targetArray = mode === "bank" ? this.bankpayins : this.upipayins;
     targetArray.length = 0;
 
     items.forEach((it: any) => {
@@ -603,8 +601,8 @@ const toDate = this.payoutDateTo
   }
 
   // ============ FILTERED ARRAYS (client‑side) ============
-  filteredUpitopups(): any[] {
-    return this.upitopups.filter((item) => {
+  filteredUpipayins(): any[] {
+    return this.upipayins.filter((item) => {
       // Search filter
       if (this.upiSearchQuery) {
         const query = this.upiSearchQuery.toLowerCase();
@@ -648,8 +646,8 @@ const toDate = this.payoutDateTo
     });
   }
 
-  filteredBanktopups(): any[] {
-    return this.banktopups.filter((item) => {
+  filteredBankpayins(): any[] {
+    return this.bankpayins.filter((item) => {
       // Search filter
       if (this.bankSearchQuery) {
         const query = this.bankSearchQuery.toLowerCase();
@@ -719,11 +717,11 @@ const toDate = this.payoutDateTo
       // }
 
       if (
-  this.payoutPortalFilter &&
-  item.raw?.portalId !== this.payoutPortalFilter
-) {
-  return false;
-}
+        this.payoutPortalFilter &&
+        item.raw?.portalId !== this.payoutPortalFilter
+      ) {
+        return false;
+      }
 
       // Date range filter
       const itemDate = new Date(item.date);
@@ -743,24 +741,24 @@ const toDate = this.payoutDateTo
   }
 
   // ============ PAGINATED ARRAYS ============
-  pagedUpitopups(): any[] {
-    const filtered = this.filteredUpitopups();
+  pagedUpipayins(): any[] {
+    const filtered = this.filteredUpipayins();
     const start = this.upiPage * this.upiPageSize;
     return filtered.slice(start, start + this.upiPageSize);
   }
 
   upiTotalPages(): number {
-    return Math.ceil(this.filteredUpitopups().length / this.upiPageSize);
+    return Math.ceil(this.filteredUpipayins().length / this.upiPageSize);
   }
 
-  pagedBanktopups(): any[] {
-    const filtered = this.filteredBanktopups();
+  pagedBankpayins(): any[] {
+    const filtered = this.filteredBankpayins();
     const start = this.bankPage * this.bankPageSize;
     return filtered.slice(start, start + this.bankPageSize);
   }
 
   bankTotalPages(): number {
-    return Math.ceil(this.filteredBanktopups().length / this.bankPageSize);
+    return Math.ceil(this.filteredBankpayins().length / this.bankPageSize);
   }
 
   pagedApprovedpayouts(): any[] {
@@ -860,23 +858,23 @@ const toDate = this.payoutDateTo
   }
 
   selectPortal(view: "upi" | "bank" | "payout", portal: any) {
-      const portalId = portal?.id || "";
+    const portalId = portal?.id || "";
 
     if (view === "upi") {
       this.upiPortalFilter = portalId;
       this.upiPortalDropdownOpen = false;
       this.upiPage = 0;
-     if (this.upiPortalFilter) this.fetchUpiTopups();
+      if (this.upiPortalFilter) this.fetchUpiPayins();
     } else if (view === "bank") {
       this.bankPortalFilter = portalId;
       this.bankPortalDropdownOpen = false;
       this.bankPage = 0;
-       if (this.bankPortalFilter)   this.fetchBankTopups(); 
+      if (this.bankPortalFilter) this.fetchBankPayins();
     } else if (view === "payout") {
       this.payoutPortalFilter = portalId;
       this.payoutPortalDropdownOpen = false;
       this.payoutApprovedPage = 0;
-          if (this.payoutPortalFilter)    this.fetchApprovedPayouts();
+      if (this.payoutPortalFilter) this.fetchApprovedPayouts();
     }
   }
 
@@ -884,8 +882,8 @@ const toDate = this.payoutDateTo
   applyUpiFilters() {
     this.upiPage = 0;
     if (this.upiPortalFilter) {
-    this.fetchUpiTopups();
-  }
+      this.fetchUpiPayins();
+    }
   }
 
   applyUpiFiltersAndClose() {
@@ -899,15 +897,15 @@ const toDate = this.payoutDateTo
     this.upiDateFrom = "";
     this.upiDateTo = "";
     this.upiPage = 0;
-    this.fetchUpiTopups();
+    this.fetchUpiPayins();
     this.filterDropdownOpen = null;
   }
 
   applyBankFilters() {
     this.bankPage = 0;
-      if (this.bankPortalFilter) {
-    this.fetchBankTopups();
-  }
+    if (this.bankPortalFilter) {
+      this.fetchBankPayins();
+    }
   }
 
   applyBankFiltersAndClose() {
@@ -921,15 +919,15 @@ const toDate = this.payoutDateTo
     this.bankDateFrom = "";
     this.bankDateTo = "";
     this.bankPage = 0;
-    this.fetchBankTopups();
+    this.fetchBankPayins();
     this.filterDropdownOpen = null;
   }
 
   applyPayoutFilters() {
     this.payoutApprovedPage = 0;
-     if (this.payoutPortalFilter) {
-    this.fetchApprovedPayouts();
-  }
+    if (this.payoutPortalFilter) {
+      this.fetchApprovedPayouts();
+    }
   }
 
   applyPayoutFiltersAndClose() {
@@ -950,9 +948,9 @@ const toDate = this.payoutDateTo
   // ============ REFRESH BUTTON ============
   refreshCurrentView(): void {
     if (this.activeView === "upi") {
-      this.fetchUpiTopups();
+      this.fetchUpiPayins();
     } else if (this.activeView === "bank") {
-      this.fetchBankTopups();
+      this.fetchBankPayins();
     } else if (this.activeView === "payout") {
       this.fetchApprovedPayouts();
     }
@@ -1028,7 +1026,7 @@ const toDate = this.payoutDateTo
   //   }
   // }
 
- loadImages(rec: any) {
+  loadImages(rec: any) {
     if (!rec) return;
 
     const raw = rec.raw || {};
@@ -1055,7 +1053,6 @@ const toDate = this.payoutDateTo
       rec.images = [];
     }
   }
-  
 
   onImageError(ev: any) {
     if (ev && ev.target) {
@@ -1181,14 +1178,14 @@ const toDate = this.payoutDateTo
     }
   }
 
-  getSelectedPortalDomain(view: 'upi' | 'bank' | 'payout'): string {
-  let selectedId = '';
+  getSelectedPortalDomain(view: "upi" | "bank" | "payout"): string {
+    let selectedId = "";
 
-  if (view === 'upi') selectedId = this.upiPortalFilter;
-  else if (view === 'bank') selectedId = this.bankPortalFilter;
-  else selectedId = this.payoutPortalFilter;
+    if (view === "upi") selectedId = this.upiPortalFilter;
+    else if (view === "bank") selectedId = this.bankPortalFilter;
+    else selectedId = this.payoutPortalFilter;
 
-  const found = this.portalOptions.find(p => p.id === selectedId);
-  return found ? found.domain : 'All Portals';
-}
+    const found = this.portalOptions.find((p) => p.id === selectedId);
+    return found ? found.domain : "All Portals";
+  }
 }

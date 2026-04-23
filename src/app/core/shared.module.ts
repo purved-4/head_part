@@ -28,7 +28,7 @@ import { ChatResponsiveComponent } from "../common/chat-responsive/chat-responsi
 import { ChatingComponent } from "../common/chating/chating.component";
  import { RecycleUpiComponent } from "../common/recycle-upi/recycle-upi.component";
 import { RecycleBankComponent } from "../common/recycle-bank/recycle-bank.component";
-import { TopupCapacityComponent } from "../common/topup-capacity/topup-capacity.component";
+// import { TopupCapacityComponent } from "../common/topup-capacity/topup-capacity.component";
 // import { AcceptRejectChatComponent } from "../pages/comPart/accept-reject-chat/accept-reject-chat.component";
 import { PlaceholderPipe } from "../pipes/placeholder.pipe";
 import { SidebarNotificationComponent } from "../common/sidebar-notification/sidebar-notification.component";
@@ -40,6 +40,8 @@ import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods
 import { BanksComponent } from "../common/head_branch/banks/banks.component";
 import { UpisComponent } from "../common/head_branch/upis/upis.component";
 import { EnityCompartEditModelComponent } from "../common/enity-compart-edit-model/enity-compart-edit-model.component";
+import { PayinCapacityComponent } from "../common/payin-capacity/payin-capacity.component";
+import { RouterModule } from "@angular/router";
 
 // shared.module.ts
 @NgModule({
@@ -70,7 +72,7 @@ import { EnityCompartEditModelComponent } from "../common/enity-compart-edit-mod
     ChatingComponent,
     RecycleBankComponent,
     RecycleUpiComponent,
-    TopupCapacityComponent,
+    // TopupCapacityComponent,
     PlaceholderPipe,
     // PortalPercentagePopupComponent,
     SidebarNotificationComponent,
@@ -81,7 +83,11 @@ import { EnityCompartEditModelComponent } from "../common/enity-compart-edit-mod
     PaymentsMethodsComponent,
     BanksComponent,
     UpisComponent,
-    EnityCompartEditModelComponent
+    EnityCompartEditModelComponent,
+    UpisComponent,
+    PayinCapacityComponent
+    
+
     
     
   ],
@@ -111,7 +117,7 @@ import { EnityCompartEditModelComponent } from "../common/enity-compart-edit-mod
     ChatingComponent,
     RecycleBankComponent,
     RecycleUpiComponent,
-    TopupCapacityComponent,
+    // TopupCapacityComponent,
     PlaceholderPipe,
     // PortalPercentagePopupComponent,
     SidebarNotificationComponent,
@@ -122,8 +128,10 @@ import { EnityCompartEditModelComponent } from "../common/enity-compart-edit-mod
     PaymentsMethodsComponent,
     BanksComponent,
     UpisComponent,
-    EnityCompartEditModelComponent
+    EnityCompartEditModelComponent,
+    UpisComponent,
+    PayinCapacityComponent
   ],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeComponent,RouterModule],
 })
 export class SharedModule {}

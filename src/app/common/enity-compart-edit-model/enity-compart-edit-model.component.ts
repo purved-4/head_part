@@ -1,4 +1,3 @@
-
 import {
   Component,
   EventEmitter,
@@ -77,14 +76,16 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
 
     if (changes["data"] && this.data) {
       this.entityData = this.data;
-      this.patchEntityForm();
-    }
 
-    if (
-      (changes["entityId"] || changes["entityType"] || changes["showModal"]) &&
-      this.showModal
-    ) {
-      this.loadAllData();
+      console.log("Incoming Currency:", this.entityData.parentCurrency);
+
+      this.editForm.patchValue({
+        username: this.entityData.username ?? "",
+        info: this.entityData.info ?? "",
+        parentCurrency: this.entityData.parentCurrency ?? "",
+      });
+
+      console.log("Form Currency:", this.editForm.value.parentCurrency);
     }
   }
 
@@ -96,6 +97,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       payinPercentage: [0, [Validators.min(0)]],
       fttPercentage: [0, [Validators.min(0)]],
       payoutPercentage: [0, [Validators.min(0)]],
+      parentCurrency: [""],
     });
   }
 
@@ -105,6 +107,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     this.editForm.patchValue({
       username: this.entityData.username ?? "",
       info: this.entityData.info ?? "",
+      parentCurrency: this.entityData.parentCurrency || "",
     });
   }
 
@@ -113,21 +116,22 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     this.loadingPercentages = true;
 
     const parent$ =
-      this.entityType === "OWNER"
-        ? this.compartService.getAllComPartByOwner(this.entityId).pipe(
-            catchError((err) => {
-              console.error("Parent API error:", err);
-              return of(null);
-            }),
-          )
-        : this.compartService
-            .getPercentageByEntityId(this.entityId, this.entityType)
-            .pipe(
-              catchError((err) => {
-                console.error("Parent API error:", err);
-                return of(null);
-              }),
-            );
+      // this.entityType === "OWNER"
+      //   ? this.compartService.getAllComPartByOwner(this.entityId).pipe(
+      //       catchError((err) => {
+      //         console.error("Parent API error:", err);
+      //         return of(null);
+      //       }),
+      //     )
+      //   :
+      this.compartService
+        .getPercentageByEntityId(this.entityId, this.entityType)
+        .pipe(
+          catchError((err) => {
+            console.error("Parent API error:", err);
+            return of(null);
+          }),
+        );
 
     const child$ = this.data?.id
       ? this.compartService
@@ -322,6 +326,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       id: this.data?.id ?? this.entityId,
       username: this.editForm.value.username,
       info: this.editForm.value.info,
+      parentCurrency: this.editForm.value.parentCurrency,
       active: !!(this.entityData?.active ?? this.data?.active),
       compartPercentages: this.buildCompartPercentagesPayload(),
 
@@ -373,5 +378,10 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
   }
   closeParentModal() {
     this.showParentModal = false;
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.editForm.get(fieldName);
+    return !!(field && field.invalid && field.touched);
   }
 }

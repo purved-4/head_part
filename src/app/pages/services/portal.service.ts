@@ -9,6 +9,11 @@ import { catchError, Observable, throwError, map } from "rxjs";
 export class PortalService {
   constructor(private http: HttpClient) {}
 
+private handleError(error: any) {
+    return throwError(() => error);
+  }
+  
+
   getByPortalId(portalId: string): Observable<any> {
     return this.http.get(`${baseUrl}/portals/getById/${portalId}`).pipe(
       map((response: any) => response.data),
@@ -178,4 +183,19 @@ getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
     );
 }
   
+  getPortalByComPartIdAndCurrency(
+    id: any,
+    currenyId : any,
+    page: any = 0,
+    size: any = 10,
+
+  ): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/portals/getAllByComPartIdAndCurrencyId/paginated/${id}/${currenyId}`)
+      .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+      );
+  }
+
 }

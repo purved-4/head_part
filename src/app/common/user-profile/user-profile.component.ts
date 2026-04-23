@@ -175,23 +175,23 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     for (const w of this.portalInfo) {
       const domain = w.portalDomain || w._raw?.name || w.portalId || "unknown";
 
-      if (w.topupsTimeStrength) {
+      if (w.payinsTimeStrength) {
         this.rewards.push({
           portalId: w.portalId,
           portalDomain: domain,
-          type: "topup",
-          timeRanges: Array.isArray(w.topupsTimeStrength)
-            ? w.topupsTimeStrength
-            : w.topupsTimeStrength?.timeRanges || [],
-          amountRanges: w._raw?.topupsAmountRanges || [],
+          type: "payin",
+          timeRanges: Array.isArray(w.payinsTimeStrength)
+            ? w.payinsTimeStrength
+            : w.payinsTimeStrength?.timeRanges || [],
+          amountRanges: w._raw?.payinsAmountRanges || [],
         });
-      } else if (w._raw?.topupsTimeStrength) {
+      } else if (w._raw?.payinsTimeStrength) {
         this.rewards.push({
           portalId: w.portalId,
           portalDomain: domain,
-          type: "topup",
-          timeRanges: w._raw?.topupsTimeStrength?.timeRanges || [],
-          amountRanges: w._raw?.topups_amount_ranges || [],
+          type: "payin",
+          timeRanges: w._raw?.payinsTimeStrength?.timeRanges || [],
+          amountRanges: w._raw?.payins_amount_ranges || [],
         });
       }
 
@@ -275,8 +275,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         portalDomain:
           w.name ?? w.portalDomain ?? w.domain ?? w._raw?.name ?? "unknown",
         fttPercentage:
-          w.fttPercentage ?? w.ftt_percentage ?? w.firstTopupPercentage ?? null,
-        payinPercentage: w.payinPercentage ?? w.topup_percentage ?? null,
+          w.fttPercentage ?? w.ftt_percentage ?? w.firstPayinPercentage ?? null,
+        payinPercentage: w.payinPercentage ?? w.payin_percentage ?? null,
         payoutPercentage: w.payoutPercentage ?? w.payout_percentage ?? null,
         payoutsTimeStrength:
           w.payoutsTimeStrength ??
@@ -284,11 +284,11 @@ export class UserProfileComponent implements OnInit, OnDestroy {
           w.payoutTimeStrength ??
           w.payout_time_strength ??
           null,
-        topupsTimeStrength:
-          w.topupsTimeStrength ??
-          w.topups_time_strength ??
-          w.topupTimeStrength ??
-          w.topup_time_strength ??
+        payinsTimeStrength:
+          w.payinsTimeStrength ??
+          w.payins_time_strength ??
+          w.payinTimeStrength ??
+          w.payin_time_strength ??
           null,
         fttsTimeStrength:
           w.fttsTimeStrength ??

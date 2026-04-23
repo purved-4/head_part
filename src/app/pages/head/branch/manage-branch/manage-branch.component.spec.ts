@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ManageBranchComponent } from './manage-branch.component';
 
-import { TopupCapacityComponent } from './topup-capacity.component';
-
-describe('TopupCapacityComponent', () => {
-  let component: TopupCapacityComponent;
-  let fixture: ComponentFixture<TopupCapacityComponent>;
+ 
+describe('ManageBranchComponent', () => {
+  let component: ManageBranchComponent;
+  let fixture: ComponentFixture<ManageBranchComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TopupCapacityComponent]
+      imports: [ManageBranchComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TopupCapacityComponent);
+    fixture = TestBed.createComponent(ManageBranchComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

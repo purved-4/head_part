@@ -167,12 +167,12 @@ export class UpiService {
   }
 
   // new
-  getTopupCapacity(
+  getPayinCapacity(
     entityType: string,
     entityId: string,
     portalId: string,
     mode: "UPI" | "BANK",
-    topupId: string,
+    payinId: string,
   ): Observable<any> {
     const params = new HttpParams({
       fromObject: {
@@ -180,18 +180,18 @@ export class UpiService {
         entityId,
         portalId,
         mode,
-        topupId,
+        payinId: payinId,
       },
     });
 
-    return this.http.get<any>(`${baseUrl}/topup-capacity`, { params }).pipe(
+    return this.http.get<any>(`${baseUrl}/payin-capacity`, { params }).pipe(
       map((res) => res.data),
       catchError((err) => throwError(() => err)),
     );
   }
 
-  addTopupCapacity(payload: any): Observable<any> {
-    return this.http.post<any>(`${baseUrl}/topup-capacity/add`, payload);
+  addPayinCapacity(payload: any): Observable<any> {
+    return this.http.post<any>(`${baseUrl}/payin-capacity/add`, payload);
   }
 
   toggleIsUpi(id: string): Observable<any> {

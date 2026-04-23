@@ -1,6 +1,10 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+<div
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+>
   <div class="w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
-    <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+    <div
+      class="flex items-center justify-between border-b border-slate-200 px-6 py-4"
+    >
       <div>
         <h2 class="text-lg font-semibold text-slate-800">Portal Percentages</h2>
         <p class="text-sm text-slate-500">
@@ -18,29 +22,54 @@
     </div>
 
     <div class="px-6 py-5">
-      <div *ngIf="loading" class="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+      <div
+        *ngIf="loading"
+        class="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600"
+      >
         Loading percentage details...
       </div>
 
-      <div *ngIf="errorMessage && !loading" class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+      <div
+        *ngIf="errorMessage && !loading"
+        class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600"
+      >
         {{ errorMessage }}
       </div>
 
-      <div *ngIf="!loading && !errorMessage" class="overflow-hidden rounded-xl border border-slate-200">
+      <div
+        *ngIf="!loading && !errorMessage"
+        class="overflow-hidden rounded-xl border border-slate-200"
+      >
         <table class="min-w-full divide-y divide-slate-200">
           <thead class="bg-slate-50">
             <tr>
-              <th class="px-4 py-3 text-left text-sm font-medium text-slate-600">Portal Name</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-slate-600">Topup %</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-slate-600">FTT %</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-slate-600">Payout %</th>
+              <th
+                class="px-4 py-3 text-left text-sm font-medium text-slate-600"
+              >
+                Portal Name
+              </th>
+              <th
+                class="px-4 py-3 text-left text-sm font-medium text-slate-600"
+              >
+                Payin %
+              </th>
+              <th
+                class="px-4 py-3 text-left text-sm font-medium text-slate-600"
+              >
+                FTT %
+              </th>
+              <th
+                class="px-4 py-3 text-left text-sm font-medium text-slate-600"
+              >
+                Payout %
+              </th>
             </tr>
           </thead>
 
           <tbody class="divide-y divide-slate-200 bg-white">
             <tr *ngFor="let item of portalPercentages">
               <td class="px-4 py-3 text-sm font-medium text-slate-800">
-                {{ item.portalName || '--' }}
+                {{ item.portalName || "--" }}
               </td>
               <td class="px-4 py-3 text-sm text-slate-700">
                 {{ formatValue(item.payinPercentage) }}
@@ -54,7 +83,10 @@
             </tr>
 
             <tr *ngIf="portalPercentages.length === 0">
-              <td colspan="4" class="px-4 py-6 text-center text-sm text-slate-500">
+              <td
+                colspan="4"
+                class="px-4 py-6 text-center text-sm text-slate-500"
+              >
                 No percentage data found.
               </td>
             </tr>

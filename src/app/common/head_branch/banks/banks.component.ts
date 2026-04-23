@@ -17,6 +17,7 @@ import { HeadService } from "../../../pages/services/head.service";
 import { SnackbarService } from "../../snackbar/snackbar.service";
 import { UpiService } from "../../../pages/services/upi.service";
 import { INDIAN_BANKS } from "../../../utils/constants";
+import { BranchService } from "../../../pages/services/branch.service";
 
 type StatusString = "active" | "inactive" | "frozen" | string;
 
@@ -54,14 +55,14 @@ interface Portal {
 }
 
 @Component({
-  selector: 'app-banks',
-  templateUrl: './banks.component.html',
-  styleUrl: './banks.component.css'
+  selector: "app-banks",
+  templateUrl: "./banks.component.html",
+  styleUrl: "./banks.component.css",
 })
 export class BanksComponent implements OnInit, OnDestroy {
-@ViewChild("portalDropdown") portalDropdown!: ElementRef;
+  @ViewChild("portalDropdown") portalDropdown!: ElementRef;
   @ViewChild("qrcodeElem", { static: false }) qrcodeElem!: ElementRef;
- @Input() currency: string = ''; // ✅ ADD THIS
+  @Input() currency: any = ""; //  ADD THIS
   // ---------- DATA (server‑paginated) ----------
   bankAccounts: BankAccount[] = [];
   totalElements = 0;
@@ -75,7 +76,7 @@ export class BanksComponent implements OnInit, OnDestroy {
   selectedMethod = "bank";
   statusFilter: string = "all";
   minLimitDateTime: string = "";
-  topupStatus: any = false;
+  payinStatus: any = false;
   // ---------- FILTERS (sent to backend) ----------
   searchTerm = ""; // unified search (accountNo, holder, IFSC, portal)
   filterStatus = ""; // 'active', 'inactive', '' (empty = all)
@@ -197,11 +198,11 @@ export class BanksComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private userStateService: UserStateService,
     private headService: HeadService,
-    // private portalService: PortalSharingService,
     private snack: SnackbarService,
     private router: Router,
     private elementRef: ElementRef,
     private upiService: UpiService,
+    private branchService: BranchService,
   ) {
     this.addBankForm = this.createAddBankForm();
   }
@@ -210,9 +211,11 @@ export class BanksComponent implements OnInit, OnDestroy {
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
-
+    if(this.route.snapshot.queryParamMap.get("currency")){
+      this.currency = this.route.snapshot.queryParamMap.get("currency")
+    }    
     this.fetchBankAccounts();
-    this.getTopupStatus();
+    this.getPayinStatus();
     // this.loadPortals();
     this.initAddUpiForm();
     // this.portalService.selectedPortals$.subscribe((sites) => {
@@ -842,7 +845,7 @@ export class BanksComponent implements OnInit, OnDestroy {
       entityId: this.currentRoleId,
       entityType: this.role,
       portal: formData.portal,
-       currency: this.currency,
+      currency: this.currency,
       bankName: formData.bankName, // This will now include both selected and custom bank names
       accountNo: formData.accountNumber,
       accountHolderName: formData.accountHolderName,
@@ -1401,6 +1404,8 @@ export class BanksComponent implements OnInit, OnDestroy {
 
   openCapacityModal(account: any) {
     this.editingAccount = account;
+    console.log(account);
+
     this.isEditingCapacity = false;
     this.showCapacityModal = true;
     this.isLoadingCapacity = true;
@@ -1408,8 +1413,8 @@ export class BanksComponent implements OnInit, OnDestroy {
     this.capacityRanges = [];
 
     this.bankService
-      .getTopupCapacity(
-        "HEAD",
+      .getPayinCapacity(
+        this.role,
         this.currentRoleId,
         account.portalId,
         "BANK",
@@ -1455,11 +1460,11 @@ export class BanksComponent implements OnInit, OnDestroy {
     }
 
     const payload = {
-      entityType: "HEAD",
+      entityType: this.role,
       entityId: this.currentRoleId,
       portalId: account.portalId,
       mode: "BANK",
-      topupId: account.id,
+      payinId: account.id,
 
       //  IMPORTANT
       ranges: this.capacityRanges.map((r) => ({
@@ -1469,7 +1474,7 @@ export class BanksComponent implements OnInit, OnDestroy {
       })),
     };
 
-    this.bankService.addTopupCapacity(payload).subscribe({
+    this.bankService.addPayinCapacity(payload).subscribe({
       next: () => {
         this.snack.show("Capacity saved successfully", true);
         this.closeCapacityModal();
@@ -1489,7 +1494,7 @@ export class BanksComponent implements OnInit, OnDestroy {
 
   selectedId!: string;
   selectedPortalId!: string;
-  selectedTopupId!: string;
+  selectedPayinId!: string;
   selectedMode!: "UPI" | "BANK";
 
   openCapacity(item: any, mode: "UPI" | "BANK") {
@@ -1497,14 +1502,14 @@ export class BanksComponent implements OnInit, OnDestroy {
 
     this.selectedPortalId = item.portalId || item.portal || item.portalID;
 
-    this.selectedTopupId = item.topupId || item.id || item.qrId;
+    this.selectedPayinId = item.payinId || item.id || item.qrId;
 
     this.selectedMode = mode;
 
     console.log(" FINAL PASS:", {
       entityId: this.selectedId,
       portalId: this.selectedPortalId,
-      topupId: this.selectedTopupId,
+      payinId: this.selectedPayinId,
     });
 
     this.showCapacityModal = true;
@@ -1600,23 +1605,45 @@ export class BanksComponent implements OnInit, OnDestroy {
   hideTooltip() {
     this.tooltipVisible = false;
   }
-  private getTopupStatus() {
-    this.headService.getHeadById(this.currentRoleId).subscribe((res) => {
-      this.topupStatus = res.topup;
-    });
+  private getPayinStatus() {
+    if (this.role === "HEAD") {
+      this.headService.getHeadById(this.currentRoleId).subscribe((res) => {
+        this.payinStatus = res.payin;
+      });
+    } else if (this.role === "BRANCH") {
+      this.branchService.getBranchById(this.currentRoleId).subscribe((res) => {
+        this.payinStatus = res.payin;
+      });
+    }
   }
-  changeTopupStatus() {
-    this.headService.toggleDashbaordTopup(this.currentRoleId).subscribe(() => {
-      this.topupStatus = !this.topupStatus;
-    });
+  changePayinStatus() {
+    if (this.role === "HEAD") {
+      this.headService
+        .toggleDashbaordPayin(this.currentRoleId)
+        .subscribe(() => {
+          this.payinStatus = !this.payinStatus;
+        });
+    } else if (this.role === "BRANCH") {
+      this.branchService
+        .toggleDashbaordPayin(this.currentRoleId)
+        .subscribe(() => {
+          this.payinStatus = !this.payinStatus;
+        });
+    }
   }
 
   viewUpi(account: any) {
     if (!account?.id) return;
 
-    this.router.navigate(["/head/upi"], {
-      queryParams: { bankId: account.id },
-    });
+    if (this.role === "HEAD") {
+      this.router.navigate(["/head/payments-methods/upi"], {
+        queryParams: { bankId: account.id },
+      });
+    } else if (this.role === "BRANCH") {
+      this.router.navigate(["/branch/payments-methods/upi"], {
+        queryParams: { bankId: account.id },
+      });
+    }
   }
   showAddUpiModal = false;
   isAddingUpi = false;
@@ -1644,6 +1671,8 @@ export class BanksComponent implements OnInit, OnDestroy {
           Validators.pattern(/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/),
         ],
       ],
+      bankId: [""],
+
       limitAmount: ["", [Validators.required, Validators.min(1)]],
 
       min_tran_count: [null],
@@ -1711,12 +1740,12 @@ export class BanksComponent implements OnInit, OnDestroy {
       //  ONLY ADD THIS EXTRA FIELD
       bankId: this.selectedBank?.id,
 
-      minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
-      maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
-      minTotalTranAmount:
-        Number(this.addUpiForm.value.min_total_tran_amount) || 0,
-      maxTotalTranAmount:
-        Number(this.addUpiForm.value.max_total_tran_amount) || 0,
+      // minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
+      // maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
+      // minTotalTranAmount:
+      //   Number(this.addUpiForm.value.min_total_tran_amount) || 0,
+      // maxTotalTranAmount:
+      //   Number(this.addUpiForm.value.max_total_tran_amount) || 0,
 
       createdAt: new Date().toISOString(),
 
@@ -1896,13 +1925,12 @@ export class BanksComponent implements OnInit, OnDestroy {
 
   showCurrencyModal = false;
 
-openCurrencyModal(portal: any) {
-  this.selectedPortal = portal;
-  this.showCurrencyModal = true;
-}
+  openCurrencyModal(portal: any) {
+    this.selectedPortal = portal;
+    this.showCurrencyModal = true;
+  }
 
-closeCurrencyModal() {
-  this.showCurrencyModal = false;
+  closeCurrencyModal() {
+    this.showCurrencyModal = false;
+  }
 }
-}
-

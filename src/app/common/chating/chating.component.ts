@@ -980,6 +980,8 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
         typeof t.isRead === "boolean" ? (t.isRead ? 0 : 1) : t.unread || 0;
     }
 
+    console.log(t);
+    
     return {
       id: t.id || t.threadId || t.fundsId,
       groupName,
@@ -2256,5 +2258,19 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       fundId,
       fundType,
     );
+  }
+
+  fundDetails:any
+  showFundModel:boolean = false
+  showFundDetailForMessage(threadId: any, fundId: any, fundType: any){
+    this.getFundWithId(threadId,fundId,fundType).subscribe((res) => {
+      this.fundDetails = res;
+      this.showFundModel = true
+    })
+  }
+
+  close(){
+    this.fundDetails = null;
+      this.showFundModel = true
   }
 }

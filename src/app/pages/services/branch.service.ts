@@ -171,9 +171,9 @@ export class BranchService {
     );
   }
 
-  toggleDashbaordTopup(branchId: string): Observable<any> {
+  toggleDashbaordPayin(branchId: string): Observable<any> {
     return this.http.patch<any>(
-      `${baseUrl}/branch/${branchId}/toggle-topup`,
+      `${baseUrl}/branch/${branchId}/toggle-payin`,
       {},
     );
   }

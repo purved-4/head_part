@@ -127,7 +127,7 @@ export class HeadService {
     );
   }
 
-  toggleDashbaordTopup(headId: string): Observable<any> {
-    return this.http.patch<any>(`${baseUrl}/head/${headId}/toggle-topup`, {});
+  toggleDashbaordPayin(headId: string): Observable<any> {
+    return this.http.patch<any>(`${baseUrl}/head/${headId}/toggle-payin`, {});
   }
 }

@@ -84,6 +84,24 @@
               placeholder="Additional info"
             ></textarea>
           </div>
+
+          <select
+            formControlName="parentCurrency"
+            [ngClass]="{
+              'border-red-400': isFieldInvalid('parentCurrency'),
+              'border-[var(--color-primary)]':
+                editForm.get('parentCurrency')?.valid &&
+                editForm.get('parentCurrency')?.touched,
+            }"
+            class="w-full px-4 py-3 border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30 focus:border-transparent transition-all duration-200 text-sm"
+          >
+            <!-- ✅ Placeholder -->
+            <option value="" disabled>Select Currency</option>
+
+            <!-- ✅ Options -->
+            <option value="INR">INR</option>
+            <option value="USD">USD</option>
+          </select>
         </div>
 
         <!-- NEW: Parent Comparts View Button and Section -->
@@ -148,7 +166,7 @@
                   </div>
                 </div>
                 <div>
-                  <label class="text-gray-500 font-medium">Topup</label>
+                  <label class="text-gray-500 font-medium">payin</label>
                   <div class="text-gray-800 font-semibold">
                     {{ percentage.payinPercentage }}%
                   </div>
@@ -212,7 +230,7 @@
                 </div>
 
                 <div>
-                  <label class="text-gray-500">Topup</label>
+                  <label class="text-gray-500">payin</label>
                   <input
                     type="number"
                     [value]="percent.payinPercentage"
@@ -294,7 +312,7 @@
             </div>
 
             <div>
-              <label class="text-xs font-medium text-gray-700">Topup %</label>
+              <label class="text-xs font-medium text-gray-700">payin %</label>
               <input
                 type="number"
                 formControlName="payinPercentage"
@@ -365,7 +383,7 @@
         <thead class="bg-gray-100">
           <tr>
             <th class="p-2 text-center">Compart</th>
-            <th class="p-2 text-center">Topup</th>
+            <th class="p-2 text-center">payin</th>
             <th class="p-2 text-center">Payout</th>
             <th class="p-2 text-center">FTT</th>
           </tr>

@@ -91,6 +91,7 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     this.currentUserId = this.userStateService.getUserId();
     this.currentRoleName = this.userStateService.getRole();
     this.currentRoleId = this.userStateService.getCurrentEntityId();
+console.log(this.currentRoleName);
 
     this.getAllNotifications();
 
@@ -321,7 +322,16 @@ openChat(notification: BackendThread, event?: Event) {
 
   const threadId = notification.relatedEntityId || "";
   const entity = (notification.createdByEntityType || "BRANCH").toLowerCase();
-  const role = (this.currentRoleName || "branch").toLowerCase();
+  // const role = (this.currentRoleName || "branch").toLowerCase();
+  const roleMap: any = {
+  COM_PART: "comPart",
+  BRANCH: "branch",
+  HEAD: "head",
+  OWNER:"owner",
+  
+};
+
+const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").toLowerCase();
 
   this.router.navigate([`/${role}/chat`], {
     queryParams: { threadId: threadId, chatType: entity },
