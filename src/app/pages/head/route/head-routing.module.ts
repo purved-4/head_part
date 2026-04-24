@@ -28,6 +28,7 @@ import { RecycleManagementComponent } from "../recycle-management/recycle-manage
 import { PaymentsMethodsComponent } from "../../../common/head_branch/payments-methods/payments-methods.component";
 import { UpisComponent } from "../../../common/head_branch/upis/upis.component";
 import { BanksComponent } from "../../../common/head_branch/banks/banks.component";
+import { OverrideCurrencyManagementComponent } from "../../../common/head_branch/override-currency-management/override-currency-management.component";
 
 const routes: Routes = [
   {
@@ -54,6 +55,10 @@ const routes: Routes = [
           { path: "upi", component: UpisComponent },
           { path: "bank", component: BanksComponent },
         ],
+      },
+         {
+        path: "override-currency-management",
+        component: OverrideCurrencyManagementComponent,
       },
 
       {

@@ -1,0 +1,73 @@
+<div class="p-4">
+  <div class="mb-4 text-sm">
+    <span class="font-semibold">Custom Rate Enabled:</span>
+    <span [ngClass]="customRate ? 'text-green-600' : 'text-red-500'">
+      {{ customRate ? 'Yes' : 'No' }}
+    </span>
+  </div>
+
+  <div *ngIf="currencies.length > 0; else noData" class="space-y-3">
+    <div *ngFor="let currency of currencies" class="border rounded-xl p-4 bg-white shadow-sm">
+
+      <div class="flex flex-col gap-3">
+
+        <!-- Header -->
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="font-semibold text-lg">{{ currency.currency }}</div>
+            <div class="text-sm text-gray-500">
+              Chief Rate: {{ currency.rate }}
+            </div>
+          </div>
+
+         
+       <button
+  *ngIf="customRate"
+  (click)="currency.isEditing = !currency.isEditing"
+  class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+>
+  Edit
+</button>
+        </div>
+
+        <!-- Override Rate -->
+        <div class="grid grid-cols-1 gap-2">
+          <label class="text-sm font-medium">Override Rate</label>
+          <input
+            type="number"
+            [(ngModel)]="currency.overrideRate"
+            [disabled]="!currency.isEditing"
+            class="border rounded-lg px-3 py-2"
+            placeholder="Enter override rate"
+          />
+        </div>
+
+        <!-- Effective From -->
+        <div class="grid grid-cols-1 gap-2">
+          <label class="text-sm font-medium">Effective From</label>
+          <input
+            type="datetime-local"
+            [(ngModel)]="currency.effectiveFrom"
+            [disabled]="!currency.isEditing"
+            class="border rounded-lg px-3 py-2"
+          />
+        </div>
+
+        <!-- Save Button (only when editing) -->
+        <button
+          *ngIf="currency.isEditing"
+          type="button"
+          (click)="createCustomCurrency(currency); currency.isEditing = false"
+          class="px-4 py-2 rounded-lg text-white bg-blue-600"
+        >
+          Save
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noData>
+    <div class="text-gray-500 text-center">No currencies found</div>
+  </ng-template>
+</div>

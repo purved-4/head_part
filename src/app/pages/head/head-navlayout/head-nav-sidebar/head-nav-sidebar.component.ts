@@ -192,6 +192,18 @@ export class HeadNavSidebarComponent implements OnInit {
         // { label: "Rejected Funds", route: "/head/reports/funds/rejected" },
       ],
     },
+        {
+  label: "Settings",
+  route: "/head/override-currency-management", 
+  icon: "settings",
+  children: [
+    {
+      label: "Currency Management",
+      route: "/head/override-currency-management", 
+    },
+   
+  ],
+},
   ];
 
   branchId: any;

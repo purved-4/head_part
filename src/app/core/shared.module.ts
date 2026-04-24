@@ -42,6 +42,7 @@ import { UpisComponent } from "../common/head_branch/upis/upis.component";
 import { EnityCompartEditModelComponent } from "../common/enity-compart-edit-model/enity-compart-edit-model.component";
 import { PayinCapacityComponent } from "../common/payin-capacity/payin-capacity.component";
 import { RouterModule } from "@angular/router";
+import { OverrideCurrencyManagementComponent } from "../common/head_branch/override-currency-management/override-currency-management.component";
 
 // shared.module.ts
 @NgModule({
@@ -85,7 +86,8 @@ import { RouterModule } from "@angular/router";
     UpisComponent,
     EnityCompartEditModelComponent,
     UpisComponent,
-    PayinCapacityComponent
+    PayinCapacityComponent,
+    OverrideCurrencyManagementComponent
     
 
     
@@ -130,7 +132,8 @@ import { RouterModule } from "@angular/router";
     UpisComponent,
     EnityCompartEditModelComponent,
     UpisComponent,
-    PayinCapacityComponent
+    PayinCapacityComponent,
+    OverrideCurrencyManagementComponent
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeComponent,RouterModule],
 })
