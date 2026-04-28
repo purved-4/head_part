@@ -67,12 +67,12 @@ export class HeadNavSidebarComponent implements OnInit {
     },
     //new hai code ke sath mujhe bs yahi dena hai
     {
-  label: "Payment Management",
+  label: "Inventory Management",
   route: "/head/payments-methods", 
   icon: "account_balance_wallet",
   children: [
     {
-      label: "Payment Management",
+      label: "Inventory Management",
       route: "/head/payments-methods", 
     },
     {
@@ -523,8 +523,7 @@ export class HeadNavSidebarComponent implements OnInit {
     const map: Record<string, string> = {
       // Dashboard
       "/head/dashboard": "dashboard",
-
-      "/head/payment-management": "payments",
+"/head/payments-methods": "inventory_2",
       "/head/recycle-management": "recycling",
 
       // Management

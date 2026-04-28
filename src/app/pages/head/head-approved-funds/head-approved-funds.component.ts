@@ -320,7 +320,7 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
         )
       : null;
     this.fundService
-      .getAllBankFundWithEntityAndPortalId(
+      .getPayinFundWithPortalIdAndEntityIdUpdated(
         this.branchId,
         this.bankPortalFilter,
         "ACCEPTED",

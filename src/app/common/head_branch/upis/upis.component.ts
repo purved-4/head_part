@@ -1413,37 +1413,31 @@ export class UpisComponent implements OnInit {
   }
 
   loadBanks() {
-    this.bankServices
-      .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, {
-        page: 0,
-        size: 100,
-        active: true,
-      })
-      .subscribe((res: any) => {
-        const data = res.data?.content || [];
+  this.bankServices.getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId).subscribe({
+    next: (res: any) => {
+      const banks = res?.data?.content || [];
 
-        this.banks = data;
-        this.filteredBanks = [...this.banks];
+      this.banks = banks;
+      this.filteredBanks = banks;
 
-        //  CASE 1: bankId exists → auto select
-        // if (this.preselectedBankId) {
-        //   const matchedBank = this.banks.find(
-        //     (b) => b.id === this.preselectedBankId
-        //   );
+      
+      if (this.preselectedBankId) {
+        const matchedBank = this.banks.find(
+          (b: any) => b.id === this.preselectedBankId
+        );
 
-        //   if (matchedBank) {
-        //     this.selectedBank = matchedBank;
-        //     this.bankSearchTerm = matchedBank.accountHolderName;
-
-        //     this.fetchUpis(); //  filtered
-        //     return;
-        //   }
-        // }
-
-        //  CASE 2: NO bankId → fetch ALL
-        // this.fetchUpis();
-      });
-  }
+        if (matchedBank) {
+          this.selectedBank = matchedBank;
+          this.bankSearchTerm = matchedBank.accountHolderName; // UI fill
+        }
+      }
+    },
+    error: () => {
+      this.banks = [];
+      this.filteredBanks = [];
+    },
+  });
+}
 
   filterBanks() {
     const term = this.bankSearchTerm.toLowerCase();

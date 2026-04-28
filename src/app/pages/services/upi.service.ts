@@ -69,7 +69,7 @@ export class UpiService {
       );
   }
 
-  getByEntityIdAndActivePaginated(
+ getByEntityIdAndActivePaginated(
     entityId: string,
     options: any = {},
   ): Observable<any> {
@@ -92,6 +92,10 @@ export class UpiService {
 
     if (options.status) {
       params = params.set("status", options.status);
+    }
+
+     if (options.bankId) {
+      params = params.set("bankId", options.bankId);
     }
 
     return this.http

@@ -338,7 +338,7 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
         : null;
 
       this.fundService
-        .getAllBankFundWithEntityAndPortalId(
+        .getPayinFundWithPortalIdAndEntityIdUpdated(
           this.branchId,
           this.bankPortalFilter,
           "REJECTED",
