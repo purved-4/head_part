@@ -270,9 +270,12 @@
                     <span
                       class="text-xs text-[var(--color-muted)] whitespace-nowrap"
                     >
-                      {{
+                      <!-- {{
                         notification.createdAt || notification.updatedAt | tz
-                      }}
+                      }} -->
+                        {{
+  (notification.createdAt || notification.updatedAt) | tz
+}}
                     </span>
                   </div>
                   <div class="flex items-center justify-between mt-1">
@@ -628,7 +631,16 @@
                   <div
                     class="text-sm font-semibold text-[var(--color-font)] break-words leading-relaxed"
                   >
-                    {{ item.value }}
+                    <!-- {{ item.value }} -->
+      {{
+  item.key.toLowerCase().includes('date') || 
+  item.key.toLowerCase().includes('time') || 
+  item.key.toLowerCase().includes('created') || 
+  item.key.toLowerCase().includes('updated')
+    ? (item.value | tz)
+    : (item.value !== null && item.value !== undefined ? item.value : '-') 
+}}
+
                   </div>
                 </div>
               </div>
@@ -743,3 +755,4 @@
     </div>
   </div>
 </div>
+

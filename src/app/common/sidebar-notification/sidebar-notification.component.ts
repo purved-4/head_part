@@ -15,6 +15,7 @@ import { AuthService } from "../../pages/services/auth.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { UserStateService } from "../../store/user-state.service";
 import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
+import { TimeZoneServiceService } from "../time-zone/time-zone-service.service";
 
 interface BackendThread {
   bankFunds?: any;
@@ -85,6 +86,7 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     private socketConfigService: SocketConfigService,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef,
+    private tzService: TimeZoneServiceService,
   ) {}
 
   ngOnInit(): void {
@@ -398,29 +400,52 @@ const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").
   getDisplayFields(obj: any): { key: string; value: any }[] {
     if (!obj || typeof obj !== "object") return [];
     return Object.keys(obj)
+      // .filter((key) => {
+      //   const lower = key.toLowerCase();
+      //   return (
+      //     !lower.includes("id") &&
+      //     ![
+      //       "fundsid",
+      //       "createdbyid",
+      //       "createdbyentityid",
+      //       "updatedbyid",
+      //       "isread",
+      //       "read",
+      //       "unreadcount",
+      //       "rejectedby",
+      //       "rejectionreason",
+      //     ].includes(lower) &&
+      //     obj[key] !== null &&
+      //     obj[key] !== undefined &&
+      //     typeof obj[key] !== "object"
+      //   );
+      // })
+
       .filter((key) => {
-        const lower = key.toLowerCase();
-        return (
-          !lower.includes("id") &&
-          ![
-            "fundsid",
-            "createdbyid",
-            "createdbyentityid",
-            "updatedbyid",
-            "isread",
-            "read",
-            "unreadcount",
-            "rejectedby",
-            "rejectionreason",
-          ].includes(lower) &&
-          obj[key] !== null &&
-          obj[key] !== undefined &&
-          typeof obj[key] !== "object"
-        );
-      })
+  const lower = key.toLowerCase();
+  return (
+    ![
+      "id",
+      "fundsid",
+      "createdbyid",
+      "createdbyentityid",
+      "updatedbyid",
+      "isread",
+      "read",
+      "unreadcount",
+      "rejectedby",
+      "rejectionreason",
+       "relatedentityid" 
+    ].includes(lower) &&
+    obj[key] !== null &&
+    obj[key] !== undefined &&
+    typeof obj[key] !== "object"
+  );
+})
       .map((key) => ({
         key: this.formatKey(key),
-        value: this.formatValue(obj[key]),
+        // value: this.formatValue(obj[key]),
+        value: obj[key],
       }));
   }
 
@@ -444,6 +469,32 @@ const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").
     if (value instanceof Date) return value.toLocaleString();
     return String(value);
   }
+
+//   private formatValue(value: any, key?: string): string {
+//   if (value === null || value === undefined) return "—";
+
+//   // Detect ISO date string
+//   if (typeof value === "string" && value.includes("T") && value.includes("Z")) {
+//     const date = new Date(value);
+//     if (!isNaN(date.getTime())) {
+//       const timeZone = this.tzService.getActiveTimeZone();
+
+//       return new Intl.DateTimeFormat("en-GB", {
+//         timeZone,
+//         day: "2-digit",
+//         month: "short",
+//         year: "numeric",
+//         hour: "2-digit",
+//         minute: "2-digit",
+//         hour12: true,
+//       }).format(date);
+//     }
+//   }
+
+//   if (typeof value === "boolean") return value ? "Yes" : "No";
+
+//   return String(value);
+// }
 
   getFieldIcon(fieldKey: string): string {
     const key = fieldKey.toLowerCase();

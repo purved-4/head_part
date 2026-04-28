@@ -246,4 +246,12 @@ getChiefsListByUserIdPaginated(
       );
   }
 
+
+  changeBranchHeadCurrencyStatus(payload: any) {
+    return this.http.patch(
+      `${baseUrl}/chief/changeBranchHeadCurrencyStatus`,
+      payload,
+    );
+  }
+
 }

@@ -174,15 +174,13 @@ export class BankService {
   getPayinCapacity(
     entityType: string,
     entityId: string,
-    portalId: string,
-    mode: "UPI" | "BANK",
+     mode: "UPI" | "BANK",
     payinId: string,
   ): Observable<any> {
     const params = new HttpParams()
       .set("entityType", entityType)
       .set("entityId", entityId)
-      .set("portalId", portalId)
-      .set("mode", mode)
+       .set("mode", mode)
       .set("payinId", payinId);
 
     return this.http
@@ -230,4 +228,13 @@ export class BankService {
     }
   );
 }
+
+toogleBankDeleted(bankId: any): Observable<any[]> {
+    return this.http
+      .patch<any[]>(`${baseUrl}/banks/toggleDeleted/${bankId}`, {})
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 }

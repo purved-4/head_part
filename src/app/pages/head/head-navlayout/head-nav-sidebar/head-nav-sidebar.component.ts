@@ -192,7 +192,7 @@ export class HeadNavSidebarComponent implements OnInit {
         // { label: "Rejected Funds", route: "/head/reports/funds/rejected" },
       ],
     },
-        {
+    {
   label: "Settings",
   route: "/head/override-currency-management", 
   icon: "settings",
@@ -234,7 +234,6 @@ export class HeadNavSidebarComponent implements OnInit {
       });
 
     this.currentRoute = this.router.url;
-    this.loadRecentItems();
 
     // Simulate user data
     this.currentUser = {
@@ -320,10 +319,7 @@ export class HeadNavSidebarComponent implements OnInit {
         this.recentItems.pop();
       }
 
-      localStorage.setItem(
-        "sidebarRecentItems",
-        JSON.stringify(this.recentItems),
-      );
+      
     }
   }
 
@@ -331,12 +327,7 @@ export class HeadNavSidebarComponent implements OnInit {
     return this.recentItems;
   }
 
-  loadRecentItems() {
-    const stored = localStorage.getItem("sidebarRecentItems");
-    if (stored) {
-      this.recentItems = JSON.parse(stored);
-    }
-  }
+
 
   getAllMenuItems(): MenuItem[] {
     const items: MenuItem[] = [];

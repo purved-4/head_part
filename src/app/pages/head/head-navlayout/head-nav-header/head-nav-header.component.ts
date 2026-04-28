@@ -18,6 +18,7 @@ import { ChiefService } from "../../../services/chief.service";
 import { HeadService } from "../../../services/head.service";
 // import { PortalSharingService } from "../../../services/portal-sharing.service";
 import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
+import { ThemeService } from "../../../../theme/theme.service";
 
 @Component({
   selector: "app-head-nav-header",
@@ -84,6 +85,8 @@ export class HeadNavHeaderComponent implements OnInit {
     // private portalState: PortalSharingService,
     private snack: SnackbarService,
     private ngZone: NgZone,
+                public theme: ThemeService,
+    
   ) {}
 
   ngOnInit(): void {

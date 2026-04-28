@@ -581,4 +581,99 @@ export class FundsService {
         catchError((error) => throwError(error)),
       );
   }
+  getAllPayInFundWithcCompartId(
+    compartId: any,
+    status: any,
+    page: number = 0,
+    pageSize: number = 10,
+    category?: any,
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set("page", page.toString())
+      .set("size", pageSize.toString());
+
+    if (category !== null && category !== undefined) {
+      params = params.set("category", category.toString());
+    }
+
+    return this.http
+      .get<any>(
+        `${baseUrl}/funds/getPayinFundsByComPartId/${compartId}/${status}`,
+        {
+          params,
+        },
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+
+     getAllPayOutFundWithcCompartId(
+    compartId: any,
+    status: any,
+    page: number = 0,
+    pageSize: number = 10,
+    category?: any,
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set("page", page.toString())
+      .set("size", pageSize.toString());
+
+    if (category !== null && category !== undefined) {
+      params = params.set("category", category.toString());
+    }
+
+    return this.http
+      .get<any>(
+        `${baseUrl}/funds/getPayoutFundsByComPartId/${compartId}/${status}`,
+        {
+          params,
+        },
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+
+ //NEW
+   getPayinFundWithPortalIdAndEntityIdUpdated(
+    entityId: any,
+    portalId: any,
+    status: any,
+    page: number = 0,
+    pageSize: number = 10,
+    category?: any,
+    fromDate?: any,
+    toDate?: any,
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set("page", page.toString())
+      .set("size", pageSize.toString())
+      .set("status", status);
+
+    if (category !== null && category !== undefined) {
+      params = params.set("category", category.toString());
+    }
+
+    if (fromDate) {
+      params = params.set("fromDate", DateTimeUtil.toUtcISOString(fromDate));
+    }
+
+    if (toDate) {
+      params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
+    }
+    return this.http
+      .get<any>(
+        `${baseUrl}/funds/getPayinFundWithPortalIdAndEntityId/${portalId}/${entityId}`,
+        { params },
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
 }

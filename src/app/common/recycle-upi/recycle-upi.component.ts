@@ -67,7 +67,7 @@ export class RecycleUpiComponent implements OnInit {
   }
 
   reactivateUpi(upi: any) {
-    this.upiService.toogleUpiStatus(upi.id).subscribe({
+    this.upiService.toogleUpiDeleted(upi.id).subscribe({
       next: () => {
         this.snack.show("UPI reactivated successfully!", true);
         this.fetchDeletedUpis();
@@ -115,3 +115,4 @@ export class RecycleUpiComponent implements OnInit {
     }
   }
 }
+

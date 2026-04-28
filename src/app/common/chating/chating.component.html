@@ -13,19 +13,11 @@
       class="px-4 py-5 border-b border-indigo-100/40 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 flex-shrink-0"
     >
       <div class="relative group">
-        <svg
-          class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-300 group-focus-within:text-white transition-colors duration-300"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+        <span
+          class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-300 group-focus-within:text-white transition-colors duration-300 text-base"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
+          search
+        </span>
         <input
           type="text"
           placeholder="Search threads…"
@@ -38,19 +30,7 @@
           (click)="clearSearch()"
           class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-violet-300 hover:text-white hover:bg-white/20 rounded-full transition-all duration-300"
         >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <span class="material-symbols-outlined text-sm">close</span>
         </button>
       </div>
     </div>
@@ -67,7 +47,10 @@
           "
           (click)="switchTab('pending')"
         >
-          ⏳ {{ "Pending" }}
+          <span class="material-symbols-outlined text-sm align-middle mr-1"
+            >hourglass_empty</span
+          >
+          {{ "Pending" }}
         </button>
 
         <button
@@ -78,7 +61,10 @@
           "
           (click)="switchTab('accept')"
         >
-          ✓ {{ "Resolved" }}
+          <span class="material-symbols-outlined text-sm align-middle mr-1"
+            >check_circle</span
+          >
+          {{ "Resolved" }}
         </button>
 
         <button
@@ -89,7 +75,10 @@
           "
           (click)="switchTab('reject')"
         >
-          ✕ {{ "Rejected" }}
+          <span class="material-symbols-outlined text-sm align-middle mr-1"
+            >cancel</span
+          >
+          {{ "Rejected" }}
         </button>
       </div>
       <!-- Fund Type Filters -->
@@ -231,25 +220,10 @@
         <div
           class="flex items-center space-x-3 text-sm text-violet-400 bg-white px-5 py-3 rounded-2xl shadow-lg shadow-violet-100/40 border border-violet-100/60"
         >
-          <svg
-            class="w-4.5 h-4.5 animate-spin text-fuchsia-500"
-            fill="none"
-            viewBox="0 0 24 24"
+          <span
+            class="material-symbols-outlined animate-spin text-fuchsia-500 text-base"
+            >progress_activity</span
           >
-            <circle
-              class="opacity-20"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-80"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            ></path>
-          </svg>
           <span class="text-xs font-semibold text-fuchsia-600"
             >Loading more…</span
           >
@@ -264,19 +238,9 @@
         <div
           class="w-22 h-22 bg-gradient-to-br from-violet-100 via-fuchsia-50 to-rose-100 rounded-3xl flex items-center justify-center mb-6 shadow-inner ring-1 ring-violet-200/40"
         >
-          <svg
-            class="w-11 h-11 text-violet-300"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <span class="material-symbols-outlined text-5xl text-violet-300"
+            >forum</span
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-            />
-          </svg>
         </div>
         <p class="text-sm font-bold text-gray-600 mb-1.5">No threads found</p>
         <p
@@ -376,7 +340,7 @@
                   class="px-3.5 py-2 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 disabled:from-violet-300 disabled:to-fuchsia-300 text-white text-xs font-bold rounded-xl transition-all duration-300 shadow-md shadow-violet-200/50 hover:shadow-lg hover:shadow-violet-200/60 active:scale-95"
                   title="Edit & Send Same User"
                 >
-                  ✎
+                  <span class="material-symbols-outlined text-sm">edit</span>
                 </button>
 
                 <!-- Resend button -->
@@ -386,7 +350,7 @@
                   class="px-3.5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-emerald-300 disabled:to-teal-300 text-white text-xs font-bold rounded-xl transition-all duration-300 shadow-md shadow-emerald-200/50 hover:shadow-lg hover:shadow-emerald-200/60 active:scale-95"
                   title="Send to All Users Again"
                 >
-                  ↻
+                  <span class="material-symbols-outlined text-sm">refresh</span>
                 </button>
 
                 <!-- Reject button -->
@@ -396,7 +360,7 @@
                   class="px-3.5 py-2 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 disabled:from-rose-300 disabled:to-pink-300 text-white text-xs font-bold rounded-xl transition-all duration-300 shadow-md shadow-rose-200/50 hover:shadow-lg hover:shadow-rose-200/60 active:scale-95"
                   title="Reject Thread"
                 >
-                  ✕
+                  <span class="material-symbols-outlined text-sm">block</span>
                 </button>
               </div>
             </div>
@@ -414,53 +378,134 @@
           }"
           title="Thread Info"
         >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+          <span class="material-symbols-outlined text-xl">info</span>
         </button>
       </div>
     </div>
 
     <!-- Messages Area -->
     <div
-      class="flex-1 overflow-y-auto px-6 py-5 bg-gradient-to-b from-slate-50/30 via-white to-violet-50/10 scrollbar-thin scrollbar-thumb-violet-200/50 scrollbar-track-transparent"
+      class="relative flex-1 overflow-y-auto px-6 py-5 bg-gradient-to-b from-slate-50/30 via-white to-violet-50/10 scrollbar-thin scrollbar-thumb-violet-200/50 scrollbar-track-transparent"
       #messagesContainer
       (scroll)="onMessagesScroll($event)"
     >
+      <div
+        *ngIf="!loadingMessages"
+        class="flex flex-col items-center justify-center py-16 px-6 animate-fade-in"
+      >
+        <!-- Enhanced Icon Container -->
+        <div
+          class="w-32 h-32 bg-gradient-to-br from-violet-50 via-fuchsia-50 to-rose-50 rounded-3xl flex items-center justify-center mb-8 shadow-lg ring-1 ring-violet-200/60 transform transition-all hover:scale-105 duration-300"
+        >
+          <span class="material-symbols-outlined text-7xl text-violet-400"
+            >chat</span
+          >
+        </div>
+
+        <!-- Notification Details Card (ALWAYS SHOW) -->
+        <div
+          class="w-full max-w-md bg-white/70 backdrop-blur-sm rounded-2xl p-6 mb-6 shadow-md border border-gray-100/50 ring-1 ring-violet-100/50"
+        >
+          <div class="space-y-3">
+            <!-- Display ID -->
+            <div class="flex items-center justify-between">
+              <span
+                class="text-sm font-medium text-gray-500 uppercase tracking-wider"
+              >
+                ID
+              </span>
+
+              <span
+                class="bg-green-100 text-green-700 border border-green-300 px-2 py-[2px] rounded-md text-xs font-semibold shadow-sm"
+              >
+                {{ selectedNotification.displayId }}
+              </span>
+            </div>
+
+            <!-- Fund Type -->
+            <div class="flex items-center justify-between">
+              <span
+                class="text-sm font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Type
+              </span>
+
+              <span class="text-base font-semibold text-gray-800">
+                {{ selectedNotification.fundType }}
+              </span>
+            </div>
+
+            <!-- Name -->
+            <div class="flex items-center justify-between">
+              <span
+                class="text-sm font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Name
+              </span>
+
+              <span class="text-base font-semibold text-gray-800">
+                {{ selectedNotification.name }}
+              </span>
+            </div>
+
+            <!-- Show Fund Action -->
+            <div class="pt-2 border-t border-gray-200/60">
+              <button
+                (click)="
+                  showFundDetailForMessage(
+                    selectedNotification.id,
+                    selectedNotification.fundId,
+                    selectedNotification.fundType
+                  )
+                "
+                class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-violet-50 hover:bg-violet-100 text-violet-700 font-medium rounded-xl transition-all duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-1"
+              >
+                <span class="material-symbols-outlined text-base"
+                  >flash_on</span
+                >
+                <span>Show Fund Details</span>
+              </button>
+            </div>
+
+            <!-- Fund Details -->
+            <div
+              *ngIf="showFundModel === true"
+              class="mt-3 p-4 bg-violet-50/80 rounded-xl border border-violet-200 animate-slide-down"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-violet-600">Amount</span>
+
+                <span class="text-base font-bold text-violet-800">
+                  {{ fundDetails.currencyWiseAmount }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Only show when NO messages -->
+        <div
+          *ngIf="
+            !selectedNotification.messages ||
+            selectedNotification.messages.length === 0
+          "
+          class="text-center"
+        >
+          <h3 class="text-xl font-bold text-gray-700 mb-1">No messages yet</h3>
+          <p class="text-sm text-gray-500">
+            Start the conversation below to begin
+          </p>
+        </div>
+      </div>
       <!-- Top Loading -->
       <div *ngIf="loadingMessages" class="flex justify-center py-4 mb-3">
         <div
           class="flex items-center space-x-3 px-6 py-3 bg-white rounded-2xl shadow-lg shadow-violet-100/30 border border-violet-100/60"
         >
-          <svg
-            class="w-4 h-4 animate-spin text-fuchsia-500"
-            fill="none"
-            viewBox="0 0 24 24"
+          <span
+            class="material-symbols-outlined animate-spin text-fuchsia-500 text-base"
+            >progress_activity</span
           >
-            <circle
-              class="opacity-20"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-80"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            ></path>
-          </svg>
           <span class="text-xs text-fuchsia-600 font-semibold"
             >Loading messages…</span
           >
@@ -623,23 +668,14 @@
                         : 'bg-white text-gray-700 rounded-3xl rounded-tl-lg shadow-md shadow-gray-100/60 border border-gray-100/80 px-5 py-3.5'
                     "
                   >
-                    <svg
-                      class="w-5 h-5"
+                    <span
+                      class="material-symbols-outlined"
                       [ngClass]="{
                         'text-white': message.isCurrentUser,
                         'text-violet-600': !message.isCurrentUser,
                       }"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                      >audiotrack</span
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                      />
-                    </svg>
                   </div>
                   <audio
                     [src]="message.mediaUrl"
@@ -681,23 +717,14 @@
                         !message.isCurrentUser,
                     }"
                   >
-                    <svg
-                      class="w-5 h-5"
+                    <span
+                      class="material-symbols-outlined"
                       [ngClass]="{
                         'text-white': message.isCurrentUser,
                         'text-amber-600': !message.isCurrentUser,
                       }"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                      >description</span
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
                   </div>
                   <div class="flex-1 min-w-0">
                     <p
@@ -733,19 +760,9 @@
                         !message.isCurrentUser,
                     }"
                   >
-                    <svg
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                    <span class="material-symbols-outlined text-base"
+                      >download</span
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                      />
-                    </svg>
                   </button>
                 </div>
               </div>
@@ -764,119 +781,21 @@
           </div>
         </ng-container>
       </div>
+      <!-- Scroll To Bottom Button -->
+      <button
+        *ngIf="showScrollToBottom"
+        (click)="scrollToBottom()"
+        class="fixed bottom-24 right-6 z-50 w-12 h-12 rounded-full bg-violet-500 hover:bg-violet-600 text-white shadow-xl flex items-center justify-center transition-all duration-300"
+      >
+        <span class="material-symbols-outlined">keyboard_arrow_down</span>
+      </button>
 
       <!-- Empty Messages -->
-      <div
-  *ngIf="
-    !loadingMessages &&
-    (!selectedNotification.messages || selectedNotification.messages.length === 0)
-  "
-  class="flex flex-col items-center justify-center py-16 px-6 animate-fade-in"
->
-  <!-- Enhanced Icon Container -->
-  <div
-    class="w-32 h-32 bg-gradient-to-br from-violet-50 via-fuchsia-50 to-rose-50 rounded-3xl flex items-center justify-center mb-8 shadow-lg ring-1 ring-violet-200/60 transform transition-all hover:scale-105 duration-300"
-  >
-    <svg
-      class="w-16 h-16 text-violet-400 drop-shadow-sm"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="1.5"
-        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-      />
-    </svg>
-  </div>
-
-  <!-- Notification Details Card -->
-  <div
-    class="w-full max-w-md bg-white/70 backdrop-blur-sm rounded-2xl p-6 mb-6 shadow-md border border-gray-100/50 ring-1 ring-violet-100/50"
-  >
-    <div class="space-y-3">
-      <!-- Display ID -->
-      <div class="flex items-center justify-between">
-        <span class="text-sm font-medium text-gray-500 uppercase tracking-wider">ID</span>
-        <span  class="bg-green-100 text-green-700 border border-green-300 px-2 py-[2px] rounded-md text-xs font-semibold shadow-sm">{{
-          selectedNotification.displayId
-        }}</span>
-      </div>
-
-      <!-- Fund Type -->
-      <div class="flex items-center justify-between">
-        <span class="text-sm font-medium text-gray-500 uppercase tracking-wider">Type</span>
-        <span class="text-base font-semibold text-gray-800">{{
-          selectedNotification.fundType
-        }}</span>
-      </div>
-
-      <!-- Name -->
-      <div class="flex items-center justify-between">
-        <span class="text-sm font-medium text-gray-500 uppercase tracking-wider">Name</span>
-        <span class="text-base font-semibold text-gray-800">{{
-          selectedNotification.name
-        }}</span>
-      </div>
-
-     
-      <!-- Show Fund Action -->
-      <div class="pt-2 border-t border-gray-200/60">
-        <button
-          (click)="
-            showFundDetailForMessage(
-              selectedNotification.id,
-              selectedNotification.fundId,
-              selectedNotification.fundType
-            )
-          "
-          class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-violet-50 hover:bg-violet-100 text-violet-700 font-medium rounded-xl transition-all duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-1"
-        >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 10V3L4 14h7v7l9-11h-7z"
-            />
-          </svg>
-          <span>Show Fund Details</span>
-        </button>
-      </div>
-
-      <!-- Fund Details (Conditional) -->
-      <div
-        *ngIf="showFundModel === true"
-        class="mt-3 p-4 bg-violet-50/80 rounded-xl border border-violet-200 animate-slide-down"
-      >
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-violet-600">Amount</span>
-          <span class="text-base font-bold text-violet-800">{{
-            fundDetails.currencyWiseAmount
-          }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Empty State Message -->
-  <div class="text-center">
-    <h3 class="text-xl font-bold text-gray-700 mb-1">No messages yet</h3>
-    <p class="text-sm text-gray-500">Start the conversation below to begin</p>
-  </div>
-</div>
     </div>
 
     <!-- ════════════════════════════════════════════
-         INPUT BAR
-         ════════════════════════════════════════════ -->
+          INPUT BAR
+          ════════════════════════════════════════════ -->
     <div
       class="px-5 py-4 bg-gradient-to-r from-violet-50/60 via-fuchsia-50/40 to-rose-50/30 border-t border-violet-100/40 flex-shrink-0"
       *ngIf="selectedNotification.resolved !== true"
@@ -901,19 +820,9 @@
             *ngIf="!uploadPreviewUrl"
             class="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-100/60 flex items-center justify-center"
           >
-            <svg
-              class="w-7 h-7 text-amber-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            <span class="material-symbols-outlined text-3xl text-amber-400"
+              >attach_file</span
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
           </div>
         </div>
 
@@ -928,25 +837,10 @@
         </div>
 
         <div *ngIf="uploadingFile" class="flex items-center space-x-2">
-          <svg
-            class="w-4 h-4 animate-spin text-fuchsia-500"
-            fill="none"
-            viewBox="0 0 24 24"
+          <span
+            class="material-symbols-outlined animate-spin text-fuchsia-500 text-base"
+            >progress_activity</span
           >
-            <circle
-              class="opacity-20"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-80"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            ></path>
-          </svg>
           <span class="text-xs text-fuchsia-600 font-semibold">Uploading…</span>
         </div>
 
@@ -956,19 +850,7 @@
           class="p-2 text-gray-400 hover:text-rose-500 hover:bg-rose-50/80 rounded-xl transition-all duration-300"
           title="Remove file"
         >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <span class="material-symbols-outlined text-sm">close</span>
         </button>
       </div>
 
@@ -977,19 +859,9 @@
         *ngIf="uploadError"
         class="mb-3 flex items-center space-x-2.5 bg-rose-50/80 border border-rose-200/80 rounded-2xl px-4 py-2.5"
       >
-        <svg
-          class="w-4 h-4 text-rose-500 flex-shrink-0"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+        <span class="material-symbols-outlined text-rose-500 text-base"
+          >error</span
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
         <span class="text-xs text-rose-600 font-semibold">{{
           uploadError
         }}</span>
@@ -997,19 +869,7 @@
           (click)="uploadError = null"
           class="ml-auto text-rose-400 hover:text-rose-600 transition-colors"
         >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <span class="material-symbols-outlined text-sm">close</span>
         </button>
       </div>
 
@@ -1021,19 +881,7 @@
             title="Attach file"
             class="absolute left-3.5 top-4 text-violet-300 hover:text-fuchsia-500 transition-colors duration-300 z-10 cursor-pointer"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-              />
-            </svg>
+            <span class="material-symbols-outlined text-xl">attach_file</span>
             <input
               type="file"
               class="hidden"
@@ -1049,12 +897,10 @@
           >
             <textarea
               rows="2"
-              data-model="question"
-              placeholder="Enter @ to mention a person or chat"
-              [(ngModel)]="questionSearchTerm"
-              (input)="filterQuestion()"
-              (focus)="showQuestionDropDown = true; filterQuestion()"
-              (keydown.enter)="onQuestionEnter($event)"
+              data-model="message"
+              placeholder="Type your message..."
+              [(ngModel)]="newMessage"
+              (keydown.enter)="sendSimpleMessage($event)"
               [disabled]="uploadingFile"
               class="w-full pl-12 pr-4 py-3.5 text-sm bg-white border-2 border-violet-100/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-300/40 focus:border-violet-300 placeholder-violet-300/60 transition-all duration-300 shadow-sm hover:shadow-md resize-none scrollbar-thin scrollbar-thumb-violet-200/50 scrollbar-track-transparent disabled:opacity-40 disabled:cursor-not-allowed text-gray-700"
             ></textarea>
@@ -1062,19 +908,7 @@
               <span
                 class="px-2.5 py-1 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-[10px] font-extrabold rounded-lg ring-1 ring-emerald-200/60 flex items-center space-x-1"
               >
-                <svg
-                  class="w-3 h-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.5"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
+                <span class="material-symbols-outlined text-sm">check</span>
                 <span>Selected</span>
               </span>
             </div>
@@ -1126,19 +960,7 @@
                 'text-fuchsia-500 bg-fuchsia-50/60': showEmojiPicker,
               }"
             >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+              <span class="material-symbols-outlined text-xl">mood</span>
             </button>
             <!-- Emoji Picker Popup -->
             <div
@@ -1185,31 +1007,9 @@
           <!-- Send Button -->
           <button
             (click)="isHeadOrBranchRole() ? sendMessage() : sendSimpleMessage()"
-            [disabled]="
-              uploadingFile ||
-              (isHeadOrBranchRole()
-                ? !(
-                    (questionSearchTerm && questionSearchTerm.trim()) ||
-                    selectedQuestion ||
-                    selectedUploadFile
-                  )
-                : !((newMessage && newMessage.trim()) || selectedUploadFile))
-            "
             class="p-3 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-500 text-white rounded-2xl hover:from-violet-600 hover:via-fuchsia-600 hover:to-rose-600 disabled:opacity-25 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-fuchsia-200/50 hover:shadow-xl hover:shadow-fuchsia-300/50 active:scale-90"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-              />
-            </svg>
+            <span class="material-symbols-outlined text-xl">send</span>
           </button>
         </div>
       </div>
@@ -1224,19 +1024,9 @@
         <div
           class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-200/50"
         >
-          <svg
-            class="w-6 h-6 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <span class="material-symbols-outlined text-2xl text-white"
+            >check_circle</span
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2.5"
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
         </div>
         <div>
           <p class="text-sm font-extrabold text-emerald-800">Thread Resolved</p>
@@ -1249,8 +1039,8 @@
   </div>
 
   <!-- ═══════════════════════════════════════
-       RIGHT SIDEBAR — Thread Details
-       ═══════════════════════════════════════ -->
+        RIGHT SIDEBAR — Thread Details
+        ═══════════════════════════════════════ -->
   <div
     *ngIf="selectedNotification && showRightPanel"
     class="w-[320px] min-w-[320px] bg-white/95 backdrop-blur-md border-l border-violet-100/40 flex flex-col h-full overflow-hidden shadow-[-4px_0_24px_-8px_rgba(139,92,246,0.08)]"
@@ -1265,19 +1055,7 @@
           (click)="showRightPanel = false"
           class="p-2 text-gray-400 hover:text-rose-500 hover:bg-rose-50/60 rounded-xl transition-all duration-300 active:scale-90"
         >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <span class="material-symbols-outlined text-base">close</span>
         </button>
       </div>
       <!-- Detail Tabs -->
@@ -1363,19 +1141,7 @@
             <div
               class="w-10 h-10 bg-gradient-to-br from-violet-100 to-fuchsia-100 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover/info:shadow-md transition-shadow"
             >
-              <svg
-                class="w-4.5 h-4.5 text-violet-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
-                />
-              </svg>
+              <span class="material-symbols-outlined text-violet-500">tag</span>
             </div>
             <div class="min-w-0">
               <p
@@ -1399,19 +1165,9 @@
             <div
               class="w-10 h-10 bg-gradient-to-br from-fuchsia-100 to-pink-100 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover/info:shadow-md transition-shadow"
             >
-              <svg
-                class="w-4.5 h-4.5 text-fuchsia-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <span class="material-symbols-outlined text-fuchsia-500"
+                >payments</span
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
             </div>
             <div>
               <p
@@ -1436,19 +1192,9 @@
             <div
               class="w-10 h-10 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover/info:shadow-md transition-shadow"
             >
-              <svg
-                class="w-4.5 h-4.5 text-emerald-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <span class="material-symbols-outlined text-emerald-500"
+                >currency_rupee</span
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
             </div>
             <div>
               <p
@@ -1470,19 +1216,9 @@
             <div
               class="w-10 h-10 bg-gradient-to-br from-slate-100 to-gray-100 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover/info:shadow-md transition-shadow"
             >
-              <svg
-                class="w-4.5 h-4.5 text-gray-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <span class="material-symbols-outlined text-gray-500"
+                >source</span
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
             </div>
             <div>
               <p
@@ -1503,19 +1239,7 @@
             <div
               class="w-10 h-10 bg-gradient-to-br from-cyan-100 to-sky-100 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover/info:shadow-md transition-shadow"
             >
-              <svg
-                class="w-4.5 h-4.5 text-cyan-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
+              <span class="material-symbols-outlined text-cyan-500">event</span>
             </div>
             <div>
               <p
@@ -1536,19 +1260,9 @@
             <div
               class="w-10 h-10 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover/info:shadow-md transition-shadow"
             >
-              <svg
-                class="w-4.5 h-4.5 text-amber-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <span class="material-symbols-outlined text-amber-500"
+                >schedule</span
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
             </div>
             <div>
               <p
@@ -1569,19 +1283,9 @@
             <div
               class="w-10 h-10 bg-gradient-to-br from-violet-100 to-purple-100 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover/info:shadow-md transition-shadow"
             >
-              <svg
-                class="w-4.5 h-4.5 text-violet-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <span class="material-symbols-outlined text-violet-500"
+                >group</span
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
             </div>
             <div>
               <p
@@ -1606,19 +1310,9 @@
               class="bg-gradient-to-br from-amber-50/80 via-orange-50/60 to-rose-50/40 border-2 border-amber-200/40 rounded-2xl p-5 shadow-sm"
             >
               <div class="flex items-start space-x-3">
-                <svg
-                  class="w-4.5 h-4.5 text-amber-500 mt-0.5 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <span class="material-symbols-outlined text-amber-500 text-base"
+                  >sticky_note_2</span
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
                 <p
                   class="text-[13px] text-amber-800 leading-relaxed font-medium"
                 >
@@ -1657,19 +1351,9 @@
             <div
               class="w-18 h-18 bg-gradient-to-br from-violet-100 via-fuchsia-50 to-rose-100 rounded-3xl flex items-center justify-center mb-5 shadow-inner ring-1 ring-violet-200/30"
             >
-              <svg
-                class="w-9 h-9 text-violet-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <span class="material-symbols-outlined text-4xl text-violet-300"
+                >group</span
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
             </div>
             <p class="text-sm font-bold text-gray-500 mb-1.5">
               No members found
@@ -1720,23 +1404,15 @@
           <div
             class="w-18 h-18 bg-gradient-to-br from-violet-100 via-fuchsia-50 to-rose-100 rounded-3xl flex items-center justify-center mb-5 shadow-inner ring-1 ring-violet-200/30"
           >
-            <svg
-              class="w-9 h-9 text-violet-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-              />
-            </svg>
+            <span class="material-symbols-outlined text-4xl text-violet-300">
+              attach_file
+            </span>
           </div>
+
           <p class="text-sm font-bold text-gray-500 mb-1.5">
             No attachments yet
           </p>
+
           <p class="text-xs text-violet-300">Shared files will appear here</p>
         </div>
 
@@ -1748,35 +1424,48 @@
             Shared Files ({{ mediaGallery.length }})
           </p>
 
-          <!-- Image Thumbnails Grid -->
+          <!-- IMAGE GRID -->
           <div class="grid grid-cols-3 gap-2.5 mb-5">
             <ng-container *ngFor="let media of mediaGallery">
               <div
                 *ngIf="media.type === 'image'"
-                class="aspect-square rounded-2xl overflow-hidden cursor-pointer border-2 border-violet-100/40 hover:border-fuchsia-300/60 hover:shadow-lg hover:shadow-fuchsia-100/30 transition-all duration-300 group/thumb"
+                class="relative aspect-square rounded-2xl overflow-hidden cursor-pointer border-2 border-violet-100/40 hover:border-fuchsia-300/60 hover:shadow-lg hover:shadow-fuchsia-100/30 transition-all duration-300 group"
                 (click)="
-                  openMediaViewer(media.mediaUrl, media.text, media.type)
+                  showMediaViewer = true;
+                  openMediaViewer(media.mediaUrl, media.text, 'image')
                 "
               >
                 <img
                   [src]="media.mediaUrl"
-                  class="w-full h-full object-cover transition-transform duration-400 group-hover/thumb:scale-110"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   loading="lazy"
                 />
+
+                <div
+                  class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"
+                ></div>
+
+                <div
+                  class="absolute bottom-2 left-2 right-2 text-white text-[10px] font-semibold truncate bg-black/40 px-2 py-1 rounded-lg backdrop-blur-sm"
+                >
+                  {{ media.text || "Image" }}
+                </div>
               </div>
             </ng-container>
           </div>
 
-          <!-- Commerce Partner Files List -->
+          <!-- FILE / VIDEO / AUDIO -->
           <div class="space-y-2">
             <ng-container *ngFor="let media of mediaGallery">
               <div
                 *ngIf="media.type !== 'image'"
-                class="flex items-center space-x-3.5 p-3.5 rounded-2xl hover:bg-gradient-to-r hover:from-violet-50/50 hover:to-fuchsia-50/30 cursor-pointer border-2 border-violet-100/40 hover:border-violet-200/60 hover:shadow-md transition-all duration-300 group/attachment"
+                class="flex items-center space-x-3.5 p-3.5 rounded-2xl hover:bg-gradient-to-r hover:from-violet-50/50 hover:to-fuchsia-50/30 cursor-pointer border-2 border-violet-100/40 hover:border-violet-200/60 hover:shadow-md transition-all duration-300 group"
                 (click)="
+                  showMediaViewer = true;
                   openMediaViewer(media.mediaUrl, media.text, media.type)
                 "
               >
+                <!-- ICON -->
                 <div
                   class="w-11 h-11 rounded-2xl flex items-center justify-center text-sm flex-shrink-0 shadow-sm"
                   [ngClass]="{
@@ -1788,40 +1477,50 @@
                       media.type === 'file',
                   }"
                 >
-                  {{ getFileIcon(media.type) }}
+                  <span
+                    class="material-symbols-outlined"
+                    [ngClass]="{
+                      'text-violet-500': media.type === 'audio',
+                      'text-cyan-500': media.type === 'video',
+                      'text-amber-500': media.type === 'file',
+                    }"
+                  >
+                    {{
+                      media.type === "video"
+                        ? "video_file"
+                        : media.type === "audio"
+                          ? "audiotrack"
+                          : "description"
+                    }}
+                  </span>
                 </div>
+
+                <!-- TEXT -->
                 <div class="flex-1 min-w-0">
                   <p
-                    class="text-xs font-bold text-gray-700 truncate group-hover/attachment:text-violet-700 transition-colors"
+                    class="text-xs font-bold text-gray-700 truncate group-hover:text-violet-700 transition-colors"
                   >
                     {{ media.text || "Attachment" }}
                   </p>
+
                   <p
                     class="text-[10px] text-violet-300 uppercase font-bold tracking-wider mt-0.5"
                   >
                     {{ getFileExtension(media.mediaUrl) }}
                   </p>
                 </div>
+
+                <!-- DOWNLOAD -->
                 <button
                   (click)="
                     $event.stopPropagation();
                     downloadFile(media.mediaUrl, media.text)
                   "
-                  class="p-2.5 text-violet-300 hover:text-fuchsia-600 hover:bg-fuchsia-50/60 rounded-xl transition-all duration-300 opacity-0 group-hover/attachment:opacity-100"
+                  class="p-2.5 text-violet-300 hover:text-fuchsia-600 hover:bg-fuchsia-50/60 rounded-xl transition-all duration-300 opacity-0 group-hover:opacity-100"
                 >
-                  <svg
-                    class="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                    />
-                  </svg>
+                  <span class="material-symbols-outlined text-base">
+                    download
+                  </span>
                 </button>
               </div>
             </ng-container>
@@ -1832,8 +1531,8 @@
   </div>
 
   <!-- ═══════════════════════════════════════
-       EMPTY STATE — No Thread Selected
-       ═══════════════════════════════════════ -->
+        EMPTY STATE — No Thread Selected
+        ═══════════════════════════════════════ -->
   <div
     *ngIf="!selectedNotification"
     class="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-white via-violet-50/20 to-fuchsia-50/10"
@@ -1844,19 +1543,9 @@
         <div
           class="w-36 h-36 mx-auto bg-gradient-to-br from-violet-100 via-fuchsia-100 to-rose-100 rounded-[2.5rem] flex items-center justify-center shadow-inner ring-1 ring-violet-200/30"
         >
-          <svg
-            class="w-18 h-18 text-violet-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <span class="material-symbols-outlined text-7xl text-violet-400"
+            >chat</span
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-            />
-          </svg>
         </div>
         <!-- Decorative dots -->
         <div
@@ -1886,19 +1575,9 @@
           <div
             class="w-9 h-9 bg-gradient-to-br from-violet-100 to-fuchsia-100 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
           >
-            <svg
-              class="w-4.5 h-4.5 text-violet-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            <span class="material-symbols-outlined text-violet-500"
+              >search</span
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
           </div>
           <p class="text-xs text-gray-500 text-left font-medium">
             Use <span class="font-bold text-violet-700">Search</span> to find
@@ -1911,19 +1590,9 @@
           <div
             class="w-9 h-9 bg-gradient-to-br from-fuchsia-100 to-pink-100 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
           >
-            <svg
-              class="w-4.5 h-4.5 text-fuchsia-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            <span class="material-symbols-outlined text-fuchsia-500"
+              >filter_alt</span
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-              />
-            </svg>
           </div>
           <p class="text-xs text-gray-500 text-left font-medium">
             <span class="font-bold text-fuchsia-700">Filter</span> by status or
@@ -1936,19 +1605,9 @@
           <div
             class="w-9 h-9 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
           >
-            <svg
-              class="w-4.5 h-4.5 text-emerald-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            <span class="material-symbols-outlined text-emerald-500"
+              >swap_horiz</span
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-              />
-            </svg>
           </div>
           <p class="text-xs text-gray-500 text-left font-medium">
             Switch between
@@ -1962,8 +1621,8 @@
 </div>
 
 <!-- ═══════════════════════════════════════
-     UPLOAD POPUP
-     ═══════════════════════════════════════ -->
+      UPLOAD POPUP
+      ═══════════════════════════════════════ -->
 <div
   *ngIf="showUploadPopup"
   class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6"
@@ -1999,19 +1658,10 @@
           (click)="closeUploadPopup()"
           aria-label="Close dialog"
         >
-          <svg
-            class="w-4 h-4 text-gray-400 group-hover:text-rose-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <span
+            class="material-symbols-outlined text-gray-400 group-hover:text-rose-500"
+            >close</span
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
         </button>
       </div>
     </div>
@@ -2026,19 +1676,9 @@
           <div
             class="w-18 h-18 mx-auto mb-5 rounded-3xl bg-gradient-to-br from-violet-100 via-fuchsia-100 to-rose-100 flex items-center justify-center shadow-inner"
           >
-            <svg
-              class="w-9 h-9 text-violet-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            <span class="material-symbols-outlined text-4xl text-violet-400"
+              >cloud_upload</span
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-              />
-            </svg>
           </div>
           <h4 class="font-bold text-gray-800 mb-2 text-base">
             Select a file to upload
@@ -2050,19 +1690,7 @@
           <label
             class="inline-flex items-center gap-2.5 px-7 py-3.5 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-500 text-white font-bold rounded-2xl hover:from-violet-600 hover:via-fuchsia-600 hover:to-rose-600 transition-all duration-400 shadow-lg shadow-fuchsia-200/40 hover:shadow-xl hover:shadow-fuchsia-300/50 cursor-pointer active:scale-95"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-              />
-            </svg>
+            <span class="material-symbols-outlined text-xl">upload_file</span>
             Choose File
             <input
               type="file"
@@ -2100,19 +1728,9 @@
               *ngIf="!isImage(selectedUploadFile.name)"
               class="w-32 h-24 bg-gradient-to-br from-violet-50 to-fuchsia-50 rounded-2xl flex flex-col items-center justify-center shadow-inner border-2 border-violet-100/40"
             >
-              <svg
-                class="w-10 h-10 text-violet-400 mb-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <span class="material-symbols-outlined text-4xl text-violet-400"
+                >description</span
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
             </div>
           </div>
 
@@ -2153,19 +1771,7 @@
               class="mt-4 p-3.5 bg-rose-50/80 border-2 border-rose-100/60 rounded-2xl"
             >
               <div class="flex items-center gap-2.5 text-rose-600">
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <span class="material-symbols-outlined text-lg">error</span>
                 <span class="text-sm font-semibold">{{ uploadError }}</span>
               </div>
             </div>
@@ -2190,19 +1796,10 @@
                       (keydown.enter)="onQuestionEnter($event)"
                       aria-label="Search questions"
                     />
-                    <svg
-                      class="absolute right-3.5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-violet-300"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                    <span
+                      class="material-symbols-outlined absolute right-3.5 top-1/2 transform -translate-y-1/2 text-violet-300"
+                      >expand_more</span
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
                   </div>
 
                   <!-- Dropdown -->
@@ -2225,17 +1822,10 @@
                           <div
                             class="w-9 h-9 bg-gradient-to-br from-violet-100 to-fuchsia-100 rounded-xl flex items-center justify-center shadow-sm"
                           >
-                            <svg
-                              class="w-4 h-4 text-violet-500"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
+                            <span
+                              class="material-symbols-outlined text-violet-500"
+                              >help</span
                             >
-                              <path
-                                fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
-                                clip-rule="evenodd"
-                              />
-                            </svg>
                           </div>
                           <div>
                             <div
@@ -2256,19 +1846,9 @@
                     <ng-template #noQuestions>
                       <div class="p-6 text-center">
                         <div class="text-violet-200 mb-3">
-                          <svg
-                            class="w-9 h-9 mx-auto"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                          <span class="material-symbols-outlined text-4xl"
+                            >help_outline</span
                           >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="1.5"
-                              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
                         </div>
                         <p class="text-sm text-gray-400 font-semibold">
                           No questions found
@@ -2319,19 +1899,7 @@
                   (click)="startUpload()"
                   [class.opacity-40]="!uploadedFileUrl"
                 >
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                    />
-                  </svg>
+                  <span class="material-symbols-outlined text-base">send</span>
                   Send File
                 </button>
               </div>
@@ -2345,19 +1913,9 @@
         <div
           class="w-22 h-22 mx-auto mb-5 rounded-3xl bg-gradient-to-br from-violet-100 via-fuchsia-100 to-rose-100 flex items-center justify-center shadow-inner"
         >
-          <svg
-            class="w-11 h-11 text-violet-300"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <span class="material-symbols-outlined text-5xl text-violet-300"
+            >attach_file</span
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-            />
-          </svg>
         </div>
         <p class="text-gray-500 font-semibold">
           Select a file to preview and upload
@@ -2371,278 +1929,166 @@
 </div>
 
 <!-- ═══════════════════════════════════════
-     MEDIA VIEWER POPUP — White theme
-     ═══════════════════════════════════════ -->
+      MEDIA VIEWER POPUP — White theme
+      ═══════════════════════════════════════ -->
 <div
   *ngIf="showMediaViewer"
-  class="fixed inset-0 z-[100] flex items-center justify-center"
+  class="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
   role="dialog"
   aria-modal="true"
   (keydown.escape)="closeMediaViewer()"
 >
-  <!-- Backdrop -->
-  <div
-    class="absolute inset-0 bg-white/80 backdrop-blur-2xl transition-opacity duration-400"
-    (click)="closeMediaViewer()"
-  ></div>
+  <!-- Static Background -->
+  <div class="absolute inset-0 bg-[#0f172a]" (click)="closeMediaViewer()">
+    <!-- Soft Blur Overlay -->
+    <div class="absolute inset-0 bg-black/45 backdrop-blur-xl"></div>
+
+    <!-- Minimal Grid Texture -->
+    <div
+      class="absolute inset-0 opacity-[0.04]"
+      style="
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+        background-size: 28px 28px;
+      "
+    ></div>
+  </div>
 
   <!-- Modal Container -->
   <div
-    class="relative z-[101] w-full max-w-4xl mx-4 flex flex-col items-center"
+    class="relative z-[101] w-full max-w-5xl mx-4 md:mx-8 flex flex-col items-center animate-in fade-in zoom-in duration-300"
   >
     <!-- Top Bar -->
     <div
-      class="w-full flex items-center justify-between px-6 py-4 bg-white/95 backdrop-blur-md rounded-t-3xl border-b border-violet-100/40 shadow-sm"
+      class="w-full flex items-center justify-between px-6 py-4 bg-white/10 backdrop-blur-2xl rounded-t-3xl border border-white/10 shadow-2xl"
     >
-      <!-- File Name -->
-      <div class="flex items-center space-x-3.5 min-w-0">
+      <!-- File Info -->
+      <div class="flex items-center gap-4 min-w-0">
         <div
-          class="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm"
-          [ngClass]="{
-            'bg-gradient-to-br from-violet-100 to-fuchsia-100':
-              currentMediaType === 'image',
-            'bg-gradient-to-br from-cyan-100 to-sky-100':
-              currentMediaType === 'video',
-            'bg-gradient-to-br from-violet-100 to-purple-100':
-              currentMediaType === 'audio',
-            'bg-gradient-to-br from-amber-100 to-orange-100':
-              currentMediaType === 'file',
-          }"
+          class="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/10 shadow-lg"
         >
-          <svg
-            *ngIf="currentMediaType === 'image'"
-            class="w-5 h-5 text-violet-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
-          <svg
-            *ngIf="currentMediaType === 'video'"
-            class="w-5 h-5 text-cyan-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-            />
-          </svg>
-          <svg
-            *ngIf="currentMediaType === 'audio'"
-            class="w-5 h-5 text-violet-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-            />
-          </svg>
-          <svg
-            *ngIf="currentMediaType === 'file'"
-            class="w-5 h-5 text-amber-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
+          <span class="material-symbols-outlined text-white text-xl">
+            {{
+              currentMediaType === "image"
+                ? "image"
+                : currentMediaType === "video"
+                  ? "videocam"
+                  : currentMediaType === "audio"
+                    ? "audiotrack"
+                    : "attach_file"
+            }}
+          </span>
         </div>
+
         <div class="min-w-0">
-          <p class="text-sm font-bold text-gray-800 truncate">
+          <p class="text-sm md:text-base font-bold text-white truncate">
             {{ currentMediaName || "Attachment" }}
           </p>
-          <p
-            class="text-[11px] text-violet-400 uppercase tracking-wider font-semibold"
-          >
+          <p class="text-[11px] uppercase tracking-[0.2em] text-gray-300">
             {{ getFileExtension(currentMediaUrl) }} · {{ currentMediaType }}
           </p>
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="flex items-center space-x-2">
-        <!-- Zoom Button (images only) -->
+      <!-- Actions -->
+      <div class="flex items-center gap-2">
         <button
           *ngIf="currentMediaType === 'image'"
           (click)="toggleZoom()"
-          class="p-2.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50/60 rounded-xl transition-all duration-300"
-          [title]="isZoomed ? 'Zoom out' : 'Zoom in'"
+          class="w-10 h-10 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all duration-300"
         >
-          <svg
-            *ngIf="!isZoomed"
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
-            />
-          </svg>
-          <svg
-            *ngIf="isZoomed"
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"
-            />
-          </svg>
+          <span class="material-symbols-outlined text-lg">
+            {{ isZoomed ? "zoom_out" : "zoom_in" }}
+          </span>
         </button>
 
-        <!-- Download Button -->
         <button
           (click)="downloadFile(currentMediaUrl, currentMediaName)"
-          class="p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50/60 rounded-xl transition-all duration-300 group"
-          title="Download"
+          class="w-10 h-10 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all duration-300"
         >
-          <svg
-            class="w-5 h-5 group-hover:translate-y-0.5 transition-transform duration-300"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-            />
-          </svg>
+          <span class="material-symbols-outlined text-lg">download</span>
         </button>
 
-        <!-- Close Button -->
         <button
           (click)="closeMediaViewer()"
-          class="p-2.5 text-gray-400 hover:text-rose-500 hover:bg-rose-50/60 rounded-xl transition-all duration-300"
-          title="Close"
+          class="w-10 h-10 rounded-xl bg-white/10 text-white hover:bg-red-500 transition-all duration-300"
         >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <span class="material-symbols-outlined text-lg">close</span>
         </button>
       </div>
     </div>
 
-    <!-- Media Content Area -->
+    <!-- Media Area -->
     <div
-      class="w-full bg-white/95 backdrop-blur-md rounded-b-3xl overflow-hidden flex items-center justify-center border-2 border-t-0 border-violet-100/30 shadow-2xl shadow-violet-100/20"
-      style="min-height: 300px; max-height: calc(100vh - 160px)"
+      class="w-full bg-white/5 backdrop-blur-2xl rounded-b-3xl border border-t-0 border-white/10 shadow-[0_25px_80px_rgba(0,0,0,0.45)] overflow-hidden flex items-center justify-center"
+      style="min-height: 340px; max-height: calc(100vh - 150px)"
     >
       <!-- IMAGE -->
       <div
         *ngIf="currentMediaType === 'image'"
-        class="flex items-center justify-center w-full h-full p-6 overflow-auto"
+        class="w-full h-full p-6 flex items-center justify-center overflow-auto"
       >
         <img
           [src]="currentMediaUrl"
-          [alt]="currentMediaName || 'Image'"
-          class="max-w-full rounded-2xl shadow-xl shadow-violet-100/20 transition-transform duration-400 cursor-pointer ring-1 ring-violet-100/30"
+          [alt]="currentMediaName"
+          class="max-w-full rounded-2xl shadow-2xl transition-transform duration-300 cursor-pointer"
           [style.transform]="'scale(' + zoomLevel + ')'"
-          [style.max-height]="isZoomed ? 'none' : 'calc(100vh - 200px)'"
+          [style.max-height]="isZoomed ? 'none' : 'calc(100vh - 220px)'"
           (click)="toggleZoom()"
-          loading="lazy"
         />
       </div>
 
       <!-- VIDEO -->
       <div
         *ngIf="currentMediaType === 'video'"
-        class="flex items-center justify-center w-full h-full p-6"
+        class="w-full h-full p-6 flex items-center justify-center"
       >
         <video
           [src]="currentMediaUrl"
           controls
           autoplay
           preload="metadata"
-          class="max-w-full rounded-2xl shadow-xl shadow-violet-100/20 ring-1 ring-violet-100/30"
-          style="max-height: calc(100vh - 200px)"
-        >
-          Your browser does not support the video tag.
-        </video>
+          class="max-w-full rounded-2xl shadow-2xl"
+          style="max-height: calc(100vh - 220px)"
+        ></video>
       </div>
 
       <!-- AUDIO -->
       <div
         *ngIf="currentMediaType === 'audio'"
-        class="flex flex-col items-center justify-center w-full py-20 px-8"
+        class="w-full px-8 py-20 flex flex-col items-center justify-center text-center"
       >
         <div
-          class="w-32 h-32 bg-gradient-to-br from-violet-100 via-fuchsia-100 to-rose-100 rounded-[2rem] flex items-center justify-center mb-8 ring-1 ring-violet-200/30 shadow-inner"
+          class="w-32 h-32 rounded-[2rem] bg-white/10 flex items-center justify-center shadow-2xl mb-8"
         >
-          <svg
-            class="w-16 h-16 text-violet-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-              d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-            />
-          </svg>
+          <span class="material-symbols-outlined text-white text-6xl">
+            audiotrack
+          </span>
         </div>
-        <p class="text-gray-800 font-extrabold text-lg mb-2 tracking-tight">
+
+        <h3 class="text-white text-xl font-bold mb-2">
           {{ currentMediaName || "Audio File" }}
+        </h3>
+
+        <p class="text-gray-300 text-sm mb-8">
+          {{ getFileExtension(currentMediaUrl) }} Audio
         </p>
-        <p class="text-violet-400 text-sm font-medium mb-7">
-          {{ getFileExtension(currentMediaUrl) }} audio
-        </p>
+
         <audio
           [src]="currentMediaUrl"
           controls
           autoplay
           class="w-full max-w-md"
-        >
-          Your browser does not support the audio tag.
-        </audio>
+        ></audio>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════
-     Resend Confirmation Modal — White Theme
-     ═══════════════════════════════════════ -->
+      Resend Confirmation Modal — White Theme
+      ═══════════════════════════════════════ -->
 <div
   *ngIf="showResendModal"
   class="fixed inset-0 bg-white/60 backdrop-blur-xl flex items-center justify-center z-50"
@@ -2654,25 +2100,9 @@
       <div
         class="flex items-center justify-center w-14 h-14 mx-auto bg-gradient-to-br from-cyan-100 to-sky-100 rounded-2xl mb-5 shadow-sm"
       >
-        <svg
-          class="w-7 h-7 text-cyan-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+        <span class="material-symbols-outlined text-3xl text-cyan-500"
+          >refresh</span
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 4v6h6"
-          />
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M20 20v-6h-6"
-          />
-        </svg>
       </div>
 
       <div class="text-center mb-7">
@@ -2704,8 +2134,8 @@
 </div>
 
 <!-- ═══════════════════════════════════════
-     Reject Confirmation Modal — White Theme
-     ═══════════════════════════════════════ -->
+      Reject Confirmation Modal — White Theme
+      ═══════════════════════════════════════ -->
 <div
   *ngIf="showRejectModal"
   class="fixed inset-0 bg-white/60 backdrop-blur-xl flex items-center justify-center z-50"
@@ -2717,19 +2147,9 @@
       <div
         class="flex items-center justify-center w-14 h-14 mx-auto bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl mb-5 shadow-sm"
       >
-        <svg
-          class="w-7 h-7 text-rose-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+        <span class="material-symbols-outlined text-3xl text-rose-500"
+          >block</span
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
       </div>
 
       <div class="text-center mb-7">
@@ -2761,8 +2181,8 @@
 </div>
 
 <!-- ═══════════════════════════════════════
-     Payout Edit & Send Modal — White Theme
-     ═══════════════════════════════════════ -->
+      Payout Edit & Send Modal — White Theme
+      ═══════════════════════════════════════ -->
 <div
   *ngIf="showPayoutModal"
   class="fixed inset-0 bg-white/60 backdrop-blur-xl flex items-center justify-center z-50"
@@ -2774,19 +2194,9 @@
       <div
         class="flex items-center justify-center w-14 h-14 mx-auto bg-gradient-to-br from-violet-100 to-fuchsia-100 rounded-2xl mb-5 shadow-sm"
       >
-        <svg
-          class="w-7 h-7 text-violet-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+        <span class="material-symbols-outlined text-3xl text-violet-500"
+          >edit</span
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v16m8-8H4"
-          />
-        </svg>
       </div>
 
       <div class="text-center mb-5">

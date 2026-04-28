@@ -126,40 +126,28 @@
                 </label>
                 <input
                   type="number"
-                  [(ngModel)]="currencyRate"
+                  [(ngModel)]="rate"
                   [ngModelOptions]="{ standalone: true }"
-                  placeholder="Enter rate"
+                  placeholder="Enter currency rate"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
 
-              <!-- Payin Rate -->
-              <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">
-                  Payin Rate
-                </label>
-                <input
-                  type="number"
-                  [(ngModel)]="payinRate"
-                  [ngModelOptions]="{ standalone: true }"
-                  placeholder="Enter payin"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
+              <!-- Effective From Date Field -->
+            </div>
+            <div
+              *ngIf="entityType !== 'COM_PART'"
+              class="grid grid-cols-1 gap-2"
+            >
+              <label class="text-sm font-medium">Effective From</label>
 
-              <!-- Payout Rate -->
-              <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">
-                  Payout Rate
-                </label>
-                <input
-                  type="number"
-                  [(ngModel)]="payoutRate"
-                  [ngModelOptions]="{ standalone: true }"
-                  placeholder="Enter payout"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
+              <input
+                type="datetime-local"
+                [(ngModel)]="effectiveFromNew"
+                name="effectiveFromNew"
+                step="1"
+                class="border rounded-lg px-3 py-2"
+              />
             </div>
 
             <p class="text-xs text-gray-400 mt-2">

@@ -37,14 +37,15 @@ interface BankAccount {
   minAmount: string;
   maxAmount: string;
   portalId?: string;
+  allotStatus?:string;
   bankName?: string;
   limitTime?: string | null;
   isBankActive?: boolean;
   currency?: string;
   min_tran_count?: number;
-  max_tran_count?: number;
+  // max_tran_count?: number;
   min_total_tran_amount?: number;
-  max_total_tran_amount?: number;
+  // max_total_tran_amount?: number;
 }
 
 interface Portal {
@@ -122,14 +123,14 @@ export class BanksComponent implements OnInit, OnDestroy {
     ifsc: "",
     limitAmount: "",
     accountType: "saving",
-    status: "active",
+    status: true,
     minAmount: "",
     maxAmount: "",
     bankName: "",
     min_tran_count: null,
-    max_tran_count: null,
+    // max_tran_count: null,
     min_total_tran_amount: null,
-    max_total_tran_amount: null,
+    // max_total_tran_amount: null,
   };
   isSubmitting = false;
 
@@ -284,36 +285,48 @@ export class BanksComponent implements OnInit, OnDestroy {
           .map((r: any) => {
             let status: StatusString = "inactive";
 
-            if (typeof r.status === "string" && r.status.trim() !== "") {
-              status = r.status.toLowerCase() as StatusString;
-            } else if (typeof r.active === "boolean") {
-              status = r.active ? "active" : "inactive";
-            } else if (typeof r.status === "boolean") {
-              status = r.status ? "active" : "inactive";
-            }
+
+if (typeof r.status === "boolean") {
+  status = r.status ? "active" : "inactive";
+}
+else if (typeof r.status === "string" && r.status.trim() !== "") {
+  status = r.status.toLowerCase() as StatusString;
+}
+else if (typeof r.active === "boolean") {
+  status = r.active ? "active" : "inactive";
+}
+
+            // if (typeof r.status === "string" && r.status.trim() !== "") {
+            //   status = r.status.toLowerCase() as StatusString;
+            // } else if (typeof r.active === "boolean") {
+            //   status = r.active ? "active" : "inactive";
+            // } else if (typeof r.status === "boolean") {
+            //   status = r.status ? "active" : "inactive";
+            // }
 
             let accountType = r.accountType ?? "";
             if (accountType.toLowerCase() === "savings") {
               accountType = "saving";
             }
 
-            const isBankActive =
-              typeof r.bank === "boolean"
-                ? r.bank
-                : typeof r.isBank === "boolean"
-                  ? r.isBank
-                  : typeof r.isBankActive === "boolean"
-                    ? r.isBankActive
-                    : typeof r.bankActive === "boolean"
-                      ? r.bankActive
-                      : status === "active";
-
+            // const isBankActive =
+            //   typeof r.bank === "boolean"
+            //     ? r.bank
+            //     : typeof r.isBank === "boolean"
+            //       ? r.isBank
+            //       : typeof r.isBankActive === "boolean"
+            //         ? r.isBankActive
+            //         : typeof r.bankActive === "boolean"
+            //           ? r.bankActive
+            //           : status === "active";
+const isBankActive = status === "active";
             return {
               id: r.id,
               branchId: r.branchId ?? null,
               portal: r.portalDomain ?? null,
               portalId: r.portal ?? null,
               portalDomain: r.portalDomain ?? null,
+               allotStatus: r.allotStatus ?? false,
               accountHolderName: r.accountHolderName ?? r.name ?? "-",
               bankName: r.bankName ?? "",
               accountNo: r.accountNo ?? r.accountNumber ?? "",
@@ -326,9 +339,9 @@ export class BanksComponent implements OnInit, OnDestroy {
               currency: r.portalCurrency || "",
               limitTime: r.limitTime ?? null,
               min_tran_count: r.minTranCount ?? null,
-              max_tran_count: r.maxTranCount ?? null,
+              // max_tran_count: r.maxTranCount ?? null,
               min_total_tran_amount: r.minTotalTranAmount ?? null,
-              max_total_tran_amount: r.maxTotalTranAmount ?? null,
+              // max_total_tran_amount: r.maxTotalTranAmount ?? null,
               // minAmount: r.minAmount ?? "",
               // maxAmount: r.maxAmount ?? "",
               isBankActive,
@@ -495,9 +508,9 @@ export class BanksComponent implements OnInit, OnDestroy {
           [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)],
         ],
         min_tran_count: [null],
-        max_tran_count: [null],
+        // max_tran_count: [null],
         min_total_tran_amount: [null],
-        max_total_tran_amount: [null],
+        // max_total_tran_amount: [null],
       },
       // { validators: this.accountNumberMatchValidator },
     );
@@ -711,11 +724,12 @@ export class BanksComponent implements OnInit, OnDestroy {
       bankName: account.bankName || "",
       limitAmount: account.limitAmount || "",
       accountType: account.accountType || "saving",
-      status: account.status || "active",
+      // status: account.status || "active",
+      status: account.status === 'active',
       min_tran_count: account.min_tran_count || null,
-      max_tran_count: account.max_tran_count || null,
+      // max_tran_count: account.max_tran_count || null,
       min_total_tran_amount: account.min_total_tran_amount || null,
-      max_total_tran_amount: account.max_total_tran_amount || null,
+      // max_total_tran_amount: account.max_total_tran_amount || null,
       // minAmount: account.minAmount,
       // maxAmount: account.maxAmount,
     };
@@ -736,9 +750,9 @@ export class BanksComponent implements OnInit, OnDestroy {
       accountType: "saving",
       status: "active",
       min_tran_count: null,
-      max_tran_count: null,
+      // max_tran_count: null,
       min_total_tran_amount: null,
-      max_total_tran_amount: null,
+      // max_total_tran_amount: null,
       // minAmount: "",
       // maxAmount: "",
     };
@@ -846,17 +860,17 @@ export class BanksComponent implements OnInit, OnDestroy {
       entityType: this.role,
       portal: formData.portal,
       currency: this.currency,
-      bankName: formData.bankName, // This will now include both selected and custom bank names
+      bankName: formData.bankName, 
       accountNo: formData.accountNumber,
       accountHolderName: formData.accountHolderName,
       ifsc: formData.ifscCode,
       accountType: formData.accountType,
       limitAmount: formData.limitAmount,
-      status: "active",
+      status: true,
       minTranCount: Number(formData.min_tran_count) || 0,
-      maxTranCount: Number(formData.max_tran_count) || 0,
+      // maxTranCount: Number(formData.max_tran_count) || 0,
       minTotalTranAmount: Number(formData.min_total_tran_amount) || 0,
-      maxTotalTranAmount: Number(formData.max_total_tran_amount) || 0,
+      // maxTotalTranAmount: Number(formData.max_total_tran_amount) || 0,
       // ranges stays same
       ranges: this.capacityRanges.map((r) => ({
         minRange: Number(r.minRange),
@@ -926,11 +940,11 @@ export class BanksComponent implements OnInit, OnDestroy {
       ifsc: this.updateForm.ifsc,
       limitAmount: this.updateForm.limitAmount,
       accountType: this.updateForm.accountType,
-      status: this.updateForm.status,
+     status: this.updateForm.status,
       minTranCount: Number(this.updateForm.min_tran_count) || 0,
-      maxTranCount: Number(this.updateForm.max_tran_count) || 0,
+      // maxTranCount: Number(this.updateForm.max_tran_count) || 0,
       minTotalTranAmount: Number(this.updateForm.min_total_tran_amount) || 0,
-      maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
+      // maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
       // minAmount: this.updateForm.minAmount,
       // maxAmount: this.updateForm.maxAmount,
     };
@@ -947,7 +961,7 @@ export class BanksComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.isSubmitting = false;
-        alert("Error updating bank account. Please try again.");
+       
         this.snack.show(
           err?.error?.message ||
             "Error updating bank account. Please try again.",
@@ -1045,7 +1059,7 @@ export class BanksComponent implements OnInit, OnDestroy {
   // }
 
   toggleBankStatus(bankId: string) {
-    this.bankService.toogleBankStatus(bankId).subscribe({
+    this.bankService.toogleBankDeleted(bankId).subscribe({
       next: (res) => {
         // Success: refresh the list to reflect the updated status
         this.fetchBankAccounts();
@@ -1416,7 +1430,7 @@ export class BanksComponent implements OnInit, OnDestroy {
       .getPayinCapacity(
         this.role,
         this.currentRoleId,
-        account.portalId,
+        // account.portalId,
         "BANK",
         account.id,
       )
@@ -1676,9 +1690,9 @@ export class BanksComponent implements OnInit, OnDestroy {
       limitAmount: ["", [Validators.required, Validators.min(1)]],
 
       min_tran_count: [null],
-      max_tran_count: [null],
+      // max_tran_count: [null],
       min_total_tran_amount: [null],
-      max_total_tran_amount: [null],
+      // max_total_tran_amount: [null],
     });
   }
 
@@ -1933,4 +1947,35 @@ export class BanksComponent implements OnInit, OnDestroy {
   closeCurrencyModal() {
     this.showCurrencyModal = false;
   }
+
+  onToggleStatus(account: any, event: any) {
+  const newStatus = event.target.checked; // true / false
+const bankID =account.id;
+  const payload = {
+    id: account.id,
+    portal: account.portalId || account.portal,
+    entityId: this.currentRoleId,
+    entityType: this.role,
+    accountNo: account.accountNo,
+    accountHolderName: account.accountHolderName,
+    ifsc: account.ifsc,
+    limitAmount: account.limitAmount,
+    accountType: account.accountType,
+    status: newStatus 
+  };
+
+  this.bankService.toggleIsBank(bankID).subscribe({
+    next: (res) => {
+      // update UI instantly
+      account.status = newStatus ? 'active' : 'inactive';
+
+      this.snack.show(res.message||"Status updated", true);
+    },
+    error: () => {
+      // revert toggle if failed
+      event.target.checked = !newStatus;
+      this.snack.show("Failed to update status", false);
+    }
+  });
+}
 }

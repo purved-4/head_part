@@ -1,3 +1,5 @@
+
+
 import { Component, OnInit } from '@angular/core';
 import { UserStateService } from '../../../store/user-state.service';
 import { BranchService } from '../../../pages/services/branch.service';
@@ -6,11 +8,11 @@ import { SnackbarService } from '../../snackbar/snackbar.service';
 import { CurrencyService } from '../../../pages/services/currency.service';
 
 @Component({
-  selector: 'app-override-currency-management',
-  templateUrl: './override-currency-management.component.html',
-  styleUrls: ['./override-currency-management.component.css']
+  selector: 'app-override-currency-rate',
+  templateUrl: './override-currency-rate.component.html',
+  styleUrl: './override-currency-rate.component.css'
 })
-export class OverrideCurrencyManagementComponent implements OnInit {
+export class OverrideCurrencyRateComponent implements OnInit {
 
   entityId!: any;
   role!: any;
@@ -78,9 +80,9 @@ isManagerView: boolean = false;
   // }
 
   loadCurrencies() {
-  this.currencyServices.getCustomCurrencies(this.entityId, this.role).subscribe({
+  this.currencyServices.getCurrencyForHeadAndBranch(this.entityId, this.role).subscribe({
     next: (res: any) => {
-      this.currencies = (res.data || []).map((c: any) => ({
+      this.currencies = (res || []).map((c: any) => ({
         ...c,
         overrideRate: this.isManagerView ? c.rate : c.rate,
         effectiveFrom: this.isManagerView ? c.effectiveFrom : this.getLocalDateTime(),
@@ -116,7 +118,7 @@ isManagerView: boolean = false;
       active: item.active ?? true
     };
 
-    this.currencyServices.createCustomCurrency(payload).subscribe({
+    this.currencyServices.addCustomCurrencyForHeadAndBranch(payload).subscribe({
       next: (res: any) => {
         console.log(' Created successfully', res);
       },

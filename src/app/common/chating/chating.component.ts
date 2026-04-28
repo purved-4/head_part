@@ -86,6 +86,8 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   currentMediaName = "";
   currentMediaType: "image" | "video" | "audio" | "file" | "text" = "text";
 
+  showScrollToBottom = false;
+
   showEmojiPicker = false;
   emojis: string[] = [];
   activeEmojiCategory = "smileys";
@@ -238,7 +240,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.paramChatType = chatType;
 
       if (chatType) {
-        this.chatMode = chatType === "head" ? "head" : "branch";
+        this.chatMode = "branch";
       }
 
       if (threadId) {
@@ -403,13 +405,11 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isHeadRole(): boolean {
-    const r = String(this.role || "").toLowerCase();
-    return r.includes("head") || r.includes("branch");
+    return this.role === "HEAD";
   }
 
   isHeadOrBranchRole(): boolean {
-    const r = String(this.role || "").toLowerCase();
-    return r.includes("head") || r.includes("branch");
+    return this.role === "HEAD" || this.role === "BRANCH";
   }
 
   /* ════════════════════════════════════════════
@@ -858,81 +858,89 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
      QUESTIONS (HEAD / BRANCH ONLY)
      ════════════════════════════════════════════ */
 
+  // loadQuestion(portalId?: string): void {
+  //   if (!this.isHeadOrBranchRole()) {
+  //     this.questions = [];
+  //     return;
+  //   }
+  //   if (!portalId) {
+  //     this.questions = [];
+  //     return;
+  //   }
+  //   this.comPartService.getAllQuestions().subscribe({
+  //     next: (res: any) => {
+  //       this.questions = res.content;
+  //     },
+  //     error: () => {
+  //       this.questions = [];
+  //     },
+  //   });
+  // }
+
   loadQuestion(portalId?: string): void {
-    if (!this.isHeadOrBranchRole()) {
-      this.questions = [];
-      return;
-    }
-    if (!portalId) {
-      this.questions = [];
-      return;
-    }
-    this.comPartService.getAllQuestions().subscribe({
-      next: (res: any) => {
-        this.questions = res.content;
-      },
-      error: () => {
-        this.questions = [];
-      },
-    });
+    this.questions = [];
+    this.filteredQuestions = [];
   }
 
+  // filterQuestion(): void {
+  //   const term = (this.questionSearchTerm || "").toString().trim();
+  //   if (!term) {
+  //     this.filteredQuestions = Array.isArray(this.questions)
+  //       ? this.questions.slice(0, 6)
+  //       : [];
+  //     this.selectedQuestion = null;
+  //     return;
+  //   }
+  //   const lower = term.toLowerCase();
+  //   this.filteredQuestions = (this.questions || []).filter((q: any) =>
+  //     String(q.messageText || "")
+  //       .toLowerCase()
+  //       .includes(lower),
+  //   );
+  //   const exact = (this.questions || []).find(
+  //     (q: any) => String(q.messageText || "").toLowerCase() === lower,
+  //   );
+  //   if (exact) {
+  //     this.selectedQuestion = exact;
+  //     this.showQuestionDropDown = false;
+  //   } else {
+  //     this.selectedQuestion = null;
+  //   }
+  // }
   filterQuestion(): void {
-    const term = (this.questionSearchTerm || "").toString().trim();
-    if (!term) {
-      this.filteredQuestions = Array.isArray(this.questions)
-        ? this.questions.slice(0, 6)
-        : [];
-      this.selectedQuestion = null;
-      return;
-    }
-    const lower = term.toLowerCase();
-    this.filteredQuestions = (this.questions || []).filter((q: any) =>
-      String(q.messageText || "")
-        .toLowerCase()
-        .includes(lower),
-    );
-    const exact = (this.questions || []).find(
-      (q: any) => String(q.messageText || "").toLowerCase() === lower,
-    );
-    if (exact) {
-      this.selectedQuestion = exact;
-      this.showQuestionDropDown = false;
-    } else {
-      this.selectedQuestion = null;
-    }
+    this.filteredQuestions = [];
   }
-
   selectQuestion(q: any): void {
-    if (!q) return;
-    this.selectedQuestion = q;
-    this.questionSearchTerm = q.messageText || "";
-    this.showQuestionDropDown = false;
+    // if (!q) return;
+    // this.selectedQuestion = q;
+    // this.questionSearchTerm = q.messageText || "";
+    // this.showQuestionDropDown = false;
   }
 
   selectQuestionTwo(q: any): void {
-    if (!q) return;
-    this.selectedQuestionTwo = q;
-    this.questionSearchTerm = q.messageText || "";
-    this.showQuestionDropDownTwo = false;
+    // if (!q) return;
+    // this.selectedQuestionTwo = q;
+    // this.questionSearchTerm = q.messageText || "";
+    // this.showQuestionDropDownTwo = false;
   }
 
   onQuestionEnter(event: any): void {
     event?.preventDefault?.();
-    if (this.selectedQuestion || this.selectedQuestionTwo) {
-      this.sendMessage();
-    } else {
-      this.snackBar.show(
-        "Please choose a question from the suggestions before sending.",
-        false,
-      );
-    }
+    // if (this.selectedQuestion || this.selectedQuestionTwo) {
+    //   this.sendMessage();
+    // } else {
+    //   this.snackBar.show(
+    //     "Please choose a question from the suggestions before sending.",
+    //     false,
+    //   );
+    // }
+    this.sendSimpleMessage();
   }
 
   canSend(): boolean {
-    if (this.isHeadOrBranchRole()) {
-      return !!this.selectedNotification && !!this.selectedQuestion;
-    }
+    // if (this.isHeadOrBranchRole()) {
+    //   return !!this.selectedNotification && !!this.selectedQuestion;
+    // }
     return !!this.selectedNotification && !!(this.newMessage || "").trim();
   }
 
@@ -980,8 +988,6 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
         typeof t.isRead === "boolean" ? (t.isRead ? 0 : 1) : t.unread || 0;
     }
 
-    console.log(t);
-    
     return {
       id: t.id || t.threadId || t.fundsId,
       groupName,
@@ -1011,16 +1017,18 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectNotification(notification: Notification): void {
     if (!notification) return;
+
     if (
       this.selectedNotification &&
       this.selectedNotification.id === notification.id
-    )
+    ) {
       return;
+    }
 
-    // cleanup old subscription
     try {
       this.realTimeSub?.unsubscribe();
     } catch {}
+
     this.realTimeSub = null;
 
     if (
@@ -1028,18 +1036,21 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.subscribedThreadId !== notification.id
     ) {
       try {
-        (this.socketConfigService as any).unsubscribeMessagePage?.(
+        this.socketConfigService.unsubscribeMessagePage(
           this.subscribedThreadId,
         );
+      } catch {}
+
+      try {
         (this.socketConfigService as any).unsubscribeMessages?.(
           this.subscribedThreadId,
         );
       } catch {}
-      this.subscribedThreadId = null;
     }
 
     this.selectedNotification = notification;
-    notification.unread = 0;
+    this.selectedNotification.unread = 0;
+
     this.showParticipants = false;
     this.participantsMap.clear();
     this.detailTab = "details";
@@ -1051,16 +1062,15 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.lastScrollTop = 0;
 
     const threadId = notification.id;
-    this.loadMessages(threadId, 0);
-    // this.loadChatMembers(threadId);
 
-    if (this.isHeadOrBranchRole()) {
-      this.loadQuestion(notification.portalId);
-    }
+    this.loadMessages(threadId, 0);
 
     this.subscribeToRealTimeMessages(threadId);
-  }
 
+    this.socketConfigService.subscribeUnreadThreads(this.currrentEntityId);
+
+    this.socketConfigService.subscribeThreads(this.currrentEntityId);
+  }
   /* ════════════════════════════════════════════
      CHAT MEMBERS
      ════════════════════════════════════════════ */
@@ -1181,11 +1191,21 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onMessagesScroll(event: Event): void {
     if (!this.messagesContainer) return;
+
     const el = event.target as HTMLElement;
     const scrollTop = el.scrollTop;
+
+    /* only show after some scroll + hide near bottom */
+    const distanceFromBottom = el.scrollHeight - el.clientHeight - scrollTop;
+
+    this.showScrollToBottom = scrollTop > 120 && distanceFromBottom > 120;
+
+    /* existing pagination logic */
     const isUpward = scrollTop < this.lastScrollTop;
     this.lastScrollTop = scrollTop;
+
     if (!isUpward) return;
+
     if (
       scrollTop <= 80 &&
       !this.loadingMessages &&
@@ -1202,13 +1222,18 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private subscribeToRealTimeMessages(threadId: string): void {
     if (!threadId) return;
+
+    // already subscribed same thread
     if (this.subscribedThreadId === threadId && this.realTimeSub) return;
 
+    // old subscription remove
     try {
       this.realTimeSub?.unsubscribe();
     } catch {}
+
     this.realTimeSub = null;
 
+    // old socket topic unsubscribe
     if (this.subscribedThreadId) {
       try {
         (this.socketConfigService as any).unsubscribeMessagePage?.(
@@ -1221,21 +1246,46 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.subscribedThreadId = threadId;
+
+    // IMPORTANT:
+    // both topics subscribe karo
     try {
       (this.socketConfigService as any).subscribeMessagePage?.(threadId);
     } catch {}
 
+    try {
+      (this.socketConfigService as any).subscribeMessages?.(threadId);
+    } catch {}
+
+    // listen socket stream
     this.realTimeSub = this.socketConfigService
       .getMessages()
       .subscribe((data: any) => {
         if (!data) return;
-        const incomingThreadId = data.threadId || data.thread || threadId;
-        if (incomingThreadId !== this.subscribedThreadId) return;
-        const payload = data.messages ?? data;
+
+        console.log("SOCKET RAW =>", data);
+
+        // backend kabhi threadId, kabhi id, kabhi nested deta hai
+        const incomingThreadId =
+          data.threadId ||
+          data.id ||
+          data?.message?.threadId ||
+          data?.payload?.threadId ||
+          threadId;
+
+        // backend kabhi messages array bhejta hai
+        const payload = data.messages || data.message || data.payload || data;
+
+        // thread mismatch ignore
+        if (String(incomingThreadId) !== String(this.subscribedThreadId)) {
+          return;
+        }
+
         this.zone.run(() => {
           if (Array.isArray(payload)) {
-            for (const msg of payload)
-              this.handleRealTimeMessage(msg, incomingThreadId);
+            payload.forEach((msg: any) =>
+              this.handleRealTimeMessage(msg, incomingThreadId),
+            );
           } else {
             this.handleRealTimeMessage(payload, incomingThreadId);
           }
@@ -1271,115 +1321,42 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private handleRealTimeMessage(rtMsg: any, threadId: string): void {
     if (!rtMsg) return;
-    const gm = this.mapBackendMessageToGroupMessage(rtMsg);
 
-    const existingIndex = this.notifications.findIndex(
-      (n) => n.id === threadId || n._raw?.threadId === threadId,
-    );
+    const raw = rtMsg.body || rtMsg.data || rtMsg.message || rtMsg;
 
-    const updateExisting = (existing: Notification) => {
-      existing.lastMessage = gm.text;
-      existing.lastSender = gm.senderName;
-      existing.time = gm.time;
-      if (
-        this.selectedNotification &&
-        this.selectedNotification.id === threadId
-      ) {
-        this.selectedNotification.messages = [
-          ...(this.selectedNotification.messages || []),
-          gm,
-        ];
-        if (existing.messages !== this.selectedNotification.messages)
-          existing.messages = this.selectedNotification.messages;
-        existing.unread = 0;
-        setTimeout(() => this.scrollChatToBottom(), 50);
-      } else {
-        existing.unread = (existing.unread || 0) + 1;
-      }
-    };
+    const gm = this.mapBackendMessageToGroupMessage(raw);
 
-    if (existingIndex > -1) {
-      const existing = this.notifications[existingIndex];
-      updateExisting(existing);
-      const copy = [...this.notifications];
-      copy.splice(existingIndex, 1);
-      copy.unshift(existing);
-      this.notifications = copy;
+    if (!this.selectedNotification) return;
 
-      const fi = this.filteredNotifications.findIndex(
-        (n) => n.id === existing.id,
-      );
-      if (fi > -1) {
-        const fcopy = [...this.filteredNotifications];
-        fcopy.splice(fi, 1);
-        fcopy.unshift(existing);
-        this.filteredNotifications = fcopy;
-      }
-    } else {
-      const findInAny = (arr: Notification[]) =>
-        arr.find((n) => n.id === threadId || n._raw?.threadId === threadId);
+    if (String(this.selectedNotification.id) === String(threadId)) {
+      this.selectedNotification.messages = [
+        ...(this.selectedNotification.messages || []),
+        gm,
+      ];
 
-      const foundInUI =
-        findInAny(this.filteredNotifications) ||
-        findInAny(this.allNotifications) ||
-        findInAny(this.resolvedNotifications) ||
-        findInAny(this.unresolvedNotifications) ||
-        findInAny(this.rejectedNotifications) ||
-        null;
+      this.selectedNotification.lastMessage = gm.text || "Attachment";
 
-      if (foundInUI) {
-        updateExisting(foundInUI);
-        const idx = this.filteredNotifications.findIndex(
-          (n) => n.id === foundInUI.id,
-        );
-        if (idx > -1) {
-          const copy = [...this.filteredNotifications];
-          copy.splice(idx, 1);
-          copy.unshift(foundInUI);
-          this.filteredNotifications = copy;
-        }
-      } else {
-        const stub: Notification = {
-          id: threadId,
-          groupName: gm.senderName || "Thread",
-          avatar: this.getInitials(gm.senderName || "U"),
-          lastMessage: gm.text,
-          lastSender: gm.senderName,
-          time: gm.time,
-          unread: 1,
-          participantCount: 0,
-          participants: [],
-          messages: [gm],
-          _raw: {},
-          role: null,
-        };
-        this.notifications = [stub, ...this.notifications];
-        this.filteredNotifications = [stub, ...this.filteredNotifications];
+      this.selectedNotification.time = "Just now";
 
-        if (this.selectedNotification?.id === threadId) {
-          this.selectedNotification.messages = [
-            ...(this.selectedNotification.messages || []),
-            gm,
-          ];
-          stub.messages = this.selectedNotification.messages;
-          stub.unread = 0;
-          setTimeout(() => this.scrollChatToBottom(), 50);
-        }
-      }
+      setTimeout(() => {
+        this.scrollChatToBottom();
+      }, 50);
     }
+
+    this.applyFilters();
   }
 
   sendSimpleMessage(event?: any): void {
     if (event) event.preventDefault();
+
     if (!this.selectedNotification) {
       this.snackBar.show("No conversation selected.", false);
       return;
     }
 
-    const text = (this.newMessage || "").toString().trim();
+    const text = (this.newMessage || "").trim();
     const hasFile = !!this.selectedUploadFile;
 
-    // Must have either text or file
     if (!text && !hasFile) {
       this.snackBar.show("Please enter a message or attach a file.", false);
       return;
@@ -1387,8 +1364,10 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const threadId = this.selectedNotification.id;
 
+    /* =========================
+     FILE + MESSAGE
+     ========================= */
     if (hasFile) {
-      // ── STEP 1: Upload the file first ──
       this.uploadingFile = true;
       this.uploadProgress = 0;
       this.uploadError = null;
@@ -1399,6 +1378,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
           next: (res: any) => {
             const fileId =
               res?.fileId || res?.id || (typeof res === "string" ? res : null);
+
             let fileUrl: string | null = null;
 
             if (fileId) {
@@ -1409,18 +1389,18 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
             if (!fileUrl) {
               this.uploadingFile = false;
-              this.uploadError = "Upload succeeded but no file URL returned.";
-              this.snackBar.show("Upload error: no file URL", false);
+              this.uploadError = "Upload failed";
+              this.snackBar.show("Upload failed", false);
               return;
             }
 
-            // ── STEP 2: Send message via socket with file URL ──
-            const payload: any = {
-              senderId: this.currrentEntityId,
+            const payload = {
+              senderId: this.currentUserId,
+              senderEntityId: this.currrentEntityId,
+              roleId: this.currrentEntityId,
+              senderType: this.role,
               message: text,
               fileUrl: fileUrl,
-              senderType: this.role,
-              roleId: this.currrentEntityId,
               type: "FILE",
             };
 
@@ -1428,75 +1408,72 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
               this.socketConfigService.sendMessage(threadId, payload);
               this.snackBar.show("File sent successfully", true);
             } catch {
-              this.snackBar.show("Failed to send message. Try again.", false);
+              this.snackBar.show("Failed to send message", false);
             }
 
-            // Clean up
             this.newMessage = "";
+            this.removeInlineFile();
             this.uploadingFile = false;
             this.uploadProgress = 100;
-            this.removeInlineFile();
+
             setTimeout(() => this.scrollChatToBottom(), 80);
           },
           error: () => {
             this.uploadingFile = false;
-            this.uploadError = "Upload failed. Please try again.";
+            this.uploadError = "Upload failed";
             this.snackBar.show("Upload failed", false);
           },
         });
-    } else {
-      // ── No file, just send text ──
-      const payload = {
-        senderId: this.currrentEntityId,
-        message: text,
-        fileUrl: null,
-        senderType: this.role,
-        roleId: this.currrentEntityId,
-      };
-      this.newMessage = "";
 
-      try {
-        this.socketConfigService.sendMessage(threadId, payload);
-      } catch {
-        this.newMessage = text;
-        this.snackBar.show("Failed to send message. Try again.", false);
-      }
-      setTimeout(() => this.scrollChatToBottom(), 80);
-    }
-  }
-
-  /**
-   * Send a predefined question message, optionally with a file attachment.
-   */
-  sendMessage(): void {
-    if (!this.selectedNotification) return;
-    if (!this.selectedQuestion) {
-      this.snackBar.show("Select a predefined question to send.", false);
       return;
     }
 
-    // Determine whether user edited the question text (so emojis/edits are included).
-    // If edited, send edited text; tpwise send the question id (preserves existing backend behaviour).
-    let textToSend = "";
-    const originalText = (this.selectedQuestion.messageText || "").toString();
+    /* =========================
+     ONLY TEXT MESSAGE
+     ========================= */
+    const payload = {
+      senderId: this.currentUserId,
+      senderEntityId: this.currrentEntityId,
+      roleId: this.currrentEntityId,
+      senderType: this.role,
+      message: text,
+      fileUrl: null,
+    };
 
-    if (
-      this.questionSearchTerm &&
-      this.questionSearchTerm.trim() &&
-      this.questionSearchTerm !== originalText
-    ) {
-      textToSend = this.questionSearchTerm.trim();
-    } else {
-      textToSend = this.selectedQuestion.id;
+    try {
+      this.socketConfigService.sendMessage(threadId, payload);
+      this.newMessage = "";
+      setTimeout(() => this.scrollChatToBottom(), 80);
+    } catch {
+      this.snackBar.show("Failed to send message", false);
     }
+  }
 
-    if (!textToSend) return;
+  sendMessage(): void {
+    if (!this.selectedNotification) {
+      this.snackBar.show("No conversation selected.", false);
+      return;
+    }
 
     const threadId = this.selectedNotification.id;
     const hasFile = !!this.selectedUploadFile;
 
+    let textToSend = "";
+
+    /* typed message */
+    if (this.newMessage?.trim()) {
+      textToSend = this.newMessage.trim();
+    }
+
+    if (!textToSend && !hasFile) {
+      this.snackBar.show("Please enter a message or attach a file.", false);
+      return;
+    }
+
+    /* =========================
+     FILE + MESSAGE
+     ========================= */
     if (hasFile) {
-      // Upload file first
       this.uploadingFile = true;
       this.uploadProgress = 0;
       this.uploadError = null;
@@ -1507,6 +1484,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
           next: (res: any) => {
             const fileId =
               res?.fileId || res?.id || (typeof res === "string" ? res : null);
+
             let fileUrl: string | null = null;
 
             if (fileId) {
@@ -1517,18 +1495,18 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
             if (!fileUrl) {
               this.uploadingFile = false;
-              this.uploadError = "Upload succeeded but no file URL returned.";
-              this.snackBar.show("Upload error: no file URL", false);
+              this.uploadError = "Upload failed";
+              this.snackBar.show("Upload failed", false);
               return;
             }
 
-            // Send via socket with file URL and message text (or question id)
-            const payload: any = {
-              senderId: this.currrentEntityId,
+            const payload = {
+              senderId: this.currentUserId,
+              senderEntityId: this.currrentEntityId,
+              roleId: this.currrentEntityId,
+              senderType: this.role,
               message: textToSend,
               fileUrl: fileUrl,
-              senderType: this.role,
-              roleId: this.currrentEntityId,
               type: "FILE",
             };
 
@@ -1536,46 +1514,54 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
               this.socketConfigService.sendMessage(threadId, payload);
               this.snackBar.show("File sent successfully", true);
             } catch {
-              this.snackBar.show("Failed to send message. Try again.", false);
+              this.snackBar.show("Failed to send message", false);
             }
 
-            // Cleanup UI state
-            this.selectedQuestion = null;
-            this.questionSearchTerm = "";
-            this.showQuestionDropDown = false;
-            this.uploadingFile = false;
-            this.uploadProgress = 100;
-            this.removeInlineFile();
-            setTimeout(() => this.scrollChatToBottom(), 80);
+            this.resetSendState();
           },
           error: () => {
             this.uploadingFile = false;
-            this.uploadError = "Upload failed. Please try again.";
+            this.uploadError = "Upload failed";
             this.snackBar.show("Upload failed", false);
           },
         });
-    } else {
-      // No file — just send question/text
-      const payload = {
-        senderId: this.currrentEntityId,
-        message: textToSend,
-        fileUrl: null,
-        senderType: this.role,
-        roleId: this.currrentEntityId,
-      };
 
-      // Reset selection UI
-      this.selectedQuestion = null;
-      this.questionSearchTerm = "";
-      this.showQuestionDropDown = false;
-
-      try {
-        this.socketConfigService.sendMessage(threadId, payload);
-      } catch {
-        this.snackBar.show("Failed to send message. Try again.", false);
-      }
-      setTimeout(() => this.scrollChatToBottom(), 80);
+      return;
     }
+
+    /* =========================
+     ONLY TEXT MESSAGE
+     ========================= */
+    const payload = {
+      senderId: this.currentUserId,
+      senderEntityId: this.currrentEntityId,
+      roleId: this.currrentEntityId,
+      senderType: this.role,
+      message: textToSend,
+      fileUrl: null,
+    };
+
+    try {
+      this.socketConfigService.sendMessage(threadId, payload);
+      this.resetSendState();
+    } catch {
+      this.snackBar.show("Failed to send message", false);
+    }
+  }
+
+  /* -----------------------------------------
+   RESET AFTER SEND
+   ----------------------------------------- */
+  private resetSendState(): void {
+    this.selectedQuestion = null;
+    this.questionSearchTerm = "";
+    this.newMessage = "";
+    this.showQuestionDropDown = false;
+    this.uploadingFile = false;
+    this.uploadProgress = 100;
+    this.removeInlineFile();
+
+    setTimeout(() => this.scrollChatToBottom(), 80);
   }
 
   /* ════════════════════════════════════════════
@@ -1819,14 +1805,15 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Last fallback: append to whichever model is relevant for the role
-    if (this.isHeadOrBranchRole()) {
-      this.questionSearchTerm = (this.questionSearchTerm || "") + emoji;
-      try {
-        this.filterQuestion();
-      } catch {}
-    } else {
-      this.newMessage = (this.newMessage || "") + emoji;
-    }
+    // if (this.isHeadOrBranchRole()) {
+    //   this.questionSearchTerm = (this.questionSearchTerm || "") + emoji;
+    //   try {
+    //     this.filterQuestion();
+    //   } catch {}
+    // } else {
+    //   this.newMessage = (this.newMessage || "") + emoji;
+    // }
+    this.newMessage = (this.newMessage || "") + emoji;
     this.showEmojiPicker = false;
   }
 
@@ -1938,12 +1925,13 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   sendUploadedFileMessage(): void {
     if (!this.selectedNotification || !this.uploadedFileUrl) return;
     const threadId = this.selectedNotification.id;
-    let text = "";
-    if (this.isHeadOrBranchRole()) {
-      text = this.newMessage;
-    } else {
-      text = (this.selectedQuestionTwo?.id || "").toString().trim();
-    }
+    let text = (this.newMessage || "").trim();
+    // let text = "";
+    // if (this.isHeadOrBranchRole()) {
+    //   text = this.newMessage;
+    // } else {
+    //   text = (this.selectedQuestionTwo?.id || "").toString().trim();
+    // }
     const payload: any = {
       senderId: this.currrentEntityId,
       message: text,
@@ -2260,17 +2248,30 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  fundDetails:any
-  showFundModel:boolean = false
-  showFundDetailForMessage(threadId: any, fundId: any, fundType: any){
-    this.getFundWithId(threadId,fundId,fundType).subscribe((res) => {
+  fundDetails: any;
+  showFundModel: boolean = false;
+  showFundDetailForMessage(threadId: any, fundId: any, fundType: any) {
+    this.getFundWithId(threadId, fundId, fundType).subscribe((res) => {
       this.fundDetails = res;
-      this.showFundModel = true
-    })
+      this.showFundModel = true;
+    });
   }
 
-  close(){
+  close() {
     this.fundDetails = null;
-      this.showFundModel = true
+    this.showFundModel = true;
+  }
+
+  //newmethods
+
+  scrollToBottom(): void {
+    const el = this.messagesContainer.nativeElement;
+
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: "smooth",
+    });
+
+    this.showScrollToBottom = false;
   }
 }

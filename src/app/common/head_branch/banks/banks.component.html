@@ -7,7 +7,7 @@
   >
     <div class="flex items-center gap-3">
       <div
-        class="w-10 h-10 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] rounded-lg flex items-center justify-center shadow-md"
+        class="w-10 h-10 bg-[var(--color-primary)] rounded-lg flex items-center justify-center shadow-md"
       >
         <span
           class="material-symbols-outlined text-[var(--color-surface)] text-lg"
@@ -298,7 +298,7 @@
       <!-- APPLY -->
       <button
         (click)="onFilterChange()"
-        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 text-sm font-medium"
+        class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 text-sm font-medium"
       >
         <span class="material-symbols-outlined mr-1.5 text-sm">filter_alt</span>
         Apply Filters
@@ -460,7 +460,7 @@
 
                 <div class="flex items-center gap-2">
                   <!-- Assigned / Unassigned -->
-                  <span
+                  <!-- <span
                     class="text-xs font-medium"
                     [ngClass]="
                       account.portalId || account.portal
@@ -473,7 +473,21 @@
                         ? "Assigned"
                         : "Unassigned"
                     }}
-                  </span>
+                  </span> -->
+                  <span
+  class="text-xs font-medium"
+  [ngClass]="
+    account.allotStatus
+      ? 'text-green-600'
+      : 'text-red-500'
+  "
+>
+  {{
+    account.allotStatus
+      ? "Assigned"
+      : "Unassigned"
+  }}
+</span>
                 </div>
 
                 <span
@@ -699,8 +713,8 @@
                   <input
                     type="checkbox"
                     class="sr-only peer"
-                    [checked]="account.isBankActive"
-                    (click)="openBankToggleConfirm(account, $event)"
+              [checked]="account.status === 'active'"
+                (change)="onToggleStatus(account, $event)"
                   />
 
                   <div
@@ -724,7 +738,7 @@
                   <!-- Action button now shows only the three dots icon -->
                   <button
                     (click)="toggleActionDropdown(account.id, $event)"
-                    class="inline-flex items-center px-2 py-1 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 text-xs"
+                    class="inline-flex items-center px-2 py-1 bg-[var(--color-primary)] text-[var(--color-surface)] rounded hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 text-xs"
                   >
                     <span
                       class="material-symbols-outlined text-[var(--color-surface)] text-sm"
@@ -830,7 +844,7 @@
   <div *ngIf="!loading && bankAccounts.length === 0" class="text-center py-12">
     <div class="flex flex-col items-center justify-center">
       <div
-        class="w-16 h-16 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] rounded-xl flex items-center justify-center mb-4 shadow-md"
+        class="w-16 h-16 bg-[var(--color-primary)] rounded-xl flex items-center justify-center mb-4 shadow-md"
       >
         <span
           class="material-symbols-outlined text-[var(--color-surface)] text-2xl"
@@ -862,7 +876,7 @@
         <button
           *ngIf="activeFilters === 0"
           (click)="openAddBankModal()"
-          class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-colors font-medium text-sm shadow-sm"
+          class="inline-flex items-center px-3 py-1.5 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-colors font-medium text-sm shadow-sm"
         >
           <span
             class="material-symbols-outlined text-[var(--color-surface)] mr-1.5"
@@ -1075,7 +1089,7 @@
             <span class="text-xs font-medium text-[var(--color-font)] truncate">
               <!-- {{ account.portalDomain || account.portal || "-" }} -->
               {{
-                account.portalId || account.portal ? "Assigned" : "Unassigned"
+                account.allotStatus || account.allotStatus ? "Assigned" : "Unassigned"
               }}
             </span>
 
@@ -1205,8 +1219,8 @@
                 <input
                   type="checkbox"
                   class="sr-only peer"
-                  [checked]="account.isBankActive"
-                  (click)="openBankToggleConfirm(account, $event)"
+               [checked]="account.status === 'active'"
+              (change)="onToggleStatus(account, $event)"
                 />
 
                 <div
@@ -1662,7 +1676,7 @@
             </div>
 
             <!-- Max Tran Count -->
-            <div>
+            <!-- <div>
               <label
                 class="text-sm font-semibold text-[var(--color-font)] mb-1"
               >
@@ -1674,7 +1688,7 @@
                 class="w-full px-3 py-2 border rounded-lg text-sm"
                 placeholder="Max count"
               />
-            </div>
+            </div> -->
 
             <!-- Min Total Amount -->
             <div>
@@ -1692,7 +1706,7 @@
             </div>
 
             <!-- Max Total Amount -->
-            <div>
+            <!-- <div>
               <label
                 class="text-sm font-semibold text-[var(--color-font)] mb-1"
               >
@@ -1704,7 +1718,7 @@
                 class="w-full px-3 py-2 border rounded-lg text-sm"
                 placeholder="Max amount"
               />
-            </div>
+            </div> -->
           </div>
 
           <!-- Capacity Range -->
@@ -1780,7 +1794,7 @@
             <button
               type="submit"
               [disabled]="!addBankForm.valid || isAdding"
-              class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 font-medium shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 font-medium shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             >
               <span
                 *ngIf="isAdding"
@@ -2007,7 +2021,7 @@
             </div>
 
             <!-- Max Transaction Count -->
-            <div>
+            <!-- <div>
               <label
                 class="block text-sm font-semibold text-[var(--color-font)] mb-1"
               >
@@ -2020,7 +2034,7 @@
                 class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm"
                 placeholder="Max count"
               />
-            </div>
+            </div> -->
 
             <!-- Min Total Amount -->
             <div>
@@ -2039,7 +2053,7 @@
             </div>
 
             <!-- Max Total Amount -->
-            <div>
+            <!-- <div>
               <label
                 class="block text-sm font-semibold text-[var(--color-font)] mb-1"
               >
@@ -2052,7 +2066,7 @@
                 class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm"
                 placeholder="Max amount"
               />
-            </div>
+            </div> -->
           </div>
           <div>
             <label
@@ -2074,7 +2088,7 @@
             <button
               type="submit"
               [disabled]="isSubmitting"
-              class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 font-medium shadow-sm hover:shadow disabled:opacity-50 text-sm"
+              class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 font-medium shadow-sm hover:shadow disabled:opacity-50 text-sm"
             >
               <span
                 *ngIf="isSubmitting"
@@ -2193,12 +2207,12 @@
         }}</span>
       </div>
 
-      <div class="flex justify-between">
+      <!-- <div class="flex justify-between">
         <span>Max Txn Count:</span>
         <span class="font-semibold">{{
           tooltipData?.max_tran_count || 0
         }}</span>
-      </div>
+      </div> -->
 
       <div class="flex justify-between">
         <span>Min Amount:</span>
@@ -2207,12 +2221,12 @@
         </span>
       </div>
 
-      <div class="flex justify-between">
+      <!-- <div class="flex justify-between">
         <span>Max Amount:</span>
         <span class="font-semibold">
           ₹{{ tooltipData?.max_total_tran_amount || 0 }}
         </span>
-      </div>
+      </div> -->
     </div>
   </div>
 
@@ -2748,3 +2762,4 @@
     </div>
   </div>
 </div>
+

@@ -12,7 +12,7 @@ import { HeadModule } from "../pages/head/route/head.module";
 import { SnackbarComponent } from "../common/snackbar/snackbar.component";
 import { WelcomeComponent } from "../common/welcome/welcome.component";
 import { AuthCacheInterceptor } from "./cache.interceptor";
-
+ 
 @NgModule({
   declarations: [
     AppComponent,
@@ -27,11 +27,17 @@ import { AuthCacheInterceptor } from "./cache.interceptor";
     FormsModule,
     HttpClientModule,
     AppRoutingModule,
+    // OwnerModule,
+    // ChiefModule,
     SharedModule,
+    // BranchModule,
+    // ManagerModule,
     HeadModule,
+    // comPartModule,
+    
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  providers: [
+  providers: [ 
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,

@@ -16,25 +16,25 @@ export class OwnerService {
     );
   }
 
-  acceptBankFund(id: string): Observable<void> {
-    return this.http.patch<any>(`${baseUrl}/owner/bank/${id}/accept`, {}).pipe(
-      map((res) => res.data),
-      catchError(this.handleError),
-    );
-  }
+  // acceptBankFund(id: string): Observable<void> {
+  //   return this.http.patch<any>(`${baseUrl}/owner/bank/${id}/accept`, {}).pipe(
+  //     map((res) => res.data),
+  //     catchError(this.handleError),
+  //   );
+  // }
 
-  rejectBankFund(id: string, reason: string, file: File): Observable<void> {
-    const formData = new FormData();
-    formData.append("reason", reason);
-    formData.append("file", file);
+  // rejectBankFund(id: string, reason: string, file: File): Observable<void> {
+  //   const formData = new FormData();
+  //   formData.append("reason", reason);
+  //   formData.append("file", file);
 
-    return this.http
-      .patch<any>(`${baseUrl}/owner/bank/${id}/reject`, formData)
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
-  }
+  //   return this.http
+  //     .patch<any>(`${baseUrl}/owner/bank/${id}/reject`, formData)
+  //     .pipe(
+  //       map((res) => res.data),
+  //       catchError(this.handleError),
+  //     );
+  // }
 
   acceptUpiFund(id: string): Observable<void> {
     return this.http.patch<any>(`${baseUrl}/owner/upi/${id}/accept`, {}).pipe(
@@ -126,6 +126,32 @@ export class OwnerService {
         map((res) => res.data),
         catchError(this.handleError),
       );
+  }
+
+  acceptBankFund(id: string): Observable<void> {
+    return this.http
+      .patch<any>(`${baseUrl}/funds/payment/${id}/accept`, {})
+      .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+      );
+  }
+
+  rejectBankFund(id: string, reason: string, file: File): Observable<void> {
+    const formData = new FormData();
+    formData.append("reason", reason);
+    formData.append("file", file);
+
+    return this.http
+      .patch<any>(`${baseUrl}funds/payment/${id}/reject`, formData)
+      .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+      );
+  }
+
+  lockOwnerFund(fundId: string, payload: any): Observable<any> {
+    return this.http.put<any>(`${baseUrl}/owner/lock/${fundId}`, payload);
   }
 
   private handleError(error: any) {

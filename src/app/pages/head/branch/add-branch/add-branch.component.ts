@@ -23,7 +23,6 @@ interface ComPartItem {
   active?: boolean;
   transaction?: boolean;
   comPartTypes?: ComPartType[];
-  customRate?: boolean;
 }
 
 @Component({
@@ -32,7 +31,7 @@ interface ComPartItem {
   styleUrls: ["./add-branch.component.scss"],
 })
 export class AddBranchComponent implements OnInit {
-  branchForm: FormGroup;
+  chiefForm: FormGroup;
   loading = false;
 
   comparts: ComPartItem[] = [];
@@ -53,14 +52,13 @@ export class AddBranchComponent implements OnInit {
     private branchService: BranchService,
     private comPartService: ComPartService,
   ) {
-    this.branchForm = this.fb.group({
+    this.chiefForm = this.fb.group({
       username: ["", Validators.required],
       userEmail: ["", [Validators.required, Validators.email]],
       userPassword: ["", [Validators.required, Validators.minLength(6)]],
       info: [""],
       isActive: [true],
       compartIds: [[], Validators.required],
-      customRate: [false],
     });
   }
 
@@ -102,8 +100,8 @@ export class AddBranchComponent implements OnInit {
     this.comparts.forEach((compart) => {
       const wid = compart.id;
 
-      if (!this.branchForm.contains(`first_payin_${wid}`)) {
-        this.branchForm.addControl(
+      if (!this.chiefForm.contains(`first_payin_${wid}`)) {
+        this.chiefForm.addControl(
           `first_payin_${wid}`,
           new FormControl("", [
             Validators.required,
@@ -113,8 +111,8 @@ export class AddBranchComponent implements OnInit {
         );
       }
 
-      if (!this.branchForm.contains(`payin_${wid}`)) {
-        this.branchForm.addControl(
+      if (!this.chiefForm.contains(`payin_${wid}`)) {
+        this.chiefForm.addControl(
           `payin_${wid}`,
           new FormControl("", [
             Validators.required,
@@ -124,8 +122,8 @@ export class AddBranchComponent implements OnInit {
         );
       }
 
-      if (!this.branchForm.contains(`payout_${wid}`)) {
-        this.branchForm.addControl(
+      if (!this.chiefForm.contains(`payout_${wid}`)) {
+        this.chiefForm.addControl(
           `payout_${wid}`,
           new FormControl("", [
             Validators.required,
@@ -142,14 +140,12 @@ export class AddBranchComponent implements OnInit {
   }
 
   isCompartSelected(compartId: string): boolean {
-    const selectedIds: string[] =
-      this.branchForm.get("compartIds")?.value || [];
+    const selectedIds: string[] = this.chiefForm.get("compartIds")?.value || [];
     return selectedIds.includes(compartId);
   }
 
   getAvailableComparts(): ComPartItem[] {
-    const selectedIds: string[] =
-      this.branchForm.get("compartIds")?.value || [];
+    const selectedIds: string[] = this.chiefForm.get("compartIds")?.value || [];
     const term = this.availableSearchTerm.toLowerCase();
 
     return this.comparts
@@ -162,8 +158,7 @@ export class AddBranchComponent implements OnInit {
   }
 
   getSelectedComparts(): ComPartItem[] {
-    const selectedIds: string[] =
-      this.branchForm.get("compartIds")?.value || [];
+    const selectedIds: string[] = this.chiefForm.get("compartIds")?.value || [];
     const term = this.selectedSearchTerm.toLowerCase();
 
     return this.comparts
@@ -176,46 +171,41 @@ export class AddBranchComponent implements OnInit {
   }
 
   selectCompart(compartId: string): void {
-    const selectedIds: string[] =
-      this.branchForm.get("compartIds")?.value || [];
+    const selectedIds: string[] = this.chiefForm.get("compartIds")?.value || [];
     if (!selectedIds.includes(compartId)) {
-      this.branchForm.get("compartIds")?.setValue([...selectedIds, compartId]);
-      this.branchForm.get("compartIds")?.markAsTouched();
+      this.chiefForm.get("compartIds")?.setValue([...selectedIds, compartId]);
+      this.chiefForm.get("compartIds")?.markAsTouched();
       this.activeTab = "selected";
     }
   }
 
   onCompartSelectionChange(event: any, compartId: string): void {
-    const selectedIds: string[] =
-      this.branchForm.get("compartIds")?.value || [];
+    const selectedIds: string[] = this.chiefForm.get("compartIds")?.value || [];
 
     if (event.target.checked) {
       if (!selectedIds.includes(compartId)) {
-        this.branchForm
-          .get("compartIds")
-          ?.setValue([...selectedIds, compartId]);
+        this.chiefForm.get("compartIds")?.setValue([...selectedIds, compartId]);
         this.activeTab = "selected";
       }
     } else {
-      this.branchForm
+      this.chiefForm
         .get("compartIds")
         ?.setValue(selectedIds.filter((id: string) => id !== compartId));
     }
 
-    this.branchForm.get("compartIds")?.markAsTouched();
+    this.chiefForm.get("compartIds")?.markAsTouched();
   }
 
   removeCompart(compartId: string): void {
-    const selectedIds: string[] =
-      this.branchForm.get("compartIds")?.value || [];
-    this.branchForm
+    const selectedIds: string[] = this.chiefForm.get("compartIds")?.value || [];
+    this.chiefForm
       .get("compartIds")
       ?.setValue(selectedIds.filter((id: string) => id !== compartId));
 
-    this.branchForm.get("compartIds")?.markAsTouched();
-    this.branchForm.get(`first_payin_${compartId}`)?.setValue("");
-    this.branchForm.get(`payin_${compartId}`)?.setValue("");
-    this.branchForm.get(`payout_${compartId}`)?.setValue("");
+    this.chiefForm.get("compartIds")?.markAsTouched();
+    this.chiefForm.get(`first_payin_${compartId}`)?.setValue("");
+    this.chiefForm.get(`payin_${compartId}`)?.setValue("");
+    this.chiefForm.get(`payout_${compartId}`)?.setValue("");
 
     if (this.getSelectedComparts().length === 0) {
       this.activeTab = "available";
@@ -238,10 +228,10 @@ export class AddBranchComponent implements OnInit {
 
     const firstCompart = selectedComparts[0];
     const controlName = `${type}_${firstCompart.id}`;
-    const value = this.branchForm.get(controlName)?.value;
+    const value = this.chiefForm.get(controlName)?.value;
 
     selectedComparts.forEach((compart) => {
-      const control = this.branchForm.get(`${type}_${compart.id}`);
+      const control = this.chiefForm.get(`${type}_${compart.id}`);
       if (control && value !== null && value !== undefined) {
         control.setValue(value);
         control.markAsTouched();
@@ -257,7 +247,7 @@ export class AddBranchComponent implements OnInit {
   onSubmit(): void {
     if (this.loading) return;
 
-    const compartIds: string[] = this.branchForm.get("compartIds")?.value || [];
+    const compartIds: string[] = this.chiefForm.get("compartIds")?.value || [];
 
     if (compartIds.length === 0) {
       this.snackService.show("Please select at least one compart", false, 3000);
@@ -265,9 +255,9 @@ export class AddBranchComponent implements OnInit {
     }
 
     if (
-      this.branchForm.get("username")?.invalid ||
-      this.branchForm.get("userEmail")?.invalid ||
-      this.branchForm.get("userPassword")?.invalid
+      this.chiefForm.get("username")?.invalid ||
+      this.chiefForm.get("userEmail")?.invalid ||
+      this.chiefForm.get("userPassword")?.invalid
     ) {
       this.snackService.show(
         "Please fill all required fields correctly",
@@ -278,9 +268,9 @@ export class AddBranchComponent implements OnInit {
     }
 
     for (const compartId of compartIds) {
-      const fttCtrl = this.branchForm.get(`first_payin_${compartId}`);
-      const payinCtrl = this.branchForm.get(`payin_${compartId}`);
-      const payoutCtrl = this.branchForm.get(`payout_${compartId}`);
+      const fttCtrl = this.chiefForm.get(`first_payin_${compartId}`);
+      const payinCtrl = this.chiefForm.get(`payin_${compartId}`);
+      const payoutCtrl = this.chiefForm.get(`payout_${compartId}`);
 
       fttCtrl?.markAsTouched();
       payinCtrl?.markAsTouched();
@@ -311,19 +301,18 @@ export class AddBranchComponent implements OnInit {
 
     compartIds.forEach((id) => {
       compartPercentages[id] = {
-        fttPercentage: Number(this.branchForm.get(`first_payin_${id}`)?.value),
-        payinPercentage: Number(this.branchForm.get(`payin_${id}`)?.value),
-        payoutPercentage: Number(this.branchForm.get(`payout_${id}`)?.value),
+        fttPercentage: Number(this.chiefForm.get(`first_payin_${id}`)?.value),
+        payinPercentage: Number(this.chiefForm.get(`payin_${id}`)?.value),
+        payoutPercentage: Number(this.chiefForm.get(`payout_${id}`)?.value),
       };
     });
 
     const payload: any = {
-      username: this.branchForm.value.username,
-      userEmail: this.branchForm.value.userEmail,
-      userPassword: this.branchForm.value.userPassword,
-      info: this.branchForm.value.info,
-      active: this.branchForm.value.isActive,
-      customRate: this.branchForm.value.customRate,
+      username: this.chiefForm.value.username,
+      userEmail: this.chiefForm.value.userEmail,
+      userPassword: this.chiefForm.value.userPassword,
+      info: this.chiefForm.value.info,
+      active: this.chiefForm.value.isActive,
       balance: 0,
       compartPercentages,
       createdById: this.currentUserId,
@@ -350,7 +339,7 @@ export class AddBranchComponent implements OnInit {
   }
 
   clearForm(): void {
-    this.branchForm.reset({
+    this.chiefForm.reset({
       username: "",
       userEmail: "",
       userPassword: "",
@@ -361,9 +350,9 @@ export class AddBranchComponent implements OnInit {
 
     this.comparts.forEach((compart) => {
       const wid = compart.id;
-      this.branchForm.get(`first_payin_${wid}`)?.setValue("");
-      this.branchForm.get(`payin_${wid}`)?.setValue("");
-      this.branchForm.get(`payout_${wid}`)?.setValue("");
+      this.chiefForm.get(`first_payin_${wid}`)?.setValue("");
+      this.chiefForm.get(`payin_${wid}`)?.setValue("");
+      this.chiefForm.get(`payout_${wid}`)?.setValue("");
     });
 
     this.loading = false;
@@ -371,12 +360,12 @@ export class AddBranchComponent implements OnInit {
     this.availableSearchTerm = "";
     this.selectedSearchTerm = "";
 
-    this.branchForm.markAsPristine();
-    this.branchForm.markAsUntouched();
+    this.chiefForm.markAsPristine();
+    this.chiefForm.markAsUntouched();
   }
 
   isFieldInvalid(fieldName: string): boolean {
-    const field = this.branchForm.get(fieldName);
+    const field = this.chiefForm.get(fieldName);
     return !!field && field.invalid && field.touched;
   }
 

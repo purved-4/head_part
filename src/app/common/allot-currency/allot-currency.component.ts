@@ -3,22 +3,24 @@ import { SnackbarService } from "../snackbar/snackbar.service";
 import { ChiefService } from "../../pages/services/chief.service";
 import { ComPartService } from "../../pages/services/com-part.service";
 import { PortalService } from "../../pages/services/portal.service";
+import { DateTimeUtil } from "../../utils/date-time.utils";
 
 @Component({
   selector: "app-allot-currency",
   templateUrl: "./allot-currency.component.html",
 })
 export class AllotCurrencyComponent implements OnInit {
+  DateTimeUtil = DateTimeUtil;
   @Input() entityId: any;
   @Input() entityType: any;
   @Output() close = new EventEmitter<void>();
 
   // Radio button selection ke liye variables
+  effectiveFrom: any = null;
   selectedCurrency: string | null = null;
-  currencyRate: number | null = null;
+
   selectedModes: string[] = [];
-  payinRate: number | null = null;
-  payoutRate: number | null = null;
+  rate: number | null = null;
 
   isPortalCurrencyLoaded: boolean = false;
 
@@ -28,13 +30,18 @@ export class AllotCurrencyComponent implements OnInit {
     USD: null,
   };
 
+  effectiveFromNew: any;
+
   constructor(
     private snackBar: SnackbarService,
     private chiefService: ChiefService,
     private comPartService: ComPartService,
     private portalService: PortalService,
-  ) {}
+  ) {
+    this.effectiveFromNew = new Date();
+  }
 
+  // ngOnInit replace karo
   ngOnInit(): void {
     if (this.entityType === "CHIEF") {
       this.loadCurrencies();
@@ -56,7 +63,6 @@ export class AllotCurrencyComponent implements OnInit {
         this.setDefaultSelection();
       },
       error: (err) => {
-        console.log("No existing data", err);
         this.snackBar.show(
           err.error?.message || "No existing data found",
           false,
@@ -77,7 +83,6 @@ export class AllotCurrencyComponent implements OnInit {
         this.setDefaultSelection();
       },
       error: (err) => {
-        console.log("No existing data", err);
         this.snackBar.show(
           err.error?.message || "No existing data found",
           false,
@@ -88,26 +93,6 @@ export class AllotCurrencyComponent implements OnInit {
     });
   }
 
-  // loadPortalCurrencies() {
-  //   this.portalService.getCurrenciesbyPortal(this.entityId).subscribe({
-  //     next: (res: any) => {
-  //       const data = Array.isArray(res) ? res : res?.data || [];
-  //       this.loadExistingData(data);
-  //       this.snackBar.show(res.message || "Portal currencies fetched", true);
-
-  //       this.setDefaultSelection();
-  //     },
-  //     error: (err) => {
-  //       console.log("No existing data", err);
-  //       this.snackBar.show(
-  //         err.error?.message || "No portal currency data found",
-  //         false,
-  //       );
-
-  //       this.setDefaultSelection();
-  //     },
-  //   });
-  // }
   loadPortalCurrencies() {
     this.portalService.getCurrenciesbyPortal(this.entityId).subscribe({
       next: (res: any) => {
@@ -121,8 +106,6 @@ export class AllotCurrencyComponent implements OnInit {
         this.setDefaultSelection();
       },
       error: (err) => {
-        console.log("No existing data", err);
-
         this.isPortalCurrencyLoaded = true;
 
         this.snackBar.show(
@@ -158,15 +141,15 @@ export class AllotCurrencyComponent implements OnInit {
       if (item.currency === "INR") {
         this.existingData.INR = {
           rate: item.rate,
-          payinRate: item.payinRate,
-          payoutRate: item.payoutRate,
+          effectiveFrom: item.effectiveFrom,
+
           modes: this.convertModes(item.modes),
         };
       } else if (item.currency === "USD") {
         this.existingData.USD = {
           rate: item.rate,
-          payinRate: item.payinRate,
-          payoutRate: item.payoutRate,
+          effectiveFrom: item.effectiveFrom,
+
           modes: this.convertModes(item.modes),
         };
       }
@@ -183,28 +166,23 @@ export class AllotCurrencyComponent implements OnInit {
   selectCurrency(currency: string) {
     this.selectedCurrency = currency;
 
-    // Load existing data if available
     const existing =
       this.existingData[currency as keyof typeof this.existingData];
+
     if (existing) {
-      this.currencyRate = existing.rate;
       this.selectedModes = [...existing.modes];
-      this.payinRate = existing.payinRate;
-      this.payoutRate = existing.payoutRate;
+      this.rate = existing.rate; // ✅ FIX
+      // this.effectiveFrom = existing.effectiveFrom;
     } else {
-      this.currencyRate = null;
       this.selectedModes = [];
-      this.payinRate = null;
-      this.payoutRate = null;
+      this.rate = null; // optional reset
     }
   }
 
   clearSelection() {
     this.selectedCurrency = null;
-    this.currencyRate = null;
+
     this.selectedModes = [];
-    this.payinRate = null;
-    this.payoutRate = null;
   }
 
   getExistingDataForCurrency(currency: string | null): any {
@@ -240,31 +218,27 @@ export class AllotCurrencyComponent implements OnInit {
 
     let payload: any;
 
+    console.log(this.effectiveFromNew);
+    console.log(DateTimeUtil.toUtcISOString(this.effectiveFromNew));
+
     if (this.entityType === "PORTAL") {
       payload = {
         currency: this.selectedCurrency,
         modes: this.selectedModes,
       };
-    } else {
-      if (!this.currencyRate) {
-        this.snackBar.show("Please enter exchange rate", false);
-        return;
-      }
-      if (!this.payinRate) {
-        this.snackBar.show("Please enter Payin rate", false);
-        return;
-      }
-      if (!this.payoutRate) {
-        this.snackBar.show("Please enter Payout rate", false);
-        return;
-      }
-
+    }
+    if (this.entityType === "COM_PART" || this.entityType === "OWNER") {
       payload = {
         currency: this.selectedCurrency,
-        rate: this.currencyRate,
+        rate: this.rate,
         modes: this.selectedModes,
-        payinRate: this.payinRate,
-        payoutRate: this.payoutRate,
+        effectiveFrom: new Date(this.effectiveFromNew).toISOString(),
+      };
+    } else {
+      payload = {
+        currency: this.selectedCurrency,
+        rate: this.rate,
+        modes: this.selectedModes,
       };
     }
 
@@ -298,13 +272,13 @@ export class AllotCurrencyComponent implements OnInit {
 
         if (!this.existingData[key]) {
           this.existingData[key] = {
-            rate: this.currencyRate,
-            payinRate: this.payinRate,
-            payoutRate: this.payoutRate,
+            rate: this.rate,
             modes: [...this.selectedModes],
+            effectiveFrom: this.effectiveFrom,
           };
         } else {
           this.existingData[key]!.modes = [...this.selectedModes];
+          this.existingData[key]!.effectiveFrom = this.effectiveFrom;
         }
 
         this.clearSelection();

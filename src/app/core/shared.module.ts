@@ -26,23 +26,26 @@ import { ReloadComponent } from "../common/reload/reload.component";
 import { MobileChattingComponent } from "../common/mobile-chatting/mobile-chatting.component";
 import { ChatResponsiveComponent } from "../common/chat-responsive/chat-responsive.component";
 import { ChatingComponent } from "../common/chating/chating.component";
- import { RecycleUpiComponent } from "../common/recycle-upi/recycle-upi.component";
+import { RecycleUpiComponent } from "../common/recycle-upi/recycle-upi.component";
 import { RecycleBankComponent } from "../common/recycle-bank/recycle-bank.component";
-// import { TopupCapacityComponent } from "../common/topup-capacity/topup-capacity.component";
+ import { PlaceholderPipe } from "../pipes/placeholder.pipe";
 // import { AcceptRejectChatComponent } from "../pages/comPart/accept-reject-chat/accept-reject-chat.component";
-import { PlaceholderPipe } from "../pipes/placeholder.pipe";
-import { SidebarNotificationComponent } from "../common/sidebar-notification/sidebar-notification.component";
 import { WebsitePercentageModelComponent } from "../common/website-percentage-model/website-percentage-model.component";
+import { SidebarNotificationComponent } from "../common/sidebar-notification/sidebar-notification.component";
 import { TimeZoneComponent } from "../common/time-zone/time-zone.component";
 import { CompartPercentageModleComponent } from "../common/compart-percentage-modle/compart-percentage-modle.component";
-import { TimeZonePipe } from "../pipes/time-zone.pipe";
-import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods/payments-methods.component";
-import { BanksComponent } from "../common/head_branch/banks/banks.component";
-import { UpisComponent } from "../common/head_branch/upis/upis.component";
 import { EnityCompartEditModelComponent } from "../common/enity-compart-edit-model/enity-compart-edit-model.component";
-import { PayinCapacityComponent } from "../common/payin-capacity/payin-capacity.component";
+import { TimeZonePipe } from "../pipes/time-zone.pipe";
+import { AutoRefreshComponent } from "../common/auto-refresh/auto-refresh.component";
+import { HierarchyManagementComponent } from "../common/hierarchy-management/hierarchy-management.component";
+import { BanksComponent } from "../common/head_branch/banks/banks.component";
+import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods/payments-methods.component";
+import { UpisComponent } from "../common/head_branch/upis/upis.component";
+import { AllotCurrencyComponent } from "../common/allot-currency/allot-currency.component";
 import { RouterModule } from "@angular/router";
-import { OverrideCurrencyManagementComponent } from "../common/head_branch/override-currency-management/override-currency-management.component";
+import { PayinCapacityComponent } from "../common/payin-capacity/payin-capacity.component";
+import { OverrideCurrencyRateComponent } from "../common/head_branch/override-currency-rate/override-currency-rate.component";
+import { ThemeToggleComponent } from "../theme/theme.component";
 
 // shared.module.ts
 @NgModule({
@@ -71,34 +74,31 @@ import { OverrideCurrencyManagementComponent } from "../common/head_branch/overr
     MobileChattingComponent,
     ChatResponsiveComponent,
     ChatingComponent,
+    // AcceptRejectChatComponent,
     RecycleBankComponent,
     RecycleUpiComponent,
-    // TopupCapacityComponent,
+    PayinCapacityComponent,
     PlaceholderPipe,
-    // PortalPercentagePopupComponent,
-    SidebarNotificationComponent,
     WebsitePercentageModelComponent,
+    SidebarNotificationComponent,
     TimeZoneComponent,
     CompartPercentageModleComponent,
-    TimeZonePipe,
-    PaymentsMethodsComponent,
-    BanksComponent,
-    UpisComponent,
     EnityCompartEditModelComponent,
+    TimeZonePipe,
+    AutoRefreshComponent,
+    HierarchyManagementComponent,
+    BanksComponent,
+    PaymentsMethodsComponent,
     UpisComponent,
-    PayinCapacityComponent,
-    OverrideCurrencyManagementComponent
-    
-
-    
-    
-  ],
+    AllotCurrencyComponent,
+    OverrideCurrencyRateComponent,
+    ThemeToggleComponent
+   ],
   exports: [
     WebhookDataComponent,
     NotificationComponent,
     UserProfileComponent,
     WorkTimeComponent,
-    
     LimitsComponent,
     FirstLetterPipe,
     PercentageLogComponent,
@@ -117,24 +117,34 @@ import { OverrideCurrencyManagementComponent } from "../common/head_branch/overr
     MobileChattingComponent,
     ChatResponsiveComponent,
     ChatingComponent,
+    // AcceptRejectChatComponent,
     RecycleBankComponent,
     RecycleUpiComponent,
-    // TopupCapacityComponent,
+    PayinCapacityComponent,
     PlaceholderPipe,
-    // PortalPercentagePopupComponent,
-    SidebarNotificationComponent,
     WebsitePercentageModelComponent,
+    SidebarNotificationComponent,
     TimeZoneComponent,
     CompartPercentageModleComponent,
-    TimeZonePipe,
-    PaymentsMethodsComponent,
-    BanksComponent,
-    UpisComponent,
     EnityCompartEditModelComponent,
+    TimeZonePipe,
+    AutoRefreshComponent,
+    HierarchyManagementComponent,
+    BanksComponent,
+    PaymentsMethodsComponent,
     UpisComponent,
-    PayinCapacityComponent,
-    OverrideCurrencyManagementComponent
+    AllotCurrencyComponent,   
+OverrideCurrencyRateComponent,
+ThemeToggleComponent
   ],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, QRCodeComponent,RouterModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+     RouterModule,
+     QRCodeComponent,
+   
+     
+  ],
 })
 export class SharedModule {}

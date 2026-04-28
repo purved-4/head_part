@@ -48,7 +48,7 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
 
   // ================= AUTO FETCH =================
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.show && this.entityId && this.portalId && this.payinId) {
+    if (this.show && this.entityId  && this.payinId) {
       this.fetchCapacity();
     }
   }
@@ -65,7 +65,7 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
 
     console.log(this.entityId, this.portalId, this.payinId);
 
-    if (!this.entityId || !this.portalId || !this.payinId) {
+    if (!this.entityId|| !this.payinId) {
       return;
     }
 
@@ -76,7 +76,7 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
         .getPayinCapacity(
           this.entityType,
           this.entityId,
-          this.portalId,
+          // this.portalId,
           this.mode,
           this.payinId,
         )
@@ -225,3 +225,4 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
     this.isEditing = false;
   }
 }
+

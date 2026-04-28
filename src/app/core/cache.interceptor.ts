@@ -26,7 +26,7 @@ export class AuthCacheInterceptor implements HttpInterceptor {
       withCredentials: true,
     });
 
-    //  Skip cache for non-GET
+    // ❌ Skip cache for non-GET
     if (authReq.method !== "GET") {
       return next.handle(authReq);
     }

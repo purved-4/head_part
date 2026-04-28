@@ -67,7 +67,7 @@ export class RecycleBankComponent implements OnInit {
   }
 
   reactivateBank(bankId: string) {
-    this.bankService.toogleBankStatus(bankId).subscribe({
+    this.bankService.toogleBankDeleted(bankId).subscribe({
       next: () => {
         this.snack.show("Bank reactivated successfully!", true);
         this.fetchDeletedBanks();

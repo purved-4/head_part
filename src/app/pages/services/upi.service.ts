@@ -197,4 +197,13 @@ export class UpiService {
   toggleIsUpi(id: string): Observable<any> {
     return this.http.patch<any>(`${baseUrl}/upi/${id}/toggle-isupi`, {});
   }
+
+  toogleUpiDeleted(upiId: any): Observable<any[]> {
+    return this.http
+      .patch<any[]>(`${baseUrl}/upi/toggleDeleted/${upiId}`, {})
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 }

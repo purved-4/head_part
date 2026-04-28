@@ -1,4 +1,3 @@
-
 import {
   Component,
   NgZone,
@@ -226,7 +225,7 @@ export class MobileChattingComponent
     private portalService: PortalService,
     private fundService: FundsService,
     private route: ActivatedRoute,
-    private compartServices : ComPartService
+    private compartServices: ComPartService,
   ) {}
 
   /* ════════════════════════════════════════════
@@ -637,8 +636,10 @@ export class MobileChattingComponent
           this.threadPageSize,
         )
         .subscribe({
-          next: (res: any) =>
-            this.processPaginatedThreadResponse(res, this.activeTab),
+          next: (res: any) => {
+            const data = res?.data?.content || res?.content || [];
+            this.processPaginatedThreadResponse(data, this.activeTab);
+          },
           error: () => this.onThreadLoadError(),
         });
     } else {
@@ -651,13 +652,13 @@ export class MobileChattingComponent
         )
         .subscribe({
           next: (res: any) => {
-            this.processPaginatedThreadResponse(res.content, this.activeTab);
+            const data = res?.data?.content || res?.content || [];
+            this.processPaginatedThreadResponse(data, this.activeTab);
           },
           error: () => this.onThreadLoadError(),
         });
     }
   }
-
   private onThreadLoadError(): void {
     this.loadingThreads = false;
     this.loadingMoreThreads = false;
@@ -865,26 +866,26 @@ export class MobileChattingComponent
   // }
 
   loadQuestion(): void {
-  if (!this.isHeadOrBranchRole()) {
-    this.questions = [];
-    return;
-  }
-
-  this.compartServices.getAllQuestions().subscribe({
-    next: (res: any) => {
-      console.log("API Response:", res); // DEBUG
-
-      this.questions = res?.content || [];   // ✅ FIX
-      this.filteredQuestions = this.questions.slice(0, 6); // ✅ IMPORTANT
-
-      console.log("Questions:", this.questions); // DEBUG
-    },
-    error: () => {
+    if (!this.isHeadOrBranchRole()) {
       this.questions = [];
-      this.filteredQuestions = [];
-    },
-  });
-}
+      return;
+    }
+
+    this.compartServices.getAllQuestions().subscribe({
+      next: (res: any) => {
+        console.log("API Response:", res); // DEBUG
+
+        this.questions = res?.content || []; // ✅ FIX
+        this.filteredQuestions = this.questions.slice(0, 6); // ✅ IMPORTANT
+
+        console.log("Questions:", this.questions); // DEBUG
+      },
+      error: () => {
+        this.questions = [];
+        this.filteredQuestions = [];
+      },
+    });
+  }
 
   filterQuestion(): void {
     const term = (this.questionSearchTerm || "").toString().trim();
@@ -942,23 +943,18 @@ export class MobileChattingComponent
   canSend(): boolean {
     if (!this.selectedNotification) return false;
 
-    if (this.isHeadOrBranchRole()) {
-      // For Head/Branch: either have selected question OR have file OR have text
-      const hasQuestion = !!this.selectedQuestion;
-      const hasFile = !!this.selectedUploadFile;
-      const hasText = !!(this.newMessage || "").trim();
+    const hasText = !!(this.newMessage || "").trim();
+    const hasFile = !!this.selectedUploadFile;
+    const hasQuestion = !!this.selectedQuestion;
 
-      // Can send if they have question OR (file with text) OR just file
+    // Head/Branch
+    if (this.isHeadOrBranchRole()) {
       return hasQuestion || hasFile || hasText;
     }
 
-    // For tp roles: either have text OR have file
-    const hasText = !!(this.newMessage || "").trim();
-    const hasFile = !!this.selectedUploadFile;
-
+    // Other roles
     return hasText || hasFile;
   }
-
   /* ════════════════════════════════════════════
      THREAD → NOTIFICATION MAPPING
      ════════════════════════════════════════════ */
@@ -1556,46 +1552,50 @@ export class MobileChattingComponent
   // }
 
   sendMessage(event?: any): void {
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
+    if (!this.canSend()) return;
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    if (!this.selectedNotification) {
+      this.snackBar.show("No conversation selected", false);
+      return;
+    }
+
+    const text = (this.newMessage || "").toString().trim();
+    const hasFile = !!this.selectedUploadFile;
+
+    if (!text && !hasFile) {
+      this.snackBar.show("Please enter a message or attach a file", false);
+      return;
+    }
+
+    const threadId = this.selectedNotification.id;
+
+    const payload = {
+      senderId: this.branchId,
+      message: text, // ✅ NORMAL TEXT (NO QUESTION)
+      fileUrl: null,
+      senderType: this.role,
+      roleId: this.branchId,
+    };
+
+    try {
+      this.socketConfigService.sendMessage(threadId, payload);
+
+      // reset only UI state
+      this.newMessage = "";
+      this.selectedUploadFile = null;
+      this.selectedQuestion = null;
+      this.questionSearchTerm = "";
+      this.showQuestionDropDown = false;
+
+      setTimeout(() => this.scrollToBottom(), 80);
+    } catch {
+      this.snackBar.show("Failed to send message", false);
+    }
   }
-
-  if (!this.selectedNotification) {
-    this.snackBar.show("No conversation selected", false);
-    return;
-  }
-
-  if (!this.selectedQuestion) {
-    this.snackBar.show("Please select a question", false);
-    return;
-  }
-
-  const threadId = this.selectedNotification.id;
-
-  const payload = {
-    senderId: this.branchId,
-    message: this.selectedQuestion.id, // ONLY QUESTION ID
-    fileUrl: null,
-    senderType: this.role,
-    roleId: this.branchId,
-  };
-
-  try {
-    this.socketConfigService.sendMessage(threadId, payload);
-
-    // Reset after send
-    this.selectedQuestion = null;
-    this.questionSearchTerm = "";
-    this.newMessage = "";
-
-    this.showQuestionDropDown = false;
-
-    setTimeout(() => this.scrollToBottom(), 80);
-  } catch {
-    this.snackBar.show("Failed to send message", false);
-  }
-}
 
   private uploadAndSend(threadId: string, text: string): void {
     this.uploadingFile = true;
@@ -1608,6 +1608,7 @@ export class MobileChattingComponent
         next: (res: any) => {
           const fileId =
             res?.fileId || res?.id || (typeof res === "string" ? res : null);
+
           let fileUrl = fileId ? `${fileBaseUrl}/${fileId}` : res?.downloadUrl;
 
           if (!fileUrl) {
@@ -1616,16 +1617,9 @@ export class MobileChattingComponent
             return;
           }
 
-          let messageToSend = text;
-
-          if (this.isHeadOrBranchRole() && this.selectedQuestion) {
-            messageToSend =
-              this.selectedQuestion.id || this.selectedQuestion.messageText;
-          }
-
-          const payload: any = {
+          const payload = {
             senderId: this.branchId,
-            message: messageToSend,
+            message: text, // ✅ NO QUESTION OVERRIDE
             fileUrl,
             senderType: this.role,
             roleId: this.branchId,
@@ -1634,19 +1628,13 @@ export class MobileChattingComponent
 
           this.socketConfigService.sendMessage(threadId, payload);
 
-          if (this.isHeadOrBranchRole()) {
-            this.newMessage = "";
-          } else {
-            this.newMessage = "";
-            this.selectedQuestion = null;
-            this.questionSearchTerm = "";
-          }
-
+          this.newMessage = "";
           this.uploadingFile = false;
           this.removeInlineFile();
+
           setTimeout(() => this.scrollToBottom(), 80);
         },
-        error: (err) => {
+        error: () => {
           this.uploadingFile = false;
           this.uploadError = "Upload failed. Please try again.";
         },
@@ -1669,15 +1657,9 @@ export class MobileChattingComponent
 
   // FIX: Improved sendTextMessage method
   private sendTextMessage(threadId: string, text: string): void {
-    let messageToSend = text;
-
-    if (this.selectedQuestion) {
-      messageToSend = this.selectedQuestion.id;
-    }
-
     const payload = {
       senderId: this.branchId,
-      message: messageToSend,
+      message: text,
       fileUrl: null,
       senderType: this.role,
       roleId: this.branchId,
@@ -1685,12 +1667,9 @@ export class MobileChattingComponent
 
     try {
       this.socketConfigService.sendMessage(threadId, payload);
-
       this.newMessage = "";
-
-      // this.snackBar.show("Message sent", true);
       setTimeout(() => this.scrollToBottom(), 80);
-    } catch (error) {
+    } catch {
       this.snackBar.show("Failed to send message. Try again.", false);
     }
   }

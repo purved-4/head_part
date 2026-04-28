@@ -207,10 +207,10 @@ export class UpisComponent implements OnInit {
         "",
         [Validators.required, Validators.min(1), Validators.max(10000000)],
       ],
-      min_tran_count: [null],
-      max_tran_count: [null],
-      min_total_tran_amount: [null],
-      max_total_tran_amount: [null],
+      // min_tran_count: [null],
+      // max_tran_count: [null],
+      // min_total_tran_amount: [null],
+      // max_total_tran_amount: [null],
     });
   }
 
@@ -282,10 +282,10 @@ export class UpisComponent implements OnInit {
             return {
               ...r,
               status: this.normalizeStatus(r),
-              min_tran_count: r.minTranCount ?? null,
-              max_tran_count: r.maxTranCount ?? null,
-              min_total_tran_amount: r.minTotalTranAmount ?? null,
-              max_total_tran_amount: r.maxTotalTranAmount ?? null,
+              // min_tran_count: r.minTranCount ?? null,
+              // max_tran_count: r.maxTranCount ?? null,
+              // min_total_tran_amount: r.minTotalTranAmount ?? null,
+              // max_total_tran_amount: r.maxTotalTranAmount ?? null,
               portalDomain:
                 r.portalDomain || r.portalName || r.portal || r.bankId || "",
 
@@ -570,7 +570,7 @@ export class UpisComponent implements OnInit {
   toggleUpiStatus(upi: any): void {
     const newStatus = upi.status === "active" ? "inactive" : "active";
     upi.status = newStatus;
-    this.upiService.toogleUpiStatus(upi.id).subscribe({
+    this.upiService.toogleUpiDeleted(upi.id).subscribe({
       next: () => this.fetchUpis(),
       error: (err) => {
         upi.status = upi.status === "active" ? "inactive" : "active";
@@ -767,10 +767,10 @@ export class UpisComponent implements OnInit {
       maxAmount: upi.maxAmount || "",
       minAmount: upi.minAmount || "",
 
-      min_tran_count: upi.min_tran_count ?? null,
-      max_tran_count: upi.max_tran_count ?? null,
-      min_total_tran_amount: upi.min_total_tran_amount ?? null,
-      max_total_tran_amount: upi.max_total_tran_amount ?? null,
+      // min_tran_count: upi.min_tran_count ?? null,
+      // max_tran_count: upi.max_tran_count ?? null,
+      // min_total_tran_amount: upi.min_total_tran_amount ?? null,
+      // max_total_tran_amount: upi.max_total_tran_amount ?? null,
     };
 
     this.originalVpa = (upi.vpa || "").trim().toLowerCase();
@@ -1477,8 +1477,8 @@ export class UpisComponent implements OnInit {
   isLive(upi: any): boolean {
     return !!(
       this.payinStatus && // Payin toggle ON
-      upi.isUpiActive && // Toggle ON
-      upi.status === "active" // Status active
+      upi.isUpiActive  // Toggle ON
+      // upi.status === "active" // Status active
     );
   }
   showTxnModal = false;
