@@ -348,6 +348,7 @@ export class HeadDashboardComponent
         const tx = {
           id: fund.id || null,
           fundId: fund.id || null,
+            fundtype: fund.fundtype,
           type: "payin",
           portal:
             fund.portalName || fund.portalDomain || fund.portalId || "Portal",
@@ -1958,7 +1959,7 @@ export class HeadDashboardComponent
             : fund.transactionType === "payout"
               ? "payout"
               : "payin",
-
+  fundtype: fund.fundtype,
       portal: fund.portalName || fund.portalDomain || fund.portalId || null,
 
       currency: fund.currency,
@@ -2297,4 +2298,23 @@ export class HeadDashboardComponent
 
     return result.trim() || "Just now";
   }
+
+
+  getTransactionLabel(tx: any): string {
+  if (tx.type === 'payout') return 'Payout';
+  if (tx.fundtype === 'UPI') return 'UPI';
+  return 'Bank';
+}
+
+getTxKind(tx: any): 'UPI' | 'Bank' | 'Payout' {
+  if (tx.type === 'payout') return 'Payout';
+  return (tx.fundtype || '').toUpperCase() === 'UPI' ? 'UPI' : 'Bank';
+}
+
+getTxAccountLabel(tx: any): string {
+  if ((tx.fundtype || '').toUpperCase() === 'UPI') {
+    return tx.upiId || tx.vpa || '—';
+  }
+  return tx.accountNo || tx.holderName || '—';
+}
 }

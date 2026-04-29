@@ -54,10 +54,10 @@
 
     <!-- MAIN GRID: Pending UPI, Pending Bank, Pending payouts -->
     <div
-      class="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6 mb-6 md:mb-8"
+      class="hidden lg:grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6 mb-6 md:mb-8"
     >
       <!-- Pending Actions (UPI payins) -->
-      <div class="lg:col-span-1 space-y-6">
+      <!-- <div class="lg:col-span-1 space-y-6">
         <div
           class="bg-[var(--color-surface)] rounded-2xl overflow-hidden shadow-[var(--shadow-md)] border border-[var(--color-border)]"
         >
@@ -83,7 +83,6 @@
             </div>
           </div>
 
-          <!-- FIXED HEIGHT container with scroll -->
           <div
             class="overflow-y-auto h-[480px] md:h-[600px] scrollbar-thin scrollbar-thumb-[var(--color-muted)]/30 scrollbar-track-[var(--color-bg)]"
           >
@@ -92,7 +91,6 @@
                 *ngFor="let transaction of pagedPendingUpi()"
                 class="p-4 hover:bg-[var(--color-hover)] transition relative group"
               >
-                <!-- Primary left border for UPI -->
                 <div
                   class="absolute left-0 top-0 w-1 h-full transition-all group-hover:w-1.5 bg-[var(--color-primary-light)]"
                 ></div>
@@ -142,7 +140,6 @@
                     <div
                       class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]"
                     >
-                      <!-- <span>{{ transaction.date | date: "short" }}</span> -->
                       <span class="font-semibold text-red-600">
                         {{ getTimeAgo(transaction.date) }}
                       </span>
@@ -154,7 +151,6 @@
                         class="px-2 py-0.5 rounded-md font-medium bg-[var(--color-info)]/20 text-[var(--color-secondary)]"
                         title="First Payin"
                       >
-                        <!-- {{transaction.ftt && "FTT"}} -->
                         {{ transaction.ftt ? "RPI" : "PPI" }}
                       </span>
 
@@ -217,7 +213,7 @@
             </div>
           </div>
 
-          <!-- Pagination for Pending UPI -->
+         
           <div
             class="p-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
           >
@@ -225,8 +221,7 @@
               <label class="text-xs text-[var(--color-muted)] font-medium"
                 >Show</label
               >
-              <!-- <select [(ngModel)]="pendingPageSize" (change)="onChangePendingPageSize(pendingPageSize)"
-                class="text-xs border border-[var(--color-border)] rounded-lg px-2 py-1 bg-[var(--color-surface)] focus:ring-2 focus:ring-[var(--color-primary)]"> -->
+
 
               <select
                 [(ngModel)]="pendingUpiPageSize"
@@ -239,10 +234,7 @@
               </select>
             </div>
             <div class="flex items-center gap-2">
-              <!-- <button (click)="setPendingPage(pendingPage - 1)" [disabled]="pendingPage === 1"
-                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed">
-                Prev
-              </button> -->
+             
 
               <button
                 (click)="setPendingUpiPage(pendingUpiPage - 1)"
@@ -251,17 +243,13 @@
               >
                 Prev
               </button>
-              <!-- <span class="text-xs text-[var(--color-muted)] font-medium px-2">{{ pendingPage }} / {{
-                pendingTotalPages() }}</span> -->
+             
 
               <span class="text-xs text-[var(--color-muted)] font-medium px-2"
                 >{{ pendingUpiPage }} / {{ pendingUpiTotalPages() }}</span
               >
 
-              <!-- <button (click)="setPendingPage(pendingPage + 1)" [disabled]="pendingPage >= pendingTotalPages()"
-                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed">
-                Next
-              </button> -->
+            
 
               <button
                 (click)="setPendingUpiPage(pendingUpiPage + 1)"
@@ -273,7 +261,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Pending Actions (Bank payins) -->
       <div class="lg:col-span-1 space-y-6">
@@ -288,7 +276,7 @@
                 <h3
                   class="font-bold text-[var(--color-font)] text-lg flex items-center"
                 >
-                  Pending Bank Payins
+                  Pending Payins
                   <span
                     class="ml-2 text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--color-info)]/20 text-[var(--color-secondary)] border border-[var(--color-info)]/50"
                   >
@@ -330,10 +318,16 @@
                   <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start gap-2">
                       <div class="flex-1 min-w-0">
-                        <p
+                        <!-- <p
                           class="text-sm font-bold text-[var(--color-font)] truncate"
                         >
                           {{ transaction.fundDisplayId }}
+                        </p> -->
+                        <p
+                          class="text-sm font-bold text-[var(--color-font)] truncate"
+                        >
+                          {{ transaction.fundDisplayId }} -
+                          {{ getTransactionLabel(transaction) }}
                         </p>
                         <p
                           class="text-xs text-[var(--color-muted)] truncate mt-0.5"
@@ -341,13 +335,23 @@
                         >
                           {{ transaction.portal }} - {{ transaction.currency }}
                         </p>
-                        <p
+
+                        <!-- <p
                           class="text-xs text-[var(--color-muted)] truncate mt-0.5"
                         >
                           {{
                             transaction.accountNo ||
                               transaction.holderName ||
                               "—"
+                          }}
+                        </p> -->
+                        <p
+                          class="text-xs text-[var(--color-muted)] truncate mt-0.5"
+                        >
+                          {{
+                            (transaction.fundtype === "UPI"
+                              ? transaction.upiId || transaction.vpa
+                              : transaction.accountNo) || "—"
                           }}
                         </p>
                       </div>
@@ -795,14 +799,16 @@
                     <p
                       class="text-sm font-bold text-[var(--color-font)] truncate"
                     >
-                      {{ transaction.fundDisplayId }} -
+                      <!-- {{ transaction.fundDisplayId }} -
                       {{
                         transaction.type === "payout"
                           ? "Payout"
                           : transaction.mode === "upi"
                             ? "UPI"
                             : "Bank"
-                      }}
+                      }} -->
+                      {{ transaction.fundDisplayId }} -
+                      {{ getTxKind(transaction) }}
                     </p>
 
                     <!-- PORTAL + CURRENCY -->
@@ -1800,7 +1806,7 @@
         </div>
 
         <!-- Bank Specific Details -->
-        <div
+        <!-- <div
           *ngIf="selectedTransaction.mode === 'bank'"
           class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200"
         >
@@ -1812,8 +1818,43 @@
           <p class="font-bold text-blue-700">
             {{ selectedTransaction.accountNo }}
           </p>
+        </div> -->
+
+        <!-- UPI Details -->
+        <div
+          *ngIf="
+            (selectedTransaction.fundtype || selectedTransaction.mode) ===
+              'UPI' || selectedTransaction.mode === 'upi'
+          "
+          class="mb-6 p-4 rounded-xl bg-violet-50 border border-violet-200"
+        >
+          <p
+            class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
+          >
+            UPI ID (VPA)
+          </p>
+          <p class="font-bold text-violet-700">
+            {{ selectedTransaction.upiId || selectedTransaction.vpa || "—" }}
+          </p>
         </div>
 
+        <!-- Bank Details -->
+        <div
+          *ngIf="
+            (selectedTransaction.fundtype || selectedTransaction.mode) !==
+              'UPI' && selectedTransaction.mode !== 'upi'
+          "
+          class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200"
+        >
+          <p
+            class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
+          >
+            Account Number
+          </p>
+          <p class="font-bold text-blue-700">
+            {{ selectedTransaction.accountNo || "—" }}
+          </p>
+        </div>
         <div
           class="mb-6"
           *ngIf="selectedTransaction.remarks || selectedTransaction.message"
