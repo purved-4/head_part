@@ -1,6 +1,6 @@
 
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { UserStateService } from '../../../store/user-state.service';
 import { BranchService } from '../../../pages/services/branch.service';
 import { HeadService } from '../../../pages/services/head.service';
@@ -14,14 +14,19 @@ import { CurrencyService } from '../../../pages/services/currency.service';
 })
 export class OverrideCurrencyRateComponent implements OnInit {
 
-  entityId!: any;
-  role!: any;
+  // entityId!: any;
+  // role!: any;
+
+  
+  @Input() entityId!: any;
+  @Input() role!: any;
+  @Input() isManagerView: boolean = false;
 
   payinStatus: boolean = false;
   customRate: boolean = false;
 
   currencies: any[] = [];
-isManagerView: boolean = false;
+// isManagerView: boolean = false;
   constructor(
     private userStateServices: UserStateService,
     private branchService: BranchService,
@@ -30,16 +35,37 @@ isManagerView: boolean = false;
     private snack : SnackbarService
   ) {}
 
-  ngOnInit(): void {
-    this.entityId = this.userStateServices.getCurrentEntityId();
-    this.role = this.userStateServices.getRole();
+  // ngOnInit(): void {
+  //   this.entityId = this.userStateServices.getCurrentEntityId();
+  //   this.role = this.userStateServices.getRole();
 
-    // Only call payin status for HEAD / BRANCH
-  if (!this.isManagerView) {
-    this.getPayinStatus();
+  //   // Only call payin status for HEAD / BRANCH
+  // if (!this.isManagerView) {
+  //   this.getPayinStatus();
+  // }
+  //   this.loadCurrencies();      
+  // }
+
+    ngOnInit(): void {
+
+    //  ONLY fallback if not coming from parent
+    if (!this.entityId) {
+      this.entityId = this.userStateServices.getCurrentEntityId();
+    }
+
+    if (!this.role) {
+      this.role = this.userStateServices.getRole();
+    }
+
+    //  Manager should skip this
+    if (!this.isManagerView) {
+      this.getPayinStatus();
+    }
+
+    this.loadCurrencies();
   }
-    this.loadCurrencies();      
-  }
+
+  
 
   //  FIXED METHOD
   private getPayinStatus() {

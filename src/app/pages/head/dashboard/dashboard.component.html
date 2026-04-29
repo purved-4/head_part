@@ -154,8 +154,8 @@
                         class="px-2 py-0.5 rounded-md font-medium bg-[var(--color-info)]/20 text-[var(--color-secondary)]"
                         title="First Payin"
                       >
-                  
-                        {{ transaction.ftt ? "PPI" : "RPI" }}
+                        <!-- {{transaction.ftt && "FTT"}} -->
+                        {{ transaction.ftt ? "RPI" : "PPI" }}
                       </span>
 
                       <div class="flex gap-1.5">
@@ -375,7 +375,7 @@
                         title="First Payin"
                       >
                         <!-- {{transaction.ftt && "FTT"}} -->
-                        {{ transaction.ftt ? "PPI" : "RPI" }}
+                        {{ transaction.ftt ? "RPI" : "PPI" }}
                       </span>
 
                       <div class="flex gap-1.5">
@@ -837,7 +837,7 @@
                         *ngIf="transaction.ftt && transaction.type !== 'payout'"
                         class="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-300"
                       >
-                        {{ transaction.ftt ? "PPI" : "RPI" }}
+                        {{ transaction.ftt ? "RPI" : "PPI" }}
                       </span>
                     </div>
                   </div>
