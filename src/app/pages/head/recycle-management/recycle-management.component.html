@@ -1,10 +1,18 @@
-<div class="p-4">
-  <h2 class="text-xl font-semibold mb-4">Recycle Management</h2>
+<div class="p-4 bg-[var(--color-bg)] min-h-screen">
+
+  <h2 class="text-xl font-semibold mb-4 text-[var(--color-font)]">
+    Recycle Management
+  </h2>
 
   <div class="mb-4">
-    <label class="mr-2 font-medium">Select Type:</label>
+    <label class="mr-2 font-medium text-[var(--color-font)]">
+      Select Type:
+    </label>
 
-    <select [(ngModel)]="selectedType" class="border p-2 rounded">
+    <select
+      [(ngModel)]="selectedType"
+      class="border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] p-2 rounded"
+    >
       <option value="bank">Bank</option>
       <option value="upi">UPI</option>
     </select>
@@ -15,4 +23,5 @@
 
   <!-- Recycle UPI -->
   <app-recycle-upi *ngIf="selectedType === 'upi'"></app-recycle-upi>
+
 </div>

@@ -29,16 +29,16 @@
 
 
 </div> -->
+<div class="head-layout bg-[var(--color-bg)] min-h-screen">
 
-<div class="owner-layout">
-  <!-- Mobile Sidebar Overlay -->
+  <!-- Mobile Overlay -->
   <div
     *ngIf="mobileMenuOpen"
     class="fixed inset-0 bg-black/50 z-40 md:hidden"
     (click)="closeMobileMenu()"
   ></div>
 
-  <!-- Sidebar Component -->
+  <!-- Sidebar -->
   <app-head-nav-sidebar
     [collapsed]="sidebarCollapsed"
     [isMobileOpen]="mobileMenuOpen"
@@ -48,7 +48,7 @@
   >
   </app-head-nav-sidebar>
 
-  <!-- Header Component -->
+  <!-- Header -->
   <app-head-nav-header
     [pageTitle]="pageTitle"
     [userName]="userName"
@@ -62,6 +62,7 @@
   >
   </app-head-nav-header>
 
+  <!-- Notification Sidebar -->
   <app-sidebar-notification
     [isOpen]="isNotificationSidebarOpen"
     (close)="closeNotificationSidebar()"
@@ -69,22 +70,16 @@
   >
   </app-sidebar-notification>
 
-  <!-- Main Content -->
-  <!-- <main
-    class="main-content pt-[72px] overflow-auto transition-all duration-300"
-    [style.marginLeft.px]="mainMargin"
-    [class.mobile-content]="mobileMenuOpen"
-    (click)="mobileMenuOpen ? closeMobileMenu() : null"
-  > -->
+  <!-- MAIN CONTENT -->
   <main
-    class="main-content relative z-18 pt-[72px] overflow-auto transition-all duration-300"
+    class="pt-[72px] min-h-[calc(100vh-72px)] bg-[var(--color-bg)] overflow-auto transition-all duration-300"
     [style.marginLeft.px]="mainMargin"
     [class.mobile-content]="mobileMenuOpen"
   >
     <router-outlet></router-outlet>
   </main>
 
-  <!-- Mobile Footer (only mobile) -->
+  <!-- Mobile Footer -->
   <app-head-mobile-footer
     *ngIf="isMobileView()"
     [payin]="headerPayin"
@@ -93,4 +88,5 @@
     [limit]="headerLimit"
   >
   </app-head-mobile-footer>
+
 </div>

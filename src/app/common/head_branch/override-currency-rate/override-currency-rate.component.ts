@@ -129,28 +129,79 @@ export class OverrideCurrencyRateComponent implements OnInit {
 }
   
 
+  // createCustomCurrency(item: any) {
+  //   if (!this.customRate) return;
+
+  //   const payload = {
+  //     entityId: this.entityId,
+  //     entityType: this.role,
+  //     chiefCurrencyId: item.currencyId,
+  //     currency: item.currency,
+  //     overrideRate: Number(item.overrideRate),
+  //     effectiveFrom: item.effectiveFrom
+  //       ? new Date(item.effectiveFrom).toISOString()
+  //       : null,
+  //     active: item.active ?? true
+  //   };
+
+  //   this.currencyServices.addCustomCurrencyForHeadAndBranch(payload).subscribe({
+  //     next: (res: any) => {
+  //       this.snack.show(res.message||"Created successfully",true)
+  //     },
+  //     error: (err) => {
+  //       this.snack.show(err?.error?.message||"Create failed",false)
+  //     }
+  //   });
+  // }
   createCustomCurrency(item: any) {
-    if (!this.customRate) return;
+  if (!this.customRate) return;
 
-    const payload = {
-      entityId: this.entityId,
-      entityType: this.role,
-      chiefCurrencyId: item.currencyId,
-      currency: item.currency,
-      overrideRate: Number(item.overrideRate),
-      effectiveFrom: item.effectiveFrom
-        ? new Date(item.effectiveFrom).toISOString()
-        : null,
-      active: item.active ?? true
-    };
+  const payload = {
+    entityId: this.entityId,
+    entityType: this.role,
+    chiefCurrencyId: item.currencyId,
+    currency: item.currency,
+    overrideRate: Number(item.overrideRate),
+    effectiveFrom: item.effectiveFrom
+      ? new Date(item.effectiveFrom).toISOString()
+      : null,
+    active: item.active ?? true
+  };
 
-    this.currencyServices.addCustomCurrencyForHeadAndBranch(payload).subscribe({
-      next: (res: any) => {
-        console.log(' Created successfully', res);
-      },
-      error: (err) => {
-        console.error(' Create failed', err);
+  this.currencyServices.addCustomCurrencyForHeadAndBranch(payload).subscribe({
+    next: (res: any) => {
+      console.log(res);
+      
+      this.snack.show(res?.message || "Created successfully", true);
+
+      // Clear backup on success
+      item._original = null;
+      item.isEditing = false;
+    },
+
+    error: (err) => {
+      this.snack.show(err?.error?.message || "Create failed", false);
+
+      //  REVERT TO ORIGINAL DATA
+      if (item._original) {
+        item.overrideRate = item._original.overrideRate;
+        item.effectiveFrom = item._original.effectiveFrom;
+        item.active = item._original.active;
       }
-    });
-  }
+
+      item.isEditing = false;
+    }
+  });
+}
+
+  startEdit(currency: any) {
+  currency.isEditing = true;
+
+  // Store original values
+  currency._original = {
+    overrideRate: currency.overrideRate,
+    effectiveFrom: currency.effectiveFrom,
+    active: currency.active
+  };
+}
 }
