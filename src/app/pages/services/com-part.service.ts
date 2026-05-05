@@ -210,7 +210,12 @@ export class ComPartService {
       );
   }
 
-  sendWebhook(portalId: string, payload?: any, snap?: any,currency?:any): Observable<string> {
+  sendWebhook(
+    portalId: string,
+    payload?: any,
+    snap?: any,
+    currency?: any,
+  ): Observable<string> {
     const formData = new FormData();
 
     if (payload !== undefined && payload !== null) {

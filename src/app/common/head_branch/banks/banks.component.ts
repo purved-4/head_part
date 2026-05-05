@@ -6,7 +6,7 @@ import { catchError } from "rxjs/operators";
 import { ViewChild, ElementRef } from "@angular/core";
 // import {
 
-//   PortalInfo,
+//   cpInfo,
 // } from "../../../services/portal-sharing.service";
 import { Subject } from "rxjs";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
@@ -37,12 +37,13 @@ interface BankAccount {
   minAmount: string;
   maxAmount: string;
   portalId?: string;
-  allotStatus?:string;
+  allotStatus?: string;
   bankName?: string;
   limitTime?: string | null;
   isBankActive?: boolean;
   currency?: string;
   min_tran_count?: number;
+  fttAcceptance?: boolean;
   // max_tran_count?: number;
   min_total_tran_amount?: number;
   // max_total_tran_amount?: number;
@@ -127,6 +128,7 @@ export class BanksComponent implements OnInit, OnDestroy {
     minAmount: "",
     maxAmount: "",
     bankName: "",
+    fttAcceptance: true,
     min_tran_count: null,
     // max_tran_count: null,
     min_total_tran_amount: null,
@@ -212,9 +214,9 @@ export class BanksComponent implements OnInit, OnDestroy {
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
-    if(this.route.snapshot.queryParamMap.get("currency")){
-      this.currency = this.route.snapshot.queryParamMap.get("currency")
-    }    
+    if (this.route.snapshot.queryParamMap.get("currency")) {
+      this.currency = this.route.snapshot.queryParamMap.get("currency");
+    }
     this.fetchBankAccounts();
     this.getPayinStatus();
     // this.loadPortals();
@@ -285,16 +287,13 @@ export class BanksComponent implements OnInit, OnDestroy {
           .map((r: any) => {
             let status: StatusString = "inactive";
 
-
-if (typeof r.status === "boolean") {
-  status = r.status ? "active" : "inactive";
-}
-else if (typeof r.status === "string" && r.status.trim() !== "") {
-  status = r.status.toLowerCase() as StatusString;
-}
-else if (typeof r.active === "boolean") {
-  status = r.active ? "active" : "inactive";
-}
+            if (typeof r.status === "boolean") {
+              status = r.status ? "active" : "inactive";
+            } else if (typeof r.status === "string" && r.status.trim() !== "") {
+              status = r.status.toLowerCase() as StatusString;
+            } else if (typeof r.active === "boolean") {
+              status = r.active ? "active" : "inactive";
+            }
 
             // if (typeof r.status === "string" && r.status.trim() !== "") {
             //   status = r.status.toLowerCase() as StatusString;
@@ -319,14 +318,14 @@ else if (typeof r.active === "boolean") {
             //         : typeof r.bankActive === "boolean"
             //           ? r.bankActive
             //           : status === "active";
-const isBankActive = status === "active";
+            const isBankActive = status === "active";
             return {
               id: r.id,
               branchId: r.branchId ?? null,
               portal: r.portalDomain ?? null,
               portalId: r.portal ?? null,
               portalDomain: r.portalDomain ?? null,
-               allotStatus: r.allotStatus ?? false,
+              allotStatus: r.allotStatus ?? false,
               accountHolderName: r.accountHolderName ?? r.name ?? "-",
               bankName: r.bankName ?? "",
               accountNo: r.accountNo ?? r.accountNumber ?? "",
@@ -338,6 +337,7 @@ const isBankActive = status === "active";
               limitAmount: r.limitAmount ?? "",
               currency: r.portalCurrency || "",
               limitTime: r.limitTime ?? null,
+              fttAcceptance: r.fttAcceptance ?? true,
               min_tran_count: r.minTranCount ?? null,
               // max_tran_count: r.maxTranCount ?? null,
               min_total_tran_amount: r.minTotalTranAmount ?? null,
@@ -511,6 +511,7 @@ const isBankActive = status === "active";
         // max_tran_count: [null],
         min_total_tran_amount: [null],
         // max_total_tran_amount: [null],
+        fttAcceptance: [true],
       },
       // { validators: this.accountNumberMatchValidator },
     );
@@ -677,6 +678,7 @@ const isBankActive = status === "active";
       ifscCode: "",
       accountType: "",
       limitAmount: "",
+      fttAcceptance: true,
     });
     this.addBankForm.markAsUntouched();
     this.bankSearchTerm = "";
@@ -698,6 +700,7 @@ const isBankActive = status === "active";
       ifscCode: "",
       accountType: "",
       limitAmount: "",
+      fttAcceptance: true,
     });
     this.isAdding = false;
 
@@ -725,10 +728,11 @@ const isBankActive = status === "active";
       limitAmount: account.limitAmount || "",
       accountType: account.accountType || "saving",
       // status: account.status || "active",
-      status: account.status === 'active',
+      status: account.status === "active",
       min_tran_count: account.min_tran_count || null,
       // max_tran_count: account.max_tran_count || null,
       min_total_tran_amount: account.min_total_tran_amount || null,
+      fttAcceptance: account.fttAcceptance ?? true,
       // max_total_tran_amount: account.max_total_tran_amount || null,
       // minAmount: account.minAmount,
       // maxAmount: account.maxAmount,
@@ -798,6 +802,7 @@ const isBankActive = status === "active";
       limitAmount: account.limitAmount,
       accountType: account.accountType,
       status: status,
+      fttAcceptance: account.fttAcceptance,
       // minAmount: account.minAmount,
       // maxAmount: account.maxAmount,
     };
@@ -860,13 +865,14 @@ const isBankActive = status === "active";
       entityType: this.role,
       portal: formData.portal,
       currency: this.currency,
-      bankName: formData.bankName, 
+      bankName: formData.bankName,
       accountNo: formData.accountNumber,
       accountHolderName: formData.accountHolderName,
       ifsc: formData.ifscCode,
       accountType: formData.accountType,
       limitAmount: formData.limitAmount,
       status: true,
+      fttAcceptance: formData.fttAcceptance,
       minTranCount: Number(formData.min_tran_count) || 0,
       // maxTranCount: Number(formData.max_tran_count) || 0,
       minTotalTranAmount: Number(formData.min_total_tran_amount) || 0,
@@ -940,7 +946,8 @@ const isBankActive = status === "active";
       ifsc: this.updateForm.ifsc,
       limitAmount: this.updateForm.limitAmount,
       accountType: this.updateForm.accountType,
-     status: this.updateForm.status,
+      status: this.updateForm.status,
+      fttAcceptance: this.updateForm.fttAcceptance,
       minTranCount: Number(this.updateForm.min_tran_count) || 0,
       // maxTranCount: Number(this.updateForm.max_tran_count) || 0,
       minTotalTranAmount: Number(this.updateForm.min_total_tran_amount) || 0,
@@ -961,7 +968,7 @@ const isBankActive = status === "active";
       },
       error: (err) => {
         this.isSubmitting = false;
-       
+
         this.snack.show(
           err?.error?.message ||
             "Error updating bank account. Please try again.",
@@ -1058,20 +1065,20 @@ const isBankActive = status === "active";
   //   }
   // }
 
-  toggleBankStatus(bankId: string) {
-    this.bankService.toogleBankDeleted(bankId).subscribe({
-      next: (res) => {
-        // Success: refresh the list to reflect the updated status
-        this.fetchBankAccounts();
-        // Optional: show success message
-        // this.showUpdateSuccess('Bank status toggled successfully!');
-      },
-      error: (err) => {
-        // Optional: show error message to user
-        // alert('Failed to toggle status. Please try again.');
-      },
-    });
-  }
+  // toggleBankStatus(bankId: string) {
+  //   this.bankService.toogleBankDeleted(bankId).subscribe({
+  //     next: (res) => {
+  //       // Success: refresh the list to reflect the updated status
+  //       this.fetchBankAccounts();
+  //       // Optional: show success message
+  //       // this.showUpdateSuccess('Bank status toggled successfully!');
+  //     },
+  //     error: (err) => {
+  //       // Optional: show error message to user
+  //       // alert('Failed to toggle status. Please try again.');
+  //     },
+  //   });
+  // }
 
   toggleView(mode: "table" | "grid") {
     this.viewMode = mode;
@@ -1418,7 +1425,6 @@ const isBankActive = status === "active";
 
   openCapacityModal(account: any) {
     this.editingAccount = account;
-    console.log(account);
 
     this.isEditingCapacity = false;
     this.showCapacityModal = true;
@@ -1949,33 +1955,33 @@ const isBankActive = status === "active";
   }
 
   onToggleStatus(account: any, event: any) {
-  const newStatus = event.target.checked; // true / false
-const bankID =account.id;
-  const payload = {
-    id: account.id,
-    portal: account.portalId || account.portal,
-    entityId: this.currentRoleId,
-    entityType: this.role,
-    accountNo: account.accountNo,
-    accountHolderName: account.accountHolderName,
-    ifsc: account.ifsc,
-    limitAmount: account.limitAmount,
-    accountType: account.accountType,
-    status: newStatus 
-  };
+    const newStatus = event.target.checked; // true / false
+    const bankID = account.id;
+    const payload = {
+      id: account.id,
+      portal: account.portalId || account.portal,
+      entityId: this.currentRoleId,
+      entityType: this.role,
+      accountNo: account.accountNo,
+      accountHolderName: account.accountHolderName,
+      ifsc: account.ifsc,
+      limitAmount: account.limitAmount,
+      accountType: account.accountType,
+      status: newStatus,
+    };
 
-  this.bankService.toggleIsBank(bankID).subscribe({
-    next: (res) => {
-      // update UI instantly
-      account.status = newStatus ? 'active' : 'inactive';
+    this.bankService.toggleIsBank(bankID).subscribe({
+      next: (res) => {
+        // update UI instantly
+        account.status = newStatus ? "active" : "inactive";
 
-      this.snack.show(res.message||"Status updated", true);
-    },
-    error: () => {
-      // revert toggle if failed
-      event.target.checked = !newStatus;
-      this.snack.show("Failed to update status", false);
-    }
-  });
-}
+        this.snack.show(res.message || "Status updated", true);
+      },
+      error: () => {
+        // revert toggle if failed
+        event.target.checked = !newStatus;
+        this.snack.show("Failed to update status", false);
+      },
+    });
+  }
 }

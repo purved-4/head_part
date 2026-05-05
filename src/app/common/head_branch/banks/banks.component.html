@@ -475,19 +475,13 @@
                     }}
                   </span> -->
                   <span
-  class="text-xs font-medium"
-  [ngClass]="
-    account.allotStatus
-      ? 'text-green-600'
-      : 'text-red-500'
-  "
->
-  {{
-    account.allotStatus
-      ? "Assigned"
-      : "Unassigned"
-  }}
-</span>
+                    class="text-xs font-medium"
+                    [ngClass]="
+                      account.allotStatus ? 'text-green-600' : 'text-red-500'
+                    "
+                  >
+                    {{ account.allotStatus ? "Assigned" : "Unassigned" }}
+                  </span>
                 </div>
 
                 <span
@@ -713,8 +707,8 @@
                   <input
                     type="checkbox"
                     class="sr-only peer"
-              [checked]="account.status === 'active'"
-                (change)="onToggleStatus(account, $event)"
+                    [checked]="account.status === 'active'"
+                    (change)="onToggleStatus(account, $event)"
                   />
 
                   <div
@@ -732,6 +726,7 @@
                 </span>
               </div>
             </td>
+
             <td class="px-4 py-3 whitespace-nowrap relative overflow-visible">
               <div class="flex items-center gap-1 overflow-visible">
                 <div class="relative action-dropdown-wrapper overflow-visible">
@@ -768,7 +763,7 @@
                       <div
                         class="border-t border-[var(--color-border)] mt-1 pt-1"
                       >
-                        <button
+                        <!-- <button
                           (click)="
                             toggleBankStatus(account.id);
                             activeActionDropdown = null
@@ -779,7 +774,7 @@
                             >auto_delete</span
                           >
                           Delete
-                        </button>
+                        </button> -->
 
                         <!-- ADD UPI -->
                         <button
@@ -1023,7 +1018,7 @@
 
               <!-- Delete Option -->
               <div class="border-t border-[var(--color-border)] mt-1 pt-1">
-                <button
+                <!-- <button
                   (click)="
                     toggleBankStatus(account.id); activeActionDropdown = null
                   "
@@ -1031,7 +1026,7 @@
                 >
                   <span class="material-icons text-base mr-2">auto_delete</span>
                   Delete
-                </button>
+                </button> -->
 
                 <button
                   (click)="openLimitModal(account); activeActionDropdown = null"
@@ -1089,7 +1084,9 @@
             <span class="text-xs font-medium text-[var(--color-font)] truncate">
               <!-- {{ account.portalDomain || account.portal || "-" }} -->
               {{
-                account.allotStatus || account.allotStatus ? "Assigned" : "Unassigned"
+                account.allotStatus || account.allotStatus
+                  ? "Assigned"
+                  : "Unassigned"
               }}
             </span>
 
@@ -1219,8 +1216,8 @@
                 <input
                   type="checkbox"
                   class="sr-only peer"
-               [checked]="account.status === 'active'"
-              (change)="onToggleStatus(account, $event)"
+                  [checked]="account.status === 'active'"
+                  (change)="onToggleStatus(account, $event)"
                 />
 
                 <div
@@ -1506,6 +1503,44 @@
                 Adding custom bank: "{{ addBankForm.get("bankName")?.value }}"
               </div>
             </div>
+          </div>
+          <!-- FTT Acceptance Toggle -->
+          <div
+            class="flex items-center justify-between p-3 border border-[var(--color-border)] rounded-lg"
+          >
+            <div class="flex flex-col">
+              <span class="text-sm font-semibold text-[var(--color-font)]">
+                FTT Acceptance
+              </span>
+              <span class="text-xs text-[var(--color-muted)]">
+                Enable or disable FTT transactions for this bank
+              </span>
+            </div>
+
+            <!-- Toggle -->
+            <button
+              type="button"
+              (click)="
+                addBankForm.patchValue({
+                  fttAcceptance: !addBankForm.get('fttAcceptance')?.value,
+                })
+              "
+              class="relative inline-flex h-6 w-11 items-center rounded-full transition-all"
+              [ngClass]="
+                addBankForm.get('fttAcceptance')?.value
+                  ? 'bg-[var(--color-success)]'
+                  : 'bg-[var(--color-danger)]'
+              "
+            >
+              <span
+                class="inline-block h-4 w-4 transform rounded-full bg-white transition-all"
+                [ngClass]="
+                  addBankForm.get('fttAcceptance')?.value
+                    ? 'translate-x-6'
+                    : 'translate-x-1'
+                "
+              ></span>
+            </button>
           </div>
 
           <!-- Account Holder Name & IFSC Code -->
@@ -1889,6 +1924,30 @@
               class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
               placeholder="Enter account holder name"
             />
+          </div>
+
+          <div class="flex items-center justify-between py-2">
+            <label class="text-sm font-semibold text-[var(--color-font)]">
+              FTT Acceptance
+            </label>
+
+            <button
+              type="button"
+              (click)="updateForm.fttAcceptance = !updateForm.fttAcceptance"
+              class="relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300"
+              [ngClass]="
+                updateForm.fttAcceptance
+                  ? 'bg-[var(--color-success)]'
+                  : 'bg-[var(--color-danger)]'
+              "
+            >
+              <span
+                class="inline-block h-4 w-4 transform rounded-full bg-white transition-all"
+                [ngClass]="
+                  updateForm.fttAcceptance ? 'translate-x-6' : 'translate-x-1'
+                "
+              ></span>
+            </button>
           </div>
 
           <!-- Bank Name with dropdown (same as add modal) -->
@@ -2762,4 +2821,3 @@
     </div>
   </div>
 </div>
-
