@@ -75,10 +75,10 @@ export class HeadNavSidebarComponent implements OnInit {
       label: "Inventory Management",
       route: "/head/payments-methods", 
     },
-    {
-      label: "Recycle Management",
-      route: "/head/recycle-management",
-    },
+    // {
+    //   label: "Recycle Management",
+    //   route: "/head/recycle-management",
+    // },
   ],
 },
     // {

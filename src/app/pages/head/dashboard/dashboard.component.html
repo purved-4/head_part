@@ -362,6 +362,8 @@
                       >
                         {{ transaction.amount }}
                       </span>
+
+                      
                     </div>
 
                     <div
@@ -381,6 +383,18 @@
                         <!-- {{transaction.ftt && "FTT"}} -->
                         {{ transaction.ftt ? "RPI" : "PPI" }}
                       </span>
+
+
+                        <!-- % Eligible -->
+  <span
+    class="px-2 py-1 text-xs rounded-md border font-semibold"
+    [ngClass]="{
+      'bg-green-100 text-green-700 border-green-300': transaction.slabEligible,
+      'bg-red-100 text-red-700 border-red-300': !transaction.slabEligible
+    }"
+  >
+    {{ transaction.slabPercentage }}% Eligible
+  </span>
 
                       <div class="flex gap-1.5">
                         <button
@@ -582,6 +596,8 @@
                       <span
                         class="w-1 h-1 rounded-full bg-[var(--color-border)]"
                       ></span>
+
+
                     </div>
 
                     <div class="flex items-center justify-between mt-3 gap-2">
@@ -605,6 +621,17 @@
 
                         <ng-template #notProcessing>Process</ng-template>
                       </button>
+
+                               <!-- % Eligible - Show for all transaction types -->
+<span
+  class="px-2 py-1 text-xs rounded-md border font-semibold"
+  [ngClass]="{
+    'bg-green-100 text-green-700 border-green-300': transaction.slabEligible,
+    'bg-red-100 text-red-700 border-red-300': !transaction.slabEligible
+  }"
+>
+  {{ transaction.slabPercentage }}% Eligible
+</span>
                       <div class="flex gap-1.5">
                         <button
                           (click)="viewTransactionDetails(transaction)"
@@ -845,6 +872,16 @@
                       >
                         {{ transaction.ftt ? "RPI" : "PPI" }}
                       </span>
+<!-- % Eligible - Show for all transaction types -->
+<span
+  class="px-2 py-1 text-xs rounded-md border font-semibold"
+  [ngClass]="{
+    'bg-green-100 text-green-700 border-green-300': transaction.slabEligible,
+    'bg-red-100 text-red-700 border-red-300': !transaction.slabEligible
+  }"
+>
+  {{ transaction.slabPercentage }}% Eligible
+</span>
                     </div>
                   </div>
 
