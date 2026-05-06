@@ -28,7 +28,7 @@ import { ChatResponsiveComponent } from "../common/chat-responsive/chat-responsi
 import { ChatingComponent } from "../common/chating/chating.component";
 import { RecycleUpiComponent } from "../common/recycle-upi/recycle-upi.component";
 import { RecycleBankComponent } from "../common/recycle-bank/recycle-bank.component";
- import { PlaceholderPipe } from "../pipes/placeholder.pipe";
+import { PlaceholderPipe } from "../pipes/placeholder.pipe";
 // import { AcceptRejectChatComponent } from "../pages/comPart/accept-reject-chat/accept-reject-chat.component";
 import { WebsitePercentageModelComponent } from "../common/website-percentage-model/website-percentage-model.component";
 import { SidebarNotificationComponent } from "../common/sidebar-notification/sidebar-notification.component";
@@ -46,6 +46,8 @@ import { RouterModule } from "@angular/router";
 import { PayinCapacityComponent } from "../common/payin-capacity/payin-capacity.component";
 import { OverrideCurrencyRateComponent } from "../common/head_branch/override-currency-rate/override-currency-rate.component";
 import { ThemeToggleComponent } from "../theme/theme.component";
+import { HeadBranchDashboardComponent } from "../common/head-branch-dashboard/head-branch-dashboard.component";
+import { HeadBranchReportsComponent } from "../common/head-branch-reports/head-branch-reports.component";
 
 // shared.module.ts
 @NgModule({
@@ -92,8 +94,10 @@ import { ThemeToggleComponent } from "../theme/theme.component";
     UpisComponent,
     AllotCurrencyComponent,
     OverrideCurrencyRateComponent,
-    ThemeToggleComponent
-   ],
+    ThemeToggleComponent,
+    HeadBranchDashboardComponent,
+    HeadBranchReportsComponent,
+  ],
   exports: [
     WebhookDataComponent,
     NotificationComponent,
@@ -133,18 +137,18 @@ import { ThemeToggleComponent } from "../theme/theme.component";
     BanksComponent,
     PaymentsMethodsComponent,
     UpisComponent,
-    AllotCurrencyComponent,   
-OverrideCurrencyRateComponent,
-ThemeToggleComponent
+    AllotCurrencyComponent,
+    OverrideCurrencyRateComponent,
+    ThemeToggleComponent,
+    HeadBranchDashboardComponent,
+    HeadBranchReportsComponent,
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-     RouterModule,
-     QRCodeComponent,
-   
-     
+    RouterModule,
+    QRCodeComponent,
   ],
 })
 export class SharedModule {}

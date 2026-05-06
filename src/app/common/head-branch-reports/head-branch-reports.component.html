@@ -17,6 +17,15 @@
       >
         <!-- Header – solid primary background -->
         <div class="p-4 sm:p-6 bg-[var(--color-primary)]">
+          <h3 class="font-bold text-lg sm:text-xl">
+            {{
+              selectedStatus === "ACCEPTED"
+                ? "Approved Bank Payins"
+                : selectedStatus === "REJECTED"
+                  ? "Rejected Bank Payins"
+                  : "Pending Bank Payins"
+            }}
+          </h3>
           <div
             class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4"
           >
@@ -44,6 +53,25 @@
             <div
               class="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto"
             >
+              <select
+                [(ngModel)]="selectedMode"
+                (change)="onModeChange(selectedMode)"
+                class="px-3 py-2 rounded-xl text-xs sm:text-sm border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)]"
+              >
+                <option value="all">All</option>
+                <option value="upi">UPI</option>
+                <option value="bank">Bank</option>
+              </select>
+
+              <select
+                [(ngModel)]="selectedStatus"
+                (change)="onStatusChange(selectedStatus)"
+                class="px-3 py-2 rounded-xl text-xs sm:text-sm border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)]"
+              >
+                <option value="ACCEPTED">Accepted</option>
+                <option value="REJECTED">Rejected</option>
+                <option value="PENDING">Pending</option>
+              </select>
               <!-- Bank portal dropdown -->
               <div
                 class="relative min-w-[140px] sm:min-w-[160px] flex-1 xl:flex-none"
@@ -535,6 +563,15 @@
       >
         <!-- Header – solid primary background -->
         <div class="p-4 sm:p-6 bg-[var(--color-primary)]">
+          <h3 class="font-bold text-lg sm:text-xl">
+            {{
+              selectedStatus === "ACCEPTED"
+                ? "Approved Payouts"
+                : selectedStatus === "REJECTED"
+                  ? "Rejected Payouts"
+                  : "Pending Payouts"
+            }}
+          </h3>
           <div
             class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4"
           >
@@ -561,6 +598,24 @@
             <div
               class="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto"
             >
+              <select
+                [(ngModel)]="selectedMode"
+                (change)="onModeChange(selectedMode)"
+                class="px-3 py-2 rounded-xl text-xs sm:text-sm border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)]"
+              >
+                <option value="all">All</option>
+                <option value="upi">UPI</option>
+                <option value="bank">Bank</option>
+              </select>
+              <select
+                [(ngModel)]="selectedStatus"
+                (change)="onStatusChange(selectedStatus)"
+                class="px-3 py-2 rounded-xl text-xs sm:text-sm border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)]"
+              >
+                <option value="ACCEPTED">Accepted</option>
+                <option value="REJECTED">Rejected</option>
+                <option value="PENDING">Pending</option>
+              </select>
               <!-- Payout portal dropdown -->
               <div
                 class="relative min-w-[140px] sm:min-w-[160px] flex-1 xl:flex-none"

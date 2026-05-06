@@ -46,7 +46,6 @@ export class FundsService {
       catchError((error) => throwError(error)),
     );
   }
- 
 
   settleUpiFund(upiSettleId: any): Observable<any> {
     return this.http
@@ -72,8 +71,6 @@ export class FundsService {
       catchError((error) => throwError(error)),
     );
   }
-
- 
 
   getAllUpiFund(): Observable<any> {
     return this.http.get<any>(`${baseUrl}/funds/getAllUpiFunds`).pipe(
@@ -609,8 +606,7 @@ export class FundsService {
       );
   }
 
-
-     getAllPayOutFundWithcCompartId(
+  getAllPayOutFundWithcCompartId(
     compartId: any,
     status: any,
     page: number = 0,
@@ -638,9 +634,8 @@ export class FundsService {
       );
   }
 
-
- //NEW
-   getPayinFundWithPortalIdAndEntityIdUpdated(
+  //NEW
+  getPayinFundWithPortalIdAndEntityIdUpdated(
     entityId: any,
     portalId: any,
     status: any,
@@ -649,13 +644,18 @@ export class FundsService {
     category?: any,
     fromDate?: any,
     toDate?: any,
+    fundType?: any,
   ): Observable<any> {
+    if (!portalId) {
+      throw new Error("portalId is required");
+    }
+
     let params = new HttpParams()
       .set("page", page.toString())
       .set("size", pageSize.toString())
       .set("status", status);
 
-    if (category !== null && category !== undefined) {
+    if (category != null) {
       params = params.set("category", category.toString());
     }
 
@@ -666,6 +666,11 @@ export class FundsService {
     if (toDate) {
       params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
     }
+
+    if (fundType) {
+      params = params.set("fundType", fundType);
+    }
+
     return this.http
       .get<any>(
         `${baseUrl}/funds/getPayinFundWithPortalIdAndEntityId/${portalId}/${entityId}`,
@@ -676,5 +681,4 @@ export class FundsService {
         catchError((error) => throwError(error)),
       );
   }
-  
 }

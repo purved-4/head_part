@@ -2,19 +2,21 @@ import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { of, Subscription } from "rxjs";
 import { catchError } from "rxjs/operators";
-import { FundsService } from "../../services/funds.service";
-import { UserStateService } from "../../../store/user-state.service";
-import { fileBaseUrl } from "../../services/helper";
-import { HeadService } from "../../services/head.service";
-import { DateTimeUtil } from "../../../utils/date-time.utils";
-import { MultimediaService } from "../../services/multimedia.service";
+import { FundsService } from "../../pages/services/funds.service";
+import { UserStateService } from "../../store/user-state.service";
+import { HeadService } from "../../pages/services/head.service";
+import { MultimediaService } from "../../pages/services/multimedia.service";
+import { DateTimeUtil } from "../../utils/date-time.utils";
+import { BranchService } from "../../pages/services/branch.service";
+import { SnackbarService } from "../snackbar/snackbar.service";
 
 @Component({
-  selector: "app-head-approved-funds",
-  templateUrl: "./head-approved-funds.component.html",
-  styleUrls: ["./head-approved-funds.component.css"],
+  selector: "app-head-branch-reports",
+
+  templateUrl: "./head-branch-reports.component.html",
+  styleUrl: "./head-branch-reports.component.css",
 })
-export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
+export class HeadBranchReportsComponent implements OnInit, OnDestroy {
   // Arrays for each type (server returns paginated data)
   upipayins: any[] = [];
   bankpayins: any[] = [];
@@ -24,6 +26,12 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
   upiTotalRecords = 0;
   bankTotalRecords = 0;
   payoutTotalRecords = 0;
+
+  // Mode filter
+  selectedMode: "all" | "upi" | "bank" = "all";
+
+  // Status filter
+  selectedStatus: "ACCEPTED" | "REJECTED" | "PENDING" = "ACCEPTED";
 
   // route + user ids
   branchId: string | null = null;
@@ -93,6 +101,8 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
     private userStateService: UserStateService,
     private headServices: HeadService,
     private multimediaService: MultimediaService,
+    private branchService: BranchService,
+    private snackbar: SnackbarService,
   ) {}
 
   ngOnInit(): void {
@@ -163,44 +173,54 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
 
   fetchUpiPayins(): void {
     if (!this.branchId) return;
+
     const fromDate = this.upiDateFrom
       ? DateTimeUtil.toUtcISOString(
           new Date(new Date(this.upiDateFrom).setHours(0, 0, 0, 0)),
         )
-      : null;
+      : undefined;
 
     const toDate = this.upiDateTo
       ? DateTimeUtil.toUtcISOString(
           new Date(new Date(this.upiDateTo).setHours(23, 59, 59, 999)),
         )
-      : null;
+      : undefined;
+
+    // ✅ IMPORTANT FIX: portalId fallback
+    const portalId =
+      this.upiPortalFilter && this.upiPortalFilter !== ""
+        ? this.upiPortalFilter
+        : "ALL"; // ⚠️ change if backend expects '0' or something else
+
+    console.log("UPI API → portalId:", portalId); // debug
+
     this.fundService
-      .getAllUpiFundWithEntityAndPortalId(
+      .getPayinFundWithPortalIdAndEntityIdUpdated(
         this.branchId,
-        this.upiPortalFilter,
-        "ACCEPTED",
-        this.upiPage,
+        portalId,
+        this.selectedStatus,
+        this.upiPage - 1, // ✅ API 0-based
         this.upiPageSize,
         undefined,
-        fromDate || undefined,
-        toDate || undefined,
+        fromDate,
+        toDate,
+        "UPI",
       )
-      .pipe(
-        catchError((err) => {
-          return of({ data: [], total: 0 });
-        }),
-      )
+      .pipe(catchError(() => of({ content: [], totalElements: 0 })))
       .subscribe((response: any) => {
         const { list, total, pageNum, pageSize } = this.parseResponse(response);
+
         this.upiTotalRecords = total;
         this.upiPage = pageNum;
         this.upiPageSize = pageSize;
+
         this.mapFundsArray(list, "upi");
       });
   }
 
   fetchBankPayins(): void {
     if (!this.branchId) return;
+
     const fromDate = this.bankDateFrom
       ? DateTimeUtil.toUtcISOString(
           new Date(new Date(this.bankDateFrom).setHours(0, 0, 0, 0)),
@@ -212,28 +232,27 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
           new Date(new Date(this.bankDateTo).setHours(23, 59, 59, 999)),
         )
       : null;
+
     this.fundService
       .getPayinFundWithPortalIdAndEntityIdUpdated(
         this.branchId,
         this.bankPortalFilter,
-        "ACCEPTED",
+        this.selectedStatus,
         this.bankPage,
         this.bankPageSize,
         undefined,
         fromDate || undefined,
         toDate || undefined,
+        "BANK",
       )
-      .pipe(
-        catchError((err) => {
-          return of({ data: [], total: 0 });
-        }),
-      )
+      .pipe(catchError(() => of({ data: [], total: 0 })))
       .subscribe((response: any) => {
         const { list, total, pageNum, pageSize } = this.parseResponse(response);
 
         this.bankTotalRecords = total;
         this.bankPage = pageNum;
         this.bankPageSize = pageSize;
+
         this.mapFundsArray(list, "bank");
       });
   }
@@ -255,7 +274,7 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
       .getAllPayoutFundWithEntityAndPortalId(
         this.branchId,
         this.payoutPortalFilter,
-        "ACCEPTED",
+        this.selectedStatus,
         this.payoutApprovedPage,
         this.payoutApprovedPageSize,
         undefined,
@@ -279,42 +298,70 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
   loadPortalOptions(): void {
     if (!this.branchId) return;
 
-    this.headServices.getAllHeadsWithPortalsById(this.branchId).subscribe({
-      next: (res: any) => {
-        const source = Array.isArray(res?.data)
-          ? res.data
-          : Array.isArray(res)
-            ? res
-            : [];
+    const role = (this.role || "").toLowerCase();
 
-        const uniqueMap = new Map<string, any>();
+    // ========= HEAD =========
+    if (role.includes("head")) {
+      this.headServices.getAllHeadsWithPortalsById(this.branchId).subscribe({
+        next: (res: any) => {
+          const source = Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res)
+              ? res
+              : [];
 
-        source.forEach((item: any) => {
-          if (item?.portalId && item?.portalDomain) {
-            uniqueMap.set(item.portalId, {
-              id: item.portalId,
-              domain: item.portalDomain,
-            });
-          }
+          const uniqueMap = new Map<string, any>();
+
+          source.forEach((item: any) => {
+            if (item?.portalId && item?.portalDomain) {
+              uniqueMap.set(item.portalId, {
+                id: item.portalId,
+                domain: item.portalDomain,
+              });
+            }
+          });
+
+          this.setPortals(Array.from(uniqueMap.values()));
+        },
+        error: () => {
+          this.setPortals([]);
+        },
+      });
+    }
+
+    // ========= BRANCH =========
+    else if (role.includes("branch")) {
+      this.branchService
+        .getPortalByBranchId(this.branchId)
+        .pipe(
+          catchError((err) => {
+            this.snackbar.show("Failed to load portals", false);
+            return of([]);
+          }),
+        )
+        .subscribe((res: any[]) => {
+          const portals = (res || [])
+            .map((p: any) => ({
+              id: p?.portalId || p?.id,
+              domain: p?.portalDomain || p?.name || "Unknown",
+            }))
+            .filter((p: any) => p.id);
+
+          this.setPortals(portals);
         });
+    }
 
-        const portals = Array.from(uniqueMap.values());
+    // ========= FALLBACK =========
+    else {
+      this.setPortals([]);
+    }
+  }
+  private setPortals(portals: any[]) {
+    this.portalOptions = portals;
 
-        // ✅ store for UI
-        this.portalOptions = portals;
-
-        // optional (if still used somewhere)
-        this.upiPortals = portals;
-        this.bankPortals = portals;
-        this.payoutPortals = portals;
-      },
-      error: () => {
-        this.portalOptions = [];
-        this.upiPortals = [];
-        this.bankPortals = [];
-        this.payoutPortals = [];
-      },
-    });
+    this.upiPortals = portals;
+    this.bankPortals = portals;
+    this.payoutPortals = portals;
   }
 
   // Helper to parse various response shapes
@@ -332,27 +379,29 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
     if (Array.isArray(response)) {
       list = response;
       total = list.length;
-    } else if (response?.data) {
-      if (Array.isArray(response.data)) {
-        list = response.data;
-        total = response.total ?? list.length;
-      } else if (Array.isArray(response.data.content)) {
-        list = response.data.content;
-        total =
-          response.data.totalElements ?? response.data.total ?? list.length;
-        pageNum = response.data.number ?? 0;
-        pageSize = response.data.size ?? 10;
-      }
-    } else if (response?.content) {
+    }
+
+    // ✅ CASE: already mapped response.data (MOST IMPORTANT)
+    else if (response?.content) {
       list = response.content;
-      total = response.totalElements ?? response.total ?? list.length;
-      pageNum = response.number ?? 0;
-      pageSize = response.size ?? 10;
+      total = response.totalElements ?? list.length;
+
+      // 🔥 FIX HERE
+      pageNum = response.pageNumber ?? 0;
+      pageSize = response.pageSize ?? 10;
+    }
+
+    // (optional fallback, rarely needed now)
+    else if (response?.data?.content) {
+      list = response.data.content;
+      total = response.data.totalElements ?? response.data.total ?? list.length;
+
+      pageNum = response.data.pageNumber ?? 0;
+      pageSize = response.data.pageSize ?? 10;
     }
 
     return { list, total, pageNum, pageSize };
   }
-
   // ============ MAPPERS ============
   private mapFundsArray(items: any[], mode: "bank" | "upi") {
     const targetArray = mode === "bank" ? this.bankpayins : this.upipayins;
@@ -747,11 +796,17 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
 
   // ============ REFRESH BUTTON ============
   refreshCurrentView(): void {
-    if (this.activeView === "upi") {
+    if (this.selectedMode === "upi") {
       this.fetchUpiPayins();
-    } else if (this.activeView === "bank") {
+    } else if (this.selectedMode === "bank") {
       this.fetchBankPayins();
-    } else if (this.activeView === "payout") {
+    } else {
+      // ALL → dono call
+      this.fetchUpiPayins();
+      this.fetchBankPayins();
+    }
+
+    if (this.activeView === "payout") {
       this.fetchApprovedPayouts();
     }
   }
@@ -972,5 +1027,25 @@ export class HeadApprovedFundsComponent implements OnInit, OnDestroy {
 
     const found = this.portalOptions.find((p) => p.id === selectedId);
     return found ? found.domain : "All Portals";
+  }
+  onModeChange(mode: "all" | "upi" | "bank") {
+    this.selectedMode = mode;
+    this.resetPages();
+    this.refreshCurrentView();
+  }
+  onStatusChange(status: "ACCEPTED" | "REJECTED" | "PENDING") {
+    this.selectedStatus = status;
+    this.resetPages();
+    this.refreshCurrentView();
+  }
+  resetPages() {
+    this.upiPage = 0;
+    this.bankPage = 0;
+    this.payoutApprovedPage = 0;
+  }
+  getFundType(): string {
+    if (this.selectedMode === "upi") return "UPI";
+    if (this.selectedMode === "bank") return "BANK";
+    return "ALL";
   }
 }
