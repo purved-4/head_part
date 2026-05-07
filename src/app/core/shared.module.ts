@@ -47,7 +47,8 @@ import { PayinCapacityComponent } from "../common/payin-capacity/payin-capacity.
 import { OverrideCurrencyRateComponent } from "../common/head_branch/override-currency-rate/override-currency-rate.component";
 import { ThemeToggleComponent } from "../theme/theme.component";
 import { HeadBranchDashboardComponent } from "../common/head-branch-dashboard/head-branch-dashboard.component";
-import { HeadBranchReportsComponent } from "../common/head-branch-reports/head-branch-reports.component";
+import { HbPayinReportComponent } from "../common/hb-payin-report/hb-payin-report.component";
+import { HbPayoutReportComponent } from "../common/hb-payout-report/hb-payout-report.component";
 
 // shared.module.ts
 @NgModule({
@@ -96,7 +97,8 @@ import { HeadBranchReportsComponent } from "../common/head-branch-reports/head-b
     OverrideCurrencyRateComponent,
     ThemeToggleComponent,
     HeadBranchDashboardComponent,
-    HeadBranchReportsComponent,
+    HbPayinReportComponent,
+    HbPayoutReportComponent,
   ],
   exports: [
     WebhookDataComponent,
@@ -141,7 +143,8 @@ import { HeadBranchReportsComponent } from "../common/head-branch-reports/head-b
     OverrideCurrencyRateComponent,
     ThemeToggleComponent,
     HeadBranchDashboardComponent,
-    HeadBranchReportsComponent,
+    HbPayinReportComponent,
+    HbPayoutReportComponent,
   ],
   imports: [
     CommonModule,

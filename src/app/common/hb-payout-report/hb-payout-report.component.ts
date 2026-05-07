@@ -1,19 +1,21 @@
-import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
+import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { of, Subscription } from "rxjs";
-import { catchError } from "rxjs/operators";
-import { FundsService } from "../../services/funds.service";
-import { UserStateService } from "../../../store/user-state.service";
-import { fileBaseUrl } from "../../services/helper";
-import { HeadService } from "../../services/head.service";
-import { DateTimeUtil } from "../../../utils/date-time.utils";
-import { MultimediaService } from "../../services/multimedia.service";
+import { FundsService } from "../../pages/services/funds.service";
+import { UserStateService } from "../../store/user-state.service";
+import { HeadService } from "../../pages/services/head.service";
+import { MultimediaService } from "../../pages/services/multimedia.service";
+import { catchError, of, Subscription } from "rxjs";
+import { DateTimeUtil } from "../../utils/date-time.utils";
+import { SnackbarService } from "../snackbar/snackbar.service";
+import { BranchService } from "../../pages/services/branch.service";
+
 @Component({
-  selector: "app-head-rejected-funds",
-  templateUrl: "./head-rejected-funds.component.html",
-  styleUrls: ["./head-rejected-funds.component.css"],
+  selector: "app-hb-payout-report",
+
+  templateUrl: "./hb-payout-report.component.html",
+  styleUrl: "./hb-payout-report.component.css",
 })
-export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
+export class HbPayoutReportComponent implements OnInit, OnDestroy {
   // Arrays for each type (server returns paginated data)
   upipayins: any[] = [];
   bankpayins: any[] = [];
@@ -94,6 +96,8 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
     private userStateService: UserStateService,
     private headServices: HeadService,
     private multimediaService: MultimediaService,
+    private snackbar: SnackbarService,
+    private branchService: BranchService,
   ) {}
 
   ngOnInit(): void {
@@ -177,16 +181,31 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
   //     });
   // }
   loadAllPortals(): void {
-    if (!this.branchId) return;
+    if (!this.branchId || !this.role) return;
 
-    this.headServices
-      .getAllHeadsWithPortalsById(this.branchId)
+    let apiCall$;
+
+    // ✅ Decide API based on entity type
+    if (this.role === "BRANCH") {
+      apiCall$ = this.branchService.getPortalByBranchId(this.branchId);
+    } else if (this.role === "HEAD") {
+      apiCall$ = this.headServices.getAllHeadsWithPortalsById(this.branchId);
+    } else {
+      this.portalOptions = [];
+      this.upiPortals = [];
+      this.bankPortals = [];
+      this.payoutPortals = [];
+      return;
+    }
+
+    apiCall$
       .pipe(
-        catchError((err) => {
+        catchError(() => {
           this.portalOptions = [];
           this.upiPortals = [];
           this.bankPortals = [];
           this.payoutPortals = [];
+          this.snackbar.show("Failed to load portals", false);
           return of([]);
         }),
       )
@@ -197,7 +216,6 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
             ? response
             : [];
 
-        // ✅ Create object with id + domain
         const uniqueMap = new Map<string, any>();
 
         portalsData.forEach((item: any) => {
@@ -211,10 +229,8 @@ export class HeadRejectedFundsComponent implements OnInit, OnDestroy {
 
         const portals = Array.from(uniqueMap.values());
 
-        // ✅ MAIN VARIABLE (use this in HTML)
+        // ✅ single source of truth
         this.portalOptions = portals;
-
-        // ✅ Filters store only ID
         this.upiPortals = portals;
         this.bankPortals = portals;
         this.payoutPortals = portals;

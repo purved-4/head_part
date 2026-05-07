@@ -67,20 +67,20 @@ export class HeadNavSidebarComponent implements OnInit {
     },
     //new hai code ke sath mujhe bs yahi dena hai
     {
-  label: "Inventory Management",
-  route: "/head/payments-methods", 
-  icon: "account_balance_wallet",
-  children: [
-    {
       label: "Inventory Management",
-      route: "/head/payments-methods", 
+      route: "/head/payments-methods",
+      icon: "account_balance_wallet",
+      children: [
+        {
+          label: "Inventory Management",
+          route: "/head/payments-methods",
+        },
+        // {
+        //   label: "Recycle Management",
+        //   route: "/head/recycle-management",
+        // },
+      ],
     },
-    // {
-    //   label: "Recycle Management",
-    //   route: "/head/recycle-management",
-    // },
-  ],
-},
     // {
     //   label: "Bank Management",
     //   route: "/head/bank",
@@ -136,12 +136,7 @@ export class HeadNavSidebarComponent implements OnInit {
       icon: "task_alt",
       children: [
         {
-          label: "UPI Reports",
-          route: "/head/reports/funds/approved/upi",
-          notifications: 2,
-        },
-        {
-          label: "BANK Reports",
+          label: "Payin Reports",
           route: "/head/reports/funds/approved/bank",
           notifications: 2,
         },
@@ -149,29 +144,6 @@ export class HeadNavSidebarComponent implements OnInit {
           label: "PAYOUT Reports",
           route: "/head/reports/funds/approved/payout",
           notifications: 2,
-        },
-      ],
-    },
-    {
-      label: "Rejected Funds",
-      route: "/head/reports/funds/rejects",
-      icon: "highlight_off",
-      children: [
-        {
-          label: "UPI Reports",
-          route: "/head/reports/funds/rejects/upi",
-          notifications: 4,
-        },
-        {
-          label: "BANK Reports",
-          route: "/head/reports/funds/rejects/bank",
-          notifications: 4,
-        },
-
-        {
-          label: "PAYOUT Reports",
-          route: "/head/reports/funds/rejects/payout",
-          notifications: 4,
         },
       ],
     },
@@ -193,17 +165,16 @@ export class HeadNavSidebarComponent implements OnInit {
       ],
     },
     {
-  label: "Settings",
-  route: "/head/override-currency-management", 
-  icon: "settings",
-  children: [
-    {
-      label: "Currency Management",
-      route: "/head/override-currency-management", 
+      label: "Settings",
+      route: "/head/override-currency-management",
+      icon: "settings",
+      children: [
+        {
+          label: "Currency Management",
+          route: "/head/override-currency-management",
+        },
+      ],
     },
-   
-  ],
-},
   ];
 
   branchId: any;
@@ -318,16 +289,12 @@ export class HeadNavSidebarComponent implements OnInit {
       if (this.recentItems.length > 3) {
         this.recentItems.pop();
       }
-
-      
     }
   }
 
   getRecentItems() {
     return this.recentItems;
   }
-
-
 
   getAllMenuItems(): MenuItem[] {
     const items: MenuItem[] = [];
@@ -523,7 +490,7 @@ export class HeadNavSidebarComponent implements OnInit {
     const map: Record<string, string> = {
       // Dashboard
       "/head/dashboard": "dashboard",
-"/head/payments-methods": "inventory_2",
+      "/head/payments-methods": "inventory_2",
       "/head/recycle-management": "recycling",
 
       // Management
