@@ -11,12 +11,12 @@ import { BranchService } from "../../pages/services/branch.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
 
 @Component({
-  selector: "app-head-branch-reports",
+  selector: "app-hb-payin-report",
 
-  templateUrl: "./head-branch-reports.component.html",
-  styleUrl: "./head-branch-reports.component.css",
+  templateUrl: "./hb-payin-report.component.html",
+  styleUrl: "./hb-payin-report.component.css",
 })
-export class HeadBranchReportsComponent implements OnInit, OnDestroy {
+export class HbPayinReportComponent implements OnInit, OnDestroy {
   // Arrays for each type (server returns paginated data)
   upipayins: any[] = [];
   bankpayins: any[] = [];
@@ -104,34 +104,31 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
     private branchService: BranchService,
     private snackbar: SnackbarService,
   ) {}
-
   ngOnInit(): void {
     this.branchId = this.userStateService.getCurrentEntityId();
     this.userId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
+
     this.setColorsByRole();
 
     if (this.branchId) {
       this.loadPortalOptions();
-    } else {
     }
+
     this.routeSub = this.route.paramMap.subscribe((params) => {
       const type = params.get("type") as "upi" | "bank" | "payout" | null;
+
       this.activeView = type === "bank" || type === "payout" ? type : "upi";
 
       if (!this.branchId) return;
 
-      // Fetch data for the current view (server‑side pagination)
+      // ✅ ALWAYS LOAD DATA
       if (this.activeView === "upi") {
-        if (this.upiPortalFilter) this.fetchUpiPayins();
+        this.fetchUpiPayins();
       } else if (this.activeView === "bank") {
-        if (this.bankPortalFilter) this.fetchBankPayins();
-
-        // this.fetchBankPayins();
+        this.fetchBankPayins();
       } else {
-        if (this.payoutPortalFilter) this.fetchApprovedPayouts();
-
-        // this.fetchApprovedPayouts();
+        this.fetchApprovedPayouts();
       }
     });
   }
@@ -186,20 +183,18 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
         )
       : undefined;
 
-    // ✅ IMPORTANT FIX: portalId fallback
+    // ✅ FIXED
     const portalId =
       this.upiPortalFilter && this.upiPortalFilter !== ""
         ? this.upiPortalFilter
-        : "ALL"; // ⚠️ change if backend expects '0' or something else
-
-    console.log("UPI API → portalId:", portalId); // debug
+        : undefined;
 
     this.fundService
       .getPayinFundWithPortalIdAndEntityIdUpdated(
         this.branchId,
         portalId,
         this.selectedStatus,
-        this.upiPage - 1, // ✅ API 0-based
+        this.upiPage, // ✅ FIXED
         this.upiPageSize,
         undefined,
         fromDate,
@@ -217,7 +212,6 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
         this.mapFundsArray(list, "upi");
       });
   }
-
   fetchBankPayins(): void {
     if (!this.branchId) return;
 
@@ -225,27 +219,32 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
       ? DateTimeUtil.toUtcISOString(
           new Date(new Date(this.bankDateFrom).setHours(0, 0, 0, 0)),
         )
-      : null;
+      : undefined;
 
     const toDate = this.bankDateTo
       ? DateTimeUtil.toUtcISOString(
           new Date(new Date(this.bankDateTo).setHours(23, 59, 59, 999)),
         )
-      : null;
+      : undefined;
+
+    const portalId =
+      this.bankPortalFilter && this.bankPortalFilter !== ""
+        ? this.bankPortalFilter
+        : undefined;
 
     this.fundService
       .getPayinFundWithPortalIdAndEntityIdUpdated(
         this.branchId,
-        this.bankPortalFilter,
+        portalId,
         this.selectedStatus,
-        this.bankPage,
+        this.bankPage, // ✅ FIXED
         this.bankPageSize,
         undefined,
-        fromDate || undefined,
-        toDate || undefined,
+        fromDate,
+        toDate,
         "BANK",
       )
-      .pipe(catchError(() => of({ data: [], total: 0 })))
+      .pipe(catchError(() => of({ content: [], totalElements: 0 })))
       .subscribe((response: any) => {
         const { list, total, pageNum, pageSize } = this.parseResponse(response);
 
@@ -259,38 +258,47 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
 
   fetchApprovedPayouts(): void {
     if (!this.branchId) return;
+
     const fromDate = this.payoutDateFrom
       ? DateTimeUtil.toUtcISOString(
           new Date(new Date(this.payoutDateFrom).setHours(0, 0, 0, 0)),
         )
-      : null;
+      : undefined;
 
     const toDate = this.payoutDateTo
       ? DateTimeUtil.toUtcISOString(
           new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999)),
         )
-      : null;
+      : undefined;
+
+    const portalId =
+      this.payoutPortalFilter && this.payoutPortalFilter !== ""
+        ? this.payoutPortalFilter
+        : undefined;
+
     this.fundService
       .getAllPayoutFundWithEntityAndPortalId(
         this.branchId,
-        this.payoutPortalFilter,
+        portalId,
         this.selectedStatus,
-        this.payoutApprovedPage,
+        this.payoutApprovedPage, // ✅ FIXED
         this.payoutApprovedPageSize,
         undefined,
-        fromDate || undefined,
-        toDate || undefined,
+        fromDate,
+        toDate,
       )
       .pipe(
-        catchError((err) => {
-          return of({ data: [], total: 0 });
+        catchError(() => {
+          return of({ content: [], totalElements: 0 });
         }),
       )
       .subscribe((response: any) => {
         const { list, total, pageNum, pageSize } = this.parseResponse(response);
+
         this.payoutTotalRecords = total;
         this.payoutApprovedPage = pageNum;
         this.payoutApprovedPageSize = pageSize;
+
         this.mapPayoutArray(list);
       });
   }
@@ -379,25 +387,19 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
     if (Array.isArray(response)) {
       list = response;
       total = list.length;
-    }
-
-    // ✅ CASE: already mapped response.data (MOST IMPORTANT)
-    else if (response?.content) {
-      list = response.content;
+    } else if (response?.content) {
+      list = response.content || [];
       total = response.totalElements ?? list.length;
-
-      // 🔥 FIX HERE
-      pageNum = response.pageNumber ?? 0;
+      pageNum = response.pageNumber ?? response.number ?? 0;
       pageSize = response.pageSize ?? 10;
-    }
-
-    // (optional fallback, rarely needed now)
-    else if (response?.data?.content) {
-      list = response.data.content;
-      total = response.data.totalElements ?? response.data.total ?? list.length;
-
-      pageNum = response.data.pageNumber ?? 0;
+    } else if (response?.data?.content) {
+      list = response.data.content || [];
+      total = response.data.totalElements ?? list.length;
+      pageNum = response.data.pageNumber ?? response.data.number ?? 0;
       pageSize = response.data.pageSize ?? 10;
+    } else if (Array.isArray(response?.data)) {
+      list = response.data;
+      total = response.total ?? list.length;
     }
 
     return { list, total, pageNum, pageSize };
@@ -410,19 +412,30 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
     items.forEach((it: any) => {
       const normalized = {
         mode: mode,
-        portal: it.portalDomain || it.domain || it.site || it.merchant,
-        portalId: it.portalId || it.siteId,
+
+        portal: it.portalDomain || it.portalId || "—",
+        portalId: it.portalId || it.raw?.portalId || null,
+
         vpa: it.vpa || it.vpaId || it.upiId,
         upiId: it.upiId,
+
         accountNo: it.accountNo || it.accNo || it.account,
+
         transactionId: it.transactionId || it.txnId,
+
         amount: Number(it.amount ?? it.value ?? 0),
+
         settled: it.settled,
+
         reviewStatus: it.reviewStatus || it.review,
+
         status: it.status || it.state,
+
         date: it.createdAt ? new Date(it.createdAt) : new Date(),
+
         raw: it,
       };
+
       targetArray.push(normalized);
     });
 
@@ -460,39 +473,42 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
   // ============ FILTERED ARRAYS (client‑side) ============
   filteredUpipayins(): any[] {
     return this.upipayins.filter((item) => {
-      // Search filter
+      // SEARCH
       if (this.upiSearchQuery) {
         const query = this.upiSearchQuery.toLowerCase();
+
         const searchFields = [
           item.vpa,
           item.upiId,
           item.transactionId,
-          item.raw?.portalDomain,
-          item.raw?.accountNo,
+          item.portal,
+          item.accountNo,
         ]
-          .filter((f) => f != null)
+          .filter(Boolean)
           .map((f) => f.toString().toLowerCase());
+
         if (!searchFields.some((f) => f.includes(query))) {
           return false;
         }
       }
 
-      // Portal filter
+      // PORTAL FILTER (FIXED)
       if (
         this.upiPortalFilter &&
-        item.raw?.portalDomain !== this.upiPortalFilter &&
-        item.portalId !== this.upiPortalFilter
+        (item.portalId || item.raw?.portalId) !== this.upiPortalFilter
       ) {
         return false;
       }
 
-      // Date range filter
+      // DATE FILTER
       const itemDate = new Date(item.date);
+
       if (this.upiDateFrom) {
         const from = new Date(this.upiDateFrom);
         from.setHours(0, 0, 0, 0);
         if (itemDate < from) return false;
       }
+
       if (this.upiDateTo) {
         const to = new Date(this.upiDateTo);
         to.setHours(23, 59, 59, 999);
@@ -505,38 +521,41 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
 
   filteredBankpayins(): any[] {
     return this.bankpayins.filter((item) => {
-      // Search filter
+      // SEARCH
       if (this.bankSearchQuery) {
         const query = this.bankSearchQuery.toLowerCase();
+
         const searchFields = [
           item.accountNo,
           item.transactionId,
-          item.raw?.portalDomain,
+          item.portal,
           item.raw?.bankAccountHolderName,
         ]
-          .filter((f) => f != null)
+          .filter(Boolean)
           .map((f) => f.toString().toLowerCase());
+
         if (!searchFields.some((f) => f.includes(query))) {
           return false;
         }
       }
 
-      // Portal filter
+      // PORTAL FILTER (FIXED)
       if (
         this.bankPortalFilter &&
-        item.raw?.portalDomain !== this.bankPortalFilter &&
-        item.portalId !== this.bankPortalFilter
+        (item.portalId || item.raw?.portalId) !== this.bankPortalFilter
       ) {
         return false;
       }
 
-      // Date range filter
+      // DATE FILTER
       const itemDate = new Date(item.date);
+
       if (this.bankDateFrom) {
         const from = new Date(this.bankDateFrom);
         from.setHours(0, 0, 0, 0);
         if (itemDate < from) return false;
       }
+
       if (this.bankDateTo) {
         const to = new Date(this.bankDateTo);
         to.setHours(23, 59, 59, 999);
@@ -549,36 +568,41 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
 
   filteredApprovedpayouts(): any[] {
     return this.approvedpayouts.filter((item) => {
-      // Search filter
+      // SEARCH
       if (this.payoutSearchQuery) {
         const query = this.payoutSearchQuery.toLowerCase();
+
         const searchFields = [
           item.accountNo,
           item.ifscCode,
           item.holder,
           item.portalDomain,
         ]
-          .filter((f) => f != null)
+          .filter(Boolean)
           .map((f) => f.toString().toLowerCase());
+
         if (!searchFields.some((f) => f.includes(query))) {
           return false;
         }
       }
 
+      // PORTAL FILTER (FIXED)
       if (
         this.payoutPortalFilter &&
-        item.raw?.portalId !== this.payoutPortalFilter
+        (item.raw?.portalId || item.portalId) !== this.payoutPortalFilter
       ) {
         return false;
       }
 
-      // Date range filter
+      // DATE FILTER
       const itemDate = new Date(item.date);
+
       if (this.payoutDateFrom) {
         const from = new Date(this.payoutDateFrom);
         from.setHours(0, 0, 0, 0);
         if (itemDate < from) return false;
       }
+
       if (this.payoutDateTo) {
         const to = new Date(this.payoutDateTo);
         to.setHours(23, 59, 59, 999);
@@ -592,8 +616,12 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
   // ============ PAGINATED ARRAYS ============
   pagedUpipayins(): any[] {
     const filtered = this.filteredUpipayins();
+
     const start = this.upiPage * this.upiPageSize;
-    return filtered.slice(start, start + this.upiPageSize);
+    const end = start + this.upiPageSize;
+
+    // 🔥 IMPORTANT: always safe slice on filtered only
+    return filtered.slice(start, end);
   }
 
   upiTotalPages(): number {
@@ -602,8 +630,11 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
 
   pagedBankpayins(): any[] {
     const filtered = this.filteredBankpayins();
+
     const start = this.bankPage * this.bankPageSize;
-    return filtered.slice(start, start + this.bankPageSize);
+    const end = start + this.bankPageSize;
+
+    return filtered.slice(start, end);
   }
 
   bankTotalPages(): number {
@@ -612,8 +643,11 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
 
   pagedApprovedpayouts(): any[] {
     const filtered = this.filteredApprovedpayouts();
+
     const start = this.payoutApprovedPage * this.payoutApprovedPageSize;
-    return filtered.slice(start, start + this.payoutApprovedPageSize);
+    const end = start + this.payoutApprovedPageSize;
+
+    return filtered.slice(start, end);
   }
 
   payoutApprovedTotalPages(): number {
@@ -655,11 +689,7 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
 
   // ============ FILTER DROPDOWN CONTROLS ============
   toggleFilterDropdown(view: string) {
-    if (this.filterDropdownOpen === view) {
-      this.filterDropdownOpen = null;
-    } else {
-      this.filterDropdownOpen = view;
-    }
+    this.filterDropdownOpen = this.filterDropdownOpen === view ? null : view;
   }
 
   get upiFilterActive(): boolean {
@@ -713,17 +743,17 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
       this.upiPortalFilter = portalId;
       this.upiPortalDropdownOpen = false;
       this.upiPage = 0;
-      if (this.upiPortalFilter) this.fetchUpiPayins();
+      this.fetchUpiPayins();
     } else if (view === "bank") {
       this.bankPortalFilter = portalId;
       this.bankPortalDropdownOpen = false;
       this.bankPage = 0;
-      if (this.bankPortalFilter) this.fetchBankPayins();
-    } else if (view === "payout") {
+      this.fetchBankPayins();
+    } else {
       this.payoutPortalFilter = portalId;
       this.payoutPortalDropdownOpen = false;
       this.payoutApprovedPage = 0;
-      if (this.payoutPortalFilter) this.fetchApprovedPayouts();
+      this.fetchApprovedPayouts();
     }
   }
 
@@ -767,9 +797,9 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
     this.bankPortalFilter = "";
     this.bankDateFrom = "";
     this.bankDateTo = "";
+
     this.bankPage = 0;
-    this.fetchBankPayins();
-    this.filterDropdownOpen = null;
+    this.fetchBankPayins(); // ✅ REQUIRED
   }
 
   applyPayoutFilters() {
@@ -796,21 +826,14 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
 
   // ============ REFRESH BUTTON ============
   refreshCurrentView(): void {
-    if (this.selectedMode === "upi") {
+    if (this.activeView === "upi") {
       this.fetchUpiPayins();
-    } else if (this.selectedMode === "bank") {
+    } else if (this.activeView === "bank") {
       this.fetchBankPayins();
     } else {
-      // ALL → dono call
-      this.fetchUpiPayins();
-      this.fetchBankPayins();
-    }
-
-    if (this.activeView === "payout") {
       this.fetchApprovedPayouts();
     }
   }
-
   refreshPage(): void {
     this.isRefreshing = true;
     setTimeout(() => {
@@ -1030,12 +1053,20 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
   }
   onModeChange(mode: "all" | "upi" | "bank") {
     this.selectedMode = mode;
-    this.resetPages();
+
+    this.upiPage = 0;
+    this.bankPage = 0;
+    this.payoutApprovedPage = 0;
+
     this.refreshCurrentView();
   }
   onStatusChange(status: "ACCEPTED" | "REJECTED" | "PENDING") {
     this.selectedStatus = status;
-    this.resetPages();
+
+    this.upiPage = 0;
+    this.bankPage = 0;
+    this.payoutApprovedPage = 0;
+
     this.refreshCurrentView();
   }
   resetPages() {
@@ -1045,7 +1076,9 @@ export class HeadBranchReportsComponent implements OnInit, OnDestroy {
   }
   getFundType(): string {
     if (this.selectedMode === "upi") return "UPI";
+
     if (this.selectedMode === "bank") return "BANK";
+
     return "ALL";
   }
 }
