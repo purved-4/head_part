@@ -143,7 +143,7 @@ export class OwnerService {
     formData.append("file", file);
 
     return this.http
-      .patch<any>(`${baseUrl}funds/payment/${id}/reject`, formData)
+      .patch<any>(`${baseUrl}/funds/payment/${id}/reject`, formData)
       .pipe(
         map((res) => res.data),
         catchError(this.handleError),

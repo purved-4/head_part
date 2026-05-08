@@ -486,9 +486,6 @@ export class UpisComponent implements OnInit {
       bankId: site.id,
     });
 
-    console.log(this.addUpiForm.value);
-    console.log(this.addUpiForm.get("bankId"));
-
     this.addUpiForm.get("bankId")?.markAsTouched();
 
     this.upiPortalSearch = site.accountHolderName;
@@ -567,20 +564,20 @@ export class UpisComponent implements OnInit {
   }
 
   // ---------- TOGGLE STATUS ----------
-  toggleUpiStatus(upi: any): void {
-    const newStatus = upi.status === "active" ? "inactive" : "active";
-    upi.status = newStatus;
-    this.upiService.toogleUpiDeleted(upi.id).subscribe({
-      next: () => this.fetchUpis(),
-      error: (err) => {
-        upi.status = upi.status === "active" ? "inactive" : "active";
-        this.snack.show(
-          err?.error?.message || "Failed to update status.",
-          false,
-        );
-      },
-    });
-  }
+  // toggleUpiStatus(upi: any): void {
+  //   const newStatus = upi.status === "active" ? "inactive" : "active";
+  //   upi.status = newStatus;
+  //   this.upiService.toogleUpiDeleted(upi.id).subscribe({
+  //     next: () => this.fetchUpis(),
+  //     error: (err) => {
+  //       upi.status = upi.status === "active" ? "inactive" : "active";
+  //       this.snack.show(
+  //         err?.error?.message || "Failed to update status.",
+  //         false,
+  //       );
+  //     },
+  //   });
+  // }
 
   // ---------- ADD MODAL ----------
   openAddModal(): void {
@@ -684,8 +681,6 @@ export class UpisComponent implements OnInit {
         quantity: r.quantity ?? null,
       })),
     };
-
-    console.log(payload);
 
     const formData = new FormData();
     const dtoBlob = new Blob([JSON.stringify(payload)], {
@@ -1224,7 +1219,6 @@ export class UpisComponent implements OnInit {
 
   openCapacity(item: any, mode: "UPI" | "BANK") {
     this.selectedId = item.id;
-    console.log(item);
 
     this.selectedPortalId = item.bankId || item.portal || item.portalID;
 
@@ -1413,31 +1407,32 @@ export class UpisComponent implements OnInit {
   }
 
   loadBanks() {
-  this.bankServices.getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId).subscribe({
-    next: (res: any) => {
-      const banks = res?.data?.content || [];
+    this.bankServices
+      .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId)
+      .subscribe({
+        next: (res: any) => {
+          const banks = res?.data?.content || [];
 
-      this.banks = banks;
-      this.filteredBanks = banks;
+          this.banks = banks;
+          this.filteredBanks = banks;
 
-      
-      if (this.preselectedBankId) {
-        const matchedBank = this.banks.find(
-          (b: any) => b.id === this.preselectedBankId
-        );
+          if (this.preselectedBankId) {
+            const matchedBank = this.banks.find(
+              (b: any) => b.id === this.preselectedBankId,
+            );
 
-        if (matchedBank) {
-          this.selectedBank = matchedBank;
-          this.bankSearchTerm = matchedBank.accountHolderName; // UI fill
-        }
-      }
-    },
-    error: () => {
-      this.banks = [];
-      this.filteredBanks = [];
-    },
-  });
-}
+            if (matchedBank) {
+              this.selectedBank = matchedBank;
+              this.bankSearchTerm = matchedBank.accountHolderName; // UI fill
+            }
+          }
+        },
+        error: () => {
+          this.banks = [];
+          this.filteredBanks = [];
+        },
+      });
+  }
 
   filterBanks() {
     const term = this.bankSearchTerm.toLowerCase();
@@ -1470,8 +1465,10 @@ export class UpisComponent implements OnInit {
 
   isLive(upi: any): boolean {
     return !!(
-      this.payinStatus && // Payin toggle ON
-      upi.isUpiActive  // Toggle ON
+      (
+        this.payinStatus && // Payin toggle ON
+        upi.isUpiActive // Toggle ON
+      )
       // upi.status === "active" // Status active
     );
   }

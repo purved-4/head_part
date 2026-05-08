@@ -198,6 +198,7 @@ export class MobileChattingComponent
   JSON: any = JSON;
   paramThreadId: any;
   paramChatType: any;
+  resolvedNotificatninService:any
 
   /* computed media gallery */
   get mediaGallery(): GroupMessage[] {
@@ -240,6 +241,7 @@ export class MobileChattingComponent
 
     // default mode based on role
     this.chatMode = this.role === "HEAD" ? "head" : "branch";
+    this.resolvedNotificatninService = this.role === "COM_PART" ? this.compartServices : this.notificationChatService
 
     if (this.branchId) {
       this.loadThreads();
@@ -327,7 +329,7 @@ export class MobileChattingComponent
       this.chatMode = chatType === "head" ? "head" : "branch";
     }
 
-    this.notificationChatService.getThreadDetailsById(threadId).subscribe({
+    this.resolvedNotificatninService.getThreadDetailsById(threadId).subscribe({
       next: (res: any) => {
         if (!res) {
           const existing = this.filteredNotifications.find(
@@ -626,7 +628,7 @@ export class MobileChattingComponent
 
   private loadResolvedThreadsPaginated(): void {
     if (this.role === "BRANCH") {
-      this.notificationChatService
+      this.resolvedNotificatninService
         .getThreadByBranchIdWithIsResolvedPaginated(
           this.branchId,
           this.role,
@@ -643,7 +645,7 @@ export class MobileChattingComponent
           error: () => this.onThreadLoadError(),
         });
     } else {
-      this.notificationChatService
+      this.resolvedNotificatninService
         .getAllThreadCombinedPaginate(
           this.headId,
           this.role,
@@ -875,8 +877,8 @@ export class MobileChattingComponent
       next: (res: any) => {
         console.log("API Response:", res); // DEBUG
 
-        this.questions = res?.content || []; // ✅ FIX
-        this.filteredQuestions = this.questions.slice(0, 6); // ✅ IMPORTANT
+        this.questions = res?.content || []; //  FIX
+        this.filteredQuestions = this.questions.slice(0, 6); //  IMPORTANT
 
         console.log("Questions:", this.questions); // DEBUG
       },
@@ -1083,7 +1085,7 @@ export class MobileChattingComponent
 
   loadChatMembers(threadId: any): void {
     this.loadingMembers = true;
-    this.notificationChatService.getChatMembersByThreadId(threadId).subscribe({
+    this.resolvedNotificatninService.getChatMembersByThreadId(threadId).subscribe({
       next: (membersRes: any) => {
         const members = Array.isArray(membersRes)
           ? membersRes
@@ -1139,7 +1141,7 @@ export class MobileChattingComponent
 
     this.loadingMessages = true;
 
-    this.notificationChatService
+    this.resolvedNotificatninService
       .getMessageByThreadId(threadId, this.branchId, page, this.pageSize)
       .subscribe({
         next: (messagesRes: any) => {
@@ -1443,7 +1445,7 @@ export class MobileChattingComponent
       this.uploadProgress = 0;
       this.uploadError = null;
 
-      this.notificationChatService
+      this.resolvedNotificatninService
         .uploadAttachment(threadId, this.selectedUploadFile!)
         .subscribe({
           next: (res: any) => {
@@ -1575,7 +1577,7 @@ export class MobileChattingComponent
 
     const payload = {
       senderId: this.branchId,
-      message: text, // ✅ NORMAL TEXT (NO QUESTION)
+      message: text, //  NORMAL TEXT (NO QUESTION)
       fileUrl: null,
       senderType: this.role,
       roleId: this.branchId,
@@ -1597,50 +1599,7 @@ export class MobileChattingComponent
     }
   }
 
-  private uploadAndSend(threadId: string, text: string): void {
-    this.uploadingFile = true;
-    this.uploadProgress = 0;
-    this.uploadError = null;
-
-    this.notificationChatService
-      .uploadAttachment(threadId, this.selectedUploadFile!)
-      .subscribe({
-        next: (res: any) => {
-          const fileId =
-            res?.fileId || res?.id || (typeof res === "string" ? res : null);
-
-          let fileUrl = fileId ? `${fileBaseUrl}/${fileId}` : res?.downloadUrl;
-
-          if (!fileUrl) {
-            this.uploadingFile = false;
-            this.uploadError = "Upload succeeded but no file URL returned";
-            return;
-          }
-
-          const payload = {
-            senderId: this.branchId,
-            message: text, // ✅ NO QUESTION OVERRIDE
-            fileUrl,
-            senderType: this.role,
-            roleId: this.branchId,
-            type: "FILE",
-          };
-
-          this.socketConfigService.sendMessage(threadId, payload);
-
-          this.newMessage = "";
-          this.uploadingFile = false;
-          this.removeInlineFile();
-
-          setTimeout(() => this.scrollToBottom(), 80);
-        },
-        error: () => {
-          this.uploadingFile = false;
-          this.uploadError = "Upload failed. Please try again.";
-        },
-      });
-  }
-
+  
   // // FIX: Improved scrollToBottom method
   // private scrollToBottom(): void {
   //   try {
@@ -1983,7 +1942,7 @@ export class MobileChattingComponent
     this.uploadProgress = 0;
     this.uploadError = null;
 
-    this.notificationChatService
+    this.resolvedNotificatninService
       .uploadAttachment(threadId, this.selectedUploadFile)
       .subscribe({
         next: (res: any) => {
@@ -2169,7 +2128,7 @@ export class MobileChattingComponent
 
     this.isLoading = true;
 
-    this.fundService
+    this.compartServices
       .acceptRejectThread(this.selectedThread.id, "ACCEPT")
       .subscribe({
         next: () => {
@@ -2189,30 +2148,7 @@ export class MobileChattingComponent
       });
   }
 
-  private resendThread(thread: any): void {
-    let call;
 
-    switch (thread?.fundsType) {
-      case "BANK":
-      case "UPI":
-        call = this.fundService.acceptRejectThread(thread.id, "RESEND");
-        break;
-      case "PAYOUT":
-        call = null;
-        break;
-      default:
-        call = this.fundService.acceptRejectThread(thread.id, "RESEND");
-    }
-
-    call?.subscribe({
-      next: (res: any) => {
-        this.isLoading = false;
-      },
-      error: (err: any) => {
-        this.isLoading = false;
-      },
-    });
-  }
 
   showRejectConfirmation(thread: any): void {
     this.selectedThread = thread;
@@ -2234,7 +2170,7 @@ export class MobileChattingComponent
 
     this.isLoading = true;
 
-    this.fundService
+    this.compartServices
       .acceptRejectThread(this.selectedThread.id, "REJECT")
       .subscribe({
         next: () => {
@@ -2267,7 +2203,7 @@ export class MobileChattingComponent
         rejectCall = this.rejectPayoutThread(thread.id);
         break;
       default:
-        rejectCall = this.fundService.acceptRejectThread(thread.id, "REJECT");
+        rejectCall = this.compartServices.acceptRejectThread(thread.id, "REJECT");
     }
 
     rejectCall?.subscribe({
@@ -2326,23 +2262,25 @@ export class MobileChattingComponent
   }
 
   rejectBankThread(threadId: any) {
-    return this.fundService.acceptRejectThread(threadId, "REJECT");
+    return this.compartServices.acceptRejectThread(threadId, "REJECT");
   }
 
   rejectUpiThread(threadId: any) {
-    return this.fundService.acceptRejectThread(threadId, "REJECT");
+    return this.compartServices.acceptRejectThread(threadId, "REJECT");
   }
 
   rejectPayoutThread(threadId: any) {
-    return this.fundService.acceptRejectThread(threadId, "REJECT");
+    return this.compartServices.acceptRejectThread(threadId, "REJECT");
   }
 
   private sentPayoutThreadUpdateToSameUser(threadId: any, data: any) {
-    return this.fundService.editpayoutRejectedFund(threadId, data);
+    return this.compartServices.editpayoutRejectedFund(threadId, data);
   }
 
   private getFundWithId(threadId: any, fundId: any, fundType: any) {
-    return this.fundService.getByThreadIdFundIdAndType(
+        const resolvedService = this.role === "COM_PART" ? this.compartServices : this.fundService
+
+    return resolvedService.getByThreadIdFundIdAndType(
       threadId,
       fundId,
       fundType,

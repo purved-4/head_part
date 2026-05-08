@@ -4,6 +4,7 @@ import { ChiefService } from "../../pages/services/chief.service";
 import { ComPartService } from "../../pages/services/com-part.service";
 import { PortalService } from "../../pages/services/portal.service";
 import { DateTimeUtil } from "../../utils/date-time.utils";
+import { UserStateService } from "../../store/user-state.service";
 
 @Component({
   selector: "app-allot-currency",
@@ -31,18 +32,22 @@ export class AllotCurrencyComponent implements OnInit {
   };
 
   effectiveFromNew: any;
+  currentRole:any
 
   constructor(
     private snackBar: SnackbarService,
     private chiefService: ChiefService,
     private comPartService: ComPartService,
     private portalService: PortalService,
+    private userStateService:UserStateService
   ) {
     this.effectiveFromNew = new Date();
   }
 
   // ngOnInit replace karo
   ngOnInit(): void {
+
+    this.currentRole = this.userStateService.getRole()
     if (this.entityType === "CHIEF") {
       this.loadCurrencies();
     } else if (this.entityType === "COM_PART") {
@@ -171,7 +176,7 @@ export class AllotCurrencyComponent implements OnInit {
 
     if (existing) {
       this.selectedModes = [...existing.modes];
-      this.rate = existing.rate; // ✅ FIX
+      this.rate = existing.rate; //  FIX
       // this.effectiveFrom = existing.effectiveFrom;
     } else {
       this.selectedModes = [];
@@ -218,8 +223,8 @@ export class AllotCurrencyComponent implements OnInit {
 
     let payload: any;
 
-    console.log(this.effectiveFromNew);
-    console.log(DateTimeUtil.toUtcISOString(this.effectiveFromNew));
+
+
 
     if (this.entityType === "PORTAL") {
       payload = {

@@ -41,7 +41,7 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
   ) {}
 
   ngOnInit() {
-    console.log("comming in the payin");
+
 
     this.fetchCapacity();
   }
@@ -63,7 +63,7 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
       entityType: this.entityType,
     });
 
-    console.log(this.entityId, this.portalId, this.payinId);
+
 
     if (!this.entityId|| !this.payinId) {
       return;

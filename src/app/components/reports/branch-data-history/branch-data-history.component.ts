@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { TransactionHistoryService } from "../../../pages/services/reports/transaction-history.service";
+import { SnackbarService } from "../../../common/snackbar/snackbar.service";
 
 @Component({
   selector: "app-branch-data-history",
@@ -10,6 +11,7 @@ import { TransactionHistoryService } from "../../../pages/services/reports/trans
 export class BranchDataHistoryComponent implements OnInit {
   reportForm: FormGroup;
   loading = false;
+  hasSearched = false;
 
   settleHistory: any[] = []; // Store raw API response
 
@@ -32,6 +34,7 @@ export class BranchDataHistoryComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private transactionHistory: TransactionHistoryService,
+    private snackBar: SnackbarService,
   ) {
     this.reportForm = this.fb.group({
       fromDate: ["", Validators.required],
@@ -55,7 +58,7 @@ export class BranchDataHistoryComponent implements OnInit {
       this.errorMessage = "From date cannot be after To date.";
       return;
     }
-
+    this.hasSearched = true;
     this.loading = true;
     this.clearMessages();
 
@@ -74,8 +77,7 @@ export class BranchDataHistoryComponent implements OnInit {
         this.successMessage = `Loaded ${this.settleHistory.length} records`;
       },
       error: (err) => {
-        console.error(err);
-        this.errorMessage = err?.error?.message || "Failed to fetch history.";
+        this.snackBar.show(err.error?.message, false);
         this.loading = false;
         this.settleHistory = [];
       },
@@ -124,9 +126,7 @@ export class BranchDataHistoryComponent implements OnInit {
       let payloadData: any = {};
       try {
         payloadData = item.payload ? JSON.parse(item.payload) : {};
-      } catch (e) {
-        console.error("Failed to parse payload:", item.payload);
-      }
+      } catch (e) {}
 
       return [
         this.formatDate(item.createdAt),
@@ -181,7 +181,6 @@ export class BranchDataHistoryComponent implements OnInit {
     try {
       payloadData = item.payload ? JSON.parse(item.payload) : {};
     } catch (e) {
-      console.error("Payload parse error", e);
       payloadData = { error: "Failed to parse payload" };
     }
 
@@ -239,4 +238,8 @@ export class BranchDataHistoryComponent implements OnInit {
       return {};
     }
   }
+  autoRefreshWrapper = () => {
+    if (!this.hasSearched) return;
+    this.fetchSettleHistory();
+  };
 }

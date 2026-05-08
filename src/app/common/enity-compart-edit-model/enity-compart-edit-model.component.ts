@@ -61,7 +61,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
 
     if (this.data) {
       this.entityData = this.data;
-      console.log(this.entityData);
+
 
       this.patchEntityForm();
     }
@@ -77,7 +77,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     if (changes["data"] && this.data) {
       this.entityData = this.data;
 
-      console.log("Incoming Currency:", this.entityData.parentCurrency);
+
 
       this.editForm.patchValue({
         username: this.entityData.username ?? "",
@@ -85,7 +85,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
         parentCurrency: this.entityData.parentCurrency ?? "",
       });
 
-      console.log("Form Currency:", this.editForm.value.parentCurrency);
+
     }
   }
 
@@ -119,7 +119,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       // this.entityType === "OWNER"
       //   ? this.compartService.getAllComPartByOwner(this.entityId).pipe(
       //       catchError((err) => {
-      //         console.error("Parent API error:", err);
+
       //         return of(null);
       //       }),
       //     )
@@ -128,7 +128,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
         .getPercentageByEntityId(this.entityId, this.entityType)
         .pipe(
           catchError((err) => {
-            console.error("Parent API error:", err);
+
             return of(null);
           }),
         );
@@ -138,7 +138,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
           .getPercentageByEntityId(this.data.id, this.getEntityLabel(this.data))
           .pipe(
             catchError((err) => {
-              console.error("Child API error:", err);
+
               return of(null);
             }),
           )
@@ -149,13 +149,13 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       child: child$,
     }).subscribe({
       next: ({ parent, child }) => {
-        console.log("parent:", parent);
-        console.log("child:", child);
+
+
         this.parentData = parent ?? [];
         this.parentComparts = parent ?? [];
 
         this.allocatedPercentages = this.extractChildRows(child);
-        console.log("allocatedPercentages:", this.allocatedPercentages);
+
 
         this.refreshAvailableComparts();
 
@@ -172,7 +172,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
         this.loadingPercentages = false;
       },
       error: (err) => {
-        console.error("loadAllData error:", err);
+
         this.loadingComparts = false;
         this.loadingPercentages = false;
       },
@@ -203,14 +203,14 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       this.allocatedPercentages.map((x) => x.compartId),
     );
 
-    console.log(allocatedIds);
+
 
     this.availableComparts = (this.parentComparts ?? []).filter(
       (item: any) => !allocatedIds.has(this.getCompartId(item)),
     );
 
-    console.log(this.availableComparts);
-    console.log(this.parentComparts);
+
+
   }
 
   // NEW: Get the percentage for a specific compart from allocated percentages
@@ -365,9 +365,9 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
 
     // child$.subscribe({
     //   next: (res: any) => {
-    //     console.log("Child API (Correct):", res);
 
-    //     // ✅ mapping bhi same use kar
+
+    //     //  mapping bhi same use kar
     //     this.parentData = this.extractChildRows(res);
     //   },
     //   error: () => {

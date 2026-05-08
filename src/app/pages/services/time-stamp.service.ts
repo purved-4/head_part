@@ -28,16 +28,15 @@ export class TimeStampService {
   }
 
   getByPortalIdAndbranchIdTypeAndMode(
-    portalId: any,
     entityId: any,
     entityType: any,
     type: any,
-    mode: any,
+    // mode: any,
   ): Observable<any[]> {
     return this.http
       .get<
         any[]
-      >(`${baseUrl}/api/owner/reward/reward`, { params: { portalId, entityId, entityType, type, mode } })
+      >(`${baseUrl}/api/owner/reward/reward`, { params: { entityId, entityType, type } })
       .pipe(
         map((response: any) => response),
         catchError((error) => throwError(error)),
@@ -47,14 +46,14 @@ export class TimeStampService {
   getByChiefIdTypeAndMode(
     entityId: any,
     entityType: any,
-    portalId: any,
     type: any,
-    mode: any,
+    // mode: any,'
+    // currency: any,
   ): Observable<any[]> {
     return this.http
       .get<
         any[]
-      >(`${baseUrl}/api/owner/reward/reward`, { params: { entityId, entityType, portalId, type, mode } })
+      >(`${baseUrl}/api/owner/reward/reward`, { params: { entityId, entityType, type } })
       .pipe(
         map((response: any) => response),
         catchError((error) => throwError(error)),

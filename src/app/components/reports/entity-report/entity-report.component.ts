@@ -9,6 +9,7 @@ import { TransactionHistoryService } from "../../../pages/services/reports/trans
 import { UserService } from "../../../pages/services/user.service";
 import { UserStateService } from "../../../store/user-state.service";
 import { UtilsServiceService } from "../../../utils/utils-service.service";
+import { SnackbarService } from "../../../common/snackbar/snackbar.service";
 
 export interface Entity {
   id: string;
@@ -118,6 +119,7 @@ export class EntityReportComponent implements OnInit {
     private fb: FormBuilder,
     private stateService: UserStateService,
     private utilService: UtilsServiceService,
+    private snackBar: SnackbarService,
   ) {
     this.reportForm = this.fb.group(
       {
@@ -236,16 +238,25 @@ export class EntityReportComponent implements OnInit {
       roleNormalized === currentRoleNormalized &&
       this.currentRoleId != null
     ) {
-      this.reportForm.patchValue({ entityId: this.currentRoleId });
+      this.entities = [
+        {
+          id: String(this.currentRoleId),
+          name: "Current User",
+        },
+      ];
+
+      this.reportForm.patchValue({
+        entityId: String(this.currentRoleId),
+      });
+
       this.reportForm.get("entityId")?.disable();
-      this.entities = [{ id: this.currentRoleId, name: "Current User" }];
     } else {
       this.reportForm.get("entityId")?.enable();
       this.reportForm.patchValue({ entityId: "" });
+
       this.fetchEntitiesForRole(role);
     }
   }
-
   fetchEntitiesForRole(role: string): void {
     if (!role) {
       this.entities = [];
@@ -259,13 +270,38 @@ export class EntityReportComponent implements OnInit {
       .getByRole(this.currentRoleId, role.toUpperCase())
       .subscribe({
         next: (res: any) => {
-          this.entities = Array.isArray(res) ? res : res.data?.data || [];
+          //  Smart extraction (same fix)
+          let list = [];
+
+          if (Array.isArray(res)) {
+            list = res;
+          } else if (Array.isArray(res?.data)) {
+            list = res.data;
+          } else if (Array.isArray(res?.data?.data)) {
+            list = res.data.data;
+          } else if (Array.isArray(res?.data?.data?.data)) {
+            list = res.data.data.data;
+          }
+
+          //  Normalize
+          this.entities = list.map((item: any) => ({
+            id: String(item.id),
+            name: item.name,
+          }));
+
+          //  Optional: auto select first
+          if (this.entities.length > 0) {
+            this.reportForm.patchValue({
+              entityId: this.entities[0].id,
+            });
+          }
+
           this.loadingEntities = false;
         },
         error: (err) => {
-          console.error("Error fetching entities:", err);
           this.entities = [];
           this.loadingEntities = false;
+          this.snackBar.show(err.error?.message, false);
         },
       });
   }
@@ -342,8 +378,8 @@ export class EntityReportComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          console.error("Error fetching report:", err);
           this.loading = false;
+          this.snackBar.show(err.error?.message, false);
         },
       });
   }
@@ -644,4 +680,8 @@ export class EntityReportComponent implements OnInit {
       this.reportForm.get("dateRangeMode")?.value === "month"
     );
   }
+  autoRefreshWrapper = () => {
+    if (!this.reportGenerated) return;
+    this.fetchReport();
+  };
 }

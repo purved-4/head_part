@@ -10,6 +10,7 @@ import {
 import { UserStateService } from "../../store/user-state.service";
 import { LimitsService } from "../../pages/services/reports/limits.service";
 import { UtilsServiceService } from "../../utils/utils-service.service";
+import { ComPartService } from "../../pages/services/com-part.service";
 
 @Component({
   selector: "app-add-limit-popup",
@@ -49,6 +50,7 @@ export class AddLimitPopupComponent implements OnInit, OnChanges {
     private userStateService: UserStateService,
     private limitService: LimitsService,
     private utilService: UtilsServiceService,
+    private comPartService:ComPartService
   ) {}
 
   ngOnInit(): void {
@@ -91,7 +93,9 @@ export class AddLimitPopupComponent implements OnInit, OnChanges {
       transactionAmount: this.transactionAmount,
     };
 
-    this.limitService.addLimits(payload).subscribe({
+    const resolvedService = this.currentUserRole === "COM_PART" ? this.comPartService : this.limitService
+
+    resolvedService.addLimits(payload).subscribe({
       next: (res) => {
         this.successMessage = "Limit added successfully";
         this.transactionAmount = "";
@@ -116,8 +120,9 @@ export class AddLimitPopupComponent implements OnInit, OnChanges {
       this.errorMessage = "Invalid entity details";
       return;
     }
+    const resolvedService = this.currentUserRole === "COM_PART" ? this.comPartService : this.limitService
 
-    this.limitService
+    resolvedService
       .getLatestLimitsByEntityAndTypeUpdate(
         this.currentRoleId,
         this.currentUserRole,
@@ -131,7 +136,7 @@ export class AddLimitPopupComponent implements OnInit, OnChanges {
         },
       });
 
-    this.limitService
+    resolvedService
       .getLatestLimitsByEntityAndTypeUpdate(this.entityId, this.entityType)
       .subscribe({
         next: (res) => {

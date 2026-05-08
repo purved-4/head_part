@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
@@ -1065,20 +1066,20 @@ export class BanksComponent implements OnInit, OnDestroy {
   //   }
   // }
 
-  // toggleBankStatus(bankId: string) {
-  //   this.bankService.toogleBankDeleted(bankId).subscribe({
-  //     next: (res) => {
-  //       // Success: refresh the list to reflect the updated status
-  //       this.fetchBankAccounts();
-  //       // Optional: show success message
-  //       // this.showUpdateSuccess('Bank status toggled successfully!');
-  //     },
-  //     error: (err) => {
-  //       // Optional: show error message to user
-  //       // alert('Failed to toggle status. Please try again.');
-  //     },
-  //   });
-  // }
+  toggleBankStatus(bankId: string) {
+    this.bankService.toogleBankDeleted(bankId).subscribe({
+      next: (res) => {
+        // Success: refresh the list to reflect the updated status
+        this.fetchBankAccounts();
+        // Optional: show success message
+        // this.showUpdateSuccess('Bank status toggled successfully!');
+      },
+      error: (err) => {
+        // Optional: show error message to user
+        // alert('Failed to toggle status. Please try again.');
+      },
+    });
+  }
 
   toggleView(mode: "table" | "grid") {
     this.viewMode = mode;

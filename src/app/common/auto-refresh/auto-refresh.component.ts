@@ -3,51 +3,37 @@ import { Component, Input, OnDestroy } from "@angular/core";
 @Component({
   selector: "app-auto-refresh",
   templateUrl: "./auto-refresh.component.html",
-  styleUrls: ["./auto-refresh.component.css"],
 })
 export class AutoRefreshComponent implements OnDestroy {
   @Input() refreshFn!: () => void;
 
-  isActive: boolean = false;
-  interval: number = 10;
-  timer: any;
-
+  interval: number | null = null; //  default = "Select"
+  timer: any = null;
   intervals: number[] = [10, 20, 30, 60];
 
-  toggleAutoRefresh(): void {
-    this.isActive = !this.isActive;
-
-    if (this.isActive) {
-      this.startTimer();
-    } else {
-      this.clearTimer();
-    }
-  }
-
+  //  Called when dropdown changes
   changeInterval(): void {
-    if (this.isActive) {
-      this.startTimer();
-    }
+    this.clearTimer();
+
+    // 👉 If "Select" (null), do nothing
+    if (!this.interval) return;
+
+    this.startTimer();
   }
 
   startTimer(): void {
-    this.clearTimer();
-
-    this.callRefresh();
+    this.callRefresh(); // immediate first call
 
     this.timer = setInterval(() => {
       this.callRefresh();
-    }, this.interval * 1000);
+    }, this.interval! * 1000);
   }
 
   private callRefresh(): void {
     try {
-      if (this.refreshFn) {
-        this.refreshFn();
-      }
+      this.refreshFn?.();
     } catch (error) {
       this.clearTimer();
-      this.isActive = false;
     }
   }
 

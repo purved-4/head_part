@@ -13,7 +13,7 @@ export class DynamicTimeSetupService {
 
   createSetup(data: any): Observable<any> {
     return this.http
-      .post(`${this.api}`, data)
+      .post(`${this.api}/create`, data)
       .pipe(catchError(this.handleError));
   }
 
@@ -31,8 +31,8 @@ export class DynamicTimeSetupService {
     );
   }
 
-  getByCnfId(cnfId: string): Observable<any> {
-    return this.http.get<any>(`${this.api}/cnf/${cnfId}`).pipe(
+  getByCnfId(): Observable<any> {
+    return this.http.get<any>(`${this.api}/get`).pipe(
       map((res) => res.data),
       catchError(this.handleError),
     );
@@ -40,7 +40,7 @@ export class DynamicTimeSetupService {
 
   updateSetup(id: string, data: any): Observable<any> {
     return this.http
-      .put(`${this.api}/${id}`, data)
+      .patch(`${this.api}/update`, data)
       .pipe(catchError(this.handleError));
   }
 

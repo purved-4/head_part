@@ -1,14 +1,15 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpParams } from '@angular/common/http';
-import { Subscription } from 'rxjs';
-import { PercentageLogService } from '../../../pages/services/reports/percentage-log.service';
+import { Component, OnInit, OnDestroy } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { HttpParams } from "@angular/common/http";
+import { Subscription } from "rxjs";
+import { PercentageLogService } from "../../../pages/services/reports/percentage-log.service";
+import { SnackbarService } from "../../../common/snackbar/snackbar.service";
 
 type HistoryDTO = {
   id: string;
   entityType: string;
   entityId: string;
-  topupPercentage: number;
+  payinPercentage: number;
   payoutPercentage: number;
   createdBy?: string;
   updatedAt?: string | null;
@@ -37,11 +38,11 @@ type GroupedResult = {
   logs: HistoryDTO[];
   summary: {
     count: number;
-    avgtopup: number;
+    avgpayin: number;
     avgpayout: number;
-    mintopup: number;
+    minpayin: number;
     minpayout: number;
-    maxtopup: number;
+    maxpayin: number;
     maxpayout: number;
   };
   expanded: boolean;
@@ -51,8 +52,8 @@ type GroupedResult = {
 };
 
 @Component({
-  selector: 'app-percentage-log',
-  templateUrl: './percentage-log.component.html'
+  selector: "app-percentage-log",
+  templateUrl: "./percentage-log.component.html",
 })
 export class PercentageLogComponent implements OnInit, OnDestroy {
   filterForm!: FormGroup;
@@ -60,21 +61,28 @@ export class PercentageLogComponent implements OnInit, OnDestroy {
   groupedResults: GroupedResult[] = [];
   loading = false;
   error: string | null = null;
+  hasSearched = false;
 
   currentPage = 0;
   pageSize = 10;
   totalPages = 0;
   totalElements = 0;
 
-  entityTypes = { SUB_ADMIN: 'CHIEF CONTROLLER', MASTER: 'MANAGER', AGENT: 'HEAD', USER: 'BRANCH' } as any;
+  entityTypes = {
+    SUB_ADMIN: "CHIEF CONTROLLER",
+    MASTER: "MANAGER",
+    AGENT: "HEAD",
+    USER: "BRANCH",
+  } as any;
   entityTypeKeys = Object.keys(this.entityTypes);
 
   private apiSub?: Subscription;
-Math: any = Math;
+  Math: any = Math;
 
   constructor(
     private fb: FormBuilder,
-    private percentageLog: PercentageLogService
+    private percentageLog: PercentageLogService,
+    private snackBar: SnackbarService,
   ) {}
 
   ngOnInit(): void {
@@ -92,25 +100,27 @@ Math: any = Math;
 
     this.filterForm = this.fb.group(
       {
-        fromDate: [weekAgo.toISOString().split('T')[0], Validators.required],
-        toDate: [today.toISOString().split('T')[0], Validators.required],
-        entityType: ['', Validators.required]
+        fromDate: [weekAgo.toISOString().split("T")[0], Validators.required],
+        toDate: [today.toISOString().split("T")[0], Validators.required],
+        entityType: ["", Validators.required],
       },
-      { validators: this.dateRangeValidator }
+      { validators: this.dateRangeValidator },
     );
 
     this.entities = [];
   }
 
   private setupFormListeners(): void {
-    this.filterForm.get('entityType')?.valueChanges.subscribe(type => {
+    this.filterForm.get("entityType")?.valueChanges.subscribe((type) => {
       this.entities = [];
     });
   }
 
-  private dateRangeValidator(group: FormGroup): { [key: string]: boolean } | null {
-    const from = group.get('fromDate')?.value;
-    const to = group.get('toDate')?.value;
+  private dateRangeValidator(
+    group: FormGroup,
+  ): { [key: string]: boolean } | null {
+    const from = group.get("fromDate")?.value;
+    const to = group.get("toDate")?.value;
 
     if (from && to && new Date(from) > new Date(to)) {
       return { dateRangeInvalid: true };
@@ -123,7 +133,7 @@ Math: any = Math;
       this.filterForm.markAllAsTouched();
       return;
     }
-
+    this.hasSearched = true;
     this.currentPage = 0;
     this.fetchPage(this.currentPage);
   }
@@ -135,11 +145,11 @@ Math: any = Math;
     const formValue = this.filterForm.getRawValue();
 
     const params = new HttpParams()
-      .set('fromDate', formValue.fromDate)
-      .set('toDate', formValue.toDate)
-      .set('entityType', formValue.entityType || '')
-      .set('pageNumber', String(pageNumber))
-      .set('pageSize', String(this.pageSize));
+      .set("fromDate", formValue.fromDate)
+      .set("toDate", formValue.toDate)
+      .set("entityType", formValue.entityType || "")
+      .set("pageNumber", String(pageNumber))
+      .set("pageSize", String(this.pageSize));
 
     this.apiSub?.unsubscribe();
     this.apiSub = this.percentageLog.getHistoryWithType(formValue).subscribe({
@@ -148,18 +158,19 @@ Math: any = Math;
         const content = page.content || [];
 
         this.totalElements = page.totalElements ?? content.length;
-        this.totalPages = page.totalPages ?? (page.size ? Math.ceil(this.totalElements / page.size) : 1);
+        this.totalPages =
+          page.totalPages ??
+          (page.size ? Math.ceil(this.totalElements / page.size) : 1);
         this.currentPage = page.number ?? pageNumber;
         this.pageSize = page.size ?? this.pageSize;
 
         this.processResults(content);
         this.loading = false;
       },
-      error: err => {
-        console.error('Failed to fetch percentage history', err);
-        this.error = 'Failed to fetch percentage history';
+      error: (err) => {
+        this.snackBar.show(err.error.message, false);
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -175,7 +186,7 @@ Math: any = Math;
   private processResults(logs: HistoryDTO[]): void {
     // Sort logs by entityId then createdAt descending
     logs.sort((a, b) => {
-      const eid = (a.entityId || '').localeCompare(b.entityId || '');
+      const eid = (a.entityId || "").localeCompare(b.entityId || "");
       if (eid !== 0) return eid;
       const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -184,78 +195,86 @@ Math: any = Math;
 
     // Group by entityId
     const grouped = new Map<string, HistoryDTO[]>();
-    logs.forEach(log => {
-      const key = log.entityId || 'unknown';
+    logs.forEach((log) => {
+      const key = log.entityId || "unknown";
       if (!grouped.has(key)) grouped.set(key, []);
       grouped.get(key)!.push(log);
     });
 
     // Create grouped results with portal categorization
-    this.groupedResults = Array.from(grouped.entries()).map(([entityId, groupLogs]) => {
-      const topupVals = groupLogs.map(l => Number(l.topupPercentage ?? 0));
-      const payoutVals = groupLogs.map(l => Number(l.payoutPercentage ?? 0));
+    this.groupedResults = Array.from(grouped.entries()).map(
+      ([entityId, groupLogs]) => {
+        const payinVals = groupLogs.map((l) => Number(l.payinPercentage ?? 0));
+        const payoutVals = groupLogs.map((l) =>
+          Number(l.payoutPercentage ?? 0),
+        );
 
-      const avg = (arr: number[]) => (arr.length ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) / 100 : 0);
-      const min = (arr: number[]) => (arr.length ? Math.min(...arr) : 0);
-      const max = (arr: number[]) => (arr.length ? Math.max(...arr) : 0);
+        const avg = (arr: number[]) =>
+          arr.length
+            ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) /
+              100
+            : 0;
+        const min = (arr: number[]) => (arr.length ? Math.min(...arr) : 0);
+        const max = (arr: number[]) => (arr.length ? Math.max(...arr) : 0);
 
-      // Sort group logs by portal then by createdAt descending
-      groupLogs.sort((x, y) => {
-        const portalX = x.portalId || '';
-        const portalY = y.portalId || '';
-        if (portalX !== portalY) return portalX.localeCompare(portalY);
-        
-        const tx = x.createdAt ? new Date(x.createdAt).getTime() : 0;
-        const ty = y.createdAt ? new Date(y.createdAt).getTime() : 0;
-        return ty - tx;
-      });
+        // Sort group logs by portal then by createdAt descending
+        groupLogs.sort((x, y) => {
+          const portalX = x.portalId || "";
+          const portalY = y.portalId || "";
+          if (portalX !== portalY) return portalX.localeCompare(portalY);
 
-      // Create portal groups
-      const portalGroupsMap = new Map<string, PortalGroup>();
-      groupLogs.forEach(log => {
-        const portalId = log.portalId || 'unknown';
-        const portalName = log.portalName || `Portal ${portalId}`;
-        
-        if (!portalGroupsMap.has(portalId)) {
-          portalGroupsMap.set(portalId, {
-            portalId,
-            portalName,
-            logs: [],
-            expanded: false
-          });
-        }
-        portalGroupsMap.get(portalId)!.logs.push(log);
-      });
+          const tx = x.createdAt ? new Date(x.createdAt).getTime() : 0;
+          const ty = y.createdAt ? new Date(y.createdAt).getTime() : 0;
+          return ty - tx;
+        });
 
-      const portalGroups = Array.from(portalGroupsMap.values());
+        // Create portal groups
+        const portalGroupsMap = new Map<string, PortalGroup>();
+        groupLogs.forEach((log) => {
+          const portalId = log.portalId || "unknown";
+          const portalName = log.portalName || `Portal ${portalId}`;
 
-      return {
-        entity: {
-          id: entityId,
-          name: `Entity ${entityId}`,
-          type: groupLogs[0]?.entityType ?? ''
-        },
-        logs: groupLogs,
-        summary: {
-          count: groupLogs.length,
-          avgtopup: avg(topupVals),
-          avgpayout: avg(payoutVals),
-          mintopup: min(topupVals),
-          minpayout: min(payoutVals),
-          maxtopup: max(topupVals),
-          maxpayout: max(payoutVals)
-        },
-        expanded: false,
-        portalGroups: portalGroups,
-        portalGroupsExpanded: false
-      } as GroupedResult;
-    });
+          if (!portalGroupsMap.has(portalId)) {
+            portalGroupsMap.set(portalId, {
+              portalId,
+              portalName,
+              logs: [],
+              expanded: false,
+            });
+          }
+          portalGroupsMap.get(portalId)!.logs.push(log);
+        });
+
+        const portalGroups = Array.from(portalGroupsMap.values());
+
+        return {
+          entity: {
+            id: entityId,
+            name: `Entity ${entityId}`,
+            type: groupLogs[0]?.entityType ?? "",
+          },
+          logs: groupLogs,
+          summary: {
+            count: groupLogs.length,
+            avgpayin: avg(payinVals),
+            avgpayout: avg(payoutVals),
+            minpayin: min(payinVals),
+            minpayout: min(payoutVals),
+            maxpayin: max(payinVals),
+            maxpayout: max(payoutVals),
+          },
+          expanded: false,
+          portalGroups: portalGroups,
+          portalGroupsExpanded: false,
+        } as GroupedResult;
+      },
+    );
 
     // Sort groups by entityType then entityId
     this.groupedResults.sort((a, b) => {
-      const t = (a.entity.type || '').localeCompare(b.entity.type || '');
+      const t = (a.entity.type || "").localeCompare(b.entity.type || "");
       if (t !== 0) return t;
-      return (a.entity.id || '').localeCompare(b.entity.id || '');
+      return (a.entity.id || "").localeCompare(b.entity.id || "");
     });
   }
 
@@ -273,21 +292,24 @@ Math: any = Math;
 
   getPortalStats(portalGroup: PortalGroup) {
     const logs = portalGroup.logs;
-    const topupVals = logs.map(l => Number(l.topupPercentage ?? 0));
-    const payoutVals = logs.map(l => Number(l.payoutPercentage ?? 0));
+    const payinVals = logs.map((l) => Number(l.payinPercentage ?? 0));
+    const payoutVals = logs.map((l) => Number(l.payoutPercentage ?? 0));
 
-    const avg = (arr: number[]) => (arr.length ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) / 100 : 0);
+    const avg = (arr: number[]) =>
+      arr.length
+        ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) / 100
+        : 0;
     const min = (arr: number[]) => (arr.length ? Math.min(...arr) : 0);
     const max = (arr: number[]) => (arr.length ? Math.max(...arr) : 0);
 
     return {
       count: logs.length,
-      avgTopup: avg(topupVals),
+      avgPayin: avg(payinVals),
       avgPayout: avg(payoutVals),
-      minTopup: min(topupVals),
-      maxTopup: max(topupVals),
+      minPayin: min(payinVals),
+      maxPayin: max(payinVals),
       minPayout: min(payoutVals),
-      maxPayout: max(payoutVals)
+      maxPayout: max(payoutVals),
     };
   }
 
@@ -308,4 +330,9 @@ Math: any = Math;
     this.currentPage = 0;
     this.fetchPage(this.currentPage);
   }
+
+  autoRefreshWrapper = () => {
+    if (!this.hasSearched) return;
+    this.onSearch();
+  };
 }

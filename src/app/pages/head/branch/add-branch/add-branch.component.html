@@ -291,7 +291,7 @@
                 </h2>
 
                 <!-- RIGHT: ADD THESE BUTTONS -->
-                <div class="flex items-center gap-2">
+                <!-- <div class="flex items-center gap-2">
                   <button
                     type="button"
                     (click)="openCompartPercentModal()"
@@ -302,7 +302,7 @@
                     </span>
                     cp %
                   </button>
-                </div>
+                </div> -->
               </div>
 
               <!-- KEEP THIS EXACTLY SAME (no change) -->
@@ -384,7 +384,7 @@
                 >
                   <div class="min-w-0">
                     <div class="truncate font-medium max-w-[120px]">
-                      {{ compart.username }}
+                      {{ compart.compartUsername }}
                     </div>
 
                     <div
@@ -394,7 +394,7 @@
                       {{ compart.info }}
                     </div>
 
-                    <div
+                    <!-- <div
                       *ngIf="compart.comPartTypes?.length"
                       class="flex flex-wrap gap-1 mt-1"
                     >
@@ -409,12 +409,12 @@
                       >
                         {{ t.comPartType }}
                       </span>
-                    </div>
+                    </div> -->
                   </div>
 
                   <button
                     type="button"
-                    (click)="selectCompart(compart.id)"
+                    (click)="selectCompart(compart.compartId)"
                     class="opacity-0 group-hover:opacity-100 text-[var(--color-primary)] text-sm transition w-5 h-5 flex items-center justify-center hover:bg-[var(--color-primary)]/10 rounded"
                   >
                     +
@@ -447,7 +447,7 @@
 
                       <div class="min-w-0">
                         <div class="text-xs font-medium truncate max-w-[100px]">
-                          {{ compart.username }}
+                          {{ compart.compartUsername }}
                         </div>
 
                         <div
@@ -461,13 +461,13 @@
 
                     <button
                       type="button"
-                      (click)="removeCompart(compart.id)"
+                      (click)="removeCompart(compart.compartId)"
                       class="text-[var(--color-muted)] hover:text-red-500 text-sm w-5 h-5 flex items-center justify-center"
                     >
                       ×
                     </button>
                   </div>
-
+<!-- 
                   <div
                     *ngIf="compart.comPartTypes?.length"
                     class="flex flex-wrap gap-1 mb-2"
@@ -483,7 +483,7 @@
                     >
                       {{ t.comPartType }}
                     </span>
-                  </div>
+                  </div> -->
 
                   <div class="grid grid-cols-3 gap-1 text-xs">
                     <div>
@@ -496,8 +496,9 @@
                         type="number"
                         min="0"
                         max="100"
-                        placeholder="%"
-                        [formControlName]="'payin_' + compart.id"
+                 [placeholder]="' ' + (compart.payinPercentage ?? 0) + '%'"
+
+                        [formControlName]="'payin_' + compart.compartId"
                         class="w-full border border-[var(--color-border)] rounded px-1.5 py-1 text-xs bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                       />
                     </div>
@@ -512,8 +513,8 @@
                         type="number"
                         min="0"
                         max="100"
-                        placeholder="%"
-                        [formControlName]="'payout_' + compart.id"
+                        [placeholder]="' ' + (compart.payoutPercentage ?? 0) + '%'"
+                        [formControlName]="'payout_' + compart.compartId"
                         class="w-full border border-[var(--color-border)] rounded px-1.5 py-1 text-xs bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                       />
                     </div>
@@ -528,8 +529,8 @@
                         type="number"
                         min="0"
                         max="100"
-                        placeholder="%"
-                        [formControlName]="'first_payin_' + compart.id"
+                        [placeholder]="' ' + (compart.fttPercentage ?? 0) + '%'"
+                        [formControlName]="'first_payin_' + compart.compartId"
                         class="w-full border border-[var(--color-border)] rounded px-1.5 py-1 text-xs bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                       />
                     </div>
@@ -623,10 +624,10 @@
 >
 </app-website-percentage-model>
 
-<app-compart-percentage-modle
+<!-- <app-compart-percentage-modle
   *ngIf="showCompartModal"
   [entityId]="currentUserId"
   [entityType]="role"
   (closed)="closeCompartPercentModal()"
 >
-</app-compart-percentage-modle>
+</app-compart-percentage-modle> -->

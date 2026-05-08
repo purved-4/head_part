@@ -593,7 +593,7 @@
               >
             </div>
           </td>
-<!-- 
+          <!-- 
           <td class="px-4 py-3 whitespace-nowrap">
             <div
               class="flex items-center cursor-pointer justify-right"
@@ -732,13 +732,13 @@
                 *ngIf="activeDropdownUpiId === upi.id"
                 class="absolute right-0 mt-2 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg z-30"
               >
-                <button
+                <!-- <button
                   (click)="toggleUpiStatus(upi); activeDropdownUpiId = null"
                   class="w-full px-4 py-3 text-left text-sm text-[var(--color-font)] hover:bg-[var(--color-hover)] flex items-center gap-3 border-b border-[var(--color-border)]"
                 >
                   <span class="material-symbols-outlined"> auto_delete </span>
                   <span>Delete</span>
-                </button>
+                </button> -->
                 <button
                   (click)="openUpdateModal(upi); activeDropdownUpiId = null"
                   class="w-full px-4 py-3 text-left text-sm text-[var(--color-font)] hover:bg-[var(--color-hover)] flex items-center gap-3"
@@ -915,7 +915,7 @@
             *ngIf="activeDropdownUpiId === upi.id"
             class="absolute right-0 top-10 w-44 bg-white border border-[var(--color-border)] rounded-lg shadow-lg z-50 overflow-hidden"
           >
-            <button
+            <!-- <button
               (click)="toggleUpiStatus(upi); activeDropdownUpiId = null"
               class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-[var(--color-hover)]"
             >
@@ -923,7 +923,7 @@
                 >delete</span
               >
               Delete
-            </button>
+            </button> -->
 
             <button
               (click)="openUpdateModal(upi); activeDropdownUpiId = null"
@@ -2111,3 +2111,4 @@
     </div>
   </div>
 </div>
+

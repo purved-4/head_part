@@ -63,7 +63,7 @@ export class AuthService {
     map((user: any) => user?.data || null),
 
     catchError((error) => {
-      console.log("FULL ERROR:", error);
+
 
       let message = "Failed to fetch user details";
 

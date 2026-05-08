@@ -131,7 +131,6 @@ export class BalanceHistoryReportComponent implements OnInit {
         this.showChart = true;
       },
       error: (err) => {
-        console.error("Error fetching settle history:", err);
         this.errorMessage =
           err.error?.message || "Failed to load settle history.";
         this.settleHistory = [];
@@ -169,7 +168,7 @@ export class BalanceHistoryReportComponent implements OnInit {
       balanceAfter: Number(item.balanceAfter || item.entityBalanceAfter || 0),
       portalBefore: Number(item.portalBefore || item.portalBalanceBefore || 0),
       portalAfter: Number(item.portalAfter || item.portalBalanceAfter || 0),
-      type: item.type || "topup",
+      type: item.type || "payin",
       status: item.status || "completed",
       referenceId: item.referenceId || item.id || "-",
       notes: item.notes || "",
@@ -258,7 +257,6 @@ export class BalanceHistoryReportComponent implements OnInit {
           this.loadingEntities = false;
         },
         error: (err) => {
-          console.error("Error fetching entities:", err);
           this.entities = [];
           this.loadingEntities = false;
         },
@@ -295,7 +293,6 @@ export class BalanceHistoryReportComponent implements OnInit {
           this.loadingPortals = false;
         },
         error: (err) => {
-          console.error("Error fetching portals:", err);
           this.portals = [];
           this.loadingPortals = false;
         },

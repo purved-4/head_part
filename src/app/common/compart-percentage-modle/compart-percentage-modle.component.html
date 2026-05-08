@@ -1,15 +1,18 @@
 <div
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-bg)]/80 backdrop-blur-sm px-4 py-6"
 >
-  <div class="w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
+  <div
+    class="w-full max-w-4xl rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)] overflow-hidden"
+  >
+    <!-- Header -->
     <div
-      class="flex items-center justify-between border-b border-slate-200 px-6 py-4"
+      class="flex items-center justify-between gap-4 px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-hover)]"
     >
       <div>
-        <h2 class="text-lg font-semibold text-slate-800">
+        <h2 class="text-lg sm:text-xl font-semibold text-[var(--color-font)]">
           Compart Percentages
         </h2>
-        <p class="text-sm text-slate-500">
+        <p class="text-sm text-[var(--color-muted)] mt-1">
           {{ getEntityLabel() }} percentage details
         </p>
       </div>
@@ -17,84 +20,116 @@
       <button
         type="button"
         (click)="closeModal()"
-        class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-slate-200 hover:text-slate-900"
+        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] transition-all hover:bg-[var(--color-hover)] hover:text-[var(--color-font)]"
       >
         <span class="text-2xl leading-none">&times;</span>
       </button>
     </div>
 
+    <!-- Body -->
     <div class="px-6 py-5">
+      <!-- Loading -->
       <div
         *ngIf="loading"
-        class="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600"
+        class="rounded-xl border border-[var(--color-border)] bg-[var(--color-hover)] px-4 py-3 text-sm text-[var(--color-muted)]"
       >
         Loading percentage details...
       </div>
 
+      <!-- Error -->
       <div
         *ngIf="errorMessage && !loading"
-        class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600"
+        class="rounded-xl border border-[var(--color-danger)] bg-[var(--color-hover)] px-4 py-3 text-sm text-[var(--color-danger)]"
       >
         {{ errorMessage }}
       </div>
 
+      <!-- Table -->
       <div
         *ngIf="!loading && !errorMessage"
-        class="overflow-hidden rounded-xl border border-slate-200"
+        class="overflow-hidden rounded-xl border border-[var(--color-border)]"
       >
-        <table class="min-w-full divide-y divide-slate-200">
-          <thead class="bg-slate-50">
-            <tr>
-              <th
-                class="px-4 py-3 text-left text-sm font-medium text-slate-600"
-              >
-                Compart Name
-              </th>
-              <th
-                class="px-4 py-3 text-left text-sm font-medium text-slate-600"
-              >
-                Payin %
-              </th>
-              <th
-                class="px-4 py-3 text-left text-sm font-medium text-slate-600"
-              >
-                FTT %
-              </th>
-              <th
-                class="px-4 py-3 text-left text-sm font-medium text-slate-600"
-              >
-                Payout %
-              </th>
-            </tr>
-          </thead>
+        <div class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead class="bg-[var(--color-hover)]">
+              <tr>
+                <th
+                  class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)]"
+                >
+                  Compart Name
+                </th>
 
-          <tbody class="divide-y divide-slate-200 bg-white">
-            <tr *ngFor="let item of portalPercentages">
-              <td class="px-4 py-3 text-sm font-medium text-slate-800">
-                {{ item.compartName || "--" }}
-              </td>
-              <td class="px-4 py-3 text-sm text-slate-700">
-                {{ formatValue(item.payinPercentage) }}
-              </td>
-              <td class="px-4 py-3 text-sm text-slate-700">
-                {{ formatValue(item.fttPercentage) }}
-              </td>
-              <td class="px-4 py-3 text-sm text-slate-700">
-                {{ formatValue(item.payoutPercentage) }}
-              </td>
-            </tr>
+                <th
+                  class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)]"
+                >
+                  Payin %
+                </th>
 
-            <tr *ngIf="portalPercentages.length === 0">
-              <td
-                colspan="4"
-                class="px-4 py-6 text-center text-sm text-slate-500"
+                <th
+                  class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)]"
+                >
+                  FTT %
+                </th>
+
+                <th
+                  class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)]"
+                >
+                  Payout %
+                </th>
+              </tr>
+            </thead>
+
+            <tbody
+              class="divide-y divide-[var(--color-border)] bg-[var(--color-surface)]"
+            >
+              <tr
+                *ngFor="let item of portalPercentages"
+                class="hover:bg-[var(--color-hover)] transition-all"
               >
-                No percentage data found.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <td
+                  class="px-4 py-3 text-sm font-medium text-[var(--color-font)]"
+                >
+                  {{ item.compartName || "--" }}
+                </td>
+
+                <td class="px-4 py-3 text-sm text-[var(--color-font)]">
+                  {{ formatValue(item.payinPercentage) }}
+                </td>
+
+                <td class="px-4 py-3 text-sm text-[var(--color-font)]">
+                  {{ formatValue(item.fttPercentage) }}
+                </td>
+
+                <td class="px-4 py-3 text-sm text-[var(--color-font)]">
+                  {{ formatValue(item.payoutPercentage) }}
+                </td>
+              </tr>
+
+              <tr *ngIf="portalPercentages.length === 0">
+                <td
+                  colspan="4"
+                  class="px-4 py-8 text-center text-sm text-[var(--color-muted)]"
+                >
+                  No percentage data found.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+    </div>
+
+    <!-- Footer -->
+    <div
+      class="px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-hover)] flex justify-end"
+    >
+      <button
+        type="button"
+        (click)="closeModal()"
+        class="px-5 py-2 rounded-xl bg-[var(--color-primary)] text-white text-sm font-medium hover:opacity-90 transition-all"
+      >
+        Close
+      </button>
     </div>
   </div>
 </div>

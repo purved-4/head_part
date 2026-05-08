@@ -11,6 +11,7 @@ import { TransactionHistoryService } from "../../../pages/services/reports/trans
 import { UserStateService } from "../../../store/user-state.service";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { SnackbarService } from "../../../common/snackbar/snackbar.service";
 
 @Component({
   selector: "app-transaction-history-report",
@@ -52,7 +53,7 @@ export class TransactionHistoryReportComponent implements OnInit {
 
   // Filter options
   filterOptions = {
-    transactionTypes: ["All", "topup", "payout", "Commission", "Reward"],
+    transactionTypes: ["All", "payin", "payout", "Commission", "Reward"],
     statuses: ["All", "Success", "Failed", "Pending"],
     portals: ["All", "Portal1", "Portal2", "Portal3"],
   };
@@ -84,6 +85,7 @@ export class TransactionHistoryReportComponent implements OnInit {
     private userService: UserService,
     private utilService: UtilsServiceService,
     private stateService: UserStateService,
+    private snackBar: SnackbarService,
   ) {}
 
   ngOnInit(): void {
@@ -150,12 +152,10 @@ export class TransactionHistoryReportComponent implements OnInit {
   }
 
   setupFormListeners(): void {
-    // When entity type changes, either auto-select for current role OR fetch entities
     this.reportForm.get("entityType")?.valueChanges.subscribe((role) => {
       this.applyEntityAutoSelect(role);
     });
 
-    // When report type changes, adjust validators
     this.reportForm.get("reportType")?.valueChanges.subscribe((type) => {
       if (type === "PORTAL") {
         this.reportForm.get("portalId")?.setValidators([Validators.required]);
@@ -164,11 +164,11 @@ export class TransactionHistoryReportComponent implements OnInit {
         this.reportForm.get("entityId")?.setValidators([Validators.required]);
         this.reportForm.get("portalId")?.clearValidators();
       }
+
       this.reportForm.get("entityId")?.updateValueAndValidity();
       this.reportForm.get("portalId")?.updateValueAndValidity();
     });
 
-    // When date range mode changes, update validators
     this.reportForm.get("dateRangeMode")?.valueChanges.subscribe((mode) => {
       this.updateDateValidators(mode);
     });
@@ -240,27 +240,32 @@ export class TransactionHistoryReportComponent implements OnInit {
       return;
     }
 
-    const roleNormalized = String(role).toUpperCase();
-    const currentRoleNormalized = String(this.currentRole || "").toUpperCase();
+    const roleNormalized = role.toUpperCase();
+    const currentRoleNormalized = (this.currentRole || "").toUpperCase();
 
-    if (
-      roleNormalized === currentRoleNormalized &&
-      this.currentRoleId != null
-    ) {
-      // Auto‑select current user
-      this.reportForm.patchValue({ entityId: this.currentRoleId });
+    //  Agar same role hai → auto select
+    if (roleNormalized === currentRoleNormalized && this.currentRoleId) {
+      this.entities = [
+        {
+          id: this.currentRoleId,
+          name: "Current User",
+        },
+      ];
+
+      this.reportForm.patchValue({
+        entityId: this.currentRoleId,
+      });
+
       this.reportForm.get("entityId")?.disable();
-
-      // Use a placeholder name – replace with actual name if available later
-      this.entities = [{ id: this.currentRoleId, name: "Current User" }];
     } else {
+      //  Otherwise fetch list
       this.reportForm.get("entityId")?.enable();
       this.reportForm.patchValue({ entityId: "" });
+
       this.fetchEntitiesForRole(role);
     }
   }
 
-  // Fetch entities based on role
   fetchEntitiesForRole(role: string): void {
     if (!role) {
       this.entities = [];
@@ -274,14 +279,31 @@ export class TransactionHistoryReportComponent implements OnInit {
       .getByRole(this.currentRoleId, role.toUpperCase())
       .subscribe({
         next: (res: any) => {
-          this.entities = Array.isArray(res) ? res : res?.data?.data || [];
+          //  SMART EXTRACTION (handles all cases)
+          let list = [];
+
+          if (Array.isArray(res)) {
+            list = res;
+          } else if (Array.isArray(res?.data)) {
+            list = res.data;
+          } else if (Array.isArray(res?.data?.data)) {
+            list = res.data.data;
+          } else if (Array.isArray(res?.data?.data?.data)) {
+            list = res.data.data.data;
+          }
+
+          //  normalize
+          this.entities = list.map((item: any) => ({
+            id: String(item.id),
+            name: item.name,
+          }));
+
           this.loadingEntities = false;
         },
         error: (err) => {
-          console.error("Error fetching entities:", err);
           this.entities = [];
           this.loadingEntities = false;
-          this.errorMessage = "Failed to load entities";
+          this.snackBar.show(err.error?.message, false);
         },
       });
   }
@@ -393,8 +415,7 @@ export class TransactionHistoryReportComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.errorMessage =
-          err?.error?.message || "Failed to fetch report. Please try again.";
+        this.snackBar.show(err.error?.message, false);
       },
     });
   }
@@ -425,7 +446,7 @@ export class TransactionHistoryReportComponent implements OnInit {
       },
       error: (err) => {
         this.loadingShow = false;
-        this.errorMessage = "Failed to load details";
+        this.snackBar.show(err.error?.message, false);
       },
     });
   }
@@ -568,7 +589,7 @@ export class TransactionHistoryReportComponent implements OnInit {
   // Get transaction type class
   getTransactionTypeClass(type: string): string {
     switch (type?.toLowerCase()) {
-      case "topup":
+      case "payin":
         return "bg-blue-100 text-blue-700";
       case "payout":
         return "bg-red-100 text-red-700";
@@ -595,4 +616,8 @@ export class TransactionHistoryReportComponent implements OnInit {
       this.reportForm.get("dateRangeMode")?.value === "month"
     );
   }
+  autoRefreshWrapper = () => {
+    if (!this.hasSearched) return;
+    this.loadReport();
+  };
 }

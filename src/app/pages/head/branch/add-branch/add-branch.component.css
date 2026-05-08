@@ -8,18 +8,19 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #ffb366;
+  background: #FFB366;
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #e67a00;
+  background: #E67A00;
 }
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   opacity: 1;
 }
+
 
 :host ::ng-deep .iti {
   @apply w-full;

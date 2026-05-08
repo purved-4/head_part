@@ -469,7 +469,7 @@
               <!-- Date Time Column -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">
-                  {{ item.dateTime | date: "medium" }}
+                  {{ item.dateTime | tz }}
                 </div>
                 <div class="text-xs text-gray-500">ID: {{ item.id }}</div>
               </td>
@@ -509,12 +509,12 @@
               <td class="px-6 py-4">
                 <div class="space-y-1">
                   <div class="text-sm font-medium text-gray-900">
-                    {{ item.type === "topup" ? "Top-up" : "Withdrawal" }}
+                    {{ item.type === "payin" ? "Top-up" : "Withdrawal" }}
                   </div>
                   <div
                     class="text-lg font-bold"
                     [ngClass]="
-                      item.type === 'topup' ? 'text-green-600' : 'text-red-600'
+                      item.type === 'payin' ? 'text-green-600' : 'text-red-600'
                     "
                   >
                     {{ item.amount | currency: "INR" : "symbol" : "1.2-2" }}

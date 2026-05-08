@@ -31,8 +31,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   branch: any = null;
   entityInfo: any = null;
-  portalInfoRaw: any[] = [];
-  portalInfo: any[] = [];
+  cpInfoRaw: any[] = [];
+  cpInfo: any[] = [];
   expandedPortals: Set<string> = new Set();
   expandedRawData: Set<string> = new Set();
 
@@ -157,13 +157,13 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         balance: data?.branchBalance,
       };
 
-    this.portalInfoRaw = Array.isArray(data?.portalInfo)
-      ? data.portalInfo
+    this.cpInfoRaw = Array.isArray(data?.cpInfo)
+      ? data.cpInfo
       : data?.portals || [];
-    this.portalInfo = this.mapPortalInfo(this.portalInfoRaw || []);
+    this.cpInfo = this.mapcpInfo(this.cpInfoRaw || []);
 
     this.portalIdToDomain = {};
-    for (const w of this.portalInfo) {
+    for (const w of this.cpInfo) {
       if (w.portalId)
         this.portalIdToDomain[w.portalId] =
           w.portalDomain || w._raw?.name || w.portalId;
@@ -172,7 +172,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.rewards = [];
     this.payouts = [];
 
-    for (const w of this.portalInfo) {
+    for (const w of this.cpInfo) {
       const domain = w.portalDomain || w._raw?.name || w.portalId || "unknown";
 
       if (w.payinsTimeStrength) {
@@ -248,7 +248,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     );
 
     const processingCollect: any[] = [];
-    for (const w of this.portalInfo) {
+    for (const w of this.cpInfo) {
       const domain = w.portalDomain || w.portalId || "unknown";
       const entries = Array.isArray(w.processingTime)
         ? w.processingTime.map((e: any) => ({
@@ -264,9 +264,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.processingTimeList = this.normalizeProcessingTime(processingCollect);
   }
 
-  private mapPortalInfo(portalInfo: any[]): any[] {
+  private mapcpInfo(cpInfo: any[]): any[] {
     const out: any[] = [];
-    for (const w of portalInfo) {
+    for (const w of cpInfo) {
       const processingTime = Array.isArray(w.processingTime)
         ? w.processingTime
         : w.processing_time || w._processingTime || [];
