@@ -1,16 +1,14 @@
-
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs/operators';
-import { PortalService } from '../../../pages/services/portal.service';
-import { UserStateService } from '../../../store/user-state.service';
+import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
+import { filter } from "rxjs/operators";
+import { PortalService } from "../../../pages/services/portal.service";
+import { UserStateService } from "../../../store/user-state.service";
 @Component({
-  selector: 'app-payments-methods',
-  templateUrl: './payments-methods.component.html',
-  styleUrl: './payments-methods.component.css'
+  selector: "app-payments-methods",
+  templateUrl: "./payments-methods.component.html",
+  styleUrl: "./payments-methods.component.css",
 })
 export class PaymentsMethodsComponent implements OnInit {
-
   entityId: any;
   role: any;
 
@@ -18,13 +16,13 @@ export class PaymentsMethodsComponent implements OnInit {
   selectedCurrency: any = null;
 
   availableModes: string[] = [];
-  selectedMode: string = '';
+  selectedMode: string = "";
 
   constructor(
     private portalService: PortalService,
     private userStateService: UserStateService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -35,25 +33,27 @@ export class PaymentsMethodsComponent implements OnInit {
     this.syncModeFromRoute();
 
     this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
+      .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => {
         this.syncModeFromRoute();
       });
   }
 
   loadCurrencies() {
-    this.portalService.getCurrenciesByEntity(this.entityId, this.role).subscribe({
-      next: (res: any) => {
-        this.currencies = res?.data || [];
+    this.portalService
+      .getCurrenciesByEntity(this.entityId, this.role)
+      .subscribe({
+        next: (res: any) => {
+          this.currencies = res?.data || [];
 
-        if (this.currencies.length) {
-          this.onCurrencyChangeValue(this.currencies[0].currency);
-        }
-      },
-      error: () => {
-        this.currencies = [];
-      },
-    });
+          if (this.currencies.length) {
+            this.onCurrencyChangeValue(this.currencies[0].currency);
+          }
+        },
+        error: () => {
+          this.currencies = [];
+        },
+      });
   }
 
   onCurrencyChange(event: Event) {
@@ -62,17 +62,18 @@ export class PaymentsMethodsComponent implements OnInit {
   }
 
   onCurrencyChangeValue(value: string) {
-    this.selectedCurrency = this.currencies.find(c => c.currency === value);
+    this.selectedCurrency = this.currencies.find((c) => c.currency === value);
 
     if (this.selectedCurrency) {
-      this.availableModes = Object.keys(this.selectedCurrency.modes)
-        .filter((key) => this.selectedCurrency.modes[key]);
+      this.availableModes = Object.keys(this.selectedCurrency.modes).filter(
+        (key) => this.selectedCurrency.modes[key],
+      );
 
-      this.selectedMode = '';
-      this.router.navigate(['.'], { relativeTo: this.route });
+      this.selectedMode = "";
+      this.router.navigate(["."], { relativeTo: this.route });
     } else {
       this.availableModes = [];
-      this.selectedMode = '';
+      this.selectedMode = "";
     }
   }
 
@@ -81,12 +82,15 @@ export class PaymentsMethodsComponent implements OnInit {
     this.selectedMode = mode;
 
     if (mode) {
-      this.router.navigate([mode], { relativeTo: this.route,queryParams:{currency:this.selectedCurrency.currency} });
+      this.router.navigate([mode], {
+        relativeTo: this.route,
+        queryParams: { currency: this.selectedCurrency.currency },
+      });
     }
   }
 
   syncModeFromRoute() {
-    const childPath = this.route.firstChild?.snapshot.routeConfig?.path || '';
+    const childPath = this.route.firstChild?.snapshot.routeConfig?.path || "";
     this.selectedMode = childPath;
   }
 }

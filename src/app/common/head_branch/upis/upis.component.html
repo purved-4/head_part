@@ -732,13 +732,13 @@
                 *ngIf="activeDropdownUpiId === upi.id"
                 class="absolute right-0 mt-2 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg z-30"
               >
-                <!-- <button
+                <button
                   (click)="toggleUpiStatus(upi); activeDropdownUpiId = null"
                   class="w-full px-4 py-3 text-left text-sm text-[var(--color-font)] hover:bg-[var(--color-hover)] flex items-center gap-3 border-b border-[var(--color-border)]"
                 >
                   <span class="material-symbols-outlined"> auto_delete </span>
                   <span>Delete</span>
-                </button> -->
+                </button>
                 <button
                   (click)="openUpdateModal(upi); activeDropdownUpiId = null"
                   class="w-full px-4 py-3 text-left text-sm text-[var(--color-font)] hover:bg-[var(--color-hover)] flex items-center gap-3"
@@ -915,7 +915,7 @@
             *ngIf="activeDropdownUpiId === upi.id"
             class="absolute right-0 top-10 w-44 bg-white border border-[var(--color-border)] rounded-lg shadow-lg z-50 overflow-hidden"
           >
-            <!-- <button
+            <button
               (click)="toggleUpiStatus(upi); activeDropdownUpiId = null"
               class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-[var(--color-hover)]"
             >
@@ -923,7 +923,7 @@
                 >delete</span
               >
               Delete
-            </button> -->
+            </button>
 
             <button
               (click)="openUpdateModal(upi); activeDropdownUpiId = null"
@@ -1146,6 +1146,7 @@
           [formGroup]="addUpiForm"
           (ngSubmit)="submitAddUpi()"
           class="space-y-4"
+          appEnterKeyFocus
         >
           <!-- Portal Selection – SEARCH BASED -->
           <div class="space-y-1" *ngIf="this.preselectedBankId === null">
@@ -1614,7 +1615,7 @@
       </div>
 
       <div class="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
-        <form (ngSubmit)="submitUpdate()" class="space-y-4">
+        <form (ngSubmit)="submitUpdate()" appEnterKeyFocus class="space-y-4">
           <!-- Current QR Display -->
           <div
             *ngIf="editingUpi?.qrImageUrl"
@@ -2111,4 +2112,3 @@
     </div>
   </div>
 </div>
-

@@ -39,7 +39,6 @@ import { TimeZonePipe } from "../pipes/time-zone.pipe";
 import { AutoRefreshComponent } from "../common/auto-refresh/auto-refresh.component";
 import { HierarchyManagementComponent } from "../common/hierarchy-management/hierarchy-management.component";
 import { BanksComponent } from "../common/head_branch/banks/banks.component";
-import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods/payments-methods.component";
 import { UpisComponent } from "../common/head_branch/upis/upis.component";
 import { AllotCurrencyComponent } from "../common/allot-currency/allot-currency.component";
 import { RouterModule } from "@angular/router";
@@ -49,6 +48,9 @@ import { ThemeToggleComponent } from "../theme/theme.component";
 import { HeadBranchDashboardComponent } from "../common/head-branch-dashboard/head-branch-dashboard.component";
 import { HbPayinReportComponent } from "../common/hb-payin-report/hb-payin-report.component";
 import { HbPayoutReportComponent } from "../common/hb-payout-report/hb-payout-report.component";
+import { EnterKeyDirective } from "../directives/enter-key.directive";
+import { BankDetailsComponent } from "../common/head_branch/bank-details/bank-details.component";
+import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods/payments-methods.component";
 
 // shared.module.ts
 @NgModule({
@@ -91,7 +93,6 @@ import { HbPayoutReportComponent } from "../common/hb-payout-report/hb-payout-re
     AutoRefreshComponent,
     HierarchyManagementComponent,
     BanksComponent,
-    PaymentsMethodsComponent,
     UpisComponent,
     AllotCurrencyComponent,
     OverrideCurrencyRateComponent,
@@ -99,6 +100,9 @@ import { HbPayoutReportComponent } from "../common/hb-payout-report/hb-payout-re
     HeadBranchDashboardComponent,
     HbPayinReportComponent,
     HbPayoutReportComponent,
+    EnterKeyDirective,
+    BankDetailsComponent,
+    PaymentsMethodsComponent,
   ],
   exports: [
     WebhookDataComponent,
@@ -145,6 +149,8 @@ import { HbPayoutReportComponent } from "../common/hb-payout-report/hb-payout-re
     HeadBranchDashboardComponent,
     HbPayinReportComponent,
     HbPayoutReportComponent,
+    EnterKeyDirective,
+    BankDetailsComponent,
   ],
   imports: [
     CommonModule,

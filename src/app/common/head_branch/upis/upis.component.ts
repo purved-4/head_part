@@ -564,20 +564,23 @@ export class UpisComponent implements OnInit {
   }
 
   // ---------- TOGGLE STATUS ----------
-  // toggleUpiStatus(upi: any): void {
-  //   const newStatus = upi.status === "active" ? "inactive" : "active";
-  //   upi.status = newStatus;
-  //   this.upiService.toogleUpiDeleted(upi.id).subscribe({
-  //     next: () => this.fetchUpis(),
-  //     error: (err) => {
-  //       upi.status = upi.status === "active" ? "inactive" : "active";
-  //       this.snack.show(
-  //         err?.error?.message || "Failed to update status.",
-  //         false,
-  //       );
-  //     },
-  //   });
-  // }
+  toggleUpiStatus(upi: any): void {
+    const newStatus = upi.status === "active" ? "inactive" : "active";
+    upi.status = newStatus;
+    this.upiService.toogleUpiDeleted(upi.id).subscribe({
+      next: (res: any) => {
+        this.snack.show(res.message, true);
+        this.fetchUpis();
+      },
+      error: (err) => {
+        upi.status = upi.status === "active" ? "inactive" : "active";
+        this.snack.show(
+          err?.error?.message || "Failed to update status.",
+          false,
+        );
+      },
+    });
+  }
 
   // ---------- ADD MODAL ----------
   openAddModal(): void {
