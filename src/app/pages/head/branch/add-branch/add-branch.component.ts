@@ -16,13 +16,13 @@ interface ComPartType {
   enabled: boolean;
 }
 
-interface ComPartItem {
-  id: string;
-  username: string;
+interface ComPartPercentage {
+  compartId: string;
+  compartUsername: string;
   info?: string;
-  active?: boolean;
-  transaction?: boolean;
-  comPartTypes?: ComPartType[];
+  payinPercentage?: any;
+  payoutPercentage?: any;
+  fttPercentage: any;
 }
 
 @Component({
@@ -34,7 +34,7 @@ export class AddBranchComponent implements OnInit {
   chiefForm: FormGroup;
   loading = false;
 
-  comparts: ComPartItem[] = [];
+  comparts: ComPartPercentage[] = [];
   activeTab: "available" | "selected" = "available";
 
   currentUserId: string | null = "";
@@ -70,7 +70,7 @@ export class AddBranchComponent implements OnInit {
 
   loadComparts(): void {
     this.comPartService
-      .getAllComPartByEntity(this.currentUserId, this.role)
+      .getPercentageByEntityId(this.currentUserId, this.role)
       .subscribe({
         next: (res: any) => {
           const data = Array.isArray(res)
@@ -98,7 +98,7 @@ export class AddBranchComponent implements OnInit {
 
   initializeCompartControls(): void {
     this.comparts.forEach((compart) => {
-      const wid = compart.id;
+      const wid = compart.compartId;
 
       if (!this.chiefForm.contains(`first_payin_${wid}`)) {
         this.chiefForm.addControl(
@@ -144,27 +144,27 @@ export class AddBranchComponent implements OnInit {
     return selectedIds.includes(compartId);
   }
 
-  getAvailableComparts(): ComPartItem[] {
+  getAvailableComparts(): ComPartPercentage[] {
     const selectedIds: string[] = this.chiefForm.get("compartIds")?.value || [];
     const term = this.availableSearchTerm.toLowerCase();
 
     return this.comparts
-      .filter((w) => !selectedIds.includes(w.id))
+      .filter((w) => !selectedIds.includes(w.compartId))
       .filter((w) => {
-        const username = (w.username || "").toLowerCase();
+        const username = (w.compartUsername || "").toLowerCase();
         const info = (w.info || "").toLowerCase();
         return username.includes(term) || info.includes(term);
       });
   }
 
-  getSelectedComparts(): ComPartItem[] {
+  getSelectedComparts(): ComPartPercentage[] {
     const selectedIds: string[] = this.chiefForm.get("compartIds")?.value || [];
     const term = this.selectedSearchTerm.toLowerCase();
 
     return this.comparts
-      .filter((w) => selectedIds.includes(w.id))
+      .filter((w) => selectedIds.includes(w.compartId))
       .filter((w) => {
-        const username = (w.username || "").toLowerCase();
+        const username = (w.compartUsername || "").toLowerCase();
         const info = (w.info || "").toLowerCase();
         return username.includes(term) || info.includes(term);
       });
@@ -227,11 +227,11 @@ export class AddBranchComponent implements OnInit {
     if (selectedComparts.length === 0) return;
 
     const firstCompart = selectedComparts[0];
-    const controlName = `${type}_${firstCompart.id}`;
+    const controlName = `${type}_${firstCompart.compartId}`;
     const value = this.chiefForm.get(controlName)?.value;
 
     selectedComparts.forEach((compart) => {
-      const control = this.chiefForm.get(`${type}_${compart.id}`);
+      const control = this.chiefForm.get(`${type}_${compart.compartId}`);
       if (control && value !== null && value !== undefined) {
         control.setValue(value);
         control.markAsTouched();
@@ -349,7 +349,7 @@ export class AddBranchComponent implements OnInit {
     });
 
     this.comparts.forEach((compart) => {
-      const wid = compart.id;
+      const wid = compart.compartId;
       this.chiefForm.get(`first_payin_${wid}`)?.setValue("");
       this.chiefForm.get(`payin_${wid}`)?.setValue("");
       this.chiefForm.get(`payout_${wid}`)?.setValue("");
@@ -369,8 +369,8 @@ export class AddBranchComponent implements OnInit {
     return !!field && field.invalid && field.touched;
   }
 
-  trackByCompartId(index: number, item: ComPartItem): string {
-    return item.id;
+  trackByCompartId(index: number, item: ComPartPercentage): string {
+    return item.compartId;
   }
 
   openPercentageModal() {
@@ -383,13 +383,13 @@ export class AddBranchComponent implements OnInit {
     this.showPercentageModal = false;
   }
 
-  openCompartPercentModal() {
-    // this.selectedWebsiteId = website;
+  // openCompartPercentModal() {
+  //   // this.selectedWebsiteId = website;
 
-    this.showCompartModal = true;
-  }
+  //   this.showCompartModal = true;
+  // }
 
-  closeCompartPercentModal() {
-    this.showCompartModal = false;
-  }
+  // closeCompartPercentModal() {
+  //   this.showCompartModal = false;
+  // }
 }

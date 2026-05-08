@@ -1,3 +1,4 @@
+
 import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { FundsService } from "../../pages/services/funds.service";
@@ -354,7 +355,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
         : null;
 
       this.fundService
-        .getPayinFundWithPortalIdAndEntityIdUpdated(
+        .getPayinFundWithPortalIdAndEntityId(
           this.branchId,
           this.bankPortalFilter,
           "REJECTED",

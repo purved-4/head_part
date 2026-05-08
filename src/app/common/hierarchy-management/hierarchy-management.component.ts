@@ -39,7 +39,7 @@ export class HierarchyManagementComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes["chiefs"] && changes["chiefs"].currentValue) {
       this.selectedChief = this.chiefs;
-      console.log("MODAL OPEN + DATA RECEIVED:", this.selectedChief);
+
       this.resetAllData();
       this.loadHierarchy();
     }
@@ -69,7 +69,7 @@ export class HierarchyManagementComponent implements OnChanges {
 
   // ================= API 1: MANAGERS =================
   getManagers(chiefId: string) {
-    console.log("API CALL: Managers");
+
 
     this.Hierarchy.getManagersByChiefIdPaginated(chiefId).subscribe({
       next: (res: any) => {
@@ -77,7 +77,7 @@ export class HierarchyManagementComponent implements OnChanges {
         this.loading = false;
       },
       error: (err) => {
-        console.error("Manager API error", err);
+
         this.loading = false;
       },
     });
@@ -85,7 +85,7 @@ export class HierarchyManagementComponent implements OnChanges {
 
   // ================= API 2: HEADS (when manager clicked) =================
   getHeads(manager: any) {
-    console.log("API CALL: Heads for manager:", manager.id);
+
 
     this.selectedManager = manager;
     this.selectedHead = null;
@@ -97,10 +97,10 @@ export class HierarchyManagementComponent implements OnChanges {
       next: (res: any) => {
         this.heads = res?.data || [];
         this.headsLoading = false;
-        console.log("Heads loaded:", this.heads);
+
       },
       error: (err) => {
-        console.error("Head API error", err);
+
         this.headsLoading = false;
       },
     });
@@ -108,7 +108,7 @@ export class HierarchyManagementComponent implements OnChanges {
 
   // ================= API 3: BRANCH (when head clicked) =================
   getBranchesByHead(head: any) {
-    console.log("API CALL: Branches by Head:", head.id);
+
 
     this.selectedHead = head;
     this.branchesLoading = true;
@@ -118,10 +118,10 @@ export class HierarchyManagementComponent implements OnChanges {
       next: (res: any) => {
         this.branches = res?.data || [];
         this.branchesLoading = false;
-        console.log("Branches loaded:", this.branches);
+
       },
       error: (err) => {
-        console.error("Branch API error", err);
+
         this.branchesLoading = false;
       },
     });
@@ -129,7 +129,7 @@ export class HierarchyManagementComponent implements OnChanges {
 
   // ================= B2C DIRECT BRANCH =================
   getBranchesByChief(chiefId: string) {
-    console.log("API CALL: Branch by Chief");
+
 
     this.Hierarchy.getBranchByChiefId(chiefId).subscribe({
       next: (res: any) => {
@@ -137,7 +137,7 @@ export class HierarchyManagementComponent implements OnChanges {
         this.loading = false;
       },
       error: (err) => {
-        console.error("Branch API error", err);
+
         this.loading = false;
       },
     });

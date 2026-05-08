@@ -13,6 +13,7 @@ import { UserService } from "../../../pages/services/user.service";
 import { WorkReportsService } from "../../../pages/services/reports/work-report.service";
 import { UserStateService } from "../../../store/user-state.service";
 import { UtilsServiceService } from "../../../utils/utils-service.service";
+import { SnackbarService } from "../../../common/snackbar/snackbar.service";
 
 interface Entity {
   id: string;
@@ -44,6 +45,7 @@ interface UserGroup {
 })
 export class WorkTimeReportComponent implements OnInit {
   entityTypes: any = [];
+  hasSearched = false;
 
   entities: Entity[] = [];
   userGroups: UserGroup[] = [];
@@ -79,6 +81,7 @@ export class WorkTimeReportComponent implements OnInit {
     private stateService: UserStateService,
     private utilService: UtilsServiceService,
     private workTimeReport: WorkReportsService,
+    private snackBar: SnackbarService,
   ) {
     const today = new Date();
     this.maxDate = today.toISOString().split("T")[0];
@@ -206,6 +209,8 @@ export class WorkTimeReportComponent implements OnInit {
     toMonthControl?.updateValueAndValidity();
     yearControl?.updateValueAndValidity();
     this.reportForm.updateValueAndValidity();
+    this.reportForm.markAllAsTouched();
+    this.reportForm.updateValueAndValidity();
   }
 
   applyEntityAutoSelect(role: string | null | undefined): void {
@@ -213,6 +218,9 @@ export class WorkTimeReportComponent implements OnInit {
       this.entities = [];
       this.reportForm.get("entityId")?.enable();
       this.reportForm.patchValue({ entityId: "" });
+      this.reportForm.get("entityId")?.disable({ emitEvent: false });
+      this.reportForm.get("entityId")?.clearValidators();
+      this.reportForm.get("entityId")?.updateValueAndValidity();
       return;
     }
 
@@ -268,9 +276,9 @@ export class WorkTimeReportComponent implements OnInit {
           this.loadingEntities = false;
         },
         error: (err) => {
-          console.error("Error fetching entities:", err);
           this.entities = [];
           this.loadingEntities = false;
+          this.snackBar.show(err.error?.message, false);
         },
       });
   }
@@ -287,53 +295,70 @@ export class WorkTimeReportComponent implements OnInit {
   fetchReport(): void {
     const formValue = this.reportForm.getRawValue();
 
-    if (!formValue.entityType || !formValue.entityId) {
+    if (this.reportForm.invalid) {
       this.markFormGroupTouched(this.reportForm);
       return;
     }
+    this.hasSearched = true;
 
-    // Compute actual from and to dates based on mode
-    let fromDate: string, toDate: string;
+    let fromDateObj: Date;
+    let toDateObj: Date;
+
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth() + 1;
 
     switch (formValue.dateRangeMode) {
       case "custom":
-        fromDate = formValue.fromDate;
-        toDate = formValue.toDate;
+        fromDateObj = new Date(formValue.fromDate);
+        toDateObj = new Date(formValue.toDate);
         break;
+
       case "month":
         const year = parseInt(formValue.selectedYear, 10);
         const fromMonth = parseInt(formValue.fromMonth, 10);
         const toMonth = parseInt(formValue.toMonth, 10);
-        fromDate = new Date(year, fromMonth - 1, 1).toISOString().split("T")[0];
+
+        fromDateObj = new Date(year, fromMonth - 1, 1);
+
         if (year === currentYear && toMonth === currentMonth) {
-          toDate = today.toISOString().split("T")[0];
+          toDateObj = new Date();
         } else {
           const lastDay = new Date(year, toMonth, 0).getDate();
-          toDate = new Date(year, toMonth - 1, lastDay)
-            .toISOString()
-            .split("T")[0];
+          toDateObj = new Date(year, toMonth - 1, lastDay);
         }
         break;
+
       case "year":
         const selYear = parseInt(formValue.selectedYear, 10);
-        fromDate = new Date(selYear, 0, 1).toISOString().split("T")[0];
+
+        fromDateObj = new Date(selYear, 0, 1);
+
         if (selYear === currentYear) {
-          toDate = today.toISOString().split("T")[0];
+          toDateObj = new Date();
         } else {
-          toDate = new Date(selYear, 11, 31).toISOString().split("T")[0];
+          toDateObj = new Date(selYear, 11, 31);
         }
         break;
+
       default:
-        fromDate = formValue.fromDate;
-        toDate = formValue.toDate;
+        fromDateObj = new Date(formValue.fromDate);
+        toDateObj = new Date(formValue.toDate);
     }
 
-    // Future date check
-    const todayISODate = this.maxDate;
-    if (fromDate > todayISODate || toDate > todayISODate) {
+    //  SAFETY CHECK
+    if (
+      !fromDateObj ||
+      !toDateObj ||
+      isNaN(fromDateObj.getTime()) ||
+      isNaN(toDateObj.getTime())
+    ) {
+      alert("Invalid date selection");
+      return;
+    }
+
+    //  Future date check
+    if (fromDateObj > today || toDateObj > today) {
       alert("Future dates are not allowed");
       return;
     }
@@ -341,11 +366,12 @@ export class WorkTimeReportComponent implements OnInit {
     this.loading = true;
     this.userGroups = [];
 
+    //  FIXED PAYLOAD KEYS
     const payload = {
       entityId: formValue.entityId,
       entityType: formValue.entityType,
-      fromDate: fromDate,
-      toDate: toDate,
+      from: fromDateObj, //   IMPORTANT
+      to: toDateObj, //   IMPORTANT
     };
 
     this.workTimeReport.getWorkReportByDate(payload).subscribe({
@@ -354,8 +380,8 @@ export class WorkTimeReportComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error("Error fetching report:", err);
         this.loading = false;
+        this.snackBar.show(err.error?.message, false);
       },
     });
   }
@@ -472,7 +498,6 @@ export class WorkTimeReportComponent implements OnInit {
     );
 
     if (this.userGroups.length === 0) {
-      console.warn("No valid data found in response");
     }
 
     this.calculateTotals();
@@ -786,4 +811,8 @@ export class WorkTimeReportComponent implements OnInit {
       this.reportForm.get("dateRangeMode")?.value === "month"
     );
   }
+  autoRefreshWrapper = () => {
+    if (!this.hasSearched) return;
+    this.fetchReport();
+  };
 }

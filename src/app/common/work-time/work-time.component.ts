@@ -5,6 +5,7 @@ import { BranchService } from "../../pages/services/branch.service";
 import { Subscription } from "rxjs";
 import { UserStateService } from "../../store/user-state.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
+import { ComPartService } from "../../pages/services/com-part.service";
 
 interface BreakPeriod {
   start: number;
@@ -77,7 +78,8 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     private BranchService: BranchService,
     private router: Router,
     private userStateService: UserStateService,
-    private snack: SnackbarService
+    private snack: SnackbarService,
+    private compartService:ComPartService
   ) { }
 
   ngOnInit(): void {
@@ -104,7 +106,9 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
       this.startStopwatch();
     }
 
-    this.subEvents = this.BranchService.getLogoutStatus(this.userId).subscribe(
+    const resolvedService = this.userRole === "COM_PART" ? this.compartService : this.BranchService
+
+    this.subEvents = resolvedService.getLogoutStatus(this.userId).subscribe(
       (incoming: any) => {
         const arr = Array.isArray(incoming) ? incoming : [incoming];
         arr.forEach((ev: any) => this.processEvent(ev));
@@ -252,7 +256,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
   // ---------- Complete clear (only when logout is confirmed) ----------
   private completeLogout(): void {
-
+localStorage.clear();
     localStorage.removeItem(this.SESSIONS_KEY);
     localStorage.removeItem(this.EVENTS_KEY);
     localStorage.removeItem(this.PENDING_LOGOUT_KEY);
@@ -367,7 +371,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
       this.saveSessions();
     }
 
-    // ✅ Direct logout roles → immediate logout
+    //  Direct logout roles → immediate logout
     if (this.isDirectLogoutRole) {
       this.authService.logout().subscribe(() => {
         

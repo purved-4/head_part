@@ -69,7 +69,7 @@ export class UpiService {
       );
   }
 
- getByEntityIdAndActivePaginated(
+  getByEntityIdAndActivePaginated(
     entityId: string,
     options: any = {},
   ): Observable<any> {

@@ -215,9 +215,7 @@ export class UserDashboardUpiBankLimitComponent implements OnInit {
       next: (res) => {
         this.balance = res.entityInfo?.balance || 0;
       },
-      error(err) {
-        console.log(err);
-      },
+      error(err) {},
     });
   }
 
@@ -231,8 +229,6 @@ export class UserDashboardUpiBankLimitComponent implements OnInit {
       })
       .subscribe(
         (res: any) => {
-          console.log("UPI Response:", res);
-
           const upiData = res.content || res.data?.content || res.data || [];
 
           // Map and sort the data
@@ -250,9 +246,7 @@ export class UserDashboardUpiBankLimitComponent implements OnInit {
           this.sortedUpis = this.sortByDateWise(this.upis);
           this.upiPage = 1;
         },
-        (error) => {
-          console.error("Error fetching UPI data:", error);
-        },
+        (error) => {},
       );
 
     // Fetch Bank data
@@ -264,8 +258,6 @@ export class UserDashboardUpiBankLimitComponent implements OnInit {
       })
       .subscribe(
         (res: any) => {
-          console.log("Bank Response:", res);
-
           const bankData = res.content || res.data?.content || res.data || [];
 
           // Map and sort the data
@@ -283,9 +275,7 @@ export class UserDashboardUpiBankLimitComponent implements OnInit {
           this.sortedBanks = this.sortByDateWise(this.banks);
           this.bankPage = 1;
         },
-        (error) => {
-          console.error("Error fetching Bank data:", error);
-        },
+        (error) => {},
       );
 
     this.getPortalData();

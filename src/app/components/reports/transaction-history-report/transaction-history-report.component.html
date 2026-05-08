@@ -381,6 +381,7 @@
           ></span>
           {{ loading ? "Generating..." : "Generate Report" }}
         </button>
+        <app-auto-refresh [refreshFn]="autoRefreshWrapper"></app-auto-refresh>
         <div class="flex-1 sm:flex-none flex gap-2">
           <button
             type="button"
@@ -456,8 +457,8 @@
           <div>
             <div class="text-xs text-gray-500 mb-0.5">Date Range</div>
             <div class="text-sm font-semibold text-gray-900">
-              {{ fromDate | date: "dd MMM yyyy" }} -
-              {{ toDate | date: "dd MMM yyyy" }}
+              {{ fromDate | tz }} -
+              {{ toDate | tz }}
             </div>
           </div>
           <div
@@ -701,10 +702,7 @@
                 class="px-2 py-0.5 bg-gray-200 rounded-full text-xs font-medium"
                 >{{ activeEntity?.type }}</span
               >
-              <span
-                >{{ fromDate | date: "dd MMM yyyy" }} -
-                {{ toDate | date: "dd MMM yyyy" }}</span
-              >
+              <span>{{ fromDate | tz }} - {{ toDate | tz }}</span>
             </p>
           </div>
           <button
@@ -835,7 +833,7 @@
                   <td
                     class="px-4 py-3 whitespace-nowrap text-xs text-gray-900 font-mono"
                   >
-                    {{ transaction.dateTime | date: "dd MMM yyyy HH:mm" }}
+                    {{ transaction.dateTime | tz }}
                   </td>
                   <td class="px-4 py-3 whitespace-nowrap">
                     <span
@@ -852,7 +850,7 @@
                   <td
                     class="px-4 py-3 whitespace-nowrap text-xs font-semibold"
                     [ngClass]="
-                      transaction.transactionType === 'topup'
+                      transaction.transactionType === 'payin'
                         ? 'text-green-600'
                         : 'text-red-600'
                     "

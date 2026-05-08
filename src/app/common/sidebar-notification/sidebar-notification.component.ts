@@ -93,7 +93,7 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     this.currentUserId = this.userStateService.getUserId();
     this.currentRoleName = this.userStateService.getRole();
     this.currentRoleId = this.userStateService.getCurrentEntityId();
-console.log(this.currentRoleName);
+
 
     this.getAllNotifications();
 

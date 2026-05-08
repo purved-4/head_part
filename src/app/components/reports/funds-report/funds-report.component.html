@@ -534,6 +534,7 @@
           <span class="material-icons text-gray-600 text-sm">refresh</span>
           Reset
         </button>
+        <app-auto-refresh [refreshFn]="autoRefreshWrapper"></app-auto-refresh>
       </div>
     </form>
   </div>
@@ -803,10 +804,10 @@
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap">
                   <div class="text-xs text-gray-900 font-medium">
-                    {{ fund.createdAt | date: "dd MMM yyyy" }}
+                    {{ fund.createdAt | tz }}
                   </div>
                   <div class="text-[10px] text-gray-500">
-                    {{ fund.createdAt | date: "hh:mm a" }}
+                    {{ fund.createdAt | tz }}
                   </div>
                 </td>
                 <td class="px-4 py-3">
@@ -1028,10 +1029,10 @@
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap">
                   <div class="text-xs text-gray-900 font-medium">
-                    {{ fund.createdAt | date: "dd MMM yyyy" }}
+                    {{ fund.createdAt | tz }}
                   </div>
                   <div class="text-[10px] text-gray-500">
-                    {{ fund.createdAt | date: "hh:mm a" }}
+                    {{ fund.createdAt | tz }}
                   </div>
                 </td>
                 <td class="px-4 py-3">
@@ -1250,10 +1251,10 @@
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap">
                   <div class="text-xs text-gray-900 font-medium">
-                    {{ fund.createdAt | date: "dd MMM yyyy" }}
+                    {{ fund.createdAt | tz }}
                   </div>
                   <div class="text-[10px] text-gray-500">
-                    {{ fund.createdAt | date: "hh:mm a" }}
+                    {{ fund.createdAt | tz }}
                   </div>
                 </td>
                 <td class="px-4 py-3">

@@ -481,6 +481,9 @@
             </p>
           </div>
           <div class="flex items-center space-x-4">
+            <app-auto-refresh
+              [refreshFn]="autoRefreshWrapper"
+            ></app-auto-refresh>
             <!-- Items per page -->
             <div class="flex items-center space-x-2">
               <span class="text-sm text-[var(--color-muted)]">Show:</span>
@@ -589,7 +592,7 @@
                           <span
                             class="px-3 py-1 text-xs font-semibold rounded-full"
                             [class]="
-                              row[col.key] === 'topup'
+                              row[col.key] === 'payin'
                                 ? 'bg-[var(--color-success)]/20 text-[var(--color-success)]'
                                 : 'bg-[var(--color-danger)]/20 text-[var(--color-danger)]'
                             "

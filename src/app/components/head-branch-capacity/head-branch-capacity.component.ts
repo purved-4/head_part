@@ -89,7 +89,7 @@ export class HeadBranchCapacityComponent implements OnInit, OnDestroy {
 
   private createForm(): FormGroup {
     return this.fb.group({
-      type: ["PAYOUT"], // ✅ fixed
+      type: ["PAYOUT"], //  fixed
       portalId: ["", Validators.required],
       capacityRanges: this.fb.array([this.createCapacityRange()]),
     });
@@ -192,16 +192,15 @@ export class HeadBranchCapacityComponent implements OnInit, OnDestroy {
   }
 
   async onSubmit(): Promise<void> {
-    console.log(this.capacityForm.value);
     if (this.capacityForm.invalid) {
       this.errorMessage = "Fill all required fields";
-      console.log(this.capacityForm.errors, this.capacityForm);
+
       return;
     }
 
     if (!this.hasUptoRange) {
       this.errorMessage = "At least one upto range required";
-      console.log(this.capacityForm.errors, this.capacityForm);
+
       return;
     }
 
@@ -222,7 +221,6 @@ export class HeadBranchCapacityComponent implements OnInit, OnDestroy {
     };
 
     try {
-      console.log(payload);
       await this.capacityService.addPayoutCapacity(payload).toPromise();
 
       this.showAddSuccess("Capacity saved successfully");

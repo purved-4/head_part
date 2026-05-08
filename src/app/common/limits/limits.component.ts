@@ -334,7 +334,7 @@ export class LimitsComponent implements OnInit {
     const entityType = this.utilSerivce.getRoleForDownLevelWithCurrentRoleId(
       this.selectedEntity.role || this.role,
     );
-    console.log("entity type ", entityType);
+
 
     this.limitService
       .getLimitsByEntityAndType(this.selectedEntity.id, entityType)

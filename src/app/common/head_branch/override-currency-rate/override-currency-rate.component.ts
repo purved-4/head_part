@@ -1,5 +1,3 @@
-
-
 import { Component, OnInit, Input } from '@angular/core';
 import { UserStateService } from '../../../store/user-state.service';
 import { BranchService } from '../../../pages/services/branch.service';

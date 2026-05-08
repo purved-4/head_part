@@ -22,7 +22,7 @@ export class PercentageLogService {
 
     let params = new HttpParams()
       .set("fromDate", range.fromUtc)
-      .set("toDate", range.toUtc) // ✅ converted UTC
+      .set("toDate", range.toUtc) //  converted UTC
       .set("entityType", user.entityType);
 
     return this.http

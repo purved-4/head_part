@@ -113,6 +113,8 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   isLoading = false;
+  resolvedNotificatninService:any
+
 
   /* subscriptions */
   private realTimeSub: Subscription | null = null;
@@ -227,6 +229,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.role = this.userStateService.getRole();
 
     this.chatMode = this.role === "HEAD" ? "head" : "branch";
+    this.resolvedNotificatninService = this.role === "COM_PART" ? this.comPartService : this.notificationChatService
 
     if (this.currrentEntityId) {
       this.loadThreads();
@@ -319,7 +322,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Call API to fetch thread details
-    this.notificationChatService.getThreadDetailsById(threadId).subscribe({
+    this.resolvedNotificatninService.getThreadDetailsById(threadId).subscribe({
       next: (res: any) => {
         if (!res) {
           // fallback: try selecting an existing thread in UI if available
@@ -605,7 +608,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private loadResolvedThreadsPaginated(): void {
     if (this.role === "BRANCH") {
-      this.notificationChatService
+      this.resolvedNotificatninService
         .getThreadByBranchIdWithIsResolvedPaginated(
           this.currrentEntityId,
           this.role,
@@ -620,7 +623,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
           error: () => this.onThreadLoadError(),
         });
     } else {
-      this.notificationChatService
+      this.resolvedNotificatninService
         .getAllThreadCombinedPaginate(
           this.currrentEntityId,
           this.role,
@@ -1077,7 +1080,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadChatMembers(threadId: any): void {
     this.loadingMembers = true;
-    this.notificationChatService.getChatMembersByThreadId(threadId).subscribe({
+    this.resolvedNotificatninService.getChatMembersByThreadId(threadId).subscribe({
       next: (membersRes: any) => {
         const members = Array.isArray(membersRes)
           ? membersRes
@@ -1125,7 +1128,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.loadingMessages = true;
 
-    this.notificationChatService
+    this.resolvedNotificatninService
       .getMessageByThreadId(
         threadId,
         this.currrentEntityId,
@@ -1263,7 +1266,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe((data: any) => {
         if (!data) return;
 
-        console.log("SOCKET RAW =>", data);
+
 
         // backend kabhi threadId, kabhi id, kabhi nested deta hai
         const incomingThreadId =
@@ -1321,10 +1324,8 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private handleRealTimeMessage(rtMsg: any, threadId: string): void {
     if (!rtMsg) return;
-
-    const raw = rtMsg.body || rtMsg.data || rtMsg.message || rtMsg;
-
-    const gm = this.mapBackendMessageToGroupMessage(raw);
+console.log(rtMsg )
+      const gm = this.mapBackendMessageToGroupMessage(rtMsg);
 
     if (!this.selectedNotification) return;
 
@@ -1372,7 +1373,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.uploadProgress = 0;
       this.uploadError = null;
 
-      this.notificationChatService
+      this.resolvedNotificatninService
         .uploadAttachment(threadId, this.selectedUploadFile!)
         .subscribe({
           next: (res: any) => {
@@ -1395,7 +1396,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
             }
 
             const payload = {
-              senderId: this.currentUserId,
+              senderId: this.currrentEntityId,
               senderEntityId: this.currrentEntityId,
               roleId: this.currrentEntityId,
               senderType: this.role,
@@ -1432,7 +1433,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
      ONLY TEXT MESSAGE
      ========================= */
     const payload = {
-      senderId: this.currentUserId,
+      senderId: this.currrentEntityId,
       senderEntityId: this.currrentEntityId,
       roleId: this.currrentEntityId,
       senderType: this.role,
@@ -1478,7 +1479,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.uploadProgress = 0;
       this.uploadError = null;
 
-      this.notificationChatService
+      this.resolvedNotificatninService
         .uploadAttachment(threadId, this.selectedUploadFile!)
         .subscribe({
           next: (res: any) => {
@@ -1501,7 +1502,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
             }
 
             const payload = {
-              senderId: this.currentUserId,
+              senderId: this.currrentEntityId,
               senderEntityId: this.currrentEntityId,
               roleId: this.currrentEntityId,
               senderType: this.role,
@@ -1533,7 +1534,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
      ONLY TEXT MESSAGE
      ========================= */
     const payload = {
-      senderId: this.currentUserId,
+      senderId: this.currrentEntityId,
       senderEntityId: this.currrentEntityId,
       roleId: this.currrentEntityId,
       senderType: this.role,
@@ -1896,7 +1897,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.uploadProgress = 0;
     this.uploadError = null;
 
-    this.notificationChatService
+    this.resolvedNotificatninService
       .uploadAttachment(threadId, this.selectedUploadFile)
       .subscribe({
         next: (res: any) => {
@@ -2104,14 +2105,14 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       case "UPI":
         // If backend supports a 'RESEND' action, use it; tpwise fallback to ACCEPT.
         // Using acceptRejectThread('RESEND') so adjust backend if needed.
-        call = this.fundService.acceptRejectThread(thread.id, "ACCEPT");
+        call = this.comPartService.acceptRejectThread(thread.id, "ACCEPT");
         break;
       case "PAYOUT":
         // Payout logic should be handled via the payout modal -> edit & send
         call = null;
         break;
       default:
-        call = this.fundService.acceptRejectThread(thread.id, "ACCEPT");
+        call = this.comPartService.acceptRejectThread(thread.id, "ACCEPT");
     }
 
     call?.subscribe({
@@ -2154,7 +2155,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
         rejectCall = this.rejectPayoutThread(thread.id);
         break;
       default:
-        rejectCall = this.fundService.acceptRejectThread(thread.id, "REJECT");
+        rejectCall = this.comPartService.acceptRejectThread(thread.id, "REJECT");
     }
 
     rejectCall?.subscribe({
@@ -2224,24 +2225,25 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
      Service wrappers (reuse existing service methods)
      -------------------- */
   rejectBankThread(threadId: any) {
-    return this.fundService.acceptRejectThread(threadId, "REJECT");
+    return this.comPartService.acceptRejectThread(threadId, "REJECT");
   }
 
   rejectUpiThread(threadId: any) {
-    return this.fundService.acceptRejectThread(threadId, "REJECT");
+    return this.comPartService.acceptRejectThread(threadId, "REJECT");
   }
 
   rejectPayoutThread(threadId: any) {
-    return this.fundService.acceptRejectThread(threadId, "REJECT");
+    return this.comPartService.acceptRejectThread(threadId, "REJECT");
   }
 
   // Existing method you had — used to send edited payout details back to a user
   private sentPayoutThreadUpdateToSameUser(threadId: any, data: any) {
-    return this.fundService.editpayoutRejectedFund(threadId, data);
+    return this.comPartService.editpayoutRejectedFund(threadId, data);
   }
 
   private getFundWithId(threadId: any, fundId: any, fundType: any) {
-    return this.fundService.getByThreadIdFundIdAndType(
+    const resolvedService = this.role === "COM_PART" ? this.comPartService : this.fundService
+    return resolvedService.getByThreadIdFundIdAndType(
       threadId,
       fundId,
       fundType,
@@ -2251,6 +2253,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   fundDetails: any;
   showFundModel: boolean = false;
   showFundDetailForMessage(threadId: any, fundId: any, fundType: any) {
+
     this.getFundWithId(threadId, fundId, fundType).subscribe((res) => {
       this.fundDetails = res;
       this.showFundModel = true;

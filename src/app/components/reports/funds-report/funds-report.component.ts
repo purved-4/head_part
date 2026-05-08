@@ -9,6 +9,8 @@ import { TransactionHistoryService } from "../../../pages/services/reports/trans
 import { UserService } from "../../../pages/services/user.service";
 import { UtilsServiceService } from "../../../utils/utils-service.service";
 import { UserStateService } from "../../../store/user-state.service";
+import { fa } from "intl-tel-input/i18n";
+import { SnackbarService } from "../../../common/snackbar/snackbar.service";
 
 export interface Fund {
   id: string;
@@ -48,6 +50,7 @@ export class FundsReportComponent implements OnInit {
   report: FundsReport | null = null;
   loading = false;
   error: string | null = null;
+  reportGenerated = false;
 
   entityTypes: any = [];
 
@@ -91,6 +94,7 @@ export class FundsReportComponent implements OnInit {
     private fb: FormBuilder,
     private utilService: UtilsServiceService,
     private stateService: UserStateService,
+    private snackBar: SnackbarService,
   ) {
     this.reportForm = this.fb.group(
       {
@@ -251,13 +255,13 @@ export class FundsReportComponent implements OnInit {
       .getByRole(this.currentRoleId, role.toUpperCase())
       .subscribe({
         next: (res: any) => {
-          this.entities = Array.isArray(res) ? res : res.data?.data || [];
+          this.entities = Array.isArray(res.data) ? res.data : res?.data || [];
           this.loadingEntities = false;
         },
         error: (err) => {
-          console.error("Error fetching entities:", err);
           this.entities = [];
           this.loadingEntities = false;
+          this.snackBar.show(err.error?.message, false);
         },
       });
   }
@@ -297,96 +301,52 @@ export class FundsReportComponent implements OnInit {
           this.loadingPortals = false;
         },
         error: (err) => {
-          console.error("Error fetching portals:", err);
           this.portals = [];
           this.loadingPortals = false;
+          this.snackBar.show(err.error?.message, false);
         },
       });
   }
 
   fetchReport(): void {
-    const formValues = this.reportForm.getRawValue(); // includes disabled entityId if auto-selected
+    const formValues = this.reportForm.getRawValue();
 
-    // Manual presence checks because entityId may be disabled
     if (!formValues.entityType || !formValues.entityId) {
       this.reportForm.markAllAsTouched();
       return;
     }
 
-    // Compute actual from and to dates based on mode
-    let from: string, to: string;
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth() + 1;
-
-    switch (formValues.dateRangeMode) {
-      case "custom":
-        from = formValues.fromDate;
-        to = formValues.toDate;
-        break;
-      case "month":
-        const year = parseInt(formValues.selectedYear, 10);
-        const fromMonth = parseInt(formValues.fromMonth, 10);
-        const toMonth = parseInt(formValues.toMonth, 10);
-        from = new Date(year, fromMonth - 1, 1).toISOString().split("T")[0];
-        if (year === currentYear && toMonth === currentMonth) {
-          to = today.toISOString().split("T")[0];
-        } else {
-          const lastDay = new Date(year, toMonth, 0).getDate();
-          to = new Date(year, toMonth - 1, lastDay).toISOString().split("T")[0];
-        }
-        break;
-      case "year":
-        const selYear = parseInt(formValues.selectedYear, 10);
-        from = new Date(selYear, 0, 1).toISOString().split("T")[0];
-        if (selYear === currentYear) {
-          to = today.toISOString().split("T")[0];
-        } else {
-          to = new Date(selYear, 11, 31).toISOString().split("T")[0];
-        }
-        break;
-      default:
-        from = formValues.fromDate;
-        to = formValues.toDate;
-    }
-
-    // Future date check
-    const todayISODate = this.getTodayDate();
-    if (from > todayISODate || to > todayISODate) {
-      alert("Future dates are not allowed");
-      return;
-    }
-
     this.loading = true;
     this.error = null;
-    this.report = null;
-    this.currentPage = 1; // Reset to first page
-
-    // Convert to ISO strings for API
-    const fromISO = new Date(from).toISOString();
-    const toISO = new Date(to).toISOString();
 
     this.reportService
       .getReport(
-        fromISO,
-        toISO,
+        new Date(formValues.fromDate).toISOString(),
+        new Date(formValues.toDate).toISOString(),
         formValues.portalId || "",
         formValues.entityId,
         formValues.reviewStatus === "ALL" ? "" : formValues.reviewStatus,
       )
       .subscribe({
         next: (res: any) => {
-          this.report = res;
+          this.report = {
+            upiFunds: res?.upiFunds || [],
+            bankFunds: res?.bankFunds || [],
+            withdrawalFunds: res?.withdrawalFunds || [],
+            openingBalance: res?.openingBalance || 0,
+            closingBalance: res?.closingBalance || 0,
+          };
+
+          this.reportGenerated = true; //  mark true
           this.loading = false;
         },
         error: (err: any) => {
-          this.error =
-            err.error?.message || "Failed to load report. Please try again.";
+          this.snackBar.show(err.error?.message, false);
+
           this.loading = false;
         },
       });
   }
-
   resetForm(): void {
     // Ensure entityId control is enabled before resetting
     this.reportForm.get("entityId")?.enable();
@@ -434,9 +394,9 @@ export class FundsReportComponent implements OnInit {
     if (!this.report) return 0;
 
     const allFunds = [
-      ...this.report.upiFunds,
-      ...this.report.bankFunds,
-      ...this.report.withdrawalFunds,
+      ...(this.report.upiFunds || []),
+      ...(this.report.bankFunds || []),
+      ...(this.report.withdrawalFunds || []),
     ];
 
     return allFunds
@@ -448,9 +408,9 @@ export class FundsReportComponent implements OnInit {
     if (!this.report) return 0;
 
     const allFunds = [
-      ...this.report.upiFunds,
-      ...this.report.bankFunds,
-      ...this.report.withdrawalFunds,
+      ...(this.report.upiFunds || []),
+      ...(this.report.bankFunds || []),
+      ...(this.report.withdrawalFunds || []),
     ];
 
     return allFunds
@@ -560,4 +520,8 @@ export class FundsReportComponent implements OnInit {
       this.reportForm.get("dateRangeMode")?.value === "month"
     );
   }
+  autoRefreshWrapper = () => {
+    if (!this.reportGenerated) return;
+    this.fetchReport();
+  };
 }

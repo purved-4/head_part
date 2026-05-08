@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { of, Subscription } from "rxjs";
@@ -190,7 +191,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
         : undefined;
 
     this.fundService
-      .getPayinFundWithPortalIdAndEntityIdUpdated(
+      .getPayinFundWithPortalIdAndEntityId(
         this.branchId,
         portalId,
         this.selectedStatus,
@@ -233,7 +234,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
         : undefined;
 
     this.fundService
-      .getPayinFundWithPortalIdAndEntityIdUpdated(
+      .getPayinFundWithPortalIdAndEntityId(
         this.branchId,
         portalId,
         this.selectedStatus,

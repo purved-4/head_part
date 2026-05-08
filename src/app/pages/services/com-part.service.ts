@@ -83,7 +83,7 @@ export class ComPartService {
       );
   }
 
-  getAllComPartByEntity(entityId: any, entityType: any): Observable<any> {
+  getComPartsByEntityId(entityId: any, entityType: any): Observable<any> {
     return this.http
       .get<any>(
         `${baseUrl}/comPart/getComPartsByEntityId/${entityId}/${entityType}`,
@@ -94,6 +94,7 @@ export class ComPartService {
       );
   }
 
+  
   getAllComPartByOwnerPaginated(
     id: any,
     page: any = 0,
@@ -118,7 +119,7 @@ export class ComPartService {
     size: any = 10,
   ): Observable<any> {
     return this.http
-      .get<any>(`${baseUrl}/portals/getAllByComPartId/${id}`)
+      .get<any>(`${baseUrl}/comPart/portals/getAllByComPartId/${id}`)
       .pipe(
         map((res) => res.data),
         catchError(this.handleError),
@@ -217,15 +218,15 @@ export class ComPartService {
     currency?: any,
   ): Observable<string> {
     const formData = new FormData();
-
+ 
     if (payload !== undefined && payload !== null) {
       formData.append("payload", JSON.stringify(payload));
-    }
+     }
 
     if (snap) {
       formData.append("snap", snap);
+    
     }
-
     return this.http.post(
       `${baseUrl}/manual/webhook/post/${portalId}?currency=${currency}`,
       formData,
@@ -380,7 +381,9 @@ export class ComPartService {
 
   getAllByComPartWithPortal(compartId: any) {
     return this.http
-      .get<any>(`${baseUrl}/banks/getAllByComPartWithPortal/${compartId}`)
+      .get<any>(
+        `${baseUrl}/comPart/banks/getAllByComPartWithPortal/${compartId}`,
+      )
       .pipe(
         map((res) => res.data),
         catchError((err) => throwError(() => err)),
@@ -389,39 +392,54 @@ export class ComPartService {
 
   getAllByComPartWithoutPortal(compartId: any) {
     return this.http
-      .get<any>(`${baseUrl}/banks/getAllByComPartWithoutPortal/${compartId}`)
+      .get<any>(
+        `${baseUrl}/comPart/banks/getAllByComPartWithoutPortal/${compartId}`,
+      )
       .pipe(
         map((res) => res.data),
         catchError((err) => throwError(() => err)),
       );
   }
 
-  getBankDetailsByAmount(portalId: any, amount?: any, currency?: any) {
+ getBankDetailsByAmount(portalId: any, amount?: any, currency?: any, fttAcceptance?: boolean) {
+  let params = new HttpParams();
+
+  if (amount != null && amount > 0) {
+    params = params.set("amount", amount);
+  }
+
+  if (currency != null) {
+    params = params.set("currency", currency);
+  }
+
+  if (fttAcceptance != null) {
+    params = params.set("fttAcceptance", fttAcceptance);
+  }
+
+  return this.http
+    .get(`${baseUrl}/manual/getBankDetailsByAmount/${portalId}`, { params })
+    .pipe(
+      map((response: any) => response.data),
+      catchError((error) => throwError(() => error)),
+    );
+}
+
+  getUpiDetailsByAmount(portalId: any, amount?: any, currency?: any, fttAcceptance?: boolean) {
     let params = new HttpParams();
 
     if (amount != null && amount > 0) {
       params = params.set("amount", amount);
     }
-    if (currency != null) {
+    // ssAssets
+
+    if (currency) {
       params = params.set("currency", currency);
     }
 
-    return this.http
-      .get(`${baseUrl}/manual/getBankDetailsByAmount/${portalId}`, {
-        params,
-      })
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(() => error)),
-      );
+     if (fttAcceptance != null) {
+    params = params.set("fttAcceptance", fttAcceptance);
   }
 
-  getUpiDetailsByAmount(portalId: any, amount?: any) {
-    let params = new HttpParams();
-
-    if (amount != null && amount > 0) {
-      params = params.set("amount", amount);
-    }
     return this.http
       .get(`${baseUrl}/manual/getUpiDetailsByAmount/${portalId}`, {
         params,
@@ -454,4 +472,378 @@ export class ComPartService {
   toggleTransaction(payload: any): Observable<any> {
     return this.http.post(`${baseUrl}/comPart/toggle-transaction`, payload);
   }
+
+  searchRecommendation(comPartId: string, userId: string) {
+    return this.http.get<any>(`${baseUrl}/comPart/recommendation`, {
+      params: {
+        comPartId,
+        userId,
+      },
+    });
+  }
+
+  getAllThreadCombinedPaginate(
+    branchId: string,
+    entityType: any,
+    isResolved: any,
+    type?: any,
+    page: any = 0,
+    size: any = 20,
+  ): Observable<any> {
+    if (type === undefined || type === null) {
+      type = "all";
+    }
+    if (isResolved === "accepted") {
+      isResolved = "accept";
+    }
+    if (isResolved === "rejected") {
+      isResolved = "reject";
+    }
+
+    return this.http
+      .get(
+        `${baseUrl}/comPart/api/chat/findThreadCombined/paginated/${branchId}/${entityType}/${isResolved}/${type}?page=${page}&size=${size}&sort=updatedAt,desc`,
+      )
+      .pipe(
+        map((res: any) => res.data),
+        catchError((err) => throwError(err)),
+      );
+  }
+
+  getThreadByBranchIdWithIsResolvedPaginated(
+    branchId: string,
+    entityType: any,
+    isResolved: any,
+    type?: any,
+    page: number = 0,
+    size: number = 20,
+  ): Observable<any> {
+    if (type === undefined || type === null) {
+      type = "all";
+    }
+
+    return this.http
+      .get(
+        `${baseUrl}/comPart/api/chat/findThread/paginated/${branchId}/${entityType}/${isResolved}/${type}`,
+        {
+          params: {
+            page: page.toString(),
+            size: size.toString(),
+            sort: "updatedAt,desc",
+          },
+        },
+      )
+      .pipe(
+        map((res: any) => res.data),
+        catchError((err) => throwError(err)),
+      );
+  }
+
+  searchBankAndUpi(query: string, comPartId: string) {
+    return this.http.get<any>(
+      `${baseUrl}/comPart/banks/searchBankAndUpi/${comPartId}`,
+      {
+        params: { query },
+      },
+    );
+  }
+
+  getAllPayInFundWithCompartId(
+    compartId: any,
+    status: any,
+    page: number = 0,
+    pageSize: number = 10,
+    category?: any,
+    fundType?: any,
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set("page", page.toString())
+      .set("size", pageSize.toString());
+
+    if (category !== null && category !== undefined) {
+      params = params.set("category", category.toString());
+    }
+    if (fundType !== null && fundType !== undefined) {
+      params = params.set("fundType", fundType.toString());
+    }
+
+    return this.http
+      .get<any>(
+        `${baseUrl}/comPart/funds/getPayinFundsByComPartId/${compartId}/${status}`,
+        {
+          params,
+        },
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+  getAllPayOutFundWithCompartId(
+    compartId: any,
+    status: any,
+    page: number = 0,
+    pageSize: number = 10,
+    category?: any,
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set("page", page.toString())
+      .set("size", pageSize.toString());
+
+    if (category !== null && category !== undefined) {
+      params = params.set("category", category.toString());
+    }
+
+    return this.http
+      .get<any>(
+        `${baseUrl}/comPart/funds/getPayoutFundsByComPartId/${compartId}/${status}`,
+        {
+          params,
+        },
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+  assignPortalToBank(bankId: string, portalId: string): Observable<any> {
+    return this.http
+      .patch<any>(
+        `${baseUrl}/comPart/banks/${bankId}/assign-portal/${portalId}`,
+        {},
+      )
+      .pipe(
+        catchError((error) => {
+          throw error;
+        }),
+      );
+  }
+
+  removePortal(id: string): Observable<any> {
+    return this.http
+      .patch<any>(`${baseUrl}/comPart/banks/${id}/remove-portal`, {})
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+  addLimits(LimitData: any): Observable<any> {
+    return this.http.post(`${baseUrl}/comPart/entityBalance/add`, LimitData);
+  }
+
+  getLatestLimitsByEntityAndTypeUpdate(
+    entityId: any,
+    type: any,
+  ): Observable<any> {
+    return this.http
+      .get(`${baseUrl}/comPart/entityBalance/latest/${entityId}/${type}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+  getPortalTokenAndId(portalId: string): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/comPart/getTokenKey/${portalId}`)
+      .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+      );
+  }
+
+  getLatestLimitsByEntityAndType(entityId: any, type: any): Observable<any> {
+    return this.http
+      .get(`${baseUrl}/comPart/entityBalance/latestBalance/${entityId}/${type}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+  getLogoutStatus(userId: any) {
+    return this.http
+      .get<
+        any[]
+      >(`${baseUrl}/comPart/processing-time/latest-before-today/${userId}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+  getThreadDetailsById(threadId: string): Observable<any> {
+    return this.http
+      .get(`${baseUrl}/comPart/api/chat/thread/${threadId}`, {
+        withCredentials: true,
+      })
+      .pipe(map((res: any) => res.data));
+  }
+
+  getChatMembersByThreadId(threadId: any): Observable<any> {
+    return this.http
+      .get(`${baseUrl}/comPart/api/chat/findMemberByThreadId/${threadId}`)
+      .pipe(map((res: any) => res.data));
+  }
+
+  getMessageByThreadId(
+    threadId: any,
+    branch: any,
+    page: any,
+    size: any,
+  ): Observable<any> {
+    return this.http
+      .get(
+        `${baseUrl}/comPart/api/chat/findMessageByThreadId/${threadId}/${branch}?page=${page}&size=${size}`,
+      )
+      .pipe(map((res: any) => res.data.content));
+  }
+
+  uploadAttachment(threadId: string, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return this.http
+      .post(`${baseUrl}/comPart/api/chat/upload/${threadId}`, formData)
+      .pipe(map((res: any) => res.data));
+  }
+
+  acceptRejectThread(threadId: any, action: any, data?: any): Observable<any> {
+    return this.http
+      .patch<any>(
+        `${baseUrl}/comPart/api/chat/resolveThread/${threadId}/${action}`,
+        {},
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+  editpayoutRejectedFund(threadId: any, data: any): Observable<any> {
+    return this.http
+      .patch<any>(`${baseUrl}/comPart/funds/updatePayout/${threadId}`, data)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+  getByThreadIdFundIdAndType(
+    threadId: any,
+    fundId: any,
+    fundType: any,
+  ): Observable<any> {
+    return this.http
+      .get<any>(
+        `${baseUrl}/funds/getFundWithThreadIdFundIdFundType/${threadId}/${fundId}/${fundType}`,
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+    getPortalByComPartIdAndCurrency(
+    id: any,
+    currenyId : any,
+    page: any = 0,
+    size: any = 10,
+
+  ): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/comPart/portals/getAllByComPartIdAndCurrencyId/paginated/${id}/${currenyId}`)
+      .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+      );
+  }
+
+  //new snashot
+  uploadUpiOcr(file: File) {
+    const formData = new FormData();
+    formData.append("snapshot", file);
+
+    return this.http.post(`${baseUrl}/upi-ocr-upload`, formData);
+  }
+  
+  uploadOcr(file: File, id: any, type: string) {
+
+  const formData = new FormData();
+
+  formData.append("file", file);
+
+  return this.http.post(
+    `${baseUrl}/ocr?comPartId=${id}&type=${type}`,
+    formData
+  );
+}
+
+  uploadGpayOcr(file: File) {
+    const formData = new FormData();
+    formData.append("snapshot", file);
+
+    return this.http.post(`${baseUrl}/gpay-ocr-upload`, formData);
+  }
+
+  //new
+  getAllUpiByBankId(bankId: any): Observable<any> {
+  return this.http
+    .get(`${baseUrl}/comPart/upi/getAllUpiByBankId/${bankId}`)
+    .pipe(
+      map((response: any) => response.data),
+      catchError((error) => throwError(error))
+    );
+}
+
+  getPayinFundWithPortalID(
+    portalId: any,
+    status: any,
+    page: number = 0,
+    pageSize: number = 10,
+    category: any,
+    fundType: any,
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set("page", page.toString())
+      .set("size", pageSize.toString());
+
+    if (category !== null && category !== undefined) {
+      params = params.set("category", category.toString());
+    }
+
+    if (fundType !== null && fundType !== undefined) {
+      params = params.set("fundType", fundType.toString());
+    }
+
+    return this.http
+      .get<any>(
+        `${baseUrl}/comPart/funds/getPayinFundWithPortalID/${portalId}/${status}`,
+        {
+          params,
+        },
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+  getAllByComPartWithPortalPagination(
+  compartId: any,
+  page: number = 0,
+  size: number = 10
+) {
+  return this.http
+    .get<any>(
+      `${baseUrl}/comPart/banks/getAllByComPartWithPortal/pagination/${compartId}?page=${page}&size=${size}`
+    )
+    .pipe(
+      map((res) => res.data),
+      catchError((err) => throwError(() => err))
+    );
+}
+  
 }

@@ -183,19 +183,6 @@ getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
     );
 }
   
-  getPortalByComPartIdAndCurrency(
-    id: any,
-    currenyId : any,
-    page: any = 0,
-    size: any = 10,
 
-  ): Observable<any> {
-    return this.http
-      .get<any>(`${baseUrl}/portals/getAllByComPartIdAndCurrencyId/paginated/${id}/${currenyId}`)
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
-  }
 
 }

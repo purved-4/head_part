@@ -214,9 +214,9 @@ getAllThreadCombinedPaginate(
       );
   }
 
-  getThreadByFundId(fundId: string): Observable<any> {
+ getThreadByFundId(fundId: string): Observable<any> {
     return this.http
-      .get(`${baseUrl}/api/chat/findThreadByFundsId/${fundId}`)
+      .get(`${baseUrl}/comPart/api/chat/findThreadByFundsId/${fundId}`)
       .pipe(
         map((res: any) => res.data),
         catchError((err) => throwError(err)),
