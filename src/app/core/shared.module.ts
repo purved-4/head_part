@@ -51,6 +51,7 @@ import { HbPayoutReportComponent } from "../common/hb-payout-report/hb-payout-re
 import { EnterKeyDirective } from "../directives/enter-key.directive";
 import { BankDetailsComponent } from "../common/head_branch/bank-details/bank-details.component";
 import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods/payments-methods.component";
+import { SearchableDropdownComponent } from "../common/drop-down/drop-down.component";
 
 // shared.module.ts
 @NgModule({
@@ -103,6 +104,7 @@ import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods
     EnterKeyDirective,
     BankDetailsComponent,
     PaymentsMethodsComponent,
+    SearchableDropdownComponent,
   ],
   exports: [
     WebhookDataComponent,
@@ -151,6 +153,7 @@ import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods
     HbPayoutReportComponent,
     EnterKeyDirective,
     BankDetailsComponent,
+    SearchableDropdownComponent,
   ],
   imports: [
     CommonModule,

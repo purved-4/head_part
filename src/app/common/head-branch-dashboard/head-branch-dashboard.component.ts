@@ -581,19 +581,24 @@ export class HeadBranchDashboardComponent
 
   getRemainingTimeLabel(tx: any): string {
     if (!tx || !tx.processing) return "Process";
+
     const deadline = this.parseProcessingDeadline(tx);
+
     if (!deadline) return "Processing";
 
-    let diffMs = deadline.getTime() - this.processingNow;
+    const diffMs = deadline.getTime() - this.processingNow;
+
+    // ✅ EXPIRED
     if (diffMs <= 0) {
-      // If you prefer to show "Process" or "Expired" when thime is up, change tis line.
       return "Process";
     }
 
     const totalSec = Math.floor(diffMs / 1000);
+
     const h = Math.floor(totalSec / 3600);
     const m = Math.floor((totalSec % 3600) / 60);
     const s = totalSec % 60;
+
     const pad = (n: number) => n.toString().padStart(2, "0");
 
     return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
@@ -1499,25 +1504,35 @@ export class HeadBranchDashboardComponent
     // Close popup
     this.closeEditAmountPopup();
   }
-
   onProcessingClick(transaction: any) {
     if (!transaction?.id) return;
 
-    // ✅ LOCAL UI UPDATE
+    // ✅ if expired then allow restart
+    const label = this.getRemainingTimeLabel(transaction);
+
+    if (transaction.processing && label !== "Process") {
+      return;
+    }
+
+    // ✅ RESTART PROCESSING
     transaction.processing = true;
 
-    // ✅ start realtime timer only once
+    // ✅ reset fresh start time
+    transaction.processingStartedAt = new Date();
+
+    // optional
+    transaction.processingDeadline = null;
+
+    this.processingNow = Date.now();
+
     this.startProcessingTimer();
 
     this.fundService
-      .updateProcessingStatus(transaction.id, this.headId)
+      .updateProcessingStatus(transaction.id, this.headId, this.role)
       .subscribe({
-        next: (res) => {
-          // no-op
-        },
+        next: () => {},
 
         error: (err) => {
-          // rollback on error
           transaction.processing = false;
 
           const message =
@@ -1525,7 +1540,6 @@ export class HeadBranchDashboardComponent
 
           this.snackbar.show(message, false);
 
-          // stop timer if no processing tx left
           this.ensureProcessingTimerState();
         },
       });

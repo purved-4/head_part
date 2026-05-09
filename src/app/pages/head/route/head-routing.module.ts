@@ -47,15 +47,24 @@ const routes: Routes = [
         component: HeadBranchDashboardComponent,
       },
 
-      {
-        path: "payments-methods",
-        component: PaymentsMethodsComponent,
-        children: [
-          // { path: "", pathMatch: "full" },
-          { path: "upi", component: UpisComponent },
-          { path: "bank", component: BanksComponent },
-        ],
-      },
+      // {
+      //   path: "payments-methods",
+      //   children: [
+      //     {
+      //       path: "",
+      //       redirectTo: "bank",
+      //       pathMatch: "full",
+      //     },
+      //     {
+      //       path: "upi",
+      //       component: UpisComponent,
+      //     },
+      //     {
+      //       path: "bank",
+      //       component: BanksComponent,
+      //     },
+      //   ],
+      // },
 
       {
         path: "override-currency-management",
@@ -63,12 +72,17 @@ const routes: Routes = [
       },
 
       {
+        path: "bank",
+        component: BanksComponent,
+      },
+      {
         path: "upi",
         component: UpisComponent,
       },
       {
-        path: "bank",
-        component: BanksComponent,
+        path: "",
+        redirectTo: "bank",
+        pathMatch: "full",
       },
       {
         path: "recycle-upi",

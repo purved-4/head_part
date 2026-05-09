@@ -1,4 +1,3 @@
-
 import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { FundsService } from "../../pages/services/funds.service";
@@ -18,13 +17,11 @@ import { BranchService } from "../../pages/services/branch.service";
 })
 export class HbPayoutReportComponent implements OnInit, OnDestroy {
   // Arrays for each type (server returns paginated data)
-  upipayins: any[] = [];
-  bankpayins: any[] = [];
+
   approvedpayouts: any[] = [];
 
   // Pagination metadata from server
-  upiTotalRecords = 0;
-  bankTotalRecords = 0;
+
   payoutTotalRecords = 0;
 
   // route + user ids
@@ -32,28 +29,16 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   userId: string | null = null;
   role: string | null = "";
 
+  selectedStatus: string = "APPROVED";
+
   private routeSub: Subscription | null = null;
 
   // active view
-  activeView: "upi" | "bank" | "payout" = "upi";
+  activeView: any;
   imageError = false;
   // ========== FILTER PROPERTIES ==========
   // UPI filters
-  upiSearchQuery = "";
-  upiPortalFilter = "";
-  upiDateFrom = "";
-  upiDateTo = "";
-  upiPortals: any[] = [];
 
-  // Bank filters
-  bankSearchQuery = "";
-  bankPortalFilter = "";
-  bankDateFrom = "";
-  bankDateTo = "";
-  bankPortals: any[] = [];
-
-  allUpiPayins: any[] = [];
-  allBankPayins: any[] = [];
   allRejectedPayouts: any[] = [];
   // Payout filters
   payoutSearchQuery = "";
@@ -63,13 +48,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   payoutPortals: any[] = [];
 
   // ========== PAGINATION (client‑side) ==========
-  upiPage = 0;
-  upiPageSize = 10;
-  upiPageSizes = [10, 20, 25, 50];
-
-  bankPage = 0;
-  bankPageSize = 10;
-  bankPageSizes = [10, 20, 25, 50];
 
   payoutApprovedPage = 0;
   payoutApprovedPageSize = 10;
@@ -79,8 +57,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   filterDropdownOpen: string | null = null; // 'upi' | 'bank' | 'payout' | null
 
   // ========== CUSTOM PORTAL DROPDOWN STATE ==========
-  upiPortalDropdownOpen = false;
-  bankPortalDropdownOpen = false;
+
   payoutPortalDropdownOpen = false;
 
   // ========== MODAL & LIGHTBOX STATE ==========
@@ -105,82 +82,28 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     this.branchId = this.userStateService.getCurrentEntityId();
     this.userId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
+
+    // ✅ default status
+    this.selectedStatus = "ACCEPTED";
+
     this.setColorsByRole();
+
+    // ✅ load portals
     this.loadAllPortals();
 
     this.routeSub = this.route.paramMap.subscribe((params) => {
-      const type = params.get("type") as "upi" | "bank" | "payout" | null;
-      this.activeView = type === "bank" || type === "payout" ? type : "upi";
+      const type = params.get("type") as "payout" | null;
+
+      // ✅ only payout view
+      this.activeView = type || "payout";
 
       if (!this.branchId) return;
 
-      // // Fetch data for the current view (server‑side pagination)
-      // if (this.activeView === "upi") {
-      //   this.fetchUpiPayins();
-      //   this.fetchUpiPortals(); // populate portal dropdown
-      // } else if (this.activeView === "bank") {
-      //   this.fetchBankPayins();
-      //   this.fetchBankPortals();
-      // } else {
-      //   this.fetchApprovedPayouts();
-      //   this.fetchPayoutPortals();
-      // }
-
-      if (this.activeView === "upi") {
-        if (this.upiPortalFilter) {
-          this.fetchAllUpiPayins();
-        }
-        // this.fetchAllUpiPayins();
-      } else if (this.activeView === "bank") {
-        // this.fetchAllBankPayins();
-        if (this.bankPortalFilter) {
-          this.fetchAllBankPayins();
-        }
-      } else {
-        if (this.payoutPortalFilter) {
-          this.fetchAllRejectedPayouts();
-        }
-        // this.fetchAllRejectedPayouts();
-      }
+      // ✅ always call API
+      this.fetchAllRejectedPayouts();
     });
   }
 
-  // loadAllPortals(): void {
-  //   if (!this.branchId) return;
-
-  //   this.headServices
-  //     .getAllHeadsWithPortalsById(this.branchId)
-  //     .pipe(
-  //       catchError((err) => {
-  //         this.headPortals = [];
-  //         this.upiPortals = [];
-  //         this.bankPortals = [];
-  //         this.payoutPortals = [];
-  //         return of([]);
-  //       }),
-  //     )
-  //     .subscribe((response: any) => {
-  //       const portalsData = Array.isArray(response?.data)
-  //         ? response.data
-  //         : Array.isArray(response)
-  //           ? response
-  //           : [];
-
-  //       this.headPortals = portalsData;
-
-  //       const portals = [
-  //         ...new Set(
-  //           portalsData
-  //             .map((item: any) => item.portalId)
-  //             .filter((site: string) => !!site?.trim()),
-  //         ),
-  //       ];
-
-  //       this.upiPortals = portals;
-  //       this.bankPortals = portals;
-  //       this.payoutPortals = portals;
-  //     });
-  // }
   loadAllPortals(): void {
     if (!this.branchId || !this.role) return;
 
@@ -193,8 +116,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       apiCall$ = this.headServices.getAllHeadsWithPortalsById(this.branchId);
     } else {
       this.portalOptions = [];
-      this.upiPortals = [];
-      this.bankPortals = [];
+
       this.payoutPortals = [];
       return;
     }
@@ -203,8 +125,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       .pipe(
         catchError(() => {
           this.portalOptions = [];
-          this.upiPortals = [];
-          this.bankPortals = [];
+
           this.payoutPortals = [];
           this.snackbar.show("Failed to load portals", false);
           return of([]);
@@ -232,8 +153,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
         // ✅ single source of truth
         this.portalOptions = portals;
-        this.upiPortals = portals;
-        this.bankPortals = portals;
+
         this.payoutPortals = portals;
       });
   }
@@ -251,263 +171,76 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     return date.toISOString(); // converts to UTC (your required format)
   }
 
-  fetchAllUpiPayins(): void {
-    if (!this.branchId) return;
-    const pageSize = 100;
-    let page = 0;
-    const allData: any[] = [];
-
-    const fetchPage = () => {
-      // this.fundService
-      //   .getAllUpiFundWithEntityAndPortalId(
-      //     this.branchId,
-      //     this.upiPortalFilter,
-      //     "REJECTED",
-      //     page,
-      //     pageSize,
-
-      //   )
-      const fromDate = this.upiDateFrom
-        ? DateTimeUtil.toUtcISOString(
-            new Date(new Date(this.upiDateFrom).setHours(0, 0, 0, 0)),
-          )
-        : null;
-
-      const toDate = this.upiDateTo
-        ? DateTimeUtil.toUtcISOString(
-            new Date(new Date(this.upiDateTo).setHours(23, 59, 59, 999)),
-          )
-        : null;
-      this.fundService
-        .getAllUpiFundWithEntityAndPortalId(
-          this.branchId,
-          this.upiPortalFilter,
-          "REJECTED",
-          page,
-          pageSize,
-          "undefined",
-          fromDate || undefined,
-          toDate || undefined,
-        )
-        .pipe(
-          catchError((err) => {
-            return of({ data: [], total: 0 });
-          }),
-        )
-        .subscribe((response: any) => {
-          const list = this.extractListFromResponse(response);
-          allData.push(...list);
-          const total = this.extractTotalFromResponse(response);
-
-          if ((page + 1) * pageSize < total) {
-            page++;
-            fetchPage();
-          } else {
-            this.allUpiPayins = allData;
-            this.mapUpiArray(allData);
-            this.upiTotalRecords = allData.length;
-            // this.upiPortals = [
-            //   ...new Set(
-            //     allData
-            //       .map((t) => t.portalDomain || t.portalId)
-            //       .filter(Boolean),
-            //   ),
-            // ];
-
-            this.headServices
-              .getAllHeadsWithPortalsById(this.branchId)
-              .subscribe({
-                next: (res: any) => {},
-              });
-          }
-        });
-    };
-    fetchPage();
-  }
-
-  fetchAllBankPayins(): void {
-    if (!this.branchId) return;
-    const pageSize = 100;
-    let page = 0;
-    const allData: any[] = [];
-
-    const fetchPage = () => {
-      // this.fundService
-      //   .getAllBankFundWithEntityAndPortalId(
-      //     this.branchId,
-      //     this.bankPortalFilter,
-      //     "REJECTED",
-      //     page,
-      //     pageSize,
-
-      //   )
-
-      const fromDate = this.bankDateFrom
-        ? DateTimeUtil.toUtcISOString(
-            new Date(new Date(this.bankDateFrom).setHours(0, 0, 0, 0)),
-          )
-        : null;
-
-      const toDate = this.bankDateTo
-        ? DateTimeUtil.toUtcISOString(
-            new Date(new Date(this.bankDateTo).setHours(23, 59, 59, 999)),
-          )
-        : null;
-
-      this.fundService
-        .getPayinFundWithPortalIdAndEntityId(
-          this.branchId,
-          this.bankPortalFilter,
-          "REJECTED",
-          page,
-          pageSize,
-          undefined,
-          fromDate || undefined,
-          toDate || undefined,
-        )
-        .pipe(
-          catchError((err) => {
-            return of({ data: [], total: 0 });
-          }),
-        )
-        .subscribe((response: any) => {
-          const list = this.extractListFromResponse(response);
-          allData.push(...list);
-          const total = this.extractTotalFromResponse(response);
-
-          if ((page + 1) * pageSize < total) {
-            page++;
-            fetchPage();
-          } else {
-            this.allBankPayins = allData;
-            this.mapBankArray(allData);
-            this.bankTotalRecords = allData.length;
-            // this.bankPortals = [
-            //   ...new Set(
-            //     allData
-            //       .map((t) => t.portalDomain || t.portalId)
-            //       .filter(Boolean),
-            //   ),
-            // ];
-          }
-        });
-    };
-    fetchPage();
-  }
-
   fetchAllRejectedPayouts(): void {
     if (!this.branchId) return;
+
     const pageSize = 100;
     let page = 0;
+
     const allData: any[] = [];
 
     const fetchPage = () => {
-      // this.fundService
-      //   .getAllPayoutFundWithEntityAndPortalId(
-      //     this.branchId,
-      //     this.payoutPortalFilter,
-      //     "REJECTED",
-      //     page,
-      //     pageSize,
-
-      //   )
-
       const fromDate = this.payoutDateFrom
         ? DateTimeUtil.toUtcISOString(
             new Date(new Date(this.payoutDateFrom).setHours(0, 0, 0, 0)),
           )
-        : " ";
+        : undefined;
 
       const toDate = this.payoutDateTo
         ? DateTimeUtil.toUtcISOString(
             new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999)),
           )
-        : null;
+        : undefined;
+
       this.fundService
         .getAllPayoutFundWithEntityAndPortalId(
           this.branchId,
-          this.payoutPortalFilter,
-          "REJECTED",
+          this.payoutPortalFilter || undefined,
+          this.selectedStatus,
           page,
           pageSize,
           undefined,
-          fromDate || undefined,
-          toDate || undefined,
+          fromDate,
+          toDate,
         )
         .pipe(
           catchError((err) => {
-            return of({ data: [], total: 0 });
+            console.error("Payout API Error:", err);
+
+            this.snackbar.show("Failed to load payouts", false);
+
+            return of({
+              data: [],
+              total: 0,
+            });
           }),
         )
         .subscribe((response: any) => {
+          console.log("Payout Response:", response);
+
           const list = this.extractListFromResponse(response);
+
           allData.push(...list);
+
           const total = this.extractTotalFromResponse(response);
 
           if ((page + 1) * pageSize < total) {
             page++;
             fetchPage();
           } else {
+            // ✅ save original
             this.allRejectedPayouts = allData;
+
+            // ✅ map for UI
             this.mapPayoutArray(allData);
+
+            // ✅ total count
             this.payoutTotalRecords = allData.length;
-            // this.payoutPortals = [
-            //   ...new Set(allData.map((p) => p.portalDomain).filter(Boolean)),
-            // ];
           }
         });
     };
-    fetchPage();
-  }
-  private mapBankArray(items: any[]) {
-    this.bankpayins = items.map((it: any) => ({
-      mode: "bank",
-      portal: it.portalDomain || it.domain || it.site || it.merchant,
-      portalId: it.portalId || it.siteId,
-      accountNo: it.accountNo || it.accNo || it.account,
-      transactionId: it.transactionId || it.txnId,
-      amount: Number(it.amount ?? it.value ?? 0),
-      settled: it.settled,
-      holder: it.bankAccountHolderName,
-      reviewStatus: it.reviewStatus || it.review,
-      status: it.status || it.state,
-      queryText: it.queryText,
-      date: it.createdAt
-        ? new Date(it.createdAt)
-        : it.date
-          ? new Date(it.date)
-          : new Date(),
-      raw: it,
-    }));
-    this.bankpayins.sort(
-      (a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0),
-    );
-  }
 
-  private mapUpiArray(items: any[]) {
-    this.upipayins = items.map((it: any) => ({
-      mode: "upi",
-      portal: it.portalDomain || it.domain || it.site || it.merchant,
-      portalId: it.portalId || it.siteId,
-      vpa: it.vpa || it.vpaId || it.upiId,
-      upiId: it.upiId,
-      accountNo: it.accountNo || it.accNo || it.account,
-      transactionId: it.transactionId || it.txnId,
-      amount: Number(it.amount ?? it.value ?? 0),
-      settled: it.settled,
-      reviewStatus: it.reviewStatus || it.review,
-      status: it.status || it.state,
-      queryText: it.queryText,
-      date: it.createdAt
-        ? new Date(it.createdAt)
-        : it.date
-          ? new Date(it.date)
-          : new Date(),
-      raw: it,
-    }));
-    this.upipayins.sort(
-      (a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0),
-    );
+    fetchPage();
   }
 
   // Helper to extract list from various response shapes
@@ -579,55 +312,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   }
 
   // ============ FETCH DATA (server‑side paginated) ============
-  fetchUpiPayins(): void {
-    if (!this.branchId) return;
-
-    this.fundService
-      .getAllUpiFundWithBranchIdPaginated(
-        this.branchId,
-        "REJECTED", // changed from ACCEPTED to REJECTED
-        this.upiPage,
-        this.upiPageSize,
-        this.upiSearchQuery,
-      )
-      .pipe(
-        catchError((err) => {
-          return of({ data: [], total: 0 });
-        }),
-      )
-      .subscribe((response: any) => {
-        const { list, total, pageNum, pageSize } = this.parseResponse(response);
-        this.upiTotalRecords = total;
-        this.upiPage = pageNum;
-        this.upiPageSize = pageSize;
-        this.mapFundsArray(list, "upi");
-      });
-  }
-
-  fetchBankPayins(): void {
-    if (!this.branchId) return;
-
-    this.fundService
-      .getAllBankFundWithBranchIdPaginated(
-        this.branchId,
-        "REJECTED", // changed from ACCEPTED to REJECTED
-        this.bankPage,
-        this.bankPageSize,
-        this.bankSearchQuery,
-      )
-      .pipe(
-        catchError((err) => {
-          return of({ data: [], total: 0 });
-        }),
-      )
-      .subscribe((response: any) => {
-        const { list, total, pageNum, pageSize } = this.parseResponse(response);
-        this.bankTotalRecords = total;
-        this.bankPage = pageNum;
-        this.bankPageSize = pageSize;
-        this.mapFundsArray(list, "bank");
-      });
-  }
 
   fetchApprovedPayouts(): void {
     if (!this.branchId) return;
@@ -691,34 +375,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   }
 
   // ============ MAPPERS ============
-  private mapFundsArray(items: any[], mode: "bank" | "upi") {
-    const targetArray = mode === "bank" ? this.bankpayins : this.upipayins;
-    targetArray.length = 0;
-
-    items.forEach((it: any) => {
-      const normalized = {
-        mode: mode,
-        portal: it.portalDomain || it.domain || it.site || it.merchant,
-        portalId: it.portalId || it.siteId,
-        vpa: it.vpa || it.vpaId || it.upiId,
-        upiId: it.upiId,
-        accountNo: it.accountNo || it.accNo || it.account,
-        transactionId: it.transactionId || it.txnId,
-        amount: Number(it.amount ?? it.value ?? 0),
-        settled: it.settled,
-        reviewStatus: it.reviewStatus || it.review,
-        status: it.status || it.state,
-        date: it.createdAt ? new Date(it.createdAt) : new Date(),
-        raw: it,
-        queryText: it.queryText,
-      };
-      targetArray.push(normalized);
-    });
-
-    targetArray.sort(
-      (a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0),
-    );
-  }
 
   private mapPayoutArray(items: any[]) {
     this.approvedpayouts = items.map((it: any) => ({
@@ -746,31 +402,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ============ TEMPLATE HELPERS ============
-  filteredUpipayins(): any[] {
-    return this.upipayins;
-  }
-
-  pagedUpipayins(): any[] {
-    return this.upipayins; // server already paginated
-  }
-
-  upiTotalPages(): number {
-    return Math.max(1, Math.ceil(this.upiTotalRecords / this.upiPageSize));
-  }
-
-  filteredBankpayins(): any[] {
-    return this.bankpayins;
-  }
-
-  pagedBankpayins(): any[] {
-    return this.bankpayins;
-  }
-
-  bankTotalPages(): number {
-    return Math.max(1, Math.ceil(this.bankTotalRecords / this.bankPageSize));
-  }
-
   filteredApprovedpayouts(): any[] {
     return this.approvedpayouts;
   }
@@ -787,23 +418,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   }
 
   // ============ PAGINATION CONTROLS ============
-  setUpiPage(p: number) {
-    const total = this.upiTotalPages();
-    const newPage = Math.max(0, Math.min(p, total - 1));
-    if (newPage !== this.upiPage) {
-      this.upiPage = newPage;
-      this.fetchUpiPayins();
-    }
-  }
-
-  setBankPage(p: number) {
-    const total = this.bankTotalPages();
-    const newPage = Math.max(0, Math.min(p, total - 1));
-    if (newPage !== this.bankPage) {
-      this.bankPage = newPage;
-      this.fetchBankPayins();
-    }
-  }
 
   setpayoutApprovedPage(p: number) {
     const total = this.payoutApprovedTotalPages();
@@ -812,18 +426,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       this.payoutApprovedPage = newPage;
       this.fetchApprovedPayouts();
     }
-  }
-
-  onChangeUpiPageSize(size: number) {
-    this.upiPageSize = Number(size);
-    this.upiPage = 0;
-    this.fetchUpiPayins();
-  }
-
-  onChangeBankPageSize(size: number) {
-    this.bankPageSize = Number(size);
-    this.bankPage = 0;
-    this.fetchBankPayins();
   }
 
   onChangepayoutApprovedPageSize(size: number) {
@@ -841,313 +443,54 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     }
   }
 
-  get upiFilterActive(): boolean {
-    return !!(this.upiDateFrom || this.upiDateTo);
-  }
-
-  get bankFilterActive(): boolean {
-    return !!(this.bankDateFrom || this.bankDateTo);
-  }
-
   get payoutFilterActive(): boolean {
     return !!(this.payoutDateFrom || this.payoutDateTo);
-  }
-
-  clearUpiDateFilters() {
-    this.upiDateFrom = "";
-    this.upiDateTo = "";
-    this.applyUpiFilters();
-  }
-
-  clearBankDateFilters() {
-    this.bankDateFrom = "";
-    this.bankDateTo = "";
-    this.applyBankFilters();
   }
 
   clearPayoutDateFilters() {
     this.payoutDateFrom = "";
     this.payoutDateTo = "";
+
     this.applyPayoutFilters();
   }
 
   // ============ PORTAL DROPDOWN CONTROLS ============
   togglePortalDropdown(view: "upi" | "bank" | "payout") {
-    if (view === "upi") {
-      this.upiPortalDropdownOpen = !this.upiPortalDropdownOpen;
-      this.bankPortalDropdownOpen = false;
-      this.payoutPortalDropdownOpen = false;
-    } else if (view === "bank") {
-      this.bankPortalDropdownOpen = !this.bankPortalDropdownOpen;
-      this.upiPortalDropdownOpen = false;
-      this.payoutPortalDropdownOpen = false;
-    } else if (view === "payout") {
+    if (view === "payout") {
       this.payoutPortalDropdownOpen = !this.payoutPortalDropdownOpen;
-      this.upiPortalDropdownOpen = false;
-      this.bankPortalDropdownOpen = false;
     }
   }
 
   selectPortal(view: "upi" | "bank" | "payout", portal: any) {
     const portalId = portal?.id || "";
 
-    if (view === "upi") {
-      this.upiPortalFilter = portalId;
-      this.upiPortalDropdownOpen = false;
-      this.applyUpiFilters();
-      this.fetchAllUpiPayins();
-    } else if (view === "bank") {
-      this.bankPortalFilter = portalId;
-      this.bankPortalDropdownOpen = false;
-      this.applyBankFilters();
-      this.fetchAllBankPayins();
-    } else if (view === "payout") {
+    if (view === "payout") {
       this.payoutPortalFilter = portalId;
+
+      // ✅ close dropdown
       this.payoutPortalDropdownOpen = false;
-      this.applyPayoutFilters();
+
+      // ✅ reset page
+      this.payoutApprovedPage = 0;
+
+      // ✅ API call
       this.fetchAllRejectedPayouts();
     }
   }
 
-  // ============ FILTER TRIGGERS ============
-  // applyUpiFilters() {
-  //   this.upiPage = 0;
-  //   this.fetchUpiPayins();
-  // }
-  applyUpiFilters() {
-    const search = this.upiSearchQuery.trim().toLowerCase();
-    const portal = this.upiPortalFilter.trim().toLowerCase();
-    const fromDate = this.upiDateFrom ? new Date(this.upiDateFrom) : null;
-    const toDate = this.upiDateTo ? new Date(this.upiDateTo) : null;
-
-    if (toDate) {
-      toDate.setHours(23, 59, 59, 999);
-    }
-
-    const filtered = this.allUpiPayins.filter((it: any) => {
-      const itemDate = it.createdAt
-        ? new Date(it.createdAt)
-        : it.date
-          ? new Date(it.date)
-          : null;
-
-      // const itemPortal = String(
-      //   it.portalDomain || it.portalId || "",
-      // ).toLowerCase();
-
-      // const matchesPortal = !portal || itemPortal === portal;
-
-      const portalId = this.upiPortalFilter.trim().toLowerCase();
-
-      const itemPortalId = String(it.portalId || "").toLowerCase();
-
-      const matchesPortal = !portalId || itemPortalId === portalId;
-
-      const matchesSearch =
-        !search ||
-        String(it.vpa || it.upiId || "")
-          .toLowerCase()
-          .includes(search) ||
-        String(it.transactionId || it.txnId || "")
-          .toLowerCase()
-          .includes(search) ||
-        String(it.portalDomain || "")
-          .toLowerCase()
-          .includes(search) ||
-        String(it.queryText || "")
-          .toLowerCase()
-          .includes(search);
-
-      const matchesFrom = !fromDate || (itemDate && itemDate >= fromDate);
-      const matchesTo = !toDate || (itemDate && itemDate <= toDate);
-
-      return matchesPortal && matchesSearch && matchesFrom && matchesTo;
-    });
-
-    this.upiPage = 0;
-    this.upiTotalRecords = filtered.length;
-    this.mapUpiArray(filtered);
-  }
-
-  applyUpiFiltersAndClose() {
-    this.applyUpiFilters();
-    this.filterDropdownOpen = null;
-  }
-
-  // clearUpiFilters() {
-  //   this.upiSearchQuery = "";
-  //   this.upiPortalFilter = "";
-  //   this.upiDateFrom = "";
-  //   this.upiDateTo = "";
-  //   this.upiPage = 0;
-  //   this.fetchUpiPayins();
-  //   this.filterDropdownOpen = null;
-  // }
-
-  // applyBankFilters() {
-  //   this.bankPage = 0;
-  //   this.fetchBankPayins();
-  // }
-
-  clearUpiFilters() {
-    this.upiSearchQuery = "";
-    this.upiPortalFilter = "";
-    this.upiDateFrom = "";
-    this.upiDateTo = "";
-    this.upiPage = 0;
-    this.upiTotalRecords = this.allUpiPayins.length;
-    this.mapUpiArray(this.allUpiPayins);
-    this.filterDropdownOpen = null;
-  }
-  applyBankFilters() {
-    if (this.bankPortalFilter) {
-      this.fetchAllBankPayins();
-      return;
-    }
-
-    const search = this.bankSearchQuery.trim().toLowerCase();
-    // const portal = this.bankPortalFilter.trim().toLowerCase();
-    const fromDate = this.bankDateFrom ? new Date(this.bankDateFrom) : null;
-    const toDate = this.bankDateTo ? new Date(this.bankDateTo) : null;
-
-    if (toDate) {
-      toDate.setHours(23, 59, 59, 999);
-    }
-
-    const filtered = this.allBankPayins.filter((it: any) => {
-      const itemDate = it.createdAt
-        ? new Date(it.createdAt)
-        : it.date
-          ? new Date(it.date)
-          : null;
-
-      // const itemPortal = String(
-      //   it.portalDomain || it.portalId || "",
-      // ).toLowerCase();
-
-      // const matchesPortal = !portal || itemPortal === portal;
-      const portalId = this.bankPortalFilter.trim().toLowerCase();
-
-      const itemPortalId = String(it.portalId || "").toLowerCase();
-
-      const matchesPortal = !portalId || itemPortalId === portalId;
-
-      const matchesSearch =
-        !search ||
-        String(it.accountNo || "")
-          .toLowerCase()
-          .includes(search) ||
-        String(it.transactionId || it.txnId || "")
-          .toLowerCase()
-          .includes(search) ||
-        String(it.portalDomain || "")
-          .toLowerCase()
-          .includes(search) ||
-        String(it.bankAccountHolderName || "")
-          .toLowerCase()
-          .includes(search) ||
-        String(it.queryText || "")
-          .toLowerCase()
-          .includes(search);
-
-      const matchesFrom = !fromDate || (itemDate && itemDate >= fromDate);
-      const matchesTo = !toDate || (itemDate && itemDate <= toDate);
-
-      return matchesPortal && matchesSearch && matchesFrom && matchesTo;
-    });
-
-    this.bankPage = 0;
-    this.bankTotalRecords = filtered.length;
-    this.mapBankArray(filtered);
-  }
-
-  applyBankFiltersAndClose() {
-    this.applyBankFilters();
-    this.filterDropdownOpen = null;
-  }
-
-  // clearBankFilters() {
-  //   this.bankSearchQuery = "";
-  //   this.bankPortalFilter = "";
-  //   this.bankDateFrom = "";
-  //   this.bankDateTo = "";
-  //   this.bankPage = 0;
-  //   this.fetchBankPayins();
-  //   this.filterDropdownOpen = null;
-  // }
-
-  // applyPayoutFilters() {
-  //   this.payoutApprovedPage = 0;
-  //   this.fetchApprovedPayouts();
-  // }
-
-  clearBankFilters() {
-    this.bankSearchQuery = "";
-    this.bankPortalFilter = "";
-    this.bankDateFrom = "";
-    this.bankDateTo = "";
-    this.bankPage = 0;
-    this.bankTotalRecords = this.allBankPayins.length;
-    this.mapBankArray(this.allBankPayins);
-    this.filterDropdownOpen = null;
-  }
   applyPayoutFilters() {
-    if (this.payoutPortalFilter) {
-      this.fetchAllRejectedPayouts();
-      return;
-    }
-    const search = this.payoutSearchQuery.trim().toLowerCase();
-    const portal = this.payoutPortalFilter.trim().toLowerCase();
-    const fromDate = this.payoutDateFrom ? new Date(this.payoutDateFrom) : null;
-    const toDate = this.payoutDateTo ? new Date(this.payoutDateTo) : null;
-
-    if (toDate) {
-      toDate.setHours(23, 59, 59, 999);
-    }
-
-    const filtered = this.allRejectedPayouts.filter((it: any) => {
-      const itemDate = it.dateTime
-        ? new Date(it.dateTime)
-        : it.createdAt
-          ? new Date(it.createdAt)
-          : null;
-
-      const itemPortal = String(it.portalDomain || "").toLowerCase();
-
-      const matchesPortal = !portal || itemPortal === portal;
-
-      const matchesSearch =
-        !search ||
-        String(it.accountNo || "")
-          .toLowerCase()
-          .includes(search) ||
-        String(it.holder || "")
-          .toLowerCase()
-          .includes(search) ||
-        String(it.portalDomain || "")
-          .toLowerCase()
-          .includes(search) ||
-        String(it.queryText || "")
-          .toLowerCase()
-          .includes(search) ||
-        String(it.remarks || "")
-          .toLowerCase()
-          .includes(search);
-
-      const matchesFrom = !fromDate || (itemDate && itemDate >= fromDate);
-      const matchesTo = !toDate || (itemDate && itemDate <= toDate);
-
-      return matchesPortal && matchesSearch && matchesFrom && matchesTo;
-    });
-
+    // ✅ reset page
     this.payoutApprovedPage = 0;
-    this.payoutTotalRecords = filtered.length;
-    this.mapPayoutArray(filtered);
+
+    // ✅ always fetch from API
+    this.fetchAllRejectedPayouts();
+
+    // ✅ close dropdown
+    this.filterDropdownOpen = null;
   }
 
   applyPayoutFiltersAndClose() {
     this.applyPayoutFilters();
-    this.filterDropdownOpen = null;
   }
 
   // clearPayoutFilters() {
@@ -1164,12 +507,19 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     this.payoutPortalFilter = "";
     this.payoutDateFrom = "";
     this.payoutDateTo = "";
-    this.payoutApprovedPage = 0;
-    this.payoutTotalRecords = this.allRejectedPayouts.length;
-    this.mapPayoutArray(this.allRejectedPayouts);
-    this.filterDropdownOpen = null;
-  }
 
+    // ✅ reset status
+    this.selectedStatus = "ACCEPTED";
+
+    // ✅ reset page
+    this.payoutApprovedPage = 0;
+
+    // ✅ close dropdown
+    this.filterDropdownOpen = null;
+
+    // ✅ fetch fresh data
+    this.fetchAllRejectedPayouts();
+  }
   // ============ HOST LISTENER for outside click ============
   @HostListener("document:click", ["$event"])
   onDocumentClick(event: MouseEvent) {
@@ -1417,15 +767,10 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   refreshCurrentView(): void {
     if (!this.branchId) return;
 
-    if (this.activeView === "upi") {
-      this.fetchUpiPayins();
-    } else if (this.activeView === "bank") {
-      this.fetchBankPayins();
-    } else if (this.activeView === "payout") {
-      this.fetchApprovedPayouts();
+    if (this.activeView === "payout") {
+      this.fetchAllRejectedPayouts();
     }
   }
-
   setPayoutPage(page: number) {
     const totalPages = this.payoutApprovedTotalPages();
     this.payoutApprovedPage = Math.max(0, Math.min(page, totalPages - 1));
@@ -1434,12 +779,19 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   getSelectedPortalDomain(view: "upi" | "bank" | "payout"): string {
     let selectedId = "";
 
-    if (view === "upi") selectedId = this.upiPortalFilter;
-    else if (view === "bank") selectedId = this.bankPortalFilter;
-    else selectedId = this.payoutPortalFilter;
+    if (view === "payout") selectedId = this.payoutPortalFilter;
 
     const found = this.portalOptions.find((p) => p.id === selectedId);
 
     return found ? found.domain : "All Portals";
+  }
+  onStatusChange(status: string) {
+    this.selectedStatus = status;
+
+    // ✅ reset page
+    this.payoutApprovedPage = 0;
+
+    // ✅ API call
+    this.fetchAllRejectedPayouts();
   }
 }

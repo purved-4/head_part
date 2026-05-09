@@ -3,6 +3,7 @@ import { Injectable } from "@angular/core";
 import { catchError, map, Observable, throwError } from "rxjs";
 import baseUrl from "./helper";
 import { DateTimeUtil } from "../../utils/date-time.utils";
+import { EntityType } from "../../components/reports/percentage-log/percentage-log.types";
 
 @Injectable({
   providedIn: "root",
@@ -46,7 +47,6 @@ export class FundsService {
       catchError((error) => throwError(error)),
     );
   }
- 
 
   settleUpiFund(upiSettleId: any): Observable<any> {
     return this.http
@@ -72,8 +72,6 @@ export class FundsService {
       catchError((error) => throwError(error)),
     );
   }
-
- 
 
   getAllUpiFund(): Observable<any> {
     return this.http.get<any>(`${baseUrl}/funds/getAllUpiFunds`).pipe(
@@ -296,16 +294,14 @@ export class FundsService {
     );
   }
 
-  updateProcessingStatus(fundId: any, branchId: any) {
+  updateProcessingStatus(fundId: any, branchId: any, entityType: any) {
     return this.http.patch(
-      `${baseUrl}/funds/payoutProcessing/${fundId}/${branchId}`,
+      `${baseUrl}/funds/payoutProcessing/${fundId}/${branchId}/${entityType}`,
       {},
     );
   }
 
   /// Accept and reject for the tp role
-
- 
 
   getByThreadIdFundIdAndType(
     threadId: any,
@@ -323,8 +319,6 @@ export class FundsService {
   }
 
   // payout rejectin
-
-  
 
   getAllUpiFundWithPortalId(
     portalId: any,
@@ -353,8 +347,6 @@ export class FundsService {
         catchError((error) => throwError(error)),
       );
   }
-
-
 
   // web do pyauouit fubd lo
   getAllPayoutFundWithPortalId(
@@ -389,13 +381,13 @@ export class FundsService {
     let params = new HttpParams();
 
     // ids.forEach((id) => {
-      params = params.append("ids", ids);
+    params = params.append("ids", ids);
     // });
 
     return this.http.get<any>(`${baseUrl}/webhook/broadcast/list`, { params });
   }
 
- getThreadsWithFundId(fundId: any): Observable<any> {
+  getThreadsWithFundId(fundId: any): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/comPart/fund-process-logs/${fundId}`)
       .pipe(
@@ -468,7 +460,7 @@ export class FundsService {
       );
   }
 
- getPayinFundWithPortalIdAndEntityId(
+  getPayinFundWithPortalIdAndEntityId(
     entityId: any,
     portalId: any,
     status: any,
@@ -552,11 +544,4 @@ export class FundsService {
         catchError((error) => throwError(error)),
       );
   }
- 
-
-
- 
-
-
- 
 }

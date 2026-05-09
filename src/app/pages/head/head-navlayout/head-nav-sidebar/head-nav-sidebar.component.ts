@@ -68,13 +68,17 @@ export class HeadNavSidebarComponent implements OnInit {
     //new hai code ke sath mujhe bs yahi dena hai
     {
       label: "Inventory Management",
-      route: "/head/payments-methods",
+      route: "/head/bank",
       icon: "account_balance_wallet",
       children: [
         {
           label: "Inventory Management",
-          route: "/head/payments-methods",
+          route: "/head/bank",
         },
+        // {
+        //   label: "",
+        //   route: "/head/upi",
+        // },
         {
           label: "Recycle Management",
           route: "/head/recycle-management",

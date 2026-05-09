@@ -613,18 +613,30 @@
                 <div class="flex items-center gap-2 flex-wrap mt-5">
                   <!-- PROCESS TIMER -->
                   <button
-                    [disabled]="transaction.processing"
+                    [disabled]="
+                      transaction.processing &&
+                      getRemainingTimeLabel(transaction) !== 'Process'
+                    "
                     (click)="
                       onProcessingClick(transaction); $event.stopPropagation()
                     "
                     [ngClass]="{
-                      'bg-orange-100 text-orange-600': transaction.processing,
-                      'bg-yellow-100 text-yellow-700': !transaction.processing,
+                      'bg-orange-100 text-orange-600':
+                        transaction.processing &&
+                        getRemainingTimeLabel(transaction) !== 'Process',
+
+                      'bg-yellow-100 text-yellow-700':
+                        !transaction.processing ||
+                        getRemainingTimeLabel(transaction) === 'Process',
                     }"
                     class="px-4 py-1.5 rounded-xl text-sm font-bold transition"
                   >
                     <ng-container
-                      *ngIf="transaction.processing; else processBtn"
+                      *ngIf="
+                        transaction.processing &&
+                          getRemainingTimeLabel(transaction) !== 'Process';
+                        else processBtn
+                      "
                     >
                       {{ getRemainingTimeLabel(transaction) }}
                     </ng-container>

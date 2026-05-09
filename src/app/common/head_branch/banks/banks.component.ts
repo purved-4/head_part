@@ -1653,11 +1653,11 @@ export class BanksComponent implements OnInit, OnDestroy {
     if (!account?.id) return;
 
     if (this.role === "HEAD") {
-      this.router.navigate(["/head/payments-methods/upi"], {
+      this.router.navigate(["/head/upi"], {
         queryParams: { bankId: account.id },
       });
     } else if (this.role === "BRANCH") {
-      this.router.navigate(["/branch/payments-methods/upi"], {
+      this.router.navigate(["/branch/upi"], {
         queryParams: { bankId: account.id },
       });
     }
