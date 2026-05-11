@@ -18,6 +18,7 @@ import { SnackbarService } from "../../snackbar/snackbar.service";
 import { UpiService } from "../../../pages/services/upi.service";
 import { INDIAN_BANKS } from "../../../utils/constants";
 import { BranchService } from "../../../pages/services/branch.service";
+import { CurrencyBehaviourService } from "../payments-methods/currency-behaviour.service";
 
 type StatusString = "active" | "inactive" | "frozen" | string;
 
@@ -92,6 +93,13 @@ export class BanksComponent implements OnInit, OnDestroy {
   portalSearchTerm = "";
   showPortalDropdown = false;
   filteredPortals: Portal[] = [];
+
+  //new
+  //new
+  selectedCurrencyData: any = null;
+  selectedModeData: string = "";
+  private currencySub!: Subscription;
+  private modeSub!: Subscription;
 
   // UI toggle for amount filter section
   showAmountFilter = false;
@@ -210,6 +218,7 @@ export class BanksComponent implements OnInit, OnDestroy {
     private elementRef: ElementRef,
     private upiService: UpiService,
     private branchService: BranchService,
+    private currencyBehaviourService: CurrencyBehaviourService,
   ) {
     this.addBankForm = this.createAddBankForm();
   }
@@ -218,23 +227,41 @@ export class BanksComponent implements OnInit, OnDestroy {
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
-    if (this.route.snapshot.queryParamMap.get("currency")) {
-      this.currency = this.route.snapshot.queryParamMap.get("currency");
-    }
-    this.fetchBankAccounts();
-    this.getPayinStatus();
-    // this.loadPortals();
-    this.initAddUpiForm();
-    // this.portalService.selectedPortals$.subscribe((sites) => {
-    //   this.selectedPortals = sites;
-    //   // Mobile → grid by default
-    //   // if (window.innerWidth < 800) {
-    //   //   this.viewMode = 'grid';
-    //   // }
 
-    //   // Example → call API using selected portalIds
-    //   const ids = sites.map((s) => s.portalId);
-    // });
+    // =========================
+    // GET CURRENCY
+    // =========================
+
+    this.currencySub = this.currencyBehaviourService
+      .getCurrency()
+      .subscribe((res) => {
+        if (!res) return;
+
+        this.selectedCurrencyData = res;
+
+        console.log("BANK Currency =>", res);
+
+        this.currency = res.currency;
+
+        // API CALL
+        this.fetchBankAccounts();
+      });
+
+    // =========================
+    // GET MODE
+    // =========================
+
+    this.modeSub = this.currencyBehaviourService.getMode().subscribe((res) => {
+      if (!res) return;
+
+      this.selectedModeData = res;
+
+      console.log("BANK Mode =>", res);
+    });
+
+    this.getPayinStatus();
+
+    this.initAddUpiForm();
 
     this.searchSubject
       .pipe(debounceTime(600), distinctUntilChanged())
@@ -247,6 +274,14 @@ export class BanksComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subs.unsubscribe();
+
+    if (this.currencySub) {
+      this.currencySub.unsubscribe();
+    }
+
+    if (this.modeSub) {
+      this.modeSub.unsubscribe();
+    }
   }
 
   // ========== DATA FETCH (server‑side paginated) ==========
