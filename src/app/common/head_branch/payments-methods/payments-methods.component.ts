@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { PortalService } from "../../../pages/services/portal.service";
 import { UserStateService } from "../../../store/user-state.service";
+import { CurrencyBehaviourService } from "./currency-behaviour.service";
 
 @Component({
   selector: "app-payments-methods",
@@ -24,6 +25,7 @@ export class PaymentsMethodsComponent implements OnInit {
     private portalService: PortalService,
     private userStateService: UserStateService,
     private router: Router,
+    private currencyBehaviourService: CurrencyBehaviourService,
   ) {}
 
   ngOnInit(): void {
@@ -58,6 +60,8 @@ export class PaymentsMethodsComponent implements OnInit {
             this.currencies[0];
 
           this.selectedCurrency = defaultCurrency;
+          this.currencyBehaviourService.setCurrency(this.selectedCurrency);
+          this.currencyBehaviourService.setMode(this.selectedMode);
 
           // AVAILABLE MODES
           this.availableModes = Object.keys(defaultCurrency.modes)
@@ -93,6 +97,8 @@ export class PaymentsMethodsComponent implements OnInit {
     this.availableModes = Object.keys(this.selectedCurrency.modes)
       .filter((key) => this.selectedCurrency.modes[key])
       .map((m) => m.toLowerCase());
+    this.currencyBehaviourService.setCurrency(this.selectedCurrency);
+    this.currencyBehaviourService.setMode(this.selectedMode);
 
     // RESET DEFAULT MODE
     if (this.availableModes.includes("bank")) {
@@ -107,16 +113,26 @@ export class PaymentsMethodsComponent implements OnInit {
   onModeChange(event: Event) {
     this.selectedMode = (event.target as HTMLSelectElement).value;
     this.navigateToMode();
+    this.currencyBehaviourService.setMode(this.selectedMode);
   }
 
   navigateToMode() {
     if (!this.selectedCurrency || !this.selectedMode) return;
 
-    this.router.navigate([`/head/${this.selectedMode}`], {
-      queryParams: {
-        currency: this.selectedCurrency.currency,
-        mode: this.selectedMode,
-      },
-    });
+    if (this.role === "BRANCH") {
+      this.router.navigate([`/branch/${this.selectedMode}`], {
+        queryParams: {
+          currency: this.selectedCurrency.currency,
+          mode: this.selectedMode,
+        },
+      });
+    } else if (this.role === "HEAD") {
+      this.router.navigate([`/head/${this.selectedMode}`], {
+        queryParams: {
+          currency: this.selectedCurrency.currency,
+          mode: this.selectedMode,
+        },
+      });
+    }
   }
 }

@@ -7,7 +7,7 @@ import {
 } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { of } from "rxjs";
+import { of, Subscription } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { Subject } from "rxjs";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
@@ -19,6 +19,7 @@ import { HeadService } from "../../../pages/services/head.service";
 import { SnackbarService } from "../../snackbar/snackbar.service";
 import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { BankService } from "../../../pages/services/bank.service";
+import { CurrencyBehaviourService } from "../payments-methods/currency-behaviour.service";
 
 @Component({
   selector: "app-upis",
@@ -45,6 +46,14 @@ export class UpisComponent implements OnInit {
 
   showPaymentDropdown = false;
   selectedMethod = "bank";
+
+  //new
+  //new
+  selectedCurrencyData: any = null;
+  selectedModeData: string = "";
+
+  private currencySub!: Subscription;
+  private modeSub!: Subscription;
 
   // UI state for filters
   portalSearchTerm = "";
@@ -154,6 +163,7 @@ export class UpisComponent implements OnInit {
     private router: Router,
     private multimediaService: MultimediaService,
     private bankServices: BankService,
+    private currencyBehaviourService: CurrencyBehaviourService,
   ) {}
 
   ngOnInit() {
@@ -162,6 +172,38 @@ export class UpisComponent implements OnInit {
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
+
+    // =========================
+    // GET CURRENCY
+    // =========================
+
+    this.currencySub = this.currencyBehaviourService
+      .getCurrency()
+      .subscribe((res) => {
+        if (!res) return;
+
+        this.selectedCurrencyData = res;
+
+        console.log("UPI Currency =>", res);
+
+        // AGAR DIRECT STRING CHAHIYE
+        // this.currency = res.currency;
+
+        // API CALL
+        this.fetchUpis();
+      });
+
+    // =========================
+    // GET MODE
+    // =========================
+
+    this.modeSub = this.currencyBehaviourService.getMode().subscribe((res) => {
+      if (!res) return;
+
+      this.selectedModeData = res;
+
+      console.log("UPI Mode =>", res);
+    });
 
     this.getPayinStatus();
 
@@ -174,13 +216,9 @@ export class UpisComponent implements OnInit {
 
     this.route.queryParams.subscribe((params) => {
       this.preselectedBankId = params["bankId"] || null;
-
-      this.fetchUpis();
     });
 
     this.loadBanks();
-
-    // this.loadPortals(this.currentRoleId);
 
     this.searchSubject
       .pipe(debounceTime(600), distinctUntilChanged())
@@ -189,9 +227,23 @@ export class UpisComponent implements OnInit {
         this.onSearch();
       });
 
-    this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
+    this.capacityRanges = [
+      {
+        minRange: null,
+        maxRange: null,
+        quantity: null,
+      },
+    ];
   }
+  ngOnDestroy() {
+    if (this.currencySub) {
+      this.currencySub.unsubscribe();
+    }
 
+    if (this.modeSub) {
+      this.modeSub.unsubscribe();
+    }
+  }
   private initAddUpiForm() {
     this.addUpiForm = this.formBuilder.group({
       bankId: [""],
