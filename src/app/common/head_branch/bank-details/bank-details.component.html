@@ -111,7 +111,16 @@
               <div class="grid grid-cols-2 gap-3">
                 <p class="text-sm text-gray-500">Payin Type</p>
 
-                <p class="text-sm font-semibold text-gray-800">PPI</p>
+                <span
+                  class="text-xs font-medium truncate"
+                  [ngClass]="
+                    bankData.fttAcceptance
+                      ? 'text-green-600'
+                      : 'text-orange-600'
+                  "
+                >
+                  {{ bankData.fttAcceptance ? "PPI" : "RPI" }}
+                </span>
               </div>
 
               <div class="grid grid-cols-2 gap-3 items-center">
@@ -187,13 +196,13 @@
                 </p>
               </div>
 
-              <div class="grid grid-cols-2 gap-3">
+              <!-- <div class="grid grid-cols-2 gap-3">
                 <p class="text-sm text-gray-500">Branch Name</p>
 
                 <p class="text-sm font-semibold text-gray-800">
                   {{ bankData?.portal || "-" }}
                 </p>
-              </div>
+              </div> -->
 
               <div class="grid grid-cols-2 gap-3 items-center">
                 <p class="text-sm text-gray-500">Account Status</p>
@@ -237,12 +246,27 @@
                 </p>
               </div>
 
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-2 gap-3 items-start">
                 <p class="text-sm text-gray-500">Capacity Range</p>
 
-                <p class="text-sm font-semibold text-gray-800">
-                  {{ bankData?.bankRange || "-" }}
-                </p>
+                <div class="space-y-2">
+                  <div
+                    *ngFor="let range of bankData?.ranges"
+                    class="text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2"
+                  >
+                    ₹{{ range.minRange }} - ₹{{ range.maxRange }}
+                    <span class="text-xs text-gray-500">
+                      (Qty: {{ range.quantity }})
+                    </span>
+                  </div>
+
+                  <p
+                    *ngIf="!bankData?.ranges || bankData?.ranges.length === 0"
+                    class="text-sm font-semibold text-gray-400"
+                  >
+                    -
+                  </p>
+                </div>
               </div>
             </div>
           </div>

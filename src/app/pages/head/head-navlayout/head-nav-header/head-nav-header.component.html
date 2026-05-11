@@ -36,7 +36,7 @@
           <div class="flex items-center space-x-2 cursor-pointer">
             <div class="w-2 h-2 rounded-full bg-[var(--color-warning)]"></div>
             <span class="text-sm font-medium">
-              Payin: ₹{{ payinBalance}}
+              Payin: ₹{{ payinBalance }}
             </span>
           </div>
 
@@ -178,7 +178,7 @@
           </button> -->
 
           <!-- Popup -->
-          <!-- <div
+          <div
             *ngIf="isLimitsOpen"
             class="absolute right-0 mt-2 z-50 w-[750px]"
             style="top: calc(100% + 6px); max-width: 95vw"
@@ -190,12 +190,11 @@
             <div
               class="bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden"
             >
-           
               <div class="max-h-[80vh] overflow-y-auto p-3">
                 <app-user-dashboard-upi-bank-limit></app-user-dashboard-upi-bank-limit>
               </div>
             </div>
-          </div> -->
+          </div>
         </div>
 
         <!-- Profile -->
@@ -267,4 +266,3 @@
     </div>
   </div>
 </header>
-
