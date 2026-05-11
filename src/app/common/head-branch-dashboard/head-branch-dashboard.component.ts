@@ -1,4 +1,3 @@
-
 // import { PoolingService } from "../../services/pooling.service"; // not used directly here
 
 import {
@@ -230,6 +229,8 @@ export class HeadBranchDashboardComponent
 
     this.sse = this.socketConfigService.getPendingData().subscribe((data) => {
       if (!data) return;
+      console.log("data", data);
+      console.log(this.lastBroadcastData);
 
       this.lastBroadcastData = data;
       this.processIncomingEvent(data);
@@ -366,6 +367,7 @@ export class HeadBranchDashboardComponent
               ? new Date(fund.dateTime)
               : new Date(),
           utrNumber: fund.transactionId || fund.utr || null,
+          parentCurrency: fund.parentCurrency,
           currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,
           mode: mode,
           accountNo: fund.accountNo || null,
@@ -433,40 +435,6 @@ export class HeadBranchDashboardComponent
       try {
         const rawPath = w.filePath || null;
 
-        // const tx = {
-        //   id: w.id || null,
-        //   fundId: w.id || null,
-        //   type: "payout",
-
-        //   portal: w.portalName || w.portalDomain || w.portalId || null,
-
-        //   amount: Number(w.amount) || 0,
-
-        //   date: w.createdAt ? new Date(w.createdAt) : new Date(),
-
-        //   utrNumber: w.transactionId || w.utr || null,
-
-        //   mode: "bank",
-
-        //   accountNo: w.accountNo || w.accountNumber || null,
-        //   bankId: w.bankId || null,
-        //   bankName: w.bankName || w.bank || w.bankName || null,
-
-        //   //  REMOVE direct URL
-        //   // filePath: `${fileBaseUrl}/${w.filePath}`
-
-        //   //  NEW
-        //   filePath: rawPath,   // backend raw path
-        //   fileUrl: '',       // blob URL later
-
-        //   remarks: w.remarks || w.message || null,
-
-        //   settled: !!w.settled,
-        //   raw: w,
-
-        //   holderName: w.holderName || w.accountHolderName || null,
-        // };
-
         const tx = {
           id: w.id || null,
           fundId: w.id || null,
@@ -475,6 +443,7 @@ export class HeadBranchDashboardComponent
           amount: Number(w.amount) || 0,
           date: w.createdAt ? new Date(w.createdAt) : new Date(),
           utrNumber: w.transactionId || w.utr || null,
+          parentCurrency: w.parentCurrency,
           mode: "bank",
           accountNo: w.accountNo || w.accountNumber || null,
           bankId: w.bankId || null,
@@ -484,7 +453,7 @@ export class HeadBranchDashboardComponent
           remarks: w.remarks || w.message || null,
           settled: !!w.settled,
           raw: w,
-          holderName: w.holderName || w.accountHolderName || null,
+          holderName: w.bankAccountHolderName || null,
           currencyWiseAmount: Number(w.currencyWiseAmount) || 0,
         };
 
@@ -612,19 +581,24 @@ export class HeadBranchDashboardComponent
 
   getRemainingTimeLabel(tx: any): string {
     if (!tx || !tx.processing) return "Process";
+
     const deadline = this.parseProcessingDeadline(tx);
+
     if (!deadline) return "Processing";
 
-    let diffMs = deadline.getTime() - this.processingNow;
+    const diffMs = deadline.getTime() - this.processingNow;
+
+    // ✅ EXPIRED
     if (diffMs <= 0) {
-      // If you prefer to show "Process" or "Expired" when thime is up, change tis line.
       return "Process";
     }
 
     const totalSec = Math.floor(diffMs / 1000);
+
     const h = Math.floor(totalSec / 3600);
     const m = Math.floor((totalSec % 3600) / 60);
     const s = totalSec % 60;
+
     const pad = (n: number) => n.toString().padStart(2, "0");
 
     return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
@@ -978,7 +952,11 @@ export class HeadBranchDashboardComponent
 
       const bankMap = new Map<string, number>();
       for (const f of payoutsAll) {
-        const key = f.bankName || f.accountNo || f.holderName || "Unknown Bank";
+        const key =
+          f.bankName ||
+          f.accountNo ||
+          f.bankAccountHolderName ||
+          "Unknown Bank";
         bankMap.set(key, (bankMap.get(key) || 0) + (Number(f.amount) || 0));
       }
       const sortedBanks = Array.from(bankMap.entries()).sort(
@@ -1106,17 +1084,16 @@ export class HeadBranchDashboardComponent
   }
 
   viewTransactionDetails(transaction: any): void {
-    //    if (transaction.filePath) {
-    //   this.multimediaService.getPrivateImage(transaction.filePath).subscribe({
-    //     next: (url) => {
-
-    //       transaction.fileUrl = url;
-    //     },
-    //     error: () => {
-    //       transaction.fileUrl = '';
-    //     },
-    //   });
-    // }
+    if (transaction.filePath) {
+      this.multimediaService.getPrivateImage(transaction.filePath).subscribe({
+        next: (url) => {
+          transaction.fileUrl = url;
+        },
+        error: () => {
+          transaction.fileUrl = "";
+        },
+      });
+    }
 
     if (!transaction) return;
     // Normalize the incoming object so modal bindings (utrNumber, upiId, accountNo, holderName, filePath, bankName, date etc.) are always present
@@ -1527,25 +1504,35 @@ export class HeadBranchDashboardComponent
     // Close popup
     this.closeEditAmountPopup();
   }
-
   onProcessingClick(transaction: any) {
     if (!transaction?.id) return;
 
-    // ✅ LOCAL UI UPDATE
+    // ✅ if expired then allow restart
+    const label = this.getRemainingTimeLabel(transaction);
+
+    if (transaction.processing && label !== "Process") {
+      return;
+    }
+
+    // ✅ RESTART PROCESSING
     transaction.processing = true;
 
-    // ✅ start realtime timer only once
+    // ✅ reset fresh start time
+    transaction.processingStartedAt = new Date();
+
+    // optional
+    transaction.processingDeadline = null;
+
+    this.processingNow = Date.now();
+
     this.startProcessingTimer();
 
     this.fundService
-      .updateProcessingStatus(transaction.id, this.headId)
+      .updateProcessingStatus(transaction.id, this.headId, this.role)
       .subscribe({
-        next: (res) => {
-          // no-op
-        },
+        next: () => {},
 
         error: (err) => {
-          // rollback on error
           transaction.processing = false;
 
           const message =
@@ -1553,7 +1540,6 @@ export class HeadBranchDashboardComponent
 
           this.snackbar.show(message, false);
 
-          // stop timer if no processing tx left
           this.ensureProcessingTimerState();
         },
       });
@@ -2014,6 +2000,7 @@ export class HeadBranchDashboardComponent
       date: parsedDate,
 
       utrNumber: fund.transactionId || fund.utr || null,
+      parentCurrency: fund.parentCurrency,
 
       mode: mode,
 
@@ -2039,13 +2026,7 @@ export class HeadBranchDashboardComponent
 
       upiId: fund.vpa || fund.upiId || null,
 
-      holderName:
-        fund.bankAccountHolderName ||
-        fund.bankHolderName ||
-        fund.holderName ||
-        fund.accountHolderName ||
-        fund.name ||
-        null,
+      holderName: fund.bankAccountHolderName || null,
 
       ifscCode:
         fund.ifscCode || fund.ifsc || (fund.raw && fund.raw.ifsc) || null,
@@ -2093,122 +2074,139 @@ export class HeadBranchDashboardComponent
 
   private processIncomingEvent(data: any) {
     if (!data) return;
+    console.log(data);
 
-    this.latestDynamicPayin = structuredClone(data?.DYNAMIC_PAYIN_TIME || {});
+    // =========================
+    // Preserve old dynamic config if websocket sends partial data
+    // =========================
+    this.latestDynamicPayin = structuredClone(
+      data?.DYNAMIC_PAYIN_TIME || this.latestDynamicPayin || {},
+    );
 
-    this.latestDynamicPayout = structuredClone(data?.DYNAMIC_PAYOUT_TIME || {});
+    this.latestDynamicPayout = structuredClone(
+      data?.DYNAMIC_PAYOUT_TIME || this.latestDynamicPayout || {},
+    );
 
     const dynamicPayin = this.latestDynamicPayin;
     const dynamicPayout = this.latestDynamicPayout;
 
     const now = Date.now();
 
-    // =========================
+    // =====================================================
     // UPI
-    // =========================
-    this.pendingUpi = Array.isArray(data.PENDING_UPI)
-      ? data.PENDING_UPI.map((f: any) => {
-          const existing = this.pendingUpi.find(
-            (x: any) => x.id === f.id || x.fundId === f.id,
-          );
+    // =====================================================
+    if (Array.isArray(data.PENDING_UPI)) {
+      this.pendingUpi = data.PENDING_UPI.map((f: any) => {
+        const existing = this.pendingUpi.find(
+          (x: any) =>
+            x.id === f.id || x.fundId === f.id || x.fundId === f.fundId,
+        );
 
-          const tx = this.normalizeIncomingFund(
-            {
-              ...f,
+        const tx = this.normalizeIncomingFund(
+          {
+            ...existing,
+            ...f,
 
-              // ✅ preserve processing state
-              processing: existing?.processing ?? f.processing,
-            },
-            "upi",
-          );
+            // preserve local state
+            processing: existing?.processing ?? f?.processing ?? false,
+          },
+          "upi",
+        );
 
-          if (!tx) return null;
+        if (!tx) return null;
 
-          const slab = this.getPayinSlabInfo(tx, dynamicPayin, now);
+        const slab = this.getPayinSlabInfo(tx, dynamicPayin, now);
 
-          return {
-            ...tx,
-            slabPercentage: slab?.percentage ?? 100,
+        return {
+          ...tx,
+          slabPercentage: slab?.percentage ?? 100,
+          slabEligible: slab?.eligible ?? true,
+          timePassed: slab?.diffMinutes ?? 0,
+        };
+      }).filter(Boolean);
+    }
 
-            slabEligible: slab?.eligible ?? true,
-
-            timePassed: slab?.diffMinutes ?? 0,
-          };
-        }).filter(Boolean)
-      : [];
-
-    // =========================
+    // =====================================================
     // BANK
-    // =========================
-    this.pendingBank = Array.isArray(data.PENDING_BANK)
-      ? data.PENDING_BANK.map((f: any) => {
-          const existing = this.pendingBank.find(
-            (x: any) => x.id === f.id || x.fundId === f.id,
-          );
+    // =====================================================
+    if (Array.isArray(data.PENDING_BANK)) {
+      this.pendingBank = data.PENDING_BANK.map((f: any) => {
+        const existing = this.pendingBank.find(
+          (x: any) =>
+            x.id === f.id || x.fundId === f.id || x.fundId === f.fundId,
+        );
 
-          const tx = this.normalizeIncomingFund(
-            {
-              ...f,
+        const tx = this.normalizeIncomingFund(
+          {
+            ...existing,
+            ...f,
 
-              processing: existing?.processing ?? f.processing,
-            },
-            "bank",
-          );
+            processing: existing?.processing ?? f?.processing ?? false,
+          },
+          "bank",
+        );
 
-          if (!tx) return null;
+        if (!tx) return null;
 
-          const slab = this.getPayinSlabInfo(tx, dynamicPayin, now);
+        const slab = this.getPayinSlabInfo(tx, dynamicPayin, now);
 
-          return {
-            ...tx,
-            slabPercentage: slab?.percentage ?? 100,
+        return {
+          ...tx,
+          slabPercentage: slab?.percentage ?? 100,
+          slabEligible: slab?.eligible ?? true,
+          timePassed: slab?.diffMinutes ?? 0,
+        };
+      }).filter(Boolean);
+    }
 
-            slabEligible: slab?.eligible ?? true,
-
-            timePassed: slab?.diffMinutes ?? 0,
-          };
-        }).filter(Boolean)
-      : [];
-
-    // =========================
+    // =====================================================
     // PAYOUT
-    // =========================
-    this.pendingpayouts = Array.isArray(data.PENDING_PAYOUT)
-      ? data.PENDING_PAYOUT.map((f: any) => {
-          const existing = this.pendingpayouts.find(
-            (x: any) => x.id === f.id || x.fundId === f.id,
-          );
+    // =====================================================
+    if (Array.isArray(data.PENDING_PAYOUT)) {
+      this.pendingpayouts = data.PENDING_PAYOUT.map((f: any) => {
+        const existing = this.pendingpayouts.find(
+          (x: any) =>
+            x.id === f.id || x.fundId === f.id || x.fundId === f.fundId,
+        );
 
-          const tx = this.normalizeIncomingFund(
-            {
-              ...f,
+        const tx = this.normalizeIncomingFund(
+          {
+            ...existing,
+            ...f,
 
-              processing: existing?.processing ?? f.processing,
-            },
-            "payout",
-          );
+            processing: existing?.processing ?? f?.processing ?? false,
+          },
+          "payout",
+        );
 
-          if (!tx) return null;
+        if (!tx) return null;
 
-          const slab = this.getPayoutSlabInfo(tx, dynamicPayout, now);
+        const slab = this.getPayoutSlabInfo(tx, dynamicPayout, now);
 
-          return {
-            ...tx,
-            slabPercentage: slab?.percentage ?? 0,
+        return {
+          ...tx,
+          slabPercentage: slab?.percentage ?? 0,
+          slabEligible: slab?.eligible ?? false,
+          timePassed: slab?.diffMinutes ?? 0,
+        };
+      }).filter(Boolean);
+    }
 
-            slabEligible: slab?.eligible ?? false,
-
-            timePassed: slab?.diffMinutes ?? 0,
-          };
-        }).filter(Boolean)
-      : [];
+    // =====================================================
+    // Force new references for Angular UI refresh
+    // =====================================================
+    this.pendingUpi = [...this.pendingUpi];
+    this.pendingBank = [...this.pendingBank];
+    this.pendingpayouts = [...this.pendingpayouts];
 
     this.computeStatsFromData();
     this.updateChartsFromData();
     this.clampPages();
 
-    // ✅ IMPORTANT
     this.ensureProcessingTimerState();
+
+    // Optional if using ChangeDetectionStrategy.OnPush
+    // this.cdr.detectChanges();
   }
 
   // Ensure accepted payouts amount is present by calling the API when SSE doesn't provide it
@@ -2404,7 +2402,7 @@ export class HeadBranchDashboardComponent
     if ((tx.fundtype || "").toUpperCase() === "UPI") {
       return tx.upiId || tx.vpa || "—";
     }
-    return tx.accountNo || tx.holderName || "—";
+    return tx.accountNo || tx.bankAccountHolderName || "—";
   }
 
   getPayinSlabInfo(transaction: any, dynamicConfig: any, now: number) {

@@ -1,4 +1,3 @@
-
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
@@ -96,6 +95,10 @@ export class BanksComponent implements OnInit, OnDestroy {
 
   // UI toggle for amount filter section
   showAmountFilter = false;
+
+  //bank details
+  selectedBankAccount: BankAccount | null = null;
+  showBankDetailsModal = false;
 
   // ---------- PAGINATION ----------
   currentPage = 1;
@@ -295,14 +298,6 @@ export class BanksComponent implements OnInit, OnDestroy {
             } else if (typeof r.active === "boolean") {
               status = r.active ? "active" : "inactive";
             }
-
-            // if (typeof r.status === "string" && r.status.trim() !== "") {
-            //   status = r.status.toLowerCase() as StatusString;
-            // } else if (typeof r.active === "boolean") {
-            //   status = r.active ? "active" : "inactive";
-            // } else if (typeof r.status === "boolean") {
-            //   status = r.status ? "active" : "inactive";
-            // }
 
             let accountType = r.accountType ?? "";
             if (accountType.toLowerCase() === "savings") {
@@ -1068,15 +1063,16 @@ export class BanksComponent implements OnInit, OnDestroy {
 
   toggleBankStatus(bankId: string) {
     this.bankService.toogleBankDeleted(bankId).subscribe({
-      next: (res) => {
-        // Success: refresh the list to reflect the updated status
+      next: (res: any) => {
+        this.snack.show(res.message, true);
+
         this.fetchBankAccounts();
-        // Optional: show success message
-        // this.showUpdateSuccess('Bank status toggled successfully!');
       },
       error: (err) => {
-        // Optional: show error message to user
-        // alert('Failed to toggle status. Please try again.');
+        this.snack.show(
+          err.error?.message || "failed to delete the bank",
+          false,
+        );
       },
     });
   }
@@ -1657,11 +1653,11 @@ export class BanksComponent implements OnInit, OnDestroy {
     if (!account?.id) return;
 
     if (this.role === "HEAD") {
-      this.router.navigate(["/head/payments-methods/upi"], {
+      this.router.navigate(["/head/upi"], {
         queryParams: { bankId: account.id },
       });
     } else if (this.role === "BRANCH") {
-      this.router.navigate(["/branch/payments-methods/upi"], {
+      this.router.navigate(["/branch/upi"], {
         queryParams: { bankId: account.id },
       });
     }
@@ -1958,18 +1954,6 @@ export class BanksComponent implements OnInit, OnDestroy {
   onToggleStatus(account: any, event: any) {
     const newStatus = event.target.checked; // true / false
     const bankID = account.id;
-    const payload = {
-      id: account.id,
-      portal: account.portalId || account.portal,
-      entityId: this.currentRoleId,
-      entityType: this.role,
-      accountNo: account.accountNo,
-      accountHolderName: account.accountHolderName,
-      ifsc: account.ifsc,
-      limitAmount: account.limitAmount,
-      accountType: account.accountType,
-      status: newStatus,
-    };
 
     this.bankService.toggleIsBank(bankID).subscribe({
       next: (res) => {
@@ -1984,5 +1968,17 @@ export class BanksComponent implements OnInit, OnDestroy {
         this.snack.show("Failed to update status", false);
       },
     });
+  }
+
+  // parent.component.ts
+
+  openBankDetails(account: BankAccount): void {
+    this.selectedBankAccount = account;
+    this.showBankDetailsModal = true;
+  }
+
+  closeBankDetails(): void {
+    this.showBankDetailsModal = false;
+    this.selectedBankAccount = null;
   }
 }

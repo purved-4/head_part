@@ -323,17 +323,12 @@
                       >
                         {{ transaction.fundDisplayId }}
                       </p>
-                      <span>{{ transaction.currency }}</span>
 
                       <!-- USER -->
                       <p
                         class="text-sm text-[var(--color-font)]/80 mt-3 font-medium truncate"
                       >
-                        {{
-                          transaction.bankAccountHolderName ||
-                            transaction.accountHolderName ||
-                            "Unknown"
-                        }}
+                        {{ transaction.holderName || "Unknown" }}
                       </p>
 
                       <!-- UPI / ACCOUNT -->
@@ -354,10 +349,15 @@
                   <div class="text-right flex-shrink-0">
                     <!-- AMOUNT -->
                     <div
-                      class="flex items-center justify-end gap-1 text-[26px] font-bold text-[var(--color-font)] leading-none"
+                      class="flex items-baseline justify-end gap-2 text-[26px] font-bold text-[var(--color-font)] leading-none"
                     >
-                      <span class="text-lg">₹</span>
-                      <span>{{ transaction.amount }}</span>
+                      <span class="text-[18px] opacity-70 uppercase">
+                        {{ transaction.parentCurrency }}
+                      </span>
+
+                      <span class="text-[26px] tabular-nums">
+                        {{ transaction.amount }}
+                      </span>
                     </div>
 
                     <!-- UTR -->
@@ -371,8 +371,12 @@
                     <p class="text-xs text-[var(--color-muted)] mt-1">
                       {{ transaction.date | date: "hh:mm a" }}
                     </p>
-                    <span class="text-xs">₹</span>
-                    <span>{{ transaction.currencyWiseAmount }}</span>
+
+                    <span
+                      >{{ transaction.currency }}-{{
+                        transaction.currencyWiseAmount
+                      }}</span
+                    >
                   </div>
                 </div>
 
@@ -576,11 +580,6 @@
                       </p>
 
                       <!-- PORTAL -->
-                      <p
-                        class="text-sm text-[var(--color-muted)] mt-3 truncate"
-                      >
-                        {{ transaction.portal }} - {{ transaction.currency }}
-                      </p>
                     </div>
                   </div>
 
@@ -590,7 +589,10 @@
                     <div
                       class="flex items-center justify-end gap-1 text-[28px] font-bold text-[var(--color-font)] leading-none"
                     >
-                      <span class="text-lg">₹</span>
+                      <span class="text-[18px] opacity-70 uppercase">
+                        {{ transaction.parentCurrency }}
+                      </span>
+
                       <span>{{ transaction.amount }}</span>
                     </div>
 
@@ -598,8 +600,12 @@
                     <p class="text-xs text-[var(--color-muted)] mt-2">
                       {{ transaction.date | date: "hh:mm a" }}
                     </p>
-                    <span class="text-xs">₹</span>
-                    <span>{{ transaction.currencyWiseAmount }}</span>
+
+                    <span>
+                      {{ transaction.currency }}-{{
+                        transaction.currencyWiseAmount
+                      }}</span
+                    >
                   </div>
                 </div>
 
@@ -607,18 +613,30 @@
                 <div class="flex items-center gap-2 flex-wrap mt-5">
                   <!-- PROCESS TIMER -->
                   <button
-                    [disabled]="transaction.processing"
+                    [disabled]="
+                      transaction.processing &&
+                      getRemainingTimeLabel(transaction) !== 'Process'
+                    "
                     (click)="
                       onProcessingClick(transaction); $event.stopPropagation()
                     "
                     [ngClass]="{
-                      'bg-orange-100 text-orange-600': transaction.processing,
-                      'bg-yellow-100 text-yellow-700': !transaction.processing,
+                      'bg-orange-100 text-orange-600':
+                        transaction.processing &&
+                        getRemainingTimeLabel(transaction) !== 'Process',
+
+                      'bg-yellow-100 text-yellow-700':
+                        !transaction.processing ||
+                        getRemainingTimeLabel(transaction) === 'Process',
                     }"
                     class="px-4 py-1.5 rounded-xl text-sm font-bold transition"
                   >
                     <ng-container
-                      *ngIf="transaction.processing; else processBtn"
+                      *ngIf="
+                        transaction.processing &&
+                          getRemainingTimeLabel(transaction) !== 'Process';
+                        else processBtn
+                      "
                     >
                       {{ getRemainingTimeLabel(transaction) }}
                     </ng-container>
@@ -847,11 +865,7 @@
                     <p
                       class="text-sm text-[var(--color-font)]/80 mt-3 truncate font-medium"
                     >
-                      {{
-                        transaction.holderName ||
-                          transaction.accountHolderName ||
-                          getTxKind(transaction)
-                      }}
+                      {{ transaction.holderName || getTxKind(transaction) }}
                     </p>
 
                     <!-- UPI / ACCOUNT -->
@@ -869,16 +883,17 @@
                   <div
                     class="flex items-center justify-end gap-1 text-[26px] font-bold leading-none"
                     [ngClass]="{
-                      'text-[var(--color-primary)]':
+                      'text-[var(--color-font)]':
                         transaction.mode === 'upi' ||
                         (transaction.mode === 'bank' &&
                           transaction.type === 'payin'),
 
-                      'text-red-500': transaction.type === 'payout',
+                      'text-red-black': transaction.type === 'payout',
                     }"
                   >
-                    <span class="text-lg">₹</span>
-
+                    <span class="text-[18px] text-[var(--color-font)]">
+                      {{ transaction.parentCurrency }}-</span
+                    >
                     <span>
                       {{
                         transaction.type === "payout"
@@ -892,8 +907,12 @@
                   <p class="text-xs text-[var(--color-muted)] mt-2">
                     {{ transaction.date | date: "hh:mm a" }}
                   </p>
-                  <span class="text-xs">₹</span>
-                  <span>{{ transaction.currencyWiseAmount }}</span>
+
+                  <span
+                    >{{ transaction.currency }}-{{
+                      transaction.currencyWiseAmount
+                    }}</span
+                  >
                 </div>
               </div>
 
@@ -1117,6 +1136,7 @@
               >Current Amount</span
             >
             <span class="font-bold text-[var(--color-font)]">
+              {{ selectedTransaction.parentCurrency }}-
               {{ selectedTransaction.amount }}
             </span>
           </div>

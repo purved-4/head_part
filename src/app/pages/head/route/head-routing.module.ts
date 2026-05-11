@@ -18,7 +18,7 @@ import { ManageBranchUserComponent } from "../branch/manage-branch-user/manage-b
 // import { RejectedFundsComponent } from "../../branch/rejected-funds/rejected-funds.component";
 import { HeadBranchCapacityComponent } from "../../../components/head-branch-capacity/head-branch-capacity.component";
 import { HeadNavDashboardLayoutComponent } from "../head-navlayout/head-nav-dashboard-layout/head-nav-dashboard-layout.component";
-import {ChatingComponent} from "../../../common/chating/chating.component";
+import { ChatingComponent } from "../../../common/chating/chating.component";
 import { RecycleUpiComponent } from "../../../common/recycle-upi/recycle-upi.component";
 import { RecycleBankComponent } from "../../../common/recycle-bank/recycle-bank.component";
 import { ChatResponsiveComponent } from "../../../common/chat-responsive/chat-responsive.component";
@@ -28,7 +28,7 @@ import { UpisComponent } from "../../../common/head_branch/upis/upis.component";
 import { BanksComponent } from "../../../common/head_branch/banks/banks.component";
 import { OverrideCurrencyRateComponent } from "../../../common/head_branch/override-currency-rate/override-currency-rate.component";
 import { HeadBranchDashboardComponent } from "../../../common/head-branch-dashboard/head-branch-dashboard.component";
- import { HbPayinReportComponent } from "../../../common/hb-payin-report/hb-payin-report.component";
+import { HbPayinReportComponent } from "../../../common/hb-payin-report/hb-payin-report.component";
 import { HbPayoutReportComponent } from "../../../common/hb-payout-report/hb-payout-report.component";
 
 const routes: Routes = [
@@ -36,27 +36,35 @@ const routes: Routes = [
     path: "",
     component: HeadNavDashboardLayoutComponent,
     children: [
-    
       {
         path: "",
         redirectTo: "dashboard",
         pathMatch: "full",
       },
-     
-       {
+
+      {
         path: "dashboard",
         component: HeadBranchDashboardComponent,
       },
 
-      {
-        path: "payments-methods",
-        component: PaymentsMethodsComponent,
-        children: [
-          // { path: "", pathMatch: "full" },
-          { path: "upi", component: UpisComponent },
-          { path: "bank", component: BanksComponent },
-        ],
-      },
+      // {
+      //   path: "payments-methods",
+      //   children: [
+      //     {
+      //       path: "",
+      //       redirectTo: "bank",
+      //       pathMatch: "full",
+      //     },
+      //     {
+      //       path: "upi",
+      //       component: UpisComponent,
+      //     },
+      //     {
+      //       path: "bank",
+      //       component: BanksComponent,
+      //     },
+      //   ],
+      // },
 
       {
         path: "override-currency-management",
@@ -64,12 +72,17 @@ const routes: Routes = [
       },
 
       {
+        path: "bank",
+        component: BanksComponent,
+      },
+      {
         path: "upi",
         component: UpisComponent,
       },
       {
-        path: "bank",
-        component: BanksComponent,
+        path: "",
+        redirectTo: "bank",
+        pathMatch: "full",
       },
       {
         path: "recycle-upi",
@@ -106,8 +119,7 @@ const routes: Routes = [
 
       {
         path: "chat",
-        component:ChatResponsiveComponent
-
+        component: ChatResponsiveComponent,
       },
 
       {

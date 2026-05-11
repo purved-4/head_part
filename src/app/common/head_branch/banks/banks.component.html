@@ -246,7 +246,7 @@
           class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
         />
       </div>
-
+      <app-payments-methods></app-payments-methods>
       <!-- Status Filter -->
       <div class="space-y-1">
         <label class="block text-xs font-medium text-[var(--color-font)]">
@@ -408,6 +408,11 @@
               class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
             >
               Actions
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+            >
+              Bank Details
             </th>
           </tr>
         </thead>
@@ -828,6 +833,15 @@
                   </div>
                 </div>
               </div>
+            </td>
+
+            <td class="px-4 py-3 whitespace-nowrap relative overflow-visible">
+              <button
+                (click)="openBankDetails(account)"
+                class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)]"
+              >
+                <span class="material-icons text-base mr-2">visibility</span>
+              </button>
             </td>
           </tr>
         </tbody>
@@ -1313,6 +1327,7 @@
           [formGroup]="addBankForm"
           (ngSubmit)="submitAddBankForm()"
           class="space-y-4"
+          appEnterKeyFocus
         >
           <!-- <div class="space-y-1">
             <label
@@ -1897,7 +1912,7 @@
 
       <!-- Modal Body -->
       <div class="p-4">
-        <form (ngSubmit)="submitUpdate()" class="space-y-4">
+        <form (ngSubmit)="submitUpdate()" appEnterKeyFocus class="space-y-4">
           <div>
             <label class="text-sm font-semibold text-[var(--color-font)] mb-1"
               >Account Number</label
@@ -2338,6 +2353,7 @@
         [formGroup]="addUpiForm"
         (ngSubmit)="submitAddUpi()"
         class="space-y-4"
+        appEnterKeyFocus
       >
         <!-- Portal Selection – SEARCH BASED -->
         <!-- <div class="space-y-1">
@@ -2821,3 +2837,11 @@
     </div>
   </div>
 </div>
+<!-- parent.component.html -->
+
+<app-bank-details
+  *ngIf="showBankDetailsModal"
+  [bankData]="selectedBankAccount"
+  (close)="closeBankDetails()"
+>
+</app-bank-details>
