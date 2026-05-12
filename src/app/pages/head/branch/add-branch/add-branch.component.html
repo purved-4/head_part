@@ -16,44 +16,28 @@
         [routerLink]="'/head/branch/manage'"
         class="px-4 py-2 bg-[var(--color-primary-light)] text-white rounded-[var(--radius-lg)] text-sm font-medium hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-300 shadow-[var(--shadow-md)] hover:shadow-lg flex items-center gap-1.5 group"
       >
-        <svg
-          class="w-4 h-4 group-hover:translate-x-1 transition-transform"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+        <span
+          class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M9 5l7 7-7 7"
-          ></path>
-        </svg>
+          arrow_forward
+        </span>
         View All Branches
       </button>
     </div>
 
     <form [formGroup]="chiefForm" (ngSubmit)="onSubmit()">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="lg:col-span-2 space-y-4">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:items-start">
+        <div class="lg:col-span-2 space-y-4" style="height: fit-content">
           <div
             class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-5 border border-[var(--color-border)]"
           >
             <div class="flex items-center gap-2 mb-4">
               <div class="p-2 rounded-[var(--radius-md)] bg-[var(--color-bg)]">
-                <svg
-                  class="w-5 h-5 text-[var(--color-primary)]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <span
+                  class="material-symbols-outlined text-[var(--color-primary)]"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  ></path>
-                </svg>
+                  person
+                </span>
               </div>
               <h2 class="text-lg font-bold text-[var(--color-font)]">
                 Branch Information
@@ -194,354 +178,6 @@
             </div>
           </div>
 
-          <!-- <div
-            class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-4 border border-[var(--color-border)]"
-          >
-            <div class="flex gap-3">
-              <button
-                type="button"
-                (click)="clearForm()"
-                [disabled]="loading"
-                class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-font)] font-medium rounded-[var(--radius-md)] text-sm hover:bg-[var(--color-hover)] hover:border-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-1.5"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  ></path>
-                </svg>
-                Clear
-              </button>
-
-              <button
-                type="submit"
-                [disabled]="loading"
-                class="flex-1 px-4 py-2.5 bg-[var(--color-primary)] text-white font-medium rounded-[var(--radius-md)] text-sm hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-[var(--shadow-md)] hover:shadow-lg flex items-center justify-center gap-1.5"
-              >
-                <span *ngIf="!loading" class="flex items-center gap-1.5">
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 4v16m8-8H4"
-                    ></path>
-                  </svg>
-                  Create
-                </span>
-
-                <span *ngIf="loading" class="flex items-center gap-1.5">
-                  <svg
-                    class="w-4 h-4 animate-spin"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    ></path>
-                  </svg>
-                  Creating...
-                </span>
-              </button>
-            </div>
-          </div> -->
-        </div>
-
-        <div class="lg:col-span-1">
-          <div
-            class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-4 border border-[var(--color-border)] sticky top-4 h-[calc(100vh-120px)] flex flex-col"
-          >
-            <!-- <div class="mb-2">
-              <h2 class="text-base font-semibold text-[var(--color-font)]">
-                Compart Assignment
-              </h2>
-
-              <div class="flex items-center gap-2 mt-0.5 text-xs">
-                <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-white font-medium">
-                  {{ getSelectedComparts().length }} Selected
-                </span>
-
-                <span class="text-[var(--color-muted)]">
-                  of {{ comparts.length }} total
-                </span>
-              </div>
-            </div> -->
-            <div class="mb-2">
-              <!-- Header row -->
-              <div class="flex items-center justify-between">
-                <!-- LEFT: Title (unchanged) -->
-                <h2 class="text-base font-semibold text-[var(--color-font)]">
-                  Compart Assignment
-                </h2>
-
-                <!-- RIGHT: ADD THESE BUTTONS -->
-                <!-- <div class="flex items-center gap-2">
-                  <button
-                    type="button"
-                    (click)="openCompartPercentModal()"
-                    class="flex items-center gap-1 rounded-lg border border-[var(--color-primary)] px-2 py-1 text-xs font-medium text-[var(--color-primary)] transition hover:bg-[var(--color-primary)] hover:text-white"
-                  >
-                    <span class="material-symbols-outlined text-sm">
-                      captive_portal
-                    </span>
-                    cp %
-                  </button>
-                </div> -->
-              </div>
-
-              <!-- KEEP THIS EXACTLY SAME (no change) -->
-              <div class="flex items-center gap-2 mt-0.5 text-xs">
-                <span
-                  class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-white font-medium"
-                >
-                  {{ getSelectedComparts().length }} Selected
-                </span>
-
-                <span class="text-[var(--color-muted)]">
-                  of {{ comparts.length }} total
-                </span>
-              </div>
-            </div>
-
-            <div
-              class="flex bg-[var(--color-bg)] rounded-lg p-0.5 mb-2 text-xs"
-            >
-              <button
-                type="button"
-                (click)="setActiveTab('available')"
-                class="flex-1 py-1.5 rounded-md transition"
-                [class.bg-[var(--color-surface)]]="activeTab === 'available'"
-                [class.text-[var(--color-primary)]]="activeTab === 'available'"
-                [class.font-semibold]="activeTab === 'available'"
-              >
-                Available
-              </button>
-
-              <button
-                type="button"
-                (click)="setActiveTab('selected')"
-                class="flex-1 py-1.5 rounded-md transition"
-                [class.bg-[var(--color-surface)]]="activeTab === 'selected'"
-                [class.text-[var(--color-primary)]]="activeTab === 'selected'"
-                [class.font-semibold]="activeTab === 'selected'"
-              >
-                Selected
-              </button>
-            </div>
-
-            <div class="mb-2">
-              <div class="relative">
-                <input
-                  type="text"
-                  [value]="
-                    activeTab === 'available'
-                      ? availableSearchTerm
-                      : selectedSearchTerm
-                  "
-                  (input)="onSearch($event)"
-                  placeholder="Search comparts..."
-                  class="w-full border border-[var(--color-border)] rounded-md px-2.5 py-1.5 text-xs bg-[var(--color-bg)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-                />
-              </div>
-            </div>
-
-            <div
-              class="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar"
-            >
-              <div
-                *ngIf="activeTab === 'available'"
-                class="flex flex-col gap-1.5"
-              >
-                <div
-                  *ngIf="getAvailableComparts().length === 0"
-                  class="text-center text-xs text-[var(--color-muted)] py-4"
-                >
-                  No available comparts
-                </div>
-
-                <div
-                  *ngFor="
-                    let compart of getAvailableComparts();
-                    trackBy: trackByCompartId
-                  "
-                  class="group flex items-center justify-between border border-[var(--color-border)] rounded-md px-2 py-1.5 text-xs hover:border-[var(--color-primary)] transition"
-                >
-                  <div class="min-w-0">
-                    <div class="truncate font-medium max-w-[120px]">
-                      {{ compart.compartUsername }}
-                    </div>
-
-                    <div
-                      *ngIf="compart.info"
-                      class="truncate text-[10px] text-[var(--color-muted)] max-w-[120px]"
-                    >
-                      {{ compart.info }}
-                    </div>
-
-                    <!-- <div
-                      *ngIf="compart.comPartTypes?.length"
-                      class="flex flex-wrap gap-1 mt-1"
-                    >
-                      <span
-                        *ngFor="let t of compart.comPartTypes"
-                        class="px-1.5 py-0.5 rounded-full text-[10px]"
-                        [ngClass]="
-                          t.enabled
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-500'
-                        "
-                      >
-                        {{ t.comPartType }}
-                      </span>
-                    </div> -->
-                  </div>
-
-                  <button
-                    type="button"
-                    (click)="selectCompart(compart.compartId)"
-                    class="opacity-0 group-hover:opacity-100 text-[var(--color-primary)] text-sm transition w-5 h-5 flex items-center justify-center hover:bg-[var(--color-primary)]/10 rounded"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              <div *ngIf="activeTab === 'selected'">
-                <div
-                  *ngIf="getSelectedComparts().length === 0"
-                  class="text-center text-xs text-[var(--color-muted)] py-4"
-                >
-                  No comparts selected
-                </div>
-
-                <div
-                  *ngFor="
-                    let compart of getSelectedComparts();
-                    trackBy: trackByCompartId
-                  "
-                  class="border border-[var(--color-border)] rounded-lg p-2 bg-[var(--color-bg)]"
-                >
-                  <div class="flex items-center justify-between mb-1.5">
-                    <div class="flex items-center gap-1.5 min-w-0">
-                      <div
-                        class="w-5 h-5 rounded bg-[var(--color-primary)]/15 flex items-center justify-center text-[var(--color-primary)] text-xs"
-                      >
-                        🌐
-                      </div>
-
-                      <div class="min-w-0">
-                        <div class="text-xs font-medium truncate max-w-[100px]">
-                          {{ compart.compartUsername }}
-                        </div>
-
-                        <div
-                          *ngIf="compart.info"
-                          class="text-[10px] text-[var(--color-muted)] truncate max-w-[100px]"
-                        >
-                          {{ compart.info }}
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      (click)="removeCompart(compart.compartId)"
-                      class="text-[var(--color-muted)] hover:text-red-500 text-sm w-5 h-5 flex items-center justify-center"
-                    >
-                      ×
-                    </button>
-                  </div>
-<!-- 
-                  <div
-                    *ngIf="compart.comPartTypes?.length"
-                    class="flex flex-wrap gap-1 mb-2"
-                  >
-                    <span
-                      *ngFor="let t of compart.comPartTypes"
-                      class="px-1.5 py-0.5 rounded-full text-[10px]"
-                      [ngClass]="
-                        t.enabled
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-500'
-                      "
-                    >
-                      {{ t.comPartType }}
-                    </span>
-                  </div> -->
-
-                  <div class="grid grid-cols-3 gap-1 text-xs">
-                    <div>
-                      <label
-                        class="block mb-0.5 text-[var(--color-muted)] text-[10px]"
-                      >
-                        Payin
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                 [placeholder]="' ' + (compart.payinPercentage ?? 0) + '%'"
-
-                        [formControlName]="'payin_' + compart.compartId"
-                        class="w-full border border-[var(--color-border)] rounded px-1.5 py-1 text-xs bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-                      />
-                    </div>
-
-                    <div>
-                      <label
-                        class="block mb-0.5 text-[var(--color-muted)] text-[10px]"
-                      >
-                        Payout
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        [placeholder]="' ' + (compart.payoutPercentage ?? 0) + '%'"
-                        [formControlName]="'payout_' + compart.compartId"
-                        class="w-full border border-[var(--color-border)] rounded px-1.5 py-1 text-xs bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-                      />
-                    </div>
-
-                    <div>
-                      <label
-                        class="block mb-0.5 text-[var(--color-muted)] text-[10px]"
-                      >
-                        FTT
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        [placeholder]="' ' + (compart.fttPercentage ?? 0) + '%'"
-                        [formControlName]="'first_payin_' + compart.compartId"
-                        class="w-full border border-[var(--color-border)] rounded px-1.5 py-1 text-xs bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="lg:col-span-2 lg:col-start-1">
           <div
             class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-4 border border-[var(--color-border)]"
           >
@@ -552,19 +188,9 @@
                 [disabled]="loading"
                 class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-font)] font-medium rounded-[var(--radius-md)] text-sm hover:bg-[var(--color-hover)] hover:border-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-1.5"
               >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  ></path>
-                </svg>
+                <span class="material-symbols-outlined text-base">
+                  delete
+                </span>
                 Clear All
               </button>
 
@@ -576,38 +202,275 @@
                 class="flex-1 px-4 py-2.5 bg-[var(--color-primary)] text-white font-medium rounded-[var(--radius-md)] text-sm hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-[var(--shadow-md)] hover:shadow-lg flex items-center justify-center gap-1.5"
               >
                 <span *ngIf="!loading" class="flex items-center gap-1.5">
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 4v16m8-8H4"
-                    ></path>
-                  </svg>
+                  <span class="material-symbols-outlined text-base"> add </span>
                   Create
                 </span>
                 <span *ngIf="loading" class="flex items-center gap-1.5">
-                  <svg
-                    class="w-4 h-4 animate-spin"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                  <span
+                    class="material-symbols-outlined text-base animate-spin"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    ></path>
-                  </svg>
+                    sync
+                  </span>
                   Creating...
                 </span>
               </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-1" style="height: 100%">
+          <div
+            class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-4 border border-[var(--color-border)] sticky top-4 flex flex-col h-full"
+            style="max-height: calc(100vh - 120px); overflow: hidden"
+          >
+            <div class="mb-3">
+              <h2 class="text-base font-semibold text-[var(--color-font)] mb-1">
+                Compart Assignment
+              </h2>
+              <div class="flex items-center gap-2 text-xs">
+                <span
+                  class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-white font-medium"
+                >
+                  {{ getSelectedComparts().length }} Selected
+                </span>
+                <span class="text-[var(--color-muted)]">
+                  of {{ comparts.length }} total
+                </span>
+              </div>
+            </div>
+
+            <div
+              class="flex bg-[var(--color-bg)] rounded-lg p-0.5 mb-3 text-xs"
+            >
+              <button
+                type="button"
+                (click)="setActiveTab('available')"
+                class="flex-1 py-1.5 rounded-md transition-all"
+                [class.bg-[var(--color-surface)]]="activeTab === 'available'"
+                [class.text-[var(--color-primary)]]="activeTab === 'available'"
+                [class.font-semibold]="activeTab === 'available'"
+                [class.shadow-sm]="activeTab === 'available'"
+              >
+                Available
+              </button>
+              <button
+                type="button"
+                (click)="setActiveTab('selected')"
+                class="flex-1 py-1.5 rounded-md transition-all"
+                [class.bg-[var(--color-surface)]]="activeTab === 'selected'"
+                [class.text-[var(--color-primary)]]="activeTab === 'selected'"
+                [class.font-semibold]="activeTab === 'selected'"
+                [class.shadow-sm]="activeTab === 'selected'"
+              >
+                Selected
+              </button>
+            </div>
+
+            <div class="mb-3">
+              <div class="relative">
+                <span
+                  class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-[var(--color-muted)] text-sm"
+                >
+                  search
+                </span>
+                <input
+                  type="text"
+                  [value]="
+                    activeTab === 'available'
+                      ? availableSearchTerm
+                      : selectedSearchTerm
+                  "
+                  (input)="onSearch($event)"
+                  placeholder="Search comparts..."
+                  class="w-full border border-[var(--color-border)] rounded-md pl-8 pr-2.5 py-1.5 text-xs bg-[var(--color-bg)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] transition-all"
+                />
+              </div>
+            </div>
+
+            <div
+              class="flex-1 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar"
+              style="min-height: 0"
+            >
+              <div
+                *ngIf="activeTab === 'available'"
+                class="flex flex-col gap-1.5"
+              >
+                <div
+                  *ngIf="getAvailableComparts().length === 0"
+                  class="text-center text-xs text-[var(--color-muted)] py-8"
+                >
+                  <span
+                    class="material-symbols-outlined text-2xl mb-2 block opacity-50"
+                  >
+                    inventory_2
+                  </span>
+                  No available comparts
+                </div>
+
+                <div
+                  *ngFor="
+                    let compart of getAvailableComparts();
+                    trackBy: trackByCompartId
+                  "
+                  class="group flex items-center justify-between border border-[var(--color-border)] rounded-md px-3 py-2 text-xs hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all cursor-pointer"
+                >
+                  <div class="min-w-0 flex-1">
+                    <div class="truncate font-medium">
+                      {{ compart.compartUsername }}
+                    </div>
+                    <div
+                      *ngIf="compart.info"
+                      class="truncate text-[10px] text-[var(--color-muted)] mt-0.5"
+                    >
+                      {{ compart.info }}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    (click)="selectCompart(compart.compartId)"
+                    class="opacity-0 group-hover:opacity-100 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-full w-6 h-6 flex items-center justify-center transition-all ml-2 flex-shrink-0"
+                    title="Add compart"
+                  >
+                    <span class="material-symbols-outlined text-base">
+                      add
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div *ngIf="activeTab === 'selected'" class="flex flex-col gap-2">
+                <div
+                  *ngIf="getSelectedComparts().length === 0"
+                  class="text-center text-xs text-[var(--color-muted)] py-8"
+                >
+                  <span
+                    class="material-symbols-outlined text-2xl mb-2 block opacity-50"
+                  >
+                    deselect
+                  </span>
+                  No comparts selected
+                </div>
+
+                <div
+                  *ngFor="
+                    let compart of getSelectedComparts();
+                    trackBy: trackByCompartId
+                  "
+                  class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)] hover:border-[var(--color-primary)]/50 transition-all"
+                >
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2 min-w-0 flex-1">
+                      <div
+                        class="w-7 h-7 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center flex-shrink-0"
+                      >
+                        <span
+                          class="material-symbols-outlined text-[var(--color-primary)] text-sm"
+                        >
+                          language
+                        </span>
+                      </div>
+
+                      <div class="min-w-0">
+                        <div class="text-xs font-medium truncate">
+                          {{ compart.compartUsername }}
+                        </div>
+                        <div
+                          *ngIf="compart.info"
+                          class="text-[10px] text-[var(--color-muted)] truncate mt-0.5"
+                        >
+                          {{ compart.info }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      (click)="removeCompart(compart.compartId)"
+                      class="text-[var(--color-muted)] hover:text-red-500 hover:bg-red-50 rounded-full w-6 h-6 flex items-center justify-center transition-all ml-2 flex-shrink-0"
+                      title="Remove compart"
+                    >
+                      <span class="material-symbols-outlined text-base">
+                        close
+                      </span>
+                    </button>
+                  </div>
+
+                  <div class="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <label
+                        class="block mb-1 text-[var(--color-muted)] text-[10px] font-medium"
+                      >
+                        Payin
+                      </label>
+                      <div class="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          [placeholder]="
+                            ' ' + (compart.payinPercentage ?? 0) + '%'
+                          "
+                          [formControlName]="'payin_' + compart.compartId"
+                          class="w-full border border-[var(--color-border)] rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all"
+                        />
+                        <span
+                          class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-muted)]"
+                          >%</span
+                        >
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        class="block mb-1 text-[var(--color-muted)] text-[10px] font-medium"
+                      >
+                        Payout
+                      </label>
+                      <div class="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          [placeholder]="
+                            ' ' + (compart.payoutPercentage ?? 0) + '%'
+                          "
+                          [formControlName]="'payout_' + compart.compartId"
+                          class="w-full border border-[var(--color-border)] rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all"
+                        />
+                        <span
+                          class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-muted)]"
+                          >%</span
+                        >
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        class="block mb-1 text-[var(--color-muted)] text-[10px] font-medium"
+                      >
+                        FTT
+                      </label>
+                      <div class="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          [placeholder]="
+                            ' ' + (compart.fttPercentage ?? 0) + '%'
+                          "
+                          [formControlName]="'first_payin_' + compart.compartId"
+                          class="w-full border border-[var(--color-border)] rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all"
+                        />
+                        <span
+                          class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-muted)]"
+                          >%</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -623,11 +486,3 @@
   (closed)="closeModal()"
 >
 </app-website-percentage-model>
-
-<!-- <app-compart-percentage-modle
-  *ngIf="showCompartModal"
-  [entityId]="currentUserId"
-  [entityType]="role"
-  (closed)="closeCompartPercentModal()"
->
-</app-compart-percentage-modle> -->

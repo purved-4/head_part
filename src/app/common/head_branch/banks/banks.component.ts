@@ -45,6 +45,8 @@ interface BankAccount {
   currency?: string;
   min_tran_count?: number;
   fttAcceptance?: boolean;
+  upiCount?: any;
+  ranges?: any;
   // max_tran_count?: number;
   min_total_tran_amount?: number;
   // max_total_tran_amount?: number;
@@ -141,6 +143,7 @@ export class BanksComponent implements OnInit, OnDestroy {
     maxAmount: "",
     bankName: "",
     fttAcceptance: true,
+
     min_tran_count: null,
     // max_tran_count: null,
     min_total_tran_amount: null,
@@ -367,13 +370,15 @@ export class BanksComponent implements OnInit, OnDestroy {
               createdAt: r.createdAt ? new Date(r.createdAt) : null,
               limitAmount: r.limitAmount ?? "",
               currency: r.portalCurrency || "",
+              ranges: r.ranges ?? [],
               limitTime: r.limitTime ?? null,
               fttAcceptance: r.fttAcceptance ?? true,
               min_tran_count: r.minTranCount ?? null,
               // max_tran_count: r.maxTranCount ?? null,
               min_total_tran_amount: r.minTotalTranAmount ?? null,
+              upiCount: r.upiCount ?? null,
               // max_total_tran_amount: r.maxTotalTranAmount ?? null,
-              // minAmount: r.minAmount ?? "",
+              // minAmount: r.minAmount ?? "",:
               // maxAmount: r.maxAmount ?? "",
               isBankActive,
             } as BankAccount;
@@ -1987,19 +1992,25 @@ export class BanksComponent implements OnInit, OnDestroy {
   }
 
   onToggleStatus(account: any, event: any) {
-    const newStatus = event.target.checked; // true / false
+    const newStatus = event.target.checked;
     const bankID = account.id;
 
     this.bankService.toggleIsBank(bankID).subscribe({
       next: (res) => {
-        // update UI instantly
+        // update instantly
+        account.isBankActive = newStatus;
+
         account.status = newStatus ? "active" : "inactive";
 
         this.snack.show(res.message || "Status updated", true);
       },
+
       error: () => {
-        // revert toggle if failed
+        // revert toggle
         event.target.checked = !newStatus;
+
+        account.isBankActive = !newStatus;
+
         this.snack.show("Failed to update status", false);
       },
     });

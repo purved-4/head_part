@@ -613,10 +613,6 @@
                 <div class="flex items-center gap-2 flex-wrap mt-5">
                   <!-- PROCESS TIMER -->
                   <button
-                    [disabled]="
-                      transaction.processing &&
-                      getRemainingTimeLabel(transaction) !== 'Process'
-                    "
                     (click)="
                       onProcessingClick(transaction); $event.stopPropagation()
                     "
