@@ -506,7 +506,54 @@ export class FundsService {
         catchError((error) => throwError(error)),
       );
   }
+  //NEW
+  getPayinFundWithCpIdAndEntityId(
+    entityId: any,
+    compartId: any,
+    status: any,
+    page: number = 0,
+    pageSize: number = 10,
+    category?: any,
+    fromDate?: any,
+    toDate?: any,
+    fundType?: any,
+    role?: any,
+  ): Observable<any> {
+    if (!compartId) {
+      throw new Error("portalId is required");
+    }
 
+    let params = new HttpParams()
+      .set("page", page.toString())
+      .set("size", pageSize.toString())
+      .set("status", status);
+
+    if (category != null) {
+      params = params.set("category", category.toString());
+    }
+
+    if (fromDate) {
+      params = params.set("fromDate", DateTimeUtil.toUtcISOString(fromDate));
+    }
+
+    if (toDate) {
+      params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
+    }
+
+    if (fundType) {
+      params = params.set("fundType", fundType);
+    }
+
+    return this.http
+      .get<any>(
+        `${baseUrl}/funds/getPayInFundWithEntityIdEntityTypeAndComPartId/${compartId}/${entityId}/${role}`,
+        { params },
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
   getAllPayoutFundWithEntityAndPortalId(
     entityId: any,
     portalId: any,
@@ -537,6 +584,45 @@ export class FundsService {
     return this.http
       .get<any>(
         `${baseUrl}/funds/getPayoutFundWithPortalIdAndEntityId/${portalId}/${entityId}`,
+        { params },
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+  getAllPayoutFundWithEntityAndCpId(
+    entityId: any,
+    portalId: any,
+    status: any,
+    page: number = 0,
+    pageSize: number = 10,
+    category?: any,
+    fromDate?: any,
+    toDate?: any,
+    role?: any,
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set("page", page.toString())
+      .set("size", pageSize.toString())
+      .set("status", status);
+
+    if (category !== null && category !== undefined) {
+      params = params.set("category", category.toString());
+    }
+
+    if (fromDate) {
+      params = params.set("fromDate", DateTimeUtil.toUtcISOString(fromDate));
+    }
+
+    if (toDate) {
+      params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
+    }
+
+    return this.http
+      .get<any>(
+        `${baseUrl}/funds/getPayoutFundWithComPartIdAndEntityId/${portalId}/${entityId}/${role}`,
         { params },
       )
       .pipe(

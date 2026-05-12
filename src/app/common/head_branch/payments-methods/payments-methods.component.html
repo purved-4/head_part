@@ -3,6 +3,7 @@
     <!-- Currency -->
     <div class="flex-1">
       <label
+        *ngIf="selectedMode !== 'upi'"
         class="block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-font)] mb-1"
       >
         Currency
@@ -24,6 +25,7 @@
     <!-- Mode -->
     <div class="flex-1">
       <label
+        *ngIf="selectedMode !== 'upi'"
         class="block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-font)] mb-1"
       >
         Mode

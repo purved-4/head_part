@@ -216,12 +216,6 @@ export class HeadBranchDashboardComponent
         this.processIncomingEvent(data);
       });
 
-    this.fundService
-      .broadcast(this.headId, this.role)
-      .subscribe((data: any) => {
-        this.processIncomingEvent(data);
-      });
-
     this.resetAllLists();
     // this.refreshAllFunds(this.headId);
 

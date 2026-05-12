@@ -2,12 +2,11 @@ import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { FundsService } from "../../pages/services/funds.service";
 import { UserStateService } from "../../store/user-state.service";
-import { HeadService } from "../../pages/services/head.service";
 import { MultimediaService } from "../../pages/services/multimedia.service";
 import { catchError, of, Subscription } from "rxjs";
 import { DateTimeUtil } from "../../utils/date-time.utils";
 import { SnackbarService } from "../snackbar/snackbar.service";
-import { BranchService } from "../../pages/services/branch.service";
+import { ComPartService } from "../../pages/services/com-part.service";
 
 @Component({
   selector: "app-hb-payout-report",
@@ -16,15 +15,10 @@ import { BranchService } from "../../pages/services/branch.service";
   styleUrl: "./hb-payout-report.component.css",
 })
 export class HbPayoutReportComponent implements OnInit, OnDestroy {
-  // Arrays for each type (server returns paginated data)
-
   approvedpayouts: any[] = [];
-
-  // Pagination metadata from server
 
   payoutTotalRecords = 0;
 
-  // route + user ids
   branchId: string | null = null;
   userId: string | null = null;
   role: string | null = "";
@@ -36,8 +30,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   // active view
   activeView: any;
   imageError = false;
-  // ========== FILTER PROPERTIES ==========
-  // UPI filters
 
   allRejectedPayouts: any[] = [];
   // Payout filters
@@ -54,7 +46,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   payoutApprovedPageSizes = [10, 20, 25, 50];
   portalOptions: { id: string; domain: string }[] = [];
   // ========== FILTER DROPDOWN STATE ==========
-  filterDropdownOpen: string | null = null; // 'upi' | 'bank' | 'payout' | null
+  filterDropdownOpen: string | null = null;
 
   // ========== CUSTOM PORTAL DROPDOWN STATE ==========
 
@@ -72,10 +64,9 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private fundService: FundsService,
     private userStateService: UserStateService,
-    private headServices: HeadService,
     private multimediaService: MultimediaService,
     private snackbar: SnackbarService,
-    private branchService: BranchService,
+    private compartService: ComPartService,
   ) {}
 
   ngOnInit(): void {
@@ -83,43 +74,36 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     this.userId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
 
-    // ✅ default status
+    //  default status
     this.selectedStatus = "ACCEPTED";
 
     this.setColorsByRole();
 
-    // ✅ load portals
-    this.loadAllPortals();
+    //  load portals
+    this.loadAllComparts();
 
     this.routeSub = this.route.paramMap.subscribe((params) => {
       const type = params.get("type") as "payout" | null;
 
-      // ✅ only payout view
+      //  only payout view
       this.activeView = type || "payout";
 
       if (!this.branchId) return;
 
-      // ✅ always call API
+      //  always call API
       this.fetchAllRejectedPayouts();
     });
   }
 
-  loadAllPortals(): void {
+  loadAllComparts(): void {
     if (!this.branchId || !this.role) return;
 
     let apiCall$;
 
-    // ✅ Decide API based on entity type
-    if (this.role === "BRANCH") {
-      apiCall$ = this.branchService.getPortalByBranchId(this.branchId);
-    } else if (this.role === "HEAD") {
-      apiCall$ = this.headServices.getAllHeadsWithPortalsById(this.branchId);
-    } else {
-      this.portalOptions = [];
-
-      this.payoutPortals = [];
-      return;
-    }
+    apiCall$ = this.compartService.getPercentageByEntityId(
+      this.branchId,
+      this.role,
+    );
 
     apiCall$
       .pipe(
@@ -141,17 +125,17 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
         const uniqueMap = new Map<string, any>();
 
         portalsData.forEach((item: any) => {
-          if (item?.portalId && item?.portalDomain) {
-            uniqueMap.set(item.portalId, {
-              id: item.portalId,
-              domain: item.portalDomain,
+          if (item?.compartId && item?.compartUsername) {
+            uniqueMap.set(item.compartId, {
+              id: item.compartId,
+              domain: item.compartUsername,
             });
           }
         });
 
         const portals = Array.from(uniqueMap.values());
 
-        // ✅ single source of truth
+        //  single source of truth
         this.portalOptions = portals;
 
         this.payoutPortals = portals;
@@ -161,86 +145,144 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     const date = new Date(dateStr);
 
     if (type === "start") {
-      // 00:00:00 IST
       date.setHours(0, 0, 0, 0);
     } else {
-      // 23:59:59 IST
       date.setHours(23, 59, 59, 999);
     }
 
     return date.toISOString(); // converts to UTC (your required format)
   }
 
+  // fetchAllRejectedPayouts(): void {
+  //   if (!this.branchId) return;
+
+  //   const pageSize = 10;
+  //   let page = 0;
+
+  //   const allData: any[] = [];
+
+  //   const fetchPage = () => {
+  //     const fromDate = this.payoutDateFrom
+  //       ? DateTimeUtil.toUtcISOString(
+  //           new Date(new Date(this.payoutDateFrom).setHours(0, 0, 0, 0)),
+  //         )
+  //       : undefined;
+
+  //     const toDate = this.payoutDateTo
+  //       ? DateTimeUtil.toUtcISOString(
+  //           new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999)),
+  //         )
+  //       : undefined;
+
+  //     this.fundService
+  //       .getAllPayoutFundWithEntityAndCpId(
+  //         this.branchId,
+  //         this.payoutPortalFilter || undefined,
+  //         this.selectedStatus,
+  //         page,
+  //         pageSize,
+  //         undefined,
+  //         fromDate,
+  //         toDate,
+  //         this.role,
+  //       )
+  //       .pipe(
+  //         catchError((err) => {
+  //           console.error("Payout API Error:", err);
+
+  //           this.snackbar.show("Failed to load payouts", false);
+
+  //           return of({
+  //             data: [],
+  //             total: 0,
+  //           });
+  //         }),
+  //       )
+  //       .subscribe((response: any) => {
+  //         console.log("Payout Response:", response);
+
+  //         const list = this.extractListFromResponse(response);
+
+  //         allData.push(...list);
+
+  //         const total = this.extractTotalFromResponse(response);
+
+  //         if ((page + 1) * pageSize < total) {
+  //           page++;
+  //           fetchPage();
+  //         } else {
+  //           // ✅ save original
+  //           this.allRejectedPayouts = allData;
+
+  //           // ✅ map for UI
+  //           this.mapPayoutArray(allData);
+
+  //           // ✅ total count
+  //           this.payoutTotalRecords = allData.length;
+  //         }
+  //       });
+  //   };
+
+  //   fetchPage();
+  // }
+
   fetchAllRejectedPayouts(): void {
     if (!this.branchId) return;
 
-    const pageSize = 100;
-    let page = 0;
-
-    const allData: any[] = [];
-
-    const fetchPage = () => {
-      const fromDate = this.payoutDateFrom
-        ? DateTimeUtil.toUtcISOString(
-            new Date(new Date(this.payoutDateFrom).setHours(0, 0, 0, 0)),
-          )
-        : undefined;
-
-      const toDate = this.payoutDateTo
-        ? DateTimeUtil.toUtcISOString(
-            new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999)),
-          )
-        : undefined;
-
-      this.fundService
-        .getAllPayoutFundWithEntityAndPortalId(
-          this.branchId,
-          this.payoutPortalFilter || undefined,
-          this.selectedStatus,
-          page,
-          pageSize,
-          undefined,
-          fromDate,
-          toDate,
+    const fromDate = this.payoutDateFrom
+      ? DateTimeUtil.toUtcISOString(
+          new Date(new Date(this.payoutDateFrom).setHours(0, 0, 0, 0)),
         )
-        .pipe(
-          catchError((err) => {
-            console.error("Payout API Error:", err);
+      : undefined;
 
-            this.snackbar.show("Failed to load payouts", false);
-
-            return of({
-              data: [],
-              total: 0,
-            });
-          }),
+    const toDate = this.payoutDateTo
+      ? DateTimeUtil.toUtcISOString(
+          new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999)),
         )
-        .subscribe((response: any) => {
-          console.log("Payout Response:", response);
+      : undefined;
 
-          const list = this.extractListFromResponse(response);
+    this.fundService
+      .getAllPayoutFundWithEntityAndCpId(
+        this.branchId,
+        this.payoutPortalFilter || undefined,
+        this.selectedStatus,
+        this.payoutApprovedPage, // ✅ current page
+        this.payoutApprovedPageSize, // ✅ dynamic page size
+        undefined,
+        fromDate,
+        toDate,
+        this.role,
+      )
+      .pipe(
+        catchError((err) => {
+          console.error("Payout API Error:", err);
 
-          allData.push(...list);
+          this.snackbar.show("Failed to load payouts", false);
 
-          const total = this.extractTotalFromResponse(response);
+          return of({
+            data: [],
+            total: 0,
+          });
+        }),
+      )
+      .subscribe((response: any) => {
+        console.log("Payout Response:", response);
 
-          if ((page + 1) * pageSize < total) {
-            page++;
-            fetchPage();
-          } else {
-            // ✅ save original
-            this.allRejectedPayouts = allData;
+        const list = this.extractListFromResponse(response);
 
-            // ✅ map for UI
-            this.mapPayoutArray(allData);
+        // ✅ only current page data
+        this.allRejectedPayouts = list;
 
-            // ✅ total count
-            this.payoutTotalRecords = allData.length;
-          }
-        });
-    };
+        // ✅ map for UI
+        this.mapPayoutArray(list);
 
-    fetchPage();
+        // ✅ backend total
+        this.payoutTotalRecords =
+          response?.data?.totalElements ||
+          response?.totalElements ||
+          response?.total ||
+          list.length;
+      });
   }
 
   // Helper to extract list from various response shapes
@@ -295,23 +337,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       this.colors = branch;
     }
   }
-
-  // ============ FETCH PORTALS (for dropdowns) ============
-  fetchUpiPortals(): void {
-    // Implement a service call to get distinct portals for UPI payins
-    // For now, we'll keep the existing upiPortals array (populated from previous data)
-    // You can call a dedicated endpoint if available.
-  }
-
-  fetchBankPortals(): void {
-    // similar
-  }
-
-  fetchPayoutPortals(): void {
-    // similar
-  }
-
-  // ============ FETCH DATA (server‑side paginated) ============
 
   fetchApprovedPayouts(): void {
     if (!this.branchId) return;
@@ -427,11 +452,12 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       this.fetchApprovedPayouts();
     }
   }
-
   onChangepayoutApprovedPageSize(size: number) {
     this.payoutApprovedPageSize = Number(size);
+
     this.payoutApprovedPage = 0;
-    this.fetchApprovedPayouts();
+
+    this.fetchAllRejectedPayouts();
   }
 
   // ============ FILTER DROPDOWN CONTROLS ============
@@ -773,7 +799,15 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   }
   setPayoutPage(page: number) {
     const totalPages = this.payoutApprovedTotalPages();
-    this.payoutApprovedPage = Math.max(0, Math.min(page, totalPages - 1));
+
+    const newPage = Math.max(0, Math.min(page, totalPages - 1));
+
+    if (newPage !== this.payoutApprovedPage) {
+      this.payoutApprovedPage = newPage;
+
+      // ✅ fetch current page
+      this.fetchAllRejectedPayouts();
+    }
   }
 
   getSelectedPortalDomain(view: "upi" | "bank" | "payout"): string {
@@ -783,7 +817,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
     const found = this.portalOptions.find((p) => p.id === selectedId);
 
-    return found ? found.domain : "All Portals";
+    return found ? found.domain : "All Comparts";
   }
   onStatusChange(status: string) {
     this.selectedStatus = status;

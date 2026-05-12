@@ -1,4 +1,3 @@
-
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { of, Subscription } from "rxjs";
@@ -10,6 +9,7 @@ import { MultimediaService } from "../../pages/services/multimedia.service";
 import { DateTimeUtil } from "../../utils/date-time.utils";
 import { BranchService } from "../../pages/services/branch.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
+import { ComPartService } from "../../pages/services/com-part.service";
 
 @Component({
   selector: "app-hb-payin-report",
@@ -104,6 +104,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     private multimediaService: MultimediaService,
     private branchService: BranchService,
     private snackbar: SnackbarService,
+    private comPartService: ComPartService,
   ) {}
   ngOnInit(): void {
     this.branchId = this.userStateService.getCurrentEntityId();
@@ -129,7 +130,6 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       } else if (this.activeView === "bank") {
         this.fetchBankPayins();
       } else {
-        this.fetchApprovedPayouts();
       }
     });
   }
@@ -195,7 +195,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
         this.branchId,
         portalId,
         this.selectedStatus,
-        this.upiPage, // ✅ FIXED
+        this.upiPage,
         this.upiPageSize,
         undefined,
         fromDate,
@@ -234,7 +234,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
         : undefined;
 
     this.fundService
-      .getPayinFundWithPortalIdAndEntityId(
+      .getPayinFundWithCpIdAndEntityId(
         this.branchId,
         portalId,
         this.selectedStatus,
@@ -244,6 +244,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
         fromDate,
         toDate,
         "BANK",
+        this.role,
       )
       .pipe(catchError(() => of({ content: [], totalElements: 0 })))
       .subscribe((response: any) => {
@@ -257,61 +258,61 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       });
   }
 
-  fetchApprovedPayouts(): void {
-    if (!this.branchId) return;
+  // fetchApprovedPayouts(): void {
+  //   if (!this.branchId) return;
 
-    const fromDate = this.payoutDateFrom
-      ? DateTimeUtil.toUtcISOString(
-          new Date(new Date(this.payoutDateFrom).setHours(0, 0, 0, 0)),
-        )
-      : undefined;
+  //   const fromDate = this.payoutDateFrom
+  //     ? DateTimeUtil.toUtcISOString(
+  //         new Date(new Date(this.payoutDateFrom).setHours(0, 0, 0, 0)),
+  //       )
+  //     : undefined;
 
-    const toDate = this.payoutDateTo
-      ? DateTimeUtil.toUtcISOString(
-          new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999)),
-        )
-      : undefined;
+  //   const toDate = this.payoutDateTo
+  //     ? DateTimeUtil.toUtcISOString(
+  //         new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999)),
+  //       )
+  //     : undefined;
 
-    const portalId =
-      this.payoutPortalFilter && this.payoutPortalFilter !== ""
-        ? this.payoutPortalFilter
-        : undefined;
+  //   const portalId =
+  //     this.payoutPortalFilter && this.payoutPortalFilter !== ""
+  //       ? this.payoutPortalFilter
+  //       : undefined;
 
-    this.fundService
-      .getAllPayoutFundWithEntityAndPortalId(
-        this.branchId,
-        portalId,
-        this.selectedStatus,
-        this.payoutApprovedPage, // ✅ FIXED
-        this.payoutApprovedPageSize,
-        undefined,
-        fromDate,
-        toDate,
-      )
-      .pipe(
-        catchError(() => {
-          return of({ content: [], totalElements: 0 });
-        }),
-      )
-      .subscribe((response: any) => {
-        const { list, total, pageNum, pageSize } = this.parseResponse(response);
+  //   this.fundService
+  //     .getAllPayoutFundWithEntityAndPortalId(
+  //       this.branchId,
+  //       portalId,
+  //       this.selectedStatus,
+  //       this.payoutApprovedPage, // ✅ FIXED
+  //       this.payoutApprovedPageSize,
+  //       undefined,
+  //       fromDate,
+  //       toDate,
+  //     )
+  //     .pipe(
+  //       catchError(() => {
+  //         return of({ content: [], totalElements: 0 });
+  //       }),
+  //     )
+  //     .subscribe((response: any) => {
+  //       const { list, total, pageNum, pageSize } = this.parseResponse(response);
 
-        this.payoutTotalRecords = total;
-        this.payoutApprovedPage = pageNum;
-        this.payoutApprovedPageSize = pageSize;
+  //       this.payoutTotalRecords = total;
+  //       this.payoutApprovedPage = pageNum;
+  //       this.payoutApprovedPageSize = pageSize;
 
-        this.mapPayoutArray(list);
-      });
-  }
+  //       this.mapPayoutArray(list);
+  //     });
+  // }
 
   loadPortalOptions(): void {
     if (!this.branchId) return;
 
     const role = (this.role || "").toLowerCase();
 
-    // ========= HEAD =========
-    if (role.includes("head")) {
-      this.headServices.getAllHeadsWithPortalsById(this.branchId).subscribe({
+    this.comPartService
+      .getPercentageByEntityId(this.branchId, this.role)
+      .subscribe({
         next: (res: any) => {
           const source = Array.isArray(res?.data)
             ? res.data
@@ -320,12 +321,12 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
               : [];
 
           const uniqueMap = new Map<string, any>();
-
+          console.log(source);
           source.forEach((item: any) => {
-            if (item?.portalId && item?.portalDomain) {
-              uniqueMap.set(item.portalId, {
-                id: item.portalId,
-                domain: item.portalDomain,
+            if (item?.compartId && item?.compartUsername) {
+              uniqueMap.set(item.compartId, {
+                id: item.compartId,
+                domain: item.compartUsername,
               });
             }
           });
@@ -336,34 +337,6 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
           this.setPortals([]);
         },
       });
-    }
-
-    // ========= BRANCH =========
-    else if (role.includes("branch")) {
-      this.branchService
-        .getPortalByBranchId(this.branchId)
-        .pipe(
-          catchError((err) => {
-            this.snackbar.show("Failed to load portals", false);
-            return of([]);
-          }),
-        )
-        .subscribe((res: any[]) => {
-          const portals = (res || [])
-            .map((p: any) => ({
-              id: p?.portalId || p?.id,
-              domain: p?.portalDomain || p?.name || "Unknown",
-            }))
-            .filter((p: any) => p.id);
-
-          this.setPortals(portals);
-        });
-    }
-
-    // ========= FALLBACK =========
-    else {
-      this.setPortals([]);
-    }
   }
   private setPortals(portals: any[]) {
     this.portalOptions = portals;
@@ -754,7 +727,6 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       this.payoutPortalFilter = portalId;
       this.payoutPortalDropdownOpen = false;
       this.payoutApprovedPage = 0;
-      this.fetchApprovedPayouts();
     }
   }
 
@@ -806,7 +778,6 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   applyPayoutFilters() {
     this.payoutApprovedPage = 0;
     if (this.payoutPortalFilter) {
-      this.fetchApprovedPayouts();
     }
   }
 
@@ -821,7 +792,6 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     this.payoutDateFrom = "";
     this.payoutDateTo = "";
     this.payoutApprovedPage = 0;
-    this.fetchApprovedPayouts();
     this.filterDropdownOpen = null;
   }
 
@@ -832,7 +802,6 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     } else if (this.activeView === "bank") {
       this.fetchBankPayins();
     } else {
-      this.fetchApprovedPayouts();
     }
   }
   refreshPage(): void {
@@ -1050,7 +1019,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     else selectedId = this.payoutPortalFilter;
 
     const found = this.portalOptions.find((p) => p.id === selectedId);
-    return found ? found.domain : "All Portals";
+    return found ? found.domain : "All Compart";
   }
   onModeChange(mode: "all" | "upi" | "bank") {
     this.selectedMode = mode;

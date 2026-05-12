@@ -340,15 +340,15 @@ export class ManageBranchUserComponent implements OnInit, OnDestroy {
     this.snack.show("User created successfully", true);
   }
 
-  openUserDetails(user: any) {
-    this.selectedUserDetails = user;
-    this.showUserDetailsModal = true;
-  }
+  // openUserDetails(user: any) {
+  //   this.selectedUserDetails = user;
+  //   this.showUserDetailsModal = true;
+  // }
 
-  closeUserDetails() {
-    this.showUserDetailsModal = false;
-    this.selectedUserDetails = null;
-  }
+  // closeUserDetails() {
+  //   this.showUserDetailsModal = false;
+  //   this.selectedUserDetails = null;
+  // }
 
   // @HostListener("window:resize")
   // onResize() {

@@ -168,7 +168,7 @@
           </div>
 
           <!-- INR MODES -->
-          <div *ngIf="selectedCurrency === 'INR'">
+          <div *ngIf="selectedCurrency === 'INR' && currentRole != 'OWNER'">
             <label
               class="block mb-2 text-sm font-medium text-[var(--color-font)]"
             >

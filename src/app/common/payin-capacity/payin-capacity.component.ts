@@ -9,6 +9,7 @@ import {
 } from "@angular/core";
 import { UpiService } from "../../pages/services/upi.service";
 import { BankService } from "../../pages/services/bank.service";
+import { SnackbarService } from "../snackbar/snackbar.service";
 
 @Component({
   selector: "app-payin-capacity",
@@ -38,17 +39,16 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
   constructor(
     private bankService: BankService,
     private upiService: UpiService,
+    private snackBar: SnackbarService,
   ) {}
 
   ngOnInit() {
-
-
     this.fetchCapacity();
   }
 
   // ================= AUTO FETCH =================
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.show && this.entityId  && this.payinId) {
+    if (this.show && this.entityId && this.payinId) {
       this.fetchCapacity();
     }
   }
@@ -63,9 +63,7 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
       entityType: this.entityType,
     });
 
-
-
-    if (!this.entityId|| !this.payinId) {
+    if (!this.entityId || !this.payinId) {
       return;
     }
 
@@ -168,7 +166,7 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
   // ================= SAVE =================
   save() {
     if (!this.isValidRanges()) {
-      alert("Invalid ranges ");
+      this.snackBar.show("invalid Ranges", false);
       return;
     }
 
@@ -225,4 +223,3 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
     this.isEditing = false;
   }
 }
-
