@@ -1194,12 +1194,20 @@
         </div>
 
         <!-- Optional File Attachment -->
-        <div class="mb-6">
+       <!-- Conditional File Attachment -->
+<div
+  class="mb-6"
+  *ngIf="confirmTransaction?.type !== 'payout'"
+>
           <div class="flex items-center justify-between mb-2">
             <label
               class="block text-xs text-[var(--color-muted)] font-semibold uppercase"
             >
-              Attachment (Optional)
+            {{
+  confirmTransaction?.type === "payin"
+    ? "Attachment (Required)"
+    : "Attachment (Optional)"
+}}
             </label>
             <span class="text-xs text-[var(--color-muted)]">Max 5MB</span>
           </div>
@@ -1217,7 +1225,7 @@
               #editFileInput
               (change)="onEditFileSelected($event)"
               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+            accept=".pdf,.jpg,.jpeg,.png,application/pdf"
               aria-label="Upload attachment"
             />
 
@@ -1490,6 +1498,93 @@
           </div>
         </div>
 
+        <!-- Attachment Upload -->
+<div
+  class="mb-6"
+  *ngIf="confirmTransaction?.type === 'payout'"
+>
+  <div class="flex items-center justify-between mb-2">
+    <label
+      class="block text-xs text-[var(--color-muted)] font-semibold uppercase"
+    >
+      Attachment Required
+    </label>
+
+    <span class="text-xs text-red-500 font-semibold">
+      Mandatory
+    </span>
+  </div>
+
+  <div
+    class="relative border-2 border-dashed border-[var(--color-success)] rounded-xl p-4 text-center"
+  >
+    <!-- <input
+      type="file"
+      id="approveFileInput"
+      (change)="onFileSelected($event)"
+      class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+    /> -->
+    <input
+  type="file"
+  id="approveFileInput"
+  (change)="onFileSelected($event)"
+  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+  accept=".pdf,.jpg,.jpeg,.png,application/pdf"
+/>
+
+    <div class="pointer-events-none">
+      <div *ngIf="!selectedFile">
+        <p class="text-sm font-medium text-[var(--color-font)]">
+          Upload payout proof
+        </p>
+
+       <p class="text-xs text-[var(--color-muted)] mt-1">
+  PDF, JPG, PNG (PDF Max 1MB)
+</p>
+      </div>
+
+      <!-- <div *ngIf="selectedFile" class="space-y-2">
+        <p class="text-sm font-semibold text-green-600">
+          {{ selectedFile.name }}
+        </p>
+
+        <p class="text-xs text-[var(--color-muted)]">
+          {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
+        </p>
+      </div> -->
+<div *ngIf="selectedFile" class="space-y-2">
+  <p class="text-sm font-semibold text-green-600">
+    {{ selectedFile.name }}
+  </p>
+
+  <p class="text-xs text-[var(--color-muted)]">
+    {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
+  </p>
+
+  <!-- PDF Preview -->
+  <iframe
+    *ngIf="previewDocument"
+    [src]="previewUrl"
+    class="w-full h-[300px] rounded-xl mt-3 border"
+  ></iframe>
+
+  <!-- Image Preview -->
+  <img
+    *ngIf="!previewDocument"
+    [src]="previewUrl"
+    class="w-full h-[300px] object-contain rounded-xl mt-3 border"
+  />
+</div>
+
+    </div>
+  </div>
+
+  <p class="text-xs mt-2 text-red-500">
+    Attachment is mandatory for payout approval
+  </p>
+</div>
+
         <div class="flex gap-3">
           <button
             (click)="cancelApprove()"
@@ -1616,12 +1711,20 @@
         </div>
 
         <!-- Optional File Attachment -->
-        <div class="mb-6">
+      <!-- Conditional File Attachment -->
+<div
+  class="mb-6"
+  *ngIf="confirmTransaction?.type !== 'payout'"
+>
           <div class="flex items-center justify-between mb-2">
             <label
               class="block text-xs text-[var(--color-muted)] font-semibold uppercase"
             >
-              Attachment (Optional)
+            {{
+  confirmTransaction?.type === "payin"
+    ? "Attachment (Required)"
+    : "Attachment (Optional)"
+}}
             </label>
             <span class="text-xs text-[var(--color-muted)]">Max 5MB</span>
           </div>
@@ -1640,7 +1743,7 @@
               #fileInput
               (change)="onFileSelected($event)"
               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+       accept=".pdf,.jpg,.jpeg,.png,application/pdf"
               aria-label="Upload attachment"
             />
 
@@ -1710,13 +1813,32 @@
                     >Uploaded</span
                   >
                 </div>
+
+                <!-- PDF Preview -->
+<iframe
+  *ngIf="previewDocument"
+  [src]="previewUrl"
+  class="w-full h-[300px] rounded-xl mt-3 border"
+></iframe>
+
+<!-- Image Preview -->
+<img
+  *ngIf="!previewDocument"
+  [src]="previewUrl"
+  class="w-full h-[300px] object-contain rounded-xl mt-3 border"
+/>
               </div>
             </div>
           </div>
 
           <p class="text-xs mt-2 text-[var(--color-muted)]">
-            Add supporting documents if needed. This is optional but recommended
-            for audit trails.
+            <!-- Add supporting documents if needed. This is optional but recommended
+            for audit trails. -->
+            {{
+  confirmTransaction?.type === "payin"
+    ? "Attachment is mandatory for payin rejection."
+    : "Optional attachment for rejection."
+}}
           </p>
         </div>
 
@@ -1729,7 +1851,7 @@
           >
             Cancel
           </button>
-          <button
+          <!-- <button
             (click)="confirmReject()"
             [disabled]="!reason || (reason === 'other' && !customReason)"
             [class.opacity-50]="
@@ -1738,6 +1860,36 @@
             [class.cursor-not-allowed]="
               !reason || (reason === 'other' && !customReason)
             "
+            class="flex-1 px-4 py-2.5 bg-[var(--color-danger)] text-white rounded-xl hover:from-[var(--color-danger)] hover:to-[var(--color-danger)] transition font-bold shadow-lg shadow-[var(--color-danger)]/30 disabled:shadow-none"
+          >
+            Reject
+          </button> -->
+              <button
+            (click)="confirmReject()"
+           [disabled]="
+  !reason ||
+  (reason === 'other' && !customReason) ||
+  (
+    confirmTransaction?.type === 'payin' &&
+    !selectedFile
+  )
+"
+           [class.opacity-50]="
+  !reason ||
+  (reason === 'other' && !customReason) ||
+  (
+    confirmTransaction?.type === 'payin' &&
+    !selectedFile
+  )
+"
+            [class.cursor-not-allowed]="
+  !reason ||
+  (reason === 'other' && !customReason) ||
+  (
+    confirmTransaction?.type === 'payin' &&
+    !selectedFile
+  )
+"
             class="flex-1 px-4 py-2.5 bg-[var(--color-danger)] text-white rounded-xl hover:from-[var(--color-danger)] hover:to-[var(--color-danger)] transition font-bold shadow-lg shadow-[var(--color-danger)]/30 disabled:shadow-none"
           >
             Reject

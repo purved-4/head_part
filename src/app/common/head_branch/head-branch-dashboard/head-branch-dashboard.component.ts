@@ -255,17 +255,57 @@ export class HeadBranchDashboardComponent
     }
   }
 
+  // changePayinStatus() {
+  //   if (this.role === "HEAD") {
+  //     this.headService.toggleDashbaordPayin(this.headId).subscribe(() => {
+  //       this.payinStatus = !this.payinStatus;
+  //     },
+  //   );
+  //   } else if (this.role === "BRANCH") {
+  //     this.branchService.toggleDashbaordPayin(this.headId).subscribe(() => {
+  //       this.payinStatus = !this.payinStatus;
+  //     });
+  //   }
+  // }
   changePayinStatus() {
-    if (this.role === "HEAD") {
-      this.headService.toggleDashbaordPayin(this.headId).subscribe(() => {
+  if (this.role === "HEAD") {
+    this.headService.toggleDashbaordPayin(this.headId).subscribe(
+      () => {
         this.payinStatus = !this.payinStatus;
-      });
-    } else if (this.role === "BRANCH") {
-      this.branchService.toggleDashbaordPayin(this.headId).subscribe(() => {
+
+        this.snackbar.show(
+          `Payin ${this.payinStatus ? "enabled" : "disabled"} successfully`,
+          true
+        );
+      },
+      (err) => {
+        this.snackbar.show(
+          err?.error?.message || "Failed to change payin status",
+          false
+        );
+      }
+    );
+
+  } else if (this.role === "BRANCH") {
+
+    this.branchService.toggleDashbaordPayin(this.headId).subscribe(
+      () => {
         this.payinStatus = !this.payinStatus;
-      });
-    }
+
+        this.snackbar.show(
+          `Payin ${this.payinStatus ? "enabled" : "disabled"} successfully`,
+          true
+        );
+      },
+      (err) => {
+        this.snackbar.show(
+          err?.error?.message || "Failed to change payin status",
+          false
+        );
+      }
+    );
   }
+}
 
   private resetAllLists() {
     this.pendingTransactions = [];
@@ -579,10 +619,9 @@ export class HeadBranchDashboardComponent
 
   getRemainingTimeLabel(tx: any): string {
     if (!tx || !tx.processing) return "Process";
+     const deadline = this.parseProcessingDeadline(tx);
 
-    const deadline = this.parseProcessingDeadline(tx);
-
-    if (!deadline) return "Processing";
+    if (!deadline) return "Process";
 
     const diffMs = deadline.getTime() - this.processingNow;
 
@@ -1366,98 +1405,285 @@ export class HeadBranchDashboardComponent
       this.payoutApprovedPage = this.payoutApprovedTotalPages();
   }
 
+  // async approveTransaction(transaction: any): Promise<void> {
+  //   if (!transaction) return;
+
+  //   const t = this.normalizeTransaction(transaction) || transaction;
+  //   const fundId =
+  //     t.fundId ||
+  //     t.id ||
+  //     (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
+  //     null;
+
+  //   try {
+  //     // Call the appropriate API based on transaction type
+  //     if (t.type === "payout") {
+  //       const accountId =
+  //         this.selectedPayoutMethod === "upi"
+  //           ? this.selectedUpi
+  //           : this.selectedPayoutMethod === "bank"
+  //             ? this.selectedBank
+  //             : null;
+
+  //       if (accountId) {
+  //         await lastValueFrom(
+  //           (this.fundService as any).acceptPayout(fundId, accountId),
+  //         );
+  //       } else {
+  //         await lastValueFrom((this.fundService as any).acceptPayout(fundId));
+  //       }
+  //     } else if (t.mode === "upi") {
+  //       await lastValueFrom(this.fundService.settleUpiFund(fundId));
+  //     } else if (t.mode === "bank") {
+  //       await lastValueFrom(this.fundService.settleBankFund(fundId));
+  //     }
+
+  //     // Success snackbar
+  //     this.snackbar.show("Transaction approved successfully", true);
+
+  //     // Remove from pending
+  //     this.removeFromPendingListsByTx(t);
+
+  //     // Add to approved lists
+  //     const approvedTx = {
+  //       ...t,
+  //       status: "completed",
+  //       settled: true,
+  //       date: t.date instanceof Date ? t.date : new Date(t.date),
+  //     };
+  //     if (approvedTx.type === "payout") {
+  //       this.addApprovedUnique(this.approvedTransactions, approvedTx);
+  //       this.addApprovedUnique(this.approvedpayouts, approvedTx);
+  //       this.recentpayouts = [...this.approvedpayouts];
+  //     } else {
+  //       this.addApprovedUnique(this.approvedTransactions, approvedTx);
+  //       this.addApprovedUnique(this.approvedpayins, approvedTx);
+  //       this.recentpayins = [...this.approvedpayins];
+  //     }
+
+  //     // Clear confirm state
+  //     this.confirmTransaction = null;
+  //     this.showApproveConfirm = false;
+  //     this.selectedTransaction = null;
+  //     this.resetRejectReason();
+
+  //     // Refresh stats
+  //     this.computeStatsFromData();
+  //     this.updateChartsFromData();
+  //     this.clampPages();
+  //     this.ensureProcessingTimerState();
+  //   } catch (err: any) {
+  //     const message =
+  //       err?.error?.message || err?.error?.error || "Approval failed";
+  //     this.snackbar.show(message, false);
+
+  //     // Best-effort: remove from pending and mark as failed
+  //     this.removeFromPendingListsByTx(t);
+  //     const failedTx = { ...t, status: "failed" };
+  //     if (t.type === "payout") {
+  //       this.recentpayouts.unshift(failedTx);
+  //     } else {
+  //       this.recentpayins.unshift(failedTx);
+  //     }
+
+  //     this.computeStatsFromData();
+  //     this.updateChartsFromData();
+  //     this.clampPages();
+  //     this.ensureProcessingTimerState();
+
+  //     this.confirmTransaction = null;
+  //     this.showApproveConfirm = false;
+  //     this.selectedTransaction = null;
+  //     this.resetRejectReason();
+  //   }
+  // }
+
   async approveTransaction(transaction: any): Promise<void> {
-    if (!transaction) return;
+  if (!transaction) return;
 
-    const t = this.normalizeTransaction(transaction) || transaction;
-    const fundId =
-      t.fundId ||
-      t.id ||
-      (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
-      null;
+  const t = this.normalizeTransaction(transaction) || transaction;
 
-    try {
-      // Call the appropriate API based on transaction type
-      if (t.type === "payout") {
-        const accountId =
-          this.selectedPayoutMethod === "upi"
-            ? this.selectedUpi
-            : this.selectedPayoutMethod === "bank"
-              ? this.selectedBank
-              : null;
+  const fundId =
+    t.fundId ||
+    t.id ||
+    (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
+    null;
 
-        if (accountId) {
-          await lastValueFrom(
-            (this.fundService as any).acceptPayout(fundId, accountId),
-          );
-        } else {
-          await lastValueFrom((this.fundService as any).acceptPayout(fundId));
-        }
-      } else if (t.mode === "upi") {
-        await lastValueFrom(this.fundService.settleUpiFund(fundId));
-      } else if (t.mode === "bank") {
-        await lastValueFrom(this.fundService.settleBankFund(fundId));
+  try {
+
+    // =====================================================
+    // PAYOUT
+    // =====================================================
+    if (t.type === "payout") {
+
+      const accountId =
+        this.selectedPayoutMethod === "upi"
+          ? this.selectedUpi
+          : this.selectedPayoutMethod === "bank"
+            ? this.selectedBank
+            : null;
+
+      const formData = new FormData();
+
+      // ACCOUNT ID
+      if (accountId) {
+        formData.append(
+          "accountId",
+          String(accountId)
+        );
       }
 
-      // Success snackbar
-      this.snackbar.show("Transaction approved successfully", true);
-
-      // Remove from pending
-      this.removeFromPendingListsByTx(t);
-
-      // Add to approved lists
-      const approvedTx = {
-        ...t,
-        status: "completed",
-        settled: true,
-        date: t.date instanceof Date ? t.date : new Date(t.date),
-      };
-      if (approvedTx.type === "payout") {
-        this.addApprovedUnique(this.approvedTransactions, approvedTx);
-        this.addApprovedUnique(this.approvedpayouts, approvedTx);
-        this.recentpayouts = [...this.approvedpayouts];
-      } else {
-        this.addApprovedUnique(this.approvedTransactions, approvedTx);
-        this.addApprovedUnique(this.approvedpayins, approvedTx);
-        this.recentpayins = [...this.approvedpayins];
+      // FILE
+      if (this.selectedFile) {
+        formData.append(
+          "file",
+          this.selectedFile,
+          this.selectedFile.name
+        );
       }
 
-      // Clear confirm state
-      this.confirmTransaction = null;
-      this.showApproveConfirm = false;
-      this.selectedTransaction = null;
-      this.resetRejectReason();
+      console.log("SELECTED FILE =>", this.selectedFile);
 
-      // Refresh stats
-      this.computeStatsFromData();
-      this.updateChartsFromData();
-      this.clampPages();
-      this.ensureProcessingTimerState();
-    } catch (err: any) {
-      const message =
-        err?.error?.message || err?.error?.error || "Approval failed";
-      this.snackbar.show(message, false);
+      await lastValueFrom(
+        this.fundService.acceptPayout(
+          fundId,
+          formData
+        )
+      );
 
-      // Best-effort: remove from pending and mark as failed
-      this.removeFromPendingListsByTx(t);
-      const failedTx = { ...t, status: "failed" };
-      if (t.type === "payout") {
-        this.recentpayouts.unshift(failedTx);
-      } else {
-        this.recentpayins.unshift(failedTx);
-      }
-
-      this.computeStatsFromData();
-      this.updateChartsFromData();
-      this.clampPages();
-      this.ensureProcessingTimerState();
-
-      this.confirmTransaction = null;
-      this.showApproveConfirm = false;
-      this.selectedTransaction = null;
-      this.resetRejectReason();
     }
+
+    // =====================================================
+    // UPI PAYIN
+    // =====================================================
+    else if (t.mode === "upi") {
+
+      await lastValueFrom(
+        this.fundService.settleUpiFund(fundId)
+      );
+
+    }
+
+    // =====================================================
+    // BANK PAYIN
+    // =====================================================
+    else if (t.mode === "bank") {
+
+      await lastValueFrom(
+        this.fundService.settleBankFund(fundId)
+      );
+
+    }
+
+    // =====================================================
+    // SUCCESS
+    // =====================================================
+
+    this.snackbar.show(
+      "Transaction approved successfully",
+      true
+    );
+
+    // Remove from pending
+    this.removeFromPendingListsByTx(t);
+
+    // Add to approved
+    const approvedTx = {
+      ...t,
+      status: "completed",
+      settled: true,
+      date:
+        t.date instanceof Date
+          ? t.date
+          : new Date(t.date),
+    };
+
+    if (approvedTx.type === "payout") {
+
+      this.addApprovedUnique(
+        this.approvedTransactions,
+        approvedTx
+      );
+
+      this.addApprovedUnique(
+        this.approvedpayouts,
+        approvedTx
+      );
+
+      this.recentpayouts = [
+        ...this.approvedpayouts
+      ];
+
+    } else {
+
+      this.addApprovedUnique(
+        this.approvedTransactions,
+        approvedTx
+      );
+
+      this.addApprovedUnique(
+        this.approvedpayins,
+        approvedTx
+      );
+
+      this.recentpayins = [
+        ...this.approvedpayins
+      ];
+    }
+
+    // RESET
+    this.confirmTransaction = null;
+    this.showApproveConfirm = false;
+    this.selectedTransaction = null;
+    this.selectedFile = null;
+
+    this.resetRejectReason();
+
+    // Refresh stats
+    this.computeStatsFromData();
+    this.updateChartsFromData();
+    this.clampPages();
+    this.ensureProcessingTimerState();
+
+  } catch (err: any) {
+
+    const message =
+      err?.error?.message ||
+      err?.error?.error ||
+      "Approval failed";
+
+    this.snackbar.show(message, false);
+
+    // Remove from pending
+    this.removeFromPendingListsByTx(t);
+
+    const failedTx = {
+      ...t,
+      status: "failed",
+    };
+
+    if (t.type === "payout") {
+
+      this.recentpayouts.unshift(failedTx);
+
+    } else {
+
+      this.recentpayins.unshift(failedTx);
+    }
+
+    this.computeStatsFromData();
+    this.updateChartsFromData();
+    this.clampPages();
+    this.ensureProcessingTimerState();
+
+    this.confirmTransaction = null;
+    this.showApproveConfirm = false;
+    this.selectedTransaction = null;
+    this.selectedFile = null;
+
+    this.resetRejectReason();
   }
+}
 
   openEditAmountPopup(): void {
     this.editAmountData = {
@@ -1812,19 +2038,46 @@ export class HeadBranchDashboardComponent
     this.resetRejectReason();
   }
 
+  // async confirmApprove() {
+  //   if (this.isPayoutActionBlocked(this.confirmTransaction)) {
+  //     this.snackbar.show(
+  //       "Processing complete hone ke baad approve kar sakte ho",
+  //       false,
+  //     );
+  //     return;
+  //   }
+
+  //   if (!this.confirmTransaction) return;
+
+  //   await this.approveTransaction(this.confirmTransaction);
+  // }
   async confirmApprove() {
-    if (this.isPayoutActionBlocked(this.confirmTransaction)) {
-      this.snackbar.show(
-        "Processing complete hone ke baad approve kar sakte ho",
-        false,
-      );
-      return;
-    }
-
-    if (!this.confirmTransaction) return;
-
-    await this.approveTransaction(this.confirmTransaction);
+  if (this.isPayoutActionBlocked(this.confirmTransaction)) {
+    this.snackbar.show(
+      "Processing complete hone ke baad approve kar sakte ho",
+      false,
+    );
+    return;
   }
+
+  if (!this.confirmTransaction) return;
+
+  // PAYOUT APPROVE => ATTACHMENT REQUIRED
+  if (
+    this.confirmTransaction.type === "payout" &&
+    !this.selectedFile
+  ) {
+    this.snackbar.show(
+      "Attachment is required for payout approval",
+      false
+    );
+    return;
+  }
+
+  await this.approveTransaction(this.confirmTransaction);
+}
+
+
   get rejectionReason(): string {
     if (!this.reason) return "";
     return this.reason === "other"
@@ -1832,37 +2085,120 @@ export class HeadBranchDashboardComponent
       : this.reason;
   }
 
-  async confirmReject() {
-    if (this.isPayoutActionBlocked(this.confirmTransaction)) {
-      this.snackbar.show(
-        "Processing complete hone ke baad reject kar sakte ho",
-        false,
-      );
-      return;
-    }
+  isAttachmentRequired(): boolean {
+  if (!this.confirmTransaction) return false;
 
-    if (!this.confirmTransaction) return;
-
-    const finalReason = this.rejectionReason;
-    if (!finalReason) {
-      this.snackbar.show(
-        "Please select or enter a reason for rejection",
-        false,
-      );
-      return;
-    }
-
-    //  File optional – agar file hai to pass karo, nahi to undefined pass karo
-    await this.rejectTransaction(
-      this.confirmTransaction,
-      finalReason,
-      this.selectedFile ?? undefined, // null/undefined ko undefined banao
-    );
-
-    this.confirmTransaction = null;
-    this.showRejectConfirm = false;
-    this.resetForm();
+  // PAYIN REJECT => REQUIRED
+  if (
+    this.showRejectConfirm &&
+    this.confirmTransaction.type === "payin"
+  ) {
+    return true;
   }
+
+  // PAYOUT APPROVE => REQUIRED
+  if (
+    this.showApproveConfirm &&
+    this.confirmTransaction.type === "payout"
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+showAttachmentField(): boolean {
+  if (!this.confirmTransaction) return true;
+
+  // HIDE IN PAYOUT REJECT
+  if (
+    this.showRejectConfirm &&
+    this.confirmTransaction.type === "payout"
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+  // async confirmReject() {
+  //   if (this.isPayoutActionBlocked(this.confirmTransaction)) {
+  //     this.snackbar.show(
+  //       "Processing complete hone ke baad reject kar sakte ho",
+  //       false,
+  //     );
+  //     return;
+  //   }
+
+  //   if (!this.confirmTransaction) return;
+
+  //   const finalReason = this.rejectionReason;
+  //   if (!finalReason) {
+  //     this.snackbar.show(
+  //       "Please select or enter a reason for rejection",
+  //       false,
+  //     );
+  //     return;
+  //   }
+
+  //   //  File optional – agar file hai to pass karo, nahi to undefined pass karo
+  //   await this.rejectTransaction(
+  //     this.confirmTransaction,
+  //     finalReason,
+  //     this.selectedFile ?? undefined, // null/undefined ko undefined banao
+  //   );
+
+  //   this.confirmTransaction = null;
+  //   this.showRejectConfirm = false;
+  //   this.resetForm();
+  // }
+
+
+  async confirmReject() {
+  if (this.isPayoutActionBlocked(this.confirmTransaction)) {
+    this.snackbar.show(
+      "Processing complete hone ke baad reject kar sakte ho",
+      false,
+    );
+    return;
+  }
+
+  if (!this.confirmTransaction) return;
+
+  const finalReason = this.rejectionReason;
+
+  if (!finalReason) {
+    this.snackbar.show(
+      "Please select or enter a reason for rejection",
+      false,
+    );
+    return;
+  }
+
+  // PAYIN REJECT => ATTACHMENT REQUIRED
+  if (
+    this.confirmTransaction.type === "payin" &&
+    !this.selectedFile
+  ) {
+    this.snackbar.show(
+      "Attachment is required for payin rejection",
+      false
+    );
+    return;
+  }
+
+  await this.rejectTransaction(
+    this.confirmTransaction,
+    finalReason,
+    this.selectedFile ?? undefined,
+  );
+
+  this.confirmTransaction = null;
+  this.showRejectConfirm = false;
+
+  this.resetForm();
+}
+
   resetForm(): void {
     this.reason = "";
     this.customReason = "";
@@ -1971,6 +2307,7 @@ export class HeadBranchDashboardComponent
       parsedDate = new Date();
     }
 
+    
     const tx = {
       id: fund.id || fund._id || null,
       fundId: fund.id || fund.fundId || fund._id || null,
@@ -2073,7 +2410,7 @@ export class HeadBranchDashboardComponent
   private processIncomingEvent(data: any) {
     if (!data) return;
 
-
+console.log("Processing incoming SSE event with data:", data);
     // =========================
     // Preserve old dynamic config if websocket sends partial data
     // =========================
@@ -2089,46 +2426,13 @@ export class HeadBranchDashboardComponent
     const dynamicPayout = this.latestDynamicPayout;
 
     const now = Date.now();
-
-    // =====================================================
-    // UPI
-    // =====================================================
-    if (Array.isArray(data.PENDING_UPI)) {
-      this.pendingUpi = data.PENDING_UPI.map((f: any) => {
-        const existing = this.pendingUpi.find(
-          (x: any) =>
-            x.id === f.id || x.fundId === f.id || x.fundId === f.fundId,
-        );
-
-        const tx = this.normalizeIncomingFund(
-          {
-            ...existing,
-            ...f,
-
-            // preserve local state
-            processing: existing?.processing ?? f?.processing ?? false,
-          },
-          "upi",
-        );
-
-        if (!tx) return null;
-
-        const slab = this.getPayinSlabInfo(tx, dynamicPayin, now);
-
-        return {
-          ...tx,
-          slabPercentage: slab?.percentage ?? 100,
-          slabEligible: slab?.eligible ?? true,
-          timePassed: slab?.diffMinutes ?? 0,
-        };
-      }).filter(Boolean);
-    }
-
+console.log("Received SSE event, processing pending lists with dynamic co")
+   
     // =====================================================
     // BANK
     // =====================================================
-    if (Array.isArray(data.PENDING_BANK)) {
-      this.pendingBank = data.PENDING_BANK.map((f: any) => {
+    if (Array.isArray(data.PENDING_PAYIN)) {
+      this.pendingBank = data.PENDING_PAYIN.map((f: any) => {
         const existing = this.pendingBank.find(
           (x: any) =>
             x.id === f.id || x.fundId === f.id || x.fundId === f.fundId,
@@ -2210,10 +2514,48 @@ export class HeadBranchDashboardComponent
   // Ensure accepted payouts amount is present by calling the API when SSE doesn't provide it
 
   // File handling methods
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    this.validateAndSetFile(file);
+  // onFileSelected(event: any): void {
+  //   const file = event.target.files[0];
+  //   this.validateAndSetFile(file);
+  // }
+onFileSelected(event: any) {
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  const allowedTypes = [
+    'image/png',
+    'image/jpeg',
+    'image/jpg',
+    'application/pdf'
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    this.snackbar.show('Only image and PDF files are allowed',false);
+    return;
   }
+
+  // PDF SIZE VALIDATION
+  const isPdf = file.type === 'application/pdf';
+  const maxPdfSize = 1 * 1024 * 1024;
+
+  // if (isPdf && file.size > maxPdfSize) {
+  //   this.snackbar.show('PDF size must be less than 1 MB',false);
+  //   return;
+  // }
+
+  // STORE FILE
+  this.selectedFile = file;
+
+  // PREVIEW
+  if (file.type === 'application/pdf') {
+    this.previewDocument = true;
+    this.previewUrl = URL.createObjectURL(file);
+  } else {
+    this.previewDocument = false;
+    this.previewUrl = URL.createObjectURL(file);
+  }
+}
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();

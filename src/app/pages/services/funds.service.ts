@@ -191,24 +191,39 @@ export class FundsService {
       );
   }
 
-  acceptPayout(bankSettleId: any, accountId?: any): Observable<any> {
-    let params = new HttpParams();
+  // acceptPayout(bankSettleId: any, accountId?: any): Observable<any> {
+  //   let params = new HttpParams();
 
-    if (accountId) {
-      params = params.set("accountId", accountId);
-    }
+  //   if (accountId) {
+  //     params = params.set("accountId", accountId);
+  //   }
 
-    return this.http
-      .patch<any>(
-        `${baseUrl}/funds/payout/${bankSettleId}/accept`,
-        {},
-        { params },
-      )
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(() => error)),
-      );
-  }
+  //   return this.http
+  //     .patch<any>(
+  //       `${baseUrl}/funds/payout/${bankSettleId}/accept`,
+  //       {},
+  //       { params },
+  //     )
+  //     .pipe(
+  //       map((response: any) => response.data),
+  //       catchError((error) => throwError(() => error)),
+  //     );
+  // }
+
+acceptPayout(
+  bankSettleId: any,
+  payload?: FormData
+): Observable<any> {
+  console.log(payload)
+
+  return this.http.patch<any>(
+    `${baseUrl}/funds/payout/${bankSettleId}/accept`,
+    payload
+  ).pipe(
+    map((response: any) => response.data),
+    catchError((error) => throwError(() => error)),
+  );
+}
 
   rejectpayout(
     bankSettleId: string,
