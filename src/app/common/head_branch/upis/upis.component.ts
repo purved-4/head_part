@@ -184,7 +184,7 @@ export class UpisComponent implements OnInit {
 
         this.selectedCurrencyData = res;
 
-        console.log("UPI Currency =>", res);
+
 
         // AGAR DIRECT STRING CHAHIYE
         // this.currency = res.currency;
@@ -202,7 +202,7 @@ export class UpisComponent implements OnInit {
 
       this.selectedModeData = res;
 
-      console.log("UPI Mode =>", res);
+
     });
 
     this.getPayinStatus();

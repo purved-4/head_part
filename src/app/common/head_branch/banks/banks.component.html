@@ -458,7 +458,6 @@
                   *ngIf="
                     payinStatus &&
                       account.isBankActive &&
-                      account.allotStatus &&
                       account.limitTime &&
                       isFutureLimitTime(account.limitTime);
                     else inactiveStatus

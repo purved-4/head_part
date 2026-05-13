@@ -44,6 +44,7 @@ export class AllotCurrencyComponent implements OnInit {
     this.effectiveFromNew = new Date();
   }
 
+  // ngOnInit replace karo
   ngOnInit(): void {
     this.currentRole = this.userStateService.getRole();
     if (this.entityType === "CHIEF") {
@@ -139,7 +140,6 @@ export class AllotCurrencyComponent implements OnInit {
       INR: null,
       USD: null,
     };
-
     apiData.forEach((item: any) => {
       if (item.currency === "INR") {
         this.existingData.INR = {
@@ -214,9 +214,9 @@ export class AllotCurrencyComponent implements OnInit {
       return;
     }
 
+    // Modes validation only for CHIEF & PORTAL
     if (
-      this.entityType !== "PORTAL" &&
-      this.entityType !== "OWNER" &&
+      (this.entityType === "CHIEF" || this.entityType === "PORTAL") &&
       this.selectedModes.length === 0
     ) {
       this.snackBar.show("Please select at least one payment mode", false);
@@ -225,20 +225,27 @@ export class AllotCurrencyComponent implements OnInit {
 
     let payload: any;
 
+    // ================= PAYLOAD =================
+
+    // PORTAL
     if (this.entityType === "PORTAL") {
       payload = {
         currency: this.selectedCurrency,
         modes: this.selectedModes,
       };
     }
-    if (this.entityType === "COM_PART" || this.entityType === "OWNER") {
+
+    // COM_PART & OWNER
+    else if (this.entityType === "COM_PART" || this.entityType === "OWNER") {
       payload = {
         currency: this.selectedCurrency,
         rate: this.rate,
-        modes: this.selectedModes,
         effectiveFrom: new Date(this.effectiveFromNew).toISOString(),
       };
-    } else {
+    }
+
+    // CHIEF
+    else if (this.entityType === "CHIEF") {
       payload = {
         currency: this.selectedCurrency,
         rate: this.rate,
@@ -246,27 +253,47 @@ export class AllotCurrencyComponent implements OnInit {
       };
     }
 
+    // INVALID
+    else {
+      this.snackBar.show("Invalid entity type", false);
+      return;
+    }
+
     let submitObservable;
 
+    // ================= API =================
+
+    // CHIEF
     if (this.entityType === "CHIEF") {
       submitObservable = this.chiefService.saveCurrencies(
         this.entityId,
         payload,
       );
-    } else if (this.entityType === "COM_PART") {
+    }
+
+    // COM_PART & OWNER
+    else if (this.entityType === "COM_PART" || this.entityType === "OWNER") {
       submitObservable = this.comPartService.saveCurrencies(
         this.entityId,
         payload,
       );
-    } else if (this.entityType === "PORTAL") {
+    }
+
+    // PORTAL
+    else if (this.entityType === "PORTAL") {
       submitObservable = this.portalService.saveCurrenciesByPortal(
         this.entityId,
         payload,
       );
-    } else {
+    }
+
+    // INVALID
+    else {
       this.snackBar.show("Invalid entity type", false);
       return;
     }
+
+    // ================= SUBSCRIBE =================
 
     submitObservable.subscribe({
       next: (res: any) => {
@@ -281,6 +308,7 @@ export class AllotCurrencyComponent implements OnInit {
             effectiveFrom: this.effectiveFrom,
           };
         } else {
+          this.existingData[key]!.rate = this.rate;
           this.existingData[key]!.modes = [...this.selectedModes];
           this.existingData[key]!.effectiveFrom = this.effectiveFrom;
         }
@@ -291,6 +319,7 @@ export class AllotCurrencyComponent implements OnInit {
           this.closeModal();
         }, 1000);
       },
+
       error: (err) => {
         this.snackBar.show(err.error?.message || "Update failed", false);
       },

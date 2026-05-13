@@ -45,13 +45,14 @@ import { RouterModule } from "@angular/router";
 import { PayinCapacityComponent } from "../common/payin-capacity/payin-capacity.component";
 import { OverrideCurrencyRateComponent } from "../common/head_branch/override-currency-rate/override-currency-rate.component";
 import { ThemeToggleComponent } from "../theme/theme.component";
-import { HeadBranchDashboardComponent } from "../common/head-branch-dashboard/head-branch-dashboard.component";
+// import { HeadBranchDashboardComponent } from "../common/head-branch-dashboard/head-branch-dashboard.component";
 import { HbPayinReportComponent } from "../common/hb-payin-report/hb-payin-report.component";
 import { HbPayoutReportComponent } from "../common/hb-payout-report/hb-payout-report.component";
 import { EnterKeyDirective } from "../directives/enter-key.directive";
 import { BankDetailsComponent } from "../common/head_branch/bank-details/bank-details.component";
 import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods/payments-methods.component";
 import { SearchableDropdownComponent } from "../common/drop-down/drop-down.component";
+import { HeadBranchDashboardComponent } from "../common/head_branch/head-branch-dashboard/head-branch-dashboard.component";
 
 // shared.module.ts
 @NgModule({
@@ -98,13 +99,13 @@ import { SearchableDropdownComponent } from "../common/drop-down/drop-down.compo
     AllotCurrencyComponent,
     OverrideCurrencyRateComponent,
     ThemeToggleComponent,
-    HeadBranchDashboardComponent,
     HbPayinReportComponent,
     HbPayoutReportComponent,
     EnterKeyDirective,
     BankDetailsComponent,
     PaymentsMethodsComponent,
     SearchableDropdownComponent,
+    HeadBranchDashboardComponent
   ],
   exports: [
     WebhookDataComponent,
@@ -148,12 +149,13 @@ import { SearchableDropdownComponent } from "../common/drop-down/drop-down.compo
     AllotCurrencyComponent,
     OverrideCurrencyRateComponent,
     ThemeToggleComponent,
-    HeadBranchDashboardComponent,
     HbPayinReportComponent,
     HbPayoutReportComponent,
     EnterKeyDirective,
     BankDetailsComponent,
     SearchableDropdownComponent,
+    BankDetailsComponent,
+    HeadBranchDashboardComponent
   ],
   imports: [
     CommonModule,

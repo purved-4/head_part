@@ -66,7 +66,7 @@ export class HeadNavSidebarComponent implements OnInit {
       children: [{ label: "Dashboard", route: "/head/dashboard" }],
     },
     //new hai code ke sath mujhe bs yahi dena hai
-    {
+   {
       label: "Inventory Management",
       route: "/head/bank",
       icon: "account_balance_wallet",
@@ -139,6 +139,7 @@ export class HeadNavSidebarComponent implements OnInit {
       route: "/head/reports/funds/approved",
       icon: "task_alt",
       children: [
+        
         {
           label: "Payin Reports",
           route: "/head/reports/funds/payin/bank",
@@ -151,6 +152,7 @@ export class HeadNavSidebarComponent implements OnInit {
         },
       ],
     },
+   
 
     {
       label: "Reports",
@@ -169,16 +171,17 @@ export class HeadNavSidebarComponent implements OnInit {
       ],
     },
     {
-      label: "Settings",
-      route: "/head/override-currency-management",
-      icon: "settings",
-      children: [
-        {
-          label: "Currency Management",
-          route: "/head/override-currency-management",
-        },
-      ],
+  label: "Settings",
+  route: "/head/override-currency-management", 
+  icon: "settings",
+  children: [
+    {
+      label: "Currency Management",
+      route: "/head/override-currency-management", 
     },
+   
+  ],
+},
   ];
 
   branchId: any;
@@ -293,12 +296,16 @@ export class HeadNavSidebarComponent implements OnInit {
       if (this.recentItems.length > 3) {
         this.recentItems.pop();
       }
+
+      
     }
   }
 
   getRecentItems() {
     return this.recentItems;
   }
+
+
 
   getAllMenuItems(): MenuItem[] {
     const items: MenuItem[] = [];
@@ -494,7 +501,7 @@ export class HeadNavSidebarComponent implements OnInit {
     const map: Record<string, string> = {
       // Dashboard
       "/head/dashboard": "dashboard",
-      "/head/payments-methods": "inventory_2",
+"/head/payments-methods": "inventory_2",
       "/head/recycle-management": "recycling",
 
       // Management
@@ -523,8 +530,10 @@ export class HeadNavSidebarComponent implements OnInit {
       "/head/reports/work-time": "schedule",
 
       // Approved Funds
-      "/head/reports/funds/payin/bank": "account_balance",
+       "/head/reports/funds/payin/bank": "account_balance",
       "/head/reports/funds/payin/payout": "payment",
+
+     
     };
 
     return map[route] || "chevron_right";

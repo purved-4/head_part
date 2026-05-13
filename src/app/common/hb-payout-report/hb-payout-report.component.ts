@@ -1,3 +1,4 @@
+
 import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { FundsService } from "../../pages/services/funds.service";
@@ -91,7 +92,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       if (!this.branchId) return;
 
       //  always call API
-      this.fetchAllRejectedPayouts();
+      // this.fetchAllRejectedPayouts();
     });
   }
 
@@ -188,7 +189,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   //       )
   //       .pipe(
   //         catchError((err) => {
-  //           console.error("Payout API Error:", err);
+
 
   //           this.snackbar.show("Failed to load payouts", false);
 
@@ -199,7 +200,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   //         }),
   //       )
   //       .subscribe((response: any) => {
-  //         console.log("Payout Response:", response);
+
 
   //         const list = this.extractListFromResponse(response);
 
@@ -255,7 +256,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       )
       .pipe(
         catchError((err) => {
-          console.error("Payout API Error:", err);
+
 
           this.snackbar.show("Failed to load payouts", false);
 
@@ -266,7 +267,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
         }),
       )
       .subscribe((response: any) => {
-        console.log("Payout Response:", response);
+
 
         const list = this.extractListFromResponse(response);
 

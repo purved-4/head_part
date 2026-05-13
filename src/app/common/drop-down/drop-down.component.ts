@@ -1,3 +1,4 @@
+
 import {
   Component,
   Input,
@@ -81,7 +82,7 @@ export class SearchableDropdownComponent
   @ViewChild('innerInput', { read: ElementRef }) 
   innerInput!: ElementRef;
 
-
+@Output() focusEvent = new EventEmitter<void>();
   
 
   isOpen = false;

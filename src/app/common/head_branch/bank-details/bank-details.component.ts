@@ -1,4 +1,4 @@
-// bank-details.component.ts
+
 
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 

@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { of, Subscription } from "rxjs";
@@ -18,16 +19,11 @@ import { ComPartService } from "../../pages/services/com-part.service";
   styleUrl: "./hb-payin-report.component.css",
 })
 export class HbPayinReportComponent implements OnInit, OnDestroy {
-  // Arrays for each type (server returns paginated data)
-  upipayins: any[] = [];
-  bankpayins: any[] = [];
-  approvedpayouts: any[] = [];
+    approvedpayins: any[] = [];
 
   // Pagination metadata from server
-  upiTotalRecords = 0;
-  bankTotalRecords = 0;
-  payoutTotalRecords = 0;
-
+   payinTotalRecords = 0;
+ 
   // Mode filter
   selectedMode: "all" | "upi" | "bank" = "all";
 
@@ -44,13 +40,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   // active view
   activeView: "upi" | "bank" | "payout" = "upi";
 
-  // ========== FILTER PROPERTIES (client‑side) ==========
-  // UPI filters
-  upiSearchQuery = "";
-  upiPortalFilter = "";
-  upiDateFrom = "";
-  upiDateTo = "";
-  upiPortals: any[] = [];
+ 
 
   // Bank filters
   bankSearchQuery = "";
@@ -59,34 +49,22 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   bankDateTo = "";
   bankPortals: any[] = [];
 
-  // Payout filters
-  payoutSearchQuery = "";
-  payoutPortalFilter = "";
-  payoutDateFrom = "";
-  payoutDateTo = "";
-  payoutPortals: any[] = [];
+ 
+ 
+ 
 
-  // ========== PAGINATION ==========
-  upiPage = 0;
-  upiPageSize = 10;
-  upiPageSizes = [5, 10, 20, 25, 50];
+  payinPage = 0;
+  payinPageSize = 10;
+  payinPageSizes = [5, 10, 20, 25, 50];
 
-  bankPage = 0;
-  bankPageSize = 10;
-  bankPageSizes = [5, 10, 20, 25, 50];
-
-  payoutApprovedPage = 0;
-  payoutApprovedPageSize = 10;
-  payoutApprovedPageSizes = [5, 10, 20, 25, 50];
-
+   payinApprovedPageSize = 10;
+ 
   // ========== FILTER DROPDOWN STATE ==========
   filterDropdownOpen: string | null = null; // 'upi' | 'bank' | 'payout' | null
 
   // ========== CUSTOM PORTAL DROPDOWN STATE ==========
-  upiPortalDropdownOpen = false;
-  bankPortalDropdownOpen = false;
-  payoutPortalDropdownOpen = false;
-
+   bankPortalDropdownOpen = false;
+ 
   // ========== MODAL & LIGHTBOX STATE ==========
   showRecordModal = false;
   selectedRecord: any = null;
@@ -124,13 +102,8 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
 
       if (!this.branchId) return;
 
-      // ✅ ALWAYS LOAD DATA
-      if (this.activeView === "upi") {
-        this.fetchUpiPayins();
-      } else if (this.activeView === "bank") {
-        this.fetchBankPayins();
-      } else {
-      }
+     
+    
     });
   }
 
@@ -168,51 +141,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       this.colors = branch;
     }
   }
-
-  fetchUpiPayins(): void {
-    if (!this.branchId) return;
-
-    const fromDate = this.upiDateFrom
-      ? DateTimeUtil.toUtcISOString(
-          new Date(new Date(this.upiDateFrom).setHours(0, 0, 0, 0)),
-        )
-      : undefined;
-
-    const toDate = this.upiDateTo
-      ? DateTimeUtil.toUtcISOString(
-          new Date(new Date(this.upiDateTo).setHours(23, 59, 59, 999)),
-        )
-      : undefined;
-
-    // ✅ FIXED
-    const portalId =
-      this.upiPortalFilter && this.upiPortalFilter !== ""
-        ? this.upiPortalFilter
-        : undefined;
-
-    this.fundService
-      .getPayinFundWithPortalIdAndEntityId(
-        this.branchId,
-        portalId,
-        this.selectedStatus,
-        this.upiPage,
-        this.upiPageSize,
-        undefined,
-        fromDate,
-        toDate,
-        "UPI",
-      )
-      .pipe(catchError(() => of({ content: [], totalElements: 0 })))
-      .subscribe((response: any) => {
-        const { list, total, pageNum, pageSize } = this.parseResponse(response);
-
-        this.upiTotalRecords = total;
-        this.upiPage = pageNum;
-        this.upiPageSize = pageSize;
-
-        this.mapFundsArray(list, "upi");
-      });
-  }
+ 
   fetchBankPayins(): void {
     if (!this.branchId) return;
 
@@ -238,8 +167,8 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
         this.branchId,
         portalId,
         this.selectedStatus,
-        this.bankPage, // ✅ FIXED
-        this.bankPageSize,
+        this.payinPage, // ✅ FIXED
+        this.payinPageSize,
         undefined,
         fromDate,
         toDate,
@@ -248,62 +177,18 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       )
       .pipe(catchError(() => of({ content: [], totalElements: 0 })))
       .subscribe((response: any) => {
+        console.log(response)
         const { list, total, pageNum, pageSize } = this.parseResponse(response);
 
-        this.bankTotalRecords = total;
-        this.bankPage = pageNum;
-        this.bankPageSize = pageSize;
-
+        this.payinTotalRecords = total;
+        this.payinPage = pageNum;
+        this.payinPageSize = pageSize;
+console.log(list)
         this.mapFundsArray(list, "bank");
       });
   }
 
-  // fetchApprovedPayouts(): void {
-  //   if (!this.branchId) return;
-
-  //   const fromDate = this.payoutDateFrom
-  //     ? DateTimeUtil.toUtcISOString(
-  //         new Date(new Date(this.payoutDateFrom).setHours(0, 0, 0, 0)),
-  //       )
-  //     : undefined;
-
-  //   const toDate = this.payoutDateTo
-  //     ? DateTimeUtil.toUtcISOString(
-  //         new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999)),
-  //       )
-  //     : undefined;
-
-  //   const portalId =
-  //     this.payoutPortalFilter && this.payoutPortalFilter !== ""
-  //       ? this.payoutPortalFilter
-  //       : undefined;
-
-  //   this.fundService
-  //     .getAllPayoutFundWithEntityAndPortalId(
-  //       this.branchId,
-  //       portalId,
-  //       this.selectedStatus,
-  //       this.payoutApprovedPage, // ✅ FIXED
-  //       this.payoutApprovedPageSize,
-  //       undefined,
-  //       fromDate,
-  //       toDate,
-  //     )
-  //     .pipe(
-  //       catchError(() => {
-  //         return of({ content: [], totalElements: 0 });
-  //       }),
-  //     )
-  //     .subscribe((response: any) => {
-  //       const { list, total, pageNum, pageSize } = this.parseResponse(response);
-
-  //       this.payoutTotalRecords = total;
-  //       this.payoutApprovedPage = pageNum;
-  //       this.payoutApprovedPageSize = pageSize;
-
-  //       this.mapPayoutArray(list);
-  //     });
-  // }
+ 
 
   loadPortalOptions(): void {
     if (!this.branchId) return;
@@ -321,7 +206,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
               : [];
 
           const uniqueMap = new Map<string, any>();
-          console.log(source);
+
           source.forEach((item: any) => {
             if (item?.compartId && item?.compartUsername) {
               uniqueMap.set(item.compartId, {
@@ -341,10 +226,8 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   private setPortals(portals: any[]) {
     this.portalOptions = portals;
 
-    this.upiPortals = portals;
-    this.bankPortals = portals;
-    this.payoutPortals = portals;
-  }
+     this.bankPortals = portals;
+   }
 
   // Helper to parse various response shapes
   private parseResponse(response: any): {
@@ -380,11 +263,10 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   }
   // ============ MAPPERS ============
   private mapFundsArray(items: any[], mode: "bank" | "upi") {
-    const targetArray = mode === "bank" ? this.bankpayins : this.upipayins;
-    targetArray.length = 0;
+        this.approvedpayins = items.map((it: any) => ({
 
-    items.forEach((it: any) => {
-      const normalized = {
+    
+     
         mode: mode,
 
         portal: it.portalDomain || it.portalId || "—",
@@ -408,353 +290,97 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
         date: it.createdAt ? new Date(it.createdAt) : new Date(),
 
         raw: it,
-      };
-
-      targetArray.push(normalized);
-    });
-
-    targetArray.sort(
+       }));
+    this.approvedpayins.sort(
       (a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0),
     );
+
+  
   }
+ 
 
-  private mapPayoutArray(items: any[]) {
-    this.approvedpayouts = items.map((it: any) => ({
-      mode: "payout",
-      userId: it.userId,
-      accountNo: it.accountNo || it.raw?.accountNo || it.accNo || "-",
-      ifscCode: it.ifsc,
-      holder: it.holder,
-      amount: Number(it.currencyWiseAmount ?? it.amount ?? it.value ?? 0),
-      status: it.status || it.state || "ACCEPTED",
-      reviewStatus: it.reviewStatus,
-      remarks: it.remarks,
-      portalDomain: it.portalDomain,
-      queryText: it.queryText,
-      rejectionFilePath: it.rejectionFilePath,
-      date: it.dateTime
-        ? new Date(it.dateTime)
-        : it.createdAt
-          ? new Date(it.createdAt)
-          : new Date(),
-      raw: it.raw || it,
-    }));
-    this.approvedpayouts.sort(
-      (a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0),
-    );
-  }
-
-  // ============ FILTERED ARRAYS (client‑side) ============
-  filteredUpipayins(): any[] {
-    return this.upipayins.filter((item) => {
-      // SEARCH
-      if (this.upiSearchQuery) {
-        const query = this.upiSearchQuery.toLowerCase();
-
-        const searchFields = [
-          item.vpa,
-          item.upiId,
-          item.transactionId,
-          item.portal,
-          item.accountNo,
-        ]
-          .filter(Boolean)
-          .map((f) => f.toString().toLowerCase());
-
-        if (!searchFields.some((f) => f.includes(query))) {
-          return false;
-        }
-      }
-
-      // PORTAL FILTER (FIXED)
-      if (
-        this.upiPortalFilter &&
-        (item.portalId || item.raw?.portalId) !== this.upiPortalFilter
-      ) {
-        return false;
-      }
-
-      // DATE FILTER
-      const itemDate = new Date(item.date);
-
-      if (this.upiDateFrom) {
-        const from = new Date(this.upiDateFrom);
-        from.setHours(0, 0, 0, 0);
-        if (itemDate < from) return false;
-      }
-
-      if (this.upiDateTo) {
-        const to = new Date(this.upiDateTo);
-        to.setHours(23, 59, 59, 999);
-        if (itemDate > to) return false;
-      }
-
-      return true;
-    });
-  }
+ 
 
   filteredBankpayins(): any[] {
-    return this.bankpayins.filter((item) => {
-      // SEARCH
-      if (this.bankSearchQuery) {
-        const query = this.bankSearchQuery.toLowerCase();
-
-        const searchFields = [
-          item.accountNo,
-          item.transactionId,
-          item.portal,
-          item.raw?.bankAccountHolderName,
-        ]
-          .filter(Boolean)
-          .map((f) => f.toString().toLowerCase());
-
-        if (!searchFields.some((f) => f.includes(query))) {
-          return false;
-        }
-      }
-
-      // PORTAL FILTER (FIXED)
-      if (
-        this.bankPortalFilter &&
-        (item.portalId || item.raw?.portalId) !== this.bankPortalFilter
-      ) {
-        return false;
-      }
-
-      // DATE FILTER
-      const itemDate = new Date(item.date);
-
-      if (this.bankDateFrom) {
-        const from = new Date(this.bankDateFrom);
-        from.setHours(0, 0, 0, 0);
-        if (itemDate < from) return false;
-      }
-
-      if (this.bankDateTo) {
-        const to = new Date(this.bankDateTo);
-        to.setHours(23, 59, 59, 999);
-        if (itemDate > to) return false;
-      }
-
-      return true;
-    });
+    return this.approvedpayins;
   }
+ 
 
-  filteredApprovedpayouts(): any[] {
-    return this.approvedpayouts.filter((item) => {
-      // SEARCH
-      if (this.payoutSearchQuery) {
-        const query = this.payoutSearchQuery.toLowerCase();
-
-        const searchFields = [
-          item.accountNo,
-          item.ifscCode,
-          item.holder,
-          item.portalDomain,
-        ]
-          .filter(Boolean)
-          .map((f) => f.toString().toLowerCase());
-
-        if (!searchFields.some((f) => f.includes(query))) {
-          return false;
-        }
-      }
-
-      // PORTAL FILTER (FIXED)
-      if (
-        this.payoutPortalFilter &&
-        (item.raw?.portalId || item.portalId) !== this.payoutPortalFilter
-      ) {
-        return false;
-      }
-
-      // DATE FILTER
-      const itemDate = new Date(item.date);
-
-      if (this.payoutDateFrom) {
-        const from = new Date(this.payoutDateFrom);
-        from.setHours(0, 0, 0, 0);
-        if (itemDate < from) return false;
-      }
-
-      if (this.payoutDateTo) {
-        const to = new Date(this.payoutDateTo);
-        to.setHours(23, 59, 59, 999);
-        if (itemDate > to) return false;
-      }
-
-      return true;
-    });
-  }
-
-  // ============ PAGINATED ARRAYS ============
-  pagedUpipayins(): any[] {
-    const filtered = this.filteredUpipayins();
-
-    const start = this.upiPage * this.upiPageSize;
-    const end = start + this.upiPageSize;
-
-    // 🔥 IMPORTANT: always safe slice on filtered only
-    return filtered.slice(start, end);
-  }
-
-  upiTotalPages(): number {
-    return Math.ceil(this.filteredUpipayins().length / this.upiPageSize);
-  }
+ 
 
   pagedBankpayins(): any[] {
-    const filtered = this.filteredBankpayins();
-
-    const start = this.bankPage * this.bankPageSize;
-    const end = start + this.bankPageSize;
-
-    return filtered.slice(start, end);
+ return this.approvedpayins;
   }
 
   bankTotalPages(): number {
-    return Math.ceil(this.filteredBankpayins().length / this.bankPageSize);
+    return  Math.max(
+      1,
+      Math.ceil(this.payinTotalRecords / this.payinApprovedPageSize),
+    ); Math.ceil(this.filteredBankpayins().length / this.payinPageSize);
   }
 
-  pagedApprovedpayouts(): any[] {
-    const filtered = this.filteredApprovedpayouts();
+  
 
-    const start = this.payoutApprovedPage * this.payoutApprovedPageSize;
-    const end = start + this.payoutApprovedPageSize;
+   
 
-    return filtered.slice(start, end);
-  }
-
-  payoutApprovedTotalPages(): number {
-    return Math.ceil(
-      this.filteredApprovedpayouts().length / this.payoutApprovedPageSize,
-    );
-  }
-
-  // ============ PAGINATION CONTROLS ============
-  setUpiPage(p: number) {
-    const totalPages = this.upiTotalPages();
-    this.upiPage = Math.max(0, Math.min(p, totalPages - 1));
-  }
-
-  setBankPage(p: number) {
+  setpayinPage(p: number) {
     const totalPages = this.bankTotalPages();
-    this.bankPage = Math.max(0, Math.min(p, totalPages - 1));
+    this.payinPage = Math.max(0, Math.min(p, totalPages - 1));
   }
 
-  setpayoutApprovedPage(p: number) {
-    const totalPages = this.payoutApprovedTotalPages();
-    this.payoutApprovedPage = Math.max(0, Math.min(p, totalPages - 1));
+  
+
+ 
+
+  onChangepayinPageSize(size: number) {
+    this.payinPageSize = Number(size);
+    this.payinPage = 0;
   }
 
-  onChangeUpiPageSize(size: number) {
-    this.upiPageSize = Number(size);
-    this.upiPage = 0;
-  }
-
-  onChangeBankPageSize(size: number) {
-    this.bankPageSize = Number(size);
-    this.bankPage = 0;
-  }
-
-  onChangepayoutApprovedPageSize(size: number) {
-    this.payoutApprovedPageSize = Number(size);
-    this.payoutApprovedPage = 0;
-  }
+  
 
   // ============ FILTER DROPDOWN CONTROLS ============
   toggleFilterDropdown(view: string) {
     this.filterDropdownOpen = this.filterDropdownOpen === view ? null : view;
   }
 
-  get upiFilterActive(): boolean {
-    return !!(this.upiDateFrom || this.upiDateTo);
-  }
+ 
 
   get bankFilterActive(): boolean {
     return !!(this.bankDateFrom || this.bankDateTo);
   }
-
-  get payoutFilterActive(): boolean {
-    return !!(this.payoutDateFrom || this.payoutDateTo);
-  }
-
-  clearUpiDateFilters() {
-    this.upiDateFrom = "";
-    this.upiDateTo = "";
-  }
+ 
 
   clearBankDateFilters() {
     this.bankDateFrom = "";
     this.bankDateTo = "";
   }
-
-  clearPayoutDateFilters() {
-    this.payoutDateFrom = "";
-    this.payoutDateTo = "";
-  }
-
+ 
   // ============ PORTAL DROPDOWN CONTROLS ============
   togglePortalDropdown(view: "upi" | "bank" | "payout") {
-    if (view === "upi") {
-      this.upiPortalDropdownOpen = !this.upiPortalDropdownOpen;
-      this.bankPortalDropdownOpen = false;
-      this.payoutPortalDropdownOpen = false;
-    } else if (view === "bank") {
+  
       this.bankPortalDropdownOpen = !this.bankPortalDropdownOpen;
-      this.upiPortalDropdownOpen = false;
-      this.payoutPortalDropdownOpen = false;
-    } else if (view === "payout") {
-      this.payoutPortalDropdownOpen = !this.payoutPortalDropdownOpen;
-      this.upiPortalDropdownOpen = false;
-      this.bankPortalDropdownOpen = false;
-    }
+        
   }
 
   selectPortal(view: "upi" | "bank" | "payout", portal: any) {
     const portalId = portal?.id || "";
-
-    if (view === "upi") {
-      this.upiPortalFilter = portalId;
-      this.upiPortalDropdownOpen = false;
-      this.upiPage = 0;
-      this.fetchUpiPayins();
-    } else if (view === "bank") {
+ 
       this.bankPortalFilter = portalId;
       this.bankPortalDropdownOpen = false;
-      this.bankPage = 0;
+      this.payinPage = 0;
       this.fetchBankPayins();
-    } else {
-      this.payoutPortalFilter = portalId;
-      this.payoutPortalDropdownOpen = false;
-      this.payoutApprovedPage = 0;
-    }
-  }
+    }  
+  
 
-  // ============ FILTER TRIGGERS ============
-  applyUpiFilters() {
-    this.upiPage = 0;
-    if (this.upiPortalFilter) {
-      this.fetchUpiPayins();
-    }
-  }
+ 
 
-  applyUpiFiltersAndClose() {
-    this.applyUpiFilters();
-    this.filterDropdownOpen = null;
-  }
+ 
 
-  clearUpiFilters() {
-    this.upiSearchQuery = "";
-    this.upiPortalFilter = "";
-    this.upiDateFrom = "";
-    this.upiDateTo = "";
-    this.upiPage = 0;
-    this.fetchUpiPayins();
-    this.filterDropdownOpen = null;
-  }
+ 
 
   applyBankFilters() {
-    this.bankPage = 0;
+    this.payinPage = 0;
     if (this.bankPortalFilter) {
       this.fetchBankPayins();
     }
@@ -771,39 +397,19 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     this.bankDateFrom = "";
     this.bankDateTo = "";
 
-    this.bankPage = 0;
-    this.fetchBankPayins(); // ✅ REQUIRED
+    this.payinPage = 0;
+    // this.fetchBankPayins(); // ✅ REQUIRED
   }
 
-  applyPayoutFilters() {
-    this.payoutApprovedPage = 0;
-    if (this.payoutPortalFilter) {
-    }
-  }
-
-  applyPayoutFiltersAndClose() {
-    this.applyPayoutFilters();
-    this.filterDropdownOpen = null;
-  }
-
-  clearPayoutFilters() {
-    this.payoutSearchQuery = "";
-    this.payoutPortalFilter = "";
-    this.payoutDateFrom = "";
-    this.payoutDateTo = "";
-    this.payoutApprovedPage = 0;
-    this.filterDropdownOpen = null;
-  }
-
+  
+ 
   // ============ REFRESH BUTTON ============
   refreshCurrentView(): void {
-    if (this.activeView === "upi") {
-      this.fetchUpiPayins();
-    } else if (this.activeView === "bank") {
-      this.fetchBankPayins();
-    } else {
-    }
+    
+       this.fetchBankPayins();
+  
   }
+
   refreshPage(): void {
     this.isRefreshing = true;
     setTimeout(() => {
@@ -1014,36 +620,28 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   getSelectedPortalDomain(view: "upi" | "bank" | "payout"): string {
     let selectedId = "";
 
-    if (view === "upi") selectedId = this.upiPortalFilter;
-    else if (view === "bank") selectedId = this.bankPortalFilter;
-    else selectedId = this.payoutPortalFilter;
-
+     if (view === "bank") selectedId = this.bankPortalFilter;
+ 
     const found = this.portalOptions.find((p) => p.id === selectedId);
     return found ? found.domain : "All Compart";
   }
   onModeChange(mode: "all" | "upi" | "bank") {
     this.selectedMode = mode;
 
-    this.upiPage = 0;
-    this.bankPage = 0;
-    this.payoutApprovedPage = 0;
-
+     this.payinPage = 0;
+ 
     this.refreshCurrentView();
   }
   onStatusChange(status: "ACCEPTED" | "REJECTED" | "PENDING") {
     this.selectedStatus = status;
 
-    this.upiPage = 0;
-    this.bankPage = 0;
-    this.payoutApprovedPage = 0;
-
+     this.payinPage = 0;
+ 
     this.refreshCurrentView();
   }
   resetPages() {
-    this.upiPage = 0;
-    this.bankPage = 0;
-    this.payoutApprovedPage = 0;
-  }
+     this.payinPage = 0;
+   }
   getFundType(): string {
     if (this.selectedMode === "upi") return "UPI";
 

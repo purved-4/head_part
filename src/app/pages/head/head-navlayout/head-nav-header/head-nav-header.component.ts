@@ -150,23 +150,23 @@ export class HeadNavHeaderComponent implements OnInit {
   loadPortalPercentages() {
     this.loadingPortalPercent = true;
 
-    this.headServices.getHeadPortalPercentage(this.currentRoleId).subscribe({
-      next: (res: any) => {
-        if (Array.isArray(res)) {
-          this.portalPercentages = res;
-        } else if (res?.data && Array.isArray(res.data)) {
-          this.portalPercentages = res.data;
-        } else {
-          this.portalPercentages = [];
-        }
+    // this.headServices.getHeadPortalPercentage(this.currentRoleId).subscribe({
+    //   next: (res: any) => {
+    //     if (Array.isArray(res)) {
+    //       this.portalPercentages = res;
+    //     } else if (res?.data && Array.isArray(res.data)) {
+    //       this.portalPercentages = res.data;
+    //     } else {
+    //       this.portalPercentages = [];
+    //     }
 
-        this.loadingPortalPercent = false;
-      },
-      error: (err) => {
-        this.portalPercentages = [];
-        this.loadingPortalPercent = false;
-      },
-    });
+    //     this.loadingPortalPercent = false;
+    //   },
+    //   error: (err) => {
+    //     this.portalPercentages = [];
+    //     this.loadingPortalPercent = false;
+    //   },
+    // });
   }
 
   // Refresh data

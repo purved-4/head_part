@@ -98,7 +98,7 @@ export class OverrideCurrencyRateComponent implements OnInit {
   //       }));
   //     },
   //     error: (err) => {
-  //       console.error('Currency fetch failed', err);
+
   //     }
   //   });
   // }
@@ -106,16 +106,27 @@ export class OverrideCurrencyRateComponent implements OnInit {
   loadCurrencies() {
   this.currencyServices.getCurrencyForHeadAndBranch(this.entityId, this.role).subscribe({
     next: (res: any) => {
-      this.currencies = (res || []).map((c: any) => ({
-        ...c,
-        overrideRate: this.isManagerView ? c.rate : c.rate,
-        effectiveFrom: this.isManagerView ? c.effectiveFrom : this.getLocalDateTime(),
-        active: true,
-        isEditing: false
-      }));
+    this.currencies = (res || []).map((c: any) => {
+  const dynamicMin = c?.dynamicTime?.min ?? 0;
+
+  // base time: API time OR current time
+  const base = c?.effectiveFrom ? new Date(c.effectiveFrom) : new Date();
+
+  // add dynamic + 1
+  base.setMinutes(base.getMinutes() + dynamicMin + 1);
+
+  return {
+    ...c,
+    overrideRate: c.rate,
+    effectiveFrom: this.formatToLocalDateTime(base),
+    active: true,
+    isEditing: false
+  };
+});
+
     },
     error: (err) => {
-      console.error('Currency fetch failed', err);
+
     }
   });
 }
@@ -126,6 +137,10 @@ export class OverrideCurrencyRateComponent implements OnInit {
   return now.toISOString().slice(0, 16);
 }
   
+formatToLocalDateTime(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
 
   // createCustomCurrency(item: any) {
   //   if (!this.customRate) return;
@@ -168,7 +183,7 @@ export class OverrideCurrencyRateComponent implements OnInit {
 
   this.currencyServices.addCustomCurrencyForHeadAndBranch(payload).subscribe({
     next: (res: any) => {
-      console.log(res);
+
       
       this.snack.show(res?.message || "Created successfully", true);
 

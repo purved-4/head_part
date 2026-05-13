@@ -414,33 +414,33 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
 
     this.showSinglePortalModal = true;
 
-    this.branchService.getBranchPortalPercentage(agent.id).subscribe({
-      next: (res: any) => {
-        const percentages = Array.isArray(res?.data)
-          ? res.data
-          : Array.isArray(res)
-            ? res
-            : [];
+    // this.branchService.getBranchPortalPercentage(agent.id).subscribe({
+    //   next: (res: any) => {
+    //     const percentages = Array.isArray(res?.data)
+    //       ? res.data
+    //       : Array.isArray(res)
+    //         ? res
+    //         : [];
 
-        const matched = percentages.find(
-          (p: any) =>
-            p.portalId === portal.portalId ||
-            p.portalName === portal.portalDomain,
-        );
+    //     const matched = percentages.find(
+    //       (p: any) =>
+    //         p.portalId === portal.portalId ||
+    //         p.portalName === portal.portalDomain,
+    //     );
 
-        if (matched) {
-          this.selectedPortal = {
-            ...this.selectedPortal,
-            fttPercentage: Number(matched.fttPercentage) || 0,
-            payinPercentage: Number(matched.payinPercentage) || 0,
-            payoutPercentage: Number(matched.payoutPercentage) || 0,
-          };
-        }
+    //     if (matched) {
+    //       this.selectedPortal = {
+    //         ...this.selectedPortal,
+    //         fttPercentage: Number(matched.fttPercentage) || 0,
+    //         payinPercentage: Number(matched.payinPercentage) || 0,
+    //         payoutPercentage: Number(matched.payoutPercentage) || 0,
+    //       };
+    //     }
 
-        this.cdr.detectChanges();
-      },
-      error: (err) => {},
-    });
+    //     this.cdr.detectChanges();
+    //   },
+    //   error: (err) => {},
+    // });
   }
 
   closeSinglePortalModal(): void {
@@ -464,43 +464,43 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
       }),
     );
 
-    this.branchService.getBranchPortalPercentage(agent.id).subscribe({
-      next: (res: any) => {
-        const percentages = Array.isArray(res?.data)
-          ? res.data
-          : Array.isArray(res)
-            ? res
-            : [];
+    // this.branchService.getBranchPortalPercentage(agent.id).subscribe({
+    //   next: (res: any) => {
+    //     const percentages = Array.isArray(res?.data)
+    //       ? res.data
+    //       : Array.isArray(res)
+    //         ? res
+    //         : [];
 
-        const updatedPortals = (agent.portalsWithRange || []).map((portal) => {
-          const matched = percentages.find(
-            (p: any) =>
-              p.portalId === portal.portalId ||
-              p.portalName === portal.portalDomain,
-          );
+    //     const updatedPortals = (agent.portalsWithRange || []).map((portal) => {
+    //       const matched = percentages.find(
+    //         (p: any) =>
+    //           p.portalId === portal.portalId ||
+    //           p.portalName === portal.portalDomain,
+    //       );
 
-          return {
-            ...portal,
-            fttPercentage: Number(matched?.fttPercentage) || 0,
-            payinPercentage: Number(matched?.payinPercentage) || 0,
-            payoutPercentage: Number(matched?.payoutPercentage) || 0,
-          };
-        });
+    //       return {
+    //         ...portal,
+    //         fttPercentage: Number(matched?.fttPercentage) || 0,
+    //         payinPercentage: Number(matched?.payinPercentage) || 0,
+    //         payoutPercentage: Number(matched?.payoutPercentage) || 0,
+    //       };
+    //     });
 
-        this.filteredModalPortals = updatedPortals;
+    //     this.filteredModalPortals = updatedPortals;
 
-        // optional: also update selectedAgent data so modal search uses latest values
-        if (this.selectedAgent) {
-          this.selectedAgent = {
-            ...this.selectedAgent,
-            portalsWithRange: updatedPortals,
-          };
-        }
+    //     // optional: also update selectedAgent data so modal search uses latest values
+    //     if (this.selectedAgent) {
+    //       this.selectedAgent = {
+    //         ...this.selectedAgent,
+    //         portalsWithRange: updatedPortals,
+    //       };
+    //     }
 
-        this.cdr.detectChanges();
-      },
-      error: (err) => {},
-    });
+    //     this.cdr.detectChanges();
+    //   },
+    //   error: (err) => {},
+    // });
   }
 
   closeAllPortalsModal(): void {
@@ -1357,35 +1357,35 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
           active: typeof w.active === "boolean" ? w.active : true,
         }));
 
-        // then load latest percentages for selected branch
-        this.branchService.getBranchPortalPercentage(agent.id).subscribe({
-          next: (res2: any) => {
-            const percentages = Array.isArray(res2) ? res2 : [];
+        // // then load latest percentages for selected branch
+        // this.branchService.getBranchPortalPercentage(agent.id).subscribe({
+        //   next: (res2: any) => {
+        //     const percentages = Array.isArray(res2) ? res2 : [];
 
-            this.editForm.portalsWithRange = this.editForm.portalsWithRange.map(
-              (portal) => {
-                const matched = percentages.find(
-                  (p: any) => p.portalId === portal.portalId,
-                );
+        //     this.editForm.portalsWithRange = this.editForm.portalsWithRange.map(
+        //       (portal) => {
+        //         const matched = percentages.find(
+        //           (p: any) => p.portalId === portal.portalId,
+        //         );
 
-                return {
-                  ...portal,
-                  fttPercentage: Number(matched?.fttPercentage) || 0,
-                  payinPercentage: Number(matched?.payinPercentage) || 0,
-                  payoutPercentage: Number(matched?.payoutPercentage) || 0,
-                };
-              },
-            );
+        //         return {
+        //           ...portal,
+        //           fttPercentage: Number(matched?.fttPercentage) || 0,
+        //           payinPercentage: Number(matched?.payinPercentage) || 0,
+        //           payoutPercentage: Number(matched?.payoutPercentage) || 0,
+        //         };
+        //       },
+        //     );
 
-            this.loadingPortals = false;
-            this.cdr.detectChanges();
-          },
-          error: (err) => {
-            this.loadingPortals = false;
-            this.snack.show("Failed to load portal percentages", false);
-            this.cdr.detectChanges();
-          },
-        });
+        //     this.loadingPortals = false;
+        //     this.cdr.detectChanges();
+        //   },
+        //   error: (err) => {
+        //     this.loadingPortals = false;
+        //     this.snack.show("Failed to load portal percentages", false);
+        //     this.cdr.detectChanges();
+        //   },
+        // });
       },
       error: (err) => {
         this.portalOptions = [];

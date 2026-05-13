@@ -193,9 +193,9 @@ export class HeadDashboardComponent
   selectedBank: any = null;
 
   payinStatus: any = false;
-  private realtimeUpdateInterval: any = null;
-  private latestDynamicPayin: any = null;
-  private latestDynamicPayout: any = null;
+private realtimeUpdateInterval: any = null;
+private latestDynamicPayin: any = null;
+private latestDynamicPayout: any = null;
   constructor(
     private fundService: FundsService,
     private userStateService: UserStateService,
@@ -214,7 +214,7 @@ export class HeadDashboardComponent
     this.chiefService
       .getCurrenciesByEntity(this.headId, this.role)
       .subscribe((res) => {
-        console.log(res);
+
       });
     this.getPayinStatus();
 
@@ -350,7 +350,7 @@ export class HeadDashboardComponent
         const tx = {
           id: fund.id || null,
           fundId: fund.id || null,
-          fundtype: fund.fundtype,
+            fundtype: fund.fundtype,
           type: "payin",
           portal:
             fund.portalName || fund.portalDomain || fund.portalId || "Portal",
@@ -1524,21 +1524,19 @@ export class HeadDashboardComponent
   onProcessingClick(fundId: any) {
     if (!fundId) return;
 
-    this.fundService
-      .updateProcessingStatus(fundId.id, this.headId, this.role)
-      .subscribe(
-        (res) => {
-          // Start a 1s timer so getRemainingTimeLabel() uses a moving reference (processingNow)
-          // This is safe to call multiple times because startProcessingTimer guards against duplicates.
-          this.startProcessingTimer();
-        },
-        (err) => {
-          const message =
-            err?.error?.message || err?.error?.error || "Processing failed";
+    this.fundService.updateProcessingStatus(fundId.id, this.headId,this.role).subscribe(
+      (res) => {
+        // Start a 1s timer so getRemainingTimeLabel() uses a moving reference (processingNow)
+        // This is safe to call multiple times because startProcessingTimer guards against duplicates.
+        this.startProcessingTimer();
+      },
+      (err) => {
+        const message =
+          err?.error?.message || err?.error?.error || "Processing failed";
 
-          this.snackbar.show(message, false);
-        },
-      );
+        this.snackbar.show(message, false);
+      },
+    );
   }
 
   private startProcessingTimer(): void {
@@ -1963,7 +1961,7 @@ export class HeadDashboardComponent
             : fund.transactionType === "payout"
               ? "payout"
               : "payin",
-      fundtype: fund.fundtype,
+  fundtype: fund.fundtype,
       portal: fund.portalName || fund.portalDomain || fund.portalId || null,
 
       currency: fund.currency,
@@ -2125,114 +2123,114 @@ export class HeadDashboardComponent
   //   this.ensureProcessingTimerState();
   // }
 
-  private processIncomingEvent(data: any) {
-    if (!data) return;
+private processIncomingEvent(data: any) {
+  if (!data) return;
 
-    // store configs
-    this.latestDynamicPayin = data?.DYNAMIC_PAYIN_TIME;
-    this.latestDynamicPayout = data?.DYNAMIC_PAYOUT_TIME;
+  // store configs
+  this.latestDynamicPayin = data?.DYNAMIC_PAYIN_TIME;
+  this.latestDynamicPayout = data?.DYNAMIC_PAYOUT_TIME;
 
-    const dynamicPayin = this.latestDynamicPayin;
-    const dynamicPayout = this.latestDynamicPayout;
+  const dynamicPayin = this.latestDynamicPayin;
+  const dynamicPayout = this.latestDynamicPayout;
 
-    // =========================
-    // UPI
-    // =========================
-    this.pendingUpi = Array.isArray(data.PENDING_UPI)
-      ? data.PENDING_UPI.map((f: any) => {
-          const tx = this.normalizeIncomingFund(f, "upi");
-          if (!tx) return null;
+  // =========================
+  // UPI
+  // =========================
+  this.pendingUpi = Array.isArray(data.PENDING_UPI)
+    ? data.PENDING_UPI.map((f: any) => {
+        const tx = this.normalizeIncomingFund(f, "upi");
+        if (!tx) return null;
 
-          const slab = this.getPayinSlabInfo(tx, dynamicPayin);
+        const slab = this.getPayinSlabInfo(tx, dynamicPayin);
 
-          return {
-            ...tx,
-            slabPercentage: slab?.percentage ?? 100,
-            slabEligible: slab?.eligible ?? true,
-            timePassed: slab?.diffMinutes,
-          };
-        }).filter(Boolean)
-      : [];
+        return {
+          ...tx,
+          slabPercentage: slab?.percentage ?? 100,
+          slabEligible: slab?.eligible ?? true,
+          timePassed: slab?.diffMinutes,
+        };
+      }).filter(Boolean)
+    : [];
 
-    // =========================
-    // BANK
-    // =========================
-    this.pendingBank = Array.isArray(data.PENDING_BANK)
-      ? data.PENDING_BANK.map((f: any) => {
-          const tx = this.normalizeIncomingFund(f, "bank");
-          if (!tx) return null;
+  // =========================
+  // BANK
+  // =========================
+  this.pendingBank = Array.isArray(data.PENDING_BANK)
+    ? data.PENDING_BANK.map((f: any) => {
+        const tx = this.normalizeIncomingFund(f, "bank");
+        if (!tx) return null;
 
-          const slab = this.getPayinSlabInfo(tx, dynamicPayin);
+        const slab = this.getPayinSlabInfo(tx, dynamicPayin);
 
-          return {
-            ...tx,
-            slabPercentage: slab?.percentage ?? 100,
-            slabEligible: slab?.eligible ?? true,
-            timePassed: slab?.diffMinutes,
-          };
-        }).filter(Boolean)
-      : [];
+        return {
+          ...tx,
+          slabPercentage: slab?.percentage ?? 100,
+          slabEligible: slab?.eligible ?? true,
+          timePassed: slab?.diffMinutes,
+        };
+      }).filter(Boolean)
+    : [];
 
-    // =========================
-    // PAYOUT
-    // =========================
-    this.pendingpayouts = Array.isArray(data.PENDING_PAYOUT)
-      ? data.PENDING_PAYOUT.map((f: any) => {
-          const tx = this.normalizeIncomingFund(f, "payout");
-          if (!tx) return null;
+  // =========================
+  // PAYOUT
+  // =========================
+  this.pendingpayouts = Array.isArray(data.PENDING_PAYOUT)
+    ? data.PENDING_PAYOUT.map((f: any) => {
+        const tx = this.normalizeIncomingFund(f, "payout");
+        if (!tx) return null;
 
-          const slab = this.getPayoutSlabInfo(tx, dynamicPayout);
+        const slab = this.getPayoutSlabInfo(tx, dynamicPayout);
 
-          return {
-            ...tx,
-            slabPercentage: slab?.percentage ?? 0,
-            slabEligible: slab?.eligible ?? false,
-            timePassed: slab?.diffMinutes,
-          };
-        }).filter(Boolean)
-      : [];
+        return {
+          ...tx,
+          slabPercentage: slab?.percentage ?? 0,
+          slabEligible: slab?.eligible ?? false,
+          timePassed: slab?.diffMinutes,
+        };
+      }).filter(Boolean)
+    : [];
 
-    // =========================
-    // KEEP YOUR EXISTING LOGIC
-    // =========================
-    this.acceptedUpi =
-      typeof data.ACCEPTED_CURRENCY_UPI !== "undefined"
-        ? data.ACCEPTED_CURRENCY_UPI
-        : this.acceptedUpi;
+  // =========================
+  // KEEP YOUR EXISTING LOGIC
+  // =========================
+  this.acceptedUpi =
+    typeof data.ACCEPTED_CURRENCY_UPI !== "undefined"
+      ? data.ACCEPTED_CURRENCY_UPI
+      : this.acceptedUpi;
 
-    this.acceptedBank =
-      typeof data.ACCEPTED_CURRENCY_BANK !== "undefined"
-        ? data.ACCEPTED_CURRENCY_BANK
-        : this.acceptedBank;
+  this.acceptedBank =
+    typeof data.ACCEPTED_CURRENCY_BANK !== "undefined"
+      ? data.ACCEPTED_CURRENCY_BANK
+      : this.acceptedBank;
 
-    this.acceptedWid =
-      typeof data.ACCEPTED_CURRENCY_PAYOUT !== "undefined"
-        ? data.ACCEPTED_CURRENCY_PAYOUT
-        : this.acceptedWid;
+  this.acceptedWid =
+    typeof data.ACCEPTED_CURRENCY_PAYOUT !== "undefined"
+      ? data.ACCEPTED_CURRENCY_PAYOUT
+      : this.acceptedWid;
 
-    this.acceptedDep = this.acceptedBank + this.acceptedUpi;
+  this.acceptedDep = this.acceptedBank + this.acceptedUpi;
 
-    this.branchCom =
-      typeof data.Branch_Balance !== "undefined"
-        ? data.Branch_Balance
-        : this.branchCom;
+  this.branchCom =
+    typeof data.Branch_Balance !== "undefined"
+      ? data.Branch_Balance
+      : this.branchCom;
 
-    this.extractPortalsFromFetched(this.pendingBank.map((p) => p.raw || p));
+  this.extractPortalsFromFetched(this.pendingBank.map((p) => p.raw || p));
 
-    this.computeStatsFromData();
-    this.updateChartsFromData();
-    this.clampPages();
-    this.ensureProcessingTimerState();
+  this.computeStatsFromData();
+  this.updateChartsFromData();
+  this.clampPages();
+  this.ensureProcessingTimerState();
 
-    // 🔥 IMPORTANT: realtime update
-    if (
-      this.pendingUpi.length > 0 ||
-      this.pendingBank.length > 0 ||
-      this.pendingpayouts.length > 0
-    ) {
-      this.startRealtimeUpdates();
-    }
+  // 🔥 IMPORTANT: realtime update
+  if (
+    this.pendingUpi.length > 0 ||
+    this.pendingBank.length > 0 ||
+    this.pendingpayouts.length > 0
+  ) {
+    this.startRealtimeUpdates();
   }
+}
 
   // Ensure accepted payouts amount is present by calling the API when SSE doesn't provide it
 
@@ -2412,170 +2410,174 @@ export class HeadDashboardComponent
     return result.trim() || "Just now";
   }
 
+
   getTransactionLabel(tx: any): string {
-    if (tx.type === "payout") return "Payout";
-    if (tx.fundtype === "UPI") return "UPI";
-    return "Bank";
+  if (tx.type === 'payout') return 'Payout';
+  if (tx.fundtype === 'UPI') return 'UPI';
+  return 'Bank';
+}
+
+getTxKind(tx: any): 'UPI' | 'Bank' | 'Payout' {
+  if (tx.type === 'payout') return 'Payout';
+  return (tx.fundtype || '').toUpperCase() === 'UPI' ? 'UPI' : 'Bank';
+}
+
+getTxAccountLabel(tx: any): string {
+  if ((tx.fundtype || '').toUpperCase() === 'UPI') {
+    return tx.upiId || tx.vpa || '—';
+  }
+  return tx.accountNo || tx.holderName || '—';
+}
+
+
+
+getPayinSlabInfo(transaction: any, dynamicConfig: any) {
+  if (!transaction?.date) return null;
+
+  const createdTime = new Date(transaction.date).getTime();
+  const now = Date.now();
+  const diffMinutes = Math.floor((now - createdTime) / 60000);
+
+  let ranges = dynamicConfig?.timeRanges || [];
+
+  ranges = ranges.sort(
+    (a: any, b: any) =>
+      (a.maxMinutes === 0 ? Infinity : a.maxMinutes) -
+      (b.maxMinutes === 0 ? Infinity : b.maxMinutes),
+  );
+
+  if (!ranges.length) {
+    return { percentage: 100, eligible: true, diffMinutes };
   }
 
-  getTxKind(tx: any): "UPI" | "Bank" | "Payout" {
-    if (tx.type === "payout") return "Payout";
-    return (tx.fundtype || "").toUpperCase() === "UPI" ? "UPI" : "Bank";
+  let prevMax = 0;
+
+  for (let range of ranges) {
+    const min = prevMax;
+    const max = range.maxMinutes === 0 ? Infinity : range.maxMinutes;
+
+    if (diffMinutes >= min && diffMinutes < max) {
+      return {
+        percentage: range.percentage,
+        eligible: true,
+        diffMinutes,
+      };
+    }
+
+    prevMax = range.maxMinutes;
   }
 
-  getTxAccountLabel(tx: any): string {
-    if ((tx.fundtype || "").toUpperCase() === "UPI") {
-      return tx.upiId || tx.vpa || "—";
-    }
-    return tx.accountNo || tx.holderName || "—";
+  return { percentage: 0, eligible: false, diffMinutes };
+}
+
+getPayoutSlabInfo(transaction: any, dynamicConfig: any) {
+  if (!transaction?.date) return null;
+
+  const createdTime = new Date(transaction.date).getTime();
+  const now = Date.now();
+  const diffMinutes = Math.floor((now - createdTime) / 60000);
+
+  const amount = Number(transaction.amount || 0);
+  let amountRanges = dynamicConfig?.amountRanges || [];
+
+  if (!amountRanges.length) {
+    return { percentage: 100, eligible: true, diffMinutes };
   }
 
-  getPayinSlabInfo(transaction: any, dynamicConfig: any) {
-    if (!transaction?.date) return null;
+  amountRanges = amountRanges.sort(
+    (a: any, b: any) =>
+      (a.maxAmount === 0 ? Infinity : a.maxAmount) -
+      (b.maxAmount === 0 ? Infinity : b.maxAmount),
+  );
 
-    const createdTime = new Date(transaction.date).getTime();
-    const now = Date.now();
-    const diffMinutes = Math.floor((now - createdTime) / 60000);
+  let selectedAmountRange = null;
+  let prevMax = 0;
 
-    let ranges = dynamicConfig?.timeRanges || [];
+  for (let range of amountRanges) {
+    const max = range.maxAmount === 0 ? Infinity : range.maxAmount;
 
-    ranges = ranges.sort(
-      (a: any, b: any) =>
-        (a.maxMinutes === 0 ? Infinity : a.maxMinutes) -
-        (b.maxMinutes === 0 ? Infinity : b.maxMinutes),
-    );
-
-    if (!ranges.length) {
-      return { percentage: 100, eligible: true, diffMinutes };
+    if (amount <= max) {
+      selectedAmountRange = range;
+      break;
     }
 
-    let prevMax = 0;
+    prevMax = range.maxAmount;
+  }
 
-    for (let range of ranges) {
-      const min = prevMax;
-      const max = range.maxMinutes === 0 ? Infinity : range.maxMinutes;
-
-      if (diffMinutes >= min && diffMinutes < max) {
-        return {
-          percentage: range.percentage,
-          eligible: true,
-          diffMinutes,
-        };
-      }
-
-      prevMax = range.maxMinutes;
-    }
-
+  if (!selectedAmountRange) {
     return { percentage: 0, eligible: false, diffMinutes };
   }
 
-  getPayoutSlabInfo(transaction: any, dynamicConfig: any) {
-    if (!transaction?.date) return null;
+  let timeRanges = selectedAmountRange.timeRanges || [];
 
-    const createdTime = new Date(transaction.date).getTime();
-    const now = Date.now();
-    const diffMinutes = Math.floor((now - createdTime) / 60000);
+  timeRanges = timeRanges.sort(
+    (a: any, b: any) =>
+      (a.maxMinutes === 0 ? Infinity : a.maxMinutes) -
+      (b.maxMinutes === 0 ? Infinity : b.maxMinutes),
+  );
 
-    const amount = Number(transaction.amount || 0);
-    let amountRanges = dynamicConfig?.amountRanges || [];
+  let prevTime = 0;
 
-    if (!amountRanges.length) {
-      return { percentage: 100, eligible: true, diffMinutes };
+  for (let t of timeRanges) {
+    const max = t.maxMinutes === 0 ? Infinity : t.maxMinutes;
+
+    if (diffMinutes >= prevTime && diffMinutes < max) {
+      return {
+        percentage: t.percentage,
+        eligible: true,
+        diffMinutes,
+      };
     }
 
-    amountRanges = amountRanges.sort(
-      (a: any, b: any) =>
-        (a.maxAmount === 0 ? Infinity : a.maxAmount) -
-        (b.maxAmount === 0 ? Infinity : b.maxAmount),
-    );
-
-    let selectedAmountRange = null;
-    let prevMax = 0;
-
-    for (let range of amountRanges) {
-      const max = range.maxAmount === 0 ? Infinity : range.maxAmount;
-
-      if (amount <= max) {
-        selectedAmountRange = range;
-        break;
-      }
-
-      prevMax = range.maxAmount;
-    }
-
-    if (!selectedAmountRange) {
-      return { percentage: 0, eligible: false, diffMinutes };
-    }
-
-    let timeRanges = selectedAmountRange.timeRanges || [];
-
-    timeRanges = timeRanges.sort(
-      (a: any, b: any) =>
-        (a.maxMinutes === 0 ? Infinity : a.maxMinutes) -
-        (b.maxMinutes === 0 ? Infinity : b.maxMinutes),
-    );
-
-    let prevTime = 0;
-
-    for (let t of timeRanges) {
-      const max = t.maxMinutes === 0 ? Infinity : t.maxMinutes;
-
-      if (diffMinutes >= prevTime && diffMinutes < max) {
-        return {
-          percentage: t.percentage,
-          eligible: true,
-          diffMinutes,
-        };
-      }
-
-      prevTime = t.maxMinutes;
-    }
-
-    return { percentage: 0, eligible: false, diffMinutes };
+    prevTime = t.maxMinutes;
   }
 
-  private startRealtimeUpdates(): void {
-    if (this.realtimeUpdateInterval) {
-      clearInterval(this.realtimeUpdateInterval);
-    }
+  return { percentage: 0, eligible: false, diffMinutes };
+}
 
-    this.realtimeUpdateInterval = setInterval(() => {
-      this.updateAllSlabPercentages();
-    }, 1000);
+
+private startRealtimeUpdates(): void {
+  if (this.realtimeUpdateInterval) {
+    clearInterval(this.realtimeUpdateInterval);
   }
 
-  private updateAllSlabPercentages(): void {
-    // UPI
-    this.pendingUpi = this.pendingUpi.map((tx) => {
-      const slab = this.getPayinSlabInfo(tx, this.latestDynamicPayin);
-      return {
-        ...tx,
-        slabPercentage: slab?.percentage ?? 100,
-        slabEligible: slab?.eligible ?? true,
-        timePassed: slab?.diffMinutes,
-      };
-    });
+  this.realtimeUpdateInterval = setInterval(() => {
+    this.updateAllSlabPercentages();
+  }, 1000);
+}
 
-    // BANK
-    this.pendingBank = this.pendingBank.map((tx) => {
-      const slab = this.getPayinSlabInfo(tx, this.latestDynamicPayin);
-      return {
-        ...tx,
-        slabPercentage: slab?.percentage ?? 100,
-        slabEligible: slab?.eligible ?? true,
-        timePassed: slab?.diffMinutes,
-      };
-    });
+private updateAllSlabPercentages(): void {
+  // UPI
+  this.pendingUpi = this.pendingUpi.map((tx) => {
+    const slab = this.getPayinSlabInfo(tx, this.latestDynamicPayin);
+    return {
+      ...tx,
+      slabPercentage: slab?.percentage ?? 100,
+      slabEligible: slab?.eligible ?? true,
+      timePassed: slab?.diffMinutes,
+    };
+  });
 
-    // PAYOUT
-    this.pendingpayouts = this.pendingpayouts.map((tx) => {
-      const slab = this.getPayoutSlabInfo(tx, this.latestDynamicPayout);
-      return {
-        ...tx,
-        slabPercentage: slab?.percentage ?? 0,
-        slabEligible: slab?.eligible ?? false,
-        timePassed: slab?.diffMinutes,
-      };
-    });
-  }
+  // BANK
+  this.pendingBank = this.pendingBank.map((tx) => {
+    const slab = this.getPayinSlabInfo(tx, this.latestDynamicPayin);
+    return {
+      ...tx,
+      slabPercentage: slab?.percentage ?? 100,
+      slabEligible: slab?.eligible ?? true,
+      timePassed: slab?.diffMinutes,
+    };
+  });
+
+  // PAYOUT
+  this.pendingpayouts = this.pendingpayouts.map((tx) => {
+    const slab = this.getPayoutSlabInfo(tx, this.latestDynamicPayout);
+    return {
+      ...tx,
+      slabPercentage: slab?.percentage ?? 0,
+      slabEligible: slab?.eligible ?? false,
+      timePassed: slab?.diffMinutes,
+    };
+  });
+}
 }

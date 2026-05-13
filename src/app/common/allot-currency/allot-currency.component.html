@@ -168,7 +168,12 @@
           </div>
 
           <!-- INR MODES -->
-          <div *ngIf="selectedCurrency === 'INR' && currentRole != 'OWNER'">
+          <div
+            *ngIf="
+              selectedCurrency === 'INR' &&
+              (entityType === 'CHIEF' || entityType === 'PORTAL')
+            "
+          >
             <label
               class="block mb-2 text-sm font-medium text-[var(--color-font)]"
             >
@@ -229,7 +234,12 @@
           </div>
 
           <!-- USD MODE -->
-          <div *ngIf="selectedCurrency === 'USD'">
+          <div
+            *ngIf="
+              selectedCurrency === 'USD' &&
+              (entityType === 'CHIEF' || entityType === 'PORTAL')
+            "
+          >
             <label
               class="block mb-2 text-sm font-medium text-[var(--color-font)]"
             >

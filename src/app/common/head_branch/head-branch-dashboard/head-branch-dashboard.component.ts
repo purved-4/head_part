@@ -1,5 +1,3 @@
-// import { PoolingService } from "../../services/pooling.service"; // not used directly here
-
 import {
   AfterViewInit,
   Component,
@@ -10,16 +8,16 @@ import {
 } from "@angular/core";
 import { Chart, registerables } from "chart.js";
 import { catchError, forkJoin, lastValueFrom, of, Subscription } from "rxjs";
-import { FundsService } from "../../pages/services/funds.service";
-import { UserStateService } from "../../store/user-state.service";
-import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
-import { BankService } from "../../pages/services/bank.service";
-import { UpiService } from "../../pages/services/upi.service";
-import { SnackbarService } from "../snackbar/snackbar.service";
-import { HeadService } from "../../pages/services/head.service";
-import { MultimediaService } from "../../pages/services/multimedia.service";
-import { ChiefService } from "../../pages/services/chief.service";
-import { BranchService } from "../../pages/services/branch.service";
+import { FundsService } from "../../../pages/services/funds.service";
+import { UserStateService } from "../../../store/user-state.service";
+import { SocketConfigService } from "../../../pages/services/socket/socket-config.service";
+import { BankService } from "../../../pages/services/bank.service";
+import { UpiService } from "../../../pages/services/upi.service";
+import { SnackbarService } from "../../snackbar/snackbar.service";
+import { HeadService } from "../../../pages/services/head.service";
+import { MultimediaService } from "../../../pages/services/multimedia.service";
+import { ChiefService } from "../../../pages/services/chief.service";
+import { BranchService } from "../../../pages/services/branch.service";
 
 Chart.register(...registerables);
 
@@ -205,7 +203,7 @@ export class HeadBranchDashboardComponent
     this.chiefService
       .getCurrenciesByEntity(this.headId, this.role)
       .subscribe((res) => {
-        console.log(res);
+
       });
     this.getPayinStatus();
 
@@ -216,6 +214,12 @@ export class HeadBranchDashboardComponent
         this.processIncomingEvent(data);
       });
 
+    this.fundService
+      .broadcast(this.headId, this.role)
+      .subscribe((data: any) => {
+        this.processIncomingEvent(data);
+      });
+
     this.resetAllLists();
     // this.refreshAllFunds(this.headId);
 
@@ -223,8 +227,8 @@ export class HeadBranchDashboardComponent
 
     this.sse = this.socketConfigService.getPendingData().subscribe((data) => {
       if (!data) return;
-      console.log("data", data);
-      console.log(this.lastBroadcastData);
+
+
 
       this.lastBroadcastData = data;
       this.processIncomingEvent(data);
@@ -2068,7 +2072,7 @@ export class HeadBranchDashboardComponent
 
   private processIncomingEvent(data: any) {
     if (!data) return;
-    console.log(data);
+
 
     // =========================
     // Preserve old dynamic config if websocket sends partial data

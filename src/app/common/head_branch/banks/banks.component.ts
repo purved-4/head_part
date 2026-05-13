@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
@@ -242,7 +243,7 @@ export class BanksComponent implements OnInit, OnDestroy {
 
         this.selectedCurrencyData = res;
 
-        console.log("BANK Currency =>", res);
+
 
         this.currency = res.currency;
 
@@ -259,7 +260,7 @@ export class BanksComponent implements OnInit, OnDestroy {
 
       this.selectedModeData = res;
 
-      console.log("BANK Mode =>", res);
+
     });
 
     this.getPayinStatus();
