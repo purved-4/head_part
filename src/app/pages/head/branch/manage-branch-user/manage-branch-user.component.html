@@ -31,24 +31,24 @@
         </svg>
         Back to Branch
       </button> -->
- <div class="flex gap-3">
-  <!-- Add User Button -->
-  <button
-    (click)="openAddUserModal()"
-    class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
-  >
-    <span class="material-icons text-sm mr-1">person_add</span>
-    Add User
-  </button>
+      <div class="flex gap-3">
+        <!-- Add User Button -->
+        <button
+          (click)="openAddUserModal()"
+          class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          <span class="material-icons text-sm mr-1">person_add</span>
+          Add User
+        </button>
 
-  <!-- Back Button -->
-  <button
-    [routerLink]="['/head/branch/manage']"
-    class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-bg)] text-sm font-medium rounded-lg transition-colors duration-200"
-  >
-    Back to Branch
-  </button>
-</div>
+        <!-- Back Button -->
+        <button
+          [routerLink]="['/head/branch/manage']"
+          class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-bg)] text-sm font-medium rounded-lg transition-colors duration-200"
+        >
+          Back to Branch
+        </button>
+      </div>
     </div>
 
     <!-- Search Bar & View Toggle -->
@@ -84,7 +84,7 @@
 
       <!-- View Toggle Buttons -->
       <div
-        class="flex items-center gap-2 p-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hidden  md:flex"
+        class="flex items-center gap-2 p-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg md:flex"
       >
         <button
           class="p-2 rounded-lg transition-all duration-150"
@@ -140,12 +140,12 @@
 
   <!-- Users Container (Table/Grid) -->
   <!-- <div *ngIf="showTable" [ngSwitch]="viewMode"> -->
-    <div *ngIf="showTable">
+  <div *ngIf="showTable">
     <!-- ========== TABLE VIEW ========== -->
     <div
-  class="hidden md:block bg-[var(--color-surface)] rounded-xl shadow-lg border border-[var(--color-border)] overflow-hidden"
-  [class.md:hidden]="viewMode === 'grid'"
->
+      class="hidden md:block bg-[var(--color-surface)] rounded-xl shadow-lg border border-[var(--color-border)] overflow-hidden"
+      [class.md:hidden]="viewMode === 'grid'"
+    >
       <!-- Table Header -->
       <div
         class="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
@@ -295,15 +295,15 @@
                     Edit
                   </button>
 
-                  <button
-  class="p-2 rounded-lg hover:bg-[var(--color-hover)] transition"
-  (click)="openUserDetails(element)"
-  title="View Details"
->
-  <span class="material-icons text-[var(--color-muted)]">
-    more_vert
-  </span>
-</button>
+                  <!-- <button
+                    class="p-2 rounded-lg hover:bg-[var(--color-hover)] transition"
+                    (click)="openUserDetails(element)"
+                    title="View Details"
+                  >
+                    <span class="material-icons text-[var(--color-muted)]">
+                      more_vert
+                    </span>
+                  </button> -->
                 </div>
               </td>
             </tr>
@@ -419,11 +419,10 @@
       </div>
     </div>
 
-
     <!-- ========== GRID VIEW ========== -->
     <!-- <div *ngSwitchCase="'grid'" class="w-full"> -->
-      <!-- <div *ngSwitchCase="'grid'" class="w-full" [class.md:hidden]="viewMode === 'table'"> -->
-   <div class="w-full md:block" [class.md:hidden]="viewMode === 'table'">
+    <!-- <div *ngSwitchCase="'grid'" class="w-full" [class.md:hidden]="viewMode === 'table'"> -->
+    <div class="w-full md:block" [class.md:hidden]="viewMode === 'table'">
       <!-- Grid Header -->
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
@@ -538,15 +537,15 @@
               </button>
 
               <div class="relative">
-  <button
-    class="p-2 rounded-lg hover:bg-[var(--color-hover)] transition"
-    (click)="openUserDetails(user); $event.stopPropagation()"
-  >
-    <span class="material-icons text-[var(--color-muted)]">
-      more_vert
-    </span>
-  </button>
-</div>
+                <!-- <button
+                  class="p-2 rounded-lg hover:bg-[var(--color-hover)] transition"
+                  (click)="openUserDetails(user); $event.stopPropagation()"
+                >
+                  <span class="material-icons text-[var(--color-muted)]">
+                    more_vert
+                  </span>
+                </button> -->
+              </div>
             </div>
           </div>
 
@@ -776,7 +775,7 @@
   <!-- Edit Modal (unchanged) -->
   <div
     *ngIf="selectedUser"
-    class="fixed  inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex justify-center items-start p-4 overflow-auto"
+    class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex justify-center items-start p-4 overflow-auto"
   >
     <div
       class="bg-[var(--color-surface)] rounded-2xl shadow-xl w-full max-w-2xl my-8 border border-[var(--color-border)]"
@@ -951,7 +950,6 @@
   </div>
 </div>
 
-
 <!-- Add User Modal -->
 <div
   *ngIf="showAddUserModal"
@@ -962,9 +960,7 @@
     (click)="closeAddUserModal()"
   ></div>
 
-  <div
-    class="relative w-full max-w-2xl rounded-xl overflow-hidden shadow-2xl"
-  >
+  <div class="relative w-full max-w-2xl rounded-xl overflow-hidden shadow-2xl">
     <app-add-branch-user
       [associate]="branchId"
       [inModal]="true"
@@ -974,59 +970,69 @@
   </div>
 </div>
 
-
 <div
   *ngIf="showUserDetailsModal"
   class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 sm:p-4"
-  (click)="closeUserDetails()"
 >
-  <div 
+  <div
     class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl"
     (click)="$event.stopPropagation()"
   >
-
     <!-- Header - Fixed -->
-    <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100 flex-shrink-0">
+    <div
+      class="flex justify-between items-center px-4 py-3 border-b border-gray-100 flex-shrink-0"
+    >
       <h2 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
         <span class="material-icons text-blue-600 text-lg">person</span>
         User Details
       </h2>
-      <button 
-        (click)="closeUserDetails()" 
+      <!-- <button
+        (click)="closeUserDetails()"
         class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
       >
         <span class="material-icons text-gray-500 text-xl">close</span>
-      </button>
+      </button> -->
     </div>
 
     <!-- Content - Scrollable -->
     <div class="overflow-y-auto p-4 space-y-3 flex-1">
-      
       <!-- User Basic Info Card -->
       <div class="bg-blue-50 rounded-xl p-3">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-sm flex-shrink-0">
-            {{ selectedUserDetails?.userName?.charAt(0) || 'U' }}
+          <div
+            class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-sm flex-shrink-0"
+          >
+            {{ selectedUserDetails?.userName?.charAt(0) || "U" }}
           </div>
           <div class="flex-1 min-w-0">
-            <h3 class="font-medium text-gray-900 text-sm truncate">{{ selectedUserDetails?.userName }}</h3>
-            <p class="text-xs text-gray-600 truncate">{{ selectedUserDetails?.userEmail }}</p>
+            <h3 class="font-medium text-gray-900 text-sm truncate">
+              {{ selectedUserDetails?.userName }}
+            </h3>
+            <p class="text-xs text-gray-600 truncate">
+              {{ selectedUserDetails?.userEmail }}
+            </p>
             <div class="flex items-center gap-2 mt-1">
-              <span class="inline-flex items-center gap-1 text-xs" 
-                    [class.text-green-600]="selectedUserDetails?.userIsOnline"
-                    [class.text-gray-500]="!selectedUserDetails?.userIsOnline">
-                <span class="w-1.5 h-1.5 rounded-full" 
-                      [class.bg-green-500]="selectedUserDetails?.userIsOnline"
-                      [class.bg-gray-400]="!selectedUserDetails?.userIsOnline"></span>
-                {{ selectedUserDetails?.userIsOnline ? 'Online' : 'Offline' }}
+              <span
+                class="inline-flex items-center gap-1 text-xs"
+                [class.text-green-600]="selectedUserDetails?.userIsOnline"
+                [class.text-gray-500]="!selectedUserDetails?.userIsOnline"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full"
+                  [class.bg-green-500]="selectedUserDetails?.userIsOnline"
+                  [class.bg-gray-400]="!selectedUserDetails?.userIsOnline"
+                ></span>
+                {{ selectedUserDetails?.userIsOnline ? "Online" : "Offline" }}
               </span>
               <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-              <span class="text-xs px-2 py-0.5 rounded-full" 
-                    [class.bg-green-100]="selectedUserDetails?.active"
-                    [class.text-green-700]="selectedUserDetails?.active"
-                    [class.bg-gray-100]="!selectedUserDetails?.active"
-                    [class.text-gray-600]="!selectedUserDetails?.active">
-                {{ selectedUserDetails?.active ? 'Active' : 'Inactive' }}
+              <span
+                class="text-xs px-2 py-0.5 rounded-full"
+                [class.bg-green-100]="selectedUserDetails?.active"
+                [class.text-green-700]="selectedUserDetails?.active"
+                [class.bg-gray-100]="!selectedUserDetails?.active"
+                [class.text-gray-600]="!selectedUserDetails?.active"
+              >
+                {{ selectedUserDetails?.active ? "Active" : "Inactive" }}
               </span>
             </div>
           </div>
@@ -1037,24 +1043,29 @@
       <div class="grid grid-cols-2 gap-2">
         <div class="bg-gray-50 rounded-lg p-2 text-center">
           <span class="text-xs text-gray-500 block">Login Count</span>
-          <span class="text-lg font-semibold text-gray-900">{{ selectedUserDetails?.userLoginCount || 0 }}</span>
+          <span class="text-lg font-semibold text-gray-900">{{
+            selectedUserDetails?.userLoginCount || 0
+          }}</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-2 text-center">
           <span class="text-xs text-gray-500 block">Last Active</span>
-          <span class="text-xs font-medium text-gray-900">{{ selectedUserDetails?.userLastActive || 'N/A' }}</span>
+          <span class="text-xs font-medium text-gray-900">{{
+            selectedUserDetails?.userLastActive || "N/A"
+          }}</span>
         </div>
       </div>
 
       <!-- Details Grid -->
       <div class="space-y-2">
-        
         <!-- Contact Info -->
         <div class="bg-gray-50 rounded-lg p-3">
           <h4 class="text-xs font-medium text-gray-500 mb-2">Contact</h4>
           <div class="space-y-2">
             <div class="flex justify-between items-center text-xs">
               <span class="text-gray-500">Phone:</span>
-              <span class="text-gray-900">{{ selectedUserDetails?.userPhone || 'N/A' }}</span>
+              <span class="text-gray-900">{{
+                selectedUserDetails?.userPhone || "N/A"
+              }}</span>
             </div>
           </div>
         </div>
@@ -1065,15 +1076,21 @@
           <div class="space-y-2">
             <div class="flex justify-between items-center text-xs">
               <span class="text-gray-500">Name:</span>
-              <span class="text-gray-900">{{ selectedUserDetails?.branchName || 'N/A' }}</span>
+              <span class="text-gray-900">{{
+                selectedUserDetails?.branchName || "N/A"
+              }}</span>
             </div>
             <div class="flex justify-between items-center text-xs">
               <span class="text-gray-500">Email:</span>
-              <span class="text-gray-900 truncate max-w-[150px]">{{ selectedUserDetails?.branchEmail || 'N/A' }}</span>
+              <span class="text-gray-900 truncate max-w-[150px]">{{
+                selectedUserDetails?.branchEmail || "N/A"
+              }}</span>
             </div>
             <div class="flex justify-between items-center text-xs">
               <span class="text-gray-500">Mobile:</span>
-              <span class="text-gray-900">{{ selectedUserDetails?.branchMobile || 'N/A' }}</span>
+              <span class="text-gray-900">{{
+                selectedUserDetails?.branchMobile || "N/A"
+              }}</span>
             </div>
           </div>
         </div>
@@ -1084,15 +1101,21 @@
           <div class="space-y-2">
             <div class="flex justify-between items-center text-xs">
               <span class="text-gray-500">Last Login:</span>
-              <span class="text-gray-900 text-right">{{ selectedUserDetails?.userLastLoginAt || 'N/A' }}</span>
+              <span class="text-gray-900 text-right">{{
+                selectedUserDetails?.userLastLoginAt || "N/A"
+              }}</span>
             </div>
             <div class="flex justify-between items-center text-xs">
               <span class="text-gray-500">Last Logout:</span>
-              <span class="text-gray-900 text-right">{{ selectedUserDetails?.userLastLogoutAt || 'N/A' }}</span>
+              <span class="text-gray-900 text-right">{{
+                selectedUserDetails?.userLastLogoutAt || "N/A"
+              }}</span>
             </div>
             <div class="flex justify-between items-center text-xs">
               <span class="text-gray-500">IP Address:</span>
-              <span class="text-gray-900 text-xs">{{ selectedUserDetails?.userLastIpAddress || 'N/A' }}</span>
+              <span class="text-gray-900 text-xs">{{
+                selectedUserDetails?.userLastIpAddress || "N/A"
+              }}</span>
             </div>
           </div>
         </div>
@@ -1100,7 +1123,9 @@
         <!-- User Agent (collapsible on mobile) -->
         <div class="bg-gray-50 rounded-lg p-3">
           <h4 class="text-xs font-medium text-gray-500 mb-2">User Agent</h4>
-          <p class="text-xs text-gray-900 break-words">{{ selectedUserDetails?.userLastUserAgent || 'N/A' }}</p>
+          <p class="text-xs text-gray-900 break-words">
+            {{ selectedUserDetails?.userLastUserAgent || "N/A" }}
+          </p>
         </div>
 
         <!-- Timestamps -->
@@ -1109,27 +1134,24 @@
           <div class="space-y-2 text-xs">
             <div class="flex justify-between">
               <span class="text-gray-500">Created:</span>
-              <span class="text-gray-900">{{ selectedUserDetails?.createdAt || 'N/A' }}</span>
+              <span class="text-gray-900">{{
+                selectedUserDetails?.createdAt || "N/A"
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-500">Updated:</span>
-              <span class="text-gray-900">{{ selectedUserDetails?.updatedAt || 'N/A' }}</span>
+              <span class="text-gray-900">{{
+                selectedUserDetails?.updatedAt || "N/A"
+              }}</span>
             </div>
           </div>
         </div>
-
       </div>
     </div>
 
     <!-- Footer - Fixed -->
-    <div class="px-4 py-3 border-t border-gray-100 flex justify-end flex-shrink-0">
-      <button 
-        (click)="closeUserDetails()"
-        class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-      >
-        Close
-      </button>
-    </div>
-
+    <div
+      class="px-4 py-3 border-t border-gray-100 flex justify-end flex-shrink-0"
+    ></div>
   </div>
 </div>

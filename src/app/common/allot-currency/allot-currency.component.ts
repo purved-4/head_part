@@ -32,22 +32,20 @@ export class AllotCurrencyComponent implements OnInit {
   };
 
   effectiveFromNew: any;
-  currentRole:any
+  currentRole: any;
 
   constructor(
     private snackBar: SnackbarService,
     private chiefService: ChiefService,
     private comPartService: ComPartService,
     private portalService: PortalService,
-    private userStateService:UserStateService
+    private userStateService: UserStateService,
   ) {
     this.effectiveFromNew = new Date();
   }
 
-  // ngOnInit replace karo
   ngOnInit(): void {
-
-    this.currentRole = this.userStateService.getRole()
+    this.currentRole = this.userStateService.getRole();
     if (this.entityType === "CHIEF") {
       this.loadCurrencies();
     } else if (this.entityType === "COM_PART") {
@@ -216,15 +214,16 @@ export class AllotCurrencyComponent implements OnInit {
       return;
     }
 
-    if (this.entityType !== "PORTAL" && this.selectedModes.length === 0) {
+    if (
+      this.entityType !== "PORTAL" &&
+      this.entityType !== "OWNER" &&
+      this.selectedModes.length === 0
+    ) {
       this.snackBar.show("Please select at least one payment mode", false);
       return;
     }
 
     let payload: any;
-
-
-
 
     if (this.entityType === "PORTAL") {
       payload = {

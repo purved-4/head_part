@@ -271,7 +271,6 @@ export class BanksComponent implements OnInit, OnDestroy {
       .subscribe((value) => {
         this.searchTerm = value;
         this.currentPage = 1;
-        this.fetchBankAccounts();
       });
   }
 
@@ -297,15 +296,11 @@ export class BanksComponent implements OnInit, OnDestroy {
       page: this.currentPage - 1,
       size: this.pageSize,
       query: this.searchTerm.trim() || undefined,
-      // minAmount: this.minAmount ?? undefined,
-      // maxAmount: this.maxAmount ?? undefined,
+
       limit: this.maxLimit ?? undefined,
       portalId: this.selectedPortal?.portalId || undefined,
       status: this.statusFilter || undefined,
     };
-
-    // if (this.filterStatus === "active") options.active = true;
-    // if (this.filterStatus === "inactive") options.active = false;
 
     const sub = this.bankService
       .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, options)
@@ -342,16 +337,6 @@ export class BanksComponent implements OnInit, OnDestroy {
               accountType = "saving";
             }
 
-            // const isBankActive =
-            //   typeof r.bank === "boolean"
-            //     ? r.bank
-            //     : typeof r.isBank === "boolean"
-            //       ? r.isBank
-            //       : typeof r.isBankActive === "boolean"
-            //         ? r.isBankActive
-            //         : typeof r.bankActive === "boolean"
-            //           ? r.bankActive
-            //           : status === "active";
             const isBankActive = status === "active";
             return {
               id: r.id,
@@ -377,9 +362,7 @@ export class BanksComponent implements OnInit, OnDestroy {
               // max_tran_count: r.maxTranCount ?? null,
               min_total_tran_amount: r.minTotalTranAmount ?? null,
               upiCount: r.upiCount ?? null,
-              // max_total_tran_amount: r.maxTotalTranAmount ?? null,
-              // minAmount: r.minAmount ?? "",:
-              // maxAmount: r.maxAmount ?? "",
+
               isBankActive,
             } as BankAccount;
           })
@@ -388,8 +371,6 @@ export class BanksComponent implements OnInit, OnDestroy {
             const bTime = b.limitTime ? new Date(b.limitTime).getTime() : 0;
             return bTime - aTime;
           });
-
-        // Pagination info
         this.totalElements = res.totalElements ?? res.data?.totalElements ?? 0;
         this.totalPagesCount = res.totalPages ?? res.data?.totalPages ?? 0;
       });
@@ -564,54 +545,6 @@ export class BanksComponent implements OnInit, OnDestroy {
       this.addBankForm.updateValueAndValidity();
     }
   }
-
-  // ========== MODAL PORTAL LOADING ==========
-  // loadPortals() {
-  //   if (this.currentRoleId) {
-  //     const sub = this.headService
-  //       .getAllHeadsWithPortalsById(this.currentRoleId, "BANK")
-  //       .subscribe({
-  //         next: (res: any) => {
-  //           this.portals = Array.isArray(res) ? res : [];
-  //           this.modalFilteredPortals = [...this.portals];
-  //         },
-  //         error: (err) => {
-  //           this.portals = [];
-  //           this.modalFilteredPortals = [];
-  //         },
-  //       });
-  //     this.subs.add(sub);
-  //   }
-  // }
-
-  // ========== MODAL PORTAL SEARCH ==========
-  // onModalPortalSearch() {
-  //   const term = this.modalPortalSearch.toLowerCase();
-  //   if (term) {
-  //     this.modalFilteredPortals = this.portals.filter(
-  //       (w) =>
-  //         w.portalDomain.toLowerCase().includes(term) ||
-  //         (w.currency && w.currency.toLowerCase().includes(term)),
-  //     );
-  //   } else {
-  //     this.modalFilteredPortals = [...this.portals];
-  //   }
-  // }
-
-  // selectPortalForForm(portal: Portal) {
-  //   this.selectedModalPortal = portal;
-  //   this.showModalPortalDropdown = false;
-  //   this.modalPortalSearch = "";
-  //   this.modalFilteredPortals = [...this.portals];
-  //   this.addBankForm.patchValue({ portal: portal.portalId });
-  //   this.addBankForm.get("portal")?.markAsTouched();
-  // }
-
-  // clearPortalSelection() {
-  //   this.selectedModalPortal = null;
-  //   this.addBankForm.patchValue({ portal: "" });
-  //   this.addBankForm.get("portal")?.markAsTouched();
-  // }
 
   onModalPortalSearch(): void {
     const term = this.modalPortalSearch.trim().toLowerCase();
@@ -1081,26 +1014,6 @@ export class BanksComponent implements OnInit, OnDestroy {
     return num.toString(); // this will correctly return 0
   }
 
-  // handleOutsideClick(event: MouseEvent) {
-  //   const target = event.target as HTMLElement;
-
-  //   // Close FILTER portal dropdown
-  //   if (
-  //     this.showPortalDropdown &&
-  //     !target.closest(".portal-filter-container")
-  //   ) {
-  //     this.showPortalDropdown = false;
-  //   }
-
-  //   // Close ADD MODAL portal dropdown
-  //   if (
-  //     this.showModalPortalDropdown &&
-  //     !target.closest(".modal-portal-container")
-  //   ) {
-  //     this.showModalPortalDropdown = false;
-  //   }
-  // }
-
   toggleBankStatus(bankId: string) {
     this.bankService.toogleBankDeleted(bankId).subscribe({
       next: (res: any) => {
@@ -1295,39 +1208,6 @@ export class BanksComponent implements OnInit, OnDestroy {
     this.minLimitDateTime = local;
   }
 
-  //   submitLimitTime() {
-  //   if (!this.limitDateTime || !this.editingAccount) return;
-
-  //   const selectedTime = new Date(this.limitDateTime).getTime();
-  //   const nowTime = new Date().getTime();
-
-  //   if (selectedTime < nowTime) {
-  //     this.snack.show("Please select a future date and time", false);
-  //     return;
-  //   }
-
-  //   this.isSubmittingLimit = true;
-
-  //   const payload = {
-  //     dateTime: this.limitDateTime,
-  //   };
-
-  //   const id = this.editingAccount.id;
-
-  //   this.bankService.setLimitTime(id, payload).subscribe({
-  //     next: () => {
-  //       this.snack.show("Limit time set successfully", true);
-  //       this.closeLimitModal();
-  //       this.isSubmittingLimit = false;
-  //     },
-  //     error: () => {
-  //       this.snack.show("Failed to set limit time", false);
-  //       this.isSubmittingLimit = false;
-  //     },
-  //   });
-
-  // }
-
   submitLimitTime() {
     if (!this.limitDateTime || !this.editingAccount) return;
 
@@ -1460,89 +1340,9 @@ export class BanksComponent implements OnInit, OnDestroy {
     this.capacityRanges[index].quantity = isNaN(value) ? null : value;
   }
 
-  openCapacityModal(account: any) {
-    this.editingAccount = account;
-
-    this.isEditingCapacity = false;
-    this.showCapacityModal = true;
-    this.isLoadingCapacity = true;
-
-    this.capacityRanges = [];
-
-    this.bankService
-      .getPayinCapacity(
-        this.role,
-        this.currentRoleId,
-        // account.portalId,
-        "BANK",
-        account.id,
-      )
-      .subscribe({
-        next: (res: any) => {
-          this.isLoadingCapacity = false;
-          const res2 = res?.data;
-          this.capacityData = Array.isArray(res2) ? res2 : [];
-
-          //  FIX: map to UI array
-          this.capacityRanges = this.capacityData.map((r: any) => ({
-            minRange: r.minRange,
-            maxRange: r.maxRange,
-            quantity: r.quantity,
-          }));
-        },
-        error: () => {
-          this.isLoadingCapacity = false;
-          this.snack.show("Failed to fetch capacity", false);
-        },
-      });
-  }
-
   closeCapacityModal() {
     this.showCapacityModal = false;
     this.capacityData = [];
-  }
-
-  saveCapacity(account: any) {
-    const invalid = this.capacityRanges.some(
-      (r) =>
-        r.minRange === null ||
-        r.maxRange === null ||
-        r.quantity === null ||
-        r.maxRange <= r.minRange,
-    );
-
-    if (invalid) {
-      this.snack.show("Please enter valid capacity ranges", false);
-      return;
-    }
-
-    const payload = {
-      entityType: this.role,
-      entityId: this.currentRoleId,
-      portalId: account.portalId,
-      mode: "BANK",
-      payinId: account.id,
-
-      //  IMPORTANT
-      ranges: this.capacityRanges.map((r) => ({
-        minRange: Number(r.minRange),
-        maxRange: Number(r.maxRange),
-        quantity: Number(r.quantity),
-      })),
-    };
-
-    this.bankService.addPayinCapacity(payload).subscribe({
-      next: () => {
-        this.snack.show("Capacity saved successfully", true);
-        this.closeCapacityModal();
-
-        //  refresh view
-        this.openCapacityModal(account);
-      },
-      error: () => {
-        this.snack.show("Failed to save capacity", false);
-      },
-    });
   }
 
   enableCapacityEdit() {
@@ -1679,12 +1479,14 @@ export class BanksComponent implements OnInit, OnDestroy {
         .toggleDashbaordPayin(this.currentRoleId)
         .subscribe(() => {
           this.payinStatus = !this.payinStatus;
+          this.fetchBankAccounts();
         });
     } else if (this.role === "BRANCH") {
       this.branchService
         .toggleDashbaordPayin(this.currentRoleId)
         .subscribe(() => {
           this.payinStatus = !this.payinStatus;
+          this.fetchBankAccounts();
         });
     }
   }
