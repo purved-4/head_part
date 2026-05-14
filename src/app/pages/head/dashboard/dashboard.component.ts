@@ -1524,7 +1524,7 @@ private latestDynamicPayout: any = null;
   onProcessingClick(fundId: any) {
     if (!fundId) return;
 
-    this.fundService.updateProcessingStatus(fundId.id, this.headId,this.role).subscribe(
+    this.fundService.updateProcessingStatus(fundId.id, this.headId).subscribe(
       (res) => {
         // Start a 1s timer so getRemainingTimeLabel() uses a moving reference (processingNow)
         // This is safe to call multiple times because startProcessingTimer guards against duplicates.

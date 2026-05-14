@@ -434,8 +434,6 @@ console.log(list)
   openRecordModal(record: any) {
     this.selectedRecord = record;
     this.showRecordModal = true;
-
-     this.loadImages(record);
   }
 
   closeRecordModal() {
@@ -467,82 +465,33 @@ console.log(list)
     return Number(v).toFixed(2);
   }
 
-  // loadImages(rec: any) {
-  //   if (!rec) return;
-
-  //   const raw = rec.raw || {};
-
-  //   rec.images = [];
-  //   this.imageError = false;
-
-  //   // ✅ sirf filePath (Approved case)
-  //   if (
-  //     raw.filePath &&
-  //     raw.filePath !== "null" &&
-  //     raw.filePath !== "undefined" &&
-  //     raw.filePath.trim() !== ""
-  //   ) {
-  //     this.multimediaService.getPrivateImage(raw.filePath).subscribe({
-  //       next: (url) => {
-  //         rec.images.push(url);
-  //       },
-  //       error: () => {
-  //         this.imageError = true;
-  //       },
-  //     });
-  //   } else {
-  //     rec.images = [];
-  //   }
-  // }
-
   loadImages(rec: any) {
-  if (!rec) return;
+    if (!rec) return;
 
-  const raw = rec.raw || {};
+    const raw = rec.raw || {};
 
-  rec.images = [];
-  this.imageError = false;
-
-  const paths: string[] = [];
-
-  // ✅ Original proof image
-  if (
-    raw.filePath &&
-    raw.filePath !== "null" &&
-    raw.filePath !== "undefined" &&
-    raw.filePath.trim() !== ""
-  ) {
-    paths.push(raw.filePath);
-  }
-
-  // ✅ Rejected proof image
-  if (
-    raw.rejectionFilePath &&
-    raw.rejectionFilePath !== "null" &&
-    raw.rejectionFilePath !== "undefined" &&
-    raw.rejectionFilePath.trim() !== ""
-  ) {
-    paths.push(raw.rejectionFilePath);
-  }
-
-  // ❌ no images
-  if (paths.length === 0) {
     rec.images = [];
-    return;
-  }
+    this.imageError = false;
 
-  // ✅ fetch all images
-  paths.forEach((id: string) => {
-    this.multimediaService.getPrivateImage(id).subscribe({
-      next: (url) => {
-        rec.images.push(url);
-      },
-      error: () => {
-        this.imageError = true;
-      },
-    });
-  });
-}
+    // ✅ sirf filePath (Approved case)
+    if (
+      raw.filePath &&
+      raw.filePath !== "null" &&
+      raw.filePath !== "undefined" &&
+      raw.filePath.trim() !== ""
+    ) {
+      this.multimediaService.getPrivateImage(raw.filePath).subscribe({
+        next: (url) => {
+          rec.images.push(url);
+        },
+        error: () => {
+          this.imageError = true;
+        },
+      });
+    } else {
+      rec.images = [];
+    }
+  }
 
   onImageError(ev: any) {
     if (ev && ev.target) {
@@ -580,15 +529,6 @@ console.log(list)
             label: "Review Status",
             value: record.reviewStatus || record.status || "—",
           },
-          {
-  label: "Rejection Reason",
-  value: record.raw?.queryText || "—",
-},
-
-{
-  label: "Rejected File",
-  value: record.raw?.rejectionFilePath || "—",
-},
           {
             label: "Date",
             value: record.date ? new Date(record.date).toLocaleString() : "—",

@@ -78,22 +78,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     //  default status
     this.selectedStatus = "ACCEPTED";
 
-    
-    this.multimediaService.getPrivateImage("4a36abd1-633f-4f9a-ac5e-7f9dc89f7c97").subscribe({
-  next: (url) => {
-    const lowerUrl = url.toLowerCase();
-
-    // // ✅ detect pdf
-    // if (lowerUrl.includes(".pdf")) {
-    //   rec.pdfs.push(url);
-    // } else {
-    //   rec.images.push(url);
-    // }
-  },
-  error: () => {
-    this.imageError = true;
-  },
-});
     this.setColorsByRole();
 
     //  load portals
@@ -112,8 +96,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     });
   }
 
-   
-    
   loadAllComparts(): void {
     if (!this.branchId || !this.role) return;
 
@@ -434,7 +416,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       portalDomain: it.portalDomain,
       queryText: it.queryText,
       rejectionFilePath: it.rejectionFilePath,
-      acceptFilePath: it.acceptFilePath,
       date: it.dateTime
         ? new Date(it.dateTime)
         : it.createdAt
@@ -659,7 +640,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     const raw = rec.raw || {};
 
     rec.images = [];
-  rec.pdfs = [];
     this.imageError = false;
 
     // ✅ alag-alag handle karo (clear logic)
@@ -682,14 +662,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     ) {
       paths.push(raw.rejectionFilePath);
     }
-    if (
-  raw.acceptFilePath &&
-  raw.acceptFilePath !== "null" &&
-  raw.acceptFilePath !== "undefined" &&
-  raw.acceptFilePath.trim() !== ""
-) {
-  paths.push(raw.acceptFilePath);
-}
 
     // ❌ agar dono nahi hai
     if (paths.length === 0) {
@@ -699,29 +671,14 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
     // ✅ API call for each
     paths.forEach((id: string) => {
-      // this.multimediaService.getPrivateImage(id).subscribe({
-      //   next: (url) => {
-      //     rec.images.push(url);
-      //   },
-      //   error: () => {
-      //     this.imageError = true;
-      //   },
-      // });
       this.multimediaService.getPrivateImage(id).subscribe({
-  next: (url) => {
-    const lowerUrl = url.toLowerCase();
-
-    // ✅ detect pdf
-    if (lowerUrl.includes(".pdf")) {
-      rec.pdfs.push(url);
-    } else {
-      rec.images.push(url);
-    }
-  },
-  error: () => {
-    this.imageError = true;
-  },
-});
+        next: (url) => {
+          rec.images.push(url);
+        },
+        error: () => {
+          this.imageError = true;
+        },
+      });
     });
   }
 
@@ -749,10 +706,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
           { label: "Transaction ID", value: record.transactionId || "—" },
           { label: "Amount", value: `₹ ${this.formatCurrency(record.amount)}` },
           { label: "Query Text", value: record.queryText || "—" },
-          {
-  label: "Accepted File",
-  value: record.acceptFilePath || "—",
-},
 
           {
             label: "Settlement Status",
@@ -784,10 +737,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
           { label: "Amount", value: `₹ ${this.formatCurrency(record.amount)}` },
           { label: "Account Holder", value: record.holder || "—" },
           { label: "Query Text", value: record.queryText || "—" },
-          {
-  label: "Accepted File",
-  value: record.acceptFilePath || "—",
-},
 
           {
             label: "Settlement Status",
@@ -820,10 +769,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
           // { label: "Review Status", value: record.reviewStatus || "—" },
           { label: "Remarks", value: record.remarks || "—" },
           { label: "Query Text", value: record.queryText || "—" },
-          {
-  label: "Accepted File",
-  value: record.acceptFilePath || "—",
-},
           // {
           //   label: "Rejection File Path",
           //   value: record.rejectionFilePath || "—",

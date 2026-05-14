@@ -845,5 +845,39 @@ export class ComPartService {
       catchError((err) => throwError(() => err))
     );
 }
+
+deleteCurrencyRate(
+  compartId: string,
+  rateId: string,
+  currencyId: string
+): Observable<any> {
+
+  return this.http
+    .delete<any>(
+      `${baseUrl}/currency/delete?compartId=${compartId}&rateId=${rateId}&currencyId=${currencyId}`
+    )
+    .pipe(
+      map((response) => response),
+      catchError((error) => throwError(() => error)),
+    );
+}
+
+updateCurrencyRate(
+  compartId: string,
+  rateId: string,
+  currencyId: string,
+  rate: number
+): Observable<any> {
+
+  return this.http
+    .patch<any>(
+      `${baseUrl}/currency/update?compartId=${compartId}&rateId=${rateId}&currencyId=${currencyId}&rate=${rate}`,
+      {}
+    )
+    .pipe(
+      map((response) => response),
+      catchError((error) => throwError(() => error)),
+    );
+}
   
 }

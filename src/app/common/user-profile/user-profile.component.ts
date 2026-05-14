@@ -27,20 +27,20 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     newPassword: string;
   }>();
 
-  selectedSection: "user" | "entity" | "portal" | "password" = "user";
+  selectedSection: "user" | "entity" | "cp" | "password" = "user";
 
   branch: any = null;
   entityInfo: any = null;
   cpInfoRaw: any[] = [];
   cpInfo: any[] = [];
-  expandedPortals: Set<string> = new Set();
+  expandedCps: Set<string> = new Set();
   expandedRawData: Set<string> = new Set();
 
   rewards: any[] = [];
   payouts: any[] = [];
   processingTimeList: any[] = [];
 
-  portalIdToDomain: Record<string, string> = {};
+  cpIdToDomain: Record<string, string> = {};
   rewardsByDomain: Record<string, any[]> = {};
   payoutsByDomain: Record<string, any[]> = {};
 
@@ -159,26 +159,26 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     this.cpInfoRaw = Array.isArray(data?.cpInfo)
       ? data.cpInfo
-      : data?.portals || [];
+      : data?.cps || [];
     this.cpInfo = this.mapcpInfo(this.cpInfoRaw || []);
 
-    this.portalIdToDomain = {};
+    this.cpIdToDomain = {};
     for (const w of this.cpInfo) {
-      if (w.portalId)
-        this.portalIdToDomain[w.portalId] =
-          w.portalDomain || w._raw?.name || w.portalId;
+      if (w.cpId)
+        this.cpIdToDomain[w.cpId] =
+          w.cpDomain || w._raw?.name || w.cpId;
     }
 
     this.rewards = [];
     this.payouts = [];
 
     for (const w of this.cpInfo) {
-      const domain = w.portalDomain || w._raw?.name || w.portalId || "unknown";
+      const domain = w.cpDomain || w._raw?.name || w.cpId || "unknown";
 
       if (w.payinsTimeStrength) {
         this.rewards.push({
-          portalId: w.portalId,
-          portalDomain: domain,
+          cpId: w.cpId,
+          cpDomain: domain,
           type: "payin",
           timeRanges: Array.isArray(w.payinsTimeStrength)
             ? w.payinsTimeStrength
@@ -187,8 +187,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         });
       } else if (w._raw?.payinsTimeStrength) {
         this.rewards.push({
-          portalId: w.portalId,
-          portalDomain: domain,
+          cpId: w.cpId,
+          cpDomain: domain,
           type: "payin",
           timeRanges: w._raw?.payinsTimeStrength?.timeRanges || [],
           amountRanges: w._raw?.payins_amount_ranges || [],
@@ -197,8 +197,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
       if (w.fttsTimeStrength) {
         this.rewards.push({
-          portalId: w.portalId,
-          portalDomain: domain,
+          cpId: w.cpId,
+          cpDomain: domain,
           type: "ftt",
           timeRanges: Array.isArray(w.fttsTimeStrength)
             ? w.fttsTimeStrength
@@ -207,8 +207,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         });
       } else if (w._raw?.fttsTimeStrength) {
         this.rewards.push({
-          portalId: w.portalId,
-          portalDomain: domain,
+          cpId: w.cpId,
+          cpDomain: domain,
           type: "ftt",
           timeRanges: w._raw?.fttsTimeStrength?.timeRanges || [],
           amountRanges: w._raw?.ftts_amount_ranges || [],
@@ -217,16 +217,16 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
       if (w.payoutsTimeStrength) {
         this.payouts.push({
-          portalId: w.portalId,
-          portalDomain: domain,
+          cpId: w.cpId,
+          cpDomain: domain,
           amountRanges: Array.isArray(w.payoutsTimeStrength)
             ? w.payoutsTimeStrength
             : w.payoutsTimeStrength?.amountRanges || [],
         });
       } else if (w._raw?.payoutsTimeStrength) {
         this.payouts.push({
-          portalId: w.portalId,
-          portalDomain: domain,
+          cpId: w.cpId,
+          cpDomain: domain,
           amountRanges: w._raw?.payoutsTimeStrength?.amountRanges || [],
         });
       }
@@ -234,22 +234,22 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     this.rewardsByDomain = this.groupByDomain(
       this.rewards.map((r) => ({
-        portalId: r.portalId,
-        portalDomain: r.portalDomain,
+        cpId: r.cpId,
+        cpDomain: r.cpDomain,
         ...r,
       })),
     );
     this.payoutsByDomain = this.groupByDomain(
       this.payouts.map((p) => ({
-        portalId: p.portalId,
-        portalDomain: p.portalDomain,
+        cpId: p.cpId,
+        cpDomain: p.cpDomain,
         ...p,
       })),
     );
 
     const processingCollect: any[] = [];
     for (const w of this.cpInfo) {
-      const domain = w.portalDomain || w.portalId || "unknown";
+      const domain = w.cpDomain || w.cpId || "unknown";
       const entries = Array.isArray(w.processingTime)
         ? w.processingTime.map((e: any) => ({
             id: e?.id,
@@ -271,9 +271,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         ? w.processingTime
         : w.processing_time || w._processingTime || [];
       out.push({
-        portalId: w.id ?? w.webId ?? w.portalId ?? null,
-        portalDomain:
-          w.name ?? w.portalDomain ?? w.domain ?? w._raw?.name ?? "unknown",
+        cpId:  w.compartId  ?? w.cpId ?? null,
+        compartUsername:
+         w.compartUsername ?? w.domain  ?? "unknown",
         fttPercentage:
           w.fttPercentage ?? w.ftt_percentage ?? w.firstPayinPercentage ?? null,
         payinPercentage: w.payinPercentage ?? w.payin_percentage ?? null,
@@ -314,11 +314,11 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     const map: Record<string, any[]> = {};
     if (!Array.isArray(entries)) return map;
     for (const e of entries) {
-      const webId = e.portalId || e.webId || e.webID || null;
+      const webId = e.cpId || e.webId || e.webID || null;
       const domain =
-        webId && this.portalIdToDomain[webId]
-          ? this.portalIdToDomain[webId]
-          : e.portalDomain || e.portalName || webId || "unknown";
+        webId && this.cpIdToDomain[webId]
+          ? this.cpIdToDomain[webId]
+          : e.cpDomain || e.cpName || webId || "unknown";
       if (!map[domain]) map[domain] = [];
       map[domain].push(e);
     }
@@ -417,32 +417,32 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  togglePortal(portalId: string) {
-    if (this.expandedPortals.has(portalId)) {
-      this.expandedPortals.delete(portalId);
+  toggleCp(cpId: string) {
+    if (this.expandedCps.has(cpId)) {
+      this.expandedCps.delete(cpId);
     } else {
-      this.expandedPortals.add(portalId);
+      this.expandedCps.add(cpId);
     }
   }
 
-  isPortalExpanded(portalId: string): boolean {
-    return this.expandedPortals.has(portalId);
+  isCpExpanded(cpId: string): boolean {
+    return this.expandedCps.has(cpId);
   }
 
-  toggleRawData(portalId: string) {
-    if (this.expandedRawData.has(portalId)) {
-      this.expandedRawData.delete(portalId);
+  toggleRawData(cpId: string) {
+    if (this.expandedRawData.has(cpId)) {
+      this.expandedRawData.delete(cpId);
     } else {
-      this.expandedRawData.add(portalId);
+      this.expandedRawData.add(cpId);
     }
   }
 
-  isRawDataExpanded(portalId: string): boolean {
-    return this.expandedRawData.has(portalId);
+  isRawDataExpanded(cpId: string): boolean {
+    return this.expandedRawData.has(cpId);
   }
 
-  copyRawData(portal: any) {
-    const data = JSON.stringify(portal._raw, null, 2);
+  copyRawData(cp: any) {
+    const data = JSON.stringify(cp._raw, null, 2);
     navigator.clipboard.writeText(data).then(() => {});
   }
 

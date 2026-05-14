@@ -1,3 +1,4 @@
+
 import {
   AfterViewInit,
   Component,
@@ -2539,10 +2540,10 @@ onFileSelected(event: any) {
   const isPdf = file.type === 'application/pdf';
   const maxPdfSize = 1 * 1024 * 1024;
 
-  // if (isPdf && file.size > maxPdfSize) {
-  //   this.snackbar.show('PDF size must be less than 1 MB',false);
-  //   return;
-  // }
+  if (isPdf && file.size > maxPdfSize) {
+    this.snackbar.show('PDF size must be less than 1 MB',false);
+    return;
+  }
 
   // STORE FILE
   this.selectedFile = file;

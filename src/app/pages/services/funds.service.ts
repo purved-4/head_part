@@ -3,7 +3,6 @@ import { Injectable } from "@angular/core";
 import { catchError, map, Observable, throwError } from "rxjs";
 import baseUrl from "./helper";
 import { DateTimeUtil } from "../../utils/date-time.utils";
-import { EntityType } from "../../components/reports/percentage-log/percentage-log.types";
 
 @Injectable({
   providedIn: "root",
@@ -47,6 +46,7 @@ export class FundsService {
       catchError((error) => throwError(error)),
     );
   }
+ 
 
   settleUpiFund(upiSettleId: any): Observable<any> {
     return this.http
@@ -72,6 +72,8 @@ export class FundsService {
       catchError((error) => throwError(error)),
     );
   }
+
+ 
 
   getAllUpiFund(): Observable<any> {
     return this.http.get<any>(`${baseUrl}/funds/getAllUpiFunds`).pipe(
@@ -191,38 +193,19 @@ export class FundsService {
       );
   }
 
-  // acceptPayout(bankSettleId: any, accountId?: any): Observable<any> {
-  //   let params = new HttpParams();
-
-  //   if (accountId) {
-  //     params = params.set("accountId", accountId);
-  //   }
-
-  //   return this.http
-  //     .patch<any>(
-  //       `${baseUrl}/funds/payout/${bankSettleId}/accept`,
-  //       {},
-  //       { params },
-  //     )
-  //     .pipe(
-  //       map((response: any) => response.data),
-  //       catchError((error) => throwError(() => error)),
-  //     );
-  // }
-
-acceptPayout(
-  bankSettleId: any,
-  payload?: FormData
+  acceptPayout(
+bankSettleId: any,
+payload?: FormData
 ): Observable<any> {
-  console.log(payload)
+console.log(payload)
 
-  return this.http.patch<any>(
+return this.http.patch<any>(
     `${baseUrl}/funds/payout/${bankSettleId}/accept`,
     payload
-  ).pipe(
+).pipe(
     map((response: any) => response.data),
     catchError((error) => throwError(() => error)),
-  );
+);
 }
 
   rejectpayout(
@@ -309,7 +292,8 @@ acceptPayout(
     );
   }
 
-  updateProcessingStatus(fundId: any, branchId: any, entityType: any) {
+   
+updateProcessingStatus(fundId: any, branchId: any, entityType?: any) {
     return this.http.patch(
       `${baseUrl}/funds/payoutProcessing/${fundId}/${branchId}/${entityType}`,
       {},
@@ -317,6 +301,8 @@ acceptPayout(
   }
 
   /// Accept and reject for the tp role
+
+ 
 
   getByThreadIdFundIdAndType(
     threadId: any,
@@ -334,6 +320,8 @@ acceptPayout(
   }
 
   // payout rejectin
+
+  
 
   getAllUpiFundWithPortalId(
     portalId: any,
@@ -362,6 +350,8 @@ acceptPayout(
         catchError((error) => throwError(error)),
       );
   }
+
+
 
   // web do pyauouit fubd lo
   getAllPayoutFundWithPortalId(
@@ -396,13 +386,13 @@ acceptPayout(
     let params = new HttpParams();
 
     // ids.forEach((id) => {
-    params = params.append("ids", ids);
+      params = params.append("ids", ids);
     // });
 
     return this.http.get<any>(`${baseUrl}/webhook/broadcast/list`, { params });
   }
 
-  getThreadsWithFundId(fundId: any): Observable<any> {
+ getThreadsWithFundId(fundId: any): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/comPart/fund-process-logs/${fundId}`)
       .pipe(
@@ -475,7 +465,7 @@ acceptPayout(
       );
   }
 
-  getPayinFundWithPortalIdAndEntityId(
+ getPayinFundWithPortalIdAndEntityId(
     entityId: any,
     portalId: any,
     status: any,
@@ -521,54 +511,7 @@ acceptPayout(
         catchError((error) => throwError(error)),
       );
   }
-  //NEW
-  getPayinFundWithCpIdAndEntityId(
-    entityId: any,
-    compartId: any,
-    status: any,
-    page: number = 0,
-    pageSize: number = 10,
-    category?: any,
-    fromDate?: any,
-    toDate?: any,
-    fundType?: any,
-    role?: any,
-  ): Observable<any> {
-    if (!compartId) {
-      throw new Error("portalId is required");
-    }
 
-    let params = new HttpParams()
-      .set("page", page.toString())
-      .set("size", pageSize.toString())
-      .set("status", status);
-
-    if (category != null) {
-      params = params.set("category", category.toString());
-    }
-
-    if (fromDate) {
-      params = params.set("fromDate", DateTimeUtil.toUtcISOString(fromDate));
-    }
-
-    if (toDate) {
-      params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
-    }
-
-    if (fundType) {
-      params = params.set("fundType", fundType);
-    }
-
-    return this.http
-      .get<any>(
-        `${baseUrl}/funds/getPayInFundWithEntityIdEntityTypeAndComPartId/${compartId}/${entityId}/${role}`,
-        { params },
-      )
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(error)),
-      );
-  }
   getAllPayoutFundWithEntityAndPortalId(
     entityId: any,
     portalId: any,
@@ -606,8 +549,8 @@ acceptPayout(
         catchError((error) => throwError(error)),
       );
   }
-
-  getAllPayoutFundWithEntityAndCpId(
+ 
+getAllPayoutFundWithEntityAndCpId(
     entityId: any,
     portalId: any,
     status: any,
@@ -617,32 +560,83 @@ acceptPayout(
     fromDate?: any,
     toDate?: any,
     role?: any,
-  ): Observable<any> {
+): Observable<any> {
     let params = new HttpParams()
-      .set("page", page.toString())
-      .set("size", pageSize.toString())
-      .set("status", status);
+     .set("page", page.toString())
+     .set("size", pageSize.toString())
+     .set("status", status);
 
     if (category !== null && category !== undefined) {
-      params = params.set("category", category.toString());
+     params = params.set("category", category.toString());
     }
 
     if (fromDate) {
-      params = params.set("fromDate", DateTimeUtil.toUtcISOString(fromDate));
+     params = params.set("fromDate", DateTimeUtil.toUtcISOString(fromDate));
     }
 
     if (toDate) {
-      params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
+     params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
     }
 
     return this.http
-      .get<any>(
+     .get<any>(
         `${baseUrl}/funds/getPayoutFundWithComPartIdAndEntityId/${portalId}/${entityId}/${role}`,
         { params },
-      )
-      .pipe(
+     )
+     .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(error)),
-      );
-  }
+     );
+}
+getPayinFundWithCpIdAndEntityId(
+    entityId: any,
+    compartId: any,
+    status: any,
+    page: number = 0,
+    pageSize: number = 10,
+    category?: any,
+    fromDate?: any,
+    toDate?: any,
+    fundType?: any,
+    role?: any,
+): Observable<any> {
+    if (!compartId) {
+     throw new Error("portalId is required");
+    }
+
+    let params = new HttpParams()
+     .set("page", page.toString())
+     .set("size", pageSize.toString())
+     .set("status", status);
+
+    if (category != null) {
+     params = params.set("category", category.toString());
+    }
+
+    if (fromDate) {
+     params = params.set("fromDate", DateTimeUtil.toUtcISOString(fromDate));
+    }
+
+    if (toDate) {
+     params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
+    }
+
+    if (fundType) {
+     params = params.set("fundType", fundType);
+    }
+
+    return this.http
+     .get<any>(
+        `${baseUrl}/funds/getPayInFundWithEntityIdEntityTypeAndComPartId/${compartId}/${entityId}/${role}`,
+        { params },
+     )
+     .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+     );
+}
+
+
+
+ 
 }

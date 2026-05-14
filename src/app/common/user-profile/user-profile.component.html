@@ -57,20 +57,20 @@
         <!-- PORTALS -->
         <button
           *ngIf="role === 'HEAD' || role === 'BRANCH'"
-          (click)="selectSection('portal')"
+          (click)="selectSection('cp')"
           class="group relative flex items-center justify-center sm:justify-start gap-1 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-all duration-200"
-          [class.bg-white]="selectedSection === 'portal'"
-          [class.text-blue-600]="selectedSection === 'portal'"
-          [class.shadow-sm]="selectedSection === 'portal'"
-          [class.text-gray-600]="selectedSection !== 'portal'"
-          [class.hover:bg-gray-200]="selectedSection !== 'portal'"
+          [class.bg-white]="selectedSection === 'cp'"
+          [class.text-blue-600]="selectedSection === 'cp'"
+          [class.shadow-sm]="selectedSection === 'cp'"
+          [class.text-gray-600]="selectedSection !== 'cp'"
+          [class.hover:bg-gray-200]="selectedSection !== 'cp'"
         >
           <span class="material-icons text-sm">language</span>
-          <span class="hidden sm:inline">Portals</span>
+          <span class="hidden sm:inline">Cps</span>
           <span
             class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap"
           >
-            Portals
+            Cps
           </span>
         </button>
 
@@ -514,7 +514,7 @@
                         class="text-sm md:text-base font-semibold"
                         [style.color]="'var(--color-font)'"
                       >
-                        Portals
+                        Cps
                       </h4>
                       <p
                         class="text-[9px] md:text-xs"
@@ -546,7 +546,7 @@
                     class="text-xs md:text-xs font-semibold"
                     [style.color]="'var(--color-font)'"
                   >
-                    No portals configured
+                    No cps configured
                   </p>
                 </div>
 
@@ -575,7 +575,7 @@
                             class="font-semibold text-xs md:text-xs truncate"
                             [style.color]="'var(--color-font)'"
                           >
-                            {{ w.portalDomain }}
+                            {{ w.cpDomain }}
                           </p>
                         </div>
                       </div>
@@ -633,7 +633,7 @@
       </div> -->
 
       <!-- ==================== PORTALS Section ==================== -->
-      <div *ngIf="selectedSection === 'portal'" class="animate-fade-in">
+      <div *ngIf="selectedSection === 'cp'" class="animate-fade-in">
         <!-- Header -->
         <div
           class="mb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
@@ -643,10 +643,10 @@
               class="text-lg md:text-2xl font-bold mb-0.5 md:mb-1"
               [style.color]="'var(--color-font)'"
             >
-              Portal Configurations
+              Cp Configurations
             </h1>
             <p class="text-xs md:text-xs" [style.color]="'var(--color-muted)'">
-              Manage settings for each connected portal
+              Manage settings for each connected cp
             </p>
           </div>
           <div class="flex items-center">
@@ -654,7 +654,7 @@
               class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-white font-semibold shadow-sm text-xs md:text-xs"
               [style.background]="'var(--color-primary)'"
             >
-              {{ (cpInfo || []).length }} Portal{{
+              {{ (cpInfo || []).length }} Cp{{
                 (cpInfo || []).length !== 1 ? "s" : ""
               }}
             </div>
@@ -682,30 +682,30 @@
               class="text-sm font-bold mb-1 md:mb-2"
               [style.color]="'var(--color-font)'"
             >
-              No Portals Configured
+              No Cps Configured
             </h3>
             <p
               class="text-xs md:text-xs mb-2"
               [style.color]="'var(--color-muted)'"
             >
-              Add portals to start configuring processing times, payin
+              Add cps to start configuring processing times, payin
               strengths, and payout rules.
             </p>
           </div>
         </div>
 
-        <!-- Portal Cards -->
+        <!-- Cp Cards -->
         <div class="space-y-3 md:space-y-4">
           <div
             *ngFor="let w of cpInfo; let i = index"
             class="bg-white rounded-lg border shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg"
             [style.borderColor]="'var(--color-border)'"
           >
-            <!-- Portal Header -->
+            <!-- Cp Header -->
             <div
               class="p-2 cursor-pointer transition-all duration-300"
               [style.background]="'var(--color-bg)'"
-              (click)="togglePortal(w.portalId)"
+              (click)="toggleCp(w.cpId)"
             >
               <div
                 class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"
@@ -732,7 +732,7 @@
                       class="text-sm md:text-base font-bold mb-0.5 break-words"
                       [style.color]="'var(--color-font)'"
                     >
-                      {{ w.portalDomain }}
+                      {{ w.compartUsername || w.compartId || "Unnamed Cp" }}
                     </h3>
                     <div class="flex flex-wrap items-center gap-1">
                       <span
@@ -805,7 +805,7 @@
                   </div>
                   <div
                     class="w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center transition-all duration-300 shadow-sm flex-shrink-0"
-                    [class.rotate-180]="isPortalExpanded(w.portalId)"
+                    [class.rotate-180]="isCpExpanded(w.cpId)"
                     [style.background]="'var(--color-primary)'"
                   >
                     <span class="material-icons text-white text-xs md:text-sm"
@@ -818,7 +818,7 @@
 
             <!-- Expanded Details -->
             <div
-              *ngIf="isPortalExpanded(w.portalId)"
+              *ngIf="isCpExpanded(w.cpId)"
               class="border-t"
               [style.borderColor]="'var(--color-border)'"
             >

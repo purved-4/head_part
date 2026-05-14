@@ -611,7 +611,7 @@
           class="w-full h-32 sm:h-48 rounded-xl sm:rounded-2xl overflow-y-auto border border-[var(--color-border)] bg-[var(--color-bg)] flex flex-col items-center justify-start p-2 gap-2"
         >
           <!-- SHOW IMAGES -->
-          <!-- <ng-container
+          <ng-container
             *ngIf="selectedRecord?.images?.length > 0; else noImage"
           >
             <img
@@ -622,61 +622,8 @@
               (click)="openLightbox(img)"
               (error)="onImageError($event)"
             />
-          </ng-container> -->
+          </ng-container>
 
-
-          <!-- SHOW IMAGES / PDFs -->
-<ng-container
-  *ngIf="
-    (selectedRecord?.images?.length > 0) ||
-    (selectedRecord?.pdfs?.length > 0);
-    else noImage
-  "
->
-  <!-- Images -->
-  <img
-    *ngFor="let img of selectedRecord.images"
-    [src]="img"
-    alt="transaction proof"
-    class="max-h-32 sm:max-h-40 w-auto rounded object-contain cursor-pointer border"
-    (click)="openLightbox(img)"
-    (error)="onImageError($event)"
-  />
-
-  <!-- PDFs -->
-  <div
-    *ngFor="let pdf of selectedRecord.pdfs"
-    class="w-full border rounded-xl p-4 bg-white flex flex-col gap-3 items-center justify-center"
-  >
-    <span class="material-symbols-outlined text-5xl text-red-600">
-      picture_as_pdf
-    </span>
-
-    <div class="text-sm font-semibold text-center">
-      PDF Received
-    </div>
-
-    <div class="flex gap-2">
-      <!-- View -->
-      <a
-        [href]="pdf"
-        target="_blank"
-        class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium"
-      >
-        View PDF
-      </a>
-
-      <!-- Download -->
-      <a
-        [href]="pdf"
-        download
-        class="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium"
-      >
-        Download
-      </a>
-    </div>
-  </div>
-</ng-container>
           <!-- NO IMAGE -->
           <ng-template #noImage>
             <div class="text-center text-[var(--color-muted)]">

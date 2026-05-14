@@ -1420,15 +1420,14 @@
         </div>
 
         <!-- payout Options Switch -->
-        <div class="mb-6" *ngIf="confirmTransaction.type === 'payout'">
+        <!-- <div class="mb-6" *ngIf="confirmTransaction.type === 'payout'">
           <label
             class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
           >
             Select Payout Method (Optional)
           </label>
 
-          <!-- Toggle Switch -->
-          <div class="flex items-center justify-center mb-4">
+           <div class="flex items-center justify-center mb-4">
             <div class="relative inline-block w-64">
               <div class="flex bg-[var(--color-bg)] rounded-xl p-1">
                 <button
@@ -1461,8 +1460,7 @@
             </div>
           </div>
 
-          <!-- UPI Dropdown (shown when UPI is selected) -->
-          <div *ngIf="selectedPayoutMethod === 'upi'" class="animate-fadeIn">
+           <div *ngIf="selectedPayoutMethod === 'upi'" class="animate-fadeIn">
             <label
               class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
             >
@@ -1479,8 +1477,7 @@
             </select>
           </div>
 
-          <!-- Bank Dropdown (shown when Bank is selected) -->
-          <div *ngIf="selectedPayoutMethod === 'bank'" class="animate-fadeIn">
+           <div *ngIf="selectedPayoutMethod === 'bank'" class="animate-fadeIn">
             <label
               class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
             >
@@ -1496,7 +1493,7 @@
               </option>
             </select>
           </div>
-        </div>
+        </div> -->
 
         <!-- Attachment Upload -->
 <div
