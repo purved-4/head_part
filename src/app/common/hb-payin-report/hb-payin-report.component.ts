@@ -19,11 +19,11 @@ import { ComPartService } from "../../pages/services/com-part.service";
   styleUrl: "./hb-payin-report.component.css",
 })
 export class HbPayinReportComponent implements OnInit, OnDestroy {
-    approvedpayins: any[] = [];
+  approvedpayins: any[] = [];
 
   // Pagination metadata from server
-   payinTotalRecords = 0;
- 
+  payinTotalRecords = 0;
+
   // Mode filter
   selectedMode: "all" | "upi" | "bank" = "all";
 
@@ -40,8 +40,6 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   // active view
   activeView: "upi" | "bank" | "payout" = "upi";
 
- 
-
   // Bank filters
   bankSearchQuery = "";
   bankPortalFilter = "";
@@ -49,22 +47,18 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   bankDateTo = "";
   bankPortals: any[] = [];
 
- 
- 
- 
-
   payinPage = 0;
   payinPageSize = 10;
   payinPageSizes = [5, 10, 20, 25, 50];
 
-   payinApprovedPageSize = 10;
- 
+  payinApprovedPageSize = 10;
+
   // ========== FILTER DROPDOWN STATE ==========
   filterDropdownOpen: string | null = null; // 'upi' | 'bank' | 'payout' | null
 
   // ========== CUSTOM PORTAL DROPDOWN STATE ==========
-   bankPortalDropdownOpen = false;
- 
+  bankPortalDropdownOpen = false;
+
   // ========== MODAL & LIGHTBOX STATE ==========
   showRecordModal = false;
   selectedRecord: any = null;
@@ -101,9 +95,6 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       this.activeView = type === "bank" || type === "payout" ? type : "upi";
 
       if (!this.branchId) return;
-
-     
-    
     });
   }
 
@@ -141,7 +132,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       this.colors = branch;
     }
   }
- 
+
   fetchBankPayins(): void {
     if (!this.branchId) return;
 
@@ -177,18 +168,16 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       )
       .pipe(catchError(() => of({ content: [], totalElements: 0 })))
       .subscribe((response: any) => {
-        console.log(response)
+        console.log(response);
         const { list, total, pageNum, pageSize } = this.parseResponse(response);
 
         this.payinTotalRecords = total;
         this.payinPage = pageNum;
         this.payinPageSize = pageSize;
-console.log(list)
+        console.log(list);
         this.mapFundsArray(list, "bank");
       });
   }
-
- 
 
   loadPortalOptions(): void {
     if (!this.branchId) return;
@@ -226,8 +215,8 @@ console.log(list)
   private setPortals(portals: any[]) {
     this.portalOptions = portals;
 
-     this.bankPortals = portals;
-   }
+    this.bankPortals = portals;
+  }
 
   // Helper to parse various response shapes
   private parseResponse(response: any): {
@@ -263,121 +252,89 @@ console.log(list)
   }
   // ============ MAPPERS ============
   private mapFundsArray(items: any[], mode: "bank" | "upi") {
-        this.approvedpayins = items.map((it: any) => ({
+    this.approvedpayins = items.map((it: any) => ({
+      mode: mode,
 
-    
-     
-        mode: mode,
+      portal: it.portalDomain || it.portalId || "—",
+      portalId: it.portalId || it.raw?.portalId || null,
 
-        portal: it.portalDomain || it.portalId || "—",
-        portalId: it.portalId || it.raw?.portalId || null,
+      vpa: it.vpa || it.vpaId || it.upiId,
+      upiId: it.upiId,
 
-        vpa: it.vpa || it.vpaId || it.upiId,
-        upiId: it.upiId,
+      accountNo: it.accountNo || it.accNo || it.account,
 
-        accountNo: it.accountNo || it.accNo || it.account,
+      transactionId: it.transactionId || it.txnId,
 
-        transactionId: it.transactionId || it.txnId,
+      amount: Number(it.amount ?? it.value ?? 0),
 
-        amount: Number(it.amount ?? it.value ?? 0),
+      settled: it.settled,
 
-        settled: it.settled,
+      reviewStatus: it.reviewStatus || it.review,
 
-        reviewStatus: it.reviewStatus || it.review,
+      status: it.status || it.state,
 
-        status: it.status || it.state,
+      date: it.createdAt ? new Date(it.createdAt) : new Date(),
 
-        date: it.createdAt ? new Date(it.createdAt) : new Date(),
-
-        raw: it,
-       }));
+      raw: it,
+    }));
     this.approvedpayins.sort(
       (a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0),
     );
-
-  
   }
- 
-
- 
 
   filteredBankpayins(): any[] {
     return this.approvedpayins;
   }
- 
-
- 
 
   pagedBankpayins(): any[] {
- return this.approvedpayins;
+    return this.approvedpayins;
   }
 
   bankTotalPages(): number {
-    return  Math.max(
+    return Math.max(
       1,
       Math.ceil(this.payinTotalRecords / this.payinApprovedPageSize),
-    ); Math.ceil(this.filteredBankpayins().length / this.payinPageSize);
+    );
+    Math.ceil(this.filteredBankpayins().length / this.payinPageSize);
   }
-
-  
-
-   
 
   setpayinPage(p: number) {
     const totalPages = this.bankTotalPages();
     this.payinPage = Math.max(0, Math.min(p, totalPages - 1));
   }
 
-  
-
- 
-
   onChangepayinPageSize(size: number) {
     this.payinPageSize = Number(size);
     this.payinPage = 0;
   }
-
-  
 
   // ============ FILTER DROPDOWN CONTROLS ============
   toggleFilterDropdown(view: string) {
     this.filterDropdownOpen = this.filterDropdownOpen === view ? null : view;
   }
 
- 
-
   get bankFilterActive(): boolean {
     return !!(this.bankDateFrom || this.bankDateTo);
   }
- 
 
   clearBankDateFilters() {
     this.bankDateFrom = "";
     this.bankDateTo = "";
   }
- 
+
   // ============ PORTAL DROPDOWN CONTROLS ============
   togglePortalDropdown(view: "upi" | "bank" | "payout") {
-  
-      this.bankPortalDropdownOpen = !this.bankPortalDropdownOpen;
-        
+    this.bankPortalDropdownOpen = !this.bankPortalDropdownOpen;
   }
 
   selectPortal(view: "upi" | "bank" | "payout", portal: any) {
     const portalId = portal?.id || "";
- 
-      this.bankPortalFilter = portalId;
-      this.bankPortalDropdownOpen = false;
-      this.payinPage = 0;
-      this.fetchBankPayins();
-    }  
-  
 
- 
-
- 
-
- 
+    this.bankPortalFilter = portalId;
+    this.bankPortalDropdownOpen = false;
+    this.payinPage = 0;
+    this.fetchBankPayins();
+  }
 
   applyBankFilters() {
     this.payinPage = 0;
@@ -401,13 +358,9 @@ console.log(list)
     // this.fetchBankPayins(); // ✅ REQUIRED
   }
 
-  
- 
   // ============ REFRESH BUTTON ============
   refreshCurrentView(): void {
-    
-       this.fetchBankPayins();
-  
+    this.fetchBankPayins();
   }
 
   refreshPage(): void {
@@ -431,11 +384,18 @@ console.log(list)
   }
 
   // ============ MODAL & LIGHTBOX ============
+  // openRecordModal(record: any) {
+  //   this.selectedRecord = record;
+  //   this.showRecordModal = true;
+  // }
+
   openRecordModal(record: any) {
     this.selectedRecord = record;
+
+    this.loadImages(this.selectedRecord);
+
     this.showRecordModal = true;
   }
-
   closeRecordModal() {
     this.selectedRecord = null;
     this.showRecordModal = false;
@@ -465,7 +425,7 @@ console.log(list)
     return Number(v).toFixed(2);
   }
 
-  loadImages(rec: any) {
+  loadImage(rec: any) {
     if (!rec) return;
 
     const raw = rec.raw || {};
@@ -492,7 +452,113 @@ console.log(list)
       rec.images = [];
     }
   }
+  loadImages(rec: any) {
+    if (!rec) return;
 
+    const raw = rec.raw || {};
+
+    rec.proofImages = [];
+    rec.proofPdfs = [];
+
+    rec.rejectedImages = [];
+    rec.rejectedPdfs = [];
+
+    this.imageError = false;
+
+    // ================= NORMAL FILE =================
+    if (raw.filePath) {
+      this.multimediaService.getPrivateImage(raw.filePath).subscribe({
+        next: (url) => {
+          rec.proofImages.push(url);
+        },
+        error: () => {
+          this.imageError = true;
+        },
+      });
+    }
+
+    // ================= REJECTED FILE =================
+    if (raw.rejectionFilePath) {
+      this.multimediaService.getPrivateImage(raw.rejectionFilePath).subscribe({
+        next: (url) => {
+          // ✅ Check whether URL is image
+          const img = new Image();
+
+          img.onload = () => {
+            // ✅ Valid image
+            rec.rejectedImages.push(url);
+          };
+
+          img.onerror = () => {
+            // ✅ Not image => treat as PDF/download
+            rec.rejectedPdfs.push({
+              url,
+              name: "Rejected Proof",
+            });
+          };
+
+          img.src = url;
+        },
+
+        error: () => {
+          this.imageError = true;
+        },
+      });
+    }
+  }
+
+  // private processFile(
+  //   filePath: string,
+  //   imageArray: any[],
+  //   pdfArray: any[],
+  //   pdfName: string,
+  // ) {
+  //   if (
+  //     !filePath ||
+  //     filePath === "null" ||
+  //     filePath === "undefined" ||
+  //     String(filePath).trim() === ""
+  //   ) {
+  //     return;
+  //   }
+
+  //   const lowerPath = String(filePath).toLowerCase();
+
+  //   // ✅ detect pdf from original path
+  //   const isPdf =
+  //     lowerPath.includes(".pdf") ||
+  //     lowerPath.includes("/pdf/") ||
+  //     lowerPath.includes("pdf") ||
+  //     lowerPath.includes("application/pdf");
+
+  //   // ✅ DIRECTLY HANDLE PDF
+  //   if (isPdf) {
+  //     this.multimediaService.getPrivateImage(filePath).subscribe({
+  //       next: (url) => {
+  //         pdfArray.push({
+  //           url,
+  //           name: pdfName,
+  //         });
+  //       },
+  //       error: () => {
+  //         this.imageError = true;
+  //       },
+  //     });
+
+  //     return;
+  //   }
+
+  //   // ✅ IMAGE
+  //   this.multimediaService.getPrivateImage(filePath).subscribe({
+  //     next: (url) => {
+  //       imageArray.push(url);
+  //     },
+
+  //     error: () => {
+  //       this.imageError = true;
+  //     },
+  //   });
+  // }
   onImageError(ev: any) {
     if (ev && ev.target) {
       ev.target.src = "";
@@ -620,28 +686,28 @@ console.log(list)
   getSelectedPortalDomain(view: "upi" | "bank" | "payout"): string {
     let selectedId = "";
 
-     if (view === "bank") selectedId = this.bankPortalFilter;
- 
+    if (view === "bank") selectedId = this.bankPortalFilter;
+
     const found = this.portalOptions.find((p) => p.id === selectedId);
     return found ? found.domain : "All Compart";
   }
   onModeChange(mode: "all" | "upi" | "bank") {
     this.selectedMode = mode;
 
-     this.payinPage = 0;
- 
+    this.payinPage = 0;
+
     this.refreshCurrentView();
   }
   onStatusChange(status: "ACCEPTED" | "REJECTED" | "PENDING") {
     this.selectedStatus = status;
 
-     this.payinPage = 0;
- 
+    this.payinPage = 0;
+
     this.refreshCurrentView();
   }
   resetPages() {
-     this.payinPage = 0;
-   }
+    this.payinPage = 0;
+  }
   getFundType(): string {
     if (this.selectedMode === "upi") return "UPI";
 

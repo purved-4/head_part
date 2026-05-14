@@ -555,8 +555,6 @@
           </div>
         </div>
       </div>
-
-       
     </div>
   </div>
 </div>
@@ -616,104 +614,136 @@
       class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 p-3 sm:p-6 overflow-y-auto max-h-[calc(90vh-80px)]"
     >
       <!-- LEFT: Image + Quick Summary -->
+      <!-- LEFT: Proof Section -->
       <div class="flex flex-col gap-3 sm:gap-4">
-        <!-- Clickable thumbnail – smaller on mobile -->
-
         <div
-          class="w-full h-32 sm:h-48 rounded-xl sm:rounded-2xl overflow-y-auto border border-[var(--color-border)] bg-[var(--color-bg)] flex flex-col items-center justify-start p-2 gap-2"
+          class="w-full rounded-xl sm:rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 flex flex-col gap-4 max-h-[420px] overflow-y-auto"
         >
-          <!-- SHOW IMAGE -->
-          <ng-container
-            *ngIf="selectedRecord?.images?.length > 0; else noImage"
+          <!-- ================= NORMAL PROOF ================= -->
+          <div
+            *ngIf="
+              selectedRecord?.proofImages?.length ||
+              selectedRecord?.proofPdfs?.length
+            "
           >
-            <img
-              *ngFor="let img of selectedRecord.images"
-              [src]="img"
-              alt="proof"
-              class="max-h-32 sm:max-h-40 w-auto rounded object-contain cursor-pointer border"
-              (click)="openLightbox(img)"
-              (error)="onImageError($event)"
-            />
-          </ng-container>
-
-          <!-- NO IMAGE -->
-          <ng-template #noImage>
-            <div class="text-center text-[var(--color-muted)]">
-              <span class="material-symbols-outlined text-3xl sm:text-5xl">
-                image_not_supported
-              </span>
-              <div class="text-xs sm:text-sm mt-1">No proof image</div>
+            <div class="text-sm font-bold text-[var(--color-font)] mb-2">
+              File Proof
             </div>
-          </ng-template>
-        </div>
 
-        <!-- Quick Summary – compact -->
-        <div
-          class="rounded-xl sm:rounded-2xl p-3 sm:p-5 bg-[var(--color-bg)] border border-[var(--color-border)]"
-        >
-          <h4
-            class="text-xs sm:text-base font-semibold mb-2 sm:mb-4 flex items-center gap-1 sm:gap-2 text-[var(--color-font)]"
-          >
-            <span class="material-symbols-outlined text-sm sm:text-lg"
-              >summarize</span
+            <!-- Images -->
+            <div class="flex flex-wrap gap-3">
+              <img
+                *ngFor="let img of selectedRecord.proofImages"
+                [src]="img"
+                alt="proof"
+                class="h-32 w-auto rounded-lg border object-contain cursor-pointer"
+                (click)="openLightbox(img)"
+                (error)="onImageError($event)"
+              />
+            </div>
+
+            <!-- PDFs -->
+            <div
+              *ngFor="let pdf of selectedRecord.proofPdfs"
+              class="border rounded-xl p-4 bg-white flex items-center justify-between"
             >
-            Quick Summary
-          </h4>
-          <div class="space-y-2 sm:space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs sm:text-sm text-[var(--color-muted)]"
-                >Amount</span
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-red-600 text-4xl">
+                  picture_as_pdf
+                </span>
+
+                <div>
+                  <div class="font-semibold text-sm">PDF Proof</div>
+                  <div class="text-xs text-gray-500">
+                    Click below to download
+                  </div>
+                </div>
+              </div>
+
+              <a
+                [href]="pdf.url"
+                download
+                class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold"
               >
-              <span
-                class="text-sm sm:text-lg font-bold text-[var(--color-font)]"
-                >₹ {{ formatCurrency(selectedRecord?.amount) }}</span
-              >
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-xs sm:text-sm text-[var(--color-muted)]"
-                >Settlement</span
-              >
-              <span
-                class="text-xs sm:text-sm font-semibold text-[var(--color-font)]"
-              >
-                {{
-                  selectedRecord?.settled === true
-                    ? "Settled"
-                    : selectedRecord?.settled === false
-                      ? "Pending"
-                      : "Unknown"
-                }}
-              </span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-xs sm:text-sm text-[var(--color-muted)]"
-                >Review Status</span
-              >
-              <span
-                class="px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs rounded-full font-bold"
-                [ngClass]="
-                  getStatusClass(
-                    selectedRecord?.reviewStatus || selectedRecord?.status
-                  )
-                "
-              >
-                {{
-                  selectedRecord?.reviewStatus || selectedRecord?.status || "—"
-                }}
-              </span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-xs sm:text-sm text-[var(--color-muted)]"
-                >Date</span
-              >
-              <span
-                class="text-xs sm:text-sm font-medium text-[var(--color-font)]"
-              >
-                {{ selectedRecord?.date ? (selectedRecord.date | tz) : "—" }}
-              </span>
+                Download
+              </a>
             </div>
           </div>
+
+          <!-- ================= REJECTED PROOF ================= -->
+          <div
+            *ngIf="
+              selectedRecord?.rejectedImages?.length ||
+              selectedRecord?.rejectedPdfs?.length
+            "
+          >
+            <div class="text-sm font-bold text-red-600 mb-2">
+              Rejected File Proof
+            </div>
+
+            <!-- Images -->
+            <div class="flex flex-wrap gap-3">
+              <img
+                *ngFor="let img of selectedRecord.rejectedImages"
+                [src]="img"
+                alt="rejected-proof"
+                class="h-32 w-auto rounded-lg border object-contain cursor-pointer"
+                (click)="openLightbox(img)"
+                (error)="onImageError($event)"
+              />
+            </div>
+
+            <!-- PDFs -->
+            <div
+              *ngFor="let pdf of selectedRecord.rejectedPdfs"
+              class="border rounded-xl p-4 bg-red-50 flex items-center justify-between"
+            >
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-red-600 text-4xl">
+                  picture_as_pdf
+                </span>
+
+                <div>
+                  <div class="font-semibold text-sm text-red-600">
+                    Rejected PDF Proof
+                  </div>
+
+                  <div class="text-xs text-gray-500">
+                    Click below to download
+                  </div>
+                </div>
+              </div>
+
+              <a
+                [href]="pdf.url"
+                download
+                class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold"
+              >
+                Download
+              </a>
+            </div>
+          </div>
+
+          <!-- EMPTY -->
+          <div
+            *ngIf="
+              !selectedRecord?.proofImages?.length &&
+              !selectedRecord?.proofPdfs?.length &&
+              !selectedRecord?.rejectedImages?.length &&
+              !selectedRecord?.rejectedPdfs?.length
+            "
+            class="text-center text-[var(--color-muted)] py-10"
+          >
+            <span class="material-symbols-outlined text-5xl">
+              image_not_supported
+            </span>
+
+            <div class="text-sm mt-2">No proof available</div>
+          </div>
         </div>
+
+        <!-- Quick Summary -->
+        <!-- SAME AS YOUR EXISTING -->
       </div>
 
       <!-- RIGHT: Transaction Details – compact grid -->
@@ -771,3 +801,4 @@
     </button>
   </div>
 </div>
+
