@@ -154,79 +154,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     return date.toISOString(); // converts to UTC (your required format)
   }
 
-  // fetchAllRejectedPayouts(): void {
-  //   if (!this.branchId) return;
-
-  //   const pageSize = 10;
-  //   let page = 0;
-
-  //   const allData: any[] = [];
-
-  //   const fetchPage = () => {
-  //     const fromDate = this.payoutDateFrom
-  //       ? DateTimeUtil.toUtcISOString(
-  //           new Date(new Date(this.payoutDateFrom).setHours(0, 0, 0, 0)),
-  //         )
-  //       : undefined;
-
-  //     const toDate = this.payoutDateTo
-  //       ? DateTimeUtil.toUtcISOString(
-  //           new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999)),
-  //         )
-  //       : undefined;
-
-  //     this.fundService
-  //       .getAllPayoutFundWithEntityAndCpId(
-  //         this.branchId,
-  //         this.payoutPortalFilter || undefined,
-  //         this.selectedStatus,
-  //         page,
-  //         pageSize,
-  //         undefined,
-  //         fromDate,
-  //         toDate,
-  //         this.role,
-  //       )
-  //       .pipe(
-  //         catchError((err) => {
-
-
-  //           this.snackbar.show("Failed to load payouts", false);
-
-  //           return of({
-  //             data: [],
-  //             total: 0,
-  //           });
-  //         }),
-  //       )
-  //       .subscribe((response: any) => {
-
-
-  //         const list = this.extractListFromResponse(response);
-
-  //         allData.push(...list);
-
-  //         const total = this.extractTotalFromResponse(response);
-
-  //         if ((page + 1) * pageSize < total) {
-  //           page++;
-  //           fetchPage();
-  //         } else {
-  //           // ✅ save original
-  //           this.allRejectedPayouts = allData;
-
-  //           // ✅ map for UI
-  //           this.mapPayoutArray(allData);
-
-  //           // ✅ total count
-  //           this.payoutTotalRecords = allData.length;
-  //         }
-  //       });
-  //   };
-
-  //   fetchPage();
-  // }
-
   fetchAllRejectedPayouts(): void {
     if (!this.branchId) return;
 
@@ -256,8 +183,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       )
       .pipe(
         catchError((err) => {
-
-
           this.snackbar.show("Failed to load payouts", false);
 
           return of({
@@ -267,8 +192,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
         }),
       )
       .subscribe((response: any) => {
-
-
         const list = this.extractListFromResponse(response);
 
         // ✅ only current page data
@@ -520,14 +443,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     this.applyPayoutFilters();
   }
 
-  // clearPayoutFilters() {
-  //   this.payoutSearchQuery = "";
-  //   this.payoutPortalFilter = "";
-  //   this.payoutDateFrom = "";
-  //   this.payoutDateTo = "";
-  //   this.payoutApprovedPage = 0;
-  //   this.fetchApprovedPayouts();
-  //   this.filterDropdownOpen = null;
   // }
   clearPayoutFilters() {
     this.payoutSearchQuery = "";
@@ -634,52 +549,86 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   //     return trimmed;
   //   }
   // }
-  loadImages(rec: any) {
+
+ loadImages(rec: any) {
     if (!rec) return;
 
     const raw = rec.raw || {};
 
-    rec.images = [];
+    // NORMAL
+    rec.proofImages = [];
+    rec.proofPdfs = [];
+
+    // ACCEPTED
+    rec.acceptedImages = [];
+    rec.acceptedPdfs = [];
+
+    // REJECTED
+    rec.rejectedImages = [];
+    rec.rejectedPdfs = [];
+
     this.imageError = false;
 
-    // ✅ alag-alag handle karo (clear logic)
-    const paths = [];
+    // ================= COMMON HANDLER =================
+    const processFile = (
+      filePath: string,
+      imageArray: any[],
+      pdfArray: any[],
+      pdfName: string,
+    ) => {
+      if (
+        !filePath ||
+        filePath === "null" ||
+        filePath === "undefined" ||
+        filePath.trim() === ""
+      ) {
+        return;
+      }
 
-    if (
-      raw.filePath &&
-      raw.filePath !== "null" &&
-      raw.filePath !== "undefined" &&
-      raw.filePath.trim() !== ""
-    ) {
-      paths.push(raw.filePath);
-    }
-
-    if (
-      raw.rejectionFilePath &&
-      raw.rejectionFilePath !== "null" &&
-      raw.rejectionFilePath !== "undefined" &&
-      raw.rejectionFilePath.trim() !== ""
-    ) {
-      paths.push(raw.rejectionFilePath);
-    }
-
-    // ❌ agar dono nahi hai
-    if (paths.length === 0) {
-      rec.images = [];
-      return;
-    }
-
-    // ✅ API call for each
-    paths.forEach((id: string) => {
-      this.multimediaService.getPrivateImage(id).subscribe({
+      this.multimediaService.getPrivateImage(filePath).subscribe({
         next: (url) => {
-          rec.images.push(url);
+          const img = new Image();
+
+          img.onload = () => {
+            // VALID IMAGE
+            imageArray.push(url);
+          };
+
+          img.onerror = () => {
+            // NOT IMAGE => PDF/DOWNLOAD
+            pdfArray.push({
+              url,
+              name: pdfName,
+            });
+          };
+
+          img.src = url;
         },
+
         error: () => {
           this.imageError = true;
         },
       });
-    });
+    };
+
+    // ================= FILE PROOF =================
+    processFile(raw.filePath, rec.proofImages, rec.proofPdfs, "File Proof");
+
+    // ================= ACCEPTED PROOF =================
+    processFile(
+      raw.acceptFilePath,
+      rec.acceptedImages,
+      rec.acceptedPdfs,
+      "Accepted Proof",
+    );
+
+    // ================= REJECTED PROOF =================
+    processFile(
+      raw.rejectionFilePath,
+      rec.rejectedImages,
+      rec.rejectedPdfs,
+      "Rejected Proof",
+    );
   }
 
   onImageError(ev: any) {
@@ -828,5 +777,9 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
     // ✅ API call
     this.fetchAllRejectedPayouts();
+  }
+
+  openPdf(url: string) {
+    window.open(url, "_blank");
   }
 }
