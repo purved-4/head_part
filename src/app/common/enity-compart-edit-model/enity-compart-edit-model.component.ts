@@ -1,3 +1,4 @@
+
 import {
   Component,
   EventEmitter,
@@ -11,6 +12,7 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { forkJoin, of } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { ComPartService } from "../../pages/services/com-part.service";
+import { UserStateService } from "../../store/user-state.service";
 
 interface CompartPercentageRow {
   compartId: string;
@@ -47,6 +49,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
   parentComparts: any[] = [];
   availableComparts: any[] = [];
   allocatedPercentages: CompartPercentageRow[] = [];
+  currentEntityType: any;
 
   // NEW: to show/hide parent comparts view
   showParentCompartsView = false;
@@ -54,14 +57,15 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
   constructor(
     private compartService: ComPartService,
     private fb: FormBuilder,
+    private userStateService: UserStateService,
   ) {}
 
   ngOnInit(): void {
+    this.currentEntityType = this.userStateService.getRole();
     this.buildForm();
 
     if (this.data) {
       this.entityData = this.data;
-
 
       this.patchEntityForm();
     }
@@ -77,15 +81,11 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     if (changes["data"] && this.data) {
       this.entityData = this.data;
 
-
-
       this.editForm.patchValue({
         username: this.entityData.username ?? "",
         info: this.entityData.info ?? "",
         parentCurrency: this.entityData.parentCurrency ?? "",
       });
-
-
     }
   }
 
@@ -128,7 +128,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
         .getPercentageByEntityId(this.entityId, this.entityType)
         .pipe(
           catchError((err) => {
-
             return of(null);
           }),
         );
@@ -138,7 +137,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
           .getPercentageByEntityId(this.data.id, this.getEntityLabel(this.data))
           .pipe(
             catchError((err) => {
-
               return of(null);
             }),
           )
@@ -149,13 +147,10 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       child: child$,
     }).subscribe({
       next: ({ parent, child }) => {
-
-
         this.parentData = parent ?? [];
         this.parentComparts = parent ?? [];
 
         this.allocatedPercentages = this.extractChildRows(child);
-
 
         this.refreshAvailableComparts();
 
@@ -172,7 +167,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
         this.loadingPercentages = false;
       },
       error: (err) => {
-
         this.loadingComparts = false;
         this.loadingPercentages = false;
       },
@@ -203,14 +197,9 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       this.allocatedPercentages.map((x) => x.compartId),
     );
 
-
-
     this.availableComparts = (this.parentComparts ?? []).filter(
       (item: any) => !allocatedIds.has(this.getCompartId(item)),
     );
-
-
-
   }
 
   // NEW: Get the percentage for a specific compart from allocated percentages
@@ -365,7 +354,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
 
     // child$.subscribe({
     //   next: (res: any) => {
-
 
     //     //  mapping bhi same use kar
     //     this.parentData = this.extractChildRows(res);

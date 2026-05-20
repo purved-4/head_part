@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { catchError, map, Observable, throwError } from "rxjs";
 import baseUrl from "./helper";
+import { CreateAgentRequest } from "../owner/chief/add-chief/add-chief.component";
 
 export interface Agent {
   id: string;
@@ -197,38 +198,40 @@ export class ChiefService {
     );
   }
 
+ 
+
   getCurrencies(chieftId: any): Observable<any> {
     return this.http.get<any>(`${baseUrl}/chief/${chieftId}/currencies`).pipe(
-      map((response) => response),
-      catchError((error) => throwError(() => error)),
+     map((response) => response),
+     catchError((error) => throwError(() => error)),
     );
-  }
+}
 
-  // POST (Add + Update)
-  saveCurrencies(chieftId: any, payload: any): Observable<any> {
+// POST (Add + Update)
+saveCurrencies(chieftId: any, payload: any): Observable<any> {
     return this.http
-      .post<any>(`${baseUrl}/chief/${chieftId}/currencies`, payload)
-      .pipe(
+     .post<any>(`${baseUrl}/chief/${chieftId}/currencies`, payload)
+     .pipe(
         map((response) => response),
         catchError((error) => throwError(() => error)),
-      );
-  }
+     );
+}
 
-  getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
-    return this.http
-      .get<any>(`${baseUrl}/chief/currencies`, {
-        params: {
-          entityId: entityId,
-          entityType: entityRole,
-        },
-      })
-      .pipe(
-        map((response) => response),
-        catchError((error) => throwError(() => error)),
-      );
-  }
+getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
+  return this.http
+    .get<any>(`${baseUrl}/chief/currencies`, {
+      params: {
+        entityId: entityId,
+        entityType: entityRole,
+      },
+    })
+    .pipe(
+      map((response) => response),
+      catchError((error) => throwError(() => error))
+    );
+}
 
-  getChiefsListByUserIdPaginated(
+getChiefsListByUserIdPaginated(
     user: any,
     page: number = 0,
     pageSize: number = 20,
@@ -243,10 +246,24 @@ export class ChiefService {
       );
   }
 
+
   changeBranchHeadCurrencyStatus(payload: any) {
     return this.http.patch(
       `${baseUrl}/chief/changeBranchHeadCurrencyStatus`,
       payload,
     );
   }
+
+    createLink(payload: { chiefId: string; compartIds: string[] }) {
+    return this.http.post(`${baseUrl}/chief/link`, payload);
+  }
+
+  // GET - chief ke saare links
+  getLinksByChiefId(chiefId: string) {
+    return this.http.get(`${baseUrl}/chief/link/${chiefId}`);
+  }
+
+deleteLink(linkId: string) {
+    return this.http.delete(`${baseUrl}/chief/link/${linkId}`);
+}
 }

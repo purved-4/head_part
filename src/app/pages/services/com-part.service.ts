@@ -730,21 +730,7 @@ export class ComPartService {
         catchError((error) => throwError(error)),
       );
   }
-
-  getByThreadIdFundIdAndType(
-    threadId: any,
-    fundId: any,
-    fundType: any,
-  ): Observable<any> {
-    return this.http
-      .get<any>(
-        `${baseUrl}/funds/getFundWithThreadIdFundIdFundType/${threadId}/${fundId}/${fundType}`,
-      )
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(error)),
-      );
-  }
+ 
 
     getPortalByComPartIdAndCurrency(
     id: any,
@@ -831,15 +817,22 @@ export class ComPartService {
       );
   }
 
-  getAllByComPartWithPortalPagination(
+getAllByComPartWithPortalPagination(
   compartId: any,
   page: number = 0,
-  size: number = 10
+  size: number = 10,
+  currency?: string
 ) {
+
+  let url =
+    `${baseUrl}/comPart/banks/getAllByComPartWithPortal/pagination/${compartId}?page=${page}&size=${size}`;
+
+  if (currency) {
+    url += `&currency=${currency}`;
+  }
+
   return this.http
-    .get<any>(
-      `${baseUrl}/comPart/banks/getAllByComPartWithPortal/pagination/${compartId}?page=${page}&size=${size}`
-    )
+    .get<any>(url)
     .pipe(
       map((res) => res.data),
       catchError((err) => throwError(() => err))
@@ -879,5 +872,131 @@ updateCurrencyRate(
       catchError((error) => throwError(() => error)),
     );
 }
+
+getByThreadIdFundIdAndType(
+    threadId: any,
+    fundId: any,
+    fundType: any,
+  ): Observable<any> {
+    return this.http
+      .get<any>(
+        `${baseUrl}/comPart/getFundWithThreadIdFundIdFundType/${threadId}/${fundId}/${fundType}`,
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+acceptPayoutFund(
+  compartId: string,
+  fundId: string
+): Observable<any> {
+
+  return this.http
+    .post<any>(
+      `${baseUrl}/comPart/acceptFund/${compartId}/${fundId}`,
+      {}
+    )
+    .pipe(
+      map((response) => response),
+      catchError((error) => throwError(() => error)),
+    );
+}
+
+
+rejectPayoutFund(
+  compartId: string,
+  fundId: string,
+  reason:string
+): Observable<any> {
+
+  return this.http
+    .post<any>(
+      `${baseUrl}/comPart/rejectFund/${compartId}/${fundId}?reason=${reason}`,
+      {}
+    )
+    .pipe(
+      map((response) => response),
+      catchError((error) => throwError(() => error)),
+    );
+}
+
+getPayoutFunds(
+  compartId: string,
+): Observable<any> {
+
+  return this.http
+    .get<any>(
+      `${baseUrl}/comPart/getPayoutFunds/${compartId}`,
+      {}
+    )
+    .pipe(
+      map((response) => response),
+      catchError((error) => throwError(() => error)),
+    );
+}
+
+  getThreadByEntityIdAndFund(
+    entityId: string,
+    fundId: string,
+    fundType: string,
+  ) {
+    return this.http.get<any>(
+      `${baseUrl}/comPart/getThreadByEntityIdTypeAndFund/${entityId}/${fundId}/${fundType}`,
+    );
+  }
+
   
+
+  // web do pyauouit fubd lo
+  getAllPayoutFundWithPortalId(
+    portalId: any,
+    status: any,
+    page: number = 0,
+    pageSize: number = 10,
+    category?: any,
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set("page", page.toString())
+      .set("size", pageSize.toString());
+
+    if (category !== null && category !== undefined) {
+      params = params.set("category", category.toString());
+    }
+
+    return this.http
+      .get<any>(
+        `${baseUrl}/comPart/funds/getPayoutFundWithPortalID/${portalId}/${status}`,
+        {
+          params,
+        },
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+   getThreadsWithFundId(fundId: any): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/comPart/fund-process-logs/${fundId}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+  generateAnonymousLink(customerId:any,comPartId:any) {
+    return this.http.post(`${baseUrl}/api/v1/internal/links/generate/${comPartId}`, {customerId});
+}
+
+ getAnonymousLinks(compartId: any): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/api/v1/internal/links/${compartId}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
 }

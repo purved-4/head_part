@@ -1,6 +1,5 @@
-
 import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { FundsService } from "../../pages/services/funds.service";
 import { UserStateService } from "../../store/user-state.service";
 import { MultimediaService } from "../../pages/services/multimedia.service";
@@ -19,10 +18,16 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   approvedpayouts: any[] = [];
 
   payoutTotalRecords = 0;
-
-  branchId: string | null = null;
+  pagedApprovedPayoutsData: any[] = [];
+  displayFields: any[] = [];
+  entityId: any;
   userId: string | null = null;
   role: string | null = "";
+
+  showChatModal = false;
+  threadMessages: any[] = [];
+  loadingThreads = false;
+  selectedMode: "all" | "upi" | "bank" = "all";
 
   selectedStatus: string = "APPROVED";
 
@@ -68,10 +73,11 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     private multimediaService: MultimediaService,
     private snackbar: SnackbarService,
     private compartService: ComPartService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
-    this.branchId = this.userStateService.getCurrentEntityId();
+    this.entityId = this.userStateService.getCurrentEntityId();
     this.userId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
 
@@ -89,7 +95,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       //  only payout view
       this.activeView = type || "payout";
 
-      if (!this.branchId) return;
+      if (!this.entityId) return;
 
       //  always call API
       // this.fetchAllRejectedPayouts();
@@ -97,12 +103,12 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   }
 
   loadAllComparts(): void {
-    if (!this.branchId || !this.role) return;
+    if (!this.entityId || !this.role) return;
 
     let apiCall$;
 
     apiCall$ = this.compartService.getPercentageByEntityId(
-      this.branchId,
+      this.entityId,
       this.role,
     );
 
@@ -155,7 +161,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   }
 
   fetchAllRejectedPayouts(): void {
-    if (!this.branchId) return;
+    if (!this.entityId) return;
 
     const fromDate = this.payoutDateFrom
       ? DateTimeUtil.toUtcISOString(
@@ -171,7 +177,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
     this.fundService
       .getAllPayoutFundWithEntityAndCpId(
-        this.branchId,
+        this.entityId,
         this.payoutPortalFilter || undefined,
         this.selectedStatus,
         this.payoutApprovedPage, // ✅ current page
@@ -263,11 +269,11 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   }
 
   fetchApprovedPayouts(): void {
-    if (!this.branchId) return;
+    if (!this.entityId) return;
 
     this.fundService
       .getAllpayoutTrueFalseBybranchIdPaginate(
-        this.branchId,
+        this.entityId,
         "REJECTED", // changed from ACCEPTED to REJECTED
         this.payoutApprovedPage,
         this.payoutApprovedPageSize,
@@ -333,7 +339,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       ifscCode: it.ifsc,
       holder: it.holder,
       amount: Number(it.currencyWiseAmount ?? it.amount ?? it.value ?? 0),
-      status: it.status || it.state || "REJECTED", // default to REJECTED
+      status: it.status || it.state || "REJECTED",
       reviewStatus: it.reviewStatus,
       remarks: it.remarks,
       portalDomain: it.portalDomain,
@@ -346,16 +352,16 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
           : new Date(),
       raw: it.raw || it,
     }));
+
     this.approvedpayouts.sort(
       (a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0),
     );
+
+    // ✅ HOLD DATA IN VARIABLE
+    this.pagedApprovedPayoutsData = [...this.approvedpayouts];
   }
 
   filteredApprovedpayouts(): any[] {
-    return this.approvedpayouts;
-  }
-
-  pagedApprovedpayouts(): any[] {
     return this.approvedpayouts;
   }
 
@@ -478,7 +484,11 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   // ============ MODAL & LIGHTBOX ============
   openRecordModal(record: any) {
     this.selectedRecord = record;
+
+    this.displayFields = this.getDisplayFields(record);
+
     this.showRecordModal = true;
+
     this.loadImages(record);
   }
 
@@ -550,7 +560,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   //   }
   // }
 
- loadImages(rec: any) {
+  loadImages(rec: any) {
     if (!rec) return;
 
     const raw = rec.raw || {};
@@ -585,30 +595,32 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.multimediaService.getPrivateImage(filePath).subscribe({
-        next: (url) => {
-          const img = new Image();
+      this.multimediaService
+        .getPrivateImage(filePath)
+        .subscribe({
+          next: (url) => {
+            const img = new Image();
 
-          img.onload = () => {
-            // VALID IMAGE
-            imageArray.push(url);
-          };
+            img.onload = () => {
+              // VALID IMAGE
+              imageArray.push(url);
+            };
 
-          img.onerror = () => {
-            // NOT IMAGE => PDF/DOWNLOAD
-            pdfArray.push({
-              url,
-              name: pdfName,
-            });
-          };
+            img.onerror = () => {
+              // NOT IMAGE => PDF/DOWNLOAD
+              pdfArray.push({
+                url,
+                name: pdfName,
+              });
+            };
 
-          img.src = url;
-        },
+            img.src = url;
+          },
 
-        error: () => {
-          this.imageError = true;
-        },
-      });
+          error: () => {
+            this.imageError = true;
+          },
+        });
     };
 
     // ================= FILE PROOF =================
@@ -741,7 +753,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   }
 
   refreshCurrentView(): void {
-    if (!this.branchId) return;
+    if (!this.entityId) return;
 
     if (this.activeView === "payout") {
       this.fetchAllRejectedPayouts();
@@ -781,5 +793,176 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
   openPdf(url: string) {
     window.open(url, "_blank");
+  }
+
+  getFundType(): string {
+    if (this.selectedMode === "upi") return "UPI";
+
+    if (this.selectedMode === "bank") return "BANK";
+
+    return "ALL";
+  }
+
+  //new
+  openChatModal(record: any) {
+    if (!record) return;
+
+    console.log("OPEN RECORD", record);
+
+    this.selectedRecord = record;
+
+    this.showChatModal = true;
+
+    // ✅ API CALL
+    this.loadThreadMessages(record);
+  }
+
+  closeChatModal() {
+    this.showChatModal = false;
+    this.threadMessages = [];
+  }
+  // ===================== LOAD THREAD API =====================
+
+  // ===================== LOAD THREAD FILES =====================
+  loadThreadMessages(record: any) {
+    const entityId = this.entityId;
+
+    const entityType = this.role;
+
+    const fundId = record?.raw?.id || record?.id;
+
+    const fundType =
+      record?.mode === "upi"
+        ? "UPI"
+        : record?.mode === "bank"
+          ? "BANK"
+          : "PAYOUT";
+
+    console.log({
+      entityId,
+      entityType,
+      fundId,
+      fundType,
+    });
+
+    if (!entityId || !entityType || !fundId || !fundType) {
+      console.log("Missing params");
+
+      return;
+    }
+
+    this.loadingThreads = true;
+
+    this.fundService
+      .getThreadByEntityIdTypeAndFund(entityId, entityType, fundId, fundType)
+      .subscribe({
+        next: (res: any) => {
+          console.log("THREAD RESPONSE", res);
+
+          this.loadingThreads = false;
+
+          this.threadMessages = Array.isArray(res?.data) ? res.data : [];
+
+          // ✅ LOAD FILES
+          this.threadMessages.forEach((msg: any) => {
+            this.loadThreadImages(msg);
+          });
+        },
+
+        error: (err) => {
+          console.log("THREAD ERROR", err);
+
+          this.loadingThreads = false;
+
+          this.threadMessages = [];
+        },
+      });
+  }
+  loadThreadImages(rec: any) {
+    if (!rec) return;
+
+    rec.proofImages = [];
+    rec.proofPdfs = [];
+
+    rec.rejectedImages = [];
+    rec.rejectedPdfs = [];
+
+    this.imageError = false;
+
+    // NORMAL FILE
+    if (
+      rec.filePath &&
+      rec.filePath !== "null" &&
+      rec.filePath !== "undefined"
+    ) {
+      this.multimediaService
+        .getPrivateImage(rec.filePath)
+        .subscribe({
+          next: (url) => {
+            const img = new Image();
+
+            img.onload = () => {
+              rec.proofImages.push(url);
+            };
+
+            img.onerror = () => {
+              rec.proofPdfs.push({
+                url,
+                name: "Proof File",
+              });
+            };
+
+            img.src = url;
+          },
+        });
+    }
+
+    // REJECTED FILE
+    if (
+      rec.rejectionFilePath &&
+      rec.rejectionFilePath !== "null" &&
+      rec.rejectionFilePath !== "undefined"
+    ) {
+      this.multimediaService
+        .getPrivateImage(rec.rejectionFilePath)
+        .subscribe({
+          next: (url) => {
+            const img = new Image();
+
+            img.onload = () => {
+              rec.rejectedImages.push(url);
+            };
+
+            img.onerror = () => {
+              rec.rejectedPdfs.push({
+                url,
+                name: "Rejected Proof",
+              });
+            };
+
+            img.src = url;
+          },
+        });
+    }
+  }
+  goToThread(msg: any) {
+    const threadId = msg?.id;
+
+    console.log("THREAD ID =>", threadId);
+
+    if (!threadId) {
+      console.log("Thread id missing");
+      return;
+    }
+
+    if (this.role === "HEAD") {
+      this.router.navigate(["/head/chat"], {
+        queryParams: { threadId: threadId },
+      });
+    } else if (this.role === "BRANCH") {
+      this.router.navigate(["/branch/chat"], {
+        queryParams: { threadId: threadId },
+      });
+    }
   }
 }

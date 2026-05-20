@@ -1,6 +1,5 @@
-
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Route, Router } from "@angular/router";
 import { of, Subscription } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { FundsService } from "../../pages/services/funds.service";
@@ -20,18 +19,19 @@ import { ComPartService } from "../../pages/services/com-part.service";
 })
 export class HbPayinReportComponent implements OnInit, OnDestroy {
   approvedpayins: any[] = [];
+  pagedBankPayinsData: any[] = [];
 
   // Pagination metadata from server
   payinTotalRecords = 0;
 
   // Mode filter
-  selectedMode: "all" | "upi" | "bank" = "all";
+  selectedMode: "upi" | "bank" = "bank";
 
   // Status filter
   selectedStatus: "ACCEPTED" | "REJECTED" | "PENDING" = "ACCEPTED";
 
   // route + user ids
-  branchId: string | null = null;
+  entityId: any;
   userId: string | null = null;
   role: string | null = "";
 
@@ -40,6 +40,9 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   // active view
   activeView: "upi" | "bank" | "payout" = "upi";
 
+  showChatModal = false;
+  threadMessages: any[] = [];
+  loadingThreads = false;
   // Bank filters
   bankSearchQuery = "";
   bankPortalFilter = "";
@@ -72,20 +75,19 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private fundService: FundsService,
     private userStateService: UserStateService,
-    private headServices: HeadService,
     private multimediaService: MultimediaService,
-    private branchService: BranchService,
     private snackbar: SnackbarService,
     private comPartService: ComPartService,
+    private router: Router,
   ) {}
   ngOnInit(): void {
-    this.branchId = this.userStateService.getCurrentEntityId();
+    this.entityId = this.userStateService.getCurrentEntityId();
     this.userId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
 
     this.setColorsByRole();
 
-    if (this.branchId) {
+    if (this.entityId) {
       this.loadPortalOptions();
     }
 
@@ -94,7 +96,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
 
       this.activeView = type === "bank" || type === "payout" ? type : "upi";
 
-      if (!this.branchId) return;
+      if (!this.entityId) return;
     });
   }
 
@@ -134,7 +136,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   }
 
   fetchBankPayins(): void {
-    if (!this.branchId) return;
+    if (!this.entityId) return;
 
     const fromDate = this.bankDateFrom
       ? DateTimeUtil.toUtcISOString(
@@ -155,7 +157,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
 
     this.fundService
       .getPayinFundWithCpIdAndEntityId(
-        this.branchId,
+        this.entityId,
         portalId,
         this.selectedStatus,
         this.payinPage, // ✅ FIXED
@@ -180,12 +182,12 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   }
 
   loadPortalOptions(): void {
-    if (!this.branchId) return;
+    if (!this.entityId) return;
 
     const role = (this.role || "").toLowerCase();
 
     this.comPartService
-      .getPercentageByEntityId(this.branchId, this.role)
+      .getPercentageByEntityId(this.entityId, this.role)
       .subscribe({
         next: (res: any) => {
           const source = Array.isArray(res?.data)
@@ -251,6 +253,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     return { list, total, pageNum, pageSize };
   }
   // ============ MAPPERS ============
+
   private mapFundsArray(items: any[], mode: "bank" | "upi") {
     this.approvedpayins = items.map((it: any) => ({
       mode: mode,
@@ -277,16 +280,16 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
 
       raw: it,
     }));
+
     this.approvedpayins.sort(
       (a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0),
     );
+
+    // ✅ HOLD DATA
+    this.pagedBankPayinsData = [...this.approvedpayins];
   }
 
   filteredBankpayins(): any[] {
-    return this.approvedpayins;
-  }
-
-  pagedBankpayins(): any[] {
     return this.approvedpayins;
   }
 
@@ -440,14 +443,16 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       raw.filePath !== "undefined" &&
       raw.filePath.trim() !== ""
     ) {
-      this.multimediaService.getPrivateImage(raw.filePath).subscribe({
-        next: (url) => {
-          rec.images.push(url);
-        },
-        error: () => {
-          this.imageError = true;
-        },
-      });
+      this.multimediaService
+        .getPrivateImage(raw.filePath)
+        .subscribe({
+          next: (url) => {
+            rec.images.push(url);
+          },
+          error: () => {
+            this.imageError = true;
+          },
+        });
     } else {
       rec.images = [];
     }
@@ -467,43 +472,47 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
 
     // ================= NORMAL FILE =================
     if (raw.filePath) {
-      this.multimediaService.getPrivateImage(raw.filePath).subscribe({
-        next: (url) => {
-          rec.proofImages.push(url);
-        },
-        error: () => {
-          this.imageError = true;
-        },
-      });
+      this.multimediaService
+        .getPrivateImage(raw.filePath)
+        .subscribe({
+          next: (url) => {
+            rec.proofImages.push(url);
+          },
+          error: () => {
+            this.imageError = true;
+          },
+        });
     }
 
     // ================= REJECTED FILE =================
     if (raw.rejectionFilePath) {
-      this.multimediaService.getPrivateImage(raw.rejectionFilePath).subscribe({
-        next: (url) => {
-          // ✅ Check whether URL is image
-          const img = new Image();
+      this.multimediaService
+        .getPrivateImage(raw.rejectionFilePath)
+        .subscribe({
+          next: (url) => {
+            // ✅ Check whether URL is image
+            const img = new Image();
 
-          img.onload = () => {
-            // ✅ Valid image
-            rec.rejectedImages.push(url);
-          };
+            img.onload = () => {
+              // ✅ Valid image
+              rec.rejectedImages.push(url);
+            };
 
-          img.onerror = () => {
-            // ✅ Not image => treat as PDF/download
-            rec.rejectedPdfs.push({
-              url,
-              name: "Rejected Proof",
-            });
-          };
+            img.onerror = () => {
+              // ✅ Not image => treat as PDF/download
+              rec.rejectedPdfs.push({
+                url,
+                name: "Rejected Proof",
+              });
+            };
 
-          img.src = url;
-        },
+            img.src = url;
+          },
 
-        error: () => {
-          this.imageError = true;
-        },
-      });
+          error: () => {
+            this.imageError = true;
+          },
+        });
     }
   }
 
@@ -691,7 +700,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     const found = this.portalOptions.find((p) => p.id === selectedId);
     return found ? found.domain : "All Compart";
   }
-  onModeChange(mode: "all" | "upi" | "bank") {
+  onModeChange(mode: "upi" | "bank") {
     this.selectedMode = mode;
 
     this.payinPage = 0;
@@ -714,5 +723,168 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     if (this.selectedMode === "bank") return "BANK";
 
     return "ALL";
+  }
+
+  //new
+  openChatModal(record: any) {
+    console.log("BUTTON CLICKED");
+
+    if (!record) {
+      console.log("NO RECORD");
+      return;
+    }
+
+    console.log("OPEN RECORD", record);
+
+    this.selectedRecord = record;
+
+    this.showChatModal = true;
+
+    console.log("MODAL STATUS", this.showChatModal);
+
+    this.loadThreadMessages(record);
+  }
+
+  closeChatModal() {
+    this.showChatModal = false;
+    this.threadMessages = [];
+  }
+  // ===================== LOAD THREAD API =====================
+
+  // ===================== LOAD THREAD FILES =====================
+  loadThreadMessages(record: any) {
+    const entityId = this.entityId;
+
+    const entityType = this.role;
+
+    const fundId = record?.raw?.id || record?.id;
+
+    if (!entityId || !entityType || !fundId) {
+      console.log("Missing params");
+
+      return;
+    }
+
+    this.loadingThreads = true;
+
+    this.fundService
+      .getThreadByEntityIdTypeAndFund(
+        entityId,
+        entityType,
+        fundId,
+        this.selectedMode,
+      )
+      .subscribe({
+        next: (res: any) => {
+          console.log("THREAD RESPONSE", res);
+
+          this.loadingThreads = false;
+
+          this.threadMessages = Array.isArray(res?.data) ? res.data : [];
+
+          // ✅ LOAD FILES
+          this.threadMessages.forEach((msg: any) => {
+            this.loadThreadImages(msg);
+          });
+        },
+
+        error: (err) => {
+          this.snackbar.show(
+            err.error.message || "failed to laod thread",
+            false,
+          );
+
+          this.loadingThreads = false;
+
+          this.threadMessages = [];
+        },
+      });
+  }
+  loadThreadImages(rec: any) {
+    if (!rec) return;
+
+    rec.proofImages = [];
+    rec.proofPdfs = [];
+
+    rec.rejectedImages = [];
+    rec.rejectedPdfs = [];
+
+    this.imageError = false;
+
+    // NORMAL FILE
+    if (
+      rec.filePath &&
+      rec.filePath !== "null" &&
+      rec.filePath !== "undefined"
+    ) {
+      this.multimediaService
+        .getPrivateImage(rec.filePath)
+        .subscribe({
+          next: (url) => {
+            const img = new Image();
+
+            img.onload = () => {
+              rec.proofImages.push(url);
+            };
+
+            img.onerror = () => {
+              rec.proofPdfs.push({
+                url,
+                name: "Proof File",
+              });
+            };
+
+            img.src = url;
+          },
+        });
+    }
+
+    // REJECTED FILE
+    if (
+      rec.rejectionFilePath &&
+      rec.rejectionFilePath !== "null" &&
+      rec.rejectionFilePath !== "undefined"
+    ) {
+      this.multimediaService
+        .getPrivateImage(rec.rejectionFilePath)
+        .subscribe({
+          next: (url) => {
+            const img = new Image();
+
+            img.onload = () => {
+              rec.rejectedImages.push(url);
+            };
+
+            img.onerror = () => {
+              rec.rejectedPdfs.push({
+                url,
+                name: "Rejected Proof",
+              });
+            };
+
+            img.src = url;
+          },
+        });
+    }
+  }
+  goToThread(msg: any) {
+    const threadId = msg?.id;
+
+    console.log("THREAD ID =>", threadId);
+
+    if (!threadId) {
+      console.log("Thread id missing");
+      return;
+    }
+
+    if (this.role === "HEAD") {
+      this.router.navigate(["/head/chat"], {
+        queryParams: { threadId: threadId },
+      });
+    } else if (this.role === "BRANCH") {
+      this.router.navigate(["/branch/chat"], {
+        queryParams: { threadId: threadId },
+      });
+    }
   }
 }

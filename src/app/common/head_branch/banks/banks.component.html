@@ -17,10 +17,10 @@
       </div>
       <div>
         <h2 class="text-xl font-bold text-[var(--color-font)]">
-          Bank Account Management
+          Inventory Management
         </h2>
         <p class="text-[var(--color-muted)] text-sm mt-0.5">
-          Manage all bank accounts and their status
+          Manage inventory sources , limits and availability
         </p>
       </div>
     </div>
@@ -363,12 +363,6 @@
             <th
               class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
             >
-              Allocation
-            </th>
-
-            <th
-              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
-            >
               Account No
             </th>
 
@@ -481,24 +475,6 @@
                     Inactive
                   </span>
                 </ng-template>
-              </div>
-            </td>
-
-            <!-- ALLOCATION -->
-            <td class="px-4 py-3 whitespace-nowrap">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-blue-500 text-sm">
-                  public
-                </span>
-
-                <span
-                  class="text-xs font-semibold"
-                  [ngClass]="
-                    account.allotStatus ? 'text-blue-600' : 'text-red-500'
-                  "
-                >
-                  {{ account.allotStatus ? "Assigned" : "Unassigned" }}
-                </span>
               </div>
             </td>
 
@@ -684,21 +660,6 @@
                     <div class="py-1">
                       <button
                         (click)="
-                          openUpdateModal(account); activeActionDropdown = null
-                        "
-                        class="w-full flex items-center px-3 py-2 text-xs text-[var(--color-font)] hover:bg-[var(--color-hover)] transition"
-                      >
-                        <span
-                          class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-sm"
-                        >
-                          edit
-                        </span>
-
-                        Edit Account
-                      </button>
-
-                      <button
-                        (click)="
                           openAddUpiFromBank(account);
                           activeActionDropdown = null
                         "
@@ -859,7 +820,6 @@
           *ngIf="
             payinStatus &&
               account.isBankActive &&
-              account.allotStatus &&
               account.limitTime &&
               isFutureLimitTime(account.limitTime);
             else normalGridNumber
@@ -904,7 +864,7 @@
             <div class="py-1">
               <!-- Edit Option -->
               <button
-                (click)="openUpdateModal(account); activeActionDropdown = null"
+                (click)="openBankDetails(account); activeActionDropdown = null"
                 class="w-full flex items-center px-3 py-2 text-xs text-[var(--color-font)] hover:bg-[var(--color-hover)] transition-colors"
               >
                 <span
@@ -971,28 +931,6 @@
         <!-- Left Column -->
         <div class="space-y-2">
           <!-- Portal -->
-          <div class="flex items-center gap-1 mt-0.5 flex-wrap">
-            <span
-              class="material-symbols-outlined text-xs text-[var(--color-primary)]"
-              >public</span
-            >
-
-            <span class="text-xs font-medium text-[var(--color-font)] truncate">
-              <!-- {{ account.portalDomain || account.portal || "-" }} -->
-              {{
-                account.allotStatus || account.allotStatus
-                  ? "Assigned"
-                  : "Unassigned"
-              }}
-            </span>
-
-            <span
-              *ngIf="account.currency"
-              class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20"
-            >
-              {{ account.currency }}
-            </span>
-          </div>
 
           <!-- Account Number -->
           <div>
@@ -2222,80 +2160,6 @@
         class="space-y-4"
         appEnterKeyFocus
       >
-        <!-- Portal Selection – SEARCH BASED -->
-        <!-- <div class="space-y-1">
-            <label
-              class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
-            >
-              <span class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base">
-                public
-              </span>
-              Portal <span class="text-[var(--color-danger)] ml-1">*</span>
-            </label>
-            <div class="relative modal-portal-container" #upiPortalContainer>
-              <div class="relative">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] text-base">
-                  search
-                </span>
-                <input
-                  type="text"
-                  [(ngModel)]="upiPortalSearch"
-                  (ngModelChange)="onUpiPortalSearch()"
-                  (click)="openUpiPortalDropdown($event)"
-                  (focus)="onUpiPortalFocus()"
-                  placeholder="Search and select portal..."
-                  class="w-full pl-10 pr-10 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-font)]"
-                  [class.border-[var(--color-danger)]]="
-                    addUpiForm.get('portalId')?.touched &&
-                    addUpiForm.get('portalId')?.invalid
-                  "
-                  [ngModelOptions]="{ standalone: true }"
-                />
-                <button
-                  *ngIf="selectedUpiPortal"
-                  type="button"
-                  (click)="clearUpiPortalSelection()"
-                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors"
-                >
-                  <span class="material-symbols-outlined text-sm">close</span>
-                </button>
-              </div>
-
-              <div
-                *ngIf="showUpiPortalDropdown"
-                class="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
-              >
-                <div
-                  *ngIf="upiFilteredPortals.length === 0"
-                  class="px-3 py-2 text-sm text-[var(--color-muted)] italic"
-                >
-                  No portals found
-                </div>
-                <div
-                  *ngFor="let site of upiFilteredPortals"
-                  class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-sm text-[var(--color-font)] border-b border-[var(--color-border)] last:border-b-0 flex justify-between items-center transition-colors"
-                  (click)="selectUpiPortal(site)"
-                >
-                  <span>{{ site.domain }}</span>
-                  <span class="text-xs text-[var(--color-muted)]">{{
-                    site.currency
-                  }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              *ngIf="
-                addUpiForm.get('portalId')?.invalid &&
-                addUpiForm.get('portalId')?.touched
-              "
-              class="text-[var(--color-danger)] text-xs mt-1 flex items-center"
-            >
-              <span class="material-symbols-outlined mr-1 text-sm">error</span>
-              Please select a portal
-            </div>
-          </div> -->
-
         <div>
           <label
             class="block text-sm font-medium text-[var(--color-font)] mb-1"
@@ -2510,49 +2374,6 @@
           </div>
         </div>
 
-        <!-- Transaction Limits -->
-        <!-- <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-sm font-medium">Min Tran Count</label>
-            <input
-              type="number"
-              formControlName="min_tran_count"
-              class="w-full px-3 py-2 border rounded-lg text-sm"
-              placeholder="Min count"
-            />
-          </div>
-
-          <div>
-            <label class="text-sm font-medium">Max Tran Count</label>
-            <input
-              type="number"
-              formControlName="max_tran_count"
-              class="w-full px-3 py-2 border rounded-lg text-sm"
-              placeholder="Max count"
-            />
-          </div>
-
-          <div>
-            <label class="text-sm font-medium">Min Total Amount</label>
-            <input
-              type="number"
-              formControlName="min_total_tran_amount"
-              class="w-full px-3 py-2 border rounded-lg text-sm"
-              placeholder="Min amount"
-            />
-          </div>
-
-          <div>
-            <label class="text-sm font-medium">Max Total Amount</label>
-            <input
-              type="number"
-              formControlName="max_total_tran_amount"
-              class="w-full px-3 py-2 border rounded-lg text-sm"
-              placeholder="Max amount"
-            />
-          </div>
-        </div> -->
-
         <!-- CAPACITY RANGES - Add Modal -->
         <div class="space-y-2">
           <label
@@ -2709,6 +2530,7 @@
 <app-bank-details
   *ngIf="showBankDetailsModal"
   [bankData]="selectedBankAccount"
+  [fetchBankAccountsFn]="refreshBankAccounts"
   (close)="closeBankDetails()"
 >
 </app-bank-details>

@@ -1,3 +1,5 @@
+
+
 import {
   Component,
   NgZone,
@@ -19,6 +21,7 @@ import { ActivatedRoute } from "@angular/router";
 import { emojiCategories } from "../../utils/constants";
 import { fileBaseUrl } from "../../pages/services/helper";
 import { ComPartService } from "../../pages/services/com-part.service";
+import { MultimediaService } from "../../pages/services/multimedia.service";
 
 interface GroupMessage {
   id: string;
@@ -227,6 +230,7 @@ export class MobileChattingComponent
     private fundService: FundsService,
     private route: ActivatedRoute,
     private compartServices: ComPartService,
+    private multimediaService : MultimediaService
   ) {}
 
   /* ════════════════════════════════════════════
@@ -1553,51 +1557,159 @@ export class MobileChattingComponent
   //   }
   // }
 
-  sendMessage(event?: any): void {
-    if (!this.canSend()) return;
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
+  // sendMessage(event?: any): void {
+  //   if (!this.canSend()) return;
+  //   if (event) {
+  //     event.preventDefault();
+  //     event.stopPropagation();
+  //   }
 
-    if (!this.selectedNotification) {
-      this.snackBar.show("No conversation selected", false);
-      return;
-    }
+  //   if (!this.selectedNotification) {
+  //     this.snackBar.show("No conversation selected", false);
+  //     return;
+  //   }
 
-    const text = (this.newMessage || "").toString().trim();
-    const hasFile = !!this.selectedUploadFile;
+  //   const text = (this.newMessage || "").toString().trim();
+  //   const hasFile = !!this.selectedUploadFile;
 
-    if (!text && !hasFile) {
-      this.snackBar.show("Please enter a message or attach a file", false);
-      return;
-    }
+  //   if (!text && !hasFile) {
+  //     this.snackBar.show("Please enter a message or attach a file", false);
+  //     return;
+  //   }
 
-    const threadId = this.selectedNotification.id;
+  //   const threadId = this.selectedNotification.id;
 
-    const payload = {
-      senderId: this.branchId,
-      message: text, //  NORMAL TEXT (NO QUESTION)
-      fileUrl: null,
-      senderType: this.role,
-      roleId: this.branchId,
-    };
+  //   const payload = {
+  //     senderId: this.branchId,
+  //     message: text, //  NORMAL TEXT (NO QUESTION)
+  //     fileUrl: null,
+  //     senderType: this.role,
+  //     roleId: this.branchId,
+  //   };
 
-    try {
+  //   try {
+  //     this.socketConfigService.sendMessage(threadId, payload);
+
+  //     // reset only UI state
+  //     this.newMessage = "";
+  //     this.selectedUploadFile = null;
+  //     this.selectedQuestion = null;
+  //     this.questionSearchTerm = "";
+  //     this.showQuestionDropDown = false;
+
+  //     setTimeout(() => this.scrollToBottom(), 80);
+  //   } catch {
+  //     this.snackBar.show("Failed to send message", false);
+  //   }
+  // }
+
+sendMessage(event?: any): void {
+if (event) {
+event.preventDefault();
+event.stopPropagation();
+}
+
+if (!this.selectedNotification) {
+this.snackBar.show("No conversation selected", false);
+return;
+}
+
+const text = (this.newMessage || "").toString().trim();
+const hasFile = !!this.selectedUploadFile;
+
+// FILE WITHOUT MESSAGE
+if (hasFile && !text) {
+this.snackBar.show("Please enter a message to send.", false);
+return;
+}
+
+if (!text && !hasFile) {
+this.snackBar.show("Please enter a message or attach a file", false);
+return;
+}
+
+const threadId = this.selectedNotification.id;
+
+// FILE MESSAGE
+if (hasFile) {
+this.uploadingFile = true;
+this.uploadError = null;
+
+
+this.resolvedNotificatninService
+  .uploadAttachment(threadId, this.selectedUploadFile!)
+  .subscribe({
+    next: (res: any) => {
+
+      const fileId =
+        res?.fileId ||
+        res?.id ||
+        (typeof res === "string" ? res : null);
+
+      const fileUrl = fileId
+        ? `${fileBaseUrl}/${fileId}`
+        : res?.downloadUrl;
+
+      const payload = {
+        senderId: this.branchId,
+        message: text,
+        fileUrl: fileUrl,
+        senderType: this.role,
+        roleId: this.branchId,
+        type: "FILE",
+      };
+
       this.socketConfigService.sendMessage(threadId, payload);
 
-      // reset only UI state
+      // RESET
       this.newMessage = "";
-      this.selectedUploadFile = null;
+      this.uploadingFile = false;
+      this.removeInlineFile();
       this.selectedQuestion = null;
       this.questionSearchTerm = "";
       this.showQuestionDropDown = false;
 
       setTimeout(() => this.scrollToBottom(), 80);
-    } catch {
-      this.snackBar.show("Failed to send message", false);
-    }
-  }
+    },
+
+    error: () => {
+      this.uploadingFile = false;
+      this.snackBar.show("Upload failed", false);
+    },
+  });
+
+return;
+
+
+}
+
+// NORMAL TEXT MESSAGE
+const payload = {
+senderId: this.branchId,
+message: text,
+fileUrl: null,
+senderType: this.role,
+roleId: this.branchId,
+};
+
+try {
+this.socketConfigService.sendMessage(threadId, payload);
+
+
+this.newMessage = "";
+this.selectedQuestion = null;
+this.questionSearchTerm = "";
+this.showQuestionDropDown = false;
+
+setTimeout(() => this.scrollToBottom(), 80);
+
+
+} catch {
+this.snackBar.show("Failed to send message", false);
+}
+}
+
+
 
   
   // // FIX: Improved scrollToBottom method
@@ -1636,7 +1748,6 @@ export class MobileChattingComponent
   /* ════════════════════════════════════════════
      MEDIA VIEWER
      ════════════════════════════════════════════ */
-
   // openMediaViewer(
   //   mediaUrl: any,
   //   name: string = "",
@@ -1646,63 +1757,96 @@ export class MobileChattingComponent
   //     this.snackBar.show("No media to preview", false);
   //     return;
   //   }
+
   //   this.currentMediaUrl = mediaUrl;
   //   this.currentMediaName = name || "";
+  //   this.currentMediaType = "file"; // default
 
-  //   if (type === "image" || this.isImage(String(mediaUrl))) {
-  //     this.currentMediaType = "image";
-  //   } else if (type === "video" || this.isVideo(String(mediaUrl))) {
-  //     this.currentMediaType = "video";
-  //   } else if (type === "audio" || this.isAudio(String(mediaUrl))) {
-  //     this.currentMediaType = "audio";
-  //   } else {
-  //     this.currentMediaType = "file";
-  //   }
+  //   //  TRY TO DETECT IMAGE EVEN WITHOUT EXTENSION
+  //   this.isImageByContent(mediaUrl).then((isImg) => {
+  //     if (isImg) {
+  //       this.currentMediaType = "image";
+  //     } else if (type === "video") {
+  //       this.currentMediaType = "video";
+  //     } else if (type === "audio") {
+  //       this.currentMediaType = "audio";
+  //     } else {
+  //       this.currentMediaType = "file";
+  //     }
+  //   });
 
   //   this.isZoomed = false;
   //   this.zoomLevel = 1;
   //   this.showMediaViewer = true;
   // }
-  openMediaViewer(
-    mediaUrl: any,
-    name: string = "",
-    type: string = "file",
-  ): void {
-    if (!mediaUrl) {
-      this.snackBar.show("No media to preview", false);
-      return;
-    }
+openMediaViewer(
+  mediaUrl: any,
+  name: string = "",
+  type: string = "file",
+): void {
 
-    this.currentMediaUrl = mediaUrl;
-    this.currentMediaName = name || "";
-    this.currentMediaType = "file"; // default
+  if (!mediaUrl) {
+    this.snackBar.show("No media to preview", false);
+    return;
+  }
 
-    //  TRY TO DETECT IMAGE EVEN WITHOUT EXTENSION
-    this.isImageByContent(mediaUrl).then((isImg) => {
-      if (isImg) {
+  this.currentMediaName = name || "";
+
+  this.multimediaService.getImageByUrlBlob(mediaUrl).subscribe({
+    next: (blob: Blob) => {
+
+      const blobUrl = URL.createObjectURL(blob);
+
+      this.currentMediaUrl = blobUrl;
+
+      //  DETECT FROM MIME TYPE
+      if (blob.type.startsWith("image/")) {
         this.currentMediaType = "image";
-      } else if (type === "video") {
+      }
+      else if (blob.type.startsWith("video/")) {
         this.currentMediaType = "video";
-      } else if (type === "audio") {
+      }
+      else if (blob.type.startsWith("audio/")) {
         this.currentMediaType = "audio";
-      } else {
+      }
+      else {
         this.currentMediaType = "file";
       }
-    });
 
-    this.isZoomed = false;
-    this.zoomLevel = 1;
-    this.showMediaViewer = true;
-  }
+      this.isZoomed = false;
+      this.zoomLevel = 1;
+      this.showMediaViewer = true;
+    },
+
+    error: () => {
+      this.snackBar.show("Failed to load media", false);
+    },
+  });
+}
+
+
+  // closeMediaViewer(): void {
+  //   this.showMediaViewer = false;
+  //   this.currentMediaUrl = "";
+  //   this.currentMediaName = "";
+  //   this.currentMediaType = "text";
+  //   this.isZoomed = false;
+  //   this.zoomLevel = 1;
+  // }
 
   closeMediaViewer(): void {
-    this.showMediaViewer = false;
-    this.currentMediaUrl = "";
-    this.currentMediaName = "";
-    this.currentMediaType = "text";
-    this.isZoomed = false;
-    this.zoomLevel = 1;
+
+  if (this.currentMediaUrl?.startsWith("blob:")) {
+    URL.revokeObjectURL(this.currentMediaUrl);
   }
+
+  this.showMediaViewer = false;
+  this.currentMediaUrl = "";
+  this.currentMediaName = "";
+  this.currentMediaType = "text";
+  this.isZoomed = false;
+  this.zoomLevel = 1;
+}
 
   toggleZoom(): void {
     this.isZoomed = !this.isZoomed;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { PortalService } from "../../../pages/services/portal.service";
 import { UserStateService } from "../../../store/user-state.service";
@@ -12,6 +12,7 @@ import { CurrencyBehaviourService } from "./currency-behaviour.service";
 export class PaymentsMethodsComponent implements OnInit {
   entityId: any;
   role: any;
+  @Input() disableRouting: boolean = false;
 
   currencies: any[] = [];
 
@@ -31,7 +32,7 @@ export class PaymentsMethodsComponent implements OnInit {
   ngOnInit(): void {
     this.entityId = this.userStateService.getCurrentEntityId();
     this.role = this.userStateService.getRole();
-
+    this.currencyBehaviourService.setMode(this.selectedMode);
     this.loadCurrencies();
   }
 
@@ -60,28 +61,29 @@ export class PaymentsMethodsComponent implements OnInit {
             this.currencies[0];
 
           this.selectedCurrency = defaultCurrency;
-          this.currencyBehaviourService.setCurrency(this.selectedCurrency);
-          this.currencyBehaviourService.setMode(this.selectedMode);
 
           // AVAILABLE MODES
           this.availableModes = Object.keys(defaultCurrency.modes)
             .filter((key) => defaultCurrency.modes[key])
             .map((m) => m.toLowerCase());
 
-          // AGAR ROUTE PE ALREADY MODE HAI
+          // AGAR URL ME MODE HAI AUR AVAILABLE HAI
           if (currentMode && this.availableModes.includes(currentMode)) {
             this.selectedMode = currentMode;
-            return;
-          }
-
-          // FIRST LOAD DEFAULT
-          if (this.availableModes.includes("bank")) {
-            this.selectedMode = "bank";
           } else {
-            this.selectedMode = this.availableModes[0] || "";
+            // DEFAULT MODE
+            if (this.availableModes.includes("bank")) {
+              this.selectedMode = "bank";
+            } else {
+              this.selectedMode = this.availableModes[0] || "";
+            }
           }
 
-          // ONLY FIRST TIME
+          // FINAL STATE SYNC
+          this.currencyBehaviourService.setCurrency(this.selectedCurrency);
+          this.currencyBehaviourService.setMode(this.selectedMode);
+
+          // FIRST LOAD NAVIGATION
           this.navigateToMode();
         },
       });
@@ -94,18 +96,23 @@ export class PaymentsMethodsComponent implements OnInit {
 
     if (!this.selectedCurrency) return;
 
+    // NEW AVAILABLE MODES
     this.availableModes = Object.keys(this.selectedCurrency.modes)
       .filter((key) => this.selectedCurrency.modes[key])
       .map((m) => m.toLowerCase());
+
+    // PRESERVE PREVIOUS MODE
+    if (!this.availableModes.includes(this.selectedMode)) {
+      if (this.availableModes.includes("bank")) {
+        this.selectedMode = "bank";
+      } else {
+        this.selectedMode = this.availableModes[0] || "";
+      }
+    }
+
+    // UPDATE SERVICE AFTER FINAL MODE DECIDED
     this.currencyBehaviourService.setCurrency(this.selectedCurrency);
     this.currencyBehaviourService.setMode(this.selectedMode);
-
-    // RESET DEFAULT MODE
-    if (this.availableModes.includes("bank")) {
-      this.selectedMode = "bank";
-    } else {
-      this.selectedMode = this.availableModes[0] || "";
-    }
 
     this.navigateToMode();
   }
@@ -117,6 +124,9 @@ export class PaymentsMethodsComponent implements OnInit {
   }
 
   navigateToMode() {
+    if (this.disableRouting) {
+      return;
+    }
     if (!this.selectedCurrency || !this.selectedMode) return;
 
     if (this.role === "BRANCH") {

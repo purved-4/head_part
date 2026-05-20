@@ -235,6 +235,12 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loadThreads();
     }
 
+    // this.route.queryParams.subscribe((params) => {
+    //   console.log(params);
+
+    //   this.threadId = params["threadId"];
+    // });
+
     this.route.queryParams.subscribe((params) => {
       const threadId = params["threadId"];
       const chatType = (params["chatType"] || "").toString().toLowerCase();
@@ -1358,10 +1364,22 @@ console.log(rtMsg )
     const text = (this.newMessage || "").trim();
     const hasFile = !!this.selectedUploadFile;
 
-    if (!text && !hasFile) {
-      this.snackBar.show("Please enter a message or attach a file.", false);
-      return;
-    }
+    // if (!text && !hasFile) {
+    //   this.snackBar.show("Please enter a message or attach a file.", false);
+    //   return;
+    // }
+
+   if (hasFile && !text) {
+this.snackBar.show("Please enter a message to send.", false);
+return;
+}
+
+if (!text && !hasFile) {
+this.snackBar.show("Please enter a message or attach a file.", false);
+return;
+}
+
+
 
     const threadId = this.selectedNotification.id;
 
@@ -1569,42 +1587,102 @@ console.log(rtMsg )
      MEDIA VIEWER
      ════════════════════════════════════════════ */
 
+  // openMediaViewer(
+  //   mediaUrl: any,
+  //   name: string = "",
+  //   type: string = "image",
+  // ): void {
+  //   if (!mediaUrl) {
+  //     this.snackBar.show("No media to preview", false);
+  //     return;
+  //   }
+  //   this.loadImage(mediaUrl);
+  //   this.currentMediaUrl = mediaUrl;
+  //   this.currentMediaName = name || "";
+
+  //   if (type === "image" || this.isImage(String(mediaUrl))) {
+  //     this.currentMediaType = "image";
+  //   } else if (type === "video" || this.isVideo(String(mediaUrl))) {
+  //     this.currentMediaType = "video";
+  //   } else if (type === "audio" || this.isAudio(String(mediaUrl))) {
+  //     this.currentMediaType = "audio";
+  //   } else {
+  //     this.currentMediaType = "file";
+  //   }
+
+  //   this.isZoomed = false;
+  //   this.zoomLevel = 1;
+  //   this.showMediaViewer = true;
+  // }
+
   openMediaViewer(
-    mediaUrl: any,
-    name: string = "",
-    type: string = "image",
-  ): void {
-    if (!mediaUrl) {
-      this.snackBar.show("No media to preview", false);
-      return;
-    }
-    this.loadImage(mediaUrl);
-    this.currentMediaUrl = mediaUrl;
-    this.currentMediaName = name || "";
+  mediaUrl: any,
+  name: string = "",
+  type: string = "file",
+): void {
 
-    if (type === "image" || this.isImage(String(mediaUrl))) {
-      this.currentMediaType = "image";
-    } else if (type === "video" || this.isVideo(String(mediaUrl))) {
-      this.currentMediaType = "video";
-    } else if (type === "audio" || this.isAudio(String(mediaUrl))) {
-      this.currentMediaType = "audio";
-    } else {
-      this.currentMediaType = "file";
-    }
-
-    this.isZoomed = false;
-    this.zoomLevel = 1;
-    this.showMediaViewer = true;
+  if (!mediaUrl) {
+    this.snackBar.show("No media to preview", false);
+    return;
   }
 
+  this.currentMediaName = name || "";
+
+  this.multimediaService.getImageByUrlBlob(mediaUrl).subscribe({
+    next: (blob: Blob) => {
+
+      // CREATE BLOB URL
+      const blobUrl = URL.createObjectURL(blob);
+
+      this.currentMediaUrl = blobUrl;
+
+      // DETECT MEDIA TYPE USING MIME
+      if (blob.type.startsWith("image/")) {
+        this.currentMediaType = "image";
+      }
+      else if (blob.type.startsWith("video/")) {
+        this.currentMediaType = "video";
+      }
+      else if (blob.type.startsWith("audio/")) {
+        this.currentMediaType = "audio";
+      }
+      else {
+        this.currentMediaType = "file";
+      }
+
+      this.isZoomed = false;
+      this.zoomLevel = 1;
+      this.showMediaViewer = true;
+    },
+
+    error: () => {
+      this.snackBar.show("Failed to load media", false);
+    },
+  });
+}
+
+  // closeMediaViewer(): void {
+  //   this.showMediaViewer = false;
+  //   this.currentMediaUrl = "";
+  //   this.currentMediaName = "";
+  //   this.currentMediaType = "text";
+  //   this.isZoomed = false;
+  //   this.zoomLevel = 1;
+  // }
   closeMediaViewer(): void {
-    this.showMediaViewer = false;
-    this.currentMediaUrl = "";
-    this.currentMediaName = "";
-    this.currentMediaType = "text";
-    this.isZoomed = false;
-    this.zoomLevel = 1;
+
+  // CLEANUP BLOB MEMORY
+  if (this.currentMediaUrl?.startsWith("blob:")) {
+    URL.revokeObjectURL(this.currentMediaUrl);
   }
+
+  this.showMediaViewer = false;
+  this.currentMediaUrl = "";
+  this.currentMediaName = "";
+  this.currentMediaType = "text";
+  this.isZoomed = false;
+  this.zoomLevel = 1;
+}
 
   toggleZoom(): void {
     this.isZoomed = !this.isZoomed;
@@ -1640,18 +1718,31 @@ console.log(rtMsg )
     });
   }
 
-  loadImage(url: string) {
-    if (!url) return;
+  // loadImage(url: string) {
+  //   if (!url) return;
 
-    this.multimediaService.getImageByUrlBlob(url).subscribe({
-      next: (blob: Blob) => {
-        this.currentMediaUrl = URL.createObjectURL(blob);
-      },
-      error: () => {
-        this.snackBar.show("Image load failed", false);
-      },
-    });
-  }
+  //   this.multimediaService.getImageByUrlBlob(url).subscribe({
+  //     next: (blob: Blob) => {
+  //       this.currentMediaUrl = URL.createObjectURL(blob);
+  //     },
+  //     error: () => {
+  //       this.snackBar.show("Image load failed", false);
+  //     },
+  //   });
+  // }
+
+  loadImage(url: string) {
+  if (!url) return;
+
+  this.multimediaService.getImageByUrlBlob(url).subscribe({
+    next: (blob: Blob) => {
+      this.currentMediaUrl = URL.createObjectURL(blob);
+    },
+    error: () => {
+      this.snackBar.show("Image load failed", false);
+    },
+  });
+} 
 
   isImage(url: string | null | undefined): boolean {
     return !!(url && String(url).match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i));

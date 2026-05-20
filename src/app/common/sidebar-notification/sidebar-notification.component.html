@@ -172,7 +172,8 @@
       </div>
 
       <!-- Notifications Content -->
-      <div *ngIf="!isLoading" class="divide-y divide-[var(--color-border)]">
+      <!-- <div *ngIf="!isLoading" class="divide-y divide-[var(--color-border)]"> -->
+<div *ngIf="!isLoading">
         <ng-container *ngFor="let cat of ['upi', 'bank', 'payout', 'other']">
           <!-- <div *ngIf="shouldShowCategory(cat)" class="py-2"> -->
           <div
