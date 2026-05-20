@@ -184,8 +184,6 @@ export class UpisComponent implements OnInit {
 
         this.selectedCurrencyData = res;
 
-
-
         // AGAR DIRECT STRING CHAHIYE
         // this.currency = res.currency;
 
@@ -201,8 +199,6 @@ export class UpisComponent implements OnInit {
       if (!res) return;
 
       this.selectedModeData = res;
-
-
     });
 
     this.getPayinStatus();
