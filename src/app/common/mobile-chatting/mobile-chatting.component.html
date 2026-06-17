@@ -613,7 +613,7 @@
               rows="1"
               [(ngModel)]="newMessage"
               (input)="onMessageInput()"
-              S(keydown.enter)="sendMessage($event)"
+              (keydown.enter)="sendMessage($event)"
               placeholder="Type a message..."
               data-model="message"
               class="w-full pl-11 pr-4 py-3 text-sm bg-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none max-h-32"
@@ -893,7 +893,7 @@
           <div
             *ngIf="
               !loadingMembers &&
-              selectedNotification?.participants?.length === 0
+              selectedNotification.participants.length === 0
             "
             class="text-center py-8 text-gray-400"
           >

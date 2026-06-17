@@ -225,11 +225,16 @@
                   >
                     Actions
                   </th>
+                  <th
+                    class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Thread Image
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-[var(--color-border)]">
                 <tr
-                  *ngFor="let w of pagedApprovedpayouts()"
+                  *ngFor="let w of pagedApprovedPayoutsData"
                   class="hover:bg-[var(--color-hover)] transition-all duration-300 group"
                 >
                   <td class="px-6 py-4">
@@ -330,6 +335,19 @@
                       <span>Details</span>
                     </button>
                   </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                    <button
+                      (click)="openChatModal(w); $event.stopPropagation()"
+                      class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] text-[var(--color-font)] bg-[var(--color-surface)] shadow-sm"
+                      title="View proof & details"
+                    >
+                      <span
+                        class="material-symbols-outlined text-base sm:text-lg"
+                        >visibility</span
+                      >
+                      <span>Thread</span>
+                    </button>
+                  </td>
                 </tr>
                 <tr *ngIf="filteredApprovedpayouts().length === 0">
                   <td colspan="7" class="px-4 py-12 text-center">
@@ -363,7 +381,7 @@
         <div class="block min-[800px]:hidden p-4">
           <div class="grid grid-cols-1 gap-4">
             <div
-              *ngFor="let w of pagedApprovedpayouts()"
+              *ngFor="let w of pagedApprovedPayoutsData"
               class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-4 shadow-sm"
             >
               <!-- Portal -->
@@ -581,7 +599,8 @@
       class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 p-3 sm:p-6 overflow-y-auto max-h-[calc(90vh-80px)]"
     >
       <!-- LEFT: Image + Quick Summary -->
-     <div
+
+      <div
         class="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 sm:p-4 max-h-[420px] overflow-y-auto"
       >
         <!-- ================= FILE PROOF ================= -->
@@ -838,7 +857,7 @@
         </h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
           <div
-            *ngFor="let field of getDisplayFields(selectedRecord)"
+            *ngFor="let field of displayFields"
             class="rounded-lg sm:rounded-xl p-2 sm:p-4 bg-[var(--color-bg)] border border-[var(--color-border)]"
           >
             <div
@@ -884,3 +903,201 @@
   </div>
 </div>
 
+<div
+  *ngIf="showChatModal"
+  class="fixed inset-0 z-[50] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+>
+  <div
+    class="w-full max-w-2xl bg-[var(--color-surface)] rounded-3xl shadow-2xl overflow-hidden border border-[var(--color-border)]"
+  >
+    <!-- HEADER -->
+    <div
+      class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]"
+    >
+      <div>
+        <h2 class="text-lg font-bold text-[var(--color-font)]">
+          Transaction Chat
+        </h2>
+      </div>
+
+      <button
+        (click)="closeChatModal()"
+        class="w-9 h-9 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition flex items-center justify-center"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="h-[500px] overflow-y-auto p-4 bg-[var(--color-bg)]">
+      <!-- LOADING -->
+      <div
+        *ngIf="loadingThreads"
+        class="flex items-center justify-center h-full"
+      >
+        <div
+          class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"
+        ></div>
+      </div>
+
+      <!-- EMPTY -->
+      <div
+        *ngIf="!loadingThreads && threadMessages.length === 0"
+        class="text-center text-gray-500 py-10"
+      >
+        No chat messages found
+      </div>
+
+      <!-- CHAT LIST -->
+      <div class="flex flex-col gap-4">
+        <div
+          *ngFor="let msg of threadMessages"
+          class="rounded-2xl p-4 border border-[var(--color-border)] bg-white shadow-sm"
+        >
+          <!-- TOP -->
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <div class="font-semibold text-[var(--color-font)]">
+                {{
+                  msg?.senderName ||
+                    msg?.username ||
+                    msg?.createdByType ||
+                    "User"
+                }}
+              </div>
+
+              <div class="text-xs text-gray-500 mt-1">
+                {{ msg?.createdAt | date: "dd MMM yyyy hh:mm a" }}
+              </div>
+
+              <button
+                (click)="goToThread(msg)"
+                class="px-4 py-2 rounded-xl bg-[var(--color-primary)] text-white text-sm font-semibold"
+              >
+                Go To Chat
+              </button>
+            </div>
+
+            <div
+              class="px-3 py-1 rounded-full text-xs font-semibold"
+              [ngClass]="{
+                'bg-yellow-100 text-yellow-700':
+                  msg?.resolveMessage === 'PENDING',
+
+                'bg-green-100 text-green-700':
+                  msg?.resolveMessage === 'RESOLVED',
+
+                'bg-red-100 text-red-700': msg?.resolveMessage === 'REJECTED',
+              }"
+            >
+              {{ msg?.resolveMessage || "PENDING" }}
+            </div>
+          </div>
+
+          <!-- MESSAGE -->
+          <div
+            class="text-sm text-[var(--color-font)] whitespace-pre-wrap mb-4"
+          >
+            {{ msg?.queryMessage || msg?.message || msg?.text || "-" }}
+          </div>
+
+          <!-- ================= NORMAL IMAGE ================= -->
+
+          <div *ngIf="msg?.proofImages?.length" class="mb-4">
+            <div class="text-sm font-semibold text-[var(--color-font)] mb-2">
+              File Proof
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+              <img
+                *ngFor="let img of msg.proofImages"
+                [src]="img"
+                alt="proof"
+                class="h-32 w-auto rounded-xl border object-contain cursor-pointer"
+                (click)="openLightbox(img)"
+                (error)="onImageError($event)"
+              />
+            </div>
+          </div>
+
+          <!-- ================= NORMAL PDF ================= -->
+
+          <div
+            *ngFor="let pdf of msg.proofPdfs"
+            class="mb-4 border rounded-xl p-4 bg-gray-50 flex items-center justify-between"
+          >
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-red-600 text-4xl">
+                picture_as_pdf
+              </span>
+
+              <div>
+                <div class="font-semibold text-sm text-[var(--color-font)]">
+                  PDF Proof
+                </div>
+
+                <div class="text-xs text-gray-500">Click below to download</div>
+              </div>
+            </div>
+
+            <a
+              [href]="pdf.url"
+              download
+              class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold"
+            >
+              Download
+            </a>
+          </div>
+
+          <!-- ================= REJECTED IMAGE ================= -->
+
+          <div *ngIf="msg?.rejectedImages?.length" class="mb-4">
+            <div class="text-sm font-semibold text-red-600 mb-2">
+              Rejected Proof
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+              <img
+                *ngFor="let img of msg.rejectedImages"
+                [src]="img"
+                alt="rejected-proof"
+                class="h-32 w-auto rounded-xl border object-contain cursor-pointer"
+                (click)="openLightbox(img)"
+                (error)="onImageError($event)"
+              />
+            </div>
+          </div>
+
+          <!-- ================= REJECTED PDF ================= -->
+
+          <div
+            *ngFor="let pdf of msg.rejectedPdfs"
+            class="border rounded-xl p-4 bg-red-50 flex items-center justify-between"
+          >
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-red-600 text-4xl">
+                picture_as_pdf
+              </span>
+
+              <div>
+                <div class="font-semibold text-sm text-red-600">
+                  Rejected PDF Proof
+                </div>
+
+                <div class="text-xs text-gray-500">Click below to download</div>
+              </div>
+            </div>
+
+            <a
+              [href]="pdf.url"
+              download
+              class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold"
+            >
+              Download
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

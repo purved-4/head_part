@@ -249,4 +249,17 @@ export class ChiefService {
       payload,
     );
   }
+
+  createLink(payload: { chiefId: string; compartIds: string[] }) {
+    return this.http.post(`${baseUrl}/chief/link`, payload);
+  }
+
+  // GET - chief ke saare links
+  getLinksByChiefId(chiefId: string) {
+    return this.http.get(`${baseUrl}/chief/link/${chiefId}`);
+  }
+
+  deleteLink(linkId: string) {
+    return this.http.delete(`${baseUrl}/chief/link/${linkId}`);
+  }
 }

@@ -1,7 +1,9 @@
+
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { ChiefManualService } from "../../pages/services/chief-manual.service";
 import { UserStateService } from "../../store/user-state.service";
+import { SnackbarService } from "../snackbar/snackbar.service";
 
 @Component({
   selector: "app-branch-register",
@@ -9,12 +11,12 @@ import { UserStateService } from "../../store/user-state.service";
   styleUrls: ["./branch-register.component.css"], // corrected to styleUrls
 })
 export class BranchRegisterComponent implements OnInit {
-  branchName = "";
   email = "";
   mobile = "";
   username = "";
   password = "";
   address = "";
+  showPassword = false;
 
   chiefId: any;
   portalId: any;
@@ -27,6 +29,7 @@ export class BranchRegisterComponent implements OnInit {
     private ChiefManualService: ChiefManualService,
     private userStateService: UserStateService,
     private route: ActivatedRoute,
+    private snackBar: SnackbarService,
   ) {}
 
   ngOnInit(): void {
@@ -69,13 +72,17 @@ export class BranchRegisterComponent implements OnInit {
   }
 
   onSubmit() {
+    if (!this.email || !this.mobile || !this.username || !this.password) {
+      this.snackBar.show("Please fill all fields", false);
+      return;
+    }
+
     if (!this.autoEnabled) {
-      alert("Auto mode OFF. Submission not allowed.");
+      this.snackBar.show("Auto mode OFF. Submission not allowed.", false);
       return;
     }
 
     const payload = {
-      name: this.branchName,
       email: this.email,
       phone: this.mobile,
       username: this.username,
@@ -88,17 +95,18 @@ export class BranchRegisterComponent implements OnInit {
       payload,
     ).subscribe({
       next: (res: any) => {
-        alert("Data submitted successfully");
+        this.snackBar.show(
+          res.message || "Branch registered successfully",
+          true,
+        );
         this.onClear();
       },
       error: (err: any) => {
-        alert("Submission failed");
+        this.snackBar.show(err.error.message || "Submission failed", false);
       },
     });
   }
-
   onClear() {
-    this.branchName = "";
     this.email = "";
     this.mobile = "";
     this.username = "";

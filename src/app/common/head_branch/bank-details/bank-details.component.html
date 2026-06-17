@@ -1,5 +1,4 @@
-<!-- bank-details.component.html -->
-
+```html
 <div
   class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-3"
 >
@@ -18,14 +17,35 @@
         </p>
       </div>
 
-      <button
-        (click)="closeModal()"
-        class="h-9 w-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition"
-      >
-        <span class="material-symbols-outlined text-gray-600 text-[20px]">
-          close
-        </span>
-      </button>
+      <div class="flex items-center gap-3">
+        <!-- EDIT BUTTON -->
+        <button
+          *ngIf="!isEditMode"
+          (click)="toggleEditMode()"
+          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition"
+        >
+          Edit
+        </button>
+
+        <!-- CANCEL -->
+        <button
+          *ngIf="isEditMode"
+          (click)="toggleEditMode()"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-100 transition"
+        >
+          Cancel
+        </button>
+
+        <!-- CLOSE -->
+        <button
+          (click)="closeModal()"
+          class="h-9 w-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition"
+        >
+          <span class="material-symbols-outlined text-gray-600 text-[20px]">
+            close
+          </span>
+        </button>
+      </div>
     </div>
 
     <!-- BODY -->
@@ -40,18 +60,30 @@
             </h3>
 
             <div class="space-y-4">
+              <!-- ACCOUNT HOLDER -->
               <div class="grid grid-cols-2 gap-3">
                 <p class="text-sm text-gray-500">Account Holder Name</p>
 
-                <p class="text-sm font-semibold text-gray-800">
-                  {{ bankData?.accountHolderName || "-" }}
-                </p>
+                <div *ngIf="!isEditMode">
+                  <p class="text-sm font-semibold text-gray-800">
+                    {{ bankData?.accountHolderName || "-" }}
+                  </p>
+                </div>
+
+                <input
+                  *ngIf="isEditMode"
+                  appEnterKeyFocus
+                  [(ngModel)]="updateForm.accountHolderName"
+                  type="text"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
               </div>
 
+              <!-- ACCOUNT NUMBER -->
               <div class="grid grid-cols-2 gap-3">
                 <p class="text-sm text-gray-500">Account Number</p>
 
-                <div class="flex items-center gap-2">
+                <div *ngIf="!isEditMode" class="flex items-center gap-2">
                   <p class="text-sm font-semibold text-gray-800">
                     {{ getMaskedAccount(bankData?.accountNo) }}
                   </p>
@@ -65,33 +97,66 @@
                     </span>
                   </button>
                 </div>
+
+                <input
+                  *ngIf="isEditMode"
+                  appEnterKeyFocus
+                  [(ngModel)]="updateForm.accountNo"
+                  type="text"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
               </div>
 
+              <!-- IFSC -->
               <div class="grid grid-cols-2 gap-3">
                 <p class="text-sm text-gray-500">IFSC Code</p>
 
-                <p class="text-sm font-semibold text-gray-800">
-                  {{ bankData?.ifsc || "-" }}
-                </p>
+                <div *ngIf="!isEditMode">
+                  <p class="text-sm font-semibold text-gray-800">
+                    {{ bankData?.ifsc || "-" }}
+                  </p>
+                </div>
+
+                <input
+                  *ngIf="isEditMode"
+                  appEnterKeyFocus
+                  [(ngModel)]="updateForm.ifsc"
+                  type="text"
+                  class="w-full uppercase border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
               </div>
 
+              <!-- ACCOUNT TYPE -->
               <div class="grid grid-cols-2 gap-3">
                 <p class="text-sm text-gray-500">Account Type</p>
 
-                <p class="text-sm font-semibold text-gray-800 uppercase">
-                  {{ bankData?.accountType || "-" }}
-                </p>
+                <div *ngIf="!isEditMode">
+                  <p class="text-sm font-semibold text-gray-800 uppercase">
+                    {{ bankData?.accountType || "-" }}
+                  </p>
+                </div>
+
+                <select
+                  *ngIf="isEditMode"
+                  [(ngModel)]="updateForm.accountType"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                >
+                  <option value="saving">SAVING</option>
+
+                  <option value="current">CURRENT</option>
+                </select>
               </div>
             </div>
           </div>
 
-          <!-- INVENTORY CONFIG -->
+          <!-- INVENTORY -->
           <div>
             <h3 class="text-lg font-semibold text-gray-900 mb-4">
               Inventory Configuration
             </h3>
 
             <div class="space-y-4">
+              <!-- CURRENCY -->
               <div class="grid grid-cols-2 gap-3">
                 <p class="text-sm text-gray-500">Currency</p>
 
@@ -100,6 +165,7 @@
                 </p>
               </div>
 
+              <!-- PAYMENT MODE -->
               <div class="grid grid-cols-2 gap-3">
                 <p class="text-sm text-gray-500">Payment Mode</p>
 
@@ -108,44 +174,47 @@
                 </p>
               </div>
 
-              <div class="grid grid-cols-2 gap-3">
+              <!-- PAYIN TYPE -->
+              <div class="grid grid-cols-2 gap-3 items-center">
                 <p class="text-sm text-gray-500">Payin Type</p>
 
-                <span
-                  class="text-xs font-medium truncate"
-                  [ngClass]="
-                    bankData.fttAcceptance
-                      ? 'text-green-600'
-                      : 'text-orange-600'
-                  "
+                <div *ngIf="!isEditMode">
+                  <span
+                    class="text-xs font-medium"
+                    [ngClass]="
+                      bankData?.fttAcceptance
+                        ? 'text-green-600'
+                        : 'text-orange-600'
+                    "
+                  >
+                    {{ bankData?.fttAcceptance ? "PPI" : "RPI" }}
+                  </span>
+                </div>
+
+                <!-- TOGGLE -->
+                <label
+                  *ngIf="isEditMode"
+                  class="relative inline-flex items-center cursor-pointer"
                 >
-                  {{ bankData.fttAcceptance ? "PPI" : "RPI" }}
-                </span>
+                  <input
+                    type="checkbox"
+                    appEnterKeyFocus
+                    class="sr-only peer"
+                    [(ngModel)]="updateForm.fttAcceptance"
+                  />
+
+                  <div
+                    class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 transition"
+                  ></div>
+
+                  <div
+                    class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform"
+                    [ngClass]="updateForm.fttAcceptance ? 'translate-x-5' : ''"
+                  ></div>
+                </label>
               </div>
 
-              <div class="grid grid-cols-2 gap-3 items-center">
-                <p class="text-sm text-gray-500">Accepts PPI</p>
-
-                <div>
-                  <span
-                    class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
-                  >
-                    Yes
-                  </span>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-3 items-center">
-                <p class="text-sm text-gray-500">Allocation Status</p>
-
-                <div>
-                  <span
-                    class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium"
-                  >
-                    {{ bankData?.allotStatus ? "Assigned" : "Not Assigned" }}
-                  </span>
-                </div>
-              </div>
+              <!-- ALLOCATION -->
             </div>
           </div>
 
@@ -182,42 +251,85 @@
         <!-- RIGHT -->
         <div class="space-y-8">
           <!-- BANK INFO -->
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">
-              Banking Details
-            </h3>
+          <!-- BANK NAME -->
+          <div class="grid grid-cols-2 gap-3 items-start">
+            <p class="text-sm text-gray-500">Bank Name</p>
 
-            <div class="space-y-4">
-              <div class="grid grid-cols-2 gap-3">
-                <p class="text-sm text-gray-500">Bank Name</p>
+            <!-- VIEW MODE -->
+            <div *ngIf="!isEditMode">
+              <p class="text-sm font-semibold text-gray-800">
+                {{ bankData?.bankName || "-" }}
+              </p>
+            </div>
 
-                <p class="text-sm font-semibold text-gray-800">
-                  {{ bankData?.bankName || "-" }}
-                </p>
-              </div>
+            <!-- EDIT MODE -->
+            <div *ngIf="isEditMode">
+              <div class="space-y-1 relative">
+                <div class="relative">
+                  <input
+                    type="text"
+                    appEnterKeyFocus
+                    [(ngModel)]="updateForm.bankName"
+                    name="bankName"
+                    (input)="onUpdateBankInputChange()"
+                    (focus)="onUpdateBankInputFocus()"
+                    (blur)="onUpdateBankInputBlur()"
+                    placeholder="Search or enter bank name..."
+                    required
+                    class="w-full px-3 py-2 pl-10 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
+                  />
 
-              <!-- <div class="grid grid-cols-2 gap-3">
-                <p class="text-sm text-gray-500">Branch Name</p>
-
-                <p class="text-sm font-semibold text-gray-800">
-                  {{ bankData?.portal || "-" }}
-                </p>
-              </div> -->
-
-              <div class="grid grid-cols-2 gap-3 items-center">
-                <p class="text-sm text-gray-500">Account Status</p>
-
-                <div>
-                  <span
-                    class="px-3 py-1 rounded-full text-xs font-medium"
-                    [ngClass]="
-                      bankData?.status === 'active'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
-                    "
+                  <button
+                    *ngIf="updateForm.bankName"
+                    type="button"
+                    (click)="clearUpdateBankSelection()"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-danger)]"
                   >
-                    {{ bankData?.status === "active" ? "Active" : "Inactive" }}
+                    <span class="material-symbols-outlined text-sm">
+                      close
+                    </span>
+                  </button>
+                </div>
+
+                <!-- DROPDOWN -->
+                <div
+                  *ngIf="updateShowBankDropdown"
+                  class="absolute z-50 w-full mt-1 max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
+                >
+                  <!-- EXISTING -->
+                  <div
+                    *ngFor="let bank of updateFilteredBanks"
+                    (mousedown)="selectUpdateBank(bank)"
+                    class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-sm border-b border-[var(--color-border)]"
+                  >
+                    {{ bank }}
+                  </div>
+
+                  <!-- CUSTOM -->
+                  <div
+                    *ngIf="
+                      updateFilteredBanks.length === 0 &&
+                      updateBankSearchTerm.trim()
+                    "
+                    (mousedown)="selectUpdateCustomBank()"
+                    class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-sm text-[var(--color-primary)] flex items-center gap-1"
+                  >
+                    <span class="material-symbols-outlined text-sm"> add </span>
+
+                    Add "{{ updateBankSearchTerm }}" as custom bank
+                  </div>
+                </div>
+
+                <!-- CUSTOM TAG -->
+                <div
+                  *ngIf="updateIsCustomBank"
+                  class="text-xs text-[var(--color-primary)] mt-1 flex items-center gap-1"
+                >
+                  <span class="material-symbols-outlined text-sm">
+                    add_circle
                   </span>
+
+                  Custom bank: "{{ updateForm.bankName }}"
                 </div>
               </div>
             </div>
@@ -230,22 +342,66 @@
             </h3>
 
             <div class="space-y-4">
+              <!-- DAILY LIMIT -->
               <div class="grid grid-cols-2 gap-3">
                 <p class="text-sm text-gray-500">Daily Limit</p>
 
-                <p class="text-sm font-semibold text-gray-800">
-                  ₹ {{ bankData?.limitAmount || 0 }}
-                </p>
+                <div *ngIf="!isEditMode">
+                  <p class="text-sm font-semibold text-gray-800">
+                    ₹
+                    {{ bankData?.limitAmount || 0 }}
+                  </p>
+                </div>
+
+                <input
+                  *ngIf="isEditMode"
+                  appEnterKeyFocus
+                  [(ngModel)]="updateForm.limitAmount"
+                  type="number"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
               </div>
 
+              <!-- MIN TOTAL -->
               <div class="grid grid-cols-2 gap-3">
                 <p class="text-sm text-gray-500">Min Total Amount</p>
 
-                <p class="text-sm font-semibold text-gray-800">
-                  ₹ {{ bankData?.min_total_tran_amount || 0 }}
-                </p>
+                <div *ngIf="!isEditMode">
+                  <p class="text-sm font-semibold text-gray-800">
+                    ₹
+                    {{ bankData?.min_total_tran_amount || 0 }}
+                  </p>
+                </div>
+
+                <input
+                  *ngIf="isEditMode"
+                  appEnterKeyFocus
+                  [(ngModel)]="updateForm.min_total_tran_amount"
+                  type="number"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
               </div>
 
+              <!-- TRANSACTION COUNT -->
+              <div class="grid grid-cols-2 gap-3">
+                <p class="text-sm text-gray-500">Transaction Count</p>
+
+                <div *ngIf="!isEditMode">
+                  <p class="text-sm font-semibold text-gray-800">
+                    {{ bankData?.min_tran_count || 0 }}
+                  </p>
+                </div>
+
+                <input
+                  *ngIf="isEditMode"
+                  [(ngModel)]="updateForm.min_tran_count"
+                  type="number"
+                  appEnterKeyFocus
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+
+              <!-- CAPACITY RANGE -->
               <div class="grid grid-cols-2 gap-3 items-start">
                 <p class="text-sm text-gray-500">Capacity Range</p>
 
@@ -255,8 +411,10 @@
                     class="text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2"
                   >
                     ₹{{ range.minRange }} - ₹{{ range.maxRange }}
+
                     <span class="text-xs text-gray-500">
-                      (Qty: {{ range.quantity }})
+                      (Qty:
+                      {{ range.quantity }})
                     </span>
                   </div>
 
@@ -271,7 +429,7 @@
             </div>
           </div>
 
-          <!-- STATUS -->
+          <!-- STATUS META -->
           <div>
             <h3 class="text-lg font-semibold text-gray-900 mb-4">
               Status Metadata
@@ -287,17 +445,9 @@
                   </span>
 
                   <p class="text-sm font-medium">
-                    {{ formatDate(bankData?.limitTime) }}
+                    {{ formatDate(bankData?.updatedAt) }}
                   </p>
                 </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-3">
-                <p class="text-sm text-gray-500">Transaction Count</p>
-
-                <p class="text-sm font-semibold text-gray-800">
-                  {{ bankData?.min_tran_count || 0 }}
-                </p>
               </div>
             </div>
           </div>
@@ -307,13 +457,22 @@
 
     <!-- FOOTER -->
     <div
-      class="flex items-center justify-end border-t border-gray-200 px-6 py-4"
+      class="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4"
     >
       <button
         (click)="closeModal()"
         class="px-5 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 font-medium hover:bg-gray-100 transition"
       >
         Close
+      </button>
+
+      <button
+        *ngIf="isEditMode"
+        (click)="submitUpdate()"
+        [disabled]="isSubmitting"
+        class="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
+      >
+        {{ isSubmitting ? "Updating..." : "Update Account" }}
       </button>
     </div>
   </div>

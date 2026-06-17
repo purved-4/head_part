@@ -1,27 +1,12 @@
-<div class="p-4 bg-[var(--color-bg)] min-h-screen">
+<div class="p-4">
+  <h2 class="text-xl font-semibold mb-4">Recycle Management</h2>
 
-  <h2 class="text-xl font-semibold mb-4 text-[var(--color-font)]">
-    Recycle Management
-  </h2>
+  <!-- PAYMENT METHOD SELECTOR -->
+  <app-payments-methods [disableRouting]="true"></app-payments-methods>
 
-  <div class="mb-4">
-    <label class="mr-2 font-medium text-[var(--color-font)]">
-      Select Type:
-    </label>
-
-    <select
-      [(ngModel)]="selectedType"
-      class="border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] p-2 rounded"
-    >
-      <option value="bank">Bank</option>
-      <option value="upi">UPI</option>
-    </select>
-  </div>
-
-  <!-- Recycle Bank -->
+  <!-- BANK -->
   <app-recycle-bank *ngIf="selectedType === 'bank'"></app-recycle-bank>
 
-  <!-- Recycle UPI -->
+  <!-- UPI -->
   <app-recycle-upi *ngIf="selectedType === 'upi'"></app-recycle-upi>
-
 </div>

@@ -243,8 +243,6 @@ export class BanksComponent implements OnInit, OnDestroy {
 
         this.selectedCurrencyData = res;
 
-
-
         this.currency = res.currency;
 
         // API CALL
@@ -259,8 +257,6 @@ export class BanksComponent implements OnInit, OnDestroy {
       if (!res) return;
 
       this.selectedModeData = res;
-
-
     });
 
     this.getPayinStatus();
@@ -404,7 +400,7 @@ export class BanksComponent implements OnInit, OnDestroy {
   resetFilters(): void {
     this.searchTerm = "";
     this.filterStatus = "";
-    this.statusFilter = "";
+
     this.selectedPortal = null;
     this.portalSearchTerm = "";
     this.minAmount = null;
@@ -602,32 +598,6 @@ export class BanksComponent implements OnInit, OnDestroy {
       this.onModalPortalSearch(); // refresh filtered list
     }
   }
-  // ========== MODAL OPEN/CLOSE ==========
-  // openAddBankModal() {
-  //   this.showAddModal = true;
-  //   this.loadPortals();
-  //   this.modalPortalSearch = "";
-  //   this.modalFilteredPortals = [];
-  //   this.selectedModalPortal = null;
-  //   this.showModalPortalDropdown = false;
-  //   this.addBankForm.reset();
-  //   this.addBankForm.markAsUntouched();
-  //   document.body.style.overflow = "hidden";
-  // }
-
-  // closeAddBankModal() {
-  //   this.showAddModal = false;
-  //   this.addBankForm.reset();
-  //   this.isAdding = false;
-  //   this.modalPortalSearch = "";
-  //   this.modalFilteredPortals = [];
-  //   this.selectedModalPortal = null;
-  //   this.showModalPortalDropdown = false;
-  //   this.bankSearchTerm = ""; // Add this line
-  //   this.filteredBanks = INDIAN_BANKS; // Add this line
-  //   this.isCustomBank = false; // Add this line
-  //   document.body.style.overflow = "auto";
-  // }
 
   // Update openAddBankModal method
   openAddBankModal(): void {
@@ -748,59 +718,6 @@ export class BanksComponent implements OnInit, OnDestroy {
   // onDocumentClick() {
   //   this.activeActionDropdown = null;
   // }
-
-  // ========== STATUS UPDATE ==========
-  updateAccountStatus(accountId: string, status: string, event?: MouseEvent) {
-    if (event) {
-      event.stopPropagation();
-      event.preventDefault();
-    }
-
-    const account = this.bankAccounts.find((acc) => acc.id === accountId);
-    if (!account) return;
-
-    this.isUpdatingStatus[accountId] = true;
-
-    const payload = {
-      id: accountId,
-      portal: account.portalId || account.portal,
-      entityId: this.currentRoleId,
-      entityType: this.role,
-      accountNo: account.accountNo,
-      accountHolderName: account.accountHolderName,
-      ifsc: account.ifsc,
-      limitAmount: account.limitAmount,
-      accountType: account.accountType,
-      status: status,
-      fttAcceptance: account.fttAcceptance,
-      // minAmount: account.minAmount,
-      // maxAmount: account.maxAmount,
-    };
-
-    const sub = this.bankService.update(payload).subscribe({
-      next: (res) => {
-        account.status = status;
-        this.isUpdatingStatus[accountId] = false;
-        this.activeActionDropdown = null;
-        this.fetchBankAccounts();
-
-        this.snack.show(
-          res.message || `Account status updated to ${status}`,
-          true,
-        );
-      },
-      error: (err) => {
-        this.isUpdatingStatus[accountId] = false;
-        // alert("Error updating account status. Please try again.");
-        this.snack.show(
-          err?.error?.message ||
-            "Error updating account status. Please try again.",
-          false,
-        );
-      },
-    });
-    this.subs.add(sub);
-  }
 
   // ========== FORM SUBMISSION ==========
 
@@ -1018,7 +935,7 @@ export class BanksComponent implements OnInit, OnDestroy {
   toggleBankStatus(bankId: string) {
     this.bankService.toogleBankDeleted(bankId).subscribe({
       next: (res: any) => {
-        this.snack.show(res.message, true);
+        this.snack.show(res.message || "bank deleted", true);
 
         this.fetchBankAccounts();
       },
@@ -1830,4 +1747,7 @@ export class BanksComponent implements OnInit, OnDestroy {
     this.showBankDetailsModal = false;
     this.selectedBankAccount = null;
   }
+  refreshBankAccounts = () => {
+    this.fetchBankAccounts();
+  };
 }

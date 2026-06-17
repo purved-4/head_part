@@ -353,35 +353,6 @@ updateProcessingStatus(fundId: any, branchId: any, entityType?: any) {
 
 
 
-  // web do pyauouit fubd lo
-  getAllPayoutFundWithPortalId(
-    portalId: any,
-    status: any,
-    page: number = 0,
-    pageSize: number = 10,
-    category?: any,
-  ): Observable<any> {
-    let params = new HttpParams()
-      .set("page", page.toString())
-      .set("size", pageSize.toString());
-
-    if (category !== null && category !== undefined) {
-      params = params.set("category", category.toString());
-    }
-
-    return this.http
-      .get<any>(
-        `${baseUrl}/comPart/funds/getPayoutFundWithPortalID/${portalId}/${status}`,
-        {
-          params,
-        },
-      )
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(error)),
-      );
-  }
-
   getFundDataWithHeadAndBranchWithIdForOwner(ids: any): Observable<any> {
     let params = new HttpParams();
 
@@ -392,14 +363,7 @@ updateProcessingStatus(fundId: any, branchId: any, entityType?: any) {
     return this.http.get<any>(`${baseUrl}/webhook/broadcast/list`, { params });
   }
 
- getThreadsWithFundId(fundId: any): Observable<any> {
-    return this.http
-      .get<any>(`${baseUrl}/comPart/fund-process-logs/${fundId}`)
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(error)),
-      );
-  }
+
 
   getTotalFundDetails(portalId: any): Observable<any> {
     let params = new HttpParams()
@@ -636,7 +600,15 @@ getPayinFundWithCpIdAndEntityId(
      );
 }
 
-
-
+ getThreadByEntityIdTypeAndFund(
+    entityId: string,
+    entityType: string,
+    fundId: string,
+    fundType: string,
+  ) {
+    return this.http.get<any>(
+      `${baseUrl}/api/chat/getThreadByEntityIdTypeAndFund/${entityId}/${entityType}/${fundId}/${fundType}`,
+    );
+  }
  
 }

@@ -1194,20 +1194,17 @@
         </div>
 
         <!-- Optional File Attachment -->
-       <!-- Conditional File Attachment -->
-<div
-  class="mb-6"
-  *ngIf="confirmTransaction?.type !== 'payout'"
->
+        <!-- Conditional File Attachment -->
+        <div class="mb-6" *ngIf="confirmTransaction?.type !== 'payout'">
           <div class="flex items-center justify-between mb-2">
             <label
               class="block text-xs text-[var(--color-muted)] font-semibold uppercase"
             >
-            {{
-  confirmTransaction?.type === "payin"
-    ? "Attachment (Required)"
-    : "Attachment (Optional)"
-}}
+              {{
+                confirmTransaction?.type === "payin"
+                  ? "Attachment (Required)"
+                  : "Attachment (Optional)"
+              }}
             </label>
             <span class="text-xs text-[var(--color-muted)]">Max 5MB</span>
           </div>
@@ -1225,7 +1222,7 @@
               #editFileInput
               (change)="onEditFileSelected($event)"
               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            accept=".pdf,.jpg,.jpeg,.png,application/pdf"
+              accept=".pdf,.jpg,.jpeg,.png,application/pdf"
               aria-label="Upload attachment"
             />
 
@@ -1321,277 +1318,252 @@
     <!-- Approve Confirmation Modal -->
     <div
       *ngIf="showApproveConfirm"
-      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-fadeIn"
+      class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-3"
     >
       <div
-        class="bg-[var(--color-surface)] rounded-2xl max-w-md w-full p-6 shadow-2xl animate-slideUp"
+        class="w-full max-w-sm bg-[var(--color-surface)] rounded-2xl shadow-2xl overflow-hidden animate-slideUp"
       >
-        <div class="text-center mb-6">
-          <div
-            class="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--color-success)]/20 flex items-center justify-center"
-          >
-            <span
-              class="material-symbols-outlined text-[var(--color-success)] text-4xl"
-              >task_alt</span
+        <!-- Header -->
+        <div class="p-4 border-b border-[var(--color-border)]">
+          <div class="flex items-start gap-3">
+            <div
+              class="w-11 h-11 rounded-full bg-[var(--color-success)]/15 flex items-center justify-center shrink-0"
             >
-          </div>
-          <h4 class="text-xl font-bold text-[var(--color-font)] mb-2">
-            Confirm Transaction Approval
-          </h4>
-          <p class="text-sm text-[var(--color-muted)]">
-            Please review the transaction details before approving
-          </p>
-        </div>
+              <span
+                class="material-symbols-outlined text-[var(--color-success)] text-2xl"
+              >
+                task_alt
+              </span>
+            </div>
 
-        <div
-          *ngIf="confirmTransaction"
-          class="mb-6 p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] space-y-3"
-        >
-          <div class="flex justify-between items-center">
-            <span
-              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
-              >Type</span
-            >
-            <span class="font-bold text-[var(--color-font)]">{{
-              confirmTransaction.type === "payin" ? "payin" : "payout"
-            }}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span
-              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
-              >Portal/Holder</span
-            >
-            <span class="font-bold text-[var(--color-font)]">{{
-              confirmTransaction.portal || confirmTransaction.holderName
-            }}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span
-              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
-              >Amount</span
-            >
-            <span
-              class="font-bold"
-              [ngClass]="{
-                'text-[var(--color-success)]':
-                  confirmTransaction.type === 'payin',
-                'text-[var(--color-danger)]':
-                  confirmTransaction.type === 'payout',
-              }"
-              >{{ confirmTransaction.amount }}</span
-            >
-          </div>
-          <div
-            *ngIf="confirmTransaction.mode === 'upi'"
-            class="flex justify-between items-center"
-          >
-            <span
-              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
-              >UPI ID</span
-            >
-            <span class="font-medium text-[var(--color-muted)] text-sm">{{
-              confirmTransaction.upiId
-            }}</span>
-          </div>
-          <div
-            *ngIf="confirmTransaction.mode === 'bank'"
-            class="flex justify-between items-center"
-          >
-            <span
-              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
-              >Account</span
-            >
-            <span class="font-medium text-[var(--color-muted)] text-sm">{{
-              confirmTransaction.accountNo
-            }}</span>
-          </div>
-          <div
-            *ngIf="confirmTransaction.utrNumber"
-            class="flex justify-between items-center"
-          >
-            <span
-              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
-              >UTR</span
-            >
-            <span class="font-medium text-[var(--color-muted)] text-sm">{{
-              confirmTransaction.utrNumber
-            }}</span>
+            <div class="flex-1">
+              <h4 class="text-base font-bold text-[var(--color-font)]">
+                Confirm Approval
+              </h4>
+
+              <p class="text-xs text-[var(--color-muted)] mt-0.5">
+                Verify transaction details before approval
+              </p>
+            </div>
           </div>
         </div>
 
-        <!-- payout Options Switch -->
-        <!-- <div class="mb-6" *ngIf="confirmTransaction.type === 'payout'">
-          <label
-            class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
+        <!-- Body -->
+        <div class="p-4 space-y-4">
+          <!-- Transaction Details -->
+          <div
+            *ngIf="confirmTransaction"
+            class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 space-y-2.5"
           >
-            Select Payout Method (Optional)
-          </label>
+            <!-- Type -->
+            <div class="flex items-center justify-between gap-3">
+              <span
+                class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
+              >
+                Type
+              </span>
 
-           <div class="flex items-center justify-center mb-4">
-            <div class="relative inline-block w-64">
-              <div class="flex bg-[var(--color-bg)] rounded-xl p-1">
-                <button
-                  type="button"
-                  (click)="selectedPayoutMethod = 'upi'"
-                  class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200"
-                  [ngClass]="{
-                    'bg-[var(--color-surface)] text-[var(--color-success)] shadow-sm':
-                      selectedPayoutMethod === 'upi',
-                    'text-[var(--color-muted)] hover:text-[var(--color-font)]':
-                      selectedPayoutMethod !== 'upi',
-                  }"
-                >
-                  UPI
-                </button>
-                <button
-                  type="button"
-                  (click)="selectedPayoutMethod = 'bank'"
-                  class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200"
-                  [ngClass]="{
-                    'bg-[var(--color-surface)] text-[var(--color-success)] shadow-sm':
-                      selectedPayoutMethod === 'bank',
-                    'text-[var(--color-muted)] hover:text-[var(--color-font)]':
-                      selectedPayoutMethod !== 'bank',
-                  }"
-                >
-                  Bank Transfer
-                </button>
-              </div>
+              <span class="text-sm font-bold text-[var(--color-font)]">
+                {{ confirmTransaction.type === "payin" ? "Payin" : "Payout" }}
+              </span>
+            </div>
+
+            <!-- Portal / Holder -->
+            <div class="flex items-center justify-between gap-3">
+              <span
+                class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
+              >
+                Portal / Holder
+              </span>
+
+              <span
+                class="text-sm font-semibold text-[var(--color-font)] text-right break-all"
+              >
+                {{ confirmTransaction.portal || confirmTransaction.holderName }}
+              </span>
+            </div>
+
+            <!-- Amount -->
+            <div class="flex items-center justify-between gap-3">
+              <span
+                class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
+              >
+                Amount
+              </span>
+
+              <span
+                class="text-base font-bold"
+                [ngClass]="{
+                  'text-[var(--color-success)]':
+                    confirmTransaction.type === 'payin',
+                  'text-[var(--color-danger)]':
+                    confirmTransaction.type === 'payout',
+                }"
+              >
+                ₹ {{ confirmTransaction.amount }}
+              </span>
+            </div>
+
+            <!-- UPI -->
+            <div
+              *ngIf="confirmTransaction.mode === 'upi'"
+              class="flex items-center justify-between gap-3"
+            >
+              <span
+                class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
+              >
+                UPI ID
+              </span>
+
+              <span
+                class="text-xs text-[var(--color-font)] text-right break-all"
+              >
+                {{ confirmTransaction.upiId }}
+              </span>
+            </div>
+
+            <!-- Account -->
+            <div
+              *ngIf="confirmTransaction.mode === 'bank'"
+              class="flex items-center justify-between gap-3"
+            >
+              <span
+                class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
+              >
+                Account
+              </span>
+
+              <span
+                class="text-xs text-[var(--color-font)] text-right break-all"
+              >
+                {{ confirmTransaction.accountNo }}
+              </span>
+            </div>
+
+            <!-- UTR -->
+            <div
+              *ngIf="confirmTransaction.utrNumber"
+              class="flex items-center justify-between gap-3"
+            >
+              <span
+                class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
+              >
+                UTR
+              </span>
+
+              <span
+                class="text-xs text-[var(--color-font)] text-right break-all"
+              >
+                {{ confirmTransaction.utrNumber }}
+              </span>
             </div>
           </div>
 
-           <div *ngIf="selectedPayoutMethod === 'upi'" class="animate-fadeIn">
-            <label
-              class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
+          <!-- Attachment Upload -->
+          <div *ngIf="confirmTransaction?.type === 'payout'">
+            <div class="flex items-center justify-between mb-2">
+              <label
+                class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
+              >
+                Payout Proof
+              </label>
+
+              <span class="text-[11px] font-semibold text-red-500">
+                Mandatory
+              </span>
+            </div>
+
+            <div
+              class="relative rounded-xl border-2 border-dashed border-[var(--color-success)] bg-[var(--color-bg)] p-4"
             >
-              Select UPI
-            </label>
-            <select
-              [(ngModel)]="selectedUpi"
-              class="w-full p-3 rounded-xl border-2 border-[var(--color-success)] bg-[var(--color-success)]/10 text-[var(--color-success)] font-semibold focus:outline-none focus:border-[var(--color-success)]"
-            >
-              <option [value]="null">Select UPI</option>
-              <option *ngFor="let upi of upis" [value]="upi.id">
-                {{ upi.vpa }}
-              </option>
-            </select>
+              <input
+                type="file"
+                id="approveFileInput"
+                (change)="onFileSelected($event)"
+                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                accept=".pdf,.jpg,.jpeg,.png,application/pdf"
+              />
+
+              <!-- No File -->
+              <div
+                *ngIf="!selectedFile"
+                class="flex flex-col items-center justify-center text-center"
+              >
+                <span
+                  class="material-symbols-outlined text-3xl text-[var(--color-success)] mb-2"
+                >
+                  upload_file
+                </span>
+
+                <p class="text-sm font-semibold text-[var(--color-font)]">
+                  Upload proof
+                </p>
+
+                <p class="text-[11px] text-[var(--color-muted)] mt-1">
+                  PDF / JPG / PNG (Max 1MB)
+                </p>
+              </div>
+
+              <!-- File Selected -->
+              <div *ngIf="selectedFile" class="space-y-3 relative">
+                <!-- Remove Button -->
+                <button
+                  type="button"
+                  (click)="removeSelectedFile($event)"
+                  class="absolute top-0 right-0 z-10 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >close</span
+                  >
+                </button>
+
+                <div class="text-center pt-2">
+                  <p class="text-sm font-semibold text-green-600 break-all">
+                    {{ selectedFile.name }}
+                  </p>
+
+                  <p class="text-[11px] text-[var(--color-muted)] mt-1">
+                    {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
+                  </p>
+                </div>
+
+                <!-- PDF Preview -->
+                <iframe
+                  *ngIf="previewDocument"
+                  [src]="previewUrl"
+                  class="w-full h-52 rounded-lg border border-[var(--color-border)]"
+                >
+                </iframe>
+
+                <!-- Image Preview -->
+                <img
+                  *ngIf="!previewDocument"
+                  [src]="previewUrl"
+                  class="w-full h-52 object-contain rounded-lg border border-[var(--color-border)]"
+                />
+              </div>
+            </div>
+
+            <p class="mt-2 text-[11px] text-red-500">
+              Attachment required for payout approval
+            </p>
           </div>
+        </div>
 
-           <div *ngIf="selectedPayoutMethod === 'bank'" class="animate-fadeIn">
-            <label
-              class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
-            >
-              Select Bank
-            </label>
-            <select
-              [(ngModel)]="selectedBank"
-              class="w-full p-3 rounded-xl border-2 border-[var(--color-success)] bg-[var(--color-success)]/10 text-[var(--color-success)] font-semibold focus:outline-none focus:border-[var(--color-success)]"
-            >
-              <option [value]="null">Select Bank</option>
-              <option *ngFor="let bank of banks" [value]="bank.id">
-                {{ bank.accountNo }} - {{ bank.bankName || "Bank" }}
-              </option>
-            </select>
-          </div>
-        </div> -->
-
-        <!-- Attachment Upload -->
-<div
-  class="mb-6"
-  *ngIf="confirmTransaction?.type === 'payout'"
->
-  <div class="flex items-center justify-between mb-2">
-    <label
-      class="block text-xs text-[var(--color-muted)] font-semibold uppercase"
-    >
-      Attachment Required
-    </label>
-
-    <span class="text-xs text-red-500 font-semibold">
-      Mandatory
-    </span>
-  </div>
-
-  <div
-    class="relative border-2 border-dashed border-[var(--color-success)] rounded-xl p-4 text-center"
-  >
-    <!-- <input
-      type="file"
-      id="approveFileInput"
-      (change)="onFileSelected($event)"
-      class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-    /> -->
-    <input
-  type="file"
-  id="approveFileInput"
-  (change)="onFileSelected($event)"
-  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-  accept=".pdf,.jpg,.jpeg,.png,application/pdf"
-/>
-
-    <div class="pointer-events-none">
-      <div *ngIf="!selectedFile">
-        <p class="text-sm font-medium text-[var(--color-font)]">
-          Upload payout proof
-        </p>
-
-       <p class="text-xs text-[var(--color-muted)] mt-1">
-  PDF, JPG, PNG (PDF Max 1MB)
-</p>
-      </div>
-
-      <!-- <div *ngIf="selectedFile" class="space-y-2">
-        <p class="text-sm font-semibold text-green-600">
-          {{ selectedFile.name }}
-        </p>
-
-        <p class="text-xs text-[var(--color-muted)]">
-          {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
-        </p>
-      </div> -->
-<div *ngIf="selectedFile" class="space-y-2">
-  <p class="text-sm font-semibold text-green-600">
-    {{ selectedFile.name }}
-  </p>
-
-  <p class="text-xs text-[var(--color-muted)]">
-    {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
-  </p>
-
-  <!-- PDF Preview -->
-  <iframe
-    *ngIf="previewDocument"
-    [src]="previewUrl"
-    class="w-full h-[300px] rounded-xl mt-3 border"
-  ></iframe>
-
-  <!-- Image Preview -->
-  <img
-    *ngIf="!previewDocument"
-    [src]="previewUrl"
-    class="w-full h-[300px] object-contain rounded-xl mt-3 border"
-  />
-</div>
-
-    </div>
-  </div>
-
-  <p class="text-xs mt-2 text-red-500">
-    Attachment is mandatory for payout approval
-  </p>
-</div>
-
-        <div class="flex gap-3">
+        <!-- Footer -->
+        <div
+          class="flex gap-3 p-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
+        >
           <button
-            (click)="cancelApprove()"
-            class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-muted)] rounded-xl hover:bg-[var(--color-bg)] transition font-bold"
+            (click)="cancelApprove(); removeSelectedFile()"
+            class="flex-1 h-11 rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-muted)] hover:bg-[var(--color-surface)] transition"
           >
             Cancel
           </button>
+
           <button
             (click)="confirmApprove()"
-            class="flex-1 px-4 py-2.5 bg-[var(--color-success)] text-white rounded-xl hover:from-[var(--color-success)] hover:to-[var(--color-success)] transition font-bold shadow-lg shadow-[var(--color-success)]/30"
+            class="flex-1 h-11 rounded-xl bg-[var(--color-success)] text-white text-sm font-bold shadow-lg shadow-[var(--color-success)]/20 hover:opacity-90 transition"
           >
             Approve
           </button>
@@ -1708,20 +1680,17 @@
         </div>
 
         <!-- Optional File Attachment -->
-      <!-- Conditional File Attachment -->
-<div
-  class="mb-6"
-  *ngIf="confirmTransaction?.type !== 'payout'"
->
+        <!-- Conditional File Attachment -->
+        <div class="mb-6">
           <div class="flex items-center justify-between mb-2">
             <label
               class="block text-xs text-[var(--color-muted)] font-semibold uppercase"
             >
-            {{
-  confirmTransaction?.type === "payin"
-    ? "Attachment (Required)"
-    : "Attachment (Optional)"
-}}
+              {{
+                confirmTransaction?.type === "payin"
+                  ? "Attachment (Required)"
+                  : "Attachment (Optional)"
+              }}
             </label>
             <span class="text-xs text-[var(--color-muted)]">Max 5MB</span>
           </div>
@@ -1740,7 +1709,7 @@
               #fileInput
               (change)="onFileSelected($event)"
               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-       accept=".pdf,.jpg,.jpeg,.png,application/pdf"
+              accept=".pdf,.jpg,.jpeg,.png,application/pdf"
               aria-label="Upload attachment"
             />
 
@@ -1812,18 +1781,18 @@
                 </div>
 
                 <!-- PDF Preview -->
-<iframe
-  *ngIf="previewDocument"
-  [src]="previewUrl"
-  class="w-full h-[300px] rounded-xl mt-3 border"
-></iframe>
+                <iframe
+                  *ngIf="previewDocument"
+                  [src]="previewUrl"
+                  class="w-full h-[300px] object-contain rounded-xl mt-3 border"
+                ></iframe>
 
-<!-- Image Preview -->
-<img
-  *ngIf="!previewDocument"
-  [src]="previewUrl"
-  class="w-full h-[300px] object-contain rounded-xl mt-3 border"
-/>
+                <!-- Image Preview -->
+                <img
+                  *ngIf="!previewDocument"
+                  [src]="previewUrl"
+                  class="w-full h-[300px] object-contain rounded-xl mt-3 border"
+                />
               </div>
             </div>
           </div>
@@ -1832,10 +1801,10 @@
             <!-- Add supporting documents if needed. This is optional but recommended
             for audit trails. -->
             {{
-  confirmTransaction?.type === "payin"
-    ? "Attachment is mandatory for payin rejection."
-    : "Optional attachment for rejection."
-}}
+              confirmTransaction?.type === "payin"
+                ? "Attachment is mandatory for payin rejection."
+                : "Optional attachment for rejection."
+            }}
           </p>
         </div>
 
@@ -1843,7 +1812,7 @@
         <!-- <div class="flex gap-3"> -->
         <div class="flex flex-col sm:flex-row gap-3">
           <button
-            (click)="cancelApprove()"
+            (click)="cancelApprove(); removeSelectedFile()"
             class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-muted)] rounded-xl hover:bg-[var(--color-bg)] transition font-bold"
           >
             Cancel
@@ -1861,32 +1830,23 @@
           >
             Reject
           </button> -->
-              <button
+          <button
             (click)="confirmReject()"
-           [disabled]="
-  !reason ||
-  (reason === 'other' && !customReason) ||
-  (
-    confirmTransaction?.type === 'payin' &&
-    !selectedFile
-  )
-"
-           [class.opacity-50]="
-  !reason ||
-  (reason === 'other' && !customReason) ||
-  (
-    confirmTransaction?.type === 'payin' &&
-    !selectedFile
-  )
-"
+            [disabled]="
+              !reason ||
+              (reason === 'other' && !customReason) ||
+              (confirmTransaction?.type === 'payin' && !selectedFile)
+            "
+            [class.opacity-50]="
+              !reason ||
+              (reason === 'other' && !customReason) ||
+              (confirmTransaction?.type === 'payin' && !selectedFile)
+            "
             [class.cursor-not-allowed]="
-  !reason ||
-  (reason === 'other' && !customReason) ||
-  (
-    confirmTransaction?.type === 'payin' &&
-    !selectedFile
-  )
-"
+              !reason ||
+              (reason === 'other' && !customReason) ||
+              (confirmTransaction?.type === 'payin' && !selectedFile)
+            "
             class="flex-1 px-4 py-2.5 bg-[var(--color-danger)] text-white rounded-xl hover:from-[var(--color-danger)] hover:to-[var(--color-danger)] transition font-bold shadow-lg shadow-[var(--color-danger)]/30 disabled:shadow-none"
           >
             Reject
