@@ -1,6 +1,26 @@
 <!-- RIGHT SLIDER PANEL -->
+
 <div
-  class="fixed top-0 right-0 h-screen w-[420px] bg-white z-[60] shadow-2xl transition-all duration-300 flex flex-col"
+  *ngIf="isOpen"
+  (click)="onClose()"
+  class="inset-0 bg-black/30 z-[9998]"
+></div>
+<div
+  class="
+fixed
+top-0
+right-0
+h-screen
+w-full
+sm:w-[420px]
+bg-white
+z-[9999]
+shadow-2xl
+transition-all
+duration-300
+flex
+flex-col
+"
   [ngClass]="{
     'translate-x-0': isOpen,
     'translate-x-full': !isOpen,

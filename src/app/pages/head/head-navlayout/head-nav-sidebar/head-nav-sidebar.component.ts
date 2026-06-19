@@ -1,3 +1,4 @@
+import { ThemeService } from './../../../../theme/theme.service';
 import {
   Component,
   Input,
@@ -200,6 +201,7 @@ export class HeadNavSidebarComponent implements OnInit {
     private router: Router,
     private BranchService: BranchService,
     private userStateService: UserStateService,
+    public theme : ThemeService
   ) {}
 
   ngOnInit() {

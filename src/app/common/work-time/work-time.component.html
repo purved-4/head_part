@@ -18,9 +18,30 @@
   </button>
 
   <div
-    *ngIf="showDropdown"
-    class="absolute right-0 mt-4 w-[420px] bg-gradient-to-br from-white to-neutral-50 backdrop-blur-xl border border-neutral-200 rounded-3xl shadow-2xl shadow-neutral-400/20 z-50 overflow-hidden"
-  >
+  *ngIf="showDropdown"
+  class="
+    fixed
+    left-1/2
+    top-20
+    z-50
+    w-[calc(100vw-1rem)]
+    -translate-x-1/2
+    overflow-hidden
+    rounded-2xl
+    border
+    border-slate-200
+    bg-white
+    shadow-xl
+
+    sm:absolute
+    sm:left-auto
+    sm:right-0
+    sm:top-auto
+    sm:mt-3
+    sm:w-[380px]
+    sm:translate-x-0
+  "
+>
     <!-- Header with primary gradient -->
     <div
       class="bg-gradient-to-br from-primary-500 via-primary-400 to-primary-600 px-6 py-5 relative overflow-hidden"

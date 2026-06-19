@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
 import { Input } from "@angular/core";
+import { ThemeService } from "../../../../theme/theme.service";
 @Component({
   selector: "app-head-mobile-footer",
   templateUrl: "./head-mobile-footer.component.html",
@@ -12,6 +13,28 @@ export class HeadMobileFooterComponent {
   @Input() limit = 0;
 
   isOpen = false;
+
+
+openPendingThreads() {
+  this.showPendingThreads = true;
+}
+
+    showPendingThreads = false;
+    chatPanelOpen = false;
+      entityId: any;
+    entityType: any;
+
+    closePendingThreads(): void {
+    this.showPendingThreads = false;
+  }
+
+  onChatPanelStateChange(isOpen: boolean): void {
+    this.chatPanelOpen = isOpen;
+  }
+
+  constructor(
+    public theme: ThemeService
+  ) {}
 
   toggleSheet() {
     this.isOpen = !this.isOpen;
