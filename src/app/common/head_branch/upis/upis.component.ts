@@ -1,3 +1,4 @@
+
 import {
   Component,
   OnInit,
@@ -34,53 +35,54 @@ export class UpisComponent implements OnInit {
   tooltipX = 0;
   tooltipY = 0;
   tooltipData: any = null;
-  // ---------- FILTERS (sent to backend) ----------
+
+  // ---------- FILTERS ----------
   searchTerm = "";
   private searchSubject = new Subject<string>();
-
-  filterStatus = ""; // 'active', 'inactive', or ''
+  filterStatus = "";
   selectedPortal: any = null;
-  maxLimit: number | null = null; //  NEW: max limit filter
+  maxLimit: number | null = null;
   transactionMinAmount: number | null = null;
   transactionMaxAmount: number | null = null;
-
   showPaymentDropdown = false;
   selectedMethod = "bank";
 
-  //new
-  //new
+  showTxnModal = false;
+  selectedTxnData: any = null;
+  private countdownInterval: any;
+
+  // ---------- TOGGLE CONFIRM ----------
+  isToggleConfirmVisible = false;
+  toggleCandidateUpi: any = null;
+
   selectedCurrencyData: any = null;
   selectedModeData: string = "";
-
   private currencySub!: Subscription;
   private modeSub!: Subscription;
 
-  // UI state for filters
+  // ---------- UI FILTER STATE ----------
   portalSearchTerm = "";
   showPortalDropdown = false;
   filteredPortals: any[] = [];
-  // UI toggle for transaction filter section
   showAmountFilter = false;
+  pageNumbers: number[] = [];
 
-  // Computed properties for active filters
   get limitFilterActive(): boolean {
     return this.maxLimit !== null && this.maxLimit > 0;
   }
   get transactionFilterActive(): boolean {
     return !!(this.transactionMinAmount || this.transactionMaxAmount);
   }
+
   payinStatus: any = false;
 
-  // Image preview
+  // ---------- IMAGE / QR ----------
   selectedImage: string | null = null;
   qrMode: "generate" | "upload" = "generate";
   vpaChanged: boolean = false;
   newQrGenerated: boolean = false;
 
   // ---------- ADD MODAL ----------
-  showAddModal = false;
-  isAddingUpi = false;
-  addUpiForm!: FormGroup;
   generatingQr = false;
   qrData: string | null = null;
   generatedFile: File | null = null;
@@ -105,6 +107,7 @@ export class UpisComponent implements OnInit {
   updateQrMode: "generate" | "upload" = "generate";
   originalVpa = "";
   updateQrError = "";
+  showInventoryModal = false;
 
   // ---------- USER / ROLE ----------
   currentRoleId: any;
@@ -112,14 +115,14 @@ export class UpisComponent implements OnInit {
   role: any;
   userId: any;
 
-  // ---------- PAGINATION (server‑driven) ----------
+  // ---------- PAGINATION ----------
   currentPage = 1;
   pageSize = 6;
   totalElements = 0;
   totalPagesCount = 0;
   Math = Math;
 
-  // ---------- QR CODE VIEWER ----------
+  // ---------- QR VIEWCHILD ----------
   @ViewChild("qrcodeElem", { static: false, read: ElementRef })
   qrcodeElem!: ElementRef;
   @ViewChild("updateQrcodeElem", { static: false, read: ElementRef })
@@ -127,11 +130,11 @@ export class UpisComponent implements OnInit {
 
   private vpaPattern = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
 
-  // Dropdown
+  // ---------- DROPDOWN ----------
   activeDropdownUpiId: string | null = null;
   viewMode: "table" | "grid" = "table";
   showUpiPortalDropdown = false;
-  // ---------- ACTIVE FILTERS COUNT ----------
+
   get activeFilters(): number {
     let count = 0;
     if (this.searchTerm.trim()) count++;
@@ -141,8 +144,8 @@ export class UpisComponent implements OnInit {
     if (this.transactionFilterActive) count++;
     return count;
   }
-  showCapacityModal = false;
 
+  showCapacityModal = false;
   capacityRanges: any[] = [];
   banks: any[] = [];
   filteredBanks: any[] = [];
@@ -151,6 +154,7 @@ export class UpisComponent implements OnInit {
   showBankDropdown = false;
   selectedUpiForCapacity: any = null;
   preselectedBankId: string | null = null;
+
   constructor(
     private upiService: UpiService,
     private branchService: BranchService,
@@ -167,41 +171,25 @@ export class UpisComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.initAddUpiForm();
-
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
-
-    // =========================
-    // GET CURRENCY
-    // =========================
 
     this.currencySub = this.currencyBehaviourService
       .getCurrency()
       .subscribe((res) => {
         if (!res) return;
-
         this.selectedCurrencyData = res;
-
-        // AGAR DIRECT STRING CHAHIYE
-        // this.currency = res.currency;
-
-        // API CALL
         this.fetchUpis();
       });
 
-    // =========================
-    // GET MODE
-    // =========================
-
     this.modeSub = this.currencyBehaviourService.getMode().subscribe((res) => {
       if (!res) return;
-
       this.selectedModeData = res;
     });
 
     this.getPayinStatus();
+    this.updatePageNumbers();
 
     if (
       typeof matchMedia !== "undefined" &&
@@ -223,53 +211,31 @@ export class UpisComponent implements OnInit {
         this.onSearch();
       });
 
-    this.capacityRanges = [
-      {
-        minRange: null,
-        maxRange: null,
-        quantity: null,
-      },
-    ];
+    this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
+    this.countdownInterval = setInterval(() => {
+      this.upis = [...this.upis];
+    }, 1000);
   }
-  ngOnDestroy() {
-    if (this.currencySub) {
-      this.currencySub.unsubscribe();
-    }
 
-    if (this.modeSub) {
-      this.modeSub.unsubscribe();
+  ngOnDestroy() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
     }
-  }
-  private initAddUpiForm() {
-    this.addUpiForm = this.formBuilder.group({
-      bankId: [""],
-      vpa: [
-        "",
-        [
-          Validators.required,
-          Validators.pattern(this.vpaPattern),
-          Validators.minLength(5),
-        ],
-      ],
-      limitAmount: [
-        "",
-        [Validators.required, Validators.min(1), Validators.max(10000000)],
-      ],
-      // min_tran_count: [null],
-      // max_tran_count: [null],
-      // min_total_tran_amount: [null],
-      // max_total_tran_amount: [null],
-    });
+    if (this.currencySub) this.currencySub.unsubscribe();
+    if (this.modeSub) this.modeSub.unsubscribe();
   }
 
   openUpiPortalDropdown(event: MouseEvent): void {
     event.stopPropagation();
     this.showUpiPortalDropdown = !this.showUpiPortalDropdown;
     if (this.showUpiPortalDropdown) {
-      this.onUpiPortalSearch(); // refresh filtered list
+      this.onUpiPortalSearch();
     }
   }
 
+  // =============================================
+  // ✅ FETCH UPIS — COMPLETE FIX
+  // =============================================
   fetchUpis(): void {
     if (!this.currentRoleId) return;
 
@@ -286,11 +252,9 @@ export class UpisComponent implements OnInit {
     if (this.preselectedBankId) {
       options.bankId = this.preselectedBankId;
     }
-
     if (this.selectedBank?.id) {
       options.bankId = this.selectedBank.id;
     }
-
     if (this.filterStatus && this.filterStatus.trim() !== "") {
       options.status = this.filterStatus;
     }
@@ -300,17 +264,15 @@ export class UpisComponent implements OnInit {
       .subscribe({
         next: (res: any) => {
           const responseData = res.data || res;
-
           const rows = Array.isArray(responseData.content)
             ? responseData.content
             : Array.isArray(responseData)
               ? responseData
               : [];
 
-          //  STEP 1: MAP (FIXED)
+          // ✅ STEP 1: MAP — normalizedStatus se isUpiActive bhi set karo
           this.upis = rows.map((r: any) => {
             let parsedRanges: any[] = [];
-
             if (Array.isArray(r.ranges)) {
               parsedRanges = r.ranges;
             } else if (typeof r.range === "string") {
@@ -324,42 +286,42 @@ export class UpisComponent implements OnInit {
                 return { from: Number(from), to: Number(to) };
               });
             }
+            this.totalPagesCount = r.totalPages;
+            this.updatePageNumbers();
 
             const rawImagePath = r.qrImagePath || r.qrImageUrl || null;
 
+            // ✅ KEY FIX: normalizedStatus pehle calculate karo
+            const normalizedStatus = this.normalizeStatus(r);
+
             return {
               ...r,
-              status: this.normalizeStatus(r),
-              // min_tran_count: r.minTranCount ?? null,
-              // max_tran_count: r.maxTranCount ?? null,
-              // min_total_tran_amount: r.minTotalTranAmount ?? null,
-              // max_total_tran_amount: r.maxTotalTranAmount ?? null,
+              status: r.status, // ✅ 'active' / 'inactive' string
+              isUpiActive: normalizedStatus === "active", // ✅ status se sync — r.upi nahi
+              liveAssigned: r.liveAssigned ?? false,
               portalDomain:
                 r.portalDomain || r.portalName || r.portal || r.bankId || "",
-
               ranges: parsedRanges,
-
               qrId: r.qrId || r.qr_id || r.id || "",
-
-              //  REMOVE direct URL
-              // qrImagePath: ...
-
-              //  NEW
               imagePath: rawImagePath,
               qrImageUrl: null,
-
               limitAmount: r.limitAmount,
               currency: r.portalCurrency || "",
               vpa: r.vpa || r.upiId || "",
-              isUpiActive: r.upi === true,
+
+              // ✅ Bank details
+              bankName: r.bankName || "",
+              accountHolder: r.accountHolder || "",
+
+              // ✅ Time fields
+              upiTime: r.upiTime || null,
+              liveTime: r.liveTime || null,
             };
           });
 
-          //  STEP 2: LOAD IMAGES (IMPORTANT)
+          // ✅ STEP 2: LOAD IMAGES
           this.upis.forEach((upi: any) => {
             if (!upi.imagePath) return;
-
-            //  smart handling (public vs private)
             if (upi.imagePath.startsWith("http")) {
               upi.qrImageUrl = upi.imagePath;
             } else {
@@ -370,28 +332,22 @@ export class UpisComponent implements OnInit {
             }
           });
 
-          //  STEP 3: SORT
+          // ✅ STEP 3: SORT
           const now = new Date().getTime();
-
           this.upis.sort((a: any, b: any) => {
             const timeA = a.limitTime ? new Date(a.limitTime).getTime() : 0;
             const timeB = b.limitTime ? new Date(b.limitTime).getTime() : 0;
-
             const isFutureA = timeA > now;
             const isFutureB = timeB > now;
-
             if (isFutureA && !isFutureB) return -1;
             if (!isFutureA && isFutureB) return 1;
-
             if (isFutureA && isFutureB) return timeB - timeA;
-
             return timeB - timeA;
           });
 
           this.totalElements = responseData.totalElements || this.upis.length;
           this.totalPagesCount = responseData.totalPages || 1;
         },
-
         error: () => {
           this.upis = [];
           this.totalElements = 0;
@@ -401,15 +357,20 @@ export class UpisComponent implements OnInit {
       });
   }
 
+  // =============================================
+  // ✅ normalizeStatus — Boolean PEHLE check karo
+  // =============================================
   private normalizeStatus(item: any): string {
+    // ✅ Boolean check PEHLE — status: true/false handle karo
+    if (typeof item.status === "boolean") {
+      return item.status ? "active" : "inactive";
+    }
+    // String check baad mein
     if (typeof item.status === "string" && item.status.trim() !== "") {
       return item.status.toLowerCase();
     }
     if (typeof item.active === "boolean") {
       return item.active ? "active" : "inactive";
-    }
-    if (typeof item.status === "boolean") {
-      return item.status ? "active" : "inactive";
     }
     return "inactive";
   }
@@ -441,7 +402,7 @@ export class UpisComponent implements OnInit {
     this.filterStatus = "";
     this.selectedPortal = null;
     this.portalSearchTerm = "";
-    this.maxLimit = null; //  NEW: reset max limit
+    this.maxLimit = null;
     this.transactionMinAmount = null;
     this.transactionMaxAmount = null;
     this.showPortalDropdown = false;
@@ -449,7 +410,7 @@ export class UpisComponent implements OnInit {
     this.fetchUpis();
   }
 
-  // ---------- PORTAL FILTER DROPDOWN ----------
+  // ---------- PORTAL FILTER ----------
   onPortalInputBlur(): void {
     setTimeout(() => (this.showPortalDropdown = false), 200);
   }
@@ -491,28 +452,13 @@ export class UpisComponent implements OnInit {
     this.onFilterChange();
   }
 
-  // ---------- ADD MODAL PORTAL SEARCH ----------
-  // onUpiPortalSearch(): void {
-  //   const term = (this.upiPortalSearch || "").trim().toLowerCase();
-  //   this.upiFilteredPortals = term
-  //     ? this.portals.filter(
-  //         (site) =>
-  //           site.domain.toLowerCase().includes(term) ||
-  //           (site.currency && site.currency.toLowerCase().includes(term)),
-  //       )
-  //     : [];
-  // }
-
   onUpiPortalSearch(): void {
     const term = (this.upiPortalSearch || "").trim().toLowerCase();
-
     this.showUpiPortalDropdown = true;
-
     if (!term) {
       this.upiFilteredPortals = [...this.portals];
       return;
     }
-
     this.upiFilteredPortals = this.portals.filter(
       (site) =>
         site.domain.toLowerCase().includes(term) ||
@@ -520,54 +466,14 @@ export class UpisComponent implements OnInit {
     );
   }
 
-  // selectUpiPortal(site: any): void {
-  //   this.selectedUpiPortal = site;
-  //   this.addUpiForm.patchValue({ bankId: site.id });
-  //   this.addUpiForm.get("bankId")?.markAsTouched();
-  //   this.upiPortalSearch = site.domain;
-  //   this.upiFilteredPortals = [];
-  // }
-  selectUpiPortal(site: any): void {
-    this.selectedUpiPortal = site;
-
-    this.addUpiForm.patchValue({
-      bankId: site.id,
-    });
-
-    this.addUpiForm.get("bankId")?.markAsTouched();
-
-    this.upiPortalSearch = site.accountHolderName;
-
-    this.upiFilteredPortals = [];
-    this.showUpiPortalDropdown = false;
-  }
-
-  // clearUpiPortalSelection(): void {
-  //   this.selectedUpiPortal = null;
-  //   this.upiPortalSearch = "";
-  //   this.upiFilteredPortals = [];
-  //   this.addUpiForm.patchValue({ bankId: "" });
-  //   this.addUpiForm.get("bankId")?.markAsTouched();
-  // }
-  clearUpiPortalSelection(): void {
-    this.selectedUpiPortal = null;
-    this.upiPortalSearch = "";
-    this.upiFilteredPortals = [];
-
-    //  Form se bankId clear karo
-    this.addUpiForm.patchValue({ bankId: "" });
-    this.addUpiForm.get("bankId")?.markAsTouched();
-    this.addUpiForm.get("bankId")?.updateValueAndValidity();
-  }
-
   // ---------- PAGINATION ----------
   totalPages(): number {
     return this.totalPagesCount;
   }
 
-  getPageNumbers(): number[] {
+  updatePageNumbers(): void {
     const pages: number[] = [];
-    const total = this.totalPages();
+    const total = this.totalPagesCount;
 
     const prev = this.currentPage - 1;
     const next = this.currentPage + 1;
@@ -582,19 +488,21 @@ export class UpisComponent implements OnInit {
       pages.push(next);
     }
 
-    return pages;
+    this.pageNumbers = pages;
   }
 
   prevPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
+      this.updatePageNumbers();
       this.fetchUpis();
     }
   }
 
   nextPage(): void {
-    if (this.currentPage < this.totalPages()) {
+    if (this.currentPage < this.totalPagesCount) {
       this.currentPage++;
+      this.updatePageNumbers();
       this.fetchUpis();
     }
   }
@@ -602,26 +510,31 @@ export class UpisComponent implements OnInit {
   goToPage(page: number | string): void {
     if (typeof page === "number") {
       this.currentPage = page;
+      this.updatePageNumbers();
       this.fetchUpis();
     }
   }
 
   onPageSizeChange(): void {
     this.currentPage = 1;
+    this.updatePageNumbers();
     this.fetchUpis();
   }
 
-  // ---------- TOGGLE STATUS ----------
+  // ---------- DELETE (toggleUpiStatus) ----------
   toggleUpiStatus(upi: any): void {
-    const newStatus = upi.status === "active" ? "inactive" : "active";
-    upi.status = newStatus;
+    const oldStatus = upi.status;
+    upi.status = oldStatus === "active" ? "inactive" : "active";
+
     this.upiService.toogleUpiDeleted(upi.id).subscribe({
       next: (res: any) => {
-        this.snack.show(res.message, true);
+        this.snack.show(res?.message || "UPI status updated", true);
+
         this.fetchUpis();
       },
       error: (err) => {
-        upi.status = upi.status === "active" ? "inactive" : "active";
+        upi.status = oldStatus;
+
         this.snack.show(
           err?.error?.message || "Failed to update status.",
           false,
@@ -630,195 +543,16 @@ export class UpisComponent implements OnInit {
     });
   }
 
-  // ---------- ADD MODAL ----------
-  openAddModal(): void {
-    // if (!this.portals?.length) this.loadPortals(this.currentRoleId);
-    this.selectedUpiPortal = null;
-    this.upiPortalSearch = "";
-    this.upiFilteredPortals = [];
-    this.showAddModal = true;
-    document.body.style.overflow = "hidden";
-  }
-
-  closeAddModal(): void {
-    this.showAddModal = false;
-    this.addUpiForm.reset();
-    this.qrData = null;
-    this.generatedFile = null;
-    this.isAddingUpi = false;
-    this.selectedUpiPortal = null;
-    this.upiPortalSearch = "";
-    this.upiFilteredPortals = [];
-    this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
-    document.body.style.overflow = "auto";
-    this.selectedImage = null;
-    this.manualQrFile = null;
-  }
-
-  submitAddUpi(): void {
-    Object.keys(this.addUpiForm.controls).forEach((key) =>
-      this.addUpiForm.get(key)?.markAsTouched(),
-    );
-
-    if (this.addUpiForm.invalid) {
-      this.snack.show("Please fill all required fields correctly.", false);
-      return;
-    }
-
-    // if (!this.generatedFile) {
-    //   this.snack.show("Please generate QR code first.", false);
-
-    //   return;
-    // }
-    if (!this.generatedFile && !this.manualQrFile) {
-      this.snack.show("Please upload or generate QR code.", false);
-      return;
-    }
-
-    // const selectedPortal = this.portals.find(
-    //   (site) => String(site.id) === String(this.addUpiForm.value.bankId),
-    // );
-    const selectedPortal = this.portals?.[0];
-    // if (!selectedPortal) {
-    //   this.snack.show("Selected portal not found.", false);
-    //   return;
-    // }
-    // if (this.addUpiForm.value.minAmount === 0) {
-    // }
-
-    if (!this.generatedFile) {
-      this.snack.show("Please generate QR code first.", false);
-      return;
-    }
-    // const validRanges = this.capacityRanges.filter(
-    //   (r) =>
-    //     r.minRange != null &&
-    //     r.maxRange != null &&
-    //     r.quantity != null &&
-    //     r.minRange > 0 &&
-    //     r.maxRange > 0 &&
-    //     r.quantity > 0,
-    // );
-    const validRanges = this.capacityRanges;
-
-    const payload = {
-      // portal: selectedPortal.bankId,
-      // bankId: selectedPortal.id,
-      vpa: this.addUpiForm.value.vpa,
-      limitAmount: this.addUpiForm.value.limitAmount,
-      // agent_id: this.currentRoleId,
-      entityId: this.currentRoleId,
-      entityType: this.role,
-
-      bankId: this.addUpiForm.value.bankId || this.preselectedBankId,
-      userId: this.userId,
-      active: true,
-      // minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
-      // maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
-      // minTotalTranAmount:
-      //   Number(this.addUpiForm.value.min_total_tran_amount) || 0,
-      // maxTotalTranAmount:
-      //   Number(this.addUpiForm.value.max_total_tran_amount) || 0,
-      createdAt: new Date().toISOString(),
-      // ranges: validRanges.map((r) => ({
-      //   minRange: Number(r.minRange),
-      //   maxRange: Number(r.maxRange),
-      //   quantity: Number(r.quantity), // User ne jo quantity di hai wahi bhejo
-      // })),
-
-      ranges: validRanges.map((r) => ({
-        minRange: r.minRange ?? null,
-        maxRange: r.maxRange ?? null,
-        quantity: r.quantity ?? null,
-      })),
-    };
-
-    const formData = new FormData();
-    const dtoBlob = new Blob([JSON.stringify(payload)], {
-      type: "application/json",
-    });
-    formData.append("dto", dtoBlob);
-    formData.append("file", this.generatedFile, this.generatedFile.name);
-
-    // if (this.currentRoleId) formData.append("agent_id", this.currentRoleId);
-    // if (this.currentRoleId) formData.append("branchId", this.currentRoleId);
-    // if (this.userId) formData.append("userId", this.userId);
-
-    this.isAddingUpi = true;
-
-    this.upiService.add(formData).subscribe({
-      next: (response: any) => {
-        this.isAddingUpi = false;
-        if (response.success || response.id || response._id) {
-          this.snack.show("UPI added successfully!", true);
-          this.closeAddModal();
-          this.fetchUpis(); //  refresh list
-        } else {
-          this.snack.show(response.message || "Failed to add UPI.", false);
-        }
-      },
-      error: (error: any) => {
-        this.isAddingUpi = false;
-
-        const errorMsg =
-          error?.error?.message || error?.error?.error || "Failed to add UPI";
-        this.snack.show(
-          errorMsg ||
-            "Failed to add UPI. Please check your connection and try again.",
-          false,
-        );
-      },
-    });
-  }
-
-  // openUpdateModal(upi: any): void {
-  //   this.editingUpi = upi;
-  //   this.updateForm = {
-  //     vpa: upi.vpa || "",
-  //     limitAmount: upi.limitAmount || "",
-  //     status: upi.status || "active",
-  //     maxAmount: upi.maxAmount || "",
-  //     minAmount: upi.minAmount || "",
-  //   };
-
-  //   // //  Validation for minAmount (allow 0)
-  //   // if (this.updateForm.minAmount < 0) {
-  //   //   this.snack.show("Min amount cannot be negative", false);
-  //   //   return;
-  //   // }
-
-  //   // //  Check if min > max
-  //   // if (this.updateForm.minAmount > this.updateForm.maxAmount) {
-  //   //   this.snack.show("Min amount cannot be greater than Max amount", false);
-  //   //   return;
-  //   // }
-
-  //   this.originalVpa = (upi.vpa || "").trim().toLowerCase();
-  //   this.vpaChanged = false;
-  //   this.newQrGenerated = false;
-  //   this.updateQrData = null;
-  //   this.generatedUpdateFile = null;
-  //   this.updateQrError = "";
-  //   this.showUpdateModal = true;
-  //   document.body.style.overflow = "hidden";
-  // }
-
+  // ---------- UPDATE MODAL ----------
   openUpdateModal(upi: any): void {
     this.editingUpi = upi;
-
     this.updateForm = {
       vpa: upi.vpa || "",
       limitAmount: upi.limitAmount || "",
       status: upi.status || "active",
       maxAmount: upi.maxAmount || "",
       minAmount: upi.minAmount || "",
-
-      // min_tran_count: upi.min_tran_count ?? null,
-      // max_tran_count: upi.max_tran_count ?? null,
-      // min_total_tran_amount: upi.min_total_tran_amount ?? null,
-      // max_total_tran_amount: upi.max_total_tran_amount ?? null,
     };
-
     this.originalVpa = (upi.vpa || "").trim().toLowerCase();
     this.vpaChanged = false;
     this.newQrGenerated = false;
@@ -828,14 +562,11 @@ export class UpisComponent implements OnInit {
     this.showUpdateModal = true;
     document.body.style.overflow = "hidden";
   }
+
   closeUpdateModal(): void {
     this.showUpdateModal = false;
     this.editingUpi = null;
-    this.updateForm = {
-      vpa: "",
-      limitAmount: "",
-      status: "active",
-    };
+    this.updateForm = { vpa: "", limitAmount: "", status: "active" };
     this.originalVpa = "";
     this.updateQrData = null;
     this.generatedUpdateFile = null;
@@ -850,25 +581,15 @@ export class UpisComponent implements OnInit {
     document.body.style.overflow = "auto";
   }
 
-  // onUpdateVpaChange(): void {
-  //   if (this.isValidUpiId(this.updateForm.vpa)) {
-  //     this.updateQrError = "";
-  //   }
-  //   this.removeGeneratedUpdateQr();
-  // }
-
   onUpdateVpaChange(): void {
-    const currentVpa = (this.updateForm.vpa || "").trim().toLowerCase(); //  lowercase
+    const currentVpa = (this.updateForm.vpa || "").trim().toLowerCase();
     const original = this.originalVpa;
     this.vpaChanged = currentVpa !== original;
-
-    // Agar VPA badal gaya, to QR reset karo
     if (this.vpaChanged) {
       this.newQrGenerated = false;
       this.updateQrData = null;
       this.generatedUpdateFile = null;
     }
-
     if (this.isValidUpiId(currentVpa)) {
       this.updateQrError = "";
     }
@@ -876,13 +597,11 @@ export class UpisComponent implements OnInit {
 
   submitUpdate(): void {
     if (!this.editingUpi) return;
-
     const vpa = (this.updateForm.vpa || "").trim();
     const limit = parseFloat(this.updateForm.limitAmount) || 0;
 
     if (!vpa) {
       this.snack.show("UPI ID is required", false);
-
       return;
     }
     if (!this.isValidUpiId(vpa)) {
@@ -891,20 +610,10 @@ export class UpisComponent implements OnInit {
     }
     if (limit <= 0) {
       this.snack.show("Please enter a valid limit amount", false);
-
       return;
     }
 
-    // const minAmount =
-    //   this.updateForm.minAmount !== "" && this.updateForm.minAmount != null
-    //     ? String(this.updateForm.minAmount)
-    //     : this.editingUpi.minAmount;
-    // const maxAmount =
-    //   this.updateForm.maxAmount !== "" && this.updateForm.maxAmount != null
-    //     ? String(this.updateForm.maxAmount)
-    //     : this.editingUpi.maxAmount;
     const statusBool = this.updateForm.status === "active";
-
     const dtoPayload: any = {
       id: this.editingUpi.id || this.editingUpi.qrId,
       portal: this.editingUpi.portal,
@@ -913,8 +622,6 @@ export class UpisComponent implements OnInit {
       vpa: vpa,
       limitAmount: limit.toString(),
       active: statusBool,
-      // minAmount,
-      // maxAmount,
     };
     if (this.currentRoleId) dtoPayload.branchId = this.currentRoleId;
     if (this.userId) dtoPayload.userId = this.userId;
@@ -933,12 +640,11 @@ export class UpisComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-
     this.upiService.updateUpi(formData).subscribe({
       next: () => {
         this.isSubmitting = false;
         this.closeUpdateModal();
-        this.fetchUpis(); //  refresh
+        this.fetchUpis();
         this.snack.show("UPI updated successfully!", true);
       },
       error: (err: any) => {
@@ -948,24 +654,9 @@ export class UpisComponent implements OnInit {
     });
   }
 
-  // ---------- QR CODE GENERATION ----------
+  // ---------- QR GENERATION ----------
   isValidUpiId(vpa: string): boolean {
     return this.vpaPattern.test(vpa);
-  }
-
-  generateQrFromVpa(): void {
-    const vpaControl = this.addUpiForm.get("vpa");
-    if (!vpaControl || vpaControl.invalid) {
-      vpaControl?.markAsTouched();
-      return;
-    }
-
-    const vpa = String(vpaControl.value).trim();
-    const upiIntent = `upi://pay?pa=${encodeURIComponent(vpa)}&cu=INR`;
-    this.qrData = upiIntent;
-    this.generatingQr = true;
-
-    setTimeout(() => this.captureQrImage(vpa, false), 300);
   }
 
   generateQrForUpdate(): void {
@@ -975,7 +666,6 @@ export class UpisComponent implements OnInit {
       return;
     }
     this.updateQrError = "";
-
     const upiIntent = `upi://pay?pa=${encodeURIComponent(vpa)}&cu=INR`;
     this.updateQrData = upiIntent;
     this.isGeneratingUpdateQr = true;
@@ -991,14 +681,12 @@ export class UpisComponent implements OnInit {
         this.finishQrGeneration(isForUpdate);
         return;
       }
-
       setTimeout(() => {
         const canvas = qrcodeElement.nativeElement.querySelector("canvas");
         if (!canvas) {
           this.finishQrGeneration(isForUpdate);
           return;
         }
-
         canvas.toBlob(
           (blob: Blob | null) => {
             if (blob) {
@@ -1007,7 +695,7 @@ export class UpisComponent implements OnInit {
                 this.generatedUpdateFile = new File([blob], filename, {
                   type: "image/png",
                 });
-                this.newQrGenerated = true; //  flag set
+                this.newQrGenerated = true;
               } else {
                 this.generatedFile = new File([blob], filename, {
                   type: "image/png",
@@ -1062,6 +750,7 @@ export class UpisComponent implements OnInit {
 
   // ---------- IMAGE MODAL ----------
   previewImage: string | null = null;
+
   openImageModal(imageUrl: string | null): void {
     if (!imageUrl) return;
     this.selectedImage = imageUrl;
@@ -1110,54 +799,22 @@ export class UpisComponent implements OnInit {
   }
 
   // ---------- CLICK OUTSIDE ----------
-
-  // @HostListener("document:click", ["$event"])
-  // onDocumentClick(event: MouseEvent): void {
-  //   const target = event.target as HTMLElement;
-
-  //   // Close portal dropdown
-  //   const portalContainer = target.closest(".portal-filter-container");
-  //   if (!portalContainer && this.showPortalDropdown) {
-  //     this.showPortalDropdown = false;
-  //   }
-
-  //   // Close action dropdown
-  //   const actionDropdown = target.closest(".relative");
-  //   if (!actionDropdown) {
-  //     this.activeDropdownUpiId = null;
-  //   }
-
-  //   const upiContainer = target.closest(".upi-portal-container");
-  //   if (!upiContainer) {
-  //     this.showUpiPortalDropdown = false;
-  //   }
-  // }
-
   @HostListener("document:click", ["$event"])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-
-    if (!target.closest(".portal-filter-container")) {
+    if (!target.closest(".portal-filter-container"))
       this.showPortalDropdown = false;
-    }
-
-    if (!target.closest(".action-dropdown-wrapper")) {
+    if (!target.closest(".action-dropdown-wrapper"))
       this.activeDropdownUpiId = null;
-    }
-
-    if (!target.closest(".upi-portal-container")) {
+    if (!target.closest(".upi-portal-container"))
       this.showUpiPortalDropdown = false;
-    }
-
-    if (!target.closest(".payment-dropdown-wrapper")) {
+    if (!target.closest(".payment-dropdown-wrapper"))
       this.showPaymentDropdown = false;
-    }
   }
 
   @HostListener("window:resize")
   onWindowResize(): void {
     this.showPortalDropdown = false;
-
     if (
       typeof matchMedia !== "undefined" &&
       matchMedia("(max-width: 800px)").matches
@@ -1169,52 +826,15 @@ export class UpisComponent implements OnInit {
   changePaymentType(type: string): void {
     this.selectedMethod = type;
     this.showPaymentDropdown = false;
-
-    this.router.navigate(["../", type], {
-      relativeTo: this.route,
-    });
+    this.router.navigate(["../", type], { relativeTo: this.route });
   }
 
-  // Add this new method for focus event
   onUpiPortalFocus(): void {
     if (this.portals.length > 0 && !this.showUpiPortalDropdown) {
       this.showUpiPortalDropdown = true;
-      this.onUpiPortalSearch(); // refresh filtered list
+      this.onUpiPortalSearch();
     }
   }
-
-  //    submitLimitTime() {
-  //   if (!this.limitDateTime || !this.editingUpi) return;
-
-  //   const selectedTime = new Date(this.limitDateTime).getTime();
-  //   const nowTime = new Date().getTime();
-
-  //   if (selectedTime < nowTime) {
-  //     this.snack.show("Please select a future date and time", false);
-  //     return;
-  //   }
-
-  //   this.isSubmittingLimit = true;
-
-  //   const payload = {
-  //     dateTime: this.limitDateTime,
-  //   };
-
-  //   const id = this.editingUpi.id;
-
-  //   this.upiService.setLimitTime(id, payload).subscribe({
-  //     next: () => {
-  //       this.snack.show("Limit time set successfully", true);
-  //       this.closeLimitModal();
-  //       this.isSubmittingLimit = false;
-  //     },
-  //     error: () => {
-  //       this.snack.show("Failed to set limit time", false);
-  //       this.isSubmittingLimit = false;
-  //     },
-  //   });
-
-  // }
 
   updateFrom(index: number, event: any) {
     const value = Number(event.target.value);
@@ -1224,23 +844,14 @@ export class UpisComponent implements OnInit {
   updateTo(index: number, event: any) {
     const value = Number(event.target.value);
     this.capacityRanges[index].maxRange = isNaN(value) ? null : value;
-
-    // this.recalculateRanges();
   }
+
   updateQuantity(index: number, event: any) {
     const value = Number(event.target.value);
     this.capacityRanges[index].quantity = isNaN(value) ? null : value;
   }
 
   addRange() {
-    const last = this.capacityRanges[this.capacityRanges.length - 1];
-
-    // this.capacityRanges.push({
-    //   minRange: last?.maxRange || null,
-    //   maxRange: null,
-    //   quantity: null,
-    // });
-
     this.capacityRanges.push({
       minRange: null,
       maxRange: null,
@@ -1250,17 +861,6 @@ export class UpisComponent implements OnInit {
 
   removeRange(index: number) {
     this.capacityRanges.splice(index, 1);
-    // this.recalculateRanges();
-  }
-
-  recalculateRanges() {
-    // for (let i = 1; i < this.capacityRanges.length; i++) {
-    //   const prev = this.capacityRanges[i - 1];
-    //   const current = this.capacityRanges[i];
-    //   if (prev?.maxRange != null) {
-    //     current.minRange = prev.maxRange;
-    //   }
-    // }
   }
 
   selectedId!: string;
@@ -1270,30 +870,17 @@ export class UpisComponent implements OnInit {
 
   openCapacity(item: any, mode: "UPI" | "BANK") {
     this.selectedId = item.id;
-
     this.selectedPortalId = item.bankId || item.portal || item.portalID;
-
     this.selectedPayinId = item.payinId || item.id || item.qrId;
-
     this.selectedMode = mode;
-
-    console.log(" FINAL PASS:", {
-      entityId: this.selectedId,
-      bankId: this.selectedPortalId,
-      payinId: this.selectedPayinId,
-    });
-
     this.showCapacityModal = true;
   }
 
-  //toggle upi status
-
-  isToggleConfirmVisible = false;
-  toggleCandidateUpi: any = null;
-
-  // Click handler
+  // =============================================
+  // ✅ TOGGLE CONFIRM — Click handler
+  // =============================================
   openUpiToggleConfirm(upi: any, event: Event) {
-    event.preventDefault(); //  prevent immediate toggle
+    event.preventDefault();
     this.toggleCandidateUpi = upi;
     this.isToggleConfirmVisible = true;
   }
@@ -1303,23 +890,57 @@ export class UpisComponent implements OnInit {
     this.toggleCandidateUpi = null;
   }
 
-  // Backend call + UI update
+  // =============================================
+  // ✅ executeUpiToggle — upiTime check FIXED
+  // =============================================
   executeUpiToggle() {
     if (!this.toggleCandidateUpi) return;
 
-    this.upiService.toggleIsUpi(this.toggleCandidateUpi.id).subscribe({
-      next: () => {
-        //  Only update UI after backend success
-        this.toggleCandidateUpi.isUpiActive =
-          !this.toggleCandidateUpi.isUpiActive;
+    const upi = this.toggleCandidateUpi;
 
+    // ✅ Sirf ACTIVE → INACTIVE karne pe upiTime check karo
+    if (upi.status === "active") {
+      const upiTime = upi.upiTime ? new Date(upi.upiTime).getTime() : null;
+      const now = new Date().getTime();
+
+      if (upiTime && upiTime > now) {
+        // ✅ upiTime future mein hai → inactive nahi karo
+        this.snack.show(
+          "UPI Time abhi future mein hai, inactive nahi kar sakte!",
+          false,
+        );
+        this.isToggleConfirmVisible = false;
+        this.toggleCandidateUpi = null;
+        return; // ✅ return — API call nahi hogi
+      }
+    }
+
+    // ✅ Normal flow — API call
+    this.upiService.toggleIsUpi(upi.id).subscribe({
+      next: () => {
+        // ✅ Dono sync karo
+        upi.isUpiActive = !upi.isUpiActive;
+        upi.status = upi.status === "active" ? "inactive" : "active";
+        this.isToggleConfirmVisible = false;
+        this.toggleCandidateUpi = null;
+        this.fetchUpis(); // fresh data
+      },
+      error: (err: any) => {
+        this.snack.show(
+          err?.error?.message || "Failed to toggle status.",
+          false,
+        );
         this.isToggleConfirmVisible = false;
         this.toggleCandidateUpi = null;
       },
-      error: (err: any) => {
-        this.isToggleConfirmVisible = false;
-      },
     });
+  }
+
+  // =============================================
+  // ✅ isAssigned — liveTime future = Assigned
+  // =============================================
+  isAssigned(upi: any): boolean {
+    return upi.liveAssigned === true;
   }
 
   isFutureLimitTime(limitTime: string | Date): boolean {
@@ -1332,61 +953,35 @@ export class UpisComponent implements OnInit {
   onQrFileSelected(event: any): void {
     const file = event.target.files[0];
     if (!file) return;
-
     this.manualQrFile = file;
-
-    // preview
     const reader = new FileReader();
     reader.onload = () => {
       this.selectedImage = reader.result as string;
     };
     reader.readAsDataURL(file);
-
-    // IMPORTANT: override generated QR
     this.generatedFile = file;
   }
 
-  // onUpdateQrFileSelected(event: any): void {
-  //   const file = event.target.files[0];
-  //   if (!file) return;
-
-  //   this.updateManualQrFile = file;
-
-  //   const reader = new FileReader();
-  //   reader.onload = () => {
-  //     this.updateSelectedImage = reader.result as string;
-  //   };
-  //   reader.readAsDataURL(file);
-
-  //   this.generatedUpdateFile = file;
-  //   this.newQrGenerated = true;
-  // }
   onUpdateQrFileSelected(event: any): void {
     const file = event.target.files[0];
     if (!file) return;
-
-    const maxSize = 500 * 1024; // 500KB
-
+    const maxSize = 500 * 1024;
     if (file.size > maxSize) {
       this.snack.show("Image size should be less than 500KB", false);
       return;
     }
-
     this.updateManualQrFile = file;
-
     const reader = new FileReader();
     reader.onload = () => {
       this.updateSelectedImage = reader.result as string;
     };
     reader.readAsDataURL(file);
-
     this.generatedUpdateFile = file;
     this.newQrGenerated = true;
   }
 
   setUpdateQrMode(mode: "generate" | "upload") {
     this.updateQrMode = mode;
-
     this.updateQrData = null;
     this.generatedUpdateFile = null;
     this.updateManualQrFile = null;
@@ -1403,8 +998,6 @@ export class UpisComponent implements OnInit {
 
   setQrMode(mode: "generate" | "upload") {
     this.qrMode = mode;
-
-    // reset everything when switching
     this.qrData = null;
     this.selectedImage = null;
     this.manualQrFile = null;
@@ -1421,7 +1014,6 @@ export class UpisComponent implements OnInit {
   showTooltip(event: MouseEvent, data: any) {
     this.tooltipVisible = true;
     this.tooltipData = data;
-
     this.tooltipX = event.clientX + 15;
     this.tooltipY = event.clientY + 15;
   }
@@ -1441,6 +1033,7 @@ export class UpisComponent implements OnInit {
       });
     }
   }
+
   changePayinStatus() {
     if (this.role === "HEAD") {
       this.headService
@@ -1463,18 +1056,15 @@ export class UpisComponent implements OnInit {
       .subscribe({
         next: (res: any) => {
           const banks = res?.data?.content || [];
-
           this.banks = banks;
           this.filteredBanks = banks;
-
           if (this.preselectedBankId) {
             const matchedBank = this.banks.find(
               (b: any) => b.id === this.preselectedBankId,
             );
-
             if (matchedBank) {
               this.selectedBank = matchedBank;
-              this.bankSearchTerm = matchedBank.accountHolderName; // UI fill
+              this.bankSearchTerm = matchedBank.accountHolderName;
             }
           }
         },
@@ -1487,7 +1077,6 @@ export class UpisComponent implements OnInit {
 
   filterBanks() {
     const term = this.bankSearchTerm.toLowerCase();
-
     this.filteredBanks = this.banks.filter((b) =>
       b.accountHolderName.toLowerCase().includes(term),
     );
@@ -1498,15 +1087,13 @@ export class UpisComponent implements OnInit {
     this.selectedBank = bank;
     this.bankSearchTerm = bank.accountHolderName;
     this.showBankDropdown = false;
-
-    this.onFilterChange(); //  trigger API
+    this.onFilterChange();
   }
 
   clearBankFilter() {
     this.selectedBank = null;
     this.bankSearchTerm = "";
     this.filteredBanks = [...this.banks];
-
     this.onFilterChange();
   }
 
@@ -1514,17 +1101,54 @@ export class UpisComponent implements OnInit {
     setTimeout(() => (this.showBankDropdown = false), 200);
   }
 
+  // =============================================
+  // ✅ isLive — payinStatus + isUpiActive
+  // =============================================
   isLive(upi: any): boolean {
-    return !!(
-      (
-        this.payinStatus && // Payin toggle ON
-        upi.isUpiActive // Toggle ON
-      )
-      // upi.status === "active" // Status active
-    );
+    const now = Date.now();
+
+    const upiTime = upi?.upiTime ? new Date(upi.upiTime).getTime() : null;
+
+    // Payin OFF
+    if (!this.payinStatus) {
+      return false;
+    }
+
+    // Status ON
+    if (upi.status === true) {
+      return true;
+    }
+
+    // Status OFF → upiTime decides
+    if (upi.status === false) {
+      return upiTime ? upiTime > now : false;
+    }
+
+    return false;
   }
-  showTxnModal = false;
-  selectedTxnData: any = null;
+
+  getRemainingTime(upi: any): string {
+    if (!upi?.upiTime) {
+      return "  ";
+    }
+
+    const diff = new Date(upi.upiTime).getTime() - Date.now();
+
+    if (diff <= 0) {
+      return "";
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    if (days > 0) {
+      return `${days}d ${hours}h ${minutes}m`;
+    }
+
+    return `   ${minutes}m ${seconds}s`;
+  }
 
   openTxnModal(upi: any) {
     this.selectedTxnData = upi;
@@ -1536,5 +1160,13 @@ export class UpisComponent implements OnInit {
     this.showTxnModal = false;
     this.selectedTxnData = null;
     document.body.style.overflow = "auto";
+  }
+
+  openAddUpiModal() {
+    this.showInventoryModal = true;
+  }
+
+  closeInventoryModal() {
+    this.showInventoryModal = false;
   }
 }

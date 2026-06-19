@@ -6,11 +6,36 @@
   >
     <!-- Header -->
     <div
-      class="px-6 py-4 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)]"
+      class="px-6 py-4 bg-[var(--color-primary)] flex items-center justify-between"
     >
-      <h2 class="text-xl font-semibold text-[var(--color-font)]">
-        Add New Limit
-      </h2>
+      <h2 class="text-lg font-medium text-white">Add New Limit</h2>
+
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div>
+          <p class="text-[10px] uppercase tracking-wide text-white/70">Given</p>
+          <p class="text-sm font-medium text-white">
+            {{ totalGiven | number: "1.0-0" }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-[10px] uppercase tracking-wide text-white/70">
+            Reduced
+          </p>
+          <p class="text-sm font-medium text-white">
+            {{ alreadyReduced | number: "1.0-0" }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-[10px] uppercase tracking-wide text-white/70">
+            Recoverable
+          </p>
+          <p class="text-sm font-medium text-green-200">
+            {{ netRecoverable | number: "1.0-0" }}
+          </p>
+        </div>
+      </div>
     </div>
 
     <!-- Content -->
@@ -19,9 +44,16 @@
       <div
         class="mb-4 p-4 bg-[var(--color-hover)] border border-[var(--color-border)] rounded-[var(--radius-md)]"
       >
-        <p class="text-sm font-medium text-[var(--color-muted)]">Self Limit</p>
+        <div class="flex items-center gap-2 mb-1">
+          <span
+            class="material-symbols-outlined text-lg text-[var(--color-muted)]"
+          >
+            person
+          </span>
+          <p class="text-sm text-[var(--color-muted)]">Self Limit</p>
+        </div>
 
-        <p class="mt-2 text-3xl font-bold text-[var(--color-primary-light)]">
+        <p class="text-2xl font-semibold text-[var(--color-font)]">
           {{ selfLimitRemainingAmount || 0 }}
         </p>
       </div>
@@ -30,11 +62,16 @@
       <div
         class="mb-6 p-4 bg-[var(--color-hover)] border border-[var(--color-border)] rounded-[var(--radius-md)]"
       >
-        <p class="text-sm font-medium text-[var(--color-muted)]">
-          Current Limit
-        </p>
+        <div class="flex items-center gap-2 mb-1">
+          <span
+            class="material-symbols-outlined text-lg text-[var(--color-muted)]"
+          >
+            account_balance_wallet
+          </span>
+          <p class="text-sm text-[var(--color-muted)]">Current Limit</p>
+        </div>
 
-        <p class="mt-2 text-3xl font-bold text-[var(--color-primary-light)]">
+        <p class="text-2xl font-semibold text-[var(--color-font)]">
           {{ limitRemainingAmount || 0 }}
         </p>
       </div>
@@ -45,8 +82,9 @@
         <div class="mb-6">
           <label
             for="transactionAmount"
-            class="block mb-2 text-sm font-medium text-[var(--color-font)]"
+            class="flex items-center gap-1.5 mb-2 text-sm font-medium text-[var(--color-font)]"
           >
+            <span class="material-symbols-outlined text-base"> payments </span>
             Amount
           </label>
 
@@ -70,8 +108,13 @@
         <!-- Error -->
         <div
           *ngIf="errorMessage"
-          class="mb-4 p-3 bg-[var(--color-danger)]/10 border border-[var(--color-danger)] rounded-[var(--radius-md)]"
+          class="mb-4 p-3 bg-[var(--color-danger)]/10 border border-[var(--color-danger)] rounded-[var(--radius-md)] flex items-center gap-2"
         >
+          <span
+            class="material-symbols-outlined text-base text-[var(--color-danger)]"
+          >
+            error
+          </span>
           <p class="text-sm text-[var(--color-danger)]">
             {{ errorMessage }}
           </p>
@@ -80,8 +123,13 @@
         <!-- Success -->
         <div
           *ngIf="successMessage"
-          class="mb-4 p-3 bg-[var(--color-success)]/10 border border-[var(--color-success)] rounded-[var(--radius-md)]"
+          class="mb-4 p-3 bg-[var(--color-success)]/10 border border-[var(--color-success)] rounded-[var(--radius-md)] flex items-center gap-2"
         >
+          <span
+            class="material-symbols-outlined text-base text-[var(--color-success)]"
+          >
+            check_circle
+          </span>
           <p class="text-sm text-[var(--color-success)]">
             {{ successMessage }}
           </p>
@@ -92,14 +140,22 @@
           <button
             type="button"
             (click)="onCancel()"
-            class="flex-1 px-4 py-3 font-medium text-[var(--color-font)] bg-[var(--color-hover)] border border-[var(--color-border)] rounded-[var(--radius-md)] hover:bg-[var(--color-border)] transition-all"
+            class="flex-1 px-4 py-3 text-sm font-medium text-[var(--color-font)] bg-[var(--color-hover)] border border-[var(--color-border)] rounded-[var(--radius-md)] hover:bg-[var(--color-border)] transition-all"
           >
             Cancel
           </button>
 
           <button
+            type="button"
+            (click)="removeLimit()"
+            class="flex-1 px-4 py-3 text-sm font-medium text-white bg-red-600 rounded-[var(--radius-md)] hover:bg-red-700 transition-all"
+          >
+            Remove Limit
+          </button>
+
+          <button
             type="submit"
-            class="flex-1 px-4 py-3 font-medium text-[var(--color-font)] bg-[var(--color-primary)] rounded-[var(--radius-md)] hover:bg-[var(--color-primary-dark)] transition-all"
+            class="flex-1 px-4 py-3 text-sm font-medium text-[var(--color-font)] bg-[var(--color-primary)] rounded-[var(--radius-md)] hover:bg-[var(--color-primary-dark)] transition-all"
           >
             Add Limit
           </button>

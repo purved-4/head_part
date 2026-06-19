@@ -5,10 +5,7 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Subscription, of } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { ViewChild, ElementRef } from "@angular/core";
-// import {
 
-//   cpInfo,
-// } from "../../../services/portal-sharing.service";
 import { Subject } from "rxjs";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { Input } from "@angular/core";
@@ -32,7 +29,7 @@ interface BankAccount {
   accountNo: string;
   accountType: string;
   status: StatusString;
-  ifsc?: string;
+  ifsc?: any;
   bankRange?: string;
   createdAt?: Date | string | null;
   limitAmount: string;
@@ -40,24 +37,21 @@ interface BankAccount {
   maxAmount: string;
   portalId?: string;
   allotStatus?: string;
-  bankName?: string;
+  bankName?: any;
   limitTime?: string | null;
   isBankActive?: boolean;
   currency?: string;
-  min_tran_count?: number;
   fttAcceptance?: boolean;
   upiCount?: any;
   ranges?: any;
-  // max_tran_count?: number;
-  min_total_tran_amount?: number;
-  // max_total_tran_amount?: number;
+  bankTime?: string | null; // ADD THIS
+  liveAssigned?: boolean; // ADD THIS
 }
 
 interface Portal {
   portalId: string;
   portalDomain: string;
   currency: string;
-  // portal:string;
 }
 
 @Component({
@@ -77,6 +71,8 @@ export class BanksComponent implements OnInit, OnDestroy {
   tooltipVisible = false;
   tooltipX = 0;
   tooltipY = 0;
+  activeCapacityPopup: any = null;
+  showInventoryModal = false;
   tooltipData: any = null;
   showPaymentDropdown = false;
   selectedMethod = "bank";
@@ -92,12 +88,42 @@ export class BanksComponent implements OnInit, OnDestroy {
   maxLimit: number | null = null; // max limit filter
   showTxnModal = false;
   selectedTxnData: any = null;
-  // UI state for portal filter dropdown
-  portalSearchTerm = "";
-  showPortalDropdown = false;
-  filteredPortals: Portal[] = [];
+  confirmStatusChecked: boolean = false;
+  private countdownInterval: any;
+  showStatusModal = false;
+  selectedAccount: any = null;
+  pendingToggleValue = false;
+  toggleEvent: any = null;
+  selectedCapacityAccount: any = null;
+  pageNumbers: number[] = [];
 
-  //new
+  capacityPopupTop = 0;
+  capacityPopupLeft = 0;
+  // Calendar picker state
+  monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  dayLabels = ["S", "M", "T", "W", "T", "F", "S"];
+  viewYear!: number;
+  viewMonth!: number;
+  pickerSelectedDay!: number;
+  pickerSelectedMonth!: number;
+  pickerSelectedYear!: number;
+  pickerHour!: number;
+  pickerMinute!: string;
+  pickerAmPm: "AM" | "PM" = "AM";
+  calendarCells: any[] = [];
   //new
   selectedCurrencyData: any = null;
   selectedModeData: string = "";
@@ -110,8 +136,12 @@ export class BanksComponent implements OnInit, OnDestroy {
   //bank details
   selectedBankAccount: BankAccount | null = null;
   showBankDetailsModal = false;
-
+  //new
+  draftSearchTerm = "";
+  draftMaxLimit: number | null = null;
+  draftStatusFilter = "all";
   // ---------- PAGINATION ----------
+
   currentPage = 1;
   pageSize = 6;
   Math = Math;
@@ -122,45 +152,18 @@ export class BanksComponent implements OnInit, OnDestroy {
   isAdding = false;
   portals: Portal[] = [];
   addBankForm: FormGroup;
-  showDebug = false; // kept for debug, but you can remove
-
-  // Modal portal search
-  modalPortalSearch = "";
-  modalFilteredPortals: Portal[] = [];
-  selectedModalPortal: Portal | null = null;
-  showModalPortalDropdown = false;
 
   // ---------- UPDATE MODAL ----------
-  showUpdateModal = false;
-  editingAccount: BankAccount | null = null;
-  updateForm: any = {
-    accountNo: "",
-    accountHolderName: "",
-    ifsc: "",
-    limitAmount: "",
-    accountType: "saving",
-    status: true,
-    minAmount: "",
-    maxAmount: "",
-    bankName: "",
-    fttAcceptance: true,
 
-    min_tran_count: null,
-    // max_tran_count: null,
-    min_total_tran_amount: null,
-    // max_total_tran_amount: null,
-  };
+  editingAccount: BankAccount | null = null;
+
   isSubmitting = false;
 
   showLimitModal: boolean = false;
   limitDateTime: any;
   isSubmittingLimit: boolean = false;
   // For update modal bank dropdown
-  updateBankSearchTerm = "";
-  updateFilteredBanks: string[] = INDIAN_BANKS;
-  updateShowBankDropdown = false;
-  updateIsCustomBank = false;
-  // ---------- USER / ROLE ----------
+
   currentRoleId: any;
   currentUserId: any;
   role: any;
@@ -269,6 +272,9 @@ export class BanksComponent implements OnInit, OnDestroy {
         this.searchTerm = value;
         this.currentPage = 1;
       });
+    this.countdownInterval = setInterval(() => {
+      this.bankAccounts = [...this.bankAccounts];
+    }, 1000);
   }
 
   ngOnDestroy() {
@@ -280,6 +286,9 @@ export class BanksComponent implements OnInit, OnDestroy {
 
     if (this.modeSub) {
       this.modeSub.unsubscribe();
+    }
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
     }
   }
 
@@ -338,6 +347,7 @@ export class BanksComponent implements OnInit, OnDestroy {
             return {
               id: r.id,
               branchId: r.branchId ?? null,
+              liveAssigned: r.liveAssigned ?? false,
               portal: r.portalDomain ?? null,
               portalId: r.portal ?? null,
               portalDomain: r.portalDomain ?? null,
@@ -355,10 +365,9 @@ export class BanksComponent implements OnInit, OnDestroy {
               ranges: r.ranges ?? [],
               limitTime: r.limitTime ?? null,
               fttAcceptance: r.fttAcceptance ?? true,
-              min_tran_count: r.minTranCount ?? null,
-              // max_tran_count: r.maxTranCount ?? null,
-              min_total_tran_amount: r.minTotalTranAmount ?? null,
+
               upiCount: r.upiCount ?? null,
+              bankTime: r.bankTime ?? null, // ADD
 
               isBankActive,
             } as BankAccount;
@@ -374,7 +383,51 @@ export class BanksComponent implements OnInit, OnDestroy {
 
     this.subs.add(sub);
   }
+  isAccountActive(account: BankAccount): boolean {
+    const now = Date.now();
+    const bankTime = account.bankTime
+      ? new Date(account.bankTime).getTime()
+      : null;
 
+    // 1. Payin OFF → always inactive
+    if (!this.payinStatus) {
+      return false;
+    }
+
+    // 2. status ON → always active (no checks)
+    if (account.status === "active") {
+      return true;
+    }
+
+    // 3. status OFF → only bankTime decides
+    if (account.status === "inactive") {
+      return bankTime ? bankTime > now : false;
+    }
+
+    return false;
+  }
+  getBankRemainingTime(account: any): string {
+    if (!account?.bankTime) {
+      return "";
+    }
+
+    const diff = new Date(account.bankTime).getTime() - Date.now();
+
+    if (diff <= 0) {
+      return "";
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    if (days > 0) {
+      return `${days}d ${hours}h ${minutes}m`;
+    }
+
+    return ` ${minutes}m ${seconds}s`;
+  }
   // ========== FILTER ACTIONS ==========
   onSearch(): void {
     this.currentPage = 1;
@@ -398,59 +451,22 @@ export class BanksComponent implements OnInit, OnDestroy {
   }
 
   resetFilters(): void {
+    // actual
     this.searchTerm = "";
-    this.filterStatus = "";
+    this.maxLimit = null;
+    this.statusFilter = "all";
+
+    // draft
+    this.draftSearchTerm = "";
+    this.draftMaxLimit = null;
+    this.draftStatusFilter = "all";
 
     this.selectedPortal = null;
-    this.portalSearchTerm = "";
     this.minAmount = null;
     this.maxAmount = null;
-    this.maxLimit = null;
-    this.showPortalDropdown = false;
+
     this.currentPage = 1;
     this.fetchBankAccounts();
-  }
-
-  // ========== PORTAL FILTER DROPDOWN ==========
-  onPortalInputBlur(): void {
-    setTimeout(() => (this.showPortalDropdown = false), 200);
-  }
-
-  filterPortals(): void {
-    const term = this.portalSearchTerm.trim().toLowerCase();
-    if (!term) {
-      this.filteredPortals = [...this.portals];
-      this.showPortalDropdown = this.portals.length > 0;
-      return;
-    }
-    this.filteredPortals = this.portals.filter(
-      (site) =>
-        site.portalDomain.toLowerCase().includes(term) ||
-        (site.currency && site.currency.toLowerCase().includes(term)),
-    );
-    this.showPortalDropdown = this.filteredPortals.length > 0;
-  }
-
-  openPortalDropdown(): void {
-    if (this.portals.length > 0) {
-      this.filteredPortals = [...this.portals];
-      this.showPortalDropdown = true;
-    }
-  }
-
-  selectPortal(portal: Portal): void {
-    this.selectedPortal = portal;
-    this.portalSearchTerm = portal.portalDomain;
-    this.showPortalDropdown = false;
-    this.onFilterChange();
-  }
-
-  clearPortalFilter(): void {
-    this.selectedPortal = null;
-    this.portalSearchTerm = "";
-    this.filteredPortals = [...this.portals];
-    this.showPortalDropdown = false;
-    this.onFilterChange();
   }
 
   // ========== PAGINATION ==========
@@ -458,7 +474,7 @@ export class BanksComponent implements OnInit, OnDestroy {
     return this.totalPagesCount;
   }
 
-  getPageNumbers(): number[] {
+  private updatePageNumbers(): void {
     const total = this.totalPages();
     const current = this.currentPage;
 
@@ -471,7 +487,7 @@ export class BanksComponent implements OnInit, OnDestroy {
       pages.push(i);
     }
 
-    return pages;
+    this.pageNumbers = pages;
   }
 
   prevPage(): void {
@@ -521,10 +537,7 @@ export class BanksComponent implements OnInit, OnDestroy {
           "",
           [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)],
         ],
-        min_tran_count: [null],
-        // max_tran_count: [null],
-        min_total_tran_amount: [null],
-        // max_total_tran_amount: [null],
+
         fttAcceptance: [true],
       },
       // { validators: this.accountNumberMatchValidator },
@@ -543,167 +556,6 @@ export class BanksComponent implements OnInit, OnDestroy {
     }
   }
 
-  onModalPortalSearch(): void {
-    const term = this.modalPortalSearch.trim().toLowerCase();
-
-    if (!term) {
-      this.modalFilteredPortals = [...this.portals];
-      return;
-    }
-
-    this.modalFilteredPortals = this.portals.filter(
-      (w) =>
-        w.portalDomain.toLowerCase().includes(term) ||
-        (w.currency && w.currency.toLowerCase().includes(term)),
-    );
-  }
-
-  // Update selectPortalForForm method
-  selectPortalForForm(portal: Portal): void {
-    this.selectedModalPortal = portal;
-    this.showModalPortalDropdown = false;
-
-    // Show the selected portal name in the input
-    this.modalPortalSearch = portal.portalDomain;
-
-    // Update form value
-    this.addBankForm.patchValue({ portal: portal.portalId });
-    this.addBankForm.get("portal")?.markAsTouched();
-
-    // Reset filtered list
-    this.modalFilteredPortals = [...this.portals];
-  }
-
-  // Update clearPortalSelection method
-  clearPortalSelection(): void {
-    this.selectedModalPortal = null;
-    this.modalPortalSearch = "";
-    this.modalFilteredPortals = [...this.portals];
-
-    // Clear form value
-    this.addBankForm.patchValue({ portal: "" });
-    this.addBankForm.get("portal")?.markAsTouched();
-    this.addBankForm.get("portal")?.updateValueAndValidity();
-
-    // Reopen dropdown if needed
-    if (this.portals.length > 0) {
-      this.showModalPortalDropdown = true;
-    }
-  }
-
-  // Add this new method for focus event
-  onModalPortalFocus(): void {
-    if (this.portals.length > 0 && !this.showModalPortalDropdown) {
-      this.showModalPortalDropdown = true;
-      this.onModalPortalSearch(); // refresh filtered list
-    }
-  }
-
-  // Update openAddBankModal method
-  openAddBankModal(): void {
-    this.showAddModal = true;
-    // this.loadPortals();
-
-    // Reset all portal selection state
-    this.selectedModalPortal = null;
-    this.modalPortalSearch = "";
-    this.modalFilteredPortals = [...this.portals];
-    this.showModalPortalDropdown = false; // Don't open dropdown automatically
-
-    this.addBankForm.reset({
-      portal: "",
-      bankName: "",
-      accountNumber: "",
-      accountHolderName: "",
-      ifscCode: "",
-      accountType: "",
-      limitAmount: "",
-      fttAcceptance: true,
-    });
-    this.addBankForm.markAsUntouched();
-    this.bankSearchTerm = "";
-    this.filteredBanks = INDIAN_BANKS;
-    this.isCustomBank = false;
-    this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
-
-    document.body.style.overflow = "hidden";
-  }
-
-  // Update closeAddBankModal method
-  closeAddBankModal(): void {
-    this.showAddModal = false;
-    this.addBankForm.reset({
-      portal: "",
-      bankName: "",
-      accountNumber: "",
-      accountHolderName: "",
-      ifscCode: "",
-      accountType: "",
-      limitAmount: "",
-      fttAcceptance: true,
-    });
-    this.isAdding = false;
-
-    // Reset portal selection state
-    this.selectedModalPortal = null;
-    this.modalPortalSearch = "";
-    this.modalFilteredPortals = [];
-    this.showModalPortalDropdown = false;
-
-    // Reset bank dropdown state
-    this.bankSearchTerm = "";
-    this.filteredBanks = INDIAN_BANKS;
-    this.isCustomBank = false;
-
-    document.body.style.overflow = "auto";
-  }
-
-  openUpdateModal(account: BankAccount) {
-    this.editingAccount = account;
-    this.updateForm = {
-      accountNo: account.accountNo || "",
-      accountHolderName: account.accountHolderName || "",
-      ifsc: account.ifsc || "",
-      bankName: account.bankName || "",
-      limitAmount: account.limitAmount || "",
-      accountType: account.accountType || "saving",
-      // status: account.status || "active",
-      status: account.status === "active",
-      min_tran_count: account.min_tran_count || null,
-      // max_tran_count: account.max_tran_count || null,
-      min_total_tran_amount: account.min_total_tran_amount || null,
-      fttAcceptance: account.fttAcceptance ?? true,
-      // max_total_tran_amount: account.max_total_tran_amount || null,
-      // minAmount: account.minAmount,
-      // maxAmount: account.maxAmount,
-    };
-    this.showUpdateModal = true;
-    this.activeActionDropdown = null;
-    document.body.style.overflow = "hidden";
-  }
-
-  closeUpdateModal() {
-    this.showUpdateModal = false;
-    this.editingAccount = null;
-    this.updateForm = {
-      accountNo: "",
-      accountHolderName: "",
-      ifsc: "",
-      bankName: "",
-      limitAmount: "",
-      accountType: "saving",
-      status: "active",
-      min_tran_count: null,
-      // max_tran_count: null,
-      min_total_tran_amount: null,
-      // max_total_tran_amount: null,
-      // minAmount: "",
-      // maxAmount: "",
-    };
-    this.isSubmitting = false;
-    document.body.style.overflow = "auto";
-  }
-
   // ========== ACTION DROPDOWN ==========
   toggleActionDropdown(accountId: string, event?: MouseEvent) {
     if (event) {
@@ -720,151 +572,6 @@ export class BanksComponent implements OnInit, OnDestroy {
   // }
 
   // ========== FORM SUBMISSION ==========
-
-  submitAddBankForm() {
-    Object.keys(this.addBankForm.controls).forEach((key) =>
-      this.addBankForm.get(key)?.markAsTouched(),
-    );
-
-    if (this.addBankForm.invalid) {
-      this.snack.show("Please fill in all required fields correctly.", false);
-      return;
-    }
-
-    const invalid = this.capacityRanges.some(
-      (r) =>
-        r.minRange === null ||
-        r.maxRange === null ||
-        r.quantity === null ||
-        Number(r.maxRange) <= Number(r.minRange),
-    );
-
-    if (invalid) {
-      this.snack.show("Max range should be greater than min range", false);
-      return;
-    }
-
-    this.isAdding = true;
-
-    const formData = this.addBankForm.value;
-    const payload = {
-      entityId: this.currentRoleId,
-      entityType: this.role,
-      portal: formData.portal,
-      currency: this.currency,
-      bankName: formData.bankName,
-      accountNo: formData.accountNumber,
-      accountHolderName: formData.accountHolderName,
-      ifsc: formData.ifscCode,
-      accountType: formData.accountType,
-      limitAmount: formData.limitAmount,
-      status: true,
-      fttAcceptance: formData.fttAcceptance,
-      minTranCount: Number(formData.min_tran_count) || 0,
-      // maxTranCount: Number(formData.max_tran_count) || 0,
-      minTotalTranAmount: Number(formData.min_total_tran_amount) || 0,
-      // maxTotalTranAmount: Number(formData.max_total_tran_amount) || 0,
-      // ranges stays same
-      ranges: this.capacityRanges.map((r) => ({
-        minRange: Number(r.minRange),
-        maxRange: Number(r.maxRange),
-        quantity: Number(r.quantity),
-      })),
-    };
-
-    const sub = this.bankService.addBank(payload).subscribe({
-      next: (res) => {
-        this.isAdding = false;
-        this.closeAddBankModal();
-        this.fetchBankAccounts();
-        this.snack.show(
-          res.message || "Bank account added successfully!",
-          true,
-        );
-      },
-      error: (err) => {
-        this.isAdding = false;
-        this.snack.show(
-          err?.error?.message || "Error adding bank account. Please try again.",
-          false,
-        );
-      },
-    });
-    this.subs.add(sub);
-  }
-
-  submitUpdate() {
-    if (!this.editingAccount) return;
-
-    if (!this.updateForm.accountNo.trim()) {
-      // alert("Account Number is required");
-      this.snack.show("Account Number is required", false);
-      return;
-    }
-    if (!this.updateForm.accountHolderName.trim()) {
-      // alert("Account Holder Name is required");
-      this.snack.show("Account Holder Name is required", false);
-
-      return;
-    }
-    if (!this.updateForm.ifsc.trim()) {
-      // alert("IFSC Code is required");
-      this.snack.show("IFSC Code is required", false);
-
-      return;
-    }
-    if (!this.updateForm.limitAmount || this.updateForm.limitAmount <= 0) {
-      // alert("Please enter a valid limit amount");
-      this.snack.show("Please enter a valid limit amount", false);
-
-      return;
-    }
-
-    this.isSubmitting = true;
-
-    const payload = {
-      id: this.editingAccount.id,
-      portal: this.editingAccount.portalId,
-      entityId: this.currentRoleId,
-      entityType: this.role,
-      accountNo: this.updateForm.accountNo,
-      accountHolderName: this.updateForm.accountHolderName,
-      bankName: this.updateForm.bankName,
-      ifsc: this.updateForm.ifsc,
-      limitAmount: this.updateForm.limitAmount,
-      accountType: this.updateForm.accountType,
-      status: this.updateForm.status,
-      fttAcceptance: this.updateForm.fttAcceptance,
-      minTranCount: Number(this.updateForm.min_tran_count) || 0,
-      // maxTranCount: Number(this.updateForm.max_tran_count) || 0,
-      minTotalTranAmount: Number(this.updateForm.min_total_tran_amount) || 0,
-      // maxTotalTranAmount: Number(this.updateForm.max_total_tran_amount) || 0,
-      // minAmount: this.updateForm.minAmount,
-      // maxAmount: this.updateForm.maxAmount,
-    };
-
-    const sub = this.bankService.update(payload).subscribe({
-      next: (res) => {
-        this.isSubmitting = false;
-        this.closeUpdateModal();
-        this.fetchBankAccounts();
-        this.snack.show(
-          res.message || "Bank account updated successfully!",
-          true,
-        );
-      },
-      error: (err) => {
-        this.isSubmitting = false;
-
-        this.snack.show(
-          err?.error?.message ||
-            "Error updating bank account. Please try again.",
-          false,
-        );
-      },
-    });
-    this.subs.add(sub);
-  }
 
   // ========== UTILITY METHODS ==========
   getStatusClass(status: string): string {
@@ -931,15 +638,16 @@ export class BanksComponent implements OnInit, OnDestroy {
 
     return num.toString(); // this will correctly return 0
   }
-
   toggleBankStatus(bankId: string) {
     this.bankService.toogleBankDeleted(bankId).subscribe({
       next: (res: any) => {
-        this.snack.show(res.message || "bank deleted", true);
+        this.snack.show(res?.message || "bank deleted", true);
 
         this.fetchBankAccounts();
       },
       error: (err) => {
+        console.error(err);
+
         this.snack.show(
           err.error?.message || "failed to delete the bank",
           false,
@@ -1015,73 +723,6 @@ export class BanksComponent implements OnInit, OnDestroy {
     this.isCustomBank = false;
   }
 
-  // ========== UPDATE MODAL BANK DROPDOWN METHODS ==========
-  onUpdateBankInputFocus(): void {
-    this.updateShowBankDropdown = true;
-    this.updateFilteredBanks = INDIAN_BANKS;
-  }
-
-  onUpdateBankInputBlur(): void {
-    setTimeout(() => {
-      this.updateShowBankDropdown = false;
-    }, 200);
-  }
-
-  onUpdateBankInputChange(): void {
-    const value = this.updateForm.bankName || "";
-    this.updateBankSearchTerm = value;
-
-    const term = value.toLowerCase().trim();
-    this.updateFilteredBanks = INDIAN_BANKS.filter((bank) =>
-      bank.toLowerCase().includes(term),
-    );
-
-    this.updateIsCustomBank =
-      value.trim() !== "" &&
-      !INDIAN_BANKS.some((bank) => bank.toLowerCase() === value.toLowerCase());
-  }
-
-  selectUpdateBank(bank: string): void {
-    this.updateForm.bankName = bank;
-    this.updateShowBankDropdown = false;
-    this.updateIsCustomBank = false;
-    // Trigger change detection if needed (Angular handles it with ngModel)
-  }
-
-  selectUpdateCustomBank(): void {
-    const customName = this.updateBankSearchTerm.trim();
-    if (!customName) return;
-
-    this.updateForm.bankName = customName;
-    this.updateIsCustomBank = true;
-    this.updateShowBankDropdown = false;
-  }
-
-  clearUpdateBankSelection(): void {
-    this.updateForm.bankName = "";
-    this.updateFilteredBanks = INDIAN_BANKS;
-    this.updateIsCustomBank = false;
-  }
-
-  // openModalPortalDropdown(event: MouseEvent) {
-  //   event.stopPropagation();
-
-  //   this.showModalPortalDropdown = true;
-
-  //   if (!this.modalPortalSearch) {
-  //     this.modalFilteredPortals = [...this.portals];
-  //   }
-  // }
-
-  openModalPortalDropdown(event: MouseEvent): void {
-    event.stopPropagation();
-    // Only open dropdown if we have portals
-    if (this.portals.length > 0) {
-      this.showModalPortalDropdown = true;
-      this.onModalPortalSearch(); // refresh filtered list
-    }
-  }
-
   @HostListener("document:click", ["$event"])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -1094,12 +735,8 @@ export class BanksComponent implements OnInit, OnDestroy {
       this.showPaymentDropdown = false;
     }
 
-    if (!target.closest(".portal-filter-container")) {
-      this.showPortalDropdown = false;
-    }
-
-    if (!target.closest(".modal-portal-container")) {
-      this.showModalPortalDropdown = false;
+    if (!target.closest(".capacity-popup") && !target.closest("button")) {
+      this.selectedCapacityAccount = null;
     }
   }
 
@@ -1117,41 +754,157 @@ export class BanksComponent implements OnInit, OnDestroy {
     this.showLimitModal = true;
 
     const now = new Date();
+    this.viewYear = now.getFullYear();
+    this.viewMonth = now.getMonth();
+    this.pickerSelectedDay = now.getDate();
+    this.pickerSelectedMonth = now.getMonth();
+    this.pickerSelectedYear = now.getFullYear();
 
-    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    let h = now.getHours();
+    this.pickerAmPm = h >= 12 ? "PM" : "AM";
+    h = h % 12 || 12;
+    this.pickerHour = h;
+    this.pickerMinute = String(now.getMinutes()).padStart(2, "0");
+
+    this.buildCalendar();
+  }
+  buildCalendar(): void {
+    this.calendarCells = [];
+    const today = new Date();
+    const todayMid = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+    const firstDay = new Date(this.viewYear, this.viewMonth, 1).getDay();
+    const daysInMonth = new Date(
+      this.viewYear,
+      this.viewMonth + 1,
+      0,
+    ).getDate();
+    const prevDays = new Date(this.viewYear, this.viewMonth, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+      this.calendarCells.push({
+        day: prevDays - firstDay + 1 + i,
+        date: null,
+        isPast: true,
+        isToday: false,
+        isSelected: false,
+        isOtherMonth: true,
+      });
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cellDate = new Date(this.viewYear, this.viewMonth, d);
+      const isPast = cellDate < todayMid;
+      const isToday = cellDate.getTime() === todayMid.getTime();
+      const isSelected =
+        d === this.pickerSelectedDay &&
+        this.viewMonth === this.pickerSelectedMonth &&
+        this.viewYear === this.pickerSelectedYear;
+      this.calendarCells.push({
+        day: d,
+        date: cellDate,
+        isPast,
+        isToday,
+        isSelected,
+        isOtherMonth: false,
+      });
+    }
+    const remaining = 42 - this.calendarCells.length;
+    for (let d = 1; d <= remaining; d++) {
+      this.calendarCells.push({
+        day: d,
+        date: null,
+        isPast: true,
+        isToday: false,
+        isSelected: false,
+        isOtherMonth: true,
+      });
+    }
+  }
+
+  selectCalendarDay(cell: any): void {
+    if (!cell.date || cell.isPast || cell.isOtherMonth) return;
+    this.pickerSelectedDay = cell.day;
+    this.pickerSelectedMonth = this.viewMonth;
+    this.pickerSelectedYear = this.viewYear;
+    this.buildCalendar();
+  }
+
+  prevMonth(): void {
+    if (this.isCurrentMonthView()) return;
+    if (--this.viewMonth < 0) {
+      this.viewMonth = 11;
+      this.viewYear--;
+    }
+    this.buildCalendar();
+  }
+
+  nextMonth(): void {
+    if (++this.viewMonth > 11) {
+      this.viewMonth = 0;
+      this.viewYear++;
+    }
+    this.buildCalendar();
+  }
+
+  isCurrentMonthView(): boolean {
+    const now = new Date();
+    return (
+      this.viewMonth === now.getMonth() && this.viewYear === now.getFullYear()
+    );
+  }
+
+  clampPickerHour(): void {
+    let h = Number(this.pickerHour);
+    if (isNaN(h) || h < 1) h = 1;
+    if (h > 12) h = 12;
+    this.pickerHour = h;
+  }
+
+  clampPickerMinute(): void {
+    let m = Number(this.pickerMinute);
+    if (isNaN(m) || m < 0) m = 0;
+    if (m > 59) m = 59;
+    this.pickerMinute = String(m).padStart(2, "0");
+  }
+  submitLimitTime() {
+    // Build limitDateTime from picker state
+    let hour = this.pickerHour;
+    if (this.pickerAmPm === "PM" && hour !== 12) hour += 12;
+    if (this.pickerAmPm === "AM" && hour === 12) hour = 0;
+
+    const selected = new Date(
+      this.pickerSelectedYear,
+      this.pickerSelectedMonth,
+      this.pickerSelectedDay,
+      hour,
+      Number(this.pickerMinute),
+      0,
+    );
+    this.limitDateTime = new Date(
+      selected.getTime() - selected.getTimezoneOffset() * 60000,
+    )
       .toISOString()
       .slice(0, 16);
 
-    this.limitDateTime = local;
-    this.minLimitDateTime = local;
-  }
-
-  submitLimitTime() {
+    // baaki sab same rehta hai
     if (!this.limitDateTime || !this.editingAccount) return;
-
     const selectedTime = new Date(this.limitDateTime).getTime();
     const nowTime = new Date().getTime();
-
     if (selectedTime < nowTime) {
       this.snack.show("Please select a future date and time", false);
       return;
     }
-
     this.isSubmittingLimit = true;
-
-    const payload = {
-      dateTime: this.limitDateTime,
-    };
-
+    const payload = { dateTime: this.limitDateTime };
     const id = this.editingAccount.id;
-
     this.bankService.setLimitTime(id, payload).subscribe({
       next: (res) => {
         this.snack.show("Limit time set successfully", true);
         this.closeLimitModal();
         this.isSubmittingLimit = false;
-
-        //  reload table/grid data
         this.fetchBankAccounts();
       },
       error: (err) => {
@@ -1428,17 +1181,6 @@ export class BanksComponent implements OnInit, OnDestroy {
   addUpiForm!: FormGroup;
   selectedBank: any = null;
 
-  // initAddUpiForm() {
-  //   this.addUpiForm = this.fb.group({
-  //     vpa: ["", [Validators.required]],
-  //     limitAmount: ["", Validators.required],
-  //     min_tran_count: [null],
-  //     max_tran_count: [null],
-  //     min_total_tran_amount: [null],
-  //     max_total_tran_amount: [null],
-  //   });
-  // }
-
   initAddUpiForm() {
     this.addUpiForm = this.fb.group({
       vpa: [
@@ -1451,11 +1193,6 @@ export class BanksComponent implements OnInit, OnDestroy {
       bankId: [""],
 
       limitAmount: ["", [Validators.required, Validators.min(1)]],
-
-      min_tran_count: [null],
-      // max_tran_count: [null],
-      min_total_tran_amount: [null],
-      // max_total_tran_amount: [null],
     });
   }
 
@@ -1516,13 +1253,6 @@ export class BanksComponent implements OnInit, OnDestroy {
 
       //  ONLY ADD THIS EXTRA FIELD
       bankId: this.selectedBank?.id,
-
-      // minTranCount: Number(this.addUpiForm.value.min_tran_count) || 0,
-      // maxTranCount: Number(this.addUpiForm.value.max_tran_count) || 0,
-      // minTotalTranAmount:
-      //   Number(this.addUpiForm.value.min_total_tran_amount) || 0,
-      // maxTotalTranAmount:
-      //   Number(this.addUpiForm.value.max_total_tran_amount) || 0,
 
       createdAt: new Date().toISOString(),
 
@@ -1711,31 +1441,6 @@ export class BanksComponent implements OnInit, OnDestroy {
     this.showCurrencyModal = false;
   }
 
-  onToggleStatus(account: any, event: any) {
-    const newStatus = event.target.checked;
-    const bankID = account.id;
-
-    this.bankService.toggleIsBank(bankID).subscribe({
-      next: (res) => {
-        // update instantly
-        account.isBankActive = newStatus;
-
-        account.status = newStatus ? "active" : "inactive";
-
-        this.snack.show(res.message || "Status updated", true);
-      },
-
-      error: () => {
-        // revert toggle
-        event.target.checked = !newStatus;
-
-        account.isBankActive = !newStatus;
-
-        this.snack.show("Failed to update status", false);
-      },
-    });
-  }
-
   // parent.component.ts
 
   openBankDetails(account: BankAccount): void {
@@ -1750,4 +1455,140 @@ export class BanksComponent implements OnInit, OnDestroy {
   refreshBankAccounts = () => {
     this.fetchBankAccounts();
   };
+  copyText(value: string, message: string): void {
+    if (!value) return;
+
+    navigator.clipboard.writeText(value);
+
+    this.snack.show(message, true);
+  }
+
+  toggleCapacityPopup(accountId: any) {
+    this.activeCapacityPopup =
+      this.activeCapacityPopup === accountId ? null : accountId;
+  }
+
+  openCapacityPreview(account: any, event: MouseEvent) {
+    console.log("ACCOUNT =>", account);
+    console.log("RANGES =>", account?.ranges);
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+
+    this.selectedCapacityAccount = account;
+
+    const popupWidth = 280;
+
+    // Approx dynamic height
+    const rows = account?.ranges?.length || 0;
+    const popupHeight = Math.max(120, rows * 56 + 70);
+
+    // Center align with clicked icon/button
+    let left = rect.left + rect.width / 2 - popupWidth / 2;
+    let top = rect.bottom + 8;
+
+    // If bottom overflow -> show above
+    if (top + popupHeight > window.innerHeight) {
+      top = rect.top - popupHeight - 8;
+    }
+
+    // If still going outside top
+    if (top < 10) {
+      top = 10;
+    }
+
+    // Horizontal boundaries
+    if (left < 10) {
+      left = 10;
+    }
+
+    if (left + popupWidth > window.innerWidth - 10) {
+      left = window.innerWidth - popupWidth - 10;
+    }
+
+    this.capacityPopupTop = top;
+    this.capacityPopupLeft = left;
+  }
+  closeCapacityPopup() {
+    this.selectedCapacityAccount = null;
+  }
+
+  openStatusModal(account: any, event: any): void {
+    event.preventDefault();
+
+    this.selectedAccount = account;
+    this.pendingToggleValue = event.target.checked;
+    this.toggleEvent = event;
+
+    // reset checkbox every time modal opens
+    this.confirmStatusChecked = false;
+
+    this.showStatusModal = true;
+  }
+
+  closeStatusModal(): void {
+    if (this.toggleEvent) {
+      this.toggleEvent.target.checked = !this.pendingToggleValue;
+    }
+
+    this.confirmStatusChecked = false;
+    this.showStatusModal = false;
+    this.selectedAccount = null;
+    this.toggleEvent = null;
+  }
+
+  confirmStatusChange(): void {
+    if (!this.selectedAccount) return;
+    if (!this.confirmStatusChecked) {
+      this.snack.show(
+        "Please confirm by checking the checkbox before proceeding",
+        false,
+      );
+      return;
+    }
+
+    this.onToggleStatus(this.selectedAccount, this.toggleEvent);
+
+    this.showStatusModal = false;
+    this.fetchBankAccounts();
+  }
+
+  onToggleStatus(account: any, event: any) {
+    const newStatus = event.target.checked;
+    const bankID = account.id;
+
+    this.bankService.toggleIsBank(bankID).subscribe({
+      next: (res) => {
+        // update instantly
+        account.isBankActive = newStatus;
+
+        account.status = newStatus ? "active" : "inactive";
+
+        this.snack.show(res.message || "Status updated", true);
+      },
+
+      error: (err) => {
+        // revert toggle
+        event.target.checked = !newStatus;
+
+        account.isBankActive = !newStatus;
+
+        this.snack.show(err.error?.message || "Failed to update status", false);
+      },
+    });
+  }
+
+  openAddBankModal() {
+    this.showInventoryModal = true;
+  }
+
+  closeInventoryModal() {
+    this.showInventoryModal = false;
+  }
+  applyFilters(): void {
+    this.searchTerm = this.draftSearchTerm;
+    this.maxLimit = this.draftMaxLimit;
+    this.statusFilter = this.draftStatusFilter;
+
+    this.currentPage = 1;
+    this.fetchBankAccounts();
+  }
 }

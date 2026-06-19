@@ -60,6 +60,7 @@ export class HeadBranchDashboardComponent
   totalpayins = 0;
   totalpayouts = 0;
   activeAccounts = 0;
+  showPendingThreads = false;
 
   // NEW: UI state flags for toggling payin/payout monitoring
   payinActive = true;
@@ -67,7 +68,13 @@ export class HeadBranchDashboardComponent
   mobilePage = 1;
   mobilePageSize = 1000;
   mobilePageSizes = [1000];
-
+  // Add these cached arrays
+  cachedMobileTransactions: any[] = [];
+  cachedPendingBank: any[] = [];
+  cachedPendingPayouts: any[] = [];
+  cachedPendingUpi: any[] = [];
+  cachedApprovedPayins: any[] = [];
+  cachedApprovedPayouts: any[] = [];
   // Original mixed lists (kept for compatibility if needed)
   pendingTransactions: any[] = [];
   approvedTransactions: any[] = [];
@@ -213,11 +220,11 @@ export class HeadBranchDashboardComponent
         this.processIncomingEvent(data);
       });
 
-    this.fundService
-      .broadcast(this.headId, this.role)
-      .subscribe((data: any) => {
-        this.processIncomingEvent(data);
-      });
+    // this.fundService
+    //   .broadcast(this.headId, this.role)
+    //   .subscribe((data: any) => {
+    //     this.processIncomingEvent(data);
+    //   });
 
     this.resetAllLists();
     // this.refreshAllFunds(this.headId);
@@ -252,18 +259,6 @@ export class HeadBranchDashboardComponent
     }
   }
 
-  // changePayinStatus() {
-  //   if (this.role === "HEAD") {
-  //     this.headService.toggleDashbaordPayin(this.headId).subscribe(() => {
-  //       this.payinStatus = !this.payinStatus;
-  //     },
-  //   );
-  //   } else if (this.role === "BRANCH") {
-  //     this.branchService.toggleDashbaordPayin(this.headId).subscribe(() => {
-  //       this.payinStatus = !this.payinStatus;
-  //     });
-  //   }
-  // }
   changePayinStatus() {
     if (this.role === "HEAD") {
       this.headService.toggleDashbaordPayin(this.headId).subscribe(
@@ -372,6 +367,7 @@ export class HeadBranchDashboardComponent
       },
       (err) => {},
     );
+    this.refreshCachedLists();
   }
 
   private mapFundsArray(
@@ -1528,7 +1524,7 @@ export class HeadBranchDashboardComponent
           formData.append("file", this.selectedFile, this.selectedFile.name);
         }
 
-        console.log("SELECTED FILE =>", this.selectedFile);
+
 
         await lastValueFrom(this.fundService.acceptPayout(fundId, formData));
       }
@@ -1622,6 +1618,7 @@ export class HeadBranchDashboardComponent
       this.selectedFile = null;
 
       this.resetRejectReason();
+      this.refreshCachedLists();
     }
   }
 
@@ -1918,27 +1915,12 @@ export class HeadBranchDashboardComponent
     } finally {
       // Ensure file input reset etc.
       this.resetForm();
+      this.refreshCachedLists();
     }
   }
 
   openApproveConfirm(transaction: any) {
     const portalId = transaction.raw.portalId;
-
-    if (this.banks == null) {
-      this.bankService
-        .getBankDataWithEntityIdAndPortalId(this.headId, portalId)
-        .subscribe((res) => {
-          this.banks = res;
-        });
-    }
-
-    if (this.upis == null) {
-      this.upiService
-        .getAllByEntityIdAndPortalId(this.headId, portalId)
-        .subscribe((res: any) => {
-          this.upis = res;
-        });
-    }
 
     if (!transaction) return;
     const t = this.normalizeTransaction(transaction) || transaction;
@@ -2185,6 +2167,52 @@ export class HeadBranchDashboardComponent
     }
   }
 
+  openTransaction(transaction: any) {
+    this.selectedTransaction = transaction;
+
+    // Screenshot Load
+    if (
+      transaction.filePath &&
+      !transaction.fileUrl &&
+      !transaction.imageLoading
+    ) {
+      transaction.imageLoading = true;
+
+      this.multimediaService.getPrivateImage(transaction.filePath).subscribe({
+        next: (url) => {
+          transaction.fileUrl = url;
+          transaction.imageLoading = false;
+        },
+        error: () => {
+          transaction.imageLoading = false;
+          transaction.fileUrl = "";
+        },
+      });
+    }
+
+    // Rejection Screenshot Load
+    if (
+      transaction.rejectionPath &&
+      !transaction.rejectionUrl &&
+      !transaction.rejectionLoading
+    ) {
+      transaction.rejectionLoading = true;
+
+      this.multimediaService
+        .getPrivateImage(transaction.rejectionPath)
+        .subscribe({
+          next: (url) => {
+            transaction.rejectionUrl = url;
+            transaction.rejectionLoading = false;
+          },
+          error: () => {
+            transaction.rejectionLoading = false;
+            transaction.rejectionUrl = "";
+          },
+        });
+    }
+  }
+
   // Process incoming SSE/broadcast event and update local pending lists
   private normalizeIncomingFund(
     fund: any,
@@ -2206,7 +2234,6 @@ export class HeadBranchDashboardComponent
 
     const filePathRaw = fund.filePath || fund.snapshot || fund.qrImage || null;
 
-    // ✅ SAFE DATE FIX
     let parsedDate: Date;
 
     if (fund.createdAt) {
@@ -2219,12 +2246,11 @@ export class HeadBranchDashboardComponent
       parsedDate = new Date();
     }
 
-    // ✅ INVALID DATE FIX
     if (isNaN(parsedDate.getTime())) {
       parsedDate = new Date();
     }
 
-    const tx = {
+    return {
       id: fund.id || fund._id || null,
       fundId: fund.id || fund.fundId || fund._id || null,
 
@@ -2247,13 +2273,13 @@ export class HeadBranchDashboardComponent
       amount: Number(fund.amount) || 0,
       currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,
 
-      // ✅ FIXED DATE
       date: parsedDate,
 
       utrNumber: fund.transactionId || fund.utr || null,
+
       parentCurrency: fund.parentCurrency,
 
-      mode: mode,
+      mode,
 
       accountNo: fund.accountNo || fund.accountNumber || null,
 
@@ -2261,11 +2287,15 @@ export class HeadBranchDashboardComponent
 
       bankName: fund.bankName || fund.bank || fund.bank_name || null,
 
+      // only path store
       filePath: filePathRaw,
-      fileUrl: "",
+      fileUrl: null,
+      imageLoading: false,
 
       rejectionPath: fund.rejectionFilePath || null,
-      rejectionUrl: "",
+
+      rejectionUrl: null,
+      rejectionLoading: false,
 
       remarks: fund.remarks || fund.message || null,
 
@@ -2279,39 +2309,12 @@ export class HeadBranchDashboardComponent
 
       holderName: fund.bankAccountHolderName || null,
 
-      ifscCode:
-        fund.ifscCode || fund.ifsc || (fund.raw && fund.raw.ifsc) || null,
+      ifscCode: fund.ifscCode || fund.ifsc || fund.raw?.ifsc || null,
 
       fundDisplayId: fund.displayId,
 
-      ftt: fund.firstPayin ? true : false,
+      ftt: !!fund.firstPayin,
     };
-
-    // IMAGE
-    if (tx.filePath) {
-      this.multimediaService.getPrivateImage(tx.filePath).subscribe({
-        next: (url) => {
-          tx.fileUrl = url;
-        },
-        error: () => {
-          tx.fileUrl = "";
-        },
-      });
-    }
-
-    // REJECTION IMAGE
-    if (tx.rejectionPath) {
-      this.multimediaService.getPrivateImage(tx.rejectionPath).subscribe({
-        next: (url) => {
-          tx.rejectionUrl = url;
-        },
-        error: () => {
-          tx.rejectionUrl = "";
-        },
-      });
-    }
-
-    return tx;
   }
 
   private normalizeTransaction(tx: any) {
@@ -2326,7 +2329,7 @@ export class HeadBranchDashboardComponent
   private processIncomingEvent(data: any) {
     if (!data) return;
 
-    console.log("Processing incoming SSE event with data:", data);
+
     // =========================
     // Preserve old dynamic config if websocket sends partial data
     // =========================
@@ -2342,7 +2345,7 @@ export class HeadBranchDashboardComponent
     const dynamicPayout = this.latestDynamicPayout;
 
     const now = Date.now();
-    console.log("Received SSE event, processing pending lists with dynamic co");
+
 
     // =====================================================
     // BANK
@@ -2408,6 +2411,7 @@ export class HeadBranchDashboardComponent
           timePassed: slab?.diffMinutes ?? 0,
         };
       }).filter(Boolean);
+      this.refreshCachedLists();
     }
 
     // =====================================================
@@ -2878,6 +2882,17 @@ export class HeadBranchDashboardComponent
     // PAYOUT
     // =========================
     this.pendingpayouts = this.pendingpayouts.map((tx: any) => {
+      // ✅ Auto reset processing when timer expires
+      if (tx?.processing) {
+        const deadline = this.parseProcessingDeadline(tx);
+
+        if (!deadline || deadline.getTime() <= now) {
+          tx.processing = false;
+          tx.processingStartedAt = null;
+          tx.processingDeadline = null;
+        }
+      }
+
       if (!tx?.date && !tx?.createdAt && !tx?.dateTime) {
         return tx;
       }
@@ -2895,6 +2910,9 @@ export class HeadBranchDashboardComponent
         timePassed: slab?.diffMinutes ?? tx?.timePassed ?? 0,
       };
     });
+
+    // ✅ Stop timer if no transaction is processing
+    this.ensureProcessingTimerState();
   }
 
   getMinutesDiff(date: any): number {
@@ -2922,5 +2940,25 @@ export class HeadBranchDashboardComponent
     if (fileInput) {
       fileInput.value = "";
     }
+  }
+
+  formatUtrNumber(utr: string | null | undefined): string {
+    if (!utr) return "";
+
+    const firstPart = utr.slice(0, 15);
+    const secondPart = utr.slice(15);
+
+    return secondPart ? `${firstPart}\n${secondPart}` : firstPart;
+  }
+  private refreshCachedLists(): void {
+    this.cachedMobileTransactions = this.getPagedMobileTransactions();
+    this.cachedPendingBank = this.pagedPendingBank();
+    this.cachedPendingPayouts = this.pagedPendingpayouts();
+    this.cachedPendingUpi = this.pagedPendingUpi();
+    this.cachedApprovedPayins = this.pagedApprovedpayins();
+    this.cachedApprovedPayouts = this.pagedApprovedpayouts();
+  }
+  trackById(index: number, item: any): any {
+    return item?.id || item?.fundId || index;
   }
 }

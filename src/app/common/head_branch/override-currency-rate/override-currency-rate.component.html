@@ -1,91 +1,244 @@
-<div class="p-4 bg-[var(--color-bg)] ">
-
-  <div class="mb-4 text-sm text-[var(--color-font)]">
-    <span class="font-semibold">Custom Rate Enabled:</span>
-    <span [ngClass]="customRate ? 'text-green-600' : 'text-red-500'">
-      {{ customRate ? 'Yes' : 'No' }}
+<div class="p-5 flex flex-col gap-4">
+  <!-- Summary Bar -->
+  <div
+    class="flex items-center gap-3 px-4 py-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]"
+  >
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-[var(--color-muted)] text-lg"
+        >currency_exchange</span
+      >
+      <span
+        class="text-[11px] font-semibold text-[var(--color-muted)] uppercase tracking-widest"
+        >Currency Override</span
+      >
+    </div>
+    <div class="h-4 w-px bg-[var(--color-border)] mx-1"></div>
+    <span
+      class="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-full"
+      [ngClass]="
+        canEdit
+          ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+          : 'bg-red-50 text-red-600 ring-1 ring-red-200'
+      "
+    >
+      <span class="material-symbols-outlined text-sm">
+        {{ canEdit ? "verified" : "lock" }}
+      </span>
+      {{ canEdit ? "Edit enabled" : "Edit disabled" }}
+    </span>
+    <span class="ml-auto text-[11px] text-[var(--color-muted)]">
+      {{ currencies.length }}
+      {{ currencies.length === 1 ? "currency" : "currencies" }}
     </span>
   </div>
 
-  <div *ngIf="currencies.length > 0; else noData" class="space-y-3">
+  <!-- No Access Banner -->
+  <div
+    *ngIf="!canEdit && currencies.length > 0"
+    class="flex items-start gap-3 px-4 py-3 rounded-2xl bg-red-50 border border-red-100"
+  >
+    <span
+      class="material-symbols-outlined text-red-400 flex-shrink-0 text-lg mt-px"
+      >info</span
+    >
+    <div class="flex flex-col gap-0.5">
+      <span class="text-xs font-semibold text-red-700">Access restricted</span>
+      <span class="text-[11px] text-red-500 leading-relaxed">
+        Currency rate editing is disabled for this entity. Contact your
+        administrator to enable override access.
+      </span>
+    </div>
+  </div>
 
-    <div *ngFor="let currency of currencies"
-         class="border border-[var(--color-border)] rounded-xl p-4 bg-[var(--color-surface)] shadow-sm">
-
-      <div class="flex flex-col gap-3">
-
-        <!-- Header -->
-        <div class="flex justify-between items-center">
-          <div>
-            <div class="font-semibold text-lg text-[var(--color-font)]">
-              {{ currency.currency }}
-            </div>
-
-            <div class="text-sm text-[var(--color-muted)]">
-              Chief Rate: {{ currency.rate }}
-            </div>
+  <!-- Currency List -->
+  <div *ngIf="currencies.length > 0; else noData" class="flex flex-col gap-3">
+    <div
+      *ngFor="let currency of currencies"
+      class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden transition-all duration-200"
+      [class.opacity-40]="!canEdit"
+      [class.pointer-events-none]="!canEdit"
+    >
+      <!-- Card Header -->
+      <div class="flex items-center justify-between px-4 pt-4 pb-3">
+        <div class="flex items-center gap-3">
+          <!-- Currency Avatar -->
+          <div
+            class="w-10 h-10 rounded-xl flex items-center justify-center text-[11px] font-black tracking-widest shrink-0 uppercase"
+            [ngClass]="
+              canEdit ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-400'
+            "
+          >
+            {{ currency.currency?.slice(0, 3) }}
           </div>
 
-          <button
-            *ngIf="customRate"
-            (click)="startEdit(currency)"
-            class="text-blue-600 hover:text-blue-800 text-sm font-medium"
-          >
-            Edit
-          </button>
+          <div class="flex flex-col gap-0.5">
+            <div
+              class="flex items-center gap-1.5 text-sm font-semibold text-[var(--color-font)]"
+            >
+              {{ currency.currency }}
+              <span
+                *ngIf="!canEdit"
+                class="material-symbols-outlined text-red-400 text-sm"
+                >lock</span
+              >
+            </div>
+            <div class="text-[11px] text-[var(--color-muted)]">
+              Chief rate:
+              <span class="font-semibold text-[var(--color-font)]">{{
+                currency.rate
+              }}</span>
+            </div>
+          </div>
         </div>
 
-        <!-- Override Rate -->
-        <div class="grid grid-cols-1 gap-2">
-          <label class="text-sm font-medium text-[var(--color-font)]">
-            Override Rate
-          </label>
+        <!-- Right side: edit btn or editing pill -->
+        <button
+          *ngIf="canEdit && !currency.isEditing"
+          type="button"
+          (click)="startEdit(currency)"
+          class="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-xl border border-[var(--color-border)] text-[var(--color-font)] hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-all duration-150"
+        >
+          <span class="material-symbols-outlined text-sm">edit</span>
+          Edit rate
+        </button>
 
-          <input
-            type="number"
-            [(ngModel)]="currency.overrideRate"
-            [disabled]="!currency.isEditing"
-            class="border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg px-3 py-2"
-            placeholder="Enter override rate"
-          />
+        <span
+          *ngIf="currency.isEditing"
+          class="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-xl bg-blue-50 text-blue-600 ring-1 ring-blue-200"
+        >
+          <span
+            class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shrink-0"
+          ></span>
+          Editing
+        </span>
+      </div>
+
+      <!-- Thin accent line when editing -->
+      <div
+        class="h-0.5 transition-all duration-300"
+        [ngClass]="
+          currency.isEditing ? 'bg-blue-400' : 'bg-[var(--color-border)]'
+        "
+      ></div>
+
+      <!-- Fields Grid -->
+      <div class="grid grid-cols-2 gap-3 px-4 py-4">
+        <!-- Override Rate -->
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]"
+          >
+            Override rate
+          </label>
+          <div
+            class="flex items-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-150"
+            [ngClass]="
+              currency.isEditing
+                ? 'border-blue-400 ring-2 ring-blue-100 bg-white'
+                : 'border-[var(--color-border)] bg-[var(--color-bg)]'
+            "
+          >
+            <span
+              class="material-symbols-outlined text-[var(--color-muted)] text-base shrink-0"
+            >
+              {{ currency.isEditing ? "edit_note" : "equal" }}
+            </span>
+            <input
+              type="number"
+              [(ngModel)]="currency.overrideRate"
+              [disabled]="!currency.isEditing"
+              placeholder="0.00"
+              class="flex-1 min-w-0 bg-transparent text-sm text-[var(--color-font)] outline-none placeholder:text-[var(--color-muted)] disabled:opacity-40 disabled:cursor-not-allowed"
+            />
+          </div>
         </div>
 
         <!-- Effective From -->
-        <div class="grid grid-cols-1 gap-2">
-          <label class="text-sm font-medium text-[var(--color-font)]">
-            Effective From
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]"
+          >
+            Effective from
           </label>
-
-          <input
-            type="datetime-local"
-            [(ngModel)]="currency.effectiveFrom"
-            [disabled]="!currency.isEditing"
-            class="border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg px-3 py-2"
-          />
+          <div
+            class="flex items-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-150"
+            [ngClass]="
+              currency.isEditing
+                ? 'border-blue-400 ring-2 ring-blue-100 bg-white'
+                : 'border-[var(--color-border)] bg-[var(--color-bg)]'
+            "
+          >
+            <span
+              class="material-symbols-outlined text-[var(--color-muted)] text-base shrink-0"
+              >calendar_clock</span
+            >
+            <input
+              type="datetime-local"
+              [(ngModel)]="currency.effectiveFrom"
+              [disabled]="!currency.isEditing"
+              class="flex-1 min-w-0 bg-transparent text-sm text-[var(--color-font)] outline-none disabled:opacity-40 disabled:cursor-not-allowed"
+            />
+          </div>
         </div>
+      </div>
 
-        <!-- Save Button -->
-        <button
-          *ngIf="currency.isEditing"
-          type="button"
-          (click)="createCustomCurrency(currency); currency.isEditing = false"
-          class="px-4 py-2 rounded-lg text-white bg-[var(--color-primary)]"
+      <!-- Save / Cancel Footer -->
+      <div
+        *ngIf="currency.isEditing"
+        class="flex justify-between items-center gap-2 px-4 py-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
+      >
+        <span
+          class="text-[11px] text-[var(--color-muted)] flex items-center gap-1"
         >
-          Save
-        </button>
+          <span class="material-symbols-outlined text-sm">info</span>
+          Changes apply immediately on save
+        </span>
 
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            (click)="cancelEdit(currency)"
+            class="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-xl border border-[var(--color-border)] text-[var(--color-muted)] hover:bg-[var(--color-surface)] transition-all duration-150"
+          >
+            <span class="material-symbols-outlined text-sm">close</span>
+            Cancel
+          </button>
+          <button
+            type="button"
+            (click)="createCustomCurrency(currency)"
+            class="inline-flex items-center gap-1.5 text-[11px] font-semibold px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white transition-all duration-150"
+          >
+            <span class="material-symbols-outlined text-sm">check</span>
+            Save changes
+          </button>
+        </div>
       </div>
     </div>
-
   </div>
 
+  <!-- Empty State -->
   <ng-template #noData>
-    <div class="text-[var(--color-muted)] text-center">
-      No currencies found
+    <div
+      class="flex flex-col items-center justify-center py-16 gap-4 text-center"
+    >
+      <div
+        class="w-16 h-16 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center"
+      >
+        <span
+          class="material-symbols-outlined text-[var(--color-muted)] text-4xl opacity-40"
+          >currency_exchange</span
+        >
+      </div>
+      <div class="flex flex-col gap-1">
+        <p class="text-sm font-semibold text-[var(--color-font)]">
+          No currencies found
+        </p>
+        <p
+          class="text-[11px] text-[var(--color-muted)] max-w-[180px] leading-relaxed"
+        >
+          No currency data is available for this entity.
+        </p>
+      </div>
     </div>
   </ng-template>
-
 </div>
-
-
-

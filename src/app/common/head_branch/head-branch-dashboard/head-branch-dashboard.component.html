@@ -1,28 +1,28 @@
 <div id="webcrumbs">
-  <div class="bg-[var(--color-bg)] min-h-screen p-4 md:p-3 lg:p-6">
+  <div class="bg-[var(--color-bg)] min-h-screen p-2 md:p-2 lg:p-3">
     <!-- Header -->
     <div
-      class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 md:mb-8 gap-4"
+      class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-3 gap-4"
     >
       <div class="flex justify-between items-start w-full mb-6">
         <!-- LEFT SIDE (unchanged) -->
         <div class="flex-1">
           <h1
-            class="text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--color-font)] tracking-tight"
+            class="text-lg md:text-2xl lg:text-3xl font-bold text-[var(--color-font)] tracking-tight"
           >
             Financial Dashboard
           </h1>
 
-          <p class="text-[var(--color-muted)] mt-2 text-sm md:text-base">
+          <p class="text-[var(--color-muted)] mt-1 text-[11px] md:text-sm">
             Monitor payins, payouts and transaction analytics in real-time
           </p>
         </div>
 
         <!-- RIGHT SIDE (force to extreme end) -->
-        <div class="ml-4 flex items-center gap-3">
+        <div class="ml-4 flex items-center gap-2">
           <!-- Toggle -->
           <div class="flex items-center gap-2">
-            <span class="text-xs font-medium text-gray-600"> Payin </span>
+            <span class="text-[11px] font-medium text-gray-600"> Payin </span>
 
             <button
               (click)="changePayinStatus()"
@@ -36,7 +36,7 @@
             </button>
 
             <span
-              class="text-xs font-semibold"
+              class="text-[11px] font-semibold"
               [ngClass]="payinStatus ? 'text-green-600' : 'text-gray-500'"
             >
               {{ payinStatus ? "ON" : "OFF" }}
@@ -47,296 +47,85 @@
           <!-- <app-reload (reload)="reloadDashboard()"></app-reload> -->
         </div>
       </div>
-      <div class="flex items-center gap-3"></div>
+      <div class="flex items-center gap-2"></div>
     </div>
 
     <!-- Quick Stats -->
 
     <!-- MAIN GRID: Pending UPI, Pending Bank, Pending payouts -->
-    <div
-      class="hidden lg:grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6 mb-6 md:mb-8"
-    >
-      <!-- Pending Actions (UPI payins) -->
-      <!-- <div class="lg:col-span-1 space-y-6">
+    <!-- MAIN GRID: Pending PayIns + Pending Payouts -->
+    <div class="hidden lg:flex gap-2.5 mb-4 md:mb-5 items-start">
+      <!-- ───────────── PENDING PAYINS ───────────── -->
+      <div class="w-[300px] flex-shrink-0">
         <div
-          class="bg-[var(--color-surface)] rounded-2xl overflow-hidden shadow-[var(--shadow-md)] border border-[var(--color-border)]"
+          class="bg-[var(--color-surface)] rounded-lg overflow-hidden shadow-sm border border-[var(--color-border)]"
         >
+          <!-- Header -->
           <div
-            class="bg-[var(--color-primary-light)]/20 p-5 border-b border-[var(--color-border)]"
+            class="bg-[var(--color-secondary)]/20 p-2.5 border-b border-[var(--color-border)]"
           >
-            <div class="flex justify-between items-start mb-3">
-              <div>
-                <h3
-                  class="font-bold text-[var(--color-font)] text-lg flex items-center"
-                >
-                  Pending UPI Payins
-                  <span
-                    class="ml-2 text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--color-primary-light)]/20 text-[var(--color-primary)] border border-[var(--color-primary-light)]"
-                  >
-                    {{ filteredPendingUpi().length }}
-                  </span>
-                </h3>
-                <p class="text-sm text-[var(--color-muted)] mt-1">
-                  Awaiting approval for UPI transactions
-                </p>
-              </div>
-            </div>
+            <h3
+              class="font-bold text-[var(--color-font)] text-sm flex items-center"
+            >
+              Pay In
+              <span
+                class="ml-2 text-[11px] font-bold px-2.5 py-1 rounded-full bg-[var(--color-info)]/20 text-[var(--color-secondary)] border border-[var(--color-info)]/50"
+              >
+                {{ filteredPendingBank().length }}
+              </span>
+            </h3>
+            <p class="text-[11px] text-[var(--color-muted)] mt-1">
+              Awaiting approval for bank transfers
+            </p>
           </div>
 
-          <div
-            class="overflow-y-auto h-[480px] md:h-[600px] scrollbar-thin scrollbar-thumb-[var(--color-muted)]/30 scrollbar-track-[var(--color-bg)]"
-          >
-            <div class="divide-y divide-[var(--color-border)]/50">
+          <!-- Scrollable list -->
+          <div class="overflow-y-auto h-[600px] scrollbar-hide px-2">
+            <div class="grid gap-2 py-1.5">
+              <!-- CARD -->
               <div
-                *ngFor="let transaction of pagedPendingUpi()"
-                class="p-4 hover:bg-[var(--color-hover)] transition relative group"
-              >
-                <div
-                  class="absolute left-0 top-0 w-1 h-full transition-all group-hover:w-1.5 bg-[var(--color-primary-light)]"
-                ></div>
-
-                <div class="flex items-start gap-3 pl-2">
-                  <div
-                    class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-[var(--color-primary-light)]/20"
-                  >
-                    <span
-                      class="material-symbols-outlined text-xl text-[var(--color-primary)]"
-                    >
-                      account_balance_wallet
-                    </span>
-                  </div>
-
-                  <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-start gap-2">
-                      <div class="flex-1 min-w-0">
-                        <p
-                          class="text-sm font-bold text-[var(--color-font)] truncate"
-                        >
-                          {{ transaction.fundDisplayId }}
-                        </p>
-                        <p
-                          class="text-xs text-[var(--color-muted)] truncate mt-0.5"
-                          [title]="transaction.currencyRate"
-                        >
-                          {{ transaction.portal }} - {{ transaction.currency }}
-                        </p>
-                        <p
-                          class="text-xs text-[var(--color-muted)] truncate mt-0.5"
-                        >
-                          {{
-                            transaction.upiId || transaction.holderName || "—"
-                          }}
-                        </p>
-                      </div>
-
-                      <span
-                        class="text-base font-bold whitespace-nowrap text-[var(--color-primary)]"
-                        [title]="transaction.currencyWiseAmount"
-                      >
-                        {{ transaction.amount }}
-                      </span>
-                    </div>
-
-                    <div
-                      class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]"
-                    >
-                      <span class="font-semibold text-red-600">
-                        {{ getTimeAgo(transaction.date) }}
-                      </span>
-
-                      <span
-                        class="w-1 h-1 rounded-full bg-[var(--color-border)]"
-                      ></span>
-                      <span
-                        class="px-2 py-0.5 rounded-md font-medium bg-[var(--color-info)]/20 text-[var(--color-secondary)]"
-                        title="First Payin"
-                      >
-                        {{ transaction.ftt ? "RPI" : "PPI" }}
-                      </span>
-
-                      <div class="flex gap-1.5">
-                        <button
-                          (click)="viewTransactionDetails(transaction)"
-                          class="p-1.5 rounded-lg hover:bg-[var(--color-border)] transition"
-                          title="View Details"
-                        >
-                          <span
-                            class="material-symbols-outlined text-[var(--color-muted)] text-lg"
-                            >visibility</span
-                          >
-                        </button>
-                        <button
-                          (click)="openApproveConfirm(transaction)"
-                          class="p-1.5 rounded-lg hover:bg-[var(--color-success)]/20 transition"
-                          title="Approve"
-                        >
-                          <span
-                            class="material-symbols-outlined text-[var(--color-success)] text-lg"
-                            >check_circle</span
-                          >
-                        </button>
-                        <button
-                          (click)="openRejectConfirm(transaction)"
-                          class="p-1.5 rounded-lg hover:bg-[var(--color-danger)]/20 transition"
-                          title="Reject"
-                        >
-                          <span
-                            class="material-symbols-outlined text-[var(--color-danger)] text-lg"
-                            >cancel</span
-                          >
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                *ngIf="filteredPendingUpi().length === 0"
-                class="p-8 text-center"
-              >
-                <div
-                  class="w-16 h-16 mx-auto mb-3 rounded-full bg-[var(--color-bg)] flex items-center justify-center"
-                >
-                  <span
-                    class="material-symbols-outlined text-[var(--color-muted)] text-3xl"
-                    >check_circle</span
-                  >
-                </div>
-                <p class="text-sm text-[var(--color-muted)] font-medium">
-                  No pending UPI payins
-                </p>
-                <p class="text-xs text-[var(--color-muted)]/70 mt-1">
-                  All UPI transactions are up to date
-                </p>
-              </div>
-            </div>
-          </div>
-
-         
-          <div
-            class="p-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
-          >
-            <div class="flex items-center gap-2">
-              <label class="text-xs text-[var(--color-muted)] font-medium"
-                >Show</label
-              >
-
-
-              <select
-                [(ngModel)]="pendingUpiPageSize"
-                (change)="onChangePendingUpiPageSize(pendingUpiPageSize)"
-                class="text-xs border border-[var(--color-border)] rounded-lg px-2 py-1 bg-[var(--color-surface)] focus:ring-2 focus:ring-[var(--color-primary)]"
-              >
-                <option *ngFor="let s of pendingPageSizes" [value]="s">
-                  {{ s }}
-                </option>
-              </select>
-            </div>
-            <div class="flex items-center gap-2">
-             
-
-              <button
-                (click)="setPendingUpiPage(pendingUpiPage - 1)"
-                [disabled]="pendingUpiPage === 1"
-                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Prev
-              </button>
-             
-
-              <span class="text-xs text-[var(--color-muted)] font-medium px-2"
-                >{{ pendingUpiPage }} / {{ pendingUpiTotalPages() }}</span
-              >
-
-            
-
-              <button
-                (click)="setPendingUpiPage(pendingUpiPage + 1)"
-                [disabled]="pendingUpiPage >= pendingUpiTotalPages()"
-                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        </div>
-      </div> -->
-
-      <!-- Pending Actions (Bank payins) -->
-      <div class="lg:col-span-1 space-y-6">
-        <div
-          class="bg-[var(--color-surface)] rounded-2xl overflow-hidden shadow-[var(--shadow-md)] border border-[var(--color-border)]"
-        >
-          <div
-            class="bg-[var(--color-secondary)]/20 p-5 border-b border-[var(--color-border)]"
-          >
-            <div class="flex justify-between items-start mb-3">
-              <div>
-                <h3
-                  class="font-bold text-[var(--color-font)] text-lg flex items-center"
-                >
-                  Pending Payins
-                  <span
-                    class="ml-2 text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--color-info)]/20 text-[var(--color-secondary)] border border-[var(--color-info)]/50"
-                  >
-                    {{ filteredPendingBank().length }}
-                  </span>
-                </h3>
-                <p class="text-sm text-[var(--color-muted)] mt-1">
-                  Awaiting approval for bank transfers
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- FIXED HEIGHT container with scroll -->
-          <div
-            class="overflow-y-auto h-[480px] md:h-[600px] scrollbar-thin scrollbar-thumb-[var(--color-muted)]/30 scrollbar-track-[var(--color-bg)] px-2"
-          >
-            <div class="grid gap-4 py-2">
-              <div
-                *ngFor="let transaction of pagedPendingBank()"
+                *ngFor="
+                  let transaction of cachedPendingBank;
+                  trackBy: trackById
+                "
                 (click)="viewTransactionDetails(transaction)"
-                class="bg-white dark:bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+                class="bg-white dark:bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
               >
-                <!-- TOP -->
-                <div class="flex items-start justify-between gap-3">
+                <!-- TOP ROW -->
+                <div class="flex items-start justify-between gap-2">
                   <!-- LEFT -->
-                  <div class="flex items-start gap-3 min-w-0">
-                    <!-- ICON -->
+                  <div class="flex items-start gap-2 min-w-0">
+                    <!-- Icon -->
                     <div
-                      class="w-14 h-14 rounded-2xl bg-[var(--color-secondary)]/10 flex items-center justify-center flex-shrink-0"
+                      class="w-9 h-9 rounded-lg bg-[var(--color-secondary)]/10 flex items-center justify-center flex-shrink-0"
                     >
                       <span
-                        class="material-symbols-outlined text-[var(--color-secondary)] text-2xl"
+                        class="material-symbols-outlined text-[var(--color-secondary)] text-[14px]"
                       >
-                        account_balance
+                        {{
+                          transaction.fundtype === "UPI"
+                            ? "qr_code"
+                            : "account_balance"
+                        }}
                       </span>
                     </div>
 
-                    <!-- INFO -->
+                    <!-- Info -->
                     <div class="min-w-0">
-                      <!-- ID -->
                       <p
-                        class="text-[18px] font-bold text-[var(--color-font)] truncate leading-tight"
+                        class="text-[13px] font-bold text-[var(--color-font)] truncate leading-tight"
                       >
                         {{ transaction.fundDisplayId }}
                       </p>
-
-                      <!-- USER -->
                       <p
-                        class="text-sm text-[var(--color-font)]/80 mt-3 font-medium truncate"
+                        class="text-[11px] text-[var(--color-font)]/80 mt-1 font-medium truncate"
                       >
                         {{ transaction.holderName || "Unknown" }}
                       </p>
-
-                      <!-- UPI / ACCOUNT -->
                       <p
-                        class="text-sm text-[var(--color-muted)] mt-0.5 truncate"
+                        class="text-[11px] text-[var(--color-muted)] mt-0.5 truncate"
                       >
-                        {{ transaction.fundtype === "UPI" ? "UPI" : "Bank" }}-
-                        {{
+                        {{ transaction.fundtype === "UPI" ? "UPI" : "Bank" }}-{{
                           (transaction.fundtype === "UPI"
                             ? transaction.upiId || transaction.vpa
                             : transaction.accountNo) || "—"
@@ -347,60 +136,68 @@
 
                   <!-- RIGHT -->
                   <div class="text-right flex-shrink-0">
-                    <!-- AMOUNT -->
+                    <!-- Amount -->
                     <div
-                      class="flex items-baseline justify-end gap-2 text-[26px] font-bold text-[var(--color-font)] leading-none"
+                      class="flex items-baseline justify-end gap-1 text-[16px] font-bold text-[var(--color-font)] leading-none"
                     >
-                      <span class="text-[18px] opacity-70 uppercase">
+                      <span class="text-[11px] opacity-70 uppercase">
                         {{ transaction.parentCurrency }}
                       </span>
-
-                      <span class="text-[26px] tabular-nums">
-                        {{ transaction.amount }}
-                      </span>
+                      <span class="tabular-nums">{{ transaction.amount }}</span>
                     </div>
 
                     <!-- UTR -->
                     <p
-                      class="text-sm text-[var(--color-muted)] mt-2 font-medium truncate"
+                      class="text-[11px] text-[var(--color-muted)] font-medium whitespace-pre-line"
                     >
-                      {{ transaction.utrNumber }}
+                      {{ formatUtrNumber(transaction.utrNumber) }}
                     </p>
 
-                    <!-- TIME -->
-                    <p class="text-xs text-[var(--color-muted)] mt-1">
-                      {{ transaction.date | date: "hh:mm a" }}
+                    <!-- Time -->
+                    <p class="text-[11px] text-[var(--color-muted)] mt-0.5">
+                      {{ transaction.date | tz }}
                     </p>
 
+                    <!-- Currency conversion (if different) -->
                     <span
-                      >{{ transaction.currency }}-{{
-                        transaction.currencyWiseAmount
-                      }}</span
+                      *ngIf="
+                        transaction.amount !== transaction.currencyWiseAmount
+                      "
+                      class="text-[11px] text-[var(--color-muted)]"
                     >
+                      {{ transaction.currency }}-{{
+                        transaction.currencyWiseAmount
+                      }}
+                    </span>
                   </div>
                 </div>
 
                 <!-- MIDDLE TAGS -->
-                <div class="flex items-center gap-2 flex-wrap mt-5">
-                  <!-- ELIGIBILITY -->
+                <div class="flex items-center gap-2 flex-wrap mt-2">
+                  <!-- Reward Eligibility -->
                   <span
-                    class="px-3 py-1 rounded-xl text-sm font-semibold"
+                    class="px-2 py-[2px] rounded-lg text-[11px] font-semibold"
                     [ngClass]="{
                       'bg-purple-100 text-purple-700': transaction.slabEligible,
                       'bg-red-100 text-red-700': !transaction.slabEligible,
                     }"
                   >
-                    Reward Eligibility {{ transaction.slabPercentage || 0 }}%
+                    Reward Eligibility
+                    {{
+                      (transaction.slabPercentage ?? 0) === 0
+                        ? 100
+                        : transaction.slabPercentage
+                    }}%
                   </span>
                 </div>
 
-                <!-- BOTTOM -->
-                <div class="flex items-center justify-between mt-5">
-                  <!-- LEFT -->
+                <!-- BOTTOM ROW -->
+                <div class="flex items-center justify-between mt-2">
+                  <!-- Left tags -->
                   <div class="flex items-center gap-2">
-                    <!-- TIME AGO -->
+                    <!-- Time ago -->
                     <span
-                      class="px-3 py-1 rounded-xl text-sm font-semibold bg-blue-100 text-blue-700"
+                      class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-blue-100 text-blue-700"
                     >
                       {{
                         getMinutesDiff(transaction.date) < 1
@@ -411,207 +208,165 @@
 
                     <!-- PPI / RPI -->
                     <span
-                      class="px-3 py-1 rounded-xl text-sm font-semibold bg-indigo-100 text-indigo-700"
+                      class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700"
                     >
                       {{ transaction.ftt ? "RPI" : "PPI" }}
                     </span>
                   </div>
 
-                  <!-- ACTIONS -->
+                  <!-- Actions -->
                   <div
-                    class="flex items-center gap-3"
+                    class="flex items-center gap-2"
                     (click)="$event.stopPropagation()"
                   >
-                    <!-- APPROVE -->
+                    <!-- Approve -->
                     <button
                       (click)="openApproveConfirm(transaction)"
-                      class="w-11 h-11 rounded-full border-2 border-green-500 flex items-center justify-center hover:bg-green-50 transition"
+                      class="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center hover:bg-green-50 transition"
                     >
                       <span
-                        class="material-symbols-outlined text-green-600 text-[24px]"
+                        class="material-symbols-outlined text-green-600 text-[14px]"
+                        >check</span
                       >
-                        check
-                      </span>
                     </button>
 
-                    <!-- REJECT -->
+                    <!-- Reject -->
                     <button
                       (click)="openRejectConfirm(transaction)"
-                      class="w-11 h-11 rounded-full border-2 border-red-500 flex items-center justify-center hover:bg-red-50 transition"
+                      class="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center hover:bg-red-50 transition"
                     >
                       <span
-                        class="material-symbols-outlined text-red-600 text-[24px]"
+                        class="material-symbols-outlined text-red-600 text-[14px]"
+                        >close</span
                       >
-                        close
-                      </span>
                     </button>
                   </div>
                 </div>
               </div>
 
-              <!-- EMPTY -->
+              <!-- EMPTY STATE -->
               <div
                 *ngIf="filteredPendingBank().length === 0"
                 class="flex flex-col items-center justify-center py-16"
               >
                 <div
-                  class="w-20 h-20 rounded-full bg-[var(--color-hover)] flex items-center justify-center"
+                  class="w-16 h-16 rounded-full bg-[var(--color-hover)] flex items-center justify-center"
                 >
                   <span
-                    class="material-symbols-outlined text-[var(--color-muted)] text-4xl"
+                    class="material-symbols-outlined text-[var(--color-muted)] text-3xl"
+                    >account_balance</span
                   >
-                    account_balance
-                  </span>
                 </div>
-
-                <p class="mt-4 text-lg font-semibold text-[var(--color-font)]">
+                <p class="mt-3 text-sm font-semibold text-[var(--color-font)]">
                   No Pending Transactions
                 </p>
-
-                <p class="text-sm text-[var(--color-muted)] mt-1">
+                <p class="text-[11px] text-[var(--color-muted)] mt-1">
                   All bank payins are completed
                 </p>
               </div>
             </div>
           </div>
-
-          <!-- Pagination for Pending Bank -->
-          <!-- <div
-            class="p-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
-          >
-            <div class="flex items-center gap-2">
-              <label class="text-xs text-[var(--color-muted)] font-medium"
-                >Show</label
-              >
-
-              <select
-                [(ngModel)]="pendingBankPageSize"
-                (change)="onChangePendingBankPageSize(pendingBankPageSize)"
-                class="text-xs border border-[var(--color-border)] rounded-lg px-2 py-1 bg-[var(--color-surface)] focus:ring-2 focus:ring-[var(--color-secondary)]"
-              >
-                <option *ngFor="let s of pendingPageSizes" [value]="s">
-                  {{ s }}
-                </option>
-              </select>
-            </div>
-            <div class="flex items-center gap-2">
-              <button
-                (click)="setPendingBankPage(pendingBankPage - 1)"
-                [disabled]="pendingBankPage === 1"
-                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Prev
-              </button>
-              <span class="text-xs text-[var(--color-muted)] font-medium px-2"
-                >{{ pendingBankPage }} / {{ pendingBankTotalPages() }}</span
-              >
-
-              <button
-                (click)="setPendingBankPage(pendingBankPage + 1)"
-                [disabled]="pendingBankPage >= pendingBankTotalPages()"
-                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
-            </div>
-          </div> -->
         </div>
       </div>
 
-      <!-- Pending Actions (payouts) -->
-      <div class="lg:col-span-1 space-y-6">
+      <!-- ───────────── PENDING PAYOUTS ───────────── -->
+      <div class="w-[300px] flex-shrink-0">
         <div
-          class="bg-[var(--color-surface)] rounded-2xl overflow-hidden shadow-[var(--shadow-md)] border border-[var(--color-border)]"
+          class="bg-[var(--color-surface)] rounded-lg overflow-hidden shadow-sm border border-[var(--color-border)]"
         >
+          <!-- Header -->
           <div
-            class="bg-[var(--color-danger)]/20 p-5 border-b border-[var(--color-border)]"
+            class="bg-[var(--color-danger)]/20 p-2.5 border-b border-[var(--color-border)]"
           >
-            <div class="flex justify-between items-start mb-3">
+            <div class="flex justify-between items-center">
               <div>
                 <h3
-                  class="font-bold text-[var(--color-font)] text-lg flex items-center"
+                  class="font-bold text-[var(--color-font)] text-sm flex items-center"
                 >
-                  Pending Payouts
+                  Pay Out
                   <span
-                    class="ml-2 text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--color-danger)]/20 text-[var(--color-danger)] border border-[var(--color-danger)]/50"
+                    class="ml-2 text-[11px] font-bold px-2.5 py-1 rounded-full bg-[var(--color-danger)]/20 text-[var(--color-danger)] border border-[var(--color-danger)]/50"
                   >
                     {{ filteredPendingpayouts().length }}
                   </span>
                 </h3>
-                <p class="text-sm text-[var(--color-muted)] mt-1">
+                <p class="text-[11px] text-[var(--color-muted)] mt-1">
                   Awaiting approval for payout requests
                 </p>
               </div>
             </div>
           </div>
 
-          <div
-            class="overflow-y-auto h-[480px] md:h-[600px] scrollbar-thin scrollbar-thumb-[var(--color-muted)]/30 scrollbar-track-[var(--color-bg)] px-2"
-          >
-            <div class="grid gap-4 py-2">
+          <!-- Scrollable list -->
+          <div class="overflow-y-auto h-[600px] scrollbar-hide px-2">
+            <div class="grid gap-2 py-1.5">
               <!-- CARD -->
               <div
-                *ngFor="let transaction of pagedPendingpayouts()"
+                *ngFor="
+                  let transaction of cachedPendingPayouts;
+                  trackBy: trackById
+                "
                 (click)="viewTransactionDetails(transaction)"
-                class="bg-white dark:bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+                class="bg-white dark:bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
               >
-                <!-- TOP -->
-                <div class="flex items-start justify-between gap-3">
+                <!-- TOP ROW -->
+                <div class="flex items-start justify-between gap-2">
                   <!-- LEFT -->
-                  <div class="flex items-start gap-3 min-w-0">
-                    <!-- ICON -->
+                  <div class="flex items-start gap-2 min-w-0">
+                    <!-- Icon -->
                     <div
-                      class="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center flex-shrink-0"
+                      class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0"
                     >
                       <span
-                        class="material-symbols-outlined text-red-500 text-2xl"
+                        class="material-symbols-outlined text-red-500 text-[14px]"
+                        >payments</span
                       >
-                        payments
-                      </span>
                     </div>
 
-                    <!-- INFO -->
+                    <!-- Info -->
                     <div class="min-w-0">
-                      <!-- ID -->
                       <p
-                        class="text-[20px] font-bold text-[var(--color-font)] truncate leading-tight"
+                        class="text-[16px] font-bold text-[var(--color-font)] truncate leading-tight"
                       >
                         {{ transaction.fundDisplayId }}
                       </p>
-
-                      <!-- PORTAL -->
                     </div>
                   </div>
 
                   <!-- RIGHT -->
                   <div class="text-right flex-shrink-0">
-                    <!-- AMOUNT -->
+                    <!-- Amount -->
                     <div
-                      class="flex items-center justify-end gap-1 text-[28px] font-bold text-[var(--color-font)] leading-none"
+                      class="flex items-center justify-end gap-1 text-[18px] font-bold text-[var(--color-font)] leading-none"
                     >
-                      <span class="text-[18px] opacity-70 uppercase">
+                      <span class="text-[11px] opacity-70 uppercase">
                         {{ transaction.parentCurrency }}
                       </span>
-
                       <span>{{ transaction.amount }}</span>
                     </div>
 
-                    <!-- TIME -->
-                    <p class="text-xs text-[var(--color-muted)] mt-2">
-                      {{ transaction.date | date: "hh:mm a" }}
+                    <!-- Time -->
+                    <p class="text-[11px] text-[var(--color-muted)] mt-1.5">
+                      {{ transaction.date | tz}}
                     </p>
 
-                    <span>
+                    <!-- Currency conversion (if different) -->
+                    <span
+                      *ngIf="
+                        transaction.amount !== transaction.currencyWiseAmount
+                      "
+                      class="text-[11px] text-[var(--color-muted)]"
+                    >
                       {{ transaction.currency }}-{{
                         transaction.currencyWiseAmount
-                      }}</span
-                    >
+                      }}
+                    </span>
                   </div>
                 </div>
 
-                <!-- CENTER TAGS -->
-                <div class="flex items-center gap-2 flex-wrap mt-5">
-                  <!-- PROCESS TIMER -->
+                <!-- MIDDLE TAGS -->
+                <div class="flex items-center gap-2 flex-wrap mt-2">
+                  <!-- Process timer button -->
                   <button
                     (click)="
                       onProcessingClick(transaction); $event.stopPropagation()
@@ -620,12 +375,11 @@
                       'bg-orange-100 text-orange-600':
                         transaction.processing &&
                         getRemainingTimeLabel(transaction) !== 'Process',
-
                       'bg-yellow-100 text-yellow-700':
                         !transaction.processing ||
                         getRemainingTimeLabel(transaction) === 'Process',
                     }"
-                    class="px-4 py-1.5 rounded-xl text-sm font-bold transition"
+                    class="px-2 py-[3px] rounded-lg text-[11px] font-bold transition"
                   >
                     <ng-container
                       *ngIf="
@@ -636,13 +390,12 @@
                     >
                       {{ getRemainingTimeLabel(transaction) }}
                     </ng-container>
-
-                    <ng-template #processBtn> Process </ng-template>
+                    <ng-template #processBtn>Process</ng-template>
                   </button>
 
-                  <!-- ELIGIBILITY -->
+                  <!-- Reward Eligibility -->
                   <span
-                    class="px-4 py-1.5 rounded-xl text-sm font-semibold"
+                    class="px-2 py-[3px] rounded-lg text-[11px] font-semibold"
                     [ngClass]="{
                       'bg-purple-100 text-purple-700': transaction.slabEligible,
                       'bg-red-100 text-red-700': !transaction.slabEligible,
@@ -652,13 +405,13 @@
                   </span>
                 </div>
 
-                <!-- BOTTOM -->
-                <div class="flex items-center justify-between mt-5">
-                  <!-- LEFT -->
+                <!-- BOTTOM ROW -->
+                <div class="flex items-center justify-between mt-2">
+                  <!-- Left tags -->
                   <div class="flex items-center gap-2">
-                    <!-- TIME AGO -->
+                    <!-- Time ago -->
                     <span
-                      class="px-3 py-1 rounded-xl text-sm font-semibold bg-blue-100 text-blue-700"
+                      class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-blue-100 text-blue-700"
                     >
                       {{
                         getMinutesDiff(transaction.date) < 1
@@ -668,152 +421,109 @@
                     </span>
                   </div>
 
-                  <!-- ACTIONS -->
+                  <!-- Actions -->
                   <div
-                    class="flex items-center gap-3"
+                    class="flex items-center gap-2"
                     (click)="$event.stopPropagation()"
                   >
-                    <!-- APPROVE -->
+                    <!-- Approve -->
                     <button
                       (click)="openApproveConfirm(transaction)"
                       [disabled]="!transaction.processing"
-                      class="w-11 h-11 rounded-full border-2 border-green-500 flex items-center justify-center hover:bg-green-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      class="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center hover:bg-green-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <span
-                        class="material-symbols-outlined text-green-600 text-[24px]"
+                        class="material-symbols-outlined text-green-600 text-[14px]"
+                        >check</span
                       >
-                        check
-                      </span>
                     </button>
 
-                    <!-- REJECT -->
+                    <!-- Reject -->
                     <button
                       (click)="openRejectConfirm(transaction)"
                       [disabled]="!transaction.processing"
-                      class="w-11 h-11 rounded-full border-2 border-red-500 flex items-center justify-center hover:bg-red-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      class="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center hover:bg-red-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <span
-                        class="material-symbols-outlined text-red-600 text-[24px]"
+                        class="material-symbols-outlined text-red-600 text-[14px]"
+                        >close</span
                       >
-                        close
-                      </span>
                     </button>
                   </div>
                 </div>
               </div>
 
-              <!-- EMPTY -->
+              <!-- EMPTY STATE -->
               <div
                 *ngIf="filteredPendingpayouts().length === 0"
                 class="flex flex-col items-center justify-center py-16"
               >
                 <div
-                  class="w-20 h-20 rounded-full bg-[var(--color-hover)] flex items-center justify-center"
+                  class="w-16 h-16 rounded-full bg-[var(--color-hover)] flex items-center justify-center"
                 >
                   <span
-                    class="material-symbols-outlined text-[var(--color-muted)] text-4xl"
+                    class="material-symbols-outlined text-[var(--color-muted)] text-3xl"
+                    >payments</span
                   >
-                    payments
-                  </span>
                 </div>
-
-                <p class="mt-4 text-lg font-semibold text-[var(--color-font)]">
+                <p class="mt-3 text-sm font-semibold text-[var(--color-font)]">
                   No Pending Payouts
                 </p>
-
-                <p class="text-sm text-[var(--color-muted)] mt-1">
+                <p class="text-[11px] text-[var(--color-muted)] mt-1">
                   All payout requests are processed
                 </p>
               </div>
             </div>
           </div>
-
-          <!-- <div
-            class="p-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
-          >
-            <div class="flex items-center gap-2">
-              <label class="text-xs text-[var(--color-muted)] font-medium"
-                >Show</label
-              >
-
-              <select
-                [(ngModel)]="pendingPayoutPageSize"
-                (change)="onChangePendingPayoutPageSize(pendingPayoutPageSize)"
-                class="text-xs border border-[var(--color-border)] rounded-lg px-2 py-1 bg-[var(--color-surface)] focus:ring-2 focus:ring-[var(--color-danger)]"
-              >
-                <option *ngFor="let s of pendingPageSizes" [value]="s">
-                  {{ s }}
-                </option>
-              </select>
-            </div>
-            <div class="flex items-center gap-2">
-              <button
-                (click)="setPendingPayoutPage(pendingPayoutPage - 1)"
-                [disabled]="pendingPayoutPage === 1"
-                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Prev
-              </button>
-              <span class="text-xs text-[var(--color-muted)] font-medium px-2"
-                >{{ pendingPayoutPage }} / {{ pendingPayoutTotalPages() }}</span
-              >
-
-              <button
-                (click)="setPendingPayoutPage(pendingPayoutPage + 1)"
-                [disabled]="pendingPayoutPage >= pendingPayoutTotalPages()"
-                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-medium hover:bg-[var(--color-surface)] transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
-            </div>
-          </div> -->
         </div>
       </div>
+
+      <!-- ───────────── BLANK RIGHT AREA ───────────── -->
+      <div class="flex-1"></div>
     </div>
 
-    <!-- Mobile Combined Transactions Table -->
-    <!-- Mobile Combined Transactions Table -->
     <div class="block lg:hidden mb-6">
       <div
-        class="bg-[var(--color-surface)] rounded-2xl overflow-hidden shadow-[var(--shadow-md)] border border-[var(--color-border)]"
+        class="bg-[var(--color-surface)] rounded-lg overflow-hidden shadow-sm border border-[var(--color-border)]"
       >
         <!-- Header -->
         <div
-          class="bg-[var(--color-primary-light)]/20 p-5 border-b border-[var(--color-border)]"
+          class="bg-[var(--color-primary-light)]/20 p-2.5 border-b border-[var(--color-border)]"
         >
           <h3
-            class="font-bold text-[var(--color-font)] text-lg flex items-center"
+            class="font-bold text-[var(--color-font)] text-sm flex items-center"
           >
             All Pending Transactions
             <span
-              class="ml-2 text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--color-primary-light)]/20 text-[var(--color-primary)] border border-[var(--color-primary-light)]"
+              class="ml-2 text-[11px] font-bold px-2.5 py-1 rounded-full bg-[var(--color-primary-light)]/20 text-[var(--color-primary)] border border-[var(--color-primary-light)]"
             >
               {{ getMobileTransactions().length }}
             </span>
           </h3>
-          <p class="text-sm text-[var(--color-muted)] mt-1">
+          <p class="text-[11px] text-[var(--color-muted)] mt-1">
             UPI, Bank & Payout transactions
           </p>
         </div>
 
         <!-- Scroll Area -->
-        <div
-          class="overflow-y-auto h-[70vh] px-2 scrollbar-thin scrollbar-thumb-[var(--color-muted)]/30 scrollbar-track-[var(--color-bg)]"
-        >
-          <div class="grid gap-4 py-2">
+        <div class="overflow-y-auto h-[70vh] px-2">
+          <div class="grid gap-2 py-1.5">
             <!-- CARD -->
             <div
-              *ngFor="let transaction of getPagedMobileTransactions()"
+              *ngFor="
+                let transaction of cachedMobileTransactions;
+                trackBy: trackById
+              "
               (click)="viewTransactionDetails(transaction)"
-              class="bg-white dark:bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+              class="bg-white dark:bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-2 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
             >
               <!-- TOP -->
-              <div class="flex items-start justify-between gap-3">
+              <div class="flex items-start justify-between gap-2">
                 <!-- LEFT -->
-                <div class="flex items-start gap-3 min-w-0">
+                <div class="flex items-start gap-2 min-w-0">
                   <!-- ICON -->
                   <div
-                    class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                    class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                     [ngClass]="{
                       'bg-[var(--color-primary)]/10':
                         transaction.mode === 'upi',
@@ -826,7 +536,7 @@
                     }"
                   >
                     <span
-                      class="material-symbols-outlined text-2xl"
+                      class="material-symbols-outlined text-[14px]"
                       [ngClass]="{
                         'text-[var(--color-primary)]':
                           transaction.mode === 'upi',
@@ -852,21 +562,21 @@
                   <div class="min-w-0">
                     <!-- ID -->
                     <p
-                      class="text-[18px] font-bold text-[var(--color-font)] truncate"
+                      class="text-[13px] font-bold text-[var(--color-font)] truncate"
                     >
                       {{ transaction.fundDisplayId }}
                     </p>
 
                     <!-- HOLDER -->
                     <p
-                      class="text-sm text-[var(--color-font)]/80 mt-3 truncate font-medium"
+                      class="text-[11px] text-[var(--color-font)]/80 mt-1 truncate font-medium"
                     >
                       {{ transaction.holderName || getTxKind(transaction) }}
                     </p>
 
                     <!-- UPI / ACCOUNT -->
                     <p
-                      class="text-sm text-[var(--color-muted)] mt-0.5 truncate"
+                      class="text-[11px] text-[var(--color-muted)] mt-0.5 truncate"
                     >
                       {{ transaction.upiId || transaction.accountNo || "—" }}
                     </p>
@@ -877,7 +587,7 @@
                 <div class="text-right flex-shrink-0">
                   <!-- AMOUNT -->
                   <div
-                    class="flex items-center justify-end gap-1 text-[26px] font-bold leading-none"
+                    class="flex items-center justify-end gap-1 text-[16px] font-bold leading-none"
                     [ngClass]="{
                       'text-[var(--color-font)]':
                         transaction.mode === 'upi' ||
@@ -887,7 +597,7 @@
                       'text-red-black': transaction.type === 'payout',
                     }"
                   >
-                    <span class="text-[18px] text-[var(--color-font)]">
+                    <span class="text-[13px] text-[var(--color-font)]">
                       {{ transaction.parentCurrency }}-</span
                     >
                     <span>
@@ -900,8 +610,8 @@
                   </div>
 
                   <!-- TIME -->
-                  <p class="text-xs text-[var(--color-muted)] mt-2">
-                    {{ transaction.date | date: "hh:mm a" }}
+                  <p class="text-[11px] text-[var(--color-muted)] mt-2">
+                    {{ transaction.date | tz }}
                   </p>
 
                   <span
@@ -913,7 +623,7 @@
               </div>
 
               <!-- CENTER TAGS -->
-              <div class="flex items-center gap-2 flex-wrap mt-5">
+              <div class="flex items-center gap-2 flex-wrap mt-2">
                 <!-- PROCESS BUTTON -->
                 <button
                   *ngIf="transaction.type === 'payout'"
@@ -924,7 +634,7 @@
 
                     'bg-yellow-100 text-yellow-700': !transaction.processing,
                   }"
-                  class="px-4 py-1.5 rounded-xl text-sm font-bold transition"
+                  class="px-2 py-[3px] rounded-lg text-[11px] font-bold transition"
                 >
                   <ng-container
                     *ngIf="transaction.processing; else processBtnMobile"
@@ -937,7 +647,7 @@
 
                 <!-- ELIGIBILITY -->
                 <span
-                  class="px-4 py-1.5 rounded-xl text-sm font-semibold"
+                  class="px-2 py-[3px] rounded-lg text-[11px] font-semibold"
                   [ngClass]="{
                     'bg-purple-100 text-purple-700': transaction.slabEligible,
 
@@ -949,12 +659,12 @@
               </div>
 
               <!-- BOTTOM -->
-              <div class="flex items-center justify-between mt-5">
+              <div class="flex items-center justify-between mt-2">
                 <!-- LEFT -->
                 <div class="flex items-center gap-2">
                   <!-- TIME AGO -->
                   <span
-                    class="px-3 py-1 rounded-xl text-sm font-semibold bg-blue-100 text-blue-700"
+                    class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-blue-100 text-blue-700"
                   >
                     {{
                       getMinutesDiff(transaction.date) < 1
@@ -966,7 +676,7 @@
                   <!-- PPI / RPI -->
                   <span
                     *ngIf="transaction.type !== 'payout'"
-                    class="px-3 py-1 rounded-xl text-sm font-semibold bg-indigo-100 text-indigo-700"
+                    class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700"
                   >
                     {{ transaction.ftt ? "RPI" : "PPI" }}
                   </span>
@@ -974,7 +684,7 @@
 
                 <!-- ACTIONS -->
                 <div
-                  class="flex items-center gap-3"
+                  class="flex items-center gap-2"
                   (click)="$event.stopPropagation()"
                 >
                   <!-- APPROVE -->
@@ -983,10 +693,10 @@
                     [disabled]="
                       transaction.type === 'payout' && !transaction.processing
                     "
-                    class="w-11 h-11 rounded-full border-2 border-green-500 flex items-center justify-center hover:bg-green-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    class="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center hover:bg-green-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <span
-                      class="material-symbols-outlined text-green-600 text-[24px]"
+                      class="material-symbols-outlined text-green-600 text-[14px]"
                     >
                       check
                     </span>
@@ -998,10 +708,10 @@
                     [disabled]="
                       transaction.type === 'payout' && !transaction.processing
                     "
-                    class="w-11 h-11 rounded-full border-2 border-red-500 flex items-center justify-center hover:bg-red-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    class="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center hover:bg-red-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <span
-                      class="material-symbols-outlined text-red-600 text-[24px]"
+                      class="material-symbols-outlined text-red-600 text-[14px]"
                     >
                       close
                     </span>
@@ -1025,64 +735,16 @@
                 </span>
               </div>
 
-              <p class="mt-4 text-lg font-semibold text-[var(--color-font)]">
+              <p class="mt-4 text-sm font-semibold text-[var(--color-font)]">
                 No Pending Transactions
               </p>
 
-              <p class="text-sm text-[var(--color-muted)] mt-1">
+              <p class="text-[11px] text-[var(--color-muted)] mt-1">
                 All transactions are processed
               </p>
             </div>
           </div>
         </div>
-
-        <!-- MOBILE PAGINATION -->
-        <!-- <div
-          class="p-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
-        >
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2">
-              <label
-                class="text-xs text-[var(--color-muted)] font-medium whitespace-nowrap"
-              >
-                Show
-              </label>
-
-              <select
-                [(ngModel)]="mobilePageSize"
-                (change)="onChangeMobilePageSize(mobilePageSize)"
-                class="text-xs border border-[var(--color-border)] rounded-lg px-2 py-1 bg-[var(--color-surface)] focus:outline-none"
-              >
-                <option *ngFor="let s of mobilePageSizes" [value]="s">
-                  {{ s }}
-                </option>
-              </select>
-            </div>
-
-            <div class="flex items-center gap-2 whitespace-nowrap">
-              <button
-                (click)="setMobilePage(mobilePage - 1)"
-                [disabled]="mobilePage === 1"
-                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                P
-              </button>
-
-              <span class="text-xs text-[var(--color-muted)] font-medium">
-                {{ mobilePage }} <span class="mx-1">/</span>
-                {{ mobileTotalPages() }}
-              </span>
-
-              <button
-                (click)="setMobilePage(mobilePage + 1)"
-                [disabled]="mobilePage >= mobileTotalPages()"
-                class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                N
-              </button>
-            </div>
-          </div>
-        </div> -->
       </div>
     </div>
 
@@ -1092,7 +754,7 @@
       class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[55] p-4 animate-fadeIn"
     >
       <div
-        class="bg-[var(--color-surface)] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl animate-slideUp"
+        class="bg-[var(--color-surface)] rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl animate-slideUp"
       >
         <div class="text-center mb-6">
           <div
@@ -1103,21 +765,21 @@
               >edit</span
             >
           </div>
-          <h4 class="text-xl font-bold text-[var(--color-font)] mb-2">
+          <h4 class="text-[14px] font-bold text-[var(--color-font)] mb-2">
             Edit Transaction Amount
           </h4>
-          <p class="text-sm text-[var(--color-muted)]">
+          <p class="text-[11px] text-[var(--color-muted)]">
             Update the transaction amount and add optional notes or attachments
           </p>
         </div>
 
         <!-- Current Transaction Info -->
         <div
-          class="mb-6 p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] space-y-3"
+          class="mb-6 p-4 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] space-y-3"
         >
           <div class="flex justify-between items-center">
             <span
-              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
+              class="text-[11px] text-[var(--color-muted)] font-semibold uppercase"
               >Type</span
             >
             <span class="font-bold text-[var(--color-font)]">
@@ -1128,7 +790,7 @@
           </div>
           <div class="flex justify-between items-center">
             <span
-              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
+              class="text-[11px] text-[var(--color-muted)] font-semibold uppercase"
               >Current Amount</span
             >
             <span class="font-bold text-[var(--color-font)]">
@@ -1138,10 +800,10 @@
           </div>
           <div class="flex justify-between items-center">
             <span
-              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
+              class="text-[11px] text-[var(--color-muted)] font-semibold uppercase"
               >UTR Number</span
             >
-            <span class="font-medium text-[var(--color-muted)] text-sm">
+            <span class="font-medium text-[var(--color-muted)] text-[11px]">
               {{ selectedTransaction.utrNumber || "N/A" }}
             </span>
           </div>
@@ -1150,26 +812,26 @@
         <!-- New Amount Input -->
         <div class="mb-6">
           <label
-            class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
+            class="block text-[11px] text-[var(--color-muted)] font-semibold uppercase mb-2"
           >
             New Amount *
           </label>
           <div class="relative">
             <span
-              class="absolute left-3 top-1/2 transform -translate-y-1/2 text-lg font-bold"
+              class="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm font-bold"
               >₹</span
             >
             <input
               type="number"
               [(ngModel)]="editAmountData.newAmount"
-              class="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-[var(--color-info)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)] outline-none transition"
+              class="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-[var(--color-info)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)] outline-none transition"
               placeholder="Enter new amount"
               min="0"
               step="0.01"
               autofocus
             />
           </div>
-          <p class="text-xs mt-2 text-[var(--color-muted)]">
+          <p class="text-[11px] mt-2 text-[var(--color-muted)]">
             Enter the correct transaction amount. This will update the
             transaction record.
           </p>
@@ -1178,17 +840,17 @@
         <!-- Optional Message -->
         <div class="mb-6">
           <label
-            class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
+            class="block text-[11px] text-[var(--color-muted)] font-semibold uppercase mb-2"
           >
             Message (Optional)
           </label>
           <textarea
             [(ngModel)]="editAmountData.message"
-            class="w-full p-3 rounded-xl border border-[var(--color-border)] focus:ring-2 focus:ring-[var(--color-primary-light)] focus:border-[var(--color-primary)] outline-none transition"
+            class="w-full p-3 rounded-lg border border-[var(--color-border)] focus:ring-2 focus:ring-[var(--color-primary-light)] focus:border-[var(--color-primary)] outline-none transition"
             rows="3"
             placeholder="Add a note about why the amount is being updated..."
           ></textarea>
-          <p class="text-xs mt-2 text-[var(--color-muted)]">
+          <p class="text-[11px] mt-2 text-[var(--color-muted)]">
             Add a note explaining the reason for updating the amount
           </p>
         </div>
@@ -1198,7 +860,7 @@
         <div class="mb-6" *ngIf="confirmTransaction?.type !== 'payout'">
           <div class="flex items-center justify-between mb-2">
             <label
-              class="block text-xs text-[var(--color-muted)] font-semibold uppercase"
+              class="block text-[11px] text-[var(--color-muted)] font-semibold uppercase"
             >
               {{
                 confirmTransaction?.type === "payin"
@@ -1206,11 +868,11 @@
                   : "Attachment (Optional)"
               }}
             </label>
-            <span class="text-xs text-[var(--color-muted)]">Max 5MB</span>
+            <span class="text-[11px] text-[var(--color-muted)]">Max 5MB</span>
           </div>
 
           <div
-            class="relative border-2 border-dashed border-[var(--color-border)] rounded-xl p-4 text-center hover:border-[var(--color-primary)] transition-colors duration-200"
+            class="relative border-2 border-dashed border-[var(--color-border)] rounded-lg p-4 text-center hover:border-[var(--color-primary)] transition-colors duration-200"
             [class.border-[var(--color-primary)]]="editAmountData.isDragging"
             (dragover)="onEditDragOver($event)"
             (dragleave)="onEditDragLeave($event)"
@@ -1237,17 +899,17 @@
                     attach_file
                   </span>
                 </div>
-                <p class="text-sm font-medium text-[var(--color-font)]">
+                <p class="text-[12px] font-medium text-[var(--color-font)]">
                   Drop file here or click to upload
                 </p>
-                <p class="text-xs text-[var(--color-muted)]">
+                <p class="text-[11px] text-[var(--color-muted)]">
                   Supports PDF, JPG, PNG, DOC (Max 5MB)
                 </p>
               </div>
 
               <!-- File preview when selected -->
               <div *ngIf="editAmountData.file" class="space-y-3">
-                <div class="flex items-center justify-center gap-3">
+                <div class="flex items-center justify-center gap-2">
                   <div
                     class="w-10 h-10 rounded-lg bg-[var(--color-primary-light)]/20 flex items-center justify-center"
                   >
@@ -1259,11 +921,11 @@
                   </div>
                   <div class="text-left flex-1">
                     <p
-                      class="text-sm font-medium text-[var(--color-font)] truncate"
+                      class="text-[12px] font-medium text-[var(--color-font)] truncate"
                     >
                       {{ editAmountData.file.name }}
                     </p>
-                    <p class="text-xs text-[var(--color-muted)]">
+                    <p class="text-[11px] text-[var(--color-muted)]">
                       {{ (editAmountData.file.size / 1024 / 1024).toFixed(2) }}
                       MB
                     </p>
@@ -1274,7 +936,7 @@
                     class="text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors pointer-events-auto"
                     aria-label="Remove file"
                   >
-                    <span class="material-symbols-outlined text-lg">
+                    <span class="material-symbols-outlined text-sm">
                       close
                     </span>
                   </button>
@@ -1283,16 +945,16 @@
             </div>
           </div>
 
-          <p class="text-xs mt-2 text-[var(--color-muted)]">
+          <p class="text-[11px] mt-2 text-[var(--color-muted)]">
             Add supporting documents like updated payment proof or screenshot
           </p>
         </div>
 
         <!-- Buttons -->
-        <div class="flex gap-3">
+        <div class="flex gap-2">
           <button
             (click)="closeEditAmountPopup()"
-            class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-muted)] rounded-xl hover:bg-[var(--color-bg)] transition font-bold"
+            class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-muted)] rounded-lg hover:bg-[var(--color-bg)] transition font-bold"
           >
             Cancel
           </button>
@@ -1307,7 +969,7 @@
             [class.cursor-not-allowed]="
               !editAmountData.newAmount || editAmountData.newAmount <= 0
             "
-            class="flex-1 px-4 py-2.5 bg-[var(--color-primary)] text-white rounded-xl hover:from-[var(--color-primary-dark)] hover:to-[var(--color-secondary)] transition font-bold shadow-lg shadow-[var(--color-primary)]/30"
+            class="flex-1 px-4 py-2.5 bg-[var(--color-primary)] text-white rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-secondary)] transition font-bold shadow-lg shadow-[var(--color-primary)]/30"
           >
             Save Changes
           </button>
@@ -1321,27 +983,27 @@
       class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-3"
     >
       <div
-        class="w-full max-w-sm bg-[var(--color-surface)] rounded-2xl shadow-2xl overflow-hidden animate-slideUp"
+        class="w-full max-w-sm bg-[var(--color-surface)] rounded-lg shadow-2xl overflow-hidden animate-slideUp"
       >
         <!-- Header -->
         <div class="p-4 border-b border-[var(--color-border)]">
-          <div class="flex items-start gap-3">
+          <div class="flex items-start gap-2">
             <div
-              class="w-11 h-11 rounded-full bg-[var(--color-success)]/15 flex items-center justify-center shrink-0"
+              class="w-8 h-8 rounded-full bg-[var(--color-success)]/15 flex items-center justify-center shrink-0"
             >
               <span
-                class="material-symbols-outlined text-[var(--color-success)] text-2xl"
+                class="material-symbols-outlined text-[var(--color-success)] text-[14px]"
               >
                 task_alt
               </span>
             </div>
 
             <div class="flex-1">
-              <h4 class="text-base font-bold text-[var(--color-font)]">
+              <h4 class="text-sm font-bold text-[var(--color-font)]">
                 Confirm Approval
               </h4>
 
-              <p class="text-xs text-[var(--color-muted)] mt-0.5">
+              <p class="text-[11px] text-[var(--color-muted)] mt-0.5">
                 Verify transaction details before approval
               </p>
             </div>
@@ -1353,23 +1015,23 @@
           <!-- Transaction Details -->
           <div
             *ngIf="confirmTransaction"
-            class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 space-y-2.5"
+            class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 space-y-2.5"
           >
             <!-- Type -->
-            <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center justify-between gap-2">
               <span
                 class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
               >
                 Type
               </span>
 
-              <span class="text-sm font-bold text-[var(--color-font)]">
+              <span class="text-[12px] font-bold text-[var(--color-font)]">
                 {{ confirmTransaction.type === "payin" ? "Payin" : "Payout" }}
               </span>
             </div>
 
             <!-- Portal / Holder -->
-            <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center justify-between gap-2">
               <span
                 class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
               >
@@ -1377,14 +1039,14 @@
               </span>
 
               <span
-                class="text-sm font-semibold text-[var(--color-font)] text-right break-all"
+                class="text-[12px] font-semibold text-[var(--color-font)] text-right break-all"
               >
                 {{ confirmTransaction.portal || confirmTransaction.holderName }}
               </span>
             </div>
 
             <!-- Amount -->
-            <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center justify-between gap-2">
               <span
                 class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
               >
@@ -1392,7 +1054,7 @@
               </span>
 
               <span
-                class="text-base font-bold"
+                class="text-sm font-bold"
                 [ngClass]="{
                   'text-[var(--color-success)]':
                     confirmTransaction.type === 'payin',
@@ -1407,7 +1069,7 @@
             <!-- UPI -->
             <div
               *ngIf="confirmTransaction.mode === 'upi'"
-              class="flex items-center justify-between gap-3"
+              class="flex items-center justify-between gap-2"
             >
               <span
                 class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
@@ -1416,7 +1078,7 @@
               </span>
 
               <span
-                class="text-xs text-[var(--color-font)] text-right break-all"
+                class="text-[11px] text-[var(--color-font)] text-right break-all"
               >
                 {{ confirmTransaction.upiId }}
               </span>
@@ -1425,7 +1087,7 @@
             <!-- Account -->
             <div
               *ngIf="confirmTransaction.mode === 'bank'"
-              class="flex items-center justify-between gap-3"
+              class="flex items-center justify-between gap-2"
             >
               <span
                 class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
@@ -1434,7 +1096,7 @@
               </span>
 
               <span
-                class="text-xs text-[var(--color-font)] text-right break-all"
+                class="text-[11px] text-[var(--color-font)] text-right break-all"
               >
                 {{ confirmTransaction.accountNo }}
               </span>
@@ -1443,7 +1105,7 @@
             <!-- UTR -->
             <div
               *ngIf="confirmTransaction.utrNumber"
-              class="flex items-center justify-between gap-3"
+              class="flex items-center justify-between gap-2"
             >
               <span
                 class="text-[11px] uppercase font-semibold text-[var(--color-muted)]"
@@ -1452,7 +1114,7 @@
               </span>
 
               <span
-                class="text-xs text-[var(--color-font)] text-right break-all"
+                class="text-[11px] text-[var(--color-font)] text-right break-all"
               >
                 {{ confirmTransaction.utrNumber }}
               </span>
@@ -1474,7 +1136,7 @@
             </div>
 
             <div
-              class="relative rounded-xl border-2 border-dashed border-[var(--color-success)] bg-[var(--color-bg)] p-4"
+              class="relative rounded-lg border-2 border-dashed border-[var(--color-success)] bg-[var(--color-bg)] p-4"
             >
               <input
                 type="file"
@@ -1495,7 +1157,7 @@
                   upload_file
                 </span>
 
-                <p class="text-sm font-semibold text-[var(--color-font)]">
+                <p class="text-[12px] font-semibold text-[var(--color-font)]">
                   Upload proof
                 </p>
 
@@ -1512,13 +1174,13 @@
                   (click)="removeSelectedFile($event)"
                   class="absolute top-0 right-0 z-10 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition"
                 >
-                  <span class="material-symbols-outlined text-[18px]"
+                  <span class="material-symbols-outlined text-[13px]"
                     >close</span
                   >
                 </button>
 
                 <div class="text-center pt-2">
-                  <p class="text-sm font-semibold text-green-600 break-all">
+                  <p class="text-[12px] font-semibold text-green-600 break-all">
                     {{ selectedFile.name }}
                   </p>
 
@@ -1552,18 +1214,18 @@
 
         <!-- Footer -->
         <div
-          class="flex gap-3 p-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
+          class="flex gap-2 p-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
         >
           <button
             (click)="cancelApprove(); removeSelectedFile()"
-            class="flex-1 h-11 rounded-xl border border-[var(--color-border)] text-sm font-semibold text-[var(--color-muted)] hover:bg-[var(--color-surface)] transition"
+            class="flex-1 h-11 rounded-lg border border-[var(--color-border)] text-[12px] font-semibold text-[var(--color-muted)] hover:bg-[var(--color-surface)] transition"
           >
             Cancel
           </button>
 
           <button
             (click)="confirmApprove()"
-            class="flex-1 h-11 rounded-xl bg-[var(--color-success)] text-white text-sm font-bold shadow-lg shadow-[var(--color-success)]/20 hover:opacity-90 transition"
+            class="flex-1 h-11 rounded-lg bg-[var(--color-success)] text-white text-[12px] font-bold shadow-lg shadow-[var(--color-success)]/20 hover:opacity-90 transition"
           >
             Approve
           </button>
@@ -1571,20 +1233,12 @@
       </div>
     </div>
 
-    <!-- Reject Confirmation Modal -->
-    <!-- <div
-      *ngIf="showRejectConfirm"
-      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
-    >
-      <div
-        class="bg-[var(--color-surface)] rounded-2xl max-w-md w-full p-6 shadow-2xl animate-slideUp"
-      > -->
     <div
       *ngIf="showRejectConfirm"
       class="fixed inset-0 z-[60] flex justify-center bg-black/60 backdrop-blur-md overflow-y-auto py-8"
     >
       <div
-        class="relative w-full max-w-lg bg-[var(--color-surface)] rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-6"
+        class="relative w-full max-w-lg bg-[var(--color-surface)] rounded-lg shadow-2xl max-h-[90vh] overflow-y-auto p-2.5 sm:p-6"
       >
         <div class="text-center mb-5 sm:mb-6">
           <div
@@ -1595,10 +1249,10 @@
               >warning</span
             >
           </div>
-          <h4 class="text-xl font-bold text-[var(--color-font)] mb-2">
+          <h4 class="text-[14px] font-bold text-[var(--color-font)] mb-2">
             Confirm Transaction Rejection
           </h4>
-          <p class="text-sm text-[var(--color-muted)]">
+          <p class="text-[12px] text-[var(--color-muted)]">
             Please provide a reason for rejecting this transaction
           </p>
         </div>
@@ -1606,11 +1260,11 @@
         <!-- Transaction preview -->
         <div
           *ngIf="confirmTransaction"
-          class="mb-5 p-3 sm:p-4 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] space-y-3"
+          class="mb-5 p-3 sm:p-4 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] space-y-3"
         >
           <div class="flex justify-between items-center">
             <span
-              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
+              class="text-[11px] text-[var(--color-muted)] font-semibold uppercase"
               >Type</span
             >
             <span class="font-bold text-[var(--color-font)]">
@@ -1627,7 +1281,7 @@
           </div>
           <div class="flex justify-between items-center">
             <span
-              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
+              class="text-[11px] text-[var(--color-muted)] font-semibold uppercase"
               >Amount</span
             >
             <span class="font-bold">
@@ -1636,10 +1290,10 @@
           </div>
           <div class="flex justify-between items-center">
             <span
-              class="text-xs text-[var(--color-muted)] font-semibold uppercase"
+              class="text-[11px] text-[var(--color-muted)] font-semibold uppercase"
               >Date</span
             >
-            <span class="font-medium text-[var(--color-muted)] text-sm">{{
+            <span class="font-medium text-[var(--color-muted)] text-[12px]">{{
               confirmTransaction.date | date: "short"
             }}</span>
           </div>
@@ -1648,14 +1302,14 @@
         <!-- Reject reason dropdown + custom input -->
         <div class="mb-6">
           <label
-            class="block text-xs text-[var(--color-muted)] font-semibold uppercase mb-2"
+            class="block text-[11px] text-[var(--color-muted)] font-semibold uppercase mb-2"
           >
             Reason for rejection
           </label>
 
           <select
             [(ngModel)]="reason"
-            class="w-full p-3 rounded-xl border-2 border-[var(--color-danger)] bg-[var(--color-danger)]/10 text-[var(--color-danger)] font-semibold focus:outline-none focus:border-[var(--color-danger)]"
+            class="w-full p-3 rounded-lg border-2 border-[var(--color-danger)] bg-[var(--color-danger)]/10 text-[var(--color-danger)] font-semibold focus:outline-none focus:border-[var(--color-danger)]"
             aria-label="Reason for rejection"
           >
             <option value="" disabled [selected]="!reason">
@@ -1670,10 +1324,10 @@
             [(ngModel)]="customReason"
             type="text"
             placeholder="Enter custom reason"
-            class="mt-3 w-full p-3 rounded-xl border border-[var(--color-danger)]/50 bg-white text-sm focus:ring-2 focus:ring-[var(--color-danger)] focus:border-[var(--color-danger)]"
+            class="mt-1 w-full p-3 rounded-lg border border-[var(--color-danger)]/50 bg-white text-[12px] focus:ring-2 focus:ring-[var(--color-danger)] focus:border-[var(--color-danger)]"
           />
 
-          <p class="text-xs mt-2 text-[var(--color-danger)]/90">
+          <p class="text-[11px] mt-2 text-[var(--color-danger)]/90">
             Pick a reason or enter a custom one. This will be saved as the
             rejection reason.
           </p>
@@ -1684,7 +1338,7 @@
         <div class="mb-6">
           <div class="flex items-center justify-between mb-2">
             <label
-              class="block text-xs text-[var(--color-muted)] font-semibold uppercase"
+              class="block text-[11px] text-[var(--color-muted)] font-semibold uppercase"
             >
               {{
                 confirmTransaction?.type === "payin"
@@ -1692,12 +1346,12 @@
                   : "Attachment (Optional)"
               }}
             </label>
-            <span class="text-xs text-[var(--color-muted)]">Max 5MB</span>
+            <span class="text-[11px] text-[var(--color-muted)]">Max 5MB</span>
           </div>
 
           <!-- File upload area -->
           <div
-            class="relative border-2 border-dashed border-[var(--color-border)] rounded-xl p-4 text-center hover:border-[var(--color-danger)] transition-colors duration-200"
+            class="relative border-2 border-dashed border-[var(--color-border)] rounded-lg p-4 text-center hover:border-[var(--color-danger)] transition-colors duration-200"
             [class.border-[var(--color-danger)]]="isDragging"
             (dragover)="onDragOver($event)"
             (dragleave)="onDragLeave($event)"
@@ -1725,17 +1379,17 @@
               </div>
 
               <div *ngIf="!selectedFile" class="space-y-2">
-                <p class="text-sm font-medium text-[var(--color-font)]">
+                <p class="text-[12px] font-medium text-[var(--color-font)]">
                   Drop file here or click to upload
                 </p>
-                <p class="text-xs text-[var(--color-muted)]">
+                <p class="text-[11px] text-[var(--color-muted)]">
                   Supports PDF, JPG, PNG, DOC (Max 5MB)
                 </p>
               </div>
 
               <!-- File preview when selected -->
               <div *ngIf="selectedFile" class="space-y-3">
-                <div class="flex items-center justify-center gap-3">
+                <div class="flex items-center justify-center gap-2">
                   <div
                     class="w-10 h-10 rounded-lg bg-[var(--color-danger)]/10 flex items-center justify-center"
                   >
@@ -1747,11 +1401,11 @@
                   </div>
                   <div class="text-left flex-1">
                     <p
-                      class="text-sm font-medium text-[var(--color-font)] truncate"
+                      class="text-[12px] font-medium text-[var(--color-font)] truncate"
                     >
                       {{ selectedFile.name }}
                     </p>
-                    <p class="text-xs text-[var(--color-muted)]">
+                    <p class="text-[11px] text-[var(--color-muted)]">
                       {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
                     </p>
                   </div>
@@ -1761,13 +1415,13 @@
                     class="text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors"
                     aria-label="Remove file"
                   >
-                    <span class="material-symbols-outlined text-lg">
+                    <span class="material-symbols-outlined text-sm">
                       close
                     </span>
                   </button>
                 </div>
 
-                <div class="flex items-center gap-2 text-xs">
+                <div class="flex items-center gap-2 text-[11px]">
                   <div
                     class="flex-1 h-2 bg-[var(--color-border)] rounded-full overflow-hidden"
                   >
@@ -1784,20 +1438,20 @@
                 <iframe
                   *ngIf="previewDocument"
                   [src]="previewUrl"
-                  class="w-full h-[300px] object-contain rounded-xl mt-3 border"
+                  class="w-full h-[300px] object-contain rounded-lg mt-1 border"
                 ></iframe>
 
                 <!-- Image Preview -->
                 <img
                   *ngIf="!previewDocument"
                   [src]="previewUrl"
-                  class="w-full h-[300px] object-contain rounded-xl mt-3 border"
+                  class="w-full h-[300px] object-contain rounded-lg mt-1 border"
                 />
               </div>
             </div>
           </div>
 
-          <p class="text-xs mt-2 text-[var(--color-muted)]">
+          <p class="text-[11px] mt-2 text-[var(--color-muted)]">
             <!-- Add supporting documents if needed. This is optional but recommended
             for audit trails. -->
             {{
@@ -1809,27 +1463,15 @@
         </div>
 
         <!-- Buttons -->
-        <!-- <div class="flex gap-3"> -->
-        <div class="flex flex-col sm:flex-row gap-3">
+        <!-- <div class="flex gap-2"> -->
+        <div class="flex flex-col sm:flex-row gap-2">
           <button
             (click)="cancelApprove(); removeSelectedFile()"
-            class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-muted)] rounded-xl hover:bg-[var(--color-bg)] transition font-bold"
+            class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-muted)] rounded-lg hover:bg-[var(--color-bg)] transition font-bold"
           >
             Cancel
           </button>
-          <!-- <button
-            (click)="confirmReject()"
-            [disabled]="!reason || (reason === 'other' && !customReason)"
-            [class.opacity-50]="
-              !reason || (reason === 'other' && !customReason)
-            "
-            [class.cursor-not-allowed]="
-              !reason || (reason === 'other' && !customReason)
-            "
-            class="flex-1 px-4 py-2.5 bg-[var(--color-danger)] text-white rounded-xl hover:from-[var(--color-danger)] hover:to-[var(--color-danger)] transition font-bold shadow-lg shadow-[var(--color-danger)]/30 disabled:shadow-none"
-          >
-            Reject
-          </button> -->
+
           <button
             (click)="confirmReject()"
             [disabled]="
@@ -1847,7 +1489,7 @@
               (reason === 'other' && !customReason) ||
               (confirmTransaction?.type === 'payin' && !selectedFile)
             "
-            class="flex-1 px-4 py-2.5 bg-[var(--color-danger)] text-white rounded-xl hover:from-[var(--color-danger)] hover:to-[var(--color-danger)] transition font-bold shadow-lg shadow-[var(--color-danger)]/30 disabled:shadow-none"
+            class="flex-1 px-4 py-2.5 bg-[var(--color-danger)] text-white rounded-lg hover:from-[var(--color-danger)] hover:to-[var(--color-danger)] transition font-bold shadow-lg shadow-[var(--color-danger)]/30 disabled:shadow-none"
           >
             Reject
           </button>
@@ -1857,448 +1499,326 @@
   </div>
 </div>
 
+<!-- Transaction Detail Modal -->
 <div
   *ngIf="selectedTransaction"
-  class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn"
 >
   <div
-    class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl animate-slideUp"
+    class="bg-white rounded-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden shadow-2xl animate-slideUp"
   >
-    <!-- Dynamic header based on transaction type -->
+    <!-- Header -->
     <div
-      class="p-6 border-b border-slate-200"
-      [ngClass]="{
-        'bg-emerald-50':
-          selectedTransaction.type === 'payin' &&
-          selectedTransaction.mode === 'upi',
-        'bg-blue-50 ':
-          selectedTransaction.type === 'payin' &&
-          selectedTransaction.mode === 'bank',
-        'bg-pink-50': selectedTransaction.type === 'payout',
-      }"
+      class="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-white"
     >
-      <div class="flex justify-between items-center">
-        <div>
-          <h3 class="text-xl font-bold text-slate-800">Transaction Details</h3>
-          <p class="text-sm text-slate-600 mt-1">
-            Complete transaction information
-          </p>
-        </div>
-        <button
-          (click)="selectedTransaction = null"
-          class="p-2 rounded-xl hover:bg-white/80 transition"
-        >
-          <span class="material-symbols-outlined text-slate-600">close</span>
-        </button>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900">Transaction Details</h3>
+        <p class="text-sm text-gray-500">Complete transaction information</p>
       </div>
+      <button
+        (click)="selectedTransaction = null"
+        class="p-2 rounded-lg hover:bg-gray-100 transition"
+      >
+        <svg
+          class="w-5 h-5 text-gray-500"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          ></path>
+        </svg>
+      </button>
     </div>
 
-    <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-      <div *ngIf="selectedTransaction.type === 'payin'">
-        <div class="mb-6">
+    <!-- Scrollable Content -->
+    <div class="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+      <!-- Two Column Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Left Column: Transaction Info -->
+        <div class="space-y-4">
+          <!-- Transaction ID Badge -->
           <div
-            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-bold"
-            [ngClass]="{
-              'bg-violet-100 text-violet-700 border border-violet-200':
-                selectedTransaction.mode === 'upi',
-              'bg-blue-100 text-blue-700 border border-blue-200':
-                selectedTransaction.mode === 'bank',
-            }"
+            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-sm font-medium"
           >
-            <span
-              class="material-symbols-outlined"
-              [ngClass]="{
-                'text-violet-600': selectedTransaction.mode === 'upi',
-                'text-blue-600': selectedTransaction.mode === 'bank',
-              }"
-              >assignment_ind</span
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-            <span>
-              {{ selectedTransaction.fundDisplayId }}
-            </span>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-5 mb-6">
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-            <p
-              class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-            >
-              UTR Number
-            </p>
-            <p class="font-bold text-slate-800">
-              {{ selectedTransaction.utrNumber || "N/A" }}
-            </p>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+            {{ selectedTransaction.fundDisplayId || "FF4D2B2" }}
           </div>
 
-          <!-- Amount Display with Edit Button -->
-          <div
-            class="p-4 rounded-xl font-bold text-lg"
-            [ngClass]="{
-              'bg-violet-50 text-violet-600 border border-violet-200':
-                selectedTransaction.mode === 'upi',
-              'bg-blue-50 text-blue-600 border border-blue-200':
-                selectedTransaction.mode === 'bank',
-            }"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <p
-                  class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-                >
-                  Amount
-                </p>
-                <p>{{ selectedTransaction.amount }}</p>
-              </div>
-              <button
-                *ngIf="
-                  selectedTransaction.mode === 'upi' ||
-                  selectedTransaction.mode === 'bank'
-                "
-                (click)="openEditAmountPopup()"
-                class="p-2 rounded-lg hover:bg-white/50 transition"
-                [ngClass]="{
-                  'hover:bg-violet-100': selectedTransaction.mode === 'upi',
-                  'hover:bg-blue-100': selectedTransaction.mode === 'bank',
-                }"
+          <!-- Grid: UTR + Amount -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-4 rounded-xl border border-gray-200 bg-white">
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
               >
-                <span class="material-symbols-outlined text-sm"> edit </span>
-              </button>
+                UTR Number
+              </p>
+              <p class="font-bold text-gray-800">
+                {{ selectedTransaction.utrNumber || "126815351851" }}
+              </p>
             </div>
-          </div>
-
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-            <p
-              class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-            >
-              Mode
-            </p>
-            <p class="font-bold text-slate-800">
-              {{ selectedTransaction.mode === "upi" ? "UPI" : "Bank Transfer" }}
-            </p>
-          </div>
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-            <p
-              class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-            >
-              Date & Time
-            </p>
-            <p class="font-bold text-slate-800 text-sm">
-              {{ selectedTransaction.date | date: "medium" }}
-            </p>
-          </div>
-        </div>
-
-        <!-- UPI Specific Details -->
-        <div
-          *ngIf="selectedTransaction.mode === 'upi'"
-          class="mb-6 p-4 rounded-xl bg-violet-50 border border-violet-200"
-        >
-          <p
-            class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-          >
-            UPI ID
-          </p>
-          <p class="font-bold text-violet-700">
-            {{ selectedTransaction.upiId }}
-          </p>
-        </div>
-
-        <!-- Bank Specific Details -->
-        <!-- <div
-          *ngIf="selectedTransaction.mode === 'bank'"
-          class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200"
-        >
-          <p
-            class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-          >
-            Account Number
-          </p>
-          <p class="font-bold text-blue-700">
-            {{ selectedTransaction.accountNo }}
-          </p>
-        </div> -->
-
-        <!-- UPI Details -->
-        <div
-          *ngIf="
-            (selectedTransaction.fundtype || selectedTransaction.mode) ===
-              'UPI' || selectedTransaction.mode === 'upi'
-          "
-          class="mb-6 p-4 rounded-xl bg-violet-50 border border-violet-200"
-        >
-          <p
-            class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-          >
-            UPI ID (VPA)
-          </p>
-          <p class="font-bold text-violet-700">
-            {{ selectedTransaction.upiId || selectedTransaction.vpa || "—" }}
-          </p>
-        </div>
-
-        <!-- Bank Details -->
-        <div
-          *ngIf="
-            (selectedTransaction.fundtype || selectedTransaction.mode) !==
-              'UPI' && selectedTransaction.mode !== 'upi'
-          "
-          class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200"
-        >
-          <p
-            class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-          >
-            Account Number
-          </p>
-          <p class="font-bold text-blue-700">
-            {{ selectedTransaction.accountNo || "—" }}
-          </p>
-        </div>
-        <div
-          class="mb-6"
-          *ngIf="selectedTransaction.remarks || selectedTransaction.message"
-        >
-          <p
-            class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-          >
-            Remarks
-          </p>
-          <p
-            class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700"
-          >
-            {{ selectedTransaction.remarks || selectedTransaction.message }}
-          </p>
-        </div>
-
-        <!-- Existing image block (inside transaction details) -->
-        <!-- <div class="mb-6">
-          <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">
-            Transaction Snapshot
-          </p>
-
-         <div *ngIf="selectedTransaction.fileUrl; else noSnapshot" class="flex items-start gap-3">
-
-  <img
-    [src]="selectedTransaction.fileUrl"
-    alt="Snapshot"
-    class="w-48 h-48 object-cover border-2 border-slate-200 rounded-xl shadow-md cursor-pointer"
-    (click)="openImagePopup(selectedTransaction.fileUrl)"
-  />
-
-  <a
-    [href]="selectedTransaction.fileUrl"
-    download
-    target="_blank"
-    class="flex items-center justify-center w-10 h-10 rounded-lg border border-slate-200 bg-white hover:bg-slate-100"
-  >
-    <span class="material-symbols-outlined">download</span>
-  </a>
-
-</div>
-
-          <ng-template #noSnapshot>
             <div
-              class="w-48 h-32 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm">
-              No Snapshot Available
+              class="p-4 rounded-xl border border-emerald-100 bg-emerald-50/50"
+            >
+              <div class="flex items-start justify-between">
+                <div>
+                  <p
+                    class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+                  >
+                    Amount
+                  </p>
+                  <p class="font-bold text-emerald-600 text-lg">
+                    {{ selectedTransaction.amount || "1000" }}
+                  </p>
+                </div>
+                <button
+                  *ngIf="
+                    selectedTransaction.mode === 'upi' ||
+                    selectedTransaction.mode === 'bank'
+                  "
+                  (click)="openEditAmountPopup()"
+                  class="p-2 rounded-lg hover:bg-white/50 transition"
+                  [ngClass]="{
+                    'hover:bg-violet-100': selectedTransaction.mode === 'upi',
+                    'hover:bg-blue-100': selectedTransaction.mode === 'bank',
+                  }"
+                >
+                  <span class="material-symbols-outlined text-[12px]">
+                    edit
+                  </span>
+                </button>
+              </div>
             </div>
-          </ng-template>
-        </div> -->
+          </div>
 
-        <!-- Image Popup Modal – add this at the end of the template (just before closing the component's root element) -->
-        <div
-          *ngIf="showImagePopup"
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
-          (click)="closeImagePopup()"
-        >
-          <div
-            class="relative max-w-4xl max-h-full p-4"
-            (click)="$event.stopPropagation()"
-          >
-            <!-- Close button -->
-            <button
-              (click)="closeImagePopup()"
-              class="absolute top-2 right-2 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
-            >
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <!-- Grid: Mode + Date -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-4 rounded-xl border border-gray-200 bg-white">
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                ></path>
-              </svg>
-            </button>
-            <!-- Enlarged image -->
-            <img
-              [src]="popupImageUrl"
-              alt="Transaction snapshot"
-              class="max-w-full max-h-screen object-contain rounded-lg"
-            />
+                Mode
+              </p>
+              <p class="font-bold text-gray-800">Bank Transfer</p>
+            </div>
+            <div class="p-4 rounded-xl border border-gray-200 bg-white">
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+              >
+                Date & Time
+              </p>
+              <p class="font-bold text-gray-800 text-sm">
+                {{ selectedTransaction.date | tz }}
+              </p>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- payout Transaction Details -->
-      <div *ngIf="selectedTransaction.type === 'payout'">
-        <div class="mb-6">
-          <div
-            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-100 border border-rose-200"
-          >
-            <span class="material-symbols-outlined text-rose-600"
-              >assignment_ind</span
-            >
-            <span class="font-bold text-rose-700">
-              {{ selectedTransaction.fundDisplayId }}
-            </span>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-5 mb-6">
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <!-- Account Number -->
+          <div class="p-4 rounded-xl border border-gray-200 bg-white">
             <p
-              class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
+              class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
             >
               Account Number
             </p>
-            <p class="font-bold text-slate-800">
-              {{
-                selectedTransaction.accountNumber ||
-                  selectedTransaction.accountNo
-              }}
+            <p class="font-bold text-emerald-600 text-lg">
+              {{ selectedTransaction.accountNo || "1235182252" }}
             </p>
           </div>
-          <div class="p-4 rounded-xl bg-rose-50 border border-rose-200">
+
+          <!-- Remarks -->
+          <div>
             <p
-              class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
+              class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
             >
-              Amount
+              Remarks
             </p>
-            <p class="font-bold text-rose-600 text-lg">
-              {{ selectedTransaction.amount }}
-            </p>
-          </div>
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-            <p
-              class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-            >
-              IFSC Code
-            </p>
-            <p class="font-bold text-slate-800">
-              {{
-                selectedTransaction.ifscCode || selectedTransaction.raw?.ifsc
-              }}
-            </p>
-          </div>
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-            <p
-              class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-            >
-              Date & Time
-            </p>
-            <p class="font-bold text-slate-800 text-sm">
-              {{ selectedTransaction.date | date: "medium" }}
-            </p>
+            <div class="p-4 rounded-xl border border-gray-200 bg-emerald-50/30">
+              <p class="text-gray-700">
+                {{ selectedTransaction.remarks || "3213f" }}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div
-          class="mb-6"
-          *ngIf="selectedTransaction.remarks || selectedTransaction.message"
-        >
-          <p
-            class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
+        <!-- Right Column: Screenshot & Upload -->
+        <div class="space-y-4">
+          <!-- Screenshot Box -->
+          <div
+            class="border border-gray-200 rounded-xl p-4 h-[400px] flex flex-col"
           >
-            Remarks
-          </p>
-          <p
-            class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700"
-          >
-            {{ selectedTransaction.remarks || selectedTransaction.message }}
-          </p>
-        </div>
+            <p
+              class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3"
+            >
+              Transaction Screenshot
+            </p>
 
-        <div class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200">
-          <p
-            class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
+            <div
+              class="flex-1 border-2 border-emerald-500 rounded-xl overflow-hidden relative group cursor-pointer"
+              (click)="openImagePopup(selectedTransaction.fileUrl)"
+            >
+              <img
+                *ngIf="selectedTransaction.fileUrl"
+                [src]="selectedTransaction.fileUrl"
+                alt="Transaction Screenshot"
+                class="w-full h-full object-contain bg-gray-50"
+              />
+              <div
+                *ngIf="!selectedTransaction.fileUrl"
+                class="w-full h-full flex items-center justify-center bg-gray-50"
+              >
+                <div class="text-center">
+                  <div
+                    class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3"
+                  >
+                    <svg
+                      class="w-8 h-8 text-emerald-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <p class="text-sm text-gray-500">No screenshot available</p>
+                </div>
+              </div>
+              <!-- Overlay -->
+              <div
+                class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition flex items-center justify-center"
+              >
+                <span
+                  class="text-white font-medium bg-black/70 px-4 py-2 rounded-lg"
+                  >Click to view Full Screen</span
+                >
+              </div>
+            </div>
+            <p class="text-center text-sm text-gray-500 mt-3">
+              Click to view Full Screen
+            </p>
+          </div>
+
+          <!-- Upload CV Section -->
+          <div
+            class="border border-gray-200 rounded-xl p-4 flex items-center justify-between"
           >
-            Bank Name
-          </p>
-          <p class="font-bold text-slate-800">
-            {{ selectedTransaction.bankName }}
-          </p>
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center"
+              >
+                <svg
+                  class="w-5 h-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                  ></path>
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-gray-800">Upload Your CV</p>
+                <p class="text-xs text-gray-500">
+                  DOCX or PDF formats, up to 5MB.
+                </p>
+              </div>
+            </div>
+            <button
+              class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
+            >
+              Upload
+            </button>
+          </div>
         </div>
-        <!-- <div class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200">
-          <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2">
-            File Path
-          </p>
-          <img [src]="
-              selectedTransaction.rejectionFilePath ||
-              selectedTransaction.qrImage
-            " alt="" class="w-48 h-48 object-cover border-2 border-slate-200 rounded-xl shadow-md" />
-        </div> -->
       </div>
 
-      <div class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200">
-        <p
-          class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2"
-        >
-          Transaction Image
-        </p>
-        <div *ngIf="selectedTransaction.fileUrl" class="flex items-start gap-3">
-          <img
-            [src]="selectedTransaction.fileUrl"
-            alt="Transaction Image"
-            class="w-48 h-48 object-cover border-2 border-slate-200 rounded-xl shadow-md cursor-pointer"
-            (click)="openImagePopup(selectedTransaction.fileUrl)"
-          />
-          <a
-            [href]="selectedTransaction.fileUrl"
-            download="transaction-snapshot"
-            target="_blank"
-            class="flex items-center justify-center w-10 h-10 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 transition"
-          >
-            <span class="material-symbols-outlined text-slate-600 text-[20px]"
-              >download</span
-            >
-          </a>
-        </div>
-        <div
-          *ngIf="!selectedTransaction.fileUrl"
-          class="w-48 h-32 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm"
-        >
-          No Image Available
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-4 pt-6 border-t border-slate-200">
-        <!-- Reject Button -->
-        <button
-          (click)="openRejectConfirm(selectedTransaction)"
-          [disabled]="isPayoutActionBlocked(selectedTransaction)"
-          class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-rose-700 bg-rose-100 border border-rose-200 hover:bg-rose-200 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-rose-100"
-        >
-          <span class="material-symbols-outlined text-[18px]">close</span>
-          Reject
-        </button>
-
-        <!-- Approve Button -->
+      <!-- Action Buttons -->
+      <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
         <button
           (click)="openApproveConfirm(selectedTransaction)"
-          [disabled]="isPayoutActionBlocked(selectedTransaction)"
-          class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/20 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-emerald-600"
+          [disabled]="
+            selectedTransaction.type === 'payout' &&
+            !selectedTransaction.processing
+          "
+          class="px-6 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
         >
-          <span class="material-symbols-outlined text-[18px]">check</span>
           Approve
+        </button>
+        <button
+          (click)="openRejectConfirm(selectedTransaction)"
+          [disabled]="
+            selectedTransaction.type === 'payout' &&
+            !selectedTransaction.processing
+          "
+          class="px-6 py-2.5 bg-red-500 rounded-lg font-medium text-white transition shadow-lg shadow-red-500/30 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-500 disabled:shadow-none"
+        >
+          Reject
         </button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Image Popup -->
+<div
+  *ngIf="showImagePopup"
+  class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+  (click)="closeImagePopup()"
+>
+  <div
+    class="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center"
+    (click)="$event.stopPropagation()"
+  >
+    <button
+      (click)="closeImagePopup()"
+      class="absolute top-4 right-4 z-10 bg-white/10 backdrop-blur rounded-full p-2 hover:bg-white/20 transition"
+    >
+      <svg
+        class="w-6 h-6 text-white"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        ></path>
+      </svg>
+    </button>
+    <img
+      [src]="popupImageUrl"
+      alt="Enlarged Transaction Screenshot"
+      class="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+    />
+  </div>
+</div>
+
 <div
   *ngIf="showImagePopup"
   class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75"

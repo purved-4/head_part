@@ -87,6 +87,10 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
             this.isLoading = false;
           },
           error: (err) => {
+            this.snackBar.show(
+              err?.error?.message || "Failed to load capacity",
+              false,
+            );
             this.isLoading = false;
           },
         });
@@ -108,6 +112,10 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
             this.isLoading = false;
           },
           error: (err) => {
+            this.snackBar.show(
+              err?.error?.message || "Failed to load capacity",
+              false,
+            );
             this.isLoading = false;
           },
         });
@@ -199,6 +207,10 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
         },
         error: (err: any) => {
           this.isLoading = false;
+          this.snackBar.show(
+            err?.error?.message || "Failed to save capacity",
+            false,
+          );
         },
       });
     } else if (this.mode === "UPI") {
@@ -212,6 +224,10 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
         },
         error: (err: any) => {
           this.isLoading = false;
+          this.snackBar.show(
+            err?.error?.message || "Failed to save capacity",
+            false,
+          );
         },
       });
     }

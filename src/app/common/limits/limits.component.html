@@ -561,7 +561,7 @@
 
               <!-- Actions -->
               <td class="px-6 py-4">
-                <div class="flex gap-2">
+                <!-- <div class="flex gap-2">
                   <button
                     (click)="openAddTransactionAmountModal(entity)"
                     class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--color-success)] text-white text-sm"
@@ -570,6 +570,37 @@
                       >add</span
                     >
                     Add Amount
+                  </button>
+
+                  <button
+                    (click)="viewLimits(entity)"
+                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-font)]"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">
+                      visibility
+                    </span>
+                    View Limits
+                  </button>
+                </div> -->
+                <div class="flex gap-2">
+                  <button
+                    (click)="openAddTransactionAmountModal(entity, 'ADD')"
+                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--color-success)] text-white text-sm"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">
+                      add
+                    </span>
+                    Add Amount
+                  </button>
+
+                  <button
+                    (click)="openAddTransactionAmountModal(entity, 'REMOVE')"
+                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-red-600 text-white text-sm"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">
+                      remove
+                    </span>
+                    Remove Amount
                   </button>
 
                   <button
@@ -631,13 +662,23 @@
             {{ entity.createdAt | tz }}
           </div>
 
-          <div class="grid grid-cols-2 gap-2 mt-4">
+          <div class="grid grid-cols-3 gap-2 mt-4">
             <button
               (click)="openAddTransactionAmountModal(entity)"
               class="px-3 py-2 rounded-xl bg-[var(--color-success)] text-white text-xs flex items-center justify-center gap-1"
             >
               <span class="material-symbols-outlined text-[16px]">add</span>
               Add
+            </button>
+
+            <button
+              (click)="openAddTransactionAmountModal(entity, 'REMOVE')"
+              class="px-3 py-2 rounded-xl bg-red-600 text-white text-xs flex items-center justify-center gap-1"
+            >
+              <span class="material-symbols-outlined text-[16px]">
+                remove
+              </span>
+              Remove
             </button>
 
             <button
@@ -1642,10 +1683,18 @@
       >
         <button
           *ngIf="role === 'OWNER'"
-          (click)="openAdminSelfTransactionAmountModal()"
+          (click)="openAdminSelfTransactionAmountModal('ADD')"
           class="px-4 py-2.5 rounded-xl bg-[var(--color-primary)] text-white text-sm font-medium hover:opacity-90 transition"
         >
           Add Amount
+        </button>
+
+        <button
+          *ngIf="role === 'OWNER'"
+          (click)="openAdminSelfTransactionAmountModal('REMOVE')"
+          class="px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition"
+        >
+          Remove Amount
         </button>
 
         <button
@@ -1659,3 +1708,4 @@
     </div>
   </div>
 </div>
+

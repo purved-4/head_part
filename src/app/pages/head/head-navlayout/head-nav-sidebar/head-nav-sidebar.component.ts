@@ -175,13 +175,19 @@ export class HeadNavSidebarComponent implements OnInit {
   route: "/head/override-currency-management", 
   icon: "settings",
   children: [
+     {
+         label: "User Profile",
+         route: "/head/sharedUserProfile",
+        },
     {
       label: "Currency Management",
       route: "/head/override-currency-management", 
     },
+
    
   ],
 },
+ 
   ];
 
   branchId: any;

@@ -1,4 +1,5 @@
-import { Injectable } from "@angular/core";
+import { Injectable, Inject, PLATFORM_ID } from "@angular/core";
+import { isPlatformBrowser } from "@angular/common";
 import { BehaviorSubject } from "rxjs";
 import { SubjectRegistryService } from "../../registery/subject-registry.service";
 
@@ -35,26 +36,64 @@ export class TimeZoneServiceService {
   private readonly TIME_ZONE_KEY = "TIME_ZONE";
 
   private readonly commonZones: TimeZoneOption[] = [
-    { code: "ASIA_KOLKATA", label: "India (IST)", iana: "Asia/Kolkata", mode: "CUSTOM" },
-    { code: "ASIA_DHAKA", label: "Bangladesh", iana: "Asia/Dhaka", mode: "CUSTOM" },
-    { code: "ASIA_DUBAI", label: "Dubai (UAE)", iana: "Asia/Dubai", mode: "CUSTOM" },
-    { code: "ASIA_KARACHI", label: "Pakistan", iana: "Asia/Karachi", mode: "CUSTOM" },
+    {
+      code: "ASIA_KOLKATA",
+      label: "India (IST)",
+      iana: "Asia/Kolkata",
+      mode: "CUSTOM",
+    },
+    {
+      code: "ASIA_DHAKA",
+      label: "Bangladesh",
+      iana: "Asia/Dhaka",
+      mode: "CUSTOM",
+    },
+    {
+      code: "ASIA_DUBAI",
+      label: "Dubai (UAE)",
+      iana: "Asia/Dubai",
+      mode: "CUSTOM",
+    },
+    {
+      code: "ASIA_KARACHI",
+      label: "Pakistan",
+      iana: "Asia/Karachi",
+      mode: "CUSTOM",
+    },
     { code: "UTC", label: "UTC", iana: "UTC", mode: "CUSTOM" },
-    { code: "EUROPE_LONDON", label: "London (UK)", iana: "Europe/London", mode: "CUSTOM" },
-    { code: "AMERICA_NEW_YORK", label: "New York (USA)", iana: "America/New_York", mode: "CUSTOM" },
-    { code: "ASIA_SINGAPORE", label: "Singapore", iana: "Asia/Singapore", mode: "CUSTOM" },
+    {
+      code: "EUROPE_LONDON",
+      label: "London (UK)",
+      iana: "Europe/London",
+      mode: "CUSTOM",
+    },
+    {
+      code: "AMERICA_NEW_YORK",
+      label: "New York (USA)",
+      iana: "America/New_York",
+      mode: "CUSTOM",
+    },
+    {
+      code: "ASIA_SINGAPORE",
+      label: "Singapore",
+      iana: "Asia/Singapore",
+      mode: "CUSTOM",
+    },
   ];
 
   private readonly timeZoneSubject: BehaviorSubject<TimeZoneState>;
   readonly timeZone$;
 
-  constructor(private subjectRegistry: SubjectRegistryService) {
+  constructor(
+    private subjectRegistry: SubjectRegistryService,
+    @Inject(PLATFORM_ID) private platformId: Object,
+  ) {
     const initialState = this.getInitialState();
 
     this.timeZoneSubject = this.subjectRegistry.register(
       this.TIME_ZONE_KEY,
       () => new BehaviorSubject<TimeZoneState>(initialState),
-      initialState
+      initialState,
     );
 
     this.timeZone$ = this.timeZoneSubject.asObservable();
@@ -75,8 +114,11 @@ export class TimeZoneServiceService {
   getActiveTimeZone(): string {
     return this.getCurrentState().iana;
   }
-
   getSystemTimeZone(): string {
+    if (!isPlatformBrowser(this.platformId)) {
+      return "UTC";
+    }
+
     return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   }
 
@@ -141,7 +183,7 @@ export class TimeZoneServiceService {
       Number(map["day"]),
       Number(map["hour"]),
       Number(map["minute"]),
-      Number(map["second"])
+      Number(map["second"]),
     );
 
     return (asUTC - date.getTime()) / 60000;
@@ -159,7 +201,7 @@ export class TimeZoneServiceService {
   formatInTimeZone(
     value: string | Date,
     timeZone: string = this.getActiveTimeZone(),
-    options?: Intl.DateTimeFormatOptions
+    options?: Intl.DateTimeFormatOptions,
   ): string {
     const date = this.toDate(value);
     return new Intl.DateTimeFormat("en-IN", {
@@ -173,7 +215,7 @@ export class TimeZoneServiceService {
   getReportRange(
     fromDate: string | Date,
     toDate: string | Date,
-    timeZone: string = this.getActiveTimeZone()
+    timeZone: string = this.getActiveTimeZone(),
   ): ReportRangeResult {
     const fromUtcDate = this.buildZonedDate(fromDate, timeZone, {
       hour: 0,
@@ -233,12 +275,14 @@ export class TimeZoneServiceService {
   }
 
   private toState(option: TimeZoneOption): TimeZoneState {
-    const iana = option.mode === "SYSTEM" ? this.getSystemTimeZone() : option.iana;
+    const iana =
+      option.mode === "SYSTEM" ? this.getSystemTimeZone() : option.iana;
 
     return {
       code: option.code,
       mode: option.mode,
-      label: option.mode === "SYSTEM" ? `System timezone (${iana})` : option.label,
+      label:
+        option.mode === "SYSTEM" ? `System timezone (${iana})` : option.label,
       iana,
       offsetLabel: this.getOffsetLabel(iana),
     };
@@ -268,7 +312,7 @@ export class TimeZoneServiceService {
       minute: number;
       second: number;
       millisecond: number;
-    }
+    },
   ): Date {
     const parts = this.extractDateParts(input);
 
@@ -279,7 +323,7 @@ export class TimeZoneServiceService {
       timeParts.hour,
       timeParts.minute,
       timeParts.second,
-      timeParts.millisecond
+      timeParts.millisecond,
     );
 
     let offset = this.getOffsetMinutes(timeZone, new Date(utcGuess));
@@ -293,7 +337,11 @@ export class TimeZoneServiceService {
     return new Date(corrected);
   }
 
-  private extractDateParts(input: string | Date): { year: number; month: number; day: number } {
+  private extractDateParts(input: string | Date): {
+    year: number;
+    month: number;
+    day: number;
+  } {
     if (input instanceof Date) {
       return {
         year: input.getFullYear(),
@@ -330,11 +378,17 @@ export class TimeZoneServiceService {
   }
 
   private readSavedState(): TimeZoneState | null {
-    if (typeof window === "undefined") return null;
+    if (!isPlatformBrowser(this.platformId)) {
+      return null;
+    }
 
     try {
       const raw = localStorage.getItem(this.STORAGE_KEY);
-      if (!raw) return null;
+
+      if (!raw) {
+        return null;
+      }
+
       return JSON.parse(raw) as TimeZoneState;
     } catch {
       return null;
@@ -342,7 +396,9 @@ export class TimeZoneServiceService {
   }
 
   private saveState(state: TimeZoneState): void {
-    if (typeof window === "undefined") return;
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
 
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));

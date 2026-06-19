@@ -1,161 +1,35 @@
 import { NgModule } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { WebhookDataComponent } from "../common/webhook-data/webhook-data.component";
-import { NotificationComponent } from "../common/notification/notification.component";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { UserProfileComponent } from "../common/user-profile/user-profile.component";
-import { WorkTimeComponent } from "../common/work-time/work-time.component";
-import { LimitsComponent } from "../common/limits/limits.component";
 import { FirstLetterPipe } from "../pipes/first-letter.pipe";
-import { PercentageLogComponent } from "../components/reports/percentage-log/percentage-log.component";
-import { TransactionHistoryReportComponent } from "../components/reports/transaction-history-report/transaction-history-report.component";
-import { EntityReportComponent } from "../components/reports/entity-report/entity-report.component";
-import { WorkTimeReportComponent } from "../components/reports/work-time-report/work-time-report.component";
-import { FundsReportComponent } from "../components/reports/funds-report/funds-report.component";
-import { QRCodeComponent } from "angularx-qrcode";
-import { ResizableDirective } from "../directives/resizable.directive";
-import { UserDashboardUpiBankLimitComponent } from "../components/user-dashboard-upi-bank-limit/user-dashboard-upi-bank-limit.component";
-import { CurrentLimitComponent } from "../components/current-limit/current-limit.component";
-import { HeadBranchCapacityComponent } from "../components/head-branch-capacity/head-branch-capacity.component";
-import { BalanceHistoryReportComponent } from "../components/reports/balance-history-report/balance-history-report.component";
 import { FileSizePipe } from "../pipes/file-size.pipe";
-import { BranchRegisterComponent } from "../common/branch-register/branch-register.component";
-import { BranchDataHistoryComponent } from "../components/reports/branch-data-history/branch-data-history.component";
-import { AddLimitPopupComponent } from "../common/add-limit-popup/add-limit-popup.component";
-import { ReloadComponent } from "../common/reload/reload.component";
-import { MobileChattingComponent } from "../common/mobile-chatting/mobile-chatting.component";
-import { ChatResponsiveComponent } from "../common/chat-responsive/chat-responsive.component";
-import { ChatingComponent } from "../common/chating/chating.component";
-import { RecycleUpiComponent } from "../common/recycle-upi/recycle-upi.component";
-import { RecycleBankComponent } from "../common/recycle-bank/recycle-bank.component";
 import { PlaceholderPipe } from "../pipes/placeholder.pipe";
-// import { AcceptRejectChatComponent } from "../pages/comPart/accept-reject-chat/accept-reject-chat.component";
-import { WebsitePercentageModelComponent } from "../common/website-percentage-model/website-percentage-model.component";
-import { SidebarNotificationComponent } from "../common/sidebar-notification/sidebar-notification.component";
-import { TimeZoneComponent } from "../common/time-zone/time-zone.component";
-import { CompartPercentageModleComponent } from "../common/compart-percentage-modle/compart-percentage-modle.component";
-import { EnityCompartEditModelComponent } from "../common/enity-compart-edit-model/enity-compart-edit-model.component";
 import { TimeZonePipe } from "../pipes/time-zone.pipe";
-import { AutoRefreshComponent } from "../common/auto-refresh/auto-refresh.component";
-import { HierarchyManagementComponent } from "../common/hierarchy-management/hierarchy-management.component";
-import { BanksComponent } from "../common/head_branch/banks/banks.component";
-import { UpisComponent } from "../common/head_branch/upis/upis.component";
-import { AllotCurrencyComponent } from "../common/allot-currency/allot-currency.component";
+import { ResizableDirective } from "../directives/resizable.directive";
+import { CommonModule } from "@angular/common";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { RouterModule } from "@angular/router";
-import { PayinCapacityComponent } from "../common/payin-capacity/payin-capacity.component";
-import { OverrideCurrencyRateComponent } from "../common/head_branch/override-currency-rate/override-currency-rate.component";
-import { ThemeToggleComponent } from "../theme/theme.component";
-// import { HeadBranchDashboardComponent } from "../common/head-branch-dashboard/head-branch-dashboard.component";
-import { HbPayinReportComponent } from "../common/hb-payin-report/hb-payin-report.component";
-import { HbPayoutReportComponent } from "../common/hb-payout-report/hb-payout-report.component";
-import { EnterKeyDirective } from "../directives/enter-key.directive";
-import { BankDetailsComponent } from "../common/head_branch/bank-details/bank-details.component";
-import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods/payments-methods.component";
-import { SearchableDropdownComponent } from "../common/drop-down/drop-down.component";
-import { HeadBranchDashboardComponent } from "../common/head_branch/head-branch-dashboard/head-branch-dashboard.component";
+import { QRCodeComponent } from "angularx-qrcode";
 
-// shared.module.ts
+import { ButtonLoaderDirective } from "../directives/button-loader.directive";
+import { CurrencyFormatPipe } from "../pipes/currency-format.pipe";
+
 @NgModule({
   declarations: [
-    WebhookDataComponent,
-    NotificationComponent,
-    UserProfileComponent,
-    WorkTimeComponent,
-    LimitsComponent,
     FirstLetterPipe,
-    PercentageLogComponent,
-    TransactionHistoryReportComponent,
-    EntityReportComponent,
-    WorkTimeReportComponent,
-    FundsReportComponent,
-    ResizableDirective,
-    UserDashboardUpiBankLimitComponent,
-    CurrentLimitComponent,
-    HeadBranchCapacityComponent,
-    BalanceHistoryReportComponent,
     FileSizePipe,
-    BranchRegisterComponent,
-    BranchDataHistoryComponent,
-    AddLimitPopupComponent,
-    ReloadComponent,
-    MobileChattingComponent,
-    ChatResponsiveComponent,
-    ChatingComponent,
-    // AcceptRejectChatComponent,
-    RecycleBankComponent,
-    RecycleUpiComponent,
-    PayinCapacityComponent,
     PlaceholderPipe,
-    WebsitePercentageModelComponent,
-    SidebarNotificationComponent,
-    TimeZoneComponent,
-    CompartPercentageModleComponent,
-    EnityCompartEditModelComponent,
     TimeZonePipe,
-    AutoRefreshComponent,
-    HierarchyManagementComponent,
-    BanksComponent,
-    UpisComponent,
-    AllotCurrencyComponent,
-    OverrideCurrencyRateComponent,
-    ThemeToggleComponent,
-    HbPayinReportComponent,
-    HbPayoutReportComponent,
-    EnterKeyDirective,
-    BankDetailsComponent,
-    PaymentsMethodsComponent,
-    SearchableDropdownComponent,
-    HeadBranchDashboardComponent
+    ResizableDirective,
+    CurrencyFormatPipe,
+    ButtonLoaderDirective,
   ],
   exports: [
-    WebhookDataComponent,
-    NotificationComponent,
-    UserProfileComponent,
-    WorkTimeComponent,
-    LimitsComponent,
     FirstLetterPipe,
-    PercentageLogComponent,
-    TransactionHistoryReportComponent,
-    EntityReportComponent,
-    WorkTimeReportComponent,
-    FundsReportComponent,
-    UserDashboardUpiBankLimitComponent,
-    CurrentLimitComponent,
-    HeadBranchCapacityComponent,
-    BalanceHistoryReportComponent,
     FileSizePipe,
-    BranchDataHistoryComponent,
-    ReloadComponent,
-    AddLimitPopupComponent,
-    MobileChattingComponent,
-    ChatResponsiveComponent,
-    ChatingComponent,
-    // AcceptRejectChatComponent,
-    RecycleBankComponent,
-    RecycleUpiComponent,
-    PayinCapacityComponent,
     PlaceholderPipe,
-    WebsitePercentageModelComponent,
-    SidebarNotificationComponent,
-    TimeZoneComponent,
-    CompartPercentageModleComponent,
-    EnityCompartEditModelComponent,
     TimeZonePipe,
-    AutoRefreshComponent,
-    HierarchyManagementComponent,
-    BanksComponent,
-    PaymentsMethodsComponent,
-    UpisComponent,
-    AllotCurrencyComponent,
-    OverrideCurrencyRateComponent,
-    ThemeToggleComponent,
-    HbPayinReportComponent,
-    HbPayoutReportComponent,
-    EnterKeyDirective,
-    BankDetailsComponent,
-    SearchableDropdownComponent,
-    BankDetailsComponent,
-    HeadBranchDashboardComponent
+    ResizableDirective,
+    CurrencyFormatPipe,
+    ButtonLoaderDirective,
   ],
   imports: [
     CommonModule,

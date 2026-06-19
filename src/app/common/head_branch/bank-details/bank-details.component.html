@@ -240,7 +240,7 @@
                   </span>
 
                   <p class="text-sm font-medium">
-                    {{ formatDate(bankData?.createdAt) }}
+                    {{ formatDate(bankData?.createdAt) | tz }}
                   </p>
                 </div>
               </div>
@@ -362,45 +362,6 @@
                 />
               </div>
 
-              <!-- MIN TOTAL -->
-              <div class="grid grid-cols-2 gap-3">
-                <p class="text-sm text-gray-500">Min Total Amount</p>
-
-                <div *ngIf="!isEditMode">
-                  <p class="text-sm font-semibold text-gray-800">
-                    ₹
-                    {{ bankData?.min_total_tran_amount || 0 }}
-                  </p>
-                </div>
-
-                <input
-                  *ngIf="isEditMode"
-                  appEnterKeyFocus
-                  [(ngModel)]="updateForm.min_total_tran_amount"
-                  type="number"
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-
-              <!-- TRANSACTION COUNT -->
-              <div class="grid grid-cols-2 gap-3">
-                <p class="text-sm text-gray-500">Transaction Count</p>
-
-                <div *ngIf="!isEditMode">
-                  <p class="text-sm font-semibold text-gray-800">
-                    {{ bankData?.min_tran_count || 0 }}
-                  </p>
-                </div>
-
-                <input
-                  *ngIf="isEditMode"
-                  [(ngModel)]="updateForm.min_tran_count"
-                  type="number"
-                  appEnterKeyFocus
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-
               <!-- CAPACITY RANGE -->
               <div class="grid grid-cols-2 gap-3 items-start">
                 <p class="text-sm text-gray-500">Capacity Range</p>
@@ -445,7 +406,7 @@
                   </span>
 
                   <p class="text-sm font-medium">
-                    {{ formatDate(bankData?.updatedAt) }}
+                    {{ formatDate(bankData?.updatedAt) | tz }}
                   </p>
                 </div>
               </div>

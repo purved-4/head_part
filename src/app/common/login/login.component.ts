@@ -18,6 +18,15 @@ export class LoginComponent implements OnInit {
     email: "",
     password: "",
   };
+  isMenuOpen=false;
+
+   stats = [
+  { title: 'Balance', value: 0, target: 845620},
+  { title: 'Savings', value: 0, target: 210000 },
+  { title: 'Income', value: 0, target: 125000 },
+  { title: 'Expenses', value: 0, target: 48200 },
+  { title: 'Investments', value: 0, target: 375000 }
+];
 
   showPassword = false;
 
@@ -31,12 +40,37 @@ export class LoginComponent implements OnInit {
     private memoryService: AuthMemoryService,
     private subjectService: SubjectRegistryService,
   ) {}
+ 
 
-  ngOnInit(): void {
+   ngOnInit(): void {
     this.socketConfigService.destroyAll();
     this.memoryService.setAccessToken(null);
     this.userStateService.setCurrentUser(null);
+
+     this.stats.forEach(stat => {
+    this.animate(stat);
+  });
   }
+ 
+
+animate(stat: any) {
+
+  const increment = stat.target / 100;
+
+  const timer = setInterval(() => {
+
+    stat.value += increment;
+
+    if (stat.value >= stat.target) {
+      stat.value = stat.target;
+      clearInterval(timer);
+    }
+
+  }, 20);
+}
+
+
+ 
 
   formSubmit() {
     if (!this.loginData.email || this.loginData.email.trim() === "") {
@@ -98,5 +132,9 @@ export class LoginComponent implements OnInit {
       default:
         this.router.navigate(["/"]);
     }
+  }
+
+   toggleMobileMenu() {
+    this.isMenuOpen = !this.isMenuOpen;
   }
 }

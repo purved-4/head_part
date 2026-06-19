@@ -80,7 +80,8 @@ export class AllotCurrencyComponent implements OnInit {
   loadComPartCurrencies() {
     this.comPartService.getCurrencies(this.entityId).subscribe({
       next: (res: any) => {
-        const data = Array.isArray(res) ? res : res?.data || [];
+        const cs = res.currencies;
+        const data = Array.isArray(cs) ? cs : cs?.data || [];
         this.loadExistingData(data);
         this.snackBar.show(res.message || "Data fetched successfully", true);
 

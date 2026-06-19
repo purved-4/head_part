@@ -45,12 +45,14 @@ export class AddLimitPopupComponent implements OnInit, OnChanges {
   successMessage: string = "";
 
   isLoading: boolean = false;
-
+  netRecoverable: number = 0;
+  totalGiven: number = 0;
+  alreadyReduced: number = 0;
   constructor(
     private userStateService: UserStateService,
     private limitService: LimitsService,
     private utilService: UtilsServiceService,
-    private comPartService:ComPartService
+    private comPartService: ComPartService,
   ) {}
 
   ngOnInit(): void {
@@ -93,7 +95,10 @@ export class AddLimitPopupComponent implements OnInit, OnChanges {
       transactionAmount: this.transactionAmount,
     };
 
-    const resolvedService = this.currentUserRole === "COM_PART" ? this.comPartService : this.limitService
+    const resolvedService =
+      this.currentUserRole === "COM_PART"
+        ? this.comPartService
+        : this.limitService;
 
     resolvedService.addLimits(payload).subscribe({
       next: (res) => {
@@ -120,7 +125,10 @@ export class AddLimitPopupComponent implements OnInit, OnChanges {
       this.errorMessage = "Invalid entity details";
       return;
     }
-    const resolvedService = this.currentUserRole === "COM_PART" ? this.comPartService : this.limitService
+    const resolvedService =
+      this.currentUserRole === "COM_PART"
+        ? this.comPartService
+        : this.limitService;
 
     resolvedService
       .getLatestLimitsByEntityAndTypeUpdate(
@@ -146,6 +154,26 @@ export class AddLimitPopupComponent implements OnInit, OnChanges {
           this.errorMessage = "Failed to load limit data";
         },
       });
+
+    this.limitService
+      .getParentGaveSummary(
+        this.currentRoleId,
+        this.currentUserRole,
+        this.entityId,
+        this.entityType,
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.totalGiven = res?.totalGiven || 0;
+          this.alreadyReduced = res?.alreadyReduced || 0;
+          this.netRecoverable = res?.netRecoverable || 0;
+        },
+        error: () => {
+          this.totalGiven = 0;
+          this.alreadyReduced = 0;
+          this.netRecoverable = 0;
+        },
+      });
   }
 
   onCancel() {
@@ -153,5 +181,59 @@ export class AddLimitPopupComponent implements OnInit, OnChanges {
     this.errorMessage = "";
     this.successMessage = "";
     this.onClose.emit();
+  }
+
+  removeLimit() {
+    this.errorMessage = "";
+    this.successMessage = "";
+
+    if (!this.transactionAmount || this.transactionAmount <= 0) {
+      this.errorMessage =
+        "Please enter a valid transactionAmount greater than 0";
+      return;
+    }
+
+    if (!this.entityId || !this.entityType) {
+      this.errorMessage = "Invalid entity details";
+      return;
+    }
+
+    this.isLoading = true;
+
+    const payload = {
+      entityId: this.entityId,
+      entityType: this.entityType,
+      transactionAmount: this.transactionAmount,
+    };
+
+    this.limitService
+      .reduceLimits(
+        this.currentRoleId,
+        this.currentUserRole,
+        this.entityId,
+        this.entityType,
+        this.transactionAmount,
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.successMessage = "Limit removed successfully";
+
+          this.transactionAmount = "";
+          this.isLoading = false;
+
+          this.getLimitData();
+          this.onSuccess.emit(res);
+
+          setTimeout(() => {
+            this.onClose.emit();
+          }, 1500);
+        },
+        error: (error: any) => {
+          this.errorMessage =
+            error?.error?.message ||
+            "Failed to remove limit. Please try again.";
+          this.isLoading = false;
+        },
+      });
   }
 }

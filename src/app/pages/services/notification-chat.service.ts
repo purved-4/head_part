@@ -2,8 +2,6 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable, NgZone } from "@angular/core";
 import { catchError, map, Observable, throwError } from "rxjs";
 import baseUrl from "./helper";
-import { EventSourcePolyfill } from "event-source-polyfill";
-import { AnyARecord } from "node:dns";
 
 @Injectable({
   providedIn: "root",
@@ -91,100 +89,11 @@ export class NotificationChatService {
     );
   }
 
-  getThreadByBranchIdWithIsResolvedPaginated(
-    branchId: string,
-    entityType: any,
-    isResolved: any,
-    type?: any,
-    page: number = 0,
-    size: number = 20,
-  ): Observable<any> {
-    if (type === undefined || type === null) {
-      type = "all";
-    }
+  
 
-    return this.http
-      .get(
-        `${baseUrl}/api/chat/findThread/paginated/${branchId}/${entityType}/${isResolved}/${type}`,
-        {
-          params: {
-            page: page.toString(),
-            size: size.toString(),
-            sort: "updatedAt,desc",
-          },
-        },
-      )
-      .pipe(
-        map((res: any) => res.data),
-        catchError((err) => throwError(err)),
-      );
-  }
+ 
 
-  // getThreadByHeadIdAndIsResolved(
-  //   branchId: string,
-  //   entityType: any,
-  //   isResolved: any,
-  //   type?: any,
-  //   page?:any,
-  //   size?:any
-  // ): Observable<any> {
-  //   if (type === undefined || type === null) {
-  //     type = "all";
-  //   }
-
-  //   return this.http
-  //     .get(
-  //       `${baseUrl}/api/chat/findThreadOfHead/${branchId}/${entityType}/${isResolved}/${type}`,
-  //     )
-  //     .pipe(
-  //       map((res: any) => res.data),
-  //       catchError((err) => throwError(err)),
-  //     );
-  // }
-
-  getThreadByHeadIdAndIsResolvedPaginated(
-    branchId: string,
-    entityType: any,
-    isResolved: any,
-    type?: any,
-    page?: any,
-    size?: any,
-  ): Observable<any> {
-    if (type === undefined || type === null) {
-      type = "all";
-    }
-
-    return this.http
-      .get(
-        `${baseUrl}/api/chat/findThreadOfHead/paginated/${branchId}/${entityType}/${isResolved}/${type}`,
-      )
-      .pipe(
-        map((res: any) => res.data),
-        catchError((err) => throwError(err)),
-      );
-  }
-
-  getAllThreadForHeadAndBranchCombined(
-    branchId: string,
-    entityType: any,
-    isResolved: any,
-    type?: any,
-    page: any = 0,
-    size: any = 20,
-  ): Observable<any> {
-    if (type === undefined || type === null) {
-      type = "all";
-    }
-
-    return this.http
-      .get(
-        `${baseUrl}/api/chat/findThreadCombined/${branchId}/${entityType}/${isResolved}/${type}`,
-      )
-      .pipe(
-        map((res: any) => res.data),
-        catchError((err) => throwError(err)),
-      );
-  }
+ 
   
 getAllThreadCombinedPaginate(
     branchId: string,
@@ -214,14 +123,6 @@ getAllThreadCombinedPaginate(
       );
   }
 
- getThreadByFundId(fundId: string): Observable<any> {
-    return this.http
-      .get(`${baseUrl}/comPart/api/chat/findThreadByFundsId/${fundId}`)
-      .pipe(
-        map((res: any) => res.data),
-        catchError((err) => throwError(err)),
-      );
-  }
 
   getAllNotifications(recipientId: any): Observable<any> {
     return this.http

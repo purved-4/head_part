@@ -63,6 +63,7 @@ export class LimitsComponent implements OnInit {
   selectedEntityBalances: any = null;
   loadingEntityBalances = false;
   chiefBuisnessType: any;
+  actionType: "ADD" | "REMOVE" = "ADD";
 
   constructor(
     private userStateService: UserStateService,
@@ -195,7 +196,9 @@ export class LimitsComponent implements OnInit {
   }
 
   // Add TransactionAmount Modal Methods
-  openAddTransactionAmountModal(entity: any) {
+  // openAddTransactionAmountModal(entity: any) {
+  openAddTransactionAmountModal(entity: any, action: "ADD" | "REMOVE" = "ADD") {
+    this.actionType = action;
     this.selectedEntity = entity;
     this.transactionAmountToAdd = null;
     this.showAddTransactionAmountModal = true;
@@ -256,7 +259,19 @@ export class LimitsComponent implements OnInit {
       transactionAmount: this.transactionAmountToAdd,
     };
 
-    this.limitService.addLimits(payload).subscribe({
+    // this.limitService.addLimits(payload).subscribe({
+    const request =
+      this.actionType === "REMOVE"
+        ? this.limitService.reduceLimits(
+            this.currentRoleId,
+            this.role,
+            this.selectedEntity.id,
+            entityType,
+            this.transactionAmountToAdd,
+          )
+        : this.limitService.addLimits(payload);
+
+    request.subscribe({
       next: (res) => {
         // this.snackBar.showSuccess(`TransactionAmount ₹${this.transactionAmountToAdd} added successfully`);
         this.closeAddTransactionAmountModal();
@@ -274,7 +289,8 @@ export class LimitsComponent implements OnInit {
   }
 
   // Admin Self TransactionAmount Methods
-  openAdminSelfTransactionAmountModal() {
+  // openAdminSelfTransactionAmountModal() {
+  openAdminSelfTransactionAmountModal(action: "ADD" | "REMOVE" = "ADD") {
     this.adminTransactionAmountToAdd = null;
     this.showAdminSelfTransactionAmountModal = true;
   }
@@ -302,7 +318,19 @@ export class LimitsComponent implements OnInit {
       transactionAmount: this.adminTransactionAmountToAdd,
     };
 
-    this.limitService.addLimits(payload).subscribe({
+    // this.limitService.addLimits(payload).subscribe({
+    const request =
+      this.actionType === "REMOVE"
+        ? this.limitService.reduceLimits(
+            this.currentRoleId,
+            this.role,
+            this.currentRoleId,
+            this.role,
+            this.adminTransactionAmountToAdd,
+          )
+        : this.limitService.addLimits(payload);
+
+    request.subscribe({
       next: (res) => {
         // this.snackBar.showSuccess(`TransactionAmount ₹${this.adminTransactionAmountToAdd} added successfully to your account`);
         this.closeAdminSelfTransactionAmountModal();
@@ -334,7 +362,6 @@ export class LimitsComponent implements OnInit {
     const entityType = this.utilSerivce.getRoleForDownLevelWithCurrentRoleId(
       this.selectedEntity.role || this.role,
     );
-
 
     this.limitService
       .getLimitsByEntityAndType(this.selectedEntity.id, entityType)

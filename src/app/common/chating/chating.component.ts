@@ -236,7 +236,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // this.route.queryParams.subscribe((params) => {
-    //   console.log(params);
+
 
     //   this.threadId = params["threadId"];
     // });
@@ -612,37 +612,26 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadResolvedThreadsPaginated();
   }
 
-  private loadResolvedThreadsPaginated(): void {
-    if (this.role === "BRANCH") {
-      this.resolvedNotificatninService
-        .getThreadByBranchIdWithIsResolvedPaginated(
-          this.currrentEntityId,
-          this.role,
-          this.activeTab,
-          this.fundTypeFilter,
-          this.threadPage,
-          this.threadPageSize,
-        )
-        .subscribe({
-          next: (res: any) =>
-            this.processPaginatedThreadResponse(res.content, this.activeTab),
-          error: () => this.onThreadLoadError(),
-        });
-    } else {
-      this.resolvedNotificatninService
-        .getAllThreadCombinedPaginate(
-          this.currrentEntityId,
-          this.role,
-          this.activeTab,
-          this.fundTypeFilter,
-        )
-        .subscribe({
-          next: (res: any) => {
-            this.processPaginatedThreadResponse(res.content, this.activeTab);
-          },
-          error: () => this.onThreadLoadError(),
-        });
-    }
+private loadResolvedThreadsPaginated(): void {
+    this.resolvedNotificatninService
+      .getAllThreadCombinedPaginate(
+        this.currrentEntityId,
+        this.role,
+        this.activeTab,
+        this.fundTypeFilter,
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.processPaginatedThreadResponse(res.content, this.activeTab);
+        },
+        error: (err: any) => {
+          this.snackBar.show(
+            err?.error?.message || "Failed to load threads",
+            false,
+          );
+          this.onThreadLoadError();
+        },
+      });
 
     // if (this.chatMode === "head") {
     //   this.listSub = this.notificationChatService

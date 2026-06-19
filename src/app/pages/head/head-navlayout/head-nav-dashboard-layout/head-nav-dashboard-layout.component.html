@@ -1,36 +1,4 @@
-<!-- <div class="owner-layout">
- 
-
-<app-head-nav-header
-  [pageTitle]="pageTitle"
-  [userName]="userName"
-  [marginLeft]="mainMargin"
-  (toggleSidebar)="toggleSidebar()"
-  (openSettings)="openSettings()"
-  (search)="onSearch($event)">
-</app-head-nav-header>
-
-
-  <app-head-nav-sidebar
-    [collapsed]="sidebarCollapsed"
-    (toggleSidebar)="toggleSidebar()"
-    (secondaryPanelStateChange)="onSecondaryPanelChange($event)">
-  </app-head-nav-sidebar>
-
- 
-
-  
-  <main
-  class="main-content pt-[72px] overflow-auto"   
-  [style.marginLeft.px]="mainMargin"
->
-  <router-outlet></router-outlet>
-</main>
-
-
-</div> -->
 <div class="head-layout bg-[var(--color-bg)] min-h-screen">
-
   <!-- Mobile Overlay -->
   <div
     *ngIf="mobileMenuOpen"
@@ -52,7 +20,8 @@
   <app-head-nav-header
     [pageTitle]="pageTitle"
     [userName]="userName"
-    [marginLeft]="mainMargin"
+        [marginLeft]="mainLeftMargin"
+
     [isMobileMenuOpen]="mobileMenuOpen"
     (toggleMobileMenu)="toggleMobileMenu()"
     (balanceChange)="onBalanceChange($event)"
@@ -70,10 +39,46 @@
   >
   </app-sidebar-notification>
 
+  <!-- Pending Threads -->
+  <app-pending-threads
+    [isOpen]="showPendingThreads"
+    [entityId]="entityId"
+    [entityType]="entityType"
+    (close)="closePendingThreads()"
+    (chatOpened)="onChatPanelStateChange($event)"
+  >
+  </app-pending-threads>
+
+  <!-- Floating Chat Button -->
+  <button
+    *ngIf="!chatPanelOpen"
+    mat-fab
+    type="button"
+    class="fixed bottom-16 right-7 z-[80] w-[48px] h-[48px] rounded-2xl bg-[var(--color-primary)] text-white shadow-[0_12px_35px_rgba(0,0,0,0.28)] hover:scale-110 hover:shadow-[0_18px_45px_rgba(0,0,0,0.35)] active:scale-95 transition-all duration-300 flex items-center justify-center group"
+    (click)="
+      showPendingThreads = !showPendingThreads;
+      isNotificationSidebarOpen = false;
+      mobileMenuOpen = false
+    "
+  >
+    <span
+      class="material-symbols-outlined text-[30px] leading-none transition-transform duration-300 group-hover:rotate-6"
+    >
+      forum
+    </span>
+
+    <span
+      *ngIf="!showPendingThreads"
+      class="absolute top-2 left-2 w-3 h-3 rounded-full bg-red-500 border-2 border-white animate-pulse"
+    >
+    </span>
+  </button>
+
   <!-- MAIN CONTENT -->
   <main
     class="pt-[72px] min-h-[calc(100vh-72px)] bg-[var(--color-bg)] overflow-auto transition-all duration-300"
-    [style.marginLeft.px]="mainMargin"
+    [style.marginLeft.px]="mainLeftMargin"
+    [style.marginRight.px]="mainRightMargin"
     [class.mobile-content]="mobileMenuOpen"
   >
     <router-outlet></router-outlet>
@@ -88,5 +93,4 @@
     [limit]="headerLimit"
   >
   </app-head-mobile-footer>
-
 </div>

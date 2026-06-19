@@ -20,32 +20,6 @@ const routes: Routes = [
 
   { path: "login", component: LoginComponent },
 
-  // {
-  //   path: "owner",
-  //   canActivate: [OwnerAuthGuard],
-  //   loadChildren: () =>
-  //     import("../pages/owner/route/owner.module").then((m) => m.OwnerModule),
-  // },
-  // {
-  //   path: "chief",
-  //   canActivate: [ChiefAuthGuard],
-  //   loadChildren: () =>
-  //     import("../pages/chief/route/chief.module").then((m) => m.ChiefModule),
-  // },
-  // {
-  //   path: "branch",
-  //   canActivate: [BranchAuthGuard],
-  //   loadChildren: () =>
-  //     import("../pages/branch/route/branch.module").then((m) => m.BranchModule),
-  // },
-  // {
-  //   path: "manager",
-  //   canActivate: [ManagerAuthGuard],
-  //   loadChildren: () =>
-  //     import("../pages/manager/route/manager-routing.module").then(
-  //       (m) => m.ManagerRoutingModule,
-  //     ),
-  // },
   {
     path: "head",
     canActivate: [HeadAuthGuard],
@@ -54,14 +28,7 @@ const routes: Routes = [
         (m) => m.HeadRoutingModule,
       ),
   },
-  // {
-  //   path: "comPart",
-  //   canActivate: [ComPartAuthGuard],
-  //   loadChildren: () =>
-  //     import("../pages/comPart/route/comPart-routing.module").then(
-  //       (m) => m.comPartRoutingModule,
-  //     ),
-  // },
+
   { path: "**", redirectTo: "/login" },
 ];
 

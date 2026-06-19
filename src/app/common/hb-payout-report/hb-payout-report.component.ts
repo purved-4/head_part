@@ -1,3 +1,4 @@
+
 import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { FundsService } from "../../pages/services/funds.service";
@@ -274,7 +275,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     this.fundService
       .getAllpayoutTrueFalseBybranchIdPaginate(
         this.entityId,
-        "REJECTED", // changed from ACCEPTED to REJECTED
+        "CP_REJECTED", // changed from ACCEPTED to REJECTED
         this.payoutApprovedPage,
         this.payoutApprovedPageSize,
         this.payoutSearchQuery,
@@ -339,7 +340,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       ifscCode: it.ifsc,
       holder: it.holder,
       amount: Number(it.currencyWiseAmount ?? it.amount ?? it.value ?? 0),
-      status: it.status || it.state || "REJECTED",
+      status: it.status || it.state || "CP_REJECTED",
       reviewStatus: it.reviewStatus,
       remarks: it.remarks,
       portalDomain: it.portalDomain,
@@ -595,32 +596,30 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.multimediaService
-        .getPrivateImage(filePath)
-        .subscribe({
-          next: (url) => {
-            const img = new Image();
+      this.multimediaService.getPrivateImage(filePath).subscribe({
+        next: (url) => {
+          const img = new Image();
 
-            img.onload = () => {
-              // VALID IMAGE
-              imageArray.push(url);
-            };
+          img.onload = () => {
+            // VALID IMAGE
+            imageArray.push(url);
+          };
 
-            img.onerror = () => {
-              // NOT IMAGE => PDF/DOWNLOAD
-              pdfArray.push({
-                url,
-                name: pdfName,
-              });
-            };
+          img.onerror = () => {
+            // NOT IMAGE => PDF/DOWNLOAD
+            pdfArray.push({
+              url,
+              name: pdfName,
+            });
+          };
 
-            img.src = url;
-          },
+          img.src = url;
+        },
 
-          error: () => {
-            this.imageError = true;
-          },
-        });
+        error: () => {
+          this.imageError = true;
+        },
+      });
     };
 
     // ================= FILE PROOF =================
@@ -807,7 +806,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   openChatModal(record: any) {
     if (!record) return;
 
-    console.log("OPEN RECORD", record);
+
 
     this.selectedRecord = record;
 
@@ -846,7 +845,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     });
 
     if (!entityId || !entityType || !fundId || !fundType) {
-      console.log("Missing params");
+
 
       return;
     }
@@ -857,7 +856,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       .getThreadByEntityIdTypeAndFund(entityId, entityType, fundId, fundType)
       .subscribe({
         next: (res: any) => {
-          console.log("THREAD RESPONSE", res);
+
 
           this.loadingThreads = false;
 
@@ -870,7 +869,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
         },
 
         error: (err) => {
-          console.log("THREAD ERROR", err);
+
 
           this.loadingThreads = false;
 
@@ -895,26 +894,24 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       rec.filePath !== "null" &&
       rec.filePath !== "undefined"
     ) {
-      this.multimediaService
-        .getPrivateImage(rec.filePath)
-        .subscribe({
-          next: (url) => {
-            const img = new Image();
+      this.multimediaService.getPrivateImage(rec.filePath).subscribe({
+        next: (url) => {
+          const img = new Image();
 
-            img.onload = () => {
-              rec.proofImages.push(url);
-            };
+          img.onload = () => {
+            rec.proofImages.push(url);
+          };
 
-            img.onerror = () => {
-              rec.proofPdfs.push({
-                url,
-                name: "Proof File",
-              });
-            };
+          img.onerror = () => {
+            rec.proofPdfs.push({
+              url,
+              name: "Proof File",
+            });
+          };
 
-            img.src = url;
-          },
-        });
+          img.src = url;
+        },
+      });
     }
 
     // REJECTED FILE
@@ -923,35 +920,33 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       rec.rejectionFilePath !== "null" &&
       rec.rejectionFilePath !== "undefined"
     ) {
-      this.multimediaService
-        .getPrivateImage(rec.rejectionFilePath)
-        .subscribe({
-          next: (url) => {
-            const img = new Image();
+      this.multimediaService.getPrivateImage(rec.rejectionFilePath).subscribe({
+        next: (url) => {
+          const img = new Image();
 
-            img.onload = () => {
-              rec.rejectedImages.push(url);
-            };
+          img.onload = () => {
+            rec.rejectedImages.push(url);
+          };
 
-            img.onerror = () => {
-              rec.rejectedPdfs.push({
-                url,
-                name: "Rejected Proof",
-              });
-            };
+          img.onerror = () => {
+            rec.rejectedPdfs.push({
+              url,
+              name: "Rejected Proof",
+            });
+          };
 
-            img.src = url;
-          },
-        });
+          img.src = url;
+        },
+      });
     }
   }
   goToThread(msg: any) {
     const threadId = msg?.id;
 
-    console.log("THREAD ID =>", threadId);
+
 
     if (!threadId) {
-      console.log("Thread id missing");
+
       return;
     }
 

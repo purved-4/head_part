@@ -43,8 +43,6 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
     limitAmount: 0,
     accountType: "",
     fttAcceptance: false,
-    min_tran_count: 0,
-    min_total_tran_amount: 0,
   };
 
   constructor(
@@ -84,10 +82,6 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       accountType: this.bankData?.accountType || "saving",
 
       fttAcceptance: this.bankData?.fttAcceptance || false,
-
-      min_tran_count: this.bankData?.min_tran_count || 0,
-
-      min_total_tran_amount: this.bankData?.min_total_tran_amount || 0,
     };
   }
 
@@ -154,10 +148,6 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       accountType: this.updateForm.accountType,
 
       fttAcceptance: this.updateForm.fttAcceptance,
-
-      minTranCount: Number(this.updateForm.min_tran_count) || 0,
-
-      minTotalTranAmount: Number(this.updateForm.min_total_tran_amount) || 0,
     };
 
     console.log("UPDATE PAYLOAD =>", payload);
@@ -170,10 +160,6 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
           ...this.bankData,
 
           ...this.updateForm,
-
-          min_tran_count: this.updateForm.min_tran_count,
-
-          min_total_tran_amount: this.updateForm.min_total_tran_amount,
         };
 
         this.isEditMode = false;

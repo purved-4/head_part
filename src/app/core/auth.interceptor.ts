@@ -6,78 +6,103 @@ import {
   HttpRequest,
   HttpErrorResponse,
 } from "@angular/common/http";
-import { Observable, throwError, BehaviorSubject, of } from "rxjs";
+import { Observable, throwError, BehaviorSubject, from } from "rxjs";
 import { catchError, switchMap, filter, take, finalize } from "rxjs/operators";
 import { AuthMemoryService } from "../pages/services/auth-memory.service";
 import { AuthService } from "../pages/services/auth.service";
+import { FingerprintService } from "../pages/services/fingerprint.service"; 
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
+private readonly OPEN_LINK_PATHS = [
+    "/api/anonymous/getBankDetailsByAmount",
+    "/api/anonymous/getUpiDetailsByAmount",
+    "/api/anonymous/webhook/post",
+    "/api/anonymous/verify",
+    "/api/anonymous/remove-assignment",
+    "/api/ocr/anonymous",
+    "/api/anonymous/favourites/add",
+      "/api/anonymous/favourites/user",
+            "/api/anonymous/favourites/delete",
+"/api/anonymous/selectFavBank",
+  ];
+
   constructor(
     private memoryService: AuthMemoryService,
     private authService: AuthService,
+    private fingerprintService: FingerprintService
   ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-  if (this.isAuthEndpoint(req.url)) {
-    return next.handle(req);
-  }
+    if (this.isAuthEndpoint(req.url)) {
+      return next.handle(req);
+    }
 
-  const token = this.memoryService.getAccessToken();  
+    const isOpenLinkRequest = this.OPEN_LINK_PATHS.some(path => req.url.includes(path));
 
-  const authReq = token ? this.addToken(req, token) : req;
+    if (isOpenLinkRequest) {
+      return from(this.fingerprintService.getFingerprint()).pipe(
+        switchMap(fp => {
+          const withFp = req.clone({
+            setHeaders: { 'X-Device-FP': fp }
+          });
+          return next.handle(withFp);
+        })
+      );
+    }
 
-  return next.handle(authReq).pipe(
-    catchError((error: HttpErrorResponse) => {
+    const token = this.memoryService.getAccessToken();
+    const authReq = token ? this.addToken(req, token) : req;
 
-      if (error.status !== 401) {
-        return throwError(() => error);
-      }
-
-      return this.handle401Error(req, next);
-    })
-  );
-}
-
-private handle401Error(req: HttpRequest<any>, next: HttpHandler) {
-  if (this.isRefreshing) {
-    return this.refreshTokenSubject.pipe(
-      filter((token): token is string => token !== null),
-      take(1),
-      switchMap((token) => next.handle(this.addToken(req, token)))
+    return next.handle(authReq).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status !== 401) {
+          return throwError(() => error);
+        }
+        return this.handle401Error(req, next);
+      })
     );
   }
 
-  this.isRefreshing = true;
-  this.refreshTokenSubject.next(null);
+  private handle401Error(req: HttpRequest<any>, next: HttpHandler) {
+    if (this.isRefreshing) {
+      return this.refreshTokenSubject.pipe(
+        filter((token): token is string => token !== null),
+        take(1),
+        switchMap((token) => next.handle(this.addToken(req, token)))
+      );
+    }
 
-  return this.authService.refreshToken().pipe(
-    switchMap((res: any) => {
-      const newToken = res?.data?.token;
+    this.isRefreshing = true;
+    this.refreshTokenSubject.next(null);
 
-      if (!newToken) {
+    return this.authService.refreshToken().pipe(
+      switchMap((res: any) => {
+        const newToken = res?.data?.token;
+
+        if (!newToken) {
+          this.memoryService.resetAccessToken();
+          return throwError(() => new Error("Refresh failed"));
+        }
+        this.refreshTokenSubject.next(newToken);
+
+        return next.handle(this.addToken(req, newToken));
+      }),
+      catchError((err) => {
         this.memoryService.resetAccessToken();
-        return throwError(() => new Error("Refresh failed"));
-      }
-      this.refreshTokenSubject.next(newToken);
-
-      return next.handle(this.addToken(req, newToken));
-    }),
-    catchError((err) => {
-      this.memoryService.resetAccessToken();
-      return throwError(() => err);
-    }),
-    finalize(() => {
-      this.isRefreshing = false;
-    })
-  );
-}
+        return throwError(() => err);
+      }),
+      finalize(() => {
+        this.isRefreshing = false;
+      })
+    );
+  }
 
   private isAuthEndpoint(url: string): boolean {
-    return url.includes("/login") || url.includes("/refresh-token")  ;
+    return url.includes("/login") || url.includes("/refresh-token");
   }
 
   private addToken(request: HttpRequest<any>, token: string) {
@@ -87,5 +112,4 @@ private handle401Error(req: HttpRequest<any>, next: HttpHandler) {
       },
     });
   }
-
 }

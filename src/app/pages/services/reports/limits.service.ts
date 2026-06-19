@@ -40,4 +40,47 @@ export class LimitsService {
         catchError((error) => throwError(error)),
       );
   }
+
+ reduceLimits(
+    parentId: string,
+    parentType: string,
+    entityId: string,
+    entityType: string,
+    transactionAmount: any,
+  ) {
+    // if (
+    //   parentId == null ||
+    //   parentType == null ||
+    //   entityId == null ||
+    //   entityType == null | |
+    //   transactionAmount == null
+    // ) {
+    //   return;
+    // }
+
+    return this.http.post(`${baseUrl}/entityBalance/reduce`, {
+      parentId,
+      parentType,
+      entityId,
+      entityType,
+      transactionAmount,
+    });
+  }
+
+  getParentGaveSummary(
+    parentId: string,
+    parentType: string,
+    childId: string,
+    childType: string,
+  ) {
+    return this.http.get(`${baseUrl}/entityBalance/parent-gave-summary`, {
+      params: {
+        parentId,
+        parentType,
+        childId,
+        childType,
+      },
+    });
+  }
+   
 }

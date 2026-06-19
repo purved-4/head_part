@@ -30,6 +30,7 @@ import { OverrideCurrencyRateComponent } from "../../../common/head_branch/overr
  import { HbPayinReportComponent } from "../../../common/hb-payin-report/hb-payin-report.component";
 import { HbPayoutReportComponent } from "../../../common/hb-payout-report/hb-payout-report.component";
 import { HeadBranchDashboardComponent } from "../../../common/head_branch/head-branch-dashboard/head-branch-dashboard.component";
+import { SharedUserProfileComponent } from "../../../common/shared-user-profile/shared-user-profile.component";
 
 const routes: Routes = [
   {
@@ -152,6 +153,10 @@ const routes: Routes = [
         path: "upi",
         component: UpisComponent,
       },
+      {
+        path: "sharedUserProfile",
+        component: SharedUserProfileComponent
+     },
       {
         path: "",
         redirectTo: "bank",

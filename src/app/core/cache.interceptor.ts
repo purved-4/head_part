@@ -21,7 +21,7 @@ export class AuthCacheInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler,
   ): Observable<HttpEvent<any>> {
-    // ✅ STEP 1: Add Auth (withCredentials)
+    //  STEP 1: Add Auth (withCredentials)
     const authReq = req.clone({
       withCredentials: true,
     });

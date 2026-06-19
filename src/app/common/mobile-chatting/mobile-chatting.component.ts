@@ -630,41 +630,29 @@ export class MobileChattingComponent
     this.loadResolvedThreadsPaginated();
   }
 
-  private loadResolvedThreadsPaginated(): void {
-    if (this.role === "BRANCH") {
-      this.resolvedNotificatninService
-        .getThreadByBranchIdWithIsResolvedPaginated(
-          this.branchId,
-          this.role,
-          this.activeTab,
-          this.fundTypeFilter,
-          this.threadPage,
-          this.threadPageSize,
-        )
-        .subscribe({
-          next: (res: any) => {
-            const data = res?.data?.content || res?.content || [];
-            this.processPaginatedThreadResponse(data, this.activeTab);
-          },
-          error: () => this.onThreadLoadError(),
-        });
-    } else {
-      this.resolvedNotificatninService
-        .getAllThreadCombinedPaginate(
-          this.headId,
-          this.role,
-          this.activeTab,
-          this.fundTypeFilter,
-        )
-        .subscribe({
-          next: (res: any) => {
-            const data = res?.data?.content || res?.content || [];
-            this.processPaginatedThreadResponse(data, this.activeTab);
-          },
-          error: () => this.onThreadLoadError(),
-        });
-    }
+private loadResolvedThreadsPaginated(): void {
+    this.resolvedNotificatninService
+      .getAllThreadCombinedPaginate(
+        this.headId,
+        this.role,
+        this.activeTab,
+        this.fundTypeFilter,
+      )
+      .subscribe({
+        next: (res: any) => {
+          const data = res?.data?.content || res?.content || [];
+          this.processPaginatedThreadResponse(data, this.activeTab);
+        },
+        error: (err: any) => {
+          this.snackBar.show(
+            err?.error?.message || "Failed to load threads",
+            false,
+          );
+          this.onThreadLoadError();
+        },
+      });
   }
+  
   private onThreadLoadError(): void {
     this.loadingThreads = false;
     this.loadingMoreThreads = false;

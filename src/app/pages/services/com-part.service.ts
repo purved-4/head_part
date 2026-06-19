@@ -94,7 +94,6 @@ export class ComPartService {
       );
   }
 
-  
   getAllComPartByOwnerPaginated(
     id: any,
     page: any = 0,
@@ -211,73 +210,6 @@ export class ComPartService {
       );
   }
 
-  sendWebhook(
-    portalId: string,
-    payload?: any,
-    snap?: any,
-    currency?: any,
-  ): Observable<string> {
-    const formData = new FormData();
- 
-    if (payload !== undefined && payload !== null) {
-      formData.append("payload", JSON.stringify(payload));
-     }
-
-    if (snap) {
-      formData.append("snap", snap);
-    
-    }
-    return this.http.post(
-      `${baseUrl}/manual/webhook/post/${portalId}?currency=${currency}`,
-      formData,
-      {
-        responseType: "text",
-      },
-    );
-  }
-
-  getUpiDetails(portalId: any, minAmount?: any, maxAmount?: any) {
-    let params = new HttpParams();
-
-    if (minAmount != null && minAmount > 0) {
-      params = params.set("minAmount", minAmount);
-    }
-
-    if (maxAmount != null && maxAmount > 0) {
-      params = params.set("maxAmount", maxAmount);
-    }
-
-    return this.http
-      .get(`${baseUrl}/manual/getUpiDetailsByAmountRange/${portalId}`, {
-        params,
-      })
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(() => error)),
-      );
-  }
-
-  getBankDetails(portalId: any, minAmount?: any, maxAmount?: any) {
-    let params = new HttpParams();
-
-    if (minAmount != null && minAmount > 0) {
-      params = params.set("minAmount", minAmount);
-    }
-
-    if (maxAmount != null && maxAmount > 0) {
-      params = params.set("maxAmount", maxAmount);
-    }
-
-    return this.http
-      .get(`${baseUrl}/manual/getBankDetailsByAmountRange/${portalId}`, {
-        params,
-      })
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(() => error)),
-      );
-  }
-
   pinUpi(upiId: any, isPin: any) {
     return this.http.patch(`${baseUrl}/upi/${upiId}/pin?isPin=${isPin}`, {});
   }
@@ -355,23 +287,7 @@ export class ComPartService {
         catchError((err) => throwError(() => err)),
       );
   }
-
-  getUpiDetailsByPortalIdAndAmount(portalId: any, amount: any) {
-    let params = new HttpParams();
-
-    if (amount != null && amount > 0) {
-      params = params.set("amount", amount);
-    }
-    return this.http
-      .get<any>(`${baseUrl}/manual/getUpiDetailsByAmount/${portalId}`, {
-        params,
-      })
-      .pipe(
-        map((res) => res.data),
-        catchError((err) => throwError(() => err)),
-      );
-  }
-
+ 
   assignPortal(bankId: any, portalId: any) {
     return this.http.patch<any>(
       `${baseUrl}/banks/${bankId}/assign-portal/${portalId}`,
@@ -401,60 +317,11 @@ export class ComPartService {
       );
   }
 
- getBankDetailsByAmount(portalId: any, amount?: any, currency?: any, fttAcceptance?: boolean) {
-  let params = new HttpParams();
-
-  if (amount != null && amount > 0) {
-    params = params.set("amount", amount);
-  }
-
-  if (currency != null) {
-    params = params.set("currency", currency);
-  }
-
-  if (fttAcceptance != null) {
-    params = params.set("fttAcceptance", fttAcceptance);
-  }
-
-  return this.http
-    .get(`${baseUrl}/manual/getBankDetailsByAmount/${portalId}`, { params })
-    .pipe(
-      map((response: any) => response.data),
-      catchError((error) => throwError(() => error)),
-    );
-}
-
-  getUpiDetailsByAmount(portalId: any, amount?: any, currency?: any, fttAcceptance?: boolean) {
-    let params = new HttpParams();
-
-    if (amount != null && amount > 0) {
-      params = params.set("amount", amount);
-    }
-    // ssAssets
-
-    if (currency) {
-      params = params.set("currency", currency);
-    }
-
-     if (fttAcceptance != null) {
-    params = params.set("fttAcceptance", fttAcceptance);
-  }
-
-    return this.http
-      .get(`${baseUrl}/manual/getUpiDetailsByAmount/${portalId}`, {
-        params,
-      })
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(() => error)),
-      );
-  }
-
   getCurrencies(comPartId: any): Observable<any> {
     return this.http
-      .get<any>(`${baseUrl}/currency/${comPartId}/currencies`)
+      .get<any>(`${baseUrl}/compart/currencies/${comPartId}`)
       .pipe(
-        map((response) => response),
+        map((response) => response.data),
         catchError((error) => throwError(() => error)),
       );
   }
@@ -462,7 +329,7 @@ export class ComPartService {
   // POST
   saveCurrencies(comPartId: any, payload: any): Observable<any> {
     return this.http
-      .post<any>(`${baseUrl}/currency/${comPartId}/currencies`, payload)
+      .post<any>(`${baseUrl}/compart/currencies/${comPartId}`, payload)
       .pipe(
         map((response) => response),
         catchError((error) => throwError(() => error)),
@@ -503,35 +370,6 @@ export class ComPartService {
     return this.http
       .get(
         `${baseUrl}/comPart/api/chat/findThreadCombined/paginated/${branchId}/${entityType}/${isResolved}/${type}?page=${page}&size=${size}&sort=updatedAt,desc`,
-      )
-      .pipe(
-        map((res: any) => res.data),
-        catchError((err) => throwError(err)),
-      );
-  }
-
-  getThreadByBranchIdWithIsResolvedPaginated(
-    branchId: string,
-    entityType: any,
-    isResolved: any,
-    type?: any,
-    page: number = 0,
-    size: number = 20,
-  ): Observable<any> {
-    if (type === undefined || type === null) {
-      type = "all";
-    }
-
-    return this.http
-      .get(
-        `${baseUrl}/comPart/api/chat/findThread/paginated/${branchId}/${entityType}/${isResolved}/${type}`,
-        {
-          params: {
-            page: page.toString(),
-            size: size.toString(),
-            sort: "updatedAt,desc",
-          },
-        },
       )
       .pipe(
         map((res: any) => res.data),
@@ -730,17 +568,17 @@ export class ComPartService {
         catchError((error) => throwError(error)),
       );
   }
- 
 
-    getPortalByComPartIdAndCurrency(
+  getPortalByComPartIdAndCurrency(
     id: any,
-    currenyId : any,
+    currenyId: any,
     page: any = 0,
     size: any = 10,
-
   ): Observable<any> {
     return this.http
-      .get<any>(`${baseUrl}/comPart/portals/getAllByComPartIdAndCurrencyId/paginated/${id}/${currenyId}`)
+      .get<any>(
+        `${baseUrl}/comPart/portals/getAllByComPartIdAndCurrencyId/paginated/${id}/${currenyId}`,
+      )
       .pipe(
         map((res) => res.data),
         catchError(this.handleError),
@@ -754,18 +592,17 @@ export class ComPartService {
 
     return this.http.post(`${baseUrl}/upi-ocr-upload`, formData);
   }
-  
+
   uploadOcr(file: File, id: any, type: string) {
+    const formData = new FormData();
 
-  const formData = new FormData();
+    formData.append("file", file);
 
-  formData.append("file", file);
-
-  return this.http.post(
-    `${baseUrl}/ocr?comPartId=${id}&type=${type}`,
-    formData
-  );
-}
+    return this.http.post(
+      `${baseUrl}/ocr?comPartId=${id}&type=${type}`,
+      formData,
+    );
+  }
 
   uploadGpayOcr(file: File) {
     const formData = new FormData();
@@ -776,13 +613,13 @@ export class ComPartService {
 
   //new
   getAllUpiByBankId(bankId: any): Observable<any> {
-  return this.http
-    .get(`${baseUrl}/comPart/upi/getAllUpiByBankId/${bankId}`)
-    .pipe(
-      map((response: any) => response.data),
-      catchError((error) => throwError(error))
-    );
-}
+    return this.http
+      .get(`${baseUrl}/comPart/upi/getAllUpiByBankId/${bankId}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
 
   getPayinFundWithPortalID(
     portalId: any,
@@ -817,63 +654,57 @@ export class ComPartService {
       );
   }
 
-getAllByComPartWithPortalPagination(
-  compartId: any,
-  page: number = 0,
-  size: number = 10,
-  currency?: string
-) {
+  getAllByComPartWithPortalPagination(
+    compartId: any,
+    page: number = 0,
+    size: number = 10,
+    currency?: string,
+  ) {
+    let url = `${baseUrl}/comPart/banks/getAllByComPartWithPortal/pagination/${compartId}?page=${page}&size=${size}`;
 
-  let url =
-    `${baseUrl}/comPart/banks/getAllByComPartWithPortal/pagination/${compartId}?page=${page}&size=${size}`;
+    if (currency) {
+      url += `&currency=${currency}`;
+    }
 
-  if (currency) {
-    url += `&currency=${currency}`;
+    return this.http.get<any>(url).pipe(
+      map((res) => res.data),
+      catchError((err) => throwError(() => err)),
+    );
   }
 
-  return this.http
-    .get<any>(url)
-    .pipe(
-      map((res) => res.data),
-      catchError((err) => throwError(() => err))
-    );
-}
+  deleteCurrencyRate(
+    compartId: string,
+    rateId: string,
+    currencyId: string,
+  ): Observable<any> {
+    return this.http
+      .delete<any>(
+        `${baseUrl}/compart/currencies/delete?compartId=${compartId}&rateId=${rateId}&currencyId=${currencyId}`,
+      )
+      .pipe(
+        map((response) => response),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 
-deleteCurrencyRate(
-  compartId: string,
-  rateId: string,
-  currencyId: string
-): Observable<any> {
+  updateCurrencyRate(
+    compartId: string,
+    rateId: string,
+    currencyId: string,
+    rate: number,
+  ): Observable<any> {
+    return this.http
+      .patch<any>(
+        `${baseUrl}/compart/currencies/update?compartId=${compartId}&rateId=${rateId}&currencyId=${currencyId}&rate=${rate}`,
+        {},
+      )
+      .pipe(
+        map((response) => response),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 
-  return this.http
-    .delete<any>(
-      `${baseUrl}/currency/delete?compartId=${compartId}&rateId=${rateId}&currencyId=${currencyId}`
-    )
-    .pipe(
-      map((response) => response),
-      catchError((error) => throwError(() => error)),
-    );
-}
-
-updateCurrencyRate(
-  compartId: string,
-  rateId: string,
-  currencyId: string,
-  rate: number
-): Observable<any> {
-
-  return this.http
-    .patch<any>(
-      `${baseUrl}/currency/update?compartId=${compartId}&rateId=${rateId}&currencyId=${currencyId}&rate=${rate}`,
-      {}
-    )
-    .pipe(
-      map((response) => response),
-      catchError((error) => throwError(() => error)),
-    );
-}
-
-getByThreadIdFundIdAndType(
+  getByThreadIdFundIdAndType(
     threadId: any,
     fundId: any,
     fundType: any,
@@ -888,54 +719,39 @@ getByThreadIdFundIdAndType(
       );
   }
 
-acceptPayoutFund(
-  compartId: string,
-  fundId: string
-): Observable<any> {
+  acceptPayoutFund(compartId: string, fundId: string): Observable<any> {
+    return this.http
+      .post<any>(`${baseUrl}/comPart/acceptFund/${compartId}/${fundId}`, {})
+      .pipe(
+        map((response) => response),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 
-  return this.http
-    .post<any>(
-      `${baseUrl}/comPart/acceptFund/${compartId}/${fundId}`,
-      {}
-    )
-    .pipe(
-      map((response) => response),
-      catchError((error) => throwError(() => error)),
-    );
-}
+  rejectPayoutFund(
+    compartId: string,
+    fundId: string,
+    reason: string,
+  ): Observable<any> {
+    return this.http
+      .post<any>(
+        `${baseUrl}/comPart/rejectFund/${compartId}/${fundId}?reason=${reason}`,
+        {},
+      )
+      .pipe(
+        map((response) => response),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 
-
-rejectPayoutFund(
-  compartId: string,
-  fundId: string,
-  reason:string
-): Observable<any> {
-
-  return this.http
-    .post<any>(
-      `${baseUrl}/comPart/rejectFund/${compartId}/${fundId}?reason=${reason}`,
-      {}
-    )
-    .pipe(
-      map((response) => response),
-      catchError((error) => throwError(() => error)),
-    );
-}
-
-getPayoutFunds(
-  compartId: string,
-): Observable<any> {
-
-  return this.http
-    .get<any>(
-      `${baseUrl}/comPart/getPayoutFunds/${compartId}`,
-      {}
-    )
-    .pipe(
-      map((response) => response),
-      catchError((error) => throwError(() => error)),
-    );
-}
+  getPayoutFunds(compartId: string): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/comPart/getPayoutFunds/${compartId}`, {})
+      .pipe(
+        map((response) => response),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 
   getThreadByEntityIdAndFund(
     entityId: string,
@@ -946,8 +762,6 @@ getPayoutFunds(
       `${baseUrl}/comPart/getThreadByEntityIdTypeAndFund/${entityId}/${fundId}/${fundType}`,
     );
   }
-
-  
 
   // web do pyauouit fubd lo
   getAllPayoutFundWithPortalId(
@@ -978,7 +792,7 @@ getPayoutFunds(
       );
   }
 
-   getThreadsWithFundId(fundId: any): Observable<any> {
+  getThreadsWithFundId(fundId: any): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/comPart/fund-process-logs/${fundId}`)
       .pipe(
@@ -987,16 +801,314 @@ getPayoutFunds(
       );
   }
 
-  generateAnonymousLink(customerId:any,comPartId:any) {
-    return this.http.post(`${baseUrl}/api/v1/internal/links/generate/${comPartId}`, {customerId});
-}
+  generateAnonymousLink(
+    portalId: any,
+    currency?: any,
+    expireMinute?: any,
+    userType?: any,
+  ): Observable<any> {
+    return this.http.post(
+      `${baseUrl}/api/v1/internal/links/generate/${portalId}`,
+      { currency, expireMinute, userType },
+    );
+  }
 
- getAnonymousLinks(compartId: any): Observable<any> {
+  getAnonymousLinks(portalId: any): Observable<any> {
     return this.http
-      .get<any>(`${baseUrl}/api/v1/internal/links/${compartId}`)
+      .get<any>(`${baseUrl}/api/v1/internal/links/${portalId}`)
       .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(error)),
       );
+  }
+
+  verifyLinkWithTokenAndSignature(token: any, signature: any) {
+    return this.http
+      .get<any>(`${baseUrl}/open/verify?token=${token}&sig=${signature}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+  sendWebhook(
+    portalId: string,
+    payload?: any,
+    snap?: any,
+    currency?: any,
+    token?: any,
+    signature?: any,
+    userId?: any,
+    turnstileToken?: string,
+  ): Observable<string> {
+    const formData = new FormData();
+    let params = new HttpParams();
+
+    if (payload !== undefined && payload !== null) {
+      formData.append("payload", JSON.stringify(payload));
+    }
+
+    if (snap) {
+      formData.append("snap", snap);
+    }
+    if (currency) {
+      params = params.set("currency", currency);
+    }
+    if (token != null) {
+      params = params.set("token", token);
+    }
+
+    if (signature != null) {
+      params = params.set("sig", signature);
+    }
+
+    if (userId != null) {
+      params = params.set("userId", userId);
+    }
+    if (turnstileToken != null) {
+      params = params.set("cf-turnstile-response", turnstileToken);
+    }
+
+    return this.http.post(
+      `${baseUrl}/anonymous/webhook/post/${portalId}`,
+      formData,
+      {
+        responseType: "text",
+        params,
+      },
+    );
+  }
+
+  sendWebhookManual(
+    portalId: string,
+    payload: any,
+    snap: any,
+    currency: any,
+    userId: any,
+  ): Observable<string> {
+    const formData = new FormData();
+
+    if (payload) {
+      formData.append(
+        "payload",
+        new Blob([JSON.stringify(payload)], { type: "application/json" }),
+      );
+    }
+
+    if (snap) {
+      formData.append("snap", snap);
+    }
+
+    let params = new HttpParams();
+
+    if (currency) {
+      params = params.set("currency", currency);
+    }
+
+    if (userId != null) {
+      params = params.set("userId", userId);
+    }
+
+    return this.http.post(
+      `${baseUrl}/manual/webhook/post/${portalId}`,
+      formData,
+      {
+        responseType: "text",
+        params,
+      },
+    );
+  }
+
+ getUpiByAmountManual(
+    portalId: any,
+    amount?: any,
+    currency?: any,
+    userId?: string,
+    isSkip?: boolean,
+    isNew?: boolean,
+    reason?: string,
+    currentPayinId?: string,
+  ) {
+    let params = new HttpParams();
+
+    if (amount != null && amount > 0) {
+      params = params.set("amount", amount);
+    }
+    // ssAssets
+
+    if (currency) {
+      params = params.set("currency", currency);
+    }
+
+    if (userId != null) {
+      params = params.set("userId", userId);
+    }
+
+    if (isSkip != null) {
+      params = params.set("isSkip", isSkip);
+    }
+
+    if (isNew != null) {
+      params = params.set("isNew", isNew);
+    }
+
+    if (reason != null) {
+      params = params.set("reason", reason);
+    }
+    if (currentPayinId != null) {
+      params = params.set("currentPayinId", currentPayinId);
+    }
+
+    return this.http
+      .get(`${baseUrl}/manual/getUpiDetailsByAmount/${portalId}`, {
+        params,
+      })
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+  
+
+ getBankByAmountManual(
+    portalId: any,
+    amount: any,
+    currency: any,
+    userId: string,
+    isSkip?: boolean,
+    isNew?: boolean,
+    reason?: string,
+    currentPayinId?: string,
+  ) {
+    let params = new HttpParams();
+
+    if (amount != null && amount > 0) {
+      params = params.set("amount", amount);
+    }
+
+    if (currency != null) {
+      params = params.set("currency", currency);
+    }
+
+    if (userId != null) {
+      params = params.set("userId", userId);
+    }
+
+    if (isSkip != null) {
+      params = params.set("isSkip", isSkip);
+    }
+    if (isNew != null) {
+      params = params.set("isNew", isNew);
+    }
+
+    if (reason != null) {
+      params = params.set("reason", reason);
+    }
+
+    if (currentPayinId != null) {
+      params = params.set("currentPayinId", currentPayinId);
+    }
+
+    return this.http
+      .get(`${baseUrl}/manual/getBankDetailsByAmount/${portalId}`, { params })
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+  getThreadByFundId(fundId: string): Observable<any> {
+    return this.http
+      .get(`${baseUrl}/comPart/api/chat/findThreadByFundsId/${fundId}`)
+      .pipe(
+        map((res: any) => res.data),
+        catchError((err) => throwError(err)),
+      );
+  }
+
+  getUserStatusByFund(fundId: string, fundType: string): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/comPart/getUserStatusByFund/${fundId}/${fundType}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+  getPayoutsCountsByUserId(userId: string, portalId: string): Observable<any> {
+    return this.http.get(
+      `${baseUrl}/comPart/getPayoutsCountsByUserId?userId=${userId}&portalId=${portalId}`,
+    );
+  }
+  getPayinsCountsByUserId(userId: string, portalId: string): Observable<any> {
+    return this.http.get(
+      `${baseUrl}/comPart/getPayinsCountsByUserId?userId=${userId}&portalId=${portalId}`,
+    );
+  }
+
+  markFundAsProcessed(id: string): Observable<any> {
+    return this.http.patch(`${baseUrl}/comPart/${id}/mark-cp`, {});
+  }
+  updateUserId(id: string, payload: any): Observable<any> {
+    return this.http.patch(`${baseUrl}/comPart/${id}/update-user`, payload);
+  }
+
+  removeAssignment(
+    payinId: string,
+    payinType: string,
+    userId: any,
+    portalId: string,
+  ) {
+    let params = new HttpParams();
+
+    if (payinId != null) {
+      params = params.set("payinId", payinId);
+    }
+
+    if (payinType != null) {
+      params = params.set("payinType", payinType);
+    }
+    if (userId != null) {
+      params = params.set("userId", userId);
+    }
+    if (portalId != null) {
+      params = params.set("portalId", portalId);
+    }
+    return this.http
+      .post(
+        `${baseUrl}/manual/remove-assignment`,
+        {},
+        {
+          params,
+        },
+      )
+      .pipe(
+        map((response: any) => response),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+restoreBankAndUpi(comPartId: any): Observable<any> {
+    return this.http.get<any>(`${baseUrl}/manual/restoreBankAndUpi/${comPartId}`).pipe(
+      map((res) => res.data),
+      catchError(this.handleError),
+    );
+  }
+
+
+  viewProflieDetails(comPartId: any): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/comPart/getDetails/${comPartId}`)
+      .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+      );
+  }
+
+  getPayinRemainingFundsDetail(payinId: any, type: any): Observable<any> {
+    return this.http.get<any>(`${baseUrl}/comPart/capacity/${type}/${payinId}`).pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+      );;
   }
 }

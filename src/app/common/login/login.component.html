@@ -1,42 +1,43 @@
-<div
-  class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-400 via-slate-500 to-slate-600 p-6 relative overflow-hidden"
->
-  <!-- Animated background shapes -->
-  <div class="absolute inset-0 overflow-hidden">
-    <div
-      class="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse"
-    ></div>
-    <div
-      class="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse animation-delay-2000"
-    ></div>
+
+  <div >
+  <app-header></app-header>
+
+
   </div>
+  
+ <div class="max-w-7xl mx-auto mt-40 bg-white rounded-3xl shadow-2xl overflow-hidden  ">
 
-  <!-- Card with running rounded border (via pseudo-element) and hover effects -->
-  <div
-    class="max-w-lg rounded-[40px] p-8 sm:p-10 shadow-[rgba(133,189,215,0.88)_0px_30px_30px_-20px] mx-auto my-5 z-10 bg-[#f9f9f9] transition-all duration-300 hover:scale-[1.02] hover:shadow-[rgba(133,189,215,0.88)_0px_35px_40px_-20px] animated-border-card"
-  >
-    <!-- Heading -->
-    <div class="text-center font-black text-3xl text-[#1089d3]">Sign In</div>
+    <div class="grid lg:grid-cols-2">
 
-    <!-- Form (unchanged) -->
-    <form class="mt-6" (ngSubmit)="formSubmit()">
-      <!-- Email input -->
+        <!-- LEFT LOGIN SECTION -->
+        <div class="flex flex-col justify-between p-8 lg:p-16">
+
+            <!-- Login Form -->
+            <div class="max-w-md mx-auto w-full">
+
+                <h1 class="text-5xl font-bold text-center mb-3"> Welcome Back </h1> <p class="text-gray-500 text-center mb-10"> Sign in to access your banking account securely. </p>
+
+ <form class="mt-6" (ngSubmit)="formSubmit()">
+    
+      <!-- Email   -->
+       <label class="block text-sm font-medium mb-2"> Email </label>
       <input
         type="email"
-        placeholder="E-mail"
-        class="w-full bg-white border-none p-4 rounded-2xl mt-4 shadow-[#cff0ff_0px_10px_10px_-5px] placeholder-gray-400 focus:outline-none focus:border-2 focus:border-[#12b1d1] transition"
+        placeholder="Email"
+        class="w-full h-12 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
         [(ngModel)]="loginData.email"
         name="email"
         
         required
       />
 
-      <!-- Password input with toggle -->
+      <!-- Password   with toggle -->
+       <label class="block text-sm font-medium my-2"> Password </label>
       <div class="relative w-full">
         <input
           [type]="showPassword ? 'text' : 'password'"
           placeholder="Password"
-          class="w-full bg-white border-none p-4 rounded-2xl mt-4 shadow-[#cff0ff_0px_10px_10px_-5px] placeholder-gray-400 pr-12 focus:outline-none focus:border-2 focus:border-[#12b1d1] transition"
+          class="w-full h-12 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           [(ngModel)]="loginData.password"
           name="password"
           required
@@ -90,7 +91,7 @@
       <div class="flex gap-4 mt-6">
         <button
           type="submit"
-          class="flex-1 font-bold bg-gradient-to-r from-[#1089d3] to-[#12b1d1] text-white py-4 rounded-2xl shadow-[rgba(133,189,215,0.88)_0px_20px_10px_-15px] border-none transition-all duration-200 hover:scale-105 hover:shadow-[rgba(133,189,215,0.88)_0px_23px_10px_-20px] active:scale-95 active:shadow-[rgba(133,189,215,0.88)_0px_15px_10px_-10px]"
+          class="flex-1 font-bold bg-gradient-to-br from-indigo-700 via-indigo-600 to-blue-600 text-white py-4 rounded-2xl shadow-[rgba(133,189,215,0.88)_0px_20px_10px_-15px] border-none transition-all duration-200 hover:scale-105 hover:shadow-[rgba(133,189,215,0.88)_0px_23px_10px_-20px] active:scale-95 active:shadow-[rgba(133,189,215,0.88)_0px_15px_10px_-10px]"
         >
           Sign In
         </button>
@@ -103,5 +104,115 @@
         </button>
       </div>
     </form>
-  </div>
+
+            </div>
+        </div>
+
+        <!-- RIGHT BANKING DASHBOARD -->
+        <div class="bg-gradient-to-br from-indigo-700 via-indigo-600 to-blue-600 relative overflow-hidden hidden lg:block rounded-lg">
+
+            <!-- Decorative Shapes -->
+            <div class="absolute -top-20 -left-20 w-96 h-96 rounded-full bg-white/5"></div>
+            <div class="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-white/5"></div>
+
+            <div class="relative z-10 p-8 text-white">
+
+                <h2 class="text-5xl font-bold leading-tight mb-5">
+                    Manage Your Finances
+                    <br>
+                    Anytime, Anywhere
+                </h2>
+
+                <p class="text-white/80 text-lg mb-10 max-w-xl">
+                    Securely access your accounts, transfer funds,
+                    pay bills, and monitor transactions from one place.
+                </p>
+
+                <!-- Banking Dashboard -->
+                <div class="relative">
+
+                    <!-- Cards -->
+                    <div class="grid grid-cols-3 gap-4">
+
+                        <div class="col-span-2 bg-white rounded-2xl p-5 shadow-xl text-gray-900">
+                            <p class="text-gray-500 text-sm">
+                                Available Balance
+                            </p>
+
+                            <h3 class="text-3xl font-bold mt-2 counter" data-target="125000">
+                                {{stats[0].value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}}
+                            </h3>
+                            
+
+                            <p class="text-green-600 text-sm mt-2">
+                                +4.8% this month
+                            </p>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-5 shadow-xl text-gray-900">
+                            <p class="text-gray-500 text-sm">
+                                Savings
+                            </p>
+                            
+
+                            <h3 class="text-2xl font-bold mt-2 counter" data-target="210000">
+                                {{stats[1].value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}}
+                            </h3>
+                            <p class="text-green-600 text-sm mt-2">
+                                +1.9%
+                            </p>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-5 shadow-xl text-gray-900">
+                            <p class="text-gray-500 text-sm">
+                                Income
+                            </p>
+
+                            <h3 class="text-2xl font-bold mt-2 counter" data-target="125000">
+                                {{stats[2].value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}}
+                            </h3>
+
+                            <p class="text-green-600 text-sm mt-2">
+                                +12%
+                            </p>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-5 shadow-xl text-gray-900">
+                            <p class="text-gray-500 text-sm">
+                                Expenses
+                            </p>
+
+                            <h3 class="text-2xl font-bold mt-2 counter" data-target="48200">
+                                {{stats[3].value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}}
+                            </h3>
+
+                            <p class="text-red-500 text-sm mt-2">
+                                -8%
+                            </p>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-5 shadow-xl text-gray-900">
+                            <p class="text-gray-500 text-sm">
+                                Investments
+                            </p>
+                            
+
+                            <h3 class="text-2xl font-bold mt-2 counter" data-target="375000">
+                                {{stats[4].value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}}
+                            </h3>
+                            <p class="text-green-600 text-sm mt-2">
+                                +3.4%
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+

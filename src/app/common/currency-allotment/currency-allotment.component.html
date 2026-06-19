@@ -10,72 +10,84 @@
         <span class="material-symbols-outlined"> currency_exchange </span>
         Currency Allotment
       </h2>
-      <p class="mt-1 text-sm text-white/80">Manage currency rates and payment modes</p>
+      <p class="mt-1 text-sm text-white/80">
+        Manage currency rates and payment modes
+      </p>
     </div>
 
     <!-- BODY -->
     <div class="p-6 bg-[var(--color-bg)] text-[var(--color-font)]">
       <!-- MAIN FORM SECTION - IMPROVED LAYOUT -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
-        <!-- LEFT COLUMN -->
-        <div class="space-y-6">
-          <!-- CURRENCY SELECTION -->
-          <div>
-            <label class="mb-2 flex items-center gap-2 text-sm font-semibold text-[var(--color-font)]">
-              <span class="material-symbols-outlined text-base text-[var(--color-accent)]">
-                currency_exchange
-              </span>
-              Currency
-            </label>
-            <select
-              [(ngModel)]="selectedCurrency"
-              [ngModelOptions]="{ standalone: true }"
-              (change)="selectCurrency(selectedCurrency!)"
-              class="w-full px-4 py-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] outline-none focus:ring-2 focus:ring-[var(--color-primary-light)] transition-all"
-            >
-              <option value="">Select Currency</option>
-              <option *ngFor="let currency of currencies" [value]="currency">
-                {{ currency }}
-              </option>
-            </select>
+      <div *ngIf="isEdited">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+          <!-- LEFT COLUMN -->
+          <div class="space-y-6">
+            <!-- CURRENCY SELECTION -->
+            <div>
+              <label
+                class="mb-2 flex items-center gap-2 text-sm font-semibold text-[var(--color-font)]"
+              >
+                <span
+                  class="material-symbols-outlined text-base text-[var(--color-accent)]"
+                >
+                  currency_exchange
+                </span>
+                Currency
+              </label>
+              <select
+                [(ngModel)]="selectedCurrency"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="selectCurrency(selectedCurrency!)"
+                class="w-full px-4 py-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] outline-none focus:ring-2 focus:ring-[var(--color-primary-light)] transition-all"
+              >
+                <option value="">Select Currency</option>
+                <option *ngFor="let currency of currencies" [value]="currency">
+                  {{ currency }}
+                </option>
+              </select>
+            </div>
+
+            <!-- CURRENCY RATE - CONDITIONAL -->
+            <div *ngIf="entityType !== 'PORTAL' && selectedCurrency">
+              <label
+                class="block mb-2 text-sm font-semibold text-[var(--color-font)]"
+              >
+                Currency Rate
+              </label>
+              <input
+                type="number"
+                [(ngModel)]="rate"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="Enter currency rate"
+                class="w-full px-4 py-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] placeholder:text-[var(--color-muted)] outline-none focus:ring-2 focus:ring-[var(--color-primary-light)] transition-all"
+              />
+            </div>
           </div>
 
-          <!-- CURRENCY RATE - CONDITIONAL -->
-          <div *ngIf="entityType !== 'PORTAL' && selectedCurrency">
-            <label class="block mb-2 text-sm font-semibold text-[var(--color-font)]">
-              Currency Rate
-            </label>
-            <input
-              type="number"
-              [(ngModel)]="rate"
-              [ngModelOptions]="{ standalone: true }"
-              placeholder="Enter currency rate"
-              class="w-full px-4 py-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] placeholder:text-[var(--color-muted)] outline-none focus:ring-2 focus:ring-[var(--color-primary-light)] transition-all"
-            />
-          </div>
-        </div>
-
-        <!-- RIGHT COLUMN -->
-        <div class="space-y-6" *ngIf="selectedCurrency">
-          <!-- EFFECTIVE FROM - CONDITIONAL -->
-          <div *ngIf="entityType !== 'PORTAL'">
-            <label class="block mb-2 text-sm font-semibold text-[var(--color-font)]">
-              Effective From
-            </label>
-            <input
-              type="datetime-local"
-              name="effectiveFrom"
-              [(ngModel)]="effectiveFromNew"
-              [min]="minDateTime"
-              (focus)="updateMinDateTime()"
-              class="w-full px-4 py-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] outline-none focus:ring-2 focus:ring-[var(--color-primary-light)] transition-all"
-            />
+          <!-- RIGHT COLUMN -->
+          <div class="space-y-6" *ngIf="selectedCurrency">
+            <!-- EFFECTIVE FROM - CONDITIONAL -->
+            <div *ngIf="entityType !== 'PORTAL'">
+              <label
+                class="block mb-2 text-sm font-semibold text-[var(--color-font)]"
+              >
+                Effective From
+              </label>
+              <input
+                type="datetime-local"
+                name="effectiveFrom"
+                [(ngModel)]="effectiveFromNew"
+                [min]="minDateTime"
+                (focus)="updateMinDateTime()"
+                class="w-full px-4 py-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] outline-none focus:ring-2 focus:ring-[var(--color-primary-light)] transition-all"
+              />
+            </div>
           </div>
         </div>
       </div>
-
       <!-- ACTION BUTTONS - IMPROVED FLEX LAYOUT -->
       <div
+        *ngIf="isEdited"
         class="mt-8 p-5 border border-[var(--color-border)] rounded-[var(--radius-lg)] bg-[var(--color-hover)] flex flex-col sm:flex-row gap-4"
       >
         <button
@@ -104,7 +116,9 @@
           <div
             class="px-6 py-4 bg-[var(--color-hover)] border-b border-[var(--color-border)]"
           >
-            <h3 class="font-semibold text-[var(--color-font)] flex items-center gap-2">
+            <h3
+              class="font-semibold text-[var(--color-font)] flex items-center gap-2"
+            >
               <span class="material-symbols-outlined text-base">history</span>
               Currency Rate History
             </h3>
@@ -113,21 +127,31 @@
           <!-- TABLE RESPONSIVE WRAPPER -->
           <div class="overflow-x-auto">
             <table class="w-full min-w-[500px]">
-              <thead class="bg-[var(--color-hover)] border-b border-[var(--color-border)]">
+              <thead
+                class="bg-[var(--color-hover)] border-b border-[var(--color-border)]"
+              >
                 <tr>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-[var(--color-font)]">
+                  <th
+                    class="px-6 py-4 text-left text-sm font-semibold text-[var(--color-font)]"
+                  >
                     Rate
                   </th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-[var(--color-font)]">
+                  <th
+                    class="px-6 py-4 text-left text-sm font-semibold text-[var(--color-font)]"
+                  >
                     Effective From
                   </th>
-                  <th class="px-6 py-4 text-center text-sm font-semibold text-[var(--color-font)]">
+                  <th
+                    class="px-6 py-4 text-center text-sm font-semibold text-[var(--color-font)]"
+                  >
                     Action
                   </th>
                 </tr>
               </thead>
               <tbody class="bg-[var(--color-surface)]">
-                <ng-container *ngIf="existingData[selectedCurrency || 'INR'] as data">
+                <ng-container
+                  *ngIf="existingData[selectedCurrency || 'INR'] as data"
+                >
                   <tr
                     *ngFor="let item of data?.currencyRates || []"
                     class="border-b border-[var(--color-border)] hover:bg-[var(--color-hover)] transition-all"
@@ -138,7 +162,11 @@
                     </td>
                     <!-- DATE -->
                     <td class="px-6 py-4 text-[var(--color-font)]">
-                      {{ item.effectiveFrom ? (item.effectiveFrom | tz:'full') : '-' }}
+                      {{
+                        item.effectiveFrom
+                          ? (item.effectiveFrom | tz: "full")
+                          : "-"
+                      }}
                     </td>
                     <!-- ACTION -->
                     <td class="px-6 py-4">
@@ -148,9 +176,13 @@
                           type="button"
                           class="p-2 rounded-lg text-blue-500 hover:bg-blue-500/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                           [disabled]="isPastDate(item.effectiveFrom)"
-                          (click)="editRate(data.currencyId, item.id, item.rate)"
+                          (click)="
+                            editRate(data.currencyId, item.id, item.rate)
+                          "
                         >
-                          <span class="material-symbols-outlined text-base">edit</span>
+                          <span class="material-symbols-outlined text-base"
+                            >edit</span
+                          >
                         </button>
                         <!-- DELETE BUTTON -->
                         <button
@@ -159,23 +191,36 @@
                           [disabled]="isPastDate(item.effectiveFrom)"
                           (click)="deleteRate(data.currencyId, item.id)"
                         >
-                          <span class="material-symbols-outlined text-base">delete</span>
+                          <span class="material-symbols-outlined text-base"
+                            >delete</span
+                          >
                         </button>
                       </div>
                     </td>
                   </tr>
                   <!-- EMPTY STATE -->
                   <tr *ngIf="!data?.currencyRates?.length">
-                    <td colspan="3" class="px-6 py-12 text-center text-[var(--color-muted)]">
-                      <span class="material-symbols-outlined text-3xl mb-2 block">inbox</span>
+                    <td
+                      colspan="3"
+                      class="px-6 py-12 text-center text-[var(--color-muted)]"
+                    >
+                      <span
+                        class="material-symbols-outlined text-3xl mb-2 block"
+                        >inbox</span
+                      >
                       No currency rates available
                     </td>
                   </tr>
                 </ng-container>
                 <!-- NO DATA STATE -->
                 <tr *ngIf="!existingData[selectedCurrency || 'INR']">
-                  <td colspan="3" class="px-6 py-12 text-center text-[var(--color-muted)]">
-                    <span class="material-symbols-outlined text-3xl mb-2 block">currency_exchange</span>
+                  <td
+                    colspan="3"
+                    class="px-6 py-12 text-center text-[var(--color-muted)]"
+                  >
+                    <span class="material-symbols-outlined text-3xl mb-2 block"
+                      >currency_exchange</span
+                    >
                     Select a currency to view history
                   </td>
                 </tr>
@@ -200,8 +245,12 @@
     <div
       class="px-6 py-4 border-b border-[var(--color-border)] flex items-center justify-between"
     >
-      <h3 class="text-lg font-semibold text-[var(--color-font)] flex items-center gap-2">
-        <span class="material-symbols-outlined text-[var(--color-primary)]">edit_note</span>
+      <h3
+        class="text-lg font-semibold text-[var(--color-font)] flex items-center gap-2"
+      >
+        <span class="material-symbols-outlined text-[var(--color-primary)]"
+          >edit_note</span
+        >
         Update Currency Rate
       </h3>
       <button
@@ -246,4 +295,3 @@
     </div>
   </div>
 </div>
-

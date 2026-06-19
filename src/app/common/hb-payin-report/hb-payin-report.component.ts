@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute, Route, Router } from "@angular/router";
 import { of, Subscription } from "rxjs";
@@ -165,18 +166,18 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
         undefined,
         fromDate,
         toDate,
-        "BANK",
+        this.selectedMode,
         this.role,
       )
       .pipe(catchError(() => of({ content: [], totalElements: 0 })))
       .subscribe((response: any) => {
-        console.log(response);
+
         const { list, total, pageNum, pageSize } = this.parseResponse(response);
 
         this.payinTotalRecords = total;
         this.payinPage = pageNum;
         this.payinPageSize = pageSize;
-        console.log(list);
+
         this.mapFundsArray(list, "bank");
       });
   }
@@ -443,16 +444,14 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       raw.filePath !== "undefined" &&
       raw.filePath.trim() !== ""
     ) {
-      this.multimediaService
-        .getPrivateImage(raw.filePath)
-        .subscribe({
-          next: (url) => {
-            rec.images.push(url);
-          },
-          error: () => {
-            this.imageError = true;
-          },
-        });
+      this.multimediaService.getPrivateImage(raw.filePath).subscribe({
+        next: (url) => {
+          rec.images.push(url);
+        },
+        error: () => {
+          this.imageError = true;
+        },
+      });
     } else {
       rec.images = [];
     }
@@ -472,47 +471,43 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
 
     // ================= NORMAL FILE =================
     if (raw.filePath) {
-      this.multimediaService
-        .getPrivateImage(raw.filePath)
-        .subscribe({
-          next: (url) => {
-            rec.proofImages.push(url);
-          },
-          error: () => {
-            this.imageError = true;
-          },
-        });
+      this.multimediaService.getPrivateImage(raw.filePath).subscribe({
+        next: (url) => {
+          rec.proofImages.push(url);
+        },
+        error: () => {
+          this.imageError = true;
+        },
+      });
     }
 
     // ================= REJECTED FILE =================
     if (raw.rejectionFilePath) {
-      this.multimediaService
-        .getPrivateImage(raw.rejectionFilePath)
-        .subscribe({
-          next: (url) => {
-            // ✅ Check whether URL is image
-            const img = new Image();
+      this.multimediaService.getPrivateImage(raw.rejectionFilePath).subscribe({
+        next: (url) => {
+          // ✅ Check whether URL is image
+          const img = new Image();
 
-            img.onload = () => {
-              // ✅ Valid image
-              rec.rejectedImages.push(url);
-            };
+          img.onload = () => {
+            // ✅ Valid image
+            rec.rejectedImages.push(url);
+          };
 
-            img.onerror = () => {
-              // ✅ Not image => treat as PDF/download
-              rec.rejectedPdfs.push({
-                url,
-                name: "Rejected Proof",
-              });
-            };
+          img.onerror = () => {
+            // ✅ Not image => treat as PDF/download
+            rec.rejectedPdfs.push({
+              url,
+              name: "Rejected Proof",
+            });
+          };
 
-            img.src = url;
-          },
+          img.src = url;
+        },
 
-          error: () => {
-            this.imageError = true;
-          },
-        });
+        error: () => {
+          this.imageError = true;
+        },
+      });
     }
   }
 
@@ -727,20 +722,20 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
 
   //new
   openChatModal(record: any) {
-    console.log("BUTTON CLICKED");
+
 
     if (!record) {
-      console.log("NO RECORD");
+
       return;
     }
 
-    console.log("OPEN RECORD", record);
+
 
     this.selectedRecord = record;
 
     this.showChatModal = true;
 
-    console.log("MODAL STATUS", this.showChatModal);
+
 
     this.loadThreadMessages(record);
   }
@@ -760,7 +755,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     const fundId = record?.raw?.id || record?.id;
 
     if (!entityId || !entityType || !fundId) {
-      console.log("Missing params");
+
 
       return;
     }
@@ -776,7 +771,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (res: any) => {
-          console.log("THREAD RESPONSE", res);
+
 
           this.loadingThreads = false;
 
@@ -817,26 +812,24 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       rec.filePath !== "null" &&
       rec.filePath !== "undefined"
     ) {
-      this.multimediaService
-        .getPrivateImage(rec.filePath)
-        .subscribe({
-          next: (url) => {
-            const img = new Image();
+      this.multimediaService.getPrivateImage(rec.filePath).subscribe({
+        next: (url) => {
+          const img = new Image();
 
-            img.onload = () => {
-              rec.proofImages.push(url);
-            };
+          img.onload = () => {
+            rec.proofImages.push(url);
+          };
 
-            img.onerror = () => {
-              rec.proofPdfs.push({
-                url,
-                name: "Proof File",
-              });
-            };
+          img.onerror = () => {
+            rec.proofPdfs.push({
+              url,
+              name: "Proof File",
+            });
+          };
 
-            img.src = url;
-          },
-        });
+          img.src = url;
+        },
+      });
     }
 
     // REJECTED FILE
@@ -845,35 +838,33 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       rec.rejectionFilePath !== "null" &&
       rec.rejectionFilePath !== "undefined"
     ) {
-      this.multimediaService
-        .getPrivateImage(rec.rejectionFilePath)
-        .subscribe({
-          next: (url) => {
-            const img = new Image();
+      this.multimediaService.getPrivateImage(rec.rejectionFilePath).subscribe({
+        next: (url) => {
+          const img = new Image();
 
-            img.onload = () => {
-              rec.rejectedImages.push(url);
-            };
+          img.onload = () => {
+            rec.rejectedImages.push(url);
+          };
 
-            img.onerror = () => {
-              rec.rejectedPdfs.push({
-                url,
-                name: "Rejected Proof",
-              });
-            };
+          img.onerror = () => {
+            rec.rejectedPdfs.push({
+              url,
+              name: "Rejected Proof",
+            });
+          };
 
-            img.src = url;
-          },
-        });
+          img.src = url;
+        },
+      });
     }
   }
   goToThread(msg: any) {
     const threadId = msg?.id;
 
-    console.log("THREAD ID =>", threadId);
+
 
     if (!threadId) {
-      console.log("Thread id missing");
+
       return;
     }
 

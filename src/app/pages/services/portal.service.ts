@@ -9,10 +9,9 @@ import { catchError, Observable, throwError, map } from "rxjs";
 export class PortalService {
   constructor(private http: HttpClient) {}
 
-private handleError(error: any) {
+  private handleError(error: any) {
     return throwError(() => error);
   }
-  
 
   getByPortalId(portalId: string): Observable<any> {
     return this.http.get(`${baseUrl}/portals/getById/${portalId}`).pipe(
@@ -150,18 +149,26 @@ private handleError(error: any) {
 
   // GET
   getCurrenciesbyPortal(portalId: any): Observable<any> {
+    return this.http.get<any>(`${baseUrl}/portal/currencies/${portalId}`).pipe(
+      map((response) => response),
+      catchError((error) => throwError(() => error)),
+    );
+  }
+
+  // POST (Add + Update)
+  saveCurrenciesByPortal(portalId: any, payload: any): Observable<any> {
     return this.http
-      .get<any>(`${baseUrl}/portal/${portalId}/currencies`)
+      .post<any>(`${baseUrl}/portal/currencies/${portalId}`, payload)
       .pipe(
         map((response) => response),
         catchError((error) => throwError(() => error)),
       );
   }
 
-  // POST (Add + Update)
-  saveCurrenciesByPortal(portalId: any, payload: any): Observable<any> {
+  // GET (Payment modes)
+  getModeByCurrencyAndPortal(portalId: any, currency: any): Observable<any> {
     return this.http
-      .post<any>(`${baseUrl}/portal/${portalId}/currencies`, payload)
+      .get<any>(`${baseUrl}/portal/currencies/${portalId}/${currency}`)
       .pipe(
         map((response) => response),
         catchError((error) => throwError(() => error)),
@@ -169,20 +176,17 @@ private handleError(error: any) {
   }
 
   // GET
-getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
-  return this.http
-    .get<any>(`${baseUrl}/chief/currencies`, {
-      params: {
-        entityId: entityId,
-        entityType: entityRole,
-      },
-    })
-    .pipe(
-      map((response) => response),
-      catchError((error) => throwError(() => error))
-    );
-}
-  
-
-
+  getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/chief/currencies`, {
+        params: {
+          entityId: entityId,
+          entityType: entityRole,
+        },
+      })
+      .pipe(
+        map((response) => response),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 }

@@ -1,0 +1,128 @@
+<div class="bg-white rounded-2xl w-full max-w-2xl mx-auto">
+  <!-- Header -->
+  <div
+    class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100"
+  >
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center"
+      >
+        <span class="material-symbols-outlined text-green-600 text-xl"
+          >inventory_2</span
+        >
+      </div>
+      <div>
+        <h2 class="text-base font-semibold text-gray-900">Add Inventory</h2>
+        <p class="text-xs text-gray-400">
+          Add a new inventory source and set limits
+        </p>
+      </div>
+    </div>
+    <button
+      (click)="close.emit()"
+      class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition"
+    >
+      <span class="material-symbols-outlined text-gray-500 text-lg">close</span>
+    </button>
+  </div>
+
+  <div class="px-6 py-5 space-y-6 max-h-[80vh] overflow-y-auto">
+    <!-- STEP 1 : Inventory Configuration -->
+    <div>
+      <div class="flex items-center gap-2 mb-4">
+        <span
+          class="w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold"
+          [ngClass]="
+            currentStep >= 1
+              ? 'border-green-500 text-green-600 bg-green-50'
+              : 'border-gray-300 text-gray-400'
+          "
+        >
+          1
+        </span>
+        <span class="text-sm font-semibold text-gray-800"
+          >Inventory Configuration</span
+        >
+        <!-- Currency Selection -->
+      </div>
+      <div class="space-y-3">
+        <label class="text-sm font-medium text-gray-700">
+          Select Currency
+        </label>
+
+        <select
+          class="w-full h-11 px-3 border border-gray-300 rounded-xl outline-none"
+          [(ngModel)]="selectedCurrency"
+          (ngModelChange)="selectCurrency($event)"
+        >
+          <option [ngValue]="null">Select Currency</option>
+
+          <option *ngFor="let currency of currencies" [ngValue]="currency">
+            {{ currency.currency }}
+          </option>
+        </select>
+      </div>
+      <div *ngIf="selectedCurrency" class="space-y-3">
+        <label class="text-sm font-medium text-gray-700"> Select Mode </label>
+
+        <select
+          class="w-full h-11 px-3 border border-gray-300 rounded-xl outline-none"
+          [(ngModel)]="selectedMode"
+          (ngModelChange)="selectMode($event)"
+        >
+          <option [ngValue]="null">Select Mode</option>
+
+          <option *ngFor="let mode of modes" [ngValue]="mode">
+            {{ mode }}
+          </option>
+        </select>
+      </div>
+
+      <!-- STEP 2 : Details — shows after currency+mode selected -->
+      <ng-container *ngIf="showAddBankForm && selectedMode === 'BANK'">
+        <div class="border-t border-gray-100 pt-5">
+          <div class="flex items-center gap-2 mb-4">
+            <span
+              class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
+              >2</span
+            >
+            <span class="text-sm font-semibold text-gray-800">Details</span>
+          </div>
+          <app-add-bank
+            *ngIf="showAddBankForm && selectedMode === 'BANK'"
+            [currency]="selectedCurrency"
+            [mode]="selectedMode"
+            [embeddedMode]="true"
+            (formSubmitted)="onBankAdded()"
+            (formCancelled)="showAddBankForm = false"
+          >
+          </app-add-bank>
+        </div>
+      </ng-container>
+
+      <!-- Future modes can go here -->
+      <ng-container *ngIf="showAddBankForm && selectedMode === 'UPI'">
+        <div class="border-t border-gray-100 pt-5">
+          <div class="flex items-center gap-2 mb-4">
+            <span
+              class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
+            >
+              2
+            </span>
+            <span class="text-sm font-semibold text-gray-800">UPI Details</span>
+          </div>
+
+          <!-- IMPORTANT: ONLY THIS COMPONENT -->
+          <app-add-upi
+            [embeddedMode]="true"
+            [currency]="selectedCurrency"
+            (formSubmitted)="onUpiAdded()"
+            (formSubmitted)="onUpiSubmitted($event)"
+            (formCancelled)="onUpiCancelled()"
+          >
+          </app-add-upi>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

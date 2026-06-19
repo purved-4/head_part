@@ -16,17 +16,18 @@
             (click)="goBack()"
             class="p-2 rounded-full hover:bg-[var(--color-primary)]/10 transition"
           >
-            <span class="material-symbols-outlined text-[var(--color-primary)]"
-              >arrow_back</span
-            >
+            <span class="material-symbols-outlined text-[var(--color-primary)]">
+              arrow_back
+            </span>
           </button>
 
           <h2
             class="text-xl font-semibold text-[var(--color-font)] flex items-center gap-2"
           >
-            <span class="material-symbols-outlined text-[var(--color-primary)]"
-              >account_tree</span
-            >
+            <span class="material-symbols-outlined text-[var(--color-primary)]">
+              account_tree
+            </span>
+
             Hierarchy Management
           </h2>
         </div>
@@ -37,13 +38,15 @@
         >
           <span *ngIf="!selectedManager && !selectedHead">
             Managers
+
             <span *ngIf="selectedChief?.username">
-              / {{ selectedChief?.username }}</span
-            >
+              / {{ selectedChief?.username }}
+            </span>
           </span>
 
           <span *ngIf="selectedManager && !selectedHead">
-            Managers /
+            Managers
+
             <span class="text-[var(--color-primary)] font-medium">
               {{ selectedManager?.username || selectedManager?.info }}
             </span>
@@ -51,6 +54,7 @@
 
           <span *ngIf="selectedHead">
             Managers / Heads /
+
             <span class="text-[var(--color-primary)] font-medium">
               {{ selectedHead?.username || selectedHead?.info }}
             </span>
@@ -77,16 +81,17 @@
 
       <!-- ================= B2B ================= -->
       <div *ngIf="selectedChief?.businessType === 'B2B'" class="space-y-6">
-        <!-- MANAGERS -->
+        <!-- ================= MANAGERS ================= -->
         <div
           *ngIf="managers.length && !selectedManager && !selectedHead"
           class="bg-white/5 rounded-xl border border-[var(--color-border)] p-5"
         >
           <div class="flex items-center mb-4">
             <h3 class="font-semibold text-[var(--color-font)]">Managers</h3>
-            <span class="ml-auto text-sm text-[var(--color-muted)]">{{
-              managers.length
-            }}</span>
+
+            <span class="ml-auto text-sm text-[var(--color-muted)]">
+              {{ managers.length }}
+            </span>
           </div>
 
           <div class="overflow-hidden rounded-lg">
@@ -96,26 +101,54 @@
                   *ngFor="let m of managers"
                   class="hover:bg-[var(--color-hover)] transition"
                 >
-                  <td class="px-4 py-3 flex items-center gap-3">
-                    <div
-                      class="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center"
-                    >
-                      <span class="material-symbols-outlined text-blue-600"
-                        >person</span
+                  <!-- USER -->
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center"
                       >
+                        <span class="material-symbols-outlined text-blue-600">
+                          person
+                        </span>
+                      </div>
+
+                      <div class="flex items-center gap-2">
+                        <span class="font-medium">
+                          {{ m.username || m.info || "No Name" }}
+                        </span>
+
+                        <!-- LIVE STATUS -->
+                        <span
+                          class="h-2.5 w-2.5 rounded-full animate-pulse shadow-lg"
+                          [ngClass]="
+                            m.onlineStatus
+                              ? 'bg-green-500 shadow-green-400'
+                              : 'bg-red-500 shadow-red-400'
+                          "
+                        ></span>
+
+                        <span
+                          class="text-xs font-medium"
+                          [ngClass]="
+                            m.onlineStatus ? 'text-green-500' : 'text-red-500'
+                          "
+                        >
+                          {{ m.onlineStatus ? "Online" : "Offline" }}
+                        </span>
+                      </div>
                     </div>
-                    <span class="font-medium">{{
-                      m.username || m.info || "No Name"
-                    }}</span>
                   </td>
 
+                  <!-- ROLE -->
                   <td class="px-4 py-3">
                     <span
                       class="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded-full"
-                      >Manager</span
                     >
+                      Manager
+                    </span>
                   </td>
 
+                  <!-- ACTION -->
                   <td class="px-4 py-3 text-right">
                     <button
                       (click)="getHeads(m)"
@@ -130,16 +163,17 @@
           </div>
         </div>
 
-        <!-- HEADS -->
+        <!-- ================= HEADS ================= -->
         <div
           *ngIf="heads.length && selectedManager && !selectedHead"
           class="bg-white/5 rounded-xl border border-[var(--color-border)] p-5"
         >
           <div class="flex items-center mb-4">
             <h3 class="font-semibold text-[var(--color-font)]">Heads</h3>
-            <span class="ml-auto text-sm text-[var(--color-muted)]">{{
-              heads.length
-            }}</span>
+
+            <span class="ml-auto text-sm text-[var(--color-muted)]">
+              {{ heads.length }}
+            </span>
           </div>
 
           <table class="min-w-full">
@@ -148,24 +182,54 @@
                 *ngFor="let h of heads"
                 class="hover:bg-[var(--color-hover)] transition"
               >
-                <td class="px-4 py-3 flex items-center gap-3">
-                  <div
-                    class="h-9 w-9 rounded-full bg-purple-100 flex items-center justify-center"
-                  >
-                    <span class="material-symbols-outlined text-purple-600"
-                      >crown</span
+                <!-- USER -->
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="h-9 w-9 rounded-full bg-purple-100 flex items-center justify-center"
                     >
+                      <span class="material-symbols-outlined text-purple-600">
+                        crown
+                      </span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium">
+                        {{ h.username || h.info }}
+                      </span>
+
+                      <!-- LIVE STATUS -->
+                      <span
+                        class="h-2.5 w-2.5 rounded-full animate-pulse shadow-lg"
+                        [ngClass]="
+                          h.onlineStatus
+                            ? 'bg-green-500 shadow-green-400'
+                            : 'bg-red-500 shadow-red-400'
+                        "
+                      ></span>
+
+                      <span
+                        class="text-xs font-medium"
+                        [ngClass]="
+                          h.onlineStatus ? 'text-green-500' : 'text-red-500'
+                        "
+                      >
+                        {{ h.onlineStatus ? "Online" : "Offline" }}
+                      </span>
+                    </div>
                   </div>
-                  <span class="font-medium">{{ h.username || h.info }}</span>
                 </td>
 
+                <!-- ROLE -->
                 <td class="px-4 py-3">
                   <span
                     class="text-xs px-2 py-1 bg-purple-100 text-purple-600 rounded-full"
-                    >Head</span
                   >
+                    Head
+                  </span>
                 </td>
 
+                <!-- ACTION -->
                 <td class="px-4 py-3 text-right">
                   <button
                     (click)="getBranchesByHead(h)"
@@ -179,16 +243,17 @@
           </table>
         </div>
 
-        <!-- BRANCHES -->
+        <!-- ================= BRANCHES ================= -->
         <div
           *ngIf="branches.length && selectedHead"
           class="bg-white/5 rounded-xl border border-[var(--color-border)] p-5"
         >
           <div class="flex items-center mb-4">
             <h3 class="font-semibold text-[var(--color-font)]">Branches</h3>
-            <span class="ml-auto text-sm text-[var(--color-muted)]">{{
-              branches.length
-            }}</span>
+
+            <span class="ml-auto text-sm text-[var(--color-muted)]">
+              {{ branches.length }}
+            </span>
           </div>
 
           <table class="min-w-full">
@@ -197,22 +262,51 @@
                 *ngFor="let b of branches"
                 class="hover:bg-[var(--color-hover)] transition"
               >
-                <td class="px-4 py-3 flex items-center gap-3">
-                  <div
-                    class="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center"
-                  >
-                    <span class="material-symbols-outlined text-green-600"
-                      >store</span
+                <!-- USER -->
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center"
                     >
+                      <span class="material-symbols-outlined text-green-600">
+                        store
+                      </span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium">
+                        {{ b.username || b.info }}
+                      </span>
+
+                      <!-- LIVE STATUS -->
+                      <span
+                        class="h-2.5 w-2.5 rounded-full animate-pulse shadow-lg"
+                        [ngClass]="
+                          b.onlineStatus
+                            ? 'bg-green-500 shadow-green-400'
+                            : 'bg-red-500 shadow-red-400'
+                        "
+                      ></span>
+
+                      <span
+                        class="text-xs font-medium"
+                        [ngClass]="
+                          b.onlineStatus ? 'text-green-500' : 'text-red-500'
+                        "
+                      >
+                        {{ b.onlineStatus ? "Online" : "Offline" }}
+                      </span>
+                    </div>
                   </div>
-                  <span class="font-medium">{{ b.username || b.info }}</span>
                 </td>
 
+                <!-- ROLE -->
                 <td class="px-4 py-3">
                   <span
                     class="text-xs px-2 py-1 bg-green-100 text-green-600 rounded-full"
-                    >Branch</span
                   >
+                    Branch
+                  </span>
                 </td>
               </tr>
             </tbody>
@@ -227,9 +321,10 @@
       >
         <div class="flex items-center mb-4">
           <h3 class="font-semibold text-[var(--color-font)]">Branches</h3>
-          <span class="ml-auto text-sm text-[var(--color-muted)]">{{
-            branches.length
-          }}</span>
+
+          <span class="ml-auto text-sm text-[var(--color-muted)]">
+            {{ branches.length }}
+          </span>
         </div>
 
         <table class="min-w-full">
@@ -238,16 +333,43 @@
               *ngFor="let b of branches"
               class="hover:bg-[var(--color-hover)] transition"
             >
-              <td class="px-4 py-3 flex items-center gap-3">
-                <div
-                  class="h-9 w-9 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center"
-                >
-                  <span
-                    class="material-symbols-outlined text-[var(--color-primary)]"
-                    >store</span
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="h-9 w-9 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center"
                   >
+                    <span
+                      class="material-symbols-outlined text-[var(--color-primary)]"
+                    >
+                      store
+                    </span>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium">
+                      {{ b.username || b.info }}
+                    </span>
+
+                    <!-- LIVE STATUS -->
+                    <span
+                      class="h-2.5 w-2.5 rounded-full animate-pulse shadow-lg"
+                      [ngClass]="
+                        b.onlineStatus
+                          ? 'bg-green-500 shadow-green-400'
+                          : 'bg-red-500 shadow-red-400'
+                      "
+                    ></span>
+
+                    <span
+                      class="text-xs font-medium"
+                      [ngClass]="
+                        b.onlineStatus ? 'text-green-500' : 'text-red-500'
+                      "
+                    >
+                      {{ b.onlineStatus ? "Online" : "Offline" }}
+                    </span>
+                  </div>
                 </div>
-                <span class="font-medium">{{ b.username || b.info }}</span>
               </td>
             </tr>
           </tbody>

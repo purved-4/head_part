@@ -1,0 +1,464 @@
+<!-- COMPACT CHAT PANEL - Right docked, doesn't expand layout sideways -->
+
+<div
+  *ngIf="isOpen"
+  class="fixed top-[72px] right-0 bottom-0 w-[380px] bg-white z-[80] overflow-hidden shadow-2xl border-l border-gray-200 flex flex-col animate-in slide-in-from-right duration-300"
+>
+  <!-- HEADER -->
+  <div
+    class="flex items-center gap-2 px-4 py-3 shrink-0 border-b border-gray-200"
+    style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"
+  >
+    <!-- Avatar -->
+    <div
+      class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+      style="background: rgba(255, 255, 255, 0.25)"
+    >
+      {{ getInitials(thread?.groupName || thread?.name || "T") }}
+    </div>
+
+    <!-- Thread info -->
+    <div class="flex-1 min-w-0">
+      <p class="text-white text-xs font-semibold truncate leading-tight">
+        {{ thread?.groupName || thread?.name || "Thread" }}
+      </p>
+      <p class="text-indigo-100 text-[10px] truncate">
+        {{ thread?.displayId || thread?.id }}
+      </p>
+    </div>
+
+    <!-- Close button -->
+    <button
+      (click)="close()"
+      class="w-7 h-7 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition shrink-0"
+      title="Close"
+    >
+      <svg
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <path d="M18 6L6 18M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- MESSAGES AREA -->
+  <div
+    class="flex-1 overflow-y-auto px-3 py-3 space-y-1.5"
+    style="background: #f9fafb"
+    #messagesContainer
+  >
+    <!-- Load more button -->
+    <!-- Older messages CTA -->
+    <div *ngIf="messages.length >= 15" class="flex justify-center mb-3">
+      <button
+        (click)="openFullChat()"
+        class="px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-medium hover:bg-indigo-100 transition"
+      >
+        View older messages in full chat
+      </button>
+    </div>
+    <!-- Loading skeleton -->
+    <div *ngIf="isLoading" class="space-y-2 pt-2">
+      <div
+        *ngFor="let i of [1, 2, 3]"
+        class="flex gap-1.5"
+        [class.justify-end]="i % 2 === 0"
+      >
+        <div
+          *ngIf="i % 2 !== 0"
+          class="w-6 h-6 rounded-full bg-gray-200 animate-pulse shrink-0"
+        ></div>
+        <div
+          class="max-w-[50%] h-8 rounded-xl bg-gray-200 animate-pulse flex-1"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <ng-container *ngIf="!isLoading">
+      <ng-container
+        *ngFor="let msg of messages; let i = index; trackBy: trackMessage"
+      >
+        <!-- Date separator -->
+        <div
+          *ngIf="getDateSeparator(msg, i) as dateSep"
+          class="flex items-center gap-2 py-1.5"
+        >
+          <div class="flex-1 h-px bg-gray-300"></div>
+          <span
+            class="text-[9px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap"
+          >
+            {{ dateSep | tz }}
+          </span>
+          <div class="flex-1 h-px bg-gray-300"></div>
+        </div>
+
+        <!-- Message bubble -->
+        <div
+          class="flex gap-1.5 items-end mb-0.5"
+          [class.flex-row-reverse]="msg.isCurrentUser"
+        >
+          <!-- Avatar -->
+          <div
+            *ngIf="!msg.isCurrentUser"
+            class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
+            [style.background]="getAvatarColor(msg.senderName)"
+          >
+            {{ getInitials(msg.senderName) }}
+          </div>
+
+          <!-- Bubble -->
+          <div
+            class="max-w-[70%] flex flex-col"
+            [class.items-end]="msg.isCurrentUser"
+          >
+            <!-- Sender name -->
+            <span
+              *ngIf="!msg.isCurrentUser"
+              class="text-[8px] text-gray-500 mb-0.5 px-1"
+              >{{ msg.senderName }}</span
+            >
+
+            <!-- Text -->
+            <div
+              *ngIf="msg.type === 'text' || (!msg.mediaUrl && msg.text)"
+              class="px-2.5 py-1.5 rounded-xl text-xs leading-relaxed shadow-sm"
+              [class.rounded-br-none]="msg.isCurrentUser"
+              [class.rounded-bl-none]="!msg.isCurrentUser"
+              [style.background]="msg.isCurrentUser ? '#6366f1' : '#ffffff'"
+              [style.color]="msg.isCurrentUser ? '#ffffff' : '#1f2937'"
+            >
+              {{ msg.text }}
+            </div>
+
+            <!-- Image -->
+            <div
+              *ngIf="msg.type === 'image' && msg.mediaUrl"
+              class="rounded-xl overflow-hidden cursor-pointer shadow-sm"
+              [class.rounded-br-none]="msg.isCurrentUser"
+              [class.rounded-bl-none]="!msg.isCurrentUser"
+              (click)="openViewer(msg.previewUrl || msg.mediaUrl, 'image')"
+            >
+              <img
+                [src]="msg.previewUrl || msg.mediaUrl"
+                class="max-w-[140px] max-h-[120px] object-cover block"
+                alt="img"
+                loading="lazy"
+              />
+              <div
+                *ngIf="msg.text"
+                class="px-2 py-1 text-xs"
+                [style.background]="msg.isCurrentUser ? '#6366f1' : '#ffffff'"
+                [style.color]="msg.isCurrentUser ? '#ffffff' : '#1f2937'"
+              >
+                {{ msg.text }}
+              </div>
+            </div>
+
+            <!-- File -->
+            <div
+              *ngIf="msg.type === 'file' && msg.mediaUrl"
+              class="px-2.5 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 cursor-pointer"
+              [class.rounded-br-none]="msg.isCurrentUser"
+              [class.rounded-bl-none]="!msg.isCurrentUser"
+              [style.background]="msg.isCurrentUser ? '#6366f1' : '#ffffff'"
+              (click)="openViewer(msg.mediaUrl, 'file')"
+            >
+              <div
+                class="w-6 h-6 rounded-lg flex items-center justify-center text-[7px] font-bold shrink-0"
+                [style.background]="
+                  msg.isCurrentUser ? 'rgba(255,255,255,0.2)' : '#eef2ff'
+                "
+                [style.color]="msg.isCurrentUser ? '#fff' : '#6366f1'"
+              >
+                F
+              </div>
+              <span
+                class="text-[9px]"
+                [class.text-white]="msg.isCurrentUser"
+                [class.text-gray-700]="!msg.isCurrentUser"
+              >
+                {{ msg.text || "File" }}
+              </span>
+            </div>
+
+            <!-- Time -->
+            <span class="text-[7px] text-gray-400 mt-0.5 px-1">
+              {{ msg.time }}
+            </span>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <!-- Empty -->
+    <div
+      *ngIf="!isLoading && messages.length === 0"
+      class="h-full flex flex-col items-center justify-center py-6"
+    >
+      <div
+        class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center mb-2"
+      >
+        <svg
+          class="w-5 h-5 text-indigo-400"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+          />
+        </svg>
+      </div>
+      <p class="text-xs text-gray-500">No messages</p>
+    </div>
+
+    <div #messagesEnd></div>
+  </div>
+
+  <!-- FILE PREVIEW -->
+  <div
+    *ngIf="selectedFile"
+    class="px-3 py-2 border-t border-gray-200 bg-white flex items-center gap-2 shrink-0"
+  >
+    <img
+      *ngIf="filePreviewUrl"
+      [src]="filePreviewUrl"
+      class="w-8 h-8 object-cover rounded border border-gray-200"
+      alt="preview"
+    />
+    <div
+      *ngIf="!filePreviewUrl"
+      class="w-8 h-8 rounded bg-indigo-50 flex items-center justify-center text-indigo-600 text-[7px] font-bold shrink-0"
+    >
+      F
+    </div>
+
+    <div class="flex-1 min-w-0">
+      <p class="text-xs font-medium text-gray-800 truncate">
+        {{ getShortFileName(selectedFile.name) }}
+      </p>
+      <p class="text-[9px] text-gray-500">
+        {{ formatSize(selectedFile.size) }}
+      </p>
+    </div>
+
+    <button
+      (click)="clearFile()"
+      class="w-6 h-6 rounded-full bg-gray-100 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition shrink-0"
+    >
+      <svg
+        width="10"
+        height="10"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <path d="M18 6L6 18M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- INPUT BAR -->
+  <div class="px-2 py-2 border-t border-gray-200 bg-white shrink-0">
+    <div class="flex items-end gap-1.5">
+      <!-- Emoji -->
+      <button
+        (click)="toggleEmoji()"
+        class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition shrink-0"
+        title="Emoji"
+      >
+        <svg
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path stroke-linecap="round" d="M8 14s1.5 2 4 2 4-2 4-2" />
+          <circle cx="9" cy="10" r="1" fill="currentColor" stroke="none" />
+          <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none" />
+        </svg>
+      </button>
+
+      <!-- File -->
+      <label
+        class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition cursor-pointer shrink-0"
+      >
+        <svg
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+          />
+        </svg>
+        <input
+          type="file"
+          class="hidden"
+          #fileInput
+          (change)="onFileSelected($event)"
+        />
+      </label>
+
+      <!-- Input -->
+      <textarea
+        [(ngModel)]="newMessage"
+        (keydown)="onEnter($event)"
+        placeholder="Type…"
+        rows="1"
+        class="flex-1 resize-none text-xs text-gray-800 placeholder-gray-400 outline-none bg-gray-100 rounded-lg px-2.5 py-1.5 leading-relaxed"
+        style="max-height: 80px"
+      ></textarea>
+
+      <!-- Send -->
+      <button
+        (click)="send()"
+        [disabled]="(!newMessage.trim() && !selectedFile) || isUploading"
+        class="w-7 h-7 rounded-lg flex items-center justify-center transition shrink-0 disabled:opacity-40"
+        [class.bg-indigo-600]="
+          (newMessage.trim() || selectedFile) && !isUploading
+        "
+        [class.bg-gray-200]="!newMessage.trim() && !selectedFile"
+      >
+        <svg
+          *ngIf="!isUploading"
+          width="14"
+          height="14"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M22 2L11 13"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <path
+            d="M22 2L15 22 11 13 2 9l20-7z"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <svg
+          *ngIf="isUploading"
+          class="animate-spin"
+          width="12"
+          height="12"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="white"
+            stroke-width="2"
+            opacity="0.3"
+          />
+          <path
+            d="M12 2a10 10 0 0110 10"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- EMOJI PICKER -->
+  <div
+    *ngIf="showEmojiPicker"
+    class="absolute bottom-[76px] left-0 right-0 mx-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden"
+    style="height: 160px"
+  >
+    <div
+      class="p-1.5 overflow-y-auto grid grid-cols-6 gap-0.5"
+      style="height: 100%"
+    >
+      <button
+        *ngFor="let emoji of emojis"
+        (click)="insertEmoji(emoji)"
+        class="text-lg p-1 hover:bg-gray-100 rounded transition text-center"
+      >
+        {{ emoji }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MEDIA VIEWER (Fullscreen Modal) -->
+<div
+  *ngIf="showViewer"
+  class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[90] flex items-center justify-center p-2"
+  (click)="closeViewer()"
+>
+  <button
+    class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition z-10"
+    (click)="closeViewer(); $event.stopPropagation()"
+  >
+    <svg
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+    >
+      <path d="M18 6L6 18M6 6l12 12" />
+    </svg>
+  </button>
+
+  <img
+    *ngIf="viewerType === 'image' && viewerUrl"
+    [src]="viewerUrl"
+    class="max-w-[95vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
+    (click)="$event.stopPropagation()"
+    alt="media"
+  />
+
+  <div
+    *ngIf="viewerType === 'file' && viewerUrl"
+    class="w-[95vw] h-[90vh] bg-white rounded-lg overflow-hidden shadow-2xl"
+    (click)="$event.stopPropagation()"
+  >
+    <div
+      class="h-12 border-b border-gray-200 flex items-center justify-between px-4 bg-white"
+    >
+      <p class="text-sm font-semibold text-gray-800">File Preview</p>
+      <a
+        [href]="viewerUrl"
+        download
+        class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition"
+      >
+        Download
+      </a>
+    </div>
+    <iframe
+      *ngIf="safeViewerUrl"
+      [src]="safeViewerUrl"
+      class="w-full h-[calc(90vh-48px)]"
+      frameborder="0"
+    ></iframe>
+  </div>
+</div>

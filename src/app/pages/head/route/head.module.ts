@@ -15,6 +15,7 @@ import { HeadNavHeaderComponent } from "../head-navlayout/head-nav-header/head-n
 import { HeadNavDashboardLayoutComponent } from "../head-navlayout/head-nav-dashboard-layout/head-nav-dashboard-layout.component";
 import { HeadMobileFooterComponent } from "../head-navlayout/head-mobile-footer/head-mobile-footer.component";
 import { RecycleManagementComponent } from "../recycle-management/recycle-management.component";
+import { ComponentSharedModule } from "../../../core/components.share.module";
 
 @NgModule({
   declarations: [
@@ -35,6 +36,7 @@ import { RecycleManagementComponent } from "../recycle-management/recycle-manage
     HeadRoutingModule,
     FormsModule,
     ReactiveFormsModule,
+    ComponentSharedModule,
    ],
   exports: [SharedModule],
 })

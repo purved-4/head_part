@@ -14,7 +14,8 @@ export class WelcomeComponent implements OnDestroy {
 
   // Mobile menu
   isMenuOpen = false;
-
+ 
+currentYear: number = new Date().getFullYear();
   // Carousel
   currentIndex = 0;
   intervalId: any;

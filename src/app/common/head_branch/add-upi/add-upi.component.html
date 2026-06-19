@@ -1,0 +1,271 @@
+<!-- ================= EMBEDDED MODE ================= -->
+<ng-container *ngIf="embeddedMode; else modalMode">
+  <!-- INLINE FORM (used inside Inventory stepper) -->
+  <form [formGroup]="addUpiForm" (ngSubmit)="submitAddUpi()" class="space-y-4">
+    <!-- ================= BANK SELECT ================= -->
+    <div *ngIf="preselectedBankId === null" class="space-y-1">
+      <label class="text-sm font-semibold flex items-center">
+        <span
+          class="material-symbols-outlined mr-2 text-[var(--color-primary)]"
+        >
+          account_balance
+        </span>
+        Select Bank
+      </label>
+
+      <div class="relative">
+        <input
+          type="text"
+          [(ngModel)]="upiPortalSearch"
+          (ngModelChange)="onUpiPortalSearch()"
+          (focus)="onUpiPortalFocus()"
+          (click)="openUpiPortalDropdown()"
+          placeholder="Search bank..."
+          class="w-full px-3 py-2 border rounded-lg"
+          [ngModelOptions]="{ standalone: true }"
+        />
+
+        <button
+          *ngIf="selectedUpiPortal"
+          type="button"
+          (click)="clearUpiPortalSelection()"
+          class="absolute right-3 top-2"
+        >
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+
+      <!-- DROPDOWN -->
+      <div
+        *ngIf="showUpiPortalDropdown"
+        class="relative z-50 mt-1 bg-white border rounded-lg shadow max-h-48 overflow-y-auto"
+      >
+        <div
+          *ngFor="let bank of filteredBanks"
+          (click)="selectUpiPortal(bank)"
+          class="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+        >
+          {{ bank.accountHolderName }} - {{ bank.accountNo }}
+          <span class="text-xs text-gray-400 float-right">
+            {{ bank.currency }}
+          </span>
+        </div>
+
+        <div
+          *ngIf="filteredBanks.length === 0"
+          class="p-2 text-sm text-gray-400"
+        >
+          No bank found
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= UPI ID ================= -->
+    <div>
+      <label class="text-sm font-semibold">UPI ID (VPA)</label>
+
+      <div class="flex gap-2">
+        <input
+          formControlName="vpa"
+          type="text"
+          placeholder="example@upi"
+          class="flex-1 px-3 py-2 border rounded-lg"
+        />
+
+        <button
+          type="button"
+          (click)="setQrMode('generate'); generateQrFromVpa()"
+          class="px-3 py-2 border rounded-lg"
+          [class.bg-[var(--color-surface)]]="qrMode === 'upload'"
+          [class.text-black]="qrMode === 'generate'"
+        >
+          QR
+        </button>
+
+        <button
+          type="button"
+          (click)="setQrMode('upload')"
+          class="px-3 py-2 border rounded-lg"
+          [class.bg-[var(--color-primary)]]="qrMode === 'upload'"
+          [class.text-white]="qrMode === 'upload'"
+        >
+          Upload
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= QR UPLOAD ================= -->
+    <div *ngIf="qrMode === 'upload' && !selectedImage">
+      <label class="text-sm font-semibold">Upload QR</label>
+
+      <div
+        class="border-dashed border-2 p-4 text-center rounded-lg cursor-pointer"
+        (click)="fileInput.click()"
+      >
+        <span class="material-symbols-outlined text-3xl">upload</span>
+        <p class="text-sm">Click to upload QR</p>
+
+        <input
+          #fileInput
+          type="file"
+          accept="image/*"
+          class="hidden"
+          (change)="onQrFileSelected($event)"
+        />
+      </div>
+    </div>
+
+    <!-- ================= QR DISPLAY ================= -->
+    <div
+      *ngIf="qrData || selectedImage"
+      class="border p-3 rounded-lg bg-gray-50"
+    >
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-sm font-medium">QR Code</span>
+
+        <button type="button" (click)="removeQr()" class="text-xs text-red-500">
+          Remove
+        </button>
+      </div>
+
+      <div #qrcodeRef>
+        <qrcode
+          *ngIf="qrData && !selectedImage"
+          [qrdata]="qrData"
+          [width]="200"
+        ></qrcode>
+      </div>
+    </div>
+
+    <!-- ================= LIMIT ================= -->
+    <div>
+      <label class="text-sm font-semibold">Limit Amount</label>
+
+      <input
+        formControlName="limitAmount"
+        type="number"
+        class="w-full px-3 py-2 border rounded-lg"
+        placeholder="Enter limit"
+      />
+    </div>
+
+    <!-- ================= CAPACITY ================= -->
+    <div class="space-y-2">
+      <label class="text-sm font-semibold flex items-center">
+        <span class="material-symbols-outlined mr-2">sync_alt</span>
+        Capacity Range
+      </label>
+
+      <div *ngFor="let r of capacityRanges; let i = index" class="flex gap-2">
+        <input
+          type="number"
+          [value]="r.minRange"
+          (input)="updateFrom(i, $event)"
+          placeholder="From"
+          class="w-full px-2 py-1 border rounded"
+        />
+
+        <input
+          type="number"
+          [value]="r.maxRange"
+          (input)="updateTo(i, $event)"
+          placeholder="To"
+          class="w-full px-2 py-1 border rounded"
+        />
+
+        <input
+          type="number"
+          [value]="r.quantity"
+          (input)="updateQuantity(i, $event)"
+          placeholder="Qty"
+          class="w-full px-2 py-1 border rounded"
+        />
+
+        <button
+          type="button"
+          (click)="addRange()"
+          *ngIf="i === capacityRanges.length - 1"
+          class="px-2 bg-green-500 text-white rounded"
+        >
+          +
+        </button>
+
+        <button
+          type="button"
+          (click)="removeRange(i)"
+          *ngIf="capacityRanges.length > 1"
+          class="px-2 bg-red-500 text-white rounded"
+        >
+          -
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= ACTION ================= -->
+    <div class="flex gap-3 pt-3">
+      <button
+        type="submit"
+        [disabled]="isAddingUpi || addUpiForm.invalid"
+        class="flex-1 bg-[var(--color-primary)] text-white py-2 rounded-lg"
+      >
+        {{ isAddingUpi ? "Adding..." : "Add UPI" }}
+      </button>
+
+      <button
+        type="button"
+        (click)="formCancelled.emit()"
+        class="flex-1 border py-2 rounded-lg"
+      >
+        Cancel
+      </button>
+    </div>
+  </form>
+</ng-container>
+
+<!-- ================= MODAL MODE ================= -->
+<ng-template #modalMode>
+  <div
+    *ngIf="showAddModal"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+  >
+    <div
+      class="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg border border-[var(--color-border)]"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- HEADER -->
+      <div
+        class="flex items-center justify-between p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+      >
+        <h3 class="text-lg font-semibold flex items-center">
+          <span
+            class="material-symbols-outlined mr-2 text-[var(--color-primary)]"
+          >
+            add_circle
+          </span>
+          Add New UPI
+        </h3>
+
+        <button
+          (click)="closeAddModal()"
+          class="p-1 hover:bg-[var(--color-hover)] rounded-full"
+        >
+          <span class="material-symbols-outlined text-[var(--color-muted)]">
+            close
+          </span>
+        </button>
+      </div>
+
+      <!-- BODY -->
+      <div class="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <!-- SAME FORM AGAIN -->
+        <form
+          [formGroup]="addUpiForm"
+          (ngSubmit)="submitAddUpi()"
+          class="space-y-4"
+        >
+          <!-- COPY SAME FORM CONTENT HERE -->
+        </form>
+      </div>
+    </div>
+  </div>
+</ng-template>

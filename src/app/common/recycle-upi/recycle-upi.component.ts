@@ -1,8 +1,10 @@
+
 import { Component, OnInit } from "@angular/core";
 import { UpiService } from "../../pages/services/upi.service";
 import { UserStateService } from "../../store/user-state.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { fileBaseUrl } from "../../pages/services/helper";
+import { MultimediaService } from "../../pages/services/multimedia.service";
 
 @Component({
   selector: "app-recycle-upi",
@@ -24,6 +26,7 @@ export class RecycleUpiComponent implements OnInit {
     private upiService: UpiService,
     private userStateService: UserStateService,
     private snack: SnackbarService,
+    private multiMediaService: MultimediaService,
   ) {}
 
   ngOnInit(): void {
@@ -34,9 +37,9 @@ export class RecycleUpiComponent implements OnInit {
   setView(mode: "table" | "grid") {
     this.viewMode = mode;
   }
-
   fetchDeletedUpis(): void {
     this.loading = true;
+
     const options = {
       page: this.currentPage - 1,
       size: this.pageSize,
@@ -50,20 +53,41 @@ export class RecycleUpiComponent implements OnInit {
 
           this.upis = rows.map((r: any) => ({
             ...r,
-            qrImagePath: r.qrImagePath
-              ? `${fileBaseUrl}/${r.qrImagePath}`
-              : null,
+            qrImageId: r.qrImagePath, // 👈 THIS IS YOUR ID
+            qrImagePath: null, // blob URL
           }));
+
+          // load images via blob API
+          this.upis.forEach((upi: any) => {
+            if (upi.qrImageId) {
+              this.loadQrImage(upi);
+            }
+          });
 
           this.totalElements = res?.totalElements || 0;
           this.totalPagesCount = res?.totalPages || 0;
           this.loading = false;
         },
+
         error: (err) => {
+          console.error(err);
           this.upis = [];
           this.loading = false;
         },
       });
+  }
+  loadQrImage(upi: any): void {
+    const url = `${fileBaseUrl}/${upi.qrImageId}`;
+
+    this.multiMediaService.getImageByUrlBlob(url).subscribe({
+      next: (blob: Blob) => {
+        const objectUrl = URL.createObjectURL(blob);
+        upi.qrImagePath = objectUrl;
+      },
+      error: () => {
+        upi.qrImagePath = null;
+      },
+    });
   }
 
   reactivateUpi(upi: any) {
@@ -115,4 +139,3 @@ export class RecycleUpiComponent implements OnInit {
     }
   }
 }
-

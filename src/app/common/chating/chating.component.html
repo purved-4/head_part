@@ -526,7 +526,7 @@
             <span
               class="px-5 py-1.5 text-[10px] font-bold text-violet-400 bg-white rounded-2xl border border-violet-100/60 mx-4 shadow-sm uppercase tracking-widest"
             >
-              {{ dateSep }}
+              {{ dateSep | tz}}
             </span>
             <div class="flex-1 border-t border-violet-100/40"></div>
           </div>
@@ -1248,7 +1248,7 @@
                 Created
               </p>
               <p class="text-[13px] font-semibold text-gray-700">
-                {{ getFormattedDateTime(selectedNotification._raw?.createdAt) }}
+                {{ getFormattedDateTime(selectedNotification._raw?.createdAt) | tz}}
               </p>
             </div>
           </div>
@@ -1271,7 +1271,7 @@
                 Last Activity
               </p>
               <p class="text-[13px] font-semibold text-gray-700">
-                {{ getFormattedDateTime(selectedNotification._raw?.updatedAt) }}
+                {{ getFormattedDateTime(selectedNotification._raw?.updatedAt) | tz}}
               </p>
             </div>
           </div>

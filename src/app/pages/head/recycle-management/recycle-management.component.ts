@@ -22,11 +22,11 @@ export class RecycleManagementComponent implements OnInit, OnDestroy {
           // FIX: lowercase conversion
           this.selectedType = mode.toLowerCase();
 
-          console.log("Selected Mode =>", this.selectedType);
+
         }
       },
       error: (err) => {
-        console.error("Mode subscription error:", err);
+
       },
     });
   }

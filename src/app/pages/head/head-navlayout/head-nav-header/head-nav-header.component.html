@@ -36,7 +36,7 @@
           <div class="flex items-center space-x-2 cursor-pointer">
             <div class="w-2 h-2 rounded-full bg-[var(--color-warning)]"></div>
             <span class="text-sm font-medium">
-              Payin: ₹{{ payinBalance }}
+              Payin: ₹{{ payinBalance | crformat }}
             </span>
           </div>
 
@@ -59,7 +59,7 @@
             </div> -->
             <div class="flex justify-between">
               <span class="font-medium">
-                {{ formatFullAmount(payinBalance) }}
+                {{ payinBalance | crformat }}
               </span>
             </div>
           </div>
@@ -73,7 +73,7 @@
               Payout: ₹{{ formatIndianAmount(payoutBalance) }}
             </span> -->
             <span class="text-sm font-medium">
-              Payout: ₹{{ payoutBalance }}
+              Payout: ₹{{ payoutBalance | crformat }}
             </span>
           </div>
 
@@ -81,7 +81,7 @@
           <div
             class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs whitespace-nowrap z-45"
           >
-            {{ formatFullAmount(payoutBalance) }}
+            {{ payoutBalance | crformat }}
           </div>
         </div>
 
@@ -91,16 +91,32 @@
             <!-- <span class="text-sm font-medium">
               Reward: ₹{{ formatIndianAmount(rewards) }}
             </span> -->
-            <span class="text-sm font-medium"> Reward: ₹{{ rewards }} </span>
+            <span class="text-sm font-medium">
+              Reward: ₹{{ rewards | crformat }}
+            </span>
           </div>
 
           <div
             class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs z-45"
           >
-            {{ formatFullAmount(rewards) }}
+            {{ rewards | crformat }}
           </div>
         </div>
 
+         <div class="stat-item relative group">
+          <div class="flex items-center space-x-2 cursor-pointer">
+            <div class="w-2 h-2 rounded-full bg-[var(--color-success)]"></div>
+            <span class="text-sm font-medium">
+              Exploser: {{ exploser | crformat }}
+            </span>
+          </div>
+
+          <div
+            class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs z-45"
+          >
+            Exploser: {{ exploser | crformat }}
+          </div>
+        </div>
         <div class="stat-item relative group">
           <div class="flex items-center space-x-2 cursor-pointer">
             <div class="w-2 h-2 rounded-full bg-[var(--color-success)]"></div>
@@ -108,14 +124,14 @@
               Balance: ₹{{ formatIndianAmount(limitRemainingAmount) }}
             </span> -->
             <span class="text-sm font-medium">
-              Balance: ₹{{ limitRemainingAmount }}
+              Balance: ₹{{ limitRemainingAmount | crformat }}
             </span>
           </div>
 
           <div
             class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs z-45"
           >
-            Remaining: {{ formatFullAmount(limitRemainingAmount) }}
+            Remaining: {{ limitRemainingAmount | crformat }}
           </div>
         </div>
       </div>

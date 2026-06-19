@@ -141,7 +141,7 @@
                       class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]"
                     >
                       <span class="font-semibold text-red-600">
-                        {{ getTimeAgo(transaction.date) }}
+                        {{ getTimeAgo(transaction.date) | tz}}
                       </span>
 
                       <span
@@ -369,8 +369,7 @@
                     <div
                       class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]"
                     >
-                      <!-- <span>{{ transaction.date | date: "short" }}</span> -->
-                      <span class="font-semibold text-red-600">
+                       <span class="font-semibold text-red-600">
                         {{ getTimeAgo(transaction.date) }}
                       </span>
                       <span
@@ -588,9 +587,8 @@
                     <div
                       class="flex items-center gap-2 mt-2 text-xs text-[var(--color-muted)]"
                     >
-                      <!-- <span>{{ transaction.date | date: "short" }}</span> -->
-                      <span class="font-semibold text-red-600">
-                        {{ getTimeAgo(transaction.date) }}
+                       <span class="font-semibold text-red-600">
+                        {{ getTimeAgo(transaction.date) | tz }}
                       </span>
 
                       <span
@@ -863,7 +861,7 @@
                     >
                       <!-- <span>{{ transaction.date | date: "short" }}</span> -->
                       <span class="font-semibold text-red-600">
-                        {{ getTimeAgo(transaction.date) }}
+                        {{ getTimeAgo(transaction.date) | tz}}
                       </span>
 
                       <span
@@ -1822,7 +1820,7 @@
               Date & Time
             </p>
             <p class="font-bold text-slate-800 text-sm">
-              {{ selectedTransaction.date | date: "medium" }}
+              {{ selectedTransaction.date  | tz}}
             </p>
           </div>
         </div>
@@ -2039,13 +2037,13 @@
               Date & Time
             </p>
             <p class="font-bold text-slate-800 text-sm">
-              {{ selectedTransaction.date | date: "medium" }}
+              {{ selectedTransaction.date | tz}}
             </p>
           </div>
         </div>
 
         <div
-          class="mb-6"
+          class="mb-6"  
           *ngIf="selectedTransaction.remarks || selectedTransaction.message"
         >
           <p

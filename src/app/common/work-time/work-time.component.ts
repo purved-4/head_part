@@ -1,11 +1,19 @@
 import { Router } from "@angular/router";
-import { Component, OnInit, OnDestroy } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  Inject,
+  PLATFORM_ID,
+} from "@angular/core";
+
 import { AuthService } from "../../pages/services/auth.service";
 import { BranchService } from "../../pages/services/branch.service";
 import { Subscription } from "rxjs";
 import { UserStateService } from "../../store/user-state.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { ComPartService } from "../../pages/services/com-part.service";
+import { isPlatformBrowser } from "@angular/common";
 
 interface BreakPeriod {
   start: number;
@@ -70,8 +78,12 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   branchId: any;
   userId: any;
   userRole: any;
-  private readonly DIRECT_LOGOUT_ROLES = ['OWNER', 'MANAGER', 'CHIEF', 'COM_PART'];
-
+  private readonly DIRECT_LOGOUT_ROLES = [
+    "OWNER",
+    "MANAGER",
+    "CHIEF",
+    "COM_PART",
+  ];
 
   constructor(
     private authService: AuthService,
@@ -79,9 +91,13 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     private router: Router,
     private userStateService: UserStateService,
     private snack: SnackbarService,
-    private compartService:ComPartService
-  ) { }
+    private compartService: ComPartService,
+    @Inject(PLATFORM_ID) private platformId: Object,
+  ) {}
 
+  private get isBrowser(): boolean {
+    return isPlatformBrowser(this.platformId);
+  }
   ngOnInit(): void {
     const s = this.userStateService.getUserId();
     this.userId = s;
@@ -92,7 +108,6 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
     // If there's an active pending logout, don't load sessions
     if (this.logoutPendingEvent) {
-
       // Listen for storage events from tp tabs
       window.addEventListener("storage", this.onStorageChange.bind(this));
       return;
@@ -106,14 +121,15 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
       this.startStopwatch();
     }
 
-    const resolvedService = this.userRole === "COM_PART" ? this.compartService : this.BranchService
+    const resolvedService =
+      this.userRole === "COM_PART" ? this.compartService : this.BranchService;
 
-    this.subEvents = resolvedService.getLogoutStatus(this.userId).subscribe(
-      (incoming: any) => {
+    this.subEvents = resolvedService
+      .getLogoutStatus(this.userId)
+      .subscribe((incoming: any) => {
         const arr = Array.isArray(incoming) ? incoming : [incoming];
         arr.forEach((ev: any) => this.processEvent(ev));
-      },
-    );
+      });
 
     // Listen for storage events from tp tabs
     window.addEventListener("storage", this.onStorageChange.bind(this));
@@ -137,9 +153,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
         if (this.isPendingLogoutRole) {
           this.startPendingTimer(state.event);
         }
-      } catch (e) {
-
-      }
+      } catch (e) {}
     }
   }
 
@@ -150,7 +164,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   }
 
   get isDirectLogoutRole(): boolean {
-    const role = String(this.userRole || '').toUpperCase();
+    const role = String(this.userRole || "").toUpperCase();
     return this.DIRECT_LOGOUT_ROLES.includes(role);
   }
 
@@ -159,12 +173,18 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   }
   // ---------- storage helpers ----------
   loadSessions(): void {
+    if (!this.isBrowser) return;
+
     const data = localStorage.getItem(this.SESSIONS_KEY);
+
     if (data) {
       try {
         this.sessions = JSON.parse(data) as WorkSession[];
         const active = this.sessions.find((s) => !s.clockOut);
-        if (active) this.activeSession = active;
+
+        if (active) {
+          this.activeSession = active;
+        }
       } catch {
         this.sessions = [];
       }
@@ -172,10 +192,13 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   }
 
   saveSessions(): void {
+    if (!this.isBrowser) return;
     localStorage.setItem(this.SESSIONS_KEY, JSON.stringify(this.sessions));
   }
 
   loadEvents(): void {
+    if (!this.isBrowser) return;
+
     const data = localStorage.getItem(this.EVENTS_KEY);
     if (data) {
       try {
@@ -187,11 +210,14 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   }
 
   saveEvents(): void {
+    if (!this.isBrowser) return;
     localStorage.setItem(this.EVENTS_KEY, JSON.stringify(this.events));
   }
 
   // ---------- pending logout persistence ----------
   private restorePendingLogoutState(): void {
+    if (!this.isBrowser) return;
+
     const data = localStorage.getItem(this.PENDING_LOGOUT_KEY);
     if (data) {
       try {
@@ -206,7 +232,6 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
         // Check if the pending timeout has already expired
         if (state.targetTs <= now) {
-
           // Timeout expired, clear and redirect
           this.clearPendingLogoutStateOnly();
           this.clearAllSessions();
@@ -217,18 +242,18 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
         // Restore the pending logout state
         this.logoutPendingEvent = state.event;
 
-
         if (this.isPendingLogoutRole) {
           this.startPendingTimer(state.event);
         }
       } catch (e) {
-
         this.clearPendingLogoutStateOnly();
       }
     }
   }
 
   private savePendingLogoutState(ev: UserEvent, targetTs: number): void {
+    if (!this.isBrowser) return;
+
     const state: PendingLogoutState = { event: ev, targetTs };
     localStorage.setItem(this.PENDING_LOGOUT_KEY, JSON.stringify(state));
     console.log("Saved pending logout state", {
@@ -238,13 +263,13 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   }
 
   private clearPendingLogoutStateOnly(): void {
-
+    if (!this.isBrowser) return;
     localStorage.removeItem(this.PENDING_LOGOUT_KEY);
   }
 
   // ---------- Clear only sessions, not pending logout ----------
   private clearAllSessions(): void {
-
+    if (!this.isBrowser) return;
     localStorage.removeItem(this.SESSIONS_KEY);
     localStorage.removeItem(this.EVENTS_KEY);
     this.sessions = [];
@@ -256,7 +281,8 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
   // ---------- Complete clear (only when logout is confirmed) ----------
   private completeLogout(): void {
-localStorage.clear();
+    if (!this.isBrowser) return;
+    localStorage.clear();
     localStorage.removeItem(this.SESSIONS_KEY);
     localStorage.removeItem(this.EVENTS_KEY);
     localStorage.removeItem(this.PENDING_LOGOUT_KEY);
@@ -362,9 +388,8 @@ localStorage.clear();
     );
   }
 
-  // ---------- logout / pending behavior ---------- 
+  // ---------- logout / pending behavior ----------
   clockOutAndStartPending(): void {
-
     // Always clock out local session first
     if (this.activeSession && !this.activeSession.clockOut) {
       this.activeSession.clockOut = Date.now();
@@ -374,9 +399,8 @@ localStorage.clear();
     //  Direct logout roles → immediate logout
     if (this.isDirectLogoutRole) {
       this.authService.logout().subscribe(() => {
-        
         this.completeLogout();
-        window.location.href = '/login';
+        window.location.href = "/login";
       });
       return;
     }
@@ -386,20 +410,19 @@ localStorage.clear();
 
     this.authService.logout().subscribe({
       next: (res: any) => {
-
-
-        if(!res.success){
-          this.snack.show(res.message,res.success)
+        if (!res.success) {
+          this.snack.show(res.message, res.success);
           return;
         }
-        
+
         const futureTime = res.data;
         const futureTs = futureTime ? Date.parse(futureTime) : NaN;
 
         // If backend didn’t send valid time → logout directly
         if (Number.isNaN(futureTs)) {
           this.completeLogout();
-          window.location.href = '/login'; return;
+          window.location.href = "/login";
+          return;
         }
 
         const pendingEvent: UserEvent = {
@@ -422,7 +445,7 @@ localStorage.clear();
         this.snack.show("Logout scheduled", 200);
       },
       error: (err: any) => {
-        console.log(err)
+
         this.snack.show(err.error.message, err.error.status);
       },
     });
@@ -447,7 +470,6 @@ localStorage.clear();
       const remainingMs = targetTs - now;
 
       if (remainingMs <= 0) {
-
         this.pendingRemaining = this.formatDuration(0);
         this.stopPendingTimer();
         // Only clear pending logout, navigate to login

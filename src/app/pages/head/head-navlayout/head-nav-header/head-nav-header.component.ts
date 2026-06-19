@@ -62,6 +62,7 @@ export class HeadNavHeaderComponent implements OnInit {
   payoutBalance: any = 0;
   payinBalance: any = 0;
   rewards: any;
+  exploser: any;
   bankBalance: any = 0;
   upiBalance: any = 0;
 
@@ -105,6 +106,7 @@ export class HeadNavHeaderComponent implements OnInit {
         this.payinBalance = res?.totalPayin ?? 0;
         this.payoutBalance = res?.totalPayout ?? 0;
         this.rewards = res?.reward ?? 0;
+            this.exploser = res?.exploser ?? 0;
 
         this.emitBalances();
       });
@@ -119,7 +121,7 @@ export class HeadNavHeaderComponent implements OnInit {
           this.payinBalance = res?.totalPayin ?? 0;
           this.payoutBalance = res?.totalPayout ?? 0;
           this.rewards = res?.reward ?? 0;
-
+          this.exploser = res?.exploser ?? 0;
           this.emitBalances();
         });
       });
@@ -290,6 +292,7 @@ export class HeadNavHeaderComponent implements OnInit {
       payin: this.payinBalance,
       payout: this.payoutBalance,
       reward: this.rewards,
+      exploser: this.exploser,
       limit: this.limitRemainingAmount,
     });
   }
