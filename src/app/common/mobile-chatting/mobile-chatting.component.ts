@@ -65,6 +65,7 @@ interface Notification {
   fundType?: string;
   threadType?: string;
   name?: string;
+  displayId?: string;
 }
 
 @Component({
@@ -116,6 +117,8 @@ export class MobileChattingComponent
   isLoading = false;
 
   showThreadInfo = false;
+
+  
 
   /* subscriptions */
   private realTimeSub: Subscription | null = null;
@@ -416,6 +419,7 @@ export class MobileChattingComponent
     return r.includes("head") || r.includes("branch");
   }
 
+
   /* ════════════════════════════════════════════
      UI HELPERS
      ════════════════════════════════════════════ */
@@ -567,6 +571,19 @@ export class MobileChattingComponent
       default:
         return "📄";
     }
+  }
+  fundDetails: any;
+  showFundModel: boolean = false;
+  hideFundDetails() {
+  this.showFundModel = false;
+}
+  showFundDetailForMessage(threadId: any, fundId: any, fundType: any) {
+    this.fundDetails = null;
+    this.showFundModel = false;
+    this.getFundWithId(threadId, fundId, fundType).subscribe((res) => {
+      this.fundDetails = res;
+      this.showFundModel = true;
+    });
   }
 
   toggleRightPanel(): void {
@@ -954,7 +971,7 @@ private loadResolvedThreadsPaginated(): void {
      ════════════════════════════════════════════ */
 
   private mapThreadToNotification(t: any): Notification {
-    const rawName = t.displayId || t.title || t.fundsType || "Thread";
+    const rawName = t.queryMessage || t.displayId || t.title || t.fundsType || "Thread";
     const groupName =
       rawName.length > 30 ? rawName.slice(0, 30) + "…" : rawName;
 
@@ -1012,6 +1029,7 @@ private loadResolvedThreadsPaginated(): void {
       fundType: t.fundsType,
       threadType,
       name: rawName,
+      displayId: t.displayId,
     };
   }
 
@@ -2421,6 +2439,8 @@ openMediaViewer(
 
   backToThreads(): void {
     this.selectedNotification = null;
+    this.fundDetails = null;
+    this.showFundModel = false;
     this.showThreadInfo = false;
   }
 

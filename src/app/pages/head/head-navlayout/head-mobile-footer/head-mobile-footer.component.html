@@ -69,10 +69,9 @@
   </button>
 
 
-  <!-- Pending Threads -->
   <!-- Pending Threads Button -->
 <button
-  (click)="openPendingThreads()"
+  (click)="goToChats()"
   class="
     w-12
     h-12
@@ -129,6 +128,16 @@
         </div>
         <span class="font-semibold text-slate-800">
           ₹{{ format(reward) }}
+        </span>
+      </div>
+      <!-- Exploser -->
+      <div class="flex justify-between items-center text-sm">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+          <span class="text-slate-600">Exploser</span>
+        </div>
+        <span class="font-semibold text-slate-800">
+          ₹{{ format(exploser) }}
         </span>
       </div>
 

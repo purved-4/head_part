@@ -11,6 +11,7 @@ export class HeadNavDashboardLayoutComponent {
   headerPayout = 0;
   headerReward = 0;
   headerLimit = 0;
+  headerExploser = 0;
 
   // ================= SIDEBAR =================
   sidebarCollapsed = false;
@@ -115,6 +116,7 @@ export class HeadNavDashboardLayoutComponent {
     this.headerPayout = data.payout;
     this.headerReward = data.reward;
     this.headerLimit = data.limit;
+    this.headerExploser = data.exploser;
   }
 
   // ================= NOTIFICATION =================

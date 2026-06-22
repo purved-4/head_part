@@ -450,22 +450,23 @@
 
             <!-- Show Fund Action -->
             <div class="pt-2 border-t border-gray-200/60">
-              <button
-                (click)="
-                  showFundDetailForMessage(
-                    selectedNotification.id,
-                    selectedNotification.fundId,
-                    selectedNotification.fundType
-                  )
-                "
-                class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-violet-50 hover:bg-violet-100 text-violet-700 font-medium rounded-xl transition-all duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-1"
-              >
-                <span class="material-symbols-outlined text-base"
-                  >flash_on</span
-                >
-                <span>Show Fund Details</span>
-              </button>
-            </div>
+  <button
+    (click)="showFundModel ? hideFundDetails() : showFundDetailForMessage(
+      selectedNotification.id,
+      selectedNotification.fundId,
+      selectedNotification.fundType
+    )"
+    class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-violet-50 hover:bg-violet-100 text-violet-700 font-medium rounded-xl transition-all duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-1"
+  >
+    <span class="material-symbols-outlined text-base">
+      {{ showFundModel ? 'visibility_off' : 'flash_on' }}
+    </span>
+
+    <span>
+      {{ showFundModel ? 'Hide Fund Details' : 'Show Fund Details' }}
+    </span>
+  </button>
+</div>
 
             <!-- Fund Details -->
             <div
@@ -778,17 +779,19 @@
                 >
               </div>
             </div>
-          </div>
-        </ng-container>
-      </div>
-      <!-- Scroll To Bottom Button -->
+
+                  <!-- Scroll To Bottom Button -->
       <button
         *ngIf="showScrollToBottom"
         (click)="scrollToBottom()"
-        class="fixed bottom-24 right-6 z-50 w-12 h-12 rounded-full bg-violet-500 hover:bg-violet-600 text-white shadow-xl flex items-center justify-center transition-all duration-300"
+        class="fixed bottom-24 left-2/3 z-50 w-8 h-8 rounded-full bg-violet-500 hover:bg-violet-600 text-white flex items-center justify-center transition-all duration-300"
       >
         <span class="material-symbols-outlined">keyboard_arrow_down</span>
       </button>
+          </div>
+        </ng-container>
+      </div>
+
 
       <!-- Empty Messages -->
     </div>

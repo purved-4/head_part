@@ -335,6 +335,8 @@
       *ngIf="selectedNotification"
       class="flex-1 flex flex-col bg-white min-h-0 overflow-visible"
     >
+
+
       <!-- Messages Area -->
 
       <div
@@ -342,6 +344,89 @@
         #messagesContainer
         (scroll)="onMessagesScroll($event)"
       >
+
+       <!-- Notification Details Card (ALWAYS SHOW) -->
+        <div
+          class="w-full max-w-md bg-white/70 backdrop-blur-sm rounded-2xl p-6 mb-6 shadow-md border border-gray-100/50 ring-1 ring-violet-100/50"
+        >
+          <div class="space-y-3">
+            <!-- Display ID -->
+            <div class="flex items-center justify-between">
+              <span
+                class="text-sm font-medium text-gray-500 uppercase tracking-wider"
+              >
+                ID
+              </span>
+
+              <span
+                class="bg-green-100 text-green-700 border border-green-300 px-2 py-[2px] rounded-md text-xs font-semibold shadow-sm"
+              >
+                {{ selectedNotification.displayId }}
+              </span>
+            </div>
+
+            <!-- Fund Type -->
+            <div class="flex items-center justify-between">
+              <span
+                class="text-sm font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Type
+              </span>
+
+              <span class="text-base font-semibold text-gray-800">
+                {{ selectedNotification.fundType }}
+              </span>
+            </div>
+
+            <!-- Name -->
+            <div class="flex items-center justify-between">
+              <span
+                class="text-sm font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Name
+              </span>
+
+              <span class="text-base font-semibold text-gray-800">
+                {{ selectedNotification.name }}
+              </span>
+            </div>
+
+            <!-- Show Fund Action -->
+            <div class="pt-2 border-t border-gray-200/60">
+  <button
+    (click)="showFundModel ? hideFundDetails() : showFundDetailForMessage(
+      selectedNotification.id,
+      selectedNotification.fundId,
+      selectedNotification.fundType
+    )"
+    class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-violet-50 hover:bg-violet-100 text-violet-700 font-medium rounded-xl transition-all duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-1"
+  >
+    <span class="material-symbols-outlined text-base">
+      {{ showFundModel ? 'visibility_off' : 'flash_on' }}
+    </span>
+
+    <span>
+      {{ showFundModel ? 'Hide Fund Details' : 'Show Fund Details' }}
+    </span>
+  </button>
+</div>
+
+            <!-- Fund Details -->
+            <div
+              *ngIf="showFundModel === true"
+              class="mt-3 p-4 bg-violet-50/80 rounded-xl border border-violet-200 animate-slide-down"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-violet-600">Amount</span>
+
+                <span class="text-base font-bold text-violet-800">
+                  {{ fundDetails?.currencyWiseAmount }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Loading Indicator -->
         <div *ngIf="loadingMessages" class="flex justify-center py-2">
           <div
@@ -526,6 +611,14 @@
           <p class="text-gray-600 font-medium">No messages yet</p>
           <p class="text-sm text-gray-400">Start the conversation</p>
         </div>
+         <!-- Scroll To Bottom Button -->
+      <button
+        *ngIf="showScrollBottomBtn"
+        (click)="scrollToBottom()"
+        class="fixed bottom-24 mb-2 left-1/2 z-50 w-8 h-8 rounded-full bg-violet-500 hover:bg-violet-600 text-white flex items-center justify-center transition-all duration-300"
+      >
+        <span class="material-symbols-outlined">keyboard_arrow_down</span>
+      </button>
       </div>
 
       <!-- Unified Input Area - FIXED VERSION -->
@@ -661,7 +754,7 @@
         </div>
       </div>
 
-      <button
+      <!-- <button
         *ngIf="showScrollBottomBtn && selectedNotification"
         (click)="scrollToBottom()"
         class="fixed bottom-24 right-4 w-9 h-9 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-md flex items-center justify-center z-[999] hover:bg-gray-100 transition"
@@ -669,7 +762,7 @@
         <span class="material-icons text-gray-700 text-[18px]">
           keyboard_arrow_down
         </span>
-      </button>
+      </button> -->
     </div>
 
     <!-- Thread Info Side Sheet -->

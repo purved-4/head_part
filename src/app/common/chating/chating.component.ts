@@ -1048,7 +1048,8 @@ private loadResolvedThreadsPaginated(): void {
 
     this.selectedNotification = notification;
     this.selectedNotification.unread = 0;
-
+    this.fundDetails = null;
+    this.showFundModel = false;
     this.showParticipants = false;
     this.participantsMap.clear();
     this.detailTab = "details";
@@ -2332,6 +2333,9 @@ return;
 
   fundDetails: any;
   showFundModel: boolean = false;
+  hideFundDetails() {
+  this.showFundModel = false;
+}
   showFundDetailForMessage(threadId: any, fundId: any, fundType: any) {
 
     this.getFundWithId(threadId, fundId, fundType).subscribe((res) => {

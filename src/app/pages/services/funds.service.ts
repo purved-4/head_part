@@ -263,7 +263,7 @@ return this.http.patch<any>(
 
   broadcast(subAgenId: any, role: any): Observable<any> {
     return this.http
-      .get<any>(`${baseUrl}/webhook/broadcast/${subAgenId}/${role}`)
+      .get<any>(`${baseUrl}/funds/webhook/broadcast/${subAgenId}/${role}`)
       .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(error)),
@@ -357,10 +357,12 @@ updateProcessingStatus(fundId: any, branchId: any, entityType?: any) {
     let params = new HttpParams();
 
     // ids.forEach((id) => {
-      params = params.append("ids", ids);
+    params = params.append("ids", ids);
     // });
 
-    return this.http.get<any>(`${baseUrl}/webhook/broadcast/list`, { params });
+    return this.http.get<any>(`${baseUrl}/funds/webhook/broadcast/list`, {
+      params,
+    });
   }
 
 

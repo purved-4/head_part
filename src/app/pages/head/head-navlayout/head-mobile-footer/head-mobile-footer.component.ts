@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { Input } from "@angular/core";
 import { ThemeService } from "../../../../theme/theme.service";
+import { Router } from "@angular/router";
 @Component({
   selector: "app-head-mobile-footer",
   templateUrl: "./head-mobile-footer.component.html",
@@ -11,8 +12,16 @@ export class HeadMobileFooterComponent {
   @Input() payout = 0;
   @Input() reward = 0;
   @Input() limit = 0;
+  @Input() exploser = 0;
 
   isOpen = false;
+
+  
+
+  goToChats(){
+    this.router.navigate(['/head/chat']);
+    this.isOpen = false;
+  }
 
 
 openPendingThreads() {
@@ -33,7 +42,8 @@ openPendingThreads() {
   }
 
   constructor(
-    public theme: ThemeService
+    public theme: ThemeService,
+    private router: Router
   ) {}
 
   toggleSheet() {
