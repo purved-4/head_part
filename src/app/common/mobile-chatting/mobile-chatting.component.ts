@@ -1067,6 +1067,7 @@ private loadResolvedThreadsPaginated(): void {
     }
 
     this.selectedNotification = notification;
+    console.log(this.selectedNotification);
     notification.unread = 0;
     this.showParticipants = false;
     this.participantsMap.clear();

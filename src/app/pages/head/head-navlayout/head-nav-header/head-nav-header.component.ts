@@ -55,6 +55,8 @@ export class HeadNavHeaderComponent implements OnInit {
   };
 
   searchTerm: string = "";
+  headId: any;
+  payinStatus: any = false;
 
   currentUserRole: any;
   limitRemainingAmount: any = 0;
@@ -65,7 +67,7 @@ export class HeadNavHeaderComponent implements OnInit {
   exploser: any;
   bankBalance: any = 0;
   upiBalance: any = 0;
-
+  role: any;
   // Popup state
   portalPopupOpen = false;
   portalPercentages: any[] = [];
@@ -91,8 +93,10 @@ export class HeadNavHeaderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.headId = this.userStateService.getCurrentEntityId();
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.currentUserRole = this.userStateService.getRole();
+    this.getPayinStatus();
 
     this.socketService.subscribeLatestBalance(
       this.currentUserRole,
@@ -232,6 +236,37 @@ export class HeadNavHeaderComponent implements OnInit {
     if (amount === null || amount === undefined) return "₹0";
     return "₹" + Number(amount).toLocaleString("en-IN");
   }
+
+  getPayinStatus() {
+
+    this.headServices
+      .getHeadById(this.headId)
+      .subscribe((res:any)=>{
+
+        this.payinStatus = res.payin;
+
+      });
+
+}
+
+  changePayinStatus() {
+
+  this.headServices
+    .toggleDashbaordPayin(this.headId)
+    .subscribe(()=>{
+
+
+      this.payinStatus =
+        !this.payinStatus;
+
+      this.snack.show(
+        `Payin ${this.payinStatus ? "enabled" : "disabled"} successfully`,
+        true
+      );
+
+    });
+
+}
 
   toggleProfile() {
     this.isProfileOpen = !this.isProfileOpen;

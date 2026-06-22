@@ -46,6 +46,9 @@ interface BankAccount {
   ranges?: any;
   bankTime?: string | null; // ADD THIS
   liveAssigned?: boolean; // ADD THIS
+  remainingLimitAmount: any;
+  totalLimitAmount:any
+
 }
 
 interface Portal {
@@ -194,7 +197,7 @@ export class BanksComponent implements OnInit, OnDestroy {
   }
 
   selectedPortals: [] = [];
-
+  headId:any;
   viewMode: "table" | "grid" = "table";
   capacityRanges: {
     minRange: number | null;
@@ -231,6 +234,7 @@ export class BanksComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.headId = this.userStateService.getCurrentEntityId();
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
@@ -262,7 +266,22 @@ export class BanksComponent implements OnInit, OnDestroy {
       this.selectedModeData = res;
     });
 
+     const savedPayin =
+    sessionStorage.getItem("payinStatus");
+
+
+  if(savedPayin !== null){
+
+    this.payinStatus =
+      savedPayin === "true";
+
+  }
+  else{
+
     this.getPayinStatus();
+
+  }
+
 
     this.initAddUpiForm();
 
@@ -365,7 +384,8 @@ export class BanksComponent implements OnInit, OnDestroy {
               ranges: r.ranges ?? [],
               limitTime: r.limitTime ?? null,
               fttAcceptance: r.fttAcceptance ?? true,
-
+              remainingLimitAmount: r.remainingLimitAmount ?? null,
+              totalLimitAmount:r.totalLimitAmount ?? null,
               upiCount: r.upiCount ?? null,
               bankTime: r.bankTime ?? null, // ADD
 
@@ -388,11 +408,6 @@ export class BanksComponent implements OnInit, OnDestroy {
     const bankTime = account.bankTime
       ? new Date(account.bankTime).getTime()
       : null;
-
-    // 1. Payin OFF → always inactive
-    if (!this.payinStatus) {
-      return false;
-    }
 
     // 2. status ON → always active (no checks)
     if (account.status === "active") {
@@ -1135,6 +1150,7 @@ export class BanksComponent implements OnInit, OnDestroy {
   }
   private getPayinStatus() {
     if (this.role === "HEAD") {
+      
       this.headService.getHeadById(this.currentRoleId).subscribe((res) => {
         this.payinStatus = res.payin;
       });
@@ -1146,19 +1162,39 @@ export class BanksComponent implements OnInit, OnDestroy {
   }
   changePayinStatus() {
     if (this.role === "HEAD") {
-      this.headService
-        .toggleDashbaordPayin(this.currentRoleId)
-        .subscribe(() => {
+      this.headService.toggleDashbaordPayin(this.headId).subscribe(
+        () => {
           this.payinStatus = !this.payinStatus;
-          this.fetchBankAccounts();
-        });
+
+          this.snack.show(
+            `Payin ${this.payinStatus ? "enabled" : "disabled"} successfully`,
+            true,
+          );
+        },
+        (err) => {
+          this.snack.show(
+            err?.error?.message || "Failed to change payin status",
+            false,
+          );
+        },
+      );
     } else if (this.role === "BRANCH") {
-      this.branchService
-        .toggleDashbaordPayin(this.currentRoleId)
-        .subscribe(() => {
+      this.branchService.toggleDashbaordPayin(this.headId).subscribe(
+        () => {
           this.payinStatus = !this.payinStatus;
-          this.fetchBankAccounts();
-        });
+
+          this.snack.show(
+            `Payin ${this.payinStatus ? "enabled" : "disabled"} successfully`,
+            true,
+          );
+        },
+        (err) => {
+          this.snack.show(
+            err?.error?.message || "Failed to change payin status",
+            false,
+          );
+        },
+      );
     }
   }
 

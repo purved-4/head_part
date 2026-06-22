@@ -52,6 +52,8 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+
+    console.log("BANK DATA RECEIVED =>", this.bankData);
     this.entityId = this.userStateService.getCurrentEntityId();
 
     this.entityType = this.userStateService.getRole();
@@ -82,6 +84,7 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       accountType: this.bankData?.accountType || "saving",
 
       fttAcceptance: this.bankData?.fttAcceptance || false,
+
     };
   }
 
@@ -148,6 +151,8 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       accountType: this.updateForm.accountType,
 
       fttAcceptance: this.updateForm.fttAcceptance,
+
+      
     };
 
     console.log("UPDATE PAYLOAD =>", payload);
