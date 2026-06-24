@@ -30,6 +30,7 @@ export class HeadNavHeaderComponent implements OnInit {
   @Input() userName: string = "Branch User";
   @Input() notifications: number = 3;
   @Input() marginLeft: number = 0;
+  @Input() parentCurrency: string = "INR";
   // Add with tp @Inputs
   @Input() isMobileMenuOpen = false;
   @Output() toggleMobileMenu = new EventEmitter<void>();
@@ -57,7 +58,8 @@ export class HeadNavHeaderComponent implements OnInit {
   searchTerm: string = "";
   headId: any;
   payinStatus: any = false;
-
+  timerInterval: any;
+  countdown: string = "";
   currentUserRole: any;
   limitRemainingAmount: any = 0;
   currentRoleId: any;
@@ -67,7 +69,10 @@ export class HeadNavHeaderComponent implements OnInit {
   exploser: any;
   bankBalance: any = 0;
   upiBalance: any = 0;
+  isCountdownFinished: boolean = false;
   role: any;
+
+  payinTime: string | null = null;
   // Popup state
   portalPopupOpen = false;
   portalPercentages: any[] = [];
@@ -88,8 +93,7 @@ export class HeadNavHeaderComponent implements OnInit {
     // private portalState: PortalSharingService,
     private snack: SnackbarService,
     private ngZone: NgZone,
-                public theme: ThemeService,
-    
+    public theme: ThemeService,
   ) {}
 
   ngOnInit(): void {
@@ -110,7 +114,7 @@ export class HeadNavHeaderComponent implements OnInit {
         this.payinBalance = res?.totalPayin ?? 0;
         this.payoutBalance = res?.totalPayout ?? 0;
         this.rewards = res?.reward ?? 0;
-            this.exploser = res?.exploser ?? 0;
+        this.exploser = res?.exploser ?? 0;
 
         this.emitBalances();
       });
@@ -131,6 +135,18 @@ export class HeadNavHeaderComponent implements OnInit {
       });
   }
 
+  getCurrencySymbol(parentCurrency: string): string {
+    const map: any = {
+      INR: "₹",
+      USD: "$",
+      EUR: "€",
+      GBP: "£",
+      USDT: "₮",
+      AED: "د.إ",
+    };
+
+    return map[parentCurrency?.toUpperCase()] || parentCurrency || "";
+  }
   toggleLimitsPopup() {
     this.isLimitsOpen = !this.isLimitsOpen;
   }
@@ -237,36 +253,16 @@ export class HeadNavHeaderComponent implements OnInit {
     return "₹" + Number(amount).toLocaleString("en-IN");
   }
 
-  getPayinStatus() {
-
-    this.headServices
-      .getHeadById(this.headId)
-      .subscribe((res:any)=>{
-
-        this.payinStatus = res.payin;
-
-      });
-
-}
-
   changePayinStatus() {
-
-  this.headServices
-    .toggleDashbaordPayin(this.headId)
-    .subscribe(()=>{
-
-
-      this.payinStatus =
-        !this.payinStatus;
+    this.headServices.toggleDashbaordPayin(this.headId).subscribe(() => {
+      this.getPayinStatus();
 
       this.snack.show(
         `Payin ${this.payinStatus ? "enabled" : "disabled"} successfully`,
-        true
+        true,
       );
-
     });
-
-}
+  }
 
   toggleProfile() {
     this.isProfileOpen = !this.isProfileOpen;
@@ -329,6 +325,7 @@ export class HeadNavHeaderComponent implements OnInit {
       reward: this.rewards,
       exploser: this.exploser,
       limit: this.limitRemainingAmount,
+      parentCurrency: this.parentCurrency, // ADD THIS
     });
   }
 
@@ -338,5 +335,48 @@ export class HeadNavHeaderComponent implements OnInit {
 
   getUnreadCount(): number {
     return this.notificationUnreadCount;
+  }
+  getPayinStatus() {
+    this.headServices.getHeadById(this.headId).subscribe((res: any) => {
+      this.payinStatus = res?.payin ?? false;
+      this.payinTime = res?.payinTime ?? null;
+
+      if (!this.payinStatus && this.payinTime) {
+        this.startCountdown(this.payinTime);
+      } else {
+        this.clearCountdown();
+      }
+    });
+  }
+  startCountdown(payinTime: string) {
+    this.clearCountdown();
+
+    this.timerInterval = setInterval(() => {
+      const target = new Date(payinTime).getTime();
+      const now = Date.now();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        this.countdown = "";
+        this.clearCountdown();
+        this.getPayinStatus(); // auto refresh
+        return;
+      }
+
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+
+      this.countdown =
+        `${h.toString().padStart(2, "0")}:` +
+        `${m.toString().padStart(2, "0")}:` +
+        `${s.toString().padStart(2, "0")}`;
+    }, 1000);
+  }
+  clearCountdown() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
   }
 }

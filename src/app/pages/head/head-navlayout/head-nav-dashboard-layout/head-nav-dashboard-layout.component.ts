@@ -12,6 +12,7 @@ export class HeadNavDashboardLayoutComponent {
   headerReward = 0;
   headerLimit = 0;
   headerExploser = 0;
+  parentCurrency = "INR";
 
   // ================= SIDEBAR =================
   sidebarCollapsed = false;
@@ -48,8 +49,7 @@ export class HeadNavDashboardLayoutComponent {
     }
 
     return (
-      this.PRIMARY_WIDTH +
-      (this.secondaryPanelOpen ? this.PANEL_WIDTH : 0)
+      this.PRIMARY_WIDTH + (this.secondaryPanelOpen ? this.PANEL_WIDTH : 0)
     );
   }
 
@@ -59,9 +59,7 @@ export class HeadNavDashboardLayoutComponent {
       return 0;
     }
 
-    return this.chatPanelOpen
-      ? this.CHAT_PANEL_WIDTH
-      : 0;
+    return this.chatPanelOpen ? this.CHAT_PANEL_WIDTH : 0;
   }
 
   // ================= MOBILE =================
@@ -117,6 +115,7 @@ export class HeadNavDashboardLayoutComponent {
     this.headerReward = data.reward;
     this.headerLimit = data.limit;
     this.headerExploser = data.exploser;
+    this.parentCurrency = data.parentCurrency ?? "INR"; // ✅ ADD THIS
   }
 
   // ================= NOTIFICATION =================

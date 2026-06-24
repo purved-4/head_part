@@ -13,27 +13,25 @@ export class HeadMobileFooterComponent {
   @Input() reward = 0;
   @Input() limit = 0;
   @Input() exploser = 0;
+  @Input() parentCurrency: string = "INR";
 
   isOpen = false;
 
-  
-
-  goToChats(){
-    this.router.navigate(['/head/chat']);
+  goToChats() {
+    this.router.navigate(["/head/chat"]);
     this.isOpen = false;
   }
 
+  openPendingThreads() {
+    this.showPendingThreads = true;
+  }
 
-openPendingThreads() {
-  this.showPendingThreads = true;
-}
+  showPendingThreads = false;
+  chatPanelOpen = false;
+  entityId: any;
+  entityType: any;
 
-    showPendingThreads = false;
-    chatPanelOpen = false;
-      entityId: any;
-    entityType: any;
-
-    closePendingThreads(): void {
+  closePendingThreads(): void {
     this.showPendingThreads = false;
   }
 
@@ -43,7 +41,7 @@ openPendingThreads() {
 
   constructor(
     public theme: ThemeService,
-    private router: Router
+    private router: Router,
   ) {}
 
   toggleSheet() {
@@ -52,5 +50,17 @@ openPendingThreads() {
 
   format(amount: number): string {
     return Number(amount || 0).toLocaleString("en-IN");
+  }
+  getCurrencySymbol(currency: string): string {
+    const map: any = {
+      INR: "₹",
+      USD: "$",
+      EUR: "€",
+      GBP: "£",
+      USDT: "₮",
+      AED: "د.إ",
+    };
+
+    return map[currency?.toUpperCase()] || currency || "";
   }
 }
