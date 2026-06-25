@@ -172,11 +172,28 @@
               class="material-symbols-outlined text-[var(--color-muted)] text-base shrink-0"
               >calendar_clock</span
             >
-            <input
+            <!-- <input
               type="datetime-local"
               [(ngModel)]="currency.effectiveFrom"
               [disabled]="!currency.isEditing"
               class="flex-1 min-w-0 bg-transparent text-sm text-[var(--color-font)] outline-none disabled:opacity-40 disabled:cursor-not-allowed"
+            /> -->
+            <!-- Live Timer -->
+            <div
+              *ngIf="!currency.isEditing"
+              (click)="startEdit(currency)"
+              class="flex-1 cursor-pointer text-sm text-[var(--color-font)] hover:text-blue-600"
+            >
+              {{ currency.liveEffectiveFrom }}
+            </div>
+
+            <!-- Datetime Picker -->
+            <input
+              *ngIf="currency.isEditing"
+              type="datetime-local"
+              [(ngModel)]="currency.effectiveFrom"
+              step="1"
+              class="flex-1 min-w-0 bg-transparent text-sm text-[var(--color-font)] outline-none"
             />
           </div>
         </div>
