@@ -55,7 +55,125 @@ export class HeadNavHeaderComponent implements OnInit {
     reward: "500 pts",
   };
 
-  searchTerm: string = "";
+  searchTerm = "";
+
+  searchResults: any[] = [];
+
+  allRoutes = [
+    {
+      label: "Dashboard",
+      path: "/head/dashboard",
+      keywords: ["dashboard", "home"],
+      icon: "dashboard",
+    },
+
+    {
+      label: "Override Currency",
+      path: "/head/override-currency-management",
+      keywords: ["currency", "rate", "exchange"],
+      icon: "currency_exchange",
+    },
+
+    {
+      label: "Recycle UPI",
+      path: "/head/recycle-management",
+      keywords: ["recycle", "upi"],
+      icon: "delete",
+    },
+
+    {
+      label: "Recycle Bank",
+      path: "/head/recycle-management",
+      keywords: ["recycle", "bank"],
+      icon: "account_balance",
+    },
+
+    {
+      label: "Add Branch",
+      path: "/head/branch/add",
+      keywords: ["branch", "add", "create"],
+      icon: "add_business",
+    },
+
+    {
+      label: "Manage Branch",
+      path: "/head/branch/manage",
+      keywords: ["branch", "manage"],
+      icon: "account_tree",
+    },
+
+    {
+      label: "Chat",
+      path: "/head/chat",
+      keywords: ["chat", "message"],
+      icon: "chat",
+    },
+
+    {
+      label: "Limits",
+      path: "/head/limit",
+      keywords: ["limit", "balance"],
+      icon: "speed",
+    },
+
+    {
+      label: "Recycle Management",
+      path: "/head/recycle-management",
+      keywords: ["recycle", "management"],
+      icon: "delete",
+    },
+
+    {
+      label: "Transaction History",
+      path: "/head/reports/transaction-history",
+      keywords: ["transaction", "history", "report"],
+      icon: "receipt_long",
+    },
+
+    {
+      label: "Entity Report",
+      path: "/head/reports/entity-report",
+      keywords: ["entity", "report"],
+      icon: "bar_chart",
+    },
+
+    {
+      label: "Funds Report",
+      path: "/head/reports/funds-report",
+      keywords: ["fund", "report"],
+      icon: "account_balance_wallet",
+    },
+
+    {
+      label: "Work Time Report",
+      path: "/head/reports/work-time",
+      keywords: ["work", "time"],
+      icon: "schedule",
+    },
+
+    {
+      label: "Banks",
+      path: "/head/bank",
+      keywords: ["bank", "accounts"],
+      icon: "account_balance",
+    },
+
+    {
+      label: "UPIs",
+      path: "/head/upi",
+      keywords: ["upi", "vpa"],
+      icon: "qr_code",
+    },
+
+    {
+      label: "Shared User Profile",
+      path: "/head/sharedUserProfile",
+      keywords: ["profile", "user"],
+      icon: "person",
+    },
+  ];
+
+  showSearchDropdown = false;
   headId: any;
   payinStatus: any = false;
   timerInterval: any;
@@ -94,6 +212,7 @@ export class HeadNavHeaderComponent implements OnInit {
     private snack: SnackbarService,
     private ngZone: NgZone,
     public theme: ThemeService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -204,9 +323,46 @@ export class HeadNavHeaderComponent implements OnInit {
     this.openSettings.emit();
   }
 
-  onSearchInput(ev: Event) {
-    this.searchTerm = (ev.target as HTMLInputElement).value;
-    this.search.emit(this.searchTerm);
+  onSearchInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value.toLowerCase().trim();
+
+    this.searchTerm = value;
+
+    if (!value || value.length < 2) {
+      this.searchResults = [];
+
+      this.showSearchDropdown = false;
+
+      return;
+    }
+
+    this.searchResults = this.allRoutes.filter(
+      (route) =>
+        route.label.toLowerCase().includes(value) ||
+        route.keywords.some((k: string) => k.includes(value)),
+    );
+
+    this.showSearchDropdown = this.searchResults.length > 0;
+  }
+
+  onSearchEnter(event: KeyboardEvent) {
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    if (this.searchResults.length) {
+      this.navigateTo(this.searchResults[0].path);
+    }
+  }
+
+  navigateTo(path: string) {
+    this.router.navigateByUrl(path);
+
+    this.searchTerm = "";
+
+    this.searchResults = [];
+
+    this.showSearchDropdown = false;
   }
 
   getUserInitials(): string {
@@ -253,9 +409,10 @@ export class HeadNavHeaderComponent implements OnInit {
     return "₹" + Number(amount).toLocaleString("en-IN");
   }
 
+
   changePayinStatus() {
     this.headServices.toggleDashbaordPayin(this.headId).subscribe(() => {
-      this.getPayinStatus();
+      this.payinStatus = !this.payinStatus;
 
       this.snack.show(
         `Payin ${this.payinStatus ? "enabled" : "disabled"} successfully`,
