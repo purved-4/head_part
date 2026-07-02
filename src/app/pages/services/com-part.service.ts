@@ -1040,6 +1040,7 @@ export class ComPartService {
       `${baseUrl}/comPart/getPayoutsCountsByUserId?userId=${userId}&portalId=${portalId}`,
     );
   }
+  
   getPayinsCountsByUserId(userId: string, portalId: string): Observable<any> {
     return this.http.get(
       `${baseUrl}/comPart/getPayinsCountsByUserId?userId=${userId}&portalId=${portalId}`,
@@ -1111,4 +1112,100 @@ restoreBankAndUpi(comPartId: any): Observable<any> {
         catchError(this.handleError),
       );;
   }
+
+  addFavourite(
+    userId: string,
+    payinId: string,
+    payinType: string,
+    portalId: string,
+  ): Observable<any> {
+    return this.http.post(
+      `${baseUrl}/manual/favourites/add`,
+      {
+        userId,
+        payinId,
+        payinType,
+        portalId,
+      },
+      {
+        params: {
+          userId,
+          payinId,
+          payinType,
+          portalId,
+        },
+      },
+    );
+  }
+
+  getUserFavourites(
+    userId: string,
+    type?: any,
+    portalId?: string,
+    amount?: any,
+    currency?: string,
+  ): Observable<any> {
+    let params = new HttpParams();
+
+    if (userId) {
+      params = params.set("userId", userId);
+    }
+    if (type) {
+      params = params.set("type", type);
+    }
+
+    if (portalId) {
+      params = params.set("portalId", portalId);
+    }
+
+    if (amount) {
+      params = params.set("amount", amount);
+    }
+
+    if (currency) {
+      params = params.set("currency", currency);
+    }
+
+    return this.http.get(`${baseUrl}/manual/favourites/user`, { params });
+  }
+
+ selectFavBank(
+    portalId: string,
+    payinId: string,
+    currency: string,
+    type: string,
+    userId: string,
+    tempAmount: number,
+  ): Observable<any> {
+    let params = new HttpParams();
+    if (portalId) {
+      params = params.set("portalId", portalId);
+    }
+    if (payinId) {
+      params = params.set("payinId", payinId);
+    }
+
+    if (currency) {
+      params = params.set("currency", currency);
+    }
+
+    if (type) {
+      params = params.set("type", type);
+    }
+
+    if (userId) {
+      params = params.set("userId", userId);
+    }
+
+    if (tempAmount != null) {
+      params = params.set("tempAmount", tempAmount.toString());
+    }
+
+    return this.http.post(`${baseUrl}/manual/selectFavBank`, {}, { params }).pipe(
+        map((res:any) => res.data),
+        catchError(this.handleError),
+      );;
+    }
+ 
+ 
 }

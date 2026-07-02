@@ -70,7 +70,7 @@ export class RecycleUpiComponent implements OnInit {
         },
 
         error: (err) => {
-          console.error(err);
+
           this.upis = [];
           this.loading = false;
         },

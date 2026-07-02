@@ -1,4 +1,5 @@
 
+
 import { Component, OnInit } from "@angular/core";
 import { LimitsService } from "../../pages/services/reports/limits.service";
 import { UserStateService } from "../../store/user-state.service";
@@ -34,9 +35,11 @@ export class LimitsComponent implements OnInit {
 
   // Add TransactionAmount Modal
   showAddTransactionAmountModal = false;
+  showRemoveTransactionAmountModal = false;
   selectedEntity: any = null;
   transactionAmountToAdd: any;
   addingTransactionAmount = false;
+  removingTransactionAmount = false;
 
   // View Limits Modal
   showViewLimitsModal = false;
@@ -201,7 +204,12 @@ export class LimitsComponent implements OnInit {
     this.actionType = action;
     this.selectedEntity = entity;
     this.transactionAmountToAdd = null;
-    this.showAddTransactionAmountModal = true;
+    if(action === "ADD"){
+      this.showAddTransactionAmountModal = true;
+    }else{
+      this.showRemoveTransactionAmountModal = true;
+    }
+    
     const entityType =
       entity.entityType ||
       this.utilSerivce.getRoleForDownLevelWithCurrentRoleId(
@@ -227,9 +235,11 @@ export class LimitsComponent implements OnInit {
 
   closeAddTransactionAmountModal() {
     this.showAddTransactionAmountModal = false;
+    this.showRemoveTransactionAmountModal = false;
     this.selectedEntity = null;
     this.transactionAmountToAdd = null;
     this.addingTransactionAmount = false;
+    this.removingTransactionAmount = false;
     this.selectedEntityBalances = null;
   }
 
@@ -244,7 +254,11 @@ export class LimitsComponent implements OnInit {
       return;
     }
 
-    this.addingTransactionAmount = true;
+    if (this.actionType === "REMOVE") {
+  this.removingTransactionAmount = true;
+} else {
+  this.addingTransactionAmount = true;
+}
 
     // Determine entity type
     const entityType =
@@ -273,16 +287,24 @@ export class LimitsComponent implements OnInit {
 
     request.subscribe({
       next: (res) => {
-        // this.snackBar.showSuccess(`TransactionAmount ₹${this.transactionAmountToAdd} added successfully`);
+        this.snackBar.show(
+  `${this.actionType === "REMOVE" ? "Removed" : "Added"} Transaction Amount ₹${this.transactionAmountToAdd} successfully`,
+  true,
+  3000
+);
         this.closeAddTransactionAmountModal();
+        this.addingTransactionAmount = false;
+  this.removingTransactionAmount = false;
 
         // Refresh both data
         this.loadDownlevelData();
         this.loadCurrentUserLimits(); // Add this line
       },
       error: (err) => {
-        // this.snackBar.showError('Failed to add transactionAmount. Please try again.');
+        // this.snackBar.show('Failed to add transactionAmount. Please try again.',false,3000);
         this.addingTransactionAmount = false;
+  this.removingTransactionAmount = false;
+
         this.snackBar.show(err.error?.message, false);
       },
     });

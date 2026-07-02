@@ -1,0 +1,1241 @@
+<div
+  class="w-full mx-auto bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6 shadow-lg"
+>
+  <!-- Header -->
+  <div
+    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6"
+  >
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 bg-[var(--color-primary)] rounded-lg flex items-center justify-center shadow-md"
+      >
+        <span
+          class="material-symbols-outlined text-[var(--color-surface)] text-lg"
+        >
+          currency_bitcoin
+        </span>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-[var(--color-font)]">
+          Crypto Management
+        </h2>
+        <p class="text-[var(--color-muted)] text-sm mt-0.5">
+          Manage crypto inventory, limits and availability
+        </p>
+      </div>
+    </div>
+
+    <div class="w-full sm:w-auto flex items-center gap-2">
+      <button
+        (click)="fetchCryptoAccounts()"
+        class="p-2 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-hover)] transition"
+        title="Reload"
+      >
+        <span
+          class="material-symbols-outlined text-[var(--color-primary)] text-lg"
+          >refresh</span
+        >
+      </button>
+      <button
+        (click)="openAddCryptoModal()"
+        class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-lg"
+      >
+        <span class="material-symbols-outlined mr-1.5 text-lg">add</span>
+        Add New Crypto
+      </button>
+      <div
+        *ngIf="showInventoryModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      >
+        <div
+          class="bg-white rounded-2xl w-[95vw] max-w-2xl max-h-[90vh] overflow-auto shadow-2xl"
+          (click)="$event.stopPropagation()"
+        >
+          <app-inventory-configuration
+            (refreshCryptoWallets)="fetchCryptoAccounts()"
+            (close)="closeInventoryModal()"
+          ></app-inventory-configuration>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== FILTER SECTION ========== -->
+  <div
+    class="bg-[var(--color-bg)] rounded-lg p-4 mb-6 border border-[var(--color-border)] shadow-sm"
+  >
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+      <h3
+        class="text-base font-semibold text-[var(--color-font)] flex items-center"
+      >
+        <span
+          class="material-symbols-outlined text-[var(--color-primary)] mr-2"
+        >
+          filter_alt
+        </span>
+        Filter Crypto Accounts
+      </h3>
+
+      <div class="flex flex-wrap items-center gap-2 text-xs">
+        <span
+          *ngIf="searchTerm"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
+        >
+          <span class="material-symbols-outlined mr-1 text-sm">search</span>
+          "{{ searchTerm }}"
+          <button
+            (click)="clearSearchFilter()"
+            class="ml-1 hover:text-[var(--color-danger)]"
+          >
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </span>
+
+        <span
+          *ngIf="maxLimit && maxLimit > 0"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
+        >
+          <span class="material-symbols-outlined mr-1 text-sm"
+            >currency_rupee</span
+          >
+          Max Limit: ≤ {{ maxLimit }}
+          <button
+            (click)="clearLimitFilter()"
+            class="ml-1 hover:text-[var(--color-danger)]"
+          >
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </span>
+
+        <span
+          *ngIf="activeFilters > 0"
+          class="text-[var(--color-primary)] font-medium"
+        >
+          {{ activeFilters }} active
+        </span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <!-- Search -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-[var(--color-font)]">
+          <span
+            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+            >search</span
+          >
+          Search (Wallet, Holder)
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="draftSearchTerm"
+          placeholder="Search..."
+          class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+        />
+      </div>
+
+      <!-- Max Limit -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-[var(--color-font)]">
+          <span
+            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+            >monetization_on</span
+          >
+          Max Limit
+        </label>
+        <input
+          type="number"
+          [(ngModel)]="draftMaxLimit"
+          placeholder="e.g. 50000"
+          min="0"
+          class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+        />
+      </div>
+
+      <!-- Payment Method (5 modes) -->
+      <div class="space-y-1">
+        <app-payments-methods></app-payments-methods>
+      </div>
+
+      <!-- Status -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-[var(--color-font)]">
+          <span
+            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+            >filter_list</span
+          >
+          Status
+        </label>
+        <select
+          [(ngModel)]="draftStatusFilter"
+          class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+        >
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex justify-end items-center gap-2 mt-4">
+      <!-- VIEW TOGGLE -->
+      <div
+        class="hidden md:flex items-center gap-1 border border-[var(--color-border)] rounded-lg p-1 bg-[var(--color-bg)]"
+      >
+        <button
+          (click)="toggleView('table')"
+          [class.bg-[var(--color-primary)]]="viewMode === 'table'"
+          [class.text-white]="viewMode === 'table'"
+          class="px-3 py-2 rounded flex items-center justify-center"
+        >
+          <span class="material-symbols-outlined text-sm">table_rows</span>
+        </button>
+        <button
+          (click)="toggleView('grid')"
+          [class.bg-[var(--color-primary)]]="viewMode === 'grid'"
+          [class.text-white]="viewMode === 'grid'"
+          class="px-3 py-2 rounded flex items-center justify-center"
+        >
+          <span class="material-symbols-outlined text-sm">grid_view</span>
+        </button>
+      </div>
+
+      <button
+        (click)="applyFilters()"
+        class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-lg text-sm font-medium"
+      >
+        <span class="material-symbols-outlined mr-1.5 text-sm">filter_alt</span>
+        Apply Filters
+      </button>
+
+      <button
+        (click)="resetFilters()"
+        class="inline-flex items-center px-4 py-2 bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] text-sm font-medium border border-[var(--color-border)]"
+      >
+        <span class="material-symbols-outlined mr-1.5 text-sm"
+          >restart_alt</span
+        >
+        Reset All
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-12">
+    <div class="flex flex-col items-center justify-center">
+      <div
+        class="w-12 h-12 bg-[var(--color-primary)] rounded-xl flex items-center justify-center mb-3"
+      >
+        <span
+          class="material-symbols-outlined animate-spin text-[var(--color-surface)] text-2xl"
+          >refresh</span
+        >
+      </div>
+      <h3 class="text-base font-medium text-[var(--color-font)] mb-1">
+        Loading crypto accounts
+      </h3>
+      <p class="text-[var(--color-muted)] text-sm">Please wait...</p>
+    </div>
+  </div>
+
+  <!-- ========== TABLE VIEW ========== -->
+  <div
+    *ngIf="!loading && viewMode === 'table'"
+    class="hidden md:block rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm mb-4 overflow-hidden"
+  >
+    <div class="overflow-x-auto">
+      <table class="min-w-full">
+        <thead
+          class="bg-[var(--color-bg)] border-b border-[var(--color-border)]"
+        >
+          <tr>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              Status
+            </th>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              Wallet Address
+            </th>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              Payin Type
+            </th>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              Payment Method
+            </th>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              Limit
+            </th>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              Holder
+            </th>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              Currency
+            </th>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              Set Limit Time
+            </th>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              Status
+            </th>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              Capacity Ranges
+            </th>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              Delete
+            </th>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              Update
+            </th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-[var(--color-border)]">
+          <tr
+            *ngFor="let account of cryptoAccounts"
+            class="hover:bg-[var(--color-hover)]/40 transition-all duration-200"
+          >
+            <!-- STATUS / LIVE -->
+            <td class="px-4 py-3 whitespace-nowrap">
+              <div class="flex items-center gap-2">
+                <ng-container
+                  *ngIf="isAccountActive(account); else inactiveStatus"
+                >
+                  <span
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-green-100 text-green-600 border border-green-200"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full bg-green-500 live-dot"
+                    ></span>
+                    Active
+                  </span>
+                </ng-container>
+                <ng-template #inactiveStatus>
+                  <span
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-red-100 text-red-600 border border-red-200"
+                  >
+                    <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                    Inactive
+                  </span>
+                </ng-template>
+                <span class="text-[11px] font-semibold">
+                  {{ getCryptoRemainingTime(account) }}
+                </span>
+              </div>
+            </td>
+
+            <!-- WALLET -->
+            <td class="px-4 py-3 whitespace-nowrap">
+              <div class="flex items-center gap-2">
+                <span
+                  class="text-xs font-semibold tracking-wider text-[var(--color-font)]"
+                >
+                  {{ maskWallet(account.walletAddress) }}
+                </span>
+                <button
+                  (click)="
+                    copyText(account.walletAddress, 'Wallet address copied')
+                  "
+                  class="text-gray-400 hover:text-[var(--color-primary)] transition"
+                >
+                  <span class="material-symbols-outlined text-[16px]"
+                    >content_copy</span
+                  >
+                </button>
+              </div>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <span
+                class="text-xs font-semibold"
+                [ngClass]="
+                  account.fttAcceptance ? 'text-green-600' : 'text-orange-500'
+                "
+              >
+                {{ account.fttAcceptance ? "PPI" : "RPI" }}
+              </span>
+            </td>
+            <!-- PAYMENT METHOD -->
+            <td class="px-4 py-3 whitespace-nowrap">
+              <span
+                class="px-2 py-1 text-xs font-semibold rounded-full border bg-indigo-50 text-indigo-600 border-indigo-200"
+              >
+                {{ account.paymentMethod || "-" }}
+              </span>
+            </td>
+
+            <!-- LIMIT -->
+            <td class="px-4 py-3 whitespace-nowrap">
+              <span
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200"
+              >
+                <span class="text-xs font-semibold">{{
+                  account.limitAmount
+                }}</span>
+              </span>
+            </td>
+
+            <!-- HOLDER -->
+            <td class="px-4 py-3 whitespace-nowrap">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-medium text-[var(--color-font)]">
+                  {{ account.holderName || "-" }}
+                </span>
+                <button
+                  (click)="copyText(account.holderName, 'Holder name copied')"
+                  class="text-gray-400 hover:text-[var(--color-primary)] transition"
+                >
+                  <span class="material-symbols-outlined text-[16px]"
+                    >content_copy</span
+                  >
+                </button>
+              </div>
+            </td>
+
+            <!-- CURRENCY -->
+            <td class="px-4 py-3 whitespace-nowrap">
+              <span
+                class="text-xs font-semibold text-gray-600 uppercase tracking-wide"
+              >
+                {{ account.currency || "-" }}
+              </span>
+            </td>
+
+            <!-- LIMIT TIME -->
+            <td class="px-4 py-3 whitespace-nowrap">
+              <div class="flex items-start gap-2">
+                <span
+                  class="material-symbols-outlined text-gray-400 text-[18px] mt-0.5"
+                  >calendar_month</span
+                >
+                <div class="flex flex-col leading-tight">
+                  <span class="text-xs font-semibold text-[var(--color-font)]">
+                    {{
+                      account.limitTime ? (account.limitTime | tz) : "Not Set"
+                    }}
+                  </span>
+                  <span class="text-[10px] text-gray-400">
+                    {{
+                      account.limitTime
+                        ? (account.limitTime | date: "shortTime")
+                        : "--:--"
+                    }}
+                  </span>
+                </div>
+                <button
+                  (click)="openLimitModal(account)"
+                  class="ml-1 p-1 rounded-md hover:bg-[var(--color-hover)] transition"
+                >
+                  <span
+                    class="material-symbols-outlined text-[var(--color-primary)] text-[18px]"
+                    >edit_calendar</span
+                  >
+                </button>
+              </div>
+            </td>
+
+            <!-- STATUS TOGGLE -->
+            <td class="px-4 py-3 whitespace-nowrap">
+              <div class="flex items-center gap-2">
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    class="sr-only peer"
+                    [checked]="account.status"
+                    (change)="openStatusModal(account, $event)"
+                  />
+                  <div
+                    class="relative w-11 h-6 rounded-full transition-all duration-300 peer-checked:bg-green-500 bg-red-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-200 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"
+                  ></div>
+                </label>
+                <span
+                  class="text-xs font-semibold"
+                  [ngClass]="account.status ? 'text-green-600' : 'text-red-500'"
+                >
+                  {{ account.status ? "Active" : "Inactive" }}
+                </span>
+              </div>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <button
+                (click)="openCapacityPreview(account, $event)"
+                class="px-3 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100 transition"
+              >
+                Edit
+              </button>
+            </td>
+
+            <!-- DELETE -->
+            <td class="px-4 py-3 whitespace-nowrap">
+              <button
+                (click)="openDeleteConfirm(account, $event)"
+                class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center transition"
+              >
+                <span class="material-icons text-red-400 text-[18px]"
+                  >delete</span
+                >
+              </button>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <div class="flex items-center gap-2">
+                <button
+                  (click)="openEditAccountModal(account, $event)"
+                  class="px-3 py-1 rounded-md bg-amber-50 text-amber-600 text-xs font-medium hover:bg-amber-100 transition"
+                >
+                  Edit
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div
+    *ngIf="!loading && cryptoAccounts.length === 0"
+    class="text-center py-12"
+  >
+    <div class="flex flex-col items-center justify-center">
+      <div
+        class="w-16 h-16 bg-[var(--color-primary)] rounded-xl flex items-center justify-center mb-4 shadow-md"
+      >
+        <span
+          class="material-symbols-outlined text-[var(--color-surface)] text-2xl"
+          >currency_bitcoin</span
+        >
+      </div>
+      <h3 class="text-lg font-semibold text-[var(--color-font)] mb-2">
+        No crypto accounts found
+      </h3>
+      <p class="text-[var(--color-muted)] text-sm max-w-md mb-4">
+        {{
+          activeFilters > 0
+            ? "Try adjusting your search criteria"
+            : "No crypto inventory available yet"
+        }}
+      </p>
+      <button
+        *ngIf="activeFilters > 0"
+        (click)="resetFilters()"
+        class="inline-flex items-center px-3 py-1.5 bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] transition-colors font-medium text-sm border border-[var(--color-border)]"
+      >
+        <span class="material-symbols-outlined text-[var(--color-font)] mr-1.5"
+          >restart_alt</span
+        >
+        Clear Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div
+    *ngIf="totalElements > 0"
+    class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-[var(--color-border)]"
+  >
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-[var(--color-muted)]">Show:</span>
+        <select
+          [(ngModel)]="pageSize"
+          (change)="onPageSizeChange()"
+          class="border border-[var(--color-border)] rounded px-2 py-1 text-xs bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        >
+          <option value="6">6</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+        <span class="text-xs text-[var(--color-muted)]">entries</span>
+      </div>
+      <div class="text-xs text-[var(--color-muted)]">
+        Showing {{ (currentPage - 1) * pageSize + 1 }} to
+        {{ Math.min(currentPage * pageSize, totalElements) }} of
+        {{ totalElements }}
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1">
+      <button
+        (click)="prevPage()"
+        [disabled]="currentPage === 1"
+        class="p-1.5 rounded border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      >
+        <span class="material-symbols-outlined text-sm">chevron_left</span>
+      </button>
+
+      <div class="flex gap-1 mx-1">
+        <button
+          *ngFor="let page of pageNumbers"
+          (click)="goToPage(page)"
+          [class]="
+            page === currentPage
+              ? 'px-2 py-1 rounded text-xs bg-[var(--color-primary)] text-[var(--color-surface)] font-medium'
+              : 'px-2 py-1 rounded text-xs border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)]'
+          "
+        >
+          {{ page }}
+        </button>
+      </div>
+
+      <button
+        (click)="nextPage()"
+        [disabled]="currentPage >= totalPages()"
+        class="p-1.5 rounded border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      >
+        <span class="material-symbols-outlined text-sm">chevron_right</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== GRID VIEW ========== -->
+  <div
+    *ngIf="!loading"
+    [ngClass]="{
+      'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4': true,
+      'md:hidden': viewMode === 'table',
+    }"
+  >
+    <div
+      *ngFor="let account of cryptoAccounts"
+      class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 shadow-sm hover:shadow-md transition relative"
+    >
+      <div class="flex justify-between items-center mb-3">
+        <ng-container *ngIf="isAccountActive(account); else gridInactive">
+          <span
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-green-100 text-green-600 border border-green-200"
+          >
+            <span class="w-2 h-2 rounded-full bg-green-500 live-dot"></span>
+            LIVE
+          </span>
+        </ng-container>
+        <ng-template #gridInactive>
+          <span
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-red-100 text-red-600 border border-red-200"
+          >
+            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+            OFFLINE
+          </span>
+        </ng-template>
+
+        <div class="relative action-dropdown-wrapper">
+          <button
+            (click)="toggleActionDropdown(account.id, $event)"
+            class="p-1 rounded-lg hover:bg-[var(--color-hover)] transition-all duration-200 text-[var(--color-muted)] hover:text-[var(--color-primary)]"
+          >
+            <span class="material-symbols-outlined text-xl">more_vert</span>
+          </button>
+
+          <div
+            *ngIf="activeActionDropdown === account.id"
+            class="absolute right-0 top-full mt-1 w-44 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] shadow-lg z-50"
+          >
+            <div class="py-1">
+              <button
+                (click)="openLimitModal(account); activeActionDropdown = null"
+                class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition-colors"
+              >
+                <span class="material-icons text-base mr-2">schedule</span>
+                Set Limit Time
+              </button>
+              <div class="border-t border-[var(--color-border)] mt-1 pt-1">
+                <button
+                  (click)="
+                    openDeleteConfirm(account); activeActionDropdown = null
+                  "
+                  class="w-full flex items-center px-3 py-2 text-xs text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 transition-colors"
+                >
+                  <span class="material-icons text-base mr-2">auto_delete</span>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm mb-3">
+        <div class="space-y-2">
+          <div>
+            <span
+              class="text-[10px] uppercase tracking-wider text-[var(--color-muted)] block"
+              >Wallet</span
+            >
+            <div class="flex items-center gap-1 mt-0.5">
+              <span
+                class="material-symbols-outlined text-xs text-[var(--color-primary)]"
+                >account_balance_wallet</span
+              >
+              <span
+                class="font-mono text-xs bg-[var(--color-bg)] px-1.5 py-0.5 rounded border border-[var(--color-border)] truncate"
+              >
+                {{ maskWallet(account.walletAddress) }}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <span
+              class="text-[10px] uppercase tracking-wider text-[var(--color-muted)] block"
+              >Method</span
+            >
+            <div class="flex items-center gap-1 mt-0.5">
+              <span
+                class="material-symbols-outlined text-xs text-[var(--color-primary)]"
+                >currency_bitcoin</span
+              >
+              <span class="text-xs truncate">{{
+                account.paymentMethod || "-"
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div>
+            <span
+              class="text-[10px] uppercase tracking-wider text-[var(--color-muted)] block"
+              >Holder</span
+            >
+            <div class="flex items-center gap-1 mt-0.5">
+              <span
+                class="material-symbols-outlined text-xs text-[var(--color-primary)]"
+                >person</span
+              >
+              <span class="text-xs truncate">{{
+                account.holderName || "-"
+              }}</span>
+            </div>
+          </div>
+
+          <div>
+            <span
+              class="text-[10px] uppercase tracking-wider text-[var(--color-muted)] block"
+              >Status</span
+            >
+            <div class="flex items-center gap-1 mt-0.5">
+              <span
+                class="text-xs font-semibold"
+                [ngClass]="account.status ? 'text-green-600' : 'text-red-500'"
+              >
+                {{ account.status ? "Active" : "Inactive" }}
+              </span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  class="sr-only peer"
+                  [checked]="account.status"
+                  (change)="openStatusModal(account, $event)"
+                />
+                <div
+                  class="w-11 h-6 rounded-full transition-all duration-300 peer-checked:bg-green-500 bg-red-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"
+                ></div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="grid grid-cols-2 gap-1 py-2 border-t border-[var(--color-border)]"
+      >
+        <div class="text-center">
+          <span
+            class="text-[9px] uppercase tracking-wider text-[var(--color-muted)] block"
+            >Limit</span
+          >
+          <span class="text-xs font-semibold text-[var(--color-font)] block">{{
+            account.limitAmount
+          }}</span>
+        </div>
+        <div class="text-center">
+          <span class="text-[9px] text-[var(--color-muted)] block"
+            >Limit Time</span
+          >
+          <span
+            class="text-xs font-semibold"
+            [ngClass]="
+              account.limitTime && isFutureLimitTime(account.limitTime)
+                ? 'text-green-600'
+                : 'text-red-500'
+            "
+          >
+            {{
+              account.limitTime
+                ? (account.limitTime | date: "short")
+                : "Not Set"
+            }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== LIMIT TIME MODAL ========== -->
+  <div
+    *ngIf="showLimitModal"
+    class="fixed inset-0 z-[70] flex items-center justify-center bg-black/30"
+    (click)="closeLimitModal()"
+  >
+    <div
+      class="bg-white rounded-2xl shadow-xl w-[320px] p-4 select-none"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-base font-semibold text-gray-900">
+          {{ monthNames[viewMonth] }}, {{ viewYear }}
+        </span>
+        <div class="flex gap-1.5">
+          <button
+            (click)="prevMonth()"
+            [disabled]="isCurrentMonthView()"
+            class="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center transition"
+            [class.opacity-30]="isCurrentMonthView()"
+            [class.bg-gray-50]="!isCurrentMonthView()"
+          >
+            <span
+              class="material-symbols-outlined text-gray-500"
+              style="font-size: 16px"
+              >chevron_left</span
+            >
+          </button>
+          <button
+            (click)="nextMonth()"
+            class="w-7 h-7 rounded-full border border-gray-200 bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition"
+          >
+            <span
+              class="material-symbols-outlined text-gray-500"
+              style="font-size: 16px"
+              >chevron_right</span
+            >
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-7 mb-1">
+        <div
+          *ngFor="let d of dayLabels"
+          class="text-center text-[11px] font-medium text-gray-400 py-1"
+        >
+          {{ d }}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-7 gap-y-0.5">
+        <div
+          *ngFor="let cell of calendarCells"
+          class="flex items-center justify-center"
+          style="aspect-ratio: 1"
+        >
+          <button
+            *ngIf="cell.day"
+            (click)="selectCalendarDay(cell)"
+            [disabled]="cell.isPast || cell.isOtherMonth"
+            class="w-8 h-8 rounded-full text-[13px] flex items-center justify-center transition relative"
+            [class.bg-green-500]="cell.isSelected"
+            [class.text-white]="cell.isSelected"
+            [class.font-semibold]="cell.isToday || cell.isSelected"
+            [class.text-gray-900]="
+              !cell.isSelected && !cell.isPast && !cell.isOtherMonth
+            "
+            [class.text-gray-300]="cell.isPast || cell.isOtherMonth"
+          >
+            {{ cell.day }}
+            <span
+              *ngIf="cell.isToday"
+              class="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+              [class.bg-green-500]="!cell.isSelected"
+              [class.bg-white]="cell.isSelected"
+            ></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 mt-4 pt-3 border-t border-gray-100">
+        <span class="text-sm text-gray-500 w-8">Time</span>
+        <input
+          type="number"
+          [(ngModel)]="pickerHour"
+          min="1"
+          max="12"
+          (change)="clampPickerHour()"
+          class="w-12 h-9 text-center border border-gray-200 rounded-lg text-sm font-medium text-gray-900 outline-none focus:border-green-500 transition"
+        />
+        <span class="text-base font-medium text-gray-400">:</span>
+        <input
+          type="number"
+          [(ngModel)]="pickerMinute"
+          min="0"
+          max="59"
+          (change)="clampPickerMinute()"
+          class="w-12 h-9 text-center border border-gray-200 rounded-lg text-sm font-medium text-gray-900 outline-none focus:border-green-500 transition"
+        />
+        <select
+          [(ngModel)]="pickerAmPm"
+          class="flex-1 h-9 border border-gray-200 rounded-lg text-sm text-gray-900 px-2 outline-none focus:border-green-500 bg-white transition"
+        >
+          <option value="AM">AM</option>
+          <option value="PM">PM</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 mt-4">
+        <button
+          (click)="closeLimitModal()"
+          [disabled]="isSubmittingLimit"
+          class="h-10 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="submitLimitTime()"
+          [disabled]="isSubmittingLimit"
+          class="h-10 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition flex items-center justify-center gap-2"
+        >
+          <span
+            *ngIf="isSubmittingLimit"
+            class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+          ></span>
+          {{ isSubmittingLimit ? "Saving..." : "Apply" }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== STATUS CONFIRM MODAL ========== -->
+  <div
+    *ngIf="showStatusModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+  >
+    <div class="w-[460px] bg-white rounded-[28px] p-7 shadow-2xl">
+      <div
+        class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
+        [ngClass]="selectedAccount?.status ? 'bg-red-50' : 'bg-green-50'"
+      >
+        <span
+          class="material-symbols-outlined text-[28px]"
+          [ngClass]="
+            selectedAccount?.status ? 'text-red-500' : 'text-green-500'
+          "
+        >
+          {{ selectedAccount?.status ? "warning" : "check_circle" }}
+        </span>
+      </div>
+
+      <h2 class="text-[28px] font-semibold text-[#111827] mb-3">
+        {{
+          selectedAccount?.status
+            ? "Deactivate Inventory?"
+            : "Activate Inventory?"
+        }}
+      </h2>
+
+      <p class="text-[15px] leading-7 text-[#64748B] mb-7">
+        {{
+          selectedAccount?.status
+            ? "This crypto wallet will no longer process transactions and may affect active payment flows."
+            : "This crypto wallet will resume transaction processing and become available for routing."
+        }}
+      </p>
+
+      <div
+        class="bg-[#DCFCE7] border border-[#BBF7D0] rounded-2xl px-4 py-4 flex items-start gap-3 mb-8"
+      >
+        <input
+          type="checkbox"
+          [(ngModel)]="confirmStatusChecked"
+          class="mt-1 w-4 h-4 accent-green-600 cursor-pointer"
+        />
+        <p class="text-[15px] text-[#1F2937] font-medium leading-6">
+          {{
+            selectedAccount?.status
+              ? "I understand this action will disable transaction processing for this wallet"
+              : "I understand this action will activate the wallet"
+          }}
+        </p>
+      </div>
+
+      <div class="flex justify-end gap-3">
+        <button
+          (click)="closeStatusModal()"
+          class="min-w-[110px] h-[42px] rounded-xl border border-[#D1D5DB] bg-white text-[#334155] font-medium hover:bg-gray-50 transition"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="confirmStatusChange()"
+          [disabled]="!confirmStatusChecked"
+          class="min-w-[120px] h-[42px] rounded-xl text-white font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+          [ngClass]="
+            selectedAccount?.status
+              ? 'bg-red-400 hover:bg-red-500'
+              : 'bg-green-500 hover:bg-green-600'
+          "
+        >
+          {{ selectedAccount?.status ? "Deactivate" : "Activate" }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== DELETE CONFIRM MODAL ========== -->
+  <div
+    *ngIf="isDeleteConfirmVisible"
+    class="fixed inset-0 flex items-center justify-center bg-black/40 z-50"
+  >
+    <div class="bg-white p-6 rounded-xl shadow-xl w-80 text-center">
+      <h2 class="text-lg font-semibold mb-3">Confirm Delete</h2>
+      <p class="text-sm text-gray-600 mb-5">
+        Are you sure you want to delete this crypto account?
+      </p>
+      <div class="flex justify-center gap-3">
+        <button
+          (click)="closeDeleteConfirm()"
+          class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="executeDelete()"
+          class="px-4 py-2 rounded bg-[var(--color-danger)] text-white"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="selectedCapacityAccount"
+  class="fixed z-[60] bg-white rounded-2xl border border-gray-200 shadow-2xl w-[300px] max-h-[70vh] overflow-y-auto"
+  [style.top.px]="capacityPopupTop"
+  [style.left.px]="capacityPopupLeft"
+>
+  <div class="p-4">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+        {{ selectedCapacityAccount.paymentMethod }} Ranges
+      </span>
+      <button
+        (click)="closeCapacityPopup()"
+        class="text-gray-400 hover:text-gray-600"
+      >
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+    </div>
+
+    <ng-container *ngIf="selectedCapacityAccount.ranges?.length; else noRanges">
+      <div
+        *ngFor="let item of selectedCapacityAccount.ranges"
+        class="py-3 border-b border-dashed border-gray-200 last:border-b-0"
+      >
+        <div class="text-[14px] font-medium text-gray-800 mb-1">
+          ₹{{ item.minRange | number }} – ₹{{ item.maxRange | number }}
+        </div>
+        <div
+          class="flex items-center justify-between text-[13px] text-slate-500"
+        >
+          <span
+            >Qty:
+            <span class="font-semibold text-slate-700">{{
+              item.quantity
+            }}</span></span
+          >
+          <span
+            >Available:
+            <span class="font-semibold text-slate-700">{{
+              item.availableQuantity
+            }}</span></span
+          >
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #noRanges>
+      <p class="text-xs text-gray-400 py-3 text-center">No ranges configured</p>
+    </ng-template>
+
+    <div class="flex justify-end pt-3">
+      <button
+        (click)="openCapacity(selectedCapacityAccount); closeCapacityPopup()"
+        class="text-slate-500 hover:text-blue-600 flex items-center gap-1 text-xs font-medium"
+      >
+        <span class="material-symbols-outlined text-[18px]">edit</span>
+        Edit Ranges
+      </button>
+    </div>
+  </div>
+</div>
+<!--  CAPACITY MODAL -->
+<app-payin-capacity
+  [show]="showCapacityModal"
+  [entityType]="role"
+  [entityId]="currentRoleId"
+  [portalId]="selectedPortalId"
+  [mode]="selectedMode"
+  [payinId]="selectedPayinId"
+  [bankId]="editingAccount?.id"
+  (close)="showCapacityModal = false"
+></app-payin-capacity>
+<!-- ========== EDIT ACCOUNT MODAL ========== -->
+<div
+  *ngIf="showEditAccountModal"
+  class="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-sm"
+  (click)="closeEditAccountModal()"
+>
+  <div
+    class="bg-white rounded-2xl shadow-2xl w-[380px] p-6"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold text-gray-900">Edit Crypto Account</h2>
+      <button
+        (click)="closeEditAccountModal()"
+        class="text-gray-400 hover:text-gray-600"
+      >
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Payment method locked, read-only -->
+    <div class="mb-4">
+      <label class="block text-xs font-medium text-gray-500 mb-1"
+        >Payment Method</label
+      >
+      <div
+        class="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-indigo-50 border border-indigo-200"
+      >
+        <span class="material-symbols-outlined text-indigo-600 text-[18px]"
+          >currency_bitcoin</span
+        >
+        <span class="text-sm font-semibold text-indigo-700">
+          {{ accountBeingEdited?.paymentMethod }}
+        </span>
+        <span
+          class="ml-auto text-[10px] uppercase tracking-wide text-indigo-400"
+          >Locked</span
+        >
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label class="block text-xs font-medium text-gray-500 mb-1"
+        >Wallet Address</label
+      >
+      <input
+        type="text"
+        [(ngModel)]="editAccountForm.walletAddress"
+        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500 transition"
+        placeholder="Enter wallet address"
+      />
+    </div>
+
+    <div class="mb-4">
+      <label class="block text-xs font-medium text-gray-500 mb-1"
+        >Holder Name</label
+      >
+      <input
+        type="text"
+        [(ngModel)]="editAccountForm.holderName"
+        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500 transition"
+        placeholder="Enter holder name"
+      />
+    </div>
+
+    <div class="mb-6">
+      <label class="block text-xs font-medium text-gray-500 mb-1"
+        >Limit Amount</label
+      >
+      <input
+        type="number"
+        min="0"
+        [(ngModel)]="editAccountForm.limitAmount"
+        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500 transition"
+        placeholder="Enter limit amount"
+      />
+    </div>
+    <div class="mb-6">
+      <label class="block text-xs font-medium text-gray-500 mb-2">
+        Payin Type
+      </label>
+
+      <div class="relative flex w-56 h-11 bg-gray-100 rounded-full p-1">
+        <!-- Sliding Background -->
+        <div
+          class="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full transition-all duration-300"
+          [ngClass]="
+            editAccountForm.fttAcceptance
+              ? 'left-[calc(50%+2px)] bg-green-500'
+              : 'left-1 bg-orange-500'
+          "
+        ></div>
+
+        <!-- LEFT : RPI -->
+        <button
+          type="button"
+          class="relative z-10 flex-1 rounded-full text-sm font-semibold transition-colors duration-300"
+          (click)="editAccountForm.fttAcceptance = false"
+          [ngClass]="
+            !editAccountForm.fttAcceptance ? 'text-white' : 'text-gray-600'
+          "
+        >
+          RPI
+        </button>
+
+        <!-- RIGHT : PPI -->
+        <button
+          type="button"
+          class="relative z-10 flex-1 rounded-full text-sm font-semibold transition-colors duration-300"
+          (click)="editAccountForm.fttAcceptance = true"
+          [ngClass]="
+            editAccountForm.fttAcceptance ? 'text-white' : 'text-gray-600'
+          "
+        >
+          PPI
+        </button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <button
+        (click)="closeEditAccountModal()"
+        [disabled]="isSavingEdit"
+        class="h-10 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="saveEditAccount()"
+        [disabled]="isSavingEdit"
+        class="h-10 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition flex items-center justify-center gap-2"
+      >
+        <span
+          *ngIf="isSavingEdit"
+          class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+        ></span>
+        {{ isSavingEdit ? "Saving..." : "Save Changes" }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,3 +1,4 @@
+
 import {
   Component,
   NgZone,
@@ -425,17 +426,8 @@ const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").
   const lower = key.toLowerCase();
   return (
     ![
-      "id",
-      "fundsid",
-      "createdbyid",
-      "createdbyentityid",
-      "updatedbyid",
       "isread",
-      "read",
-      "unreadcount",
-      "rejectedby",
-      "rejectionreason",
-       "relatedentityid" 
+      "title"
     ].includes(lower) &&
     obj[key] !== null &&
     obj[key] !== undefined &&
@@ -670,10 +662,12 @@ openChatAndMarkRead(notification: any, event?: Event) {
     notification.isRead = true;
     notification.unreadCount = 0;
     this.markAsRead(notification.id || notification.fundsId || "");
-  }
+  } 
+
   
   // Then open the chat - pass event as optional
   this.openChat(notification, event);
+  this.showDetailsPanel = false;
 }
 
 refreshNotifications() {

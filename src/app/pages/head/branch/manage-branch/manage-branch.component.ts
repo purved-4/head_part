@@ -12,6 +12,7 @@ import { HeadService } from "../../../services/head.service";
 import { UserStateService } from "../../../../store/user-state.service";
 import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
 import { COUNTRY_CODES } from "../../../../utils/constants";
+import { SocketConfigService } from "../../../services/socket/socket-config.service";
 interface PortalRange {
   portalId: string;
   range: string;
@@ -156,6 +157,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     private userStateService: UserStateService,
     private cdr: ChangeDetectorRef,
     private snack: SnackbarService,
+    private snackService: SnackbarService,
   ) {}
   ngOnDestroy(): void {
     sessionStorage.removeItem("branchViewMode");
@@ -1419,9 +1421,15 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
     this.showCompartModel = false;
   }
 
-  onSaveCompartData(payload: any) {
-    this.branchService.updateBranch(payload).subscribe((res) => {});
-    this.onCloseCompartModal();
-    // yaha API call kar dena
-  }
+onSaveCompartData(payload: any) {
+    this.branchService.updateBranch(payload).subscribe({
+     next: (res: any) => {
+        this.snackService.show(res.message || "updated", true);
+        this.onCloseCompartModal();
+     },
+     error: (err) => {
+        this.snackService.show(err.error?.message || "failed to update", false);
+     },
+    });
+}
 }

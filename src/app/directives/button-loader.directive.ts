@@ -28,7 +28,6 @@ export class ButtonLoaderDirective implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.injectKeyframes();
-    this.originalHTML = this.el.nativeElement.innerHTML;
 
     runInInjectionContext(this.injector, () => {
       effect(() => {
@@ -38,21 +37,27 @@ export class ButtonLoaderDirective implements OnInit, OnDestroy {
   }
 
   private toggleLoader(isLoading: boolean): void {
-    const btn = this.el.nativeElement;
-    if (isLoading) {
-      this.originalHTML = btn.innerHTML;
-      btn.innerHTML = this.buildSpinnerHTML();
-      btn.disabled = true;
-      this.renderer.setStyle(btn, "opacity", "0.72");
-      this.renderer.setStyle(btn, "cursor", "not-allowed");
-      // ✅ pointer-events button pe NAHI — warna (click) aur submit block hoga
-    } else {
-      btn.innerHTML = this.originalHTML;
-      btn.disabled = false;
-      this.renderer.removeStyle(btn, "opacity");
-      this.renderer.removeStyle(btn, "cursor");
+  const btn = this.el.nativeElement;
+
+  if (isLoading) {
+    btn.disabled = true;
+
+    this.renderer.setStyle(btn, "opacity", "0.72");
+    this.renderer.setStyle(btn, "cursor", "not-allowed");
+
+  } else {
+    const spinner = btn.querySelector(".btn-loader-spinner");
+
+    if (spinner) {
+      spinner.remove();
     }
+
+    btn.disabled = false;
+
+    this.renderer.removeStyle(btn, "opacity");
+    this.renderer.removeStyle(btn, "cursor");
   }
+}
 
   private buildSpinnerHTML(): string {
     const text = this.loaderText?.trim() || "Loading...";

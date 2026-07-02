@@ -47,8 +47,7 @@ interface BankAccount {
   bankTime?: string | null; // ADD THIS
   liveAssigned?: boolean; // ADD THIS
   remainingLimitAmount: any;
-  totalLimitAmount:any
-
+  totalLimitAmount: any;
 }
 
 interface Portal {
@@ -99,7 +98,17 @@ export class BanksComponent implements OnInit, OnDestroy {
   toggleEvent: any = null;
   selectedCapacityAccount: any = null;
   pageNumbers: number[] = [];
+  selectedLimitAccount: BankAccount | null = null;
+  hoveredLimitAccount: BankAccount | null = null;
+  tooltipPosition = { x: 0, y: 0 };
 
+  showAddUpiModal = false;
+  isAddingUpi = false;
+
+  addUpiForm!: FormGroup;
+  selectedBank: any = null;
+
+  hoverTimeout: any;
   capacityPopupTop = 0;
   capacityPopupLeft = 0;
   // Calendar picker state
@@ -197,7 +206,7 @@ export class BanksComponent implements OnInit, OnDestroy {
   }
 
   selectedPortals: [] = [];
-  headId:any;
+
   viewMode: "table" | "grid" = "table";
   capacityRanges: {
     minRange: number | null;
@@ -234,7 +243,6 @@ export class BanksComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.headId = this.userStateService.getCurrentEntityId();
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
@@ -266,22 +274,7 @@ export class BanksComponent implements OnInit, OnDestroy {
       this.selectedModeData = res;
     });
 
-     const savedPayin =
-    sessionStorage.getItem("payinStatus");
-
-
-  if(savedPayin !== null){
-
-    this.payinStatus =
-      savedPayin === "true";
-
-  }
-  else{
-
     this.getPayinStatus();
-
-  }
-
 
     this.initAddUpiForm();
 
@@ -311,6 +304,12 @@ export class BanksComponent implements OnInit, OnDestroy {
     }
   }
 
+  getUsedAmount(account: BankAccount): any {
+    const limitAmount = Number(account.limitAmount || 0);
+    const remaining = Number(account.remainingLimitAmount || 0);
+
+    return Math.max(limitAmount - remaining, 0);
+  }
   // ========== DATA FETCH (server‑side paginated) ==========
   fetchBankAccounts(): void {
     if (!this.currentRoleId) return;
@@ -384,8 +383,9 @@ export class BanksComponent implements OnInit, OnDestroy {
               ranges: r.ranges ?? [],
               limitTime: r.limitTime ?? null,
               fttAcceptance: r.fttAcceptance ?? true,
-              remainingLimitAmount: r.remainingLimitAmount ?? null,
-              totalLimitAmount:r.totalLimitAmount ?? null,
+              totalLimitAmount: r.totalLimitAmount,
+              remainingLimitAmount: r.remainingLimitAmount,
+
               upiCount: r.upiCount ?? null,
               bankTime: r.bankTime ?? null, // ADD
 
@@ -403,24 +403,29 @@ export class BanksComponent implements OnInit, OnDestroy {
 
     this.subs.add(sub);
   }
-  isAccountActive(account: BankAccount): boolean {
+
+  isAccountActive(account: any): boolean {
     const now = Date.now();
+    const limitTime = account.limitTime
+      ? new Date(account.limitTime).getTime()
+      : null;
+
     const bankTime = account.bankTime
       ? new Date(account.bankTime).getTime()
       : null;
 
-    // 2. status ON → always active (no checks)
-    if (account.status === "active") {
+    const status =
+      account.status === "active"
+        ? true
+        : bankTime != null
+          ? bankTime > now
+          : false;
+    if (limitTime !== null && limitTime > now && status) {
       return true;
     }
-
-    // 3. status OFF → only bankTime decides
-    if (account.status === "inactive") {
-      return bankTime ? bankTime > now : false;
-    }
-
     return false;
   }
+
   getBankRemainingTime(account: any): string {
     if (!account?.bankTime) {
       return "";
@@ -938,34 +943,48 @@ export class BanksComponent implements OnInit, OnDestroy {
     this.minLimitDateTime = "";
   }
 
+  updateFrom(index: number, event: any) {
+    const value = event.target.value;
+
+    this.capacityRanges[index].minRange =
+      value === "" || value === null ? null : Number(value);
+  }
+
+  updateTo(index: number, event: any) {
+    const value = event.target.value;
+
+    this.capacityRanges[index].maxRange =
+      value === "" || value === null ? null : Number(value);
+  }
+
+  updateQuantity(index: number, event: any) {
+    const value = event.target.value;
+
+    this.capacityRanges[index].quantity =
+      value === "" || value === null ? null : Number(value);
+  }
   addRange() {
     const last = this.capacityRanges[this.capacityRanges.length - 1];
 
-    // if (
-    //   last.maxRange === null ||
-    //   last.maxRange === undefined ||
-    //   last.quantity === null
-    // )
     if (
-      last.minRange === null ||
-      last.maxRange === null ||
-      last.quantity === null
+      last.minRange == null ||
+      last.maxRange == null ||
+      last.quantity == null
     ) {
-      this.snack.show("Please fill 'To' and Quantity first", false);
+      this.snack.show("Please fill all range fields first.", false);
       return;
     }
 
-    //  MAIN VALIDATION HERE ONLY
-    if (last.maxRange <= (last.minRange ?? 0)) {
-      this.snack.show("'To' must be greater than 'From'", false);
+    if (last.minRange <= 0 || last.maxRange <= 0 || last.quantity <= 0) {
+      this.snack.show("Range values must be greater than 0.", false);
       return;
     }
 
-    // this.capacityRanges.push({
-    //   minRange: last.maxRange,
-    //   maxRange: null,
-    //   quantity: null,
-    // });
+    if (last.maxRange <= last.minRange) {
+      this.snack.show("'To' must be greater than 'From'.", false);
+      return;
+    }
+
     this.capacityRanges.push({
       minRange: null,
       maxRange: null,
@@ -976,54 +995,15 @@ export class BanksComponent implements OnInit, OnDestroy {
   removeRange(index: number) {
     this.capacityRanges.splice(index, 1);
 
-    // this.recalculateRanges();
-  }
-
-  recalculateRanges() {
-    // for (let i = 1; i < this.capacityRanges.length; i++) {
-    //   const prev = this.capacityRanges[i - 1];
-    //   const current = this.capacityRanges[i];
-    //   current.minRange = prev.maxRange;
-    // }
-  }
-
-  // onRangeChange(index: number) {
-  //   const current = this.capacityRanges[index];
-
-  //   current.maxRange =
-  //     current.maxRange !== null ? Number(current.maxRange) : null;
-  //   current.minRange =
-  //     current.minRange !== null ? Number(current.minRange) : null;
-
-  //   if (
-  //     current.maxRange &&
-  //     current.minRange &&
-  //     current.maxRange <= current.minRange
-  //   ) {
-  //     current.maxRange = null;
-  //     return;
-  //   }
-
-  //   if (this.capacityRanges[index + 1]) {
-  //     this.capacityRanges[index + 1].minRange = current.maxRange;
-  //   }
-  // }
-
-  updateFrom(index: number, event: any) {
-    const value = Number(event.target.value);
-    this.capacityRanges[index].minRange = isNaN(value) ? null : value;
-  }
-
-  updateTo(index: number, event: any) {
-    const value = Number(event.target.value);
-    this.capacityRanges[index].maxRange = isNaN(value) ? null : value;
-
-    // this.recalculateRanges();
-  }
-
-  updateQuantity(index: number, event: any) {
-    const value = Number(event.target.value);
-    this.capacityRanges[index].quantity = isNaN(value) ? null : value;
+    if (this.capacityRanges.length === 0) {
+      this.capacityRanges = [
+        {
+          minRange: null,
+          maxRange: null,
+          quantity: null,
+        },
+      ];
+    }
   }
 
   closeCapacityModal() {
@@ -1078,25 +1058,6 @@ export class BanksComponent implements OnInit, OnDestroy {
     this.isBankToggleConfirmVisible = false;
   }
 
-  // Execute toggle after OK
-  // executeBankToggle() {
-  //   if (!this.toggleCandidateBank) return;
-
-  //   const bank = this.toggleCandidateBank;
-
-  //   this.bankService.toggleIsBank(bank.id).subscribe({
-  //     next: (res: any) => {
-  //       // Toggle UI only after backend success
-  //       bank.isBankActive = !bank.isBankActive;
-
-  //       this.closeBankToggleConfirm();
-  //     },
-  //     error: (err) => {
-
-  //       this.closeBankToggleConfirm();
-  //     },
-  //   });
-  // }
   executeBankToggle() {
     if (!this.toggleCandidateBank) return;
 
@@ -1135,22 +1096,30 @@ export class BanksComponent implements OnInit, OnDestroy {
     return index >= this.bankAccounts.length - 2;
   }
 
-  showTooltip(event: MouseEvent, account: any) {
-    const rect = (event.target as HTMLElement).getBoundingClientRect();
+  showLimitTooltip(account: BankAccount, event: MouseEvent): void {
+    clearTimeout(this.hoverTimeout);
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const tooltipWidth = 288;
 
-    this.tooltipX = rect.left + rect.width / 2 - 120; // center align
-    this.tooltipY = rect.top - 10; // above element
+    this.tooltipPosition = {
+      x: rect.left + rect.width / 2 - tooltipWidth / 2,
+      y: rect.bottom + 8, // ← below the button, not above
+    };
 
-    this.tooltipData = account;
-    this.tooltipVisible = true;
+    this.hoveredLimitAccount = account;
   }
 
-  hideTooltip() {
-    this.tooltipVisible = false;
+  hideLimitTooltip(): void {
+    this.hoverTimeout = setTimeout(() => {
+      this.hoveredLimitAccount = null;
+    }, 150);
+  }
+
+  clearHide() {
+    clearTimeout(this.hoverTimeout);
   }
   private getPayinStatus() {
     if (this.role === "HEAD") {
-      
       this.headService.getHeadById(this.currentRoleId).subscribe((res) => {
         this.payinStatus = res.payin;
       });
@@ -1162,60 +1131,38 @@ export class BanksComponent implements OnInit, OnDestroy {
   }
   changePayinStatus() {
     if (this.role === "HEAD") {
-      this.headService.toggleDashbaordPayin(this.headId).subscribe(
-        () => {
+      this.headService
+        .toggleDashbaordPayin(this.currentRoleId)
+        .subscribe(() => {
           this.payinStatus = !this.payinStatus;
-
-          this.snack.show(
-            `Payin ${this.payinStatus ? "enabled" : "disabled"} successfully`,
-            true,
-          );
-        },
-        (err) => {
-          this.snack.show(
-            err?.error?.message || "Failed to change payin status",
-            false,
-          );
-        },
-      );
+          this.fetchBankAccounts();
+        });
     } else if (this.role === "BRANCH") {
-      this.branchService.toggleDashbaordPayin(this.headId).subscribe(
-        () => {
+      this.branchService
+        .toggleDashbaordPayin(this.currentRoleId)
+        .subscribe(() => {
           this.payinStatus = !this.payinStatus;
-
-          this.snack.show(
-            `Payin ${this.payinStatus ? "enabled" : "disabled"} successfully`,
-            true,
-          );
-        },
-        (err) => {
-          this.snack.show(
-            err?.error?.message || "Failed to change payin status",
-            false,
-          );
-        },
-      );
+          this.fetchBankAccounts();
+        });
     }
   }
 
   viewUpi(account: any) {
-    if (!account?.id) return;
+    const bankId = account?.id;
+    if (!bankId) return;
 
     if (this.role === "HEAD") {
       this.router.navigate(["/head/upi"], {
-        queryParams: { bankId: account.id },
+        queryParams: { bankId },
+        queryParamsHandling: "merge", // existing params ke saath merge hoga
       });
     } else if (this.role === "BRANCH") {
       this.router.navigate(["/branch/upi"], {
-        queryParams: { bankId: account.id },
+        queryParams: { bankId },
+        queryParamsHandling: "merge", // existing params ke saath merge hoga
       });
     }
   }
-  showAddUpiModal = false;
-  isAddingUpi = false;
-
-  addUpiForm!: FormGroup;
-  selectedBank: any = null;
 
   initAddUpiForm() {
     this.addUpiForm = this.fb.group({
@@ -1274,7 +1221,21 @@ export class BanksComponent implements OnInit, OnDestroy {
     }
 
     // ranges (reuse existing)
-    const validRanges = this.capacityRanges || [];
+    const validRanges = this.capacityRanges
+      .filter(
+        (r) =>
+          r.minRange != null &&
+          r.maxRange != null &&
+          r.quantity != null &&
+          r.minRange > 0 &&
+          r.maxRange > 0 &&
+          r.quantity > 0,
+      )
+      .map((r) => ({
+        minRange: r.minRange!,
+        maxRange: r.maxRange!,
+        quantity: r.quantity!,
+      }));
 
     // payload
     const payload = {
@@ -1289,14 +1250,9 @@ export class BanksComponent implements OnInit, OnDestroy {
 
       //  ONLY ADD THIS EXTRA FIELD
       bankId: this.selectedBank?.id,
+      ranges: validRanges.length ? validRanges : null,
 
       createdAt: new Date().toISOString(),
-
-      ranges: this.capacityRanges.map((r) => ({
-        minRange: r.minRange ?? null,
-        maxRange: r.maxRange ?? null,
-        quantity: r.quantity ?? null,
-      })),
     };
 
     // form data
@@ -1599,6 +1555,7 @@ export class BanksComponent implements OnInit, OnDestroy {
         account.status = newStatus ? "active" : "inactive";
 
         this.snack.show(res.message || "Status updated", true);
+        this.fetchBankAccounts();
       },
 
       error: (err) => {
@@ -1626,5 +1583,13 @@ export class BanksComponent implements OnInit, OnDestroy {
 
     this.currentPage = 1;
     this.fetchBankAccounts();
+  }
+
+  openLimitDetails(account: BankAccount): void {
+    this.selectedLimitAccount = account;
+  }
+
+  closeLimitDetails(): void {
+    this.selectedLimitAccount = null;
   }
 }

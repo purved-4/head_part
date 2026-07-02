@@ -22,15 +22,15 @@ import {ChatingComponent} from "../../../common/chating/chating.component";
 import { RecycleUpiComponent } from "../../../common/recycle-upi/recycle-upi.component";
 import { RecycleBankComponent } from "../../../common/recycle-bank/recycle-bank.component";
 import { ChatResponsiveComponent } from "../../../common/chat-responsive/chat-responsive.component";
-import { RecycleManagementComponent } from "../recycle-management/recycle-management.component";
 import { PaymentsMethodsComponent } from "../../../common/head_branch/payments-methods/payments-methods.component";
 import { UpisComponent } from "../../../common/head_branch/upis/upis.component";
 import { BanksComponent } from "../../../common/head_branch/banks/banks.component";
 import { OverrideCurrencyRateComponent } from "../../../common/head_branch/override-currency-rate/override-currency-rate.component";
- import { HbPayinReportComponent } from "../../../common/hb-payin-report/hb-payin-report.component";
-import { HbPayoutReportComponent } from "../../../common/hb-payout-report/hb-payout-report.component";
+ import { HbPayinReportComponent } from "../../../common/head_branch/hb-payin-report/hb-payin-report.component";
+import { HbPayoutReportComponent } from "../../../common/head_branch/hb-payout-report/hb-payout-report.component";
 import { HeadBranchDashboardComponent } from "../../../common/head_branch/head-branch-dashboard/head-branch-dashboard.component";
 import { SharedUserProfileComponent } from "../../../common/shared-user-profile/shared-user-profile.component";
+import { RecycleManagementComponent } from "../../../common/head_branch/recycle-management/recycle-management.component";
 
 const routes: Routes = [
   {

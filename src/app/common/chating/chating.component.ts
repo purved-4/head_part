@@ -1320,7 +1320,7 @@ private loadResolvedThreadsPaginated(): void {
 
   private handleRealTimeMessage(rtMsg: any, threadId: string): void {
     if (!rtMsg) return;
-console.log(rtMsg )
+// console.log(rtMsg )
       const gm = this.mapBackendMessageToGroupMessage(rtMsg);
 
     if (!this.selectedNotification) return;
@@ -2362,3 +2362,5 @@ return;
     this.showScrollToBottom = false;
   }
 }
+
+

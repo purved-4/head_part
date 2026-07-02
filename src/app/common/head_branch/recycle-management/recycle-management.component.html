@@ -1,0 +1,15 @@
+<div class="p-4">
+  <h2 class="text-xl font-semibold mb-4">Recycle Management</h2>
+
+  <!-- PAYMENT METHOD SELECTOR -->
+  <app-payments-methods [disableRouting]="true"></app-payments-methods>
+
+  <!-- BANK -->
+  <app-recycle-bank *ngIf="selectedType === 'bank'"></app-recycle-bank>
+
+  <!-- UPI -->
+  <app-recycle-upi *ngIf="selectedType === 'upi'"></app-recycle-upi>
+
+  <!-- CRYPTO (USDT ke 5 modes me se koi bhi ho: ERC20/BEP20/TRC20/OMNI/SPL) -->
+  <app-recycle-crypto *ngIf="selectedType === 'crypto'"></app-recycle-crypto>
+</div>

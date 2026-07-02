@@ -5,7 +5,7 @@ import { ComPartService } from "../../pages/services/com-part.service";
 import { PortalService } from "../../pages/services/portal.service";
 import { DateTimeUtil } from "../../utils/date-time.utils";
 import { UserStateService } from "../../store/user-state.service";
-
+import { LoaderService } from "../../pages/services/loader.service";
 @Component({
   selector: "app-allot-currency",
   templateUrl: "./allot-currency.component.html",
@@ -16,7 +16,6 @@ export class AllotCurrencyComponent implements OnInit {
   @Input() entityType: any;
   @Output() close = new EventEmitter<void>();
 
-  // Radio button selection ke liye variables
   effectiveFrom: any = null;
   selectedCurrency: string | null = null;
 
@@ -25,10 +24,11 @@ export class AllotCurrencyComponent implements OnInit {
 
   isPortalCurrencyLoaded: boolean = false;
 
-  // Existing data store
+  // Existing data store — USDT added
   existingData: any = {
     INR: null,
     USD: null,
+    USDT: null,
   };
 
   effectiveFromNew: any;
@@ -40,11 +40,11 @@ export class AllotCurrencyComponent implements OnInit {
     private comPartService: ComPartService,
     private portalService: PortalService,
     private userStateService: UserStateService,
+    private loaderService: LoaderService,
   ) {
     this.effectiveFromNew = new Date();
   }
 
-  // ngOnInit replace karo
   ngOnInit(): void {
     this.currentRole = this.userStateService.getRole();
     if (this.entityType === "CHIEF") {
@@ -63,7 +63,6 @@ export class AllotCurrencyComponent implements OnInit {
         const data = Array.isArray(res) ? res : res?.data || [];
         this.loadExistingData(data);
         this.snackBar.show(res.message || "Data fetched successfully", true);
-        // By default INR select karo agar data hai
         this.setDefaultSelection();
       },
       error: (err) => {
@@ -71,7 +70,6 @@ export class AllotCurrencyComponent implements OnInit {
           err.error?.message || "No existing data found",
           false,
         );
-        // Agar error hai toh bhi INR select karo (empty form ke liye)
         this.setDefaultSelection();
       },
     });
@@ -84,7 +82,6 @@ export class AllotCurrencyComponent implements OnInit {
         const data = Array.isArray(cs) ? cs : cs?.data || [];
         this.loadExistingData(data);
         this.snackBar.show(res.message || "Data fetched successfully", true);
-
         this.setDefaultSelection();
       },
       error: (err) => {
@@ -92,7 +89,6 @@ export class AllotCurrencyComponent implements OnInit {
           err.error?.message || "No existing data found",
           false,
         );
-        // Agar error hai toh bhi INR select karo (empty form ke liye)
         this.setDefaultSelection();
       },
     });
@@ -102,58 +98,58 @@ export class AllotCurrencyComponent implements OnInit {
     this.portalService.getCurrenciesbyPortal(this.entityId).subscribe({
       next: (res: any) => {
         const data = Array.isArray(res) ? res : res?.data || [];
-
         this.isPortalCurrencyLoaded = true;
-
         this.loadExistingData(data);
         this.snackBar.show(res.message || "Portal currencies fetched", true);
-
         this.setDefaultSelection();
       },
       error: (err) => {
         this.isPortalCurrencyLoaded = true;
-
         this.snackBar.show(
           err.error?.message || "No portal currency data found",
           false,
         );
-
         this.setDefaultSelection();
       },
     });
   }
-  // Default selection set karne ka method
+
   setDefaultSelection() {
-    // Pehle check karo agar INR ka data hai toh
     if (this.existingData.INR) {
       this.selectCurrency("INR");
     } else if (this.existingData.USD) {
       this.selectCurrency("USD");
+    } else if (this.existingData.USDT) {
+      this.selectCurrency("USDT");
     } else {
       this.selectCurrency("INR");
     }
   }
 
-  // Load existing data into store
+  // Load existing data into store — USDT handled
   loadExistingData(apiData: any[]) {
-    // Reset existing data
     this.existingData = {
       INR: null,
       USD: null,
+      USDT: null,
     };
     apiData.forEach((item: any) => {
       if (item.currency === "INR") {
         this.existingData.INR = {
           rate: item.rate,
           effectiveFrom: item.effectiveFrom,
-
           modes: this.convertModes(item.modes),
         };
       } else if (item.currency === "USD") {
         this.existingData.USD = {
           rate: item.rate,
           effectiveFrom: item.effectiveFrom,
-
+          modes: this.convertModes(item.modes),
+        };
+      } else if (item.currency === "USDT") {
+        this.existingData.USDT = {
+          rate: item.rate,
+          effectiveFrom: item.effectiveFrom,
           modes: this.convertModes(item.modes),
         };
       }
@@ -175,17 +171,15 @@ export class AllotCurrencyComponent implements OnInit {
 
     if (existing) {
       this.selectedModes = [...existing.modes];
-      this.rate = existing.rate; //  FIX
-      // this.effectiveFrom = existing.effectiveFrom;
+      this.rate = existing.rate;
     } else {
       this.selectedModes = [];
-      this.rate = null; // optional reset
+      this.rate = null;
     }
   }
 
   clearSelection() {
     this.selectedCurrency = null;
-
     this.selectedModes = [];
   }
 
@@ -199,7 +193,7 @@ export class AllotCurrencyComponent implements OnInit {
     if (this.selectedModes.includes(mode)) {
       this.selectedModes = this.selectedModes.filter((m) => m !== mode);
     } else {
-      // For USD, only one mode allowed (QR)
+      // USD allows only one mode (QR); INR and USDT allow multiple
       if (this.selectedCurrency === "USD") {
         this.selectedModes = [mode];
       } else {
@@ -223,7 +217,7 @@ export class AllotCurrencyComponent implements OnInit {
       this.snackBar.show("Please select at least one payment mode", false);
       return;
     }
-
+    this.loaderService.showButtonLoader();
     let payload: any;
 
     // ================= PAYLOAD =================
@@ -264,32 +258,22 @@ export class AllotCurrencyComponent implements OnInit {
 
     // ================= API =================
 
-    // CHIEF
     if (this.entityType === "CHIEF") {
       submitObservable = this.chiefService.saveCurrencies(
         this.entityId,
         payload,
       );
-    }
-
-    // COM_PART & OWNER
-    else if (this.entityType === "COM_PART" || this.entityType === "OWNER") {
+    } else if (this.entityType === "COM_PART" || this.entityType === "OWNER") {
       submitObservable = this.comPartService.saveCurrencies(
         this.entityId,
         payload,
       );
-    }
-
-    // PORTAL
-    else if (this.entityType === "PORTAL") {
+    } else if (this.entityType === "PORTAL") {
       submitObservable = this.portalService.saveCurrenciesByPortal(
         this.entityId,
         payload,
       );
-    }
-
-    // INVALID
-    else {
+    } else {
       this.snackBar.show("Invalid entity type", false);
       return;
     }
@@ -298,6 +282,7 @@ export class AllotCurrencyComponent implements OnInit {
 
     submitObservable.subscribe({
       next: (res: any) => {
+        this.loaderService.hideButtonLoader();
         this.snackBar.show(res?.message || "Updated successfully", true);
 
         const key = this.selectedCurrency as keyof typeof this.existingData;
@@ -322,6 +307,7 @@ export class AllotCurrencyComponent implements OnInit {
       },
 
       error: (err) => {
+        this.loaderService.hideButtonLoader();
         this.snackBar.show(err.error?.message || "Update failed", false);
       },
     });
@@ -331,3 +317,4 @@ export class AllotCurrencyComponent implements OnInit {
     this.close.emit();
   }
 }
+

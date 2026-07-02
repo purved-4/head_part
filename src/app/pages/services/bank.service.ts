@@ -205,4 +205,21 @@ toogleBankDeleted(bankId: any): Observable<any[]> {
         catchError((error) => throwError(() => error)),
       );
   }
+
+  getIfsc(ifsc: any): Observable<any> {
+    let params = new HttpParams();
+
+    if (ifsc) {
+     params = params.set("ifsc", ifsc);
+    }
+    return this.http
+     .get<any>(`${baseUrl}/banks/ifsc`, {
+        params,
+     })
+     .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+     );
+}
+
 }

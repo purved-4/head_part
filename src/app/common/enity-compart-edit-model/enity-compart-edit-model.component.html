@@ -326,6 +326,95 @@
                 </span>
               </div>
             </div>
+            <!-- ADD TO LIST BUTTON -->
+            <div class="sm:col-span-2 flex justify-end mt-2">
+              <button
+                type="button"
+                (click)="addCompartEntry()"
+                class="px-4 py-2 rounded-xl bg-[var(--color-primary)] text-white text-sm font-medium disabled:opacity-40 flex items-center gap-1 transition-all"
+              >
+                <span class="material-symbols-outlined text-[16px]">add</span>
+                Add to List
+              </button>
+            </div>
+
+            <!-- PENDING ENTRIES LIST -->
+            <div
+              *ngIf="newCompartEntries.length > 0"
+              class="sm:col-span-2 space-y-2 mt-3"
+            >
+              <p class="text-xs font-medium text-[var(--color-muted)]">
+                Pending to save:
+              </p>
+              <div
+                *ngFor="let entry of newCompartEntries"
+                class="flex flex-wrap items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3"
+              >
+                <span
+                  class="text-sm font-medium text-[var(--color-font)] flex-1 truncate"
+                >
+                  {{ entry.compartUsername }}
+                </span>
+                <div
+                  class="flex items-center gap-2 text-xs text-[var(--color-muted)]"
+                >
+                  <label
+                    >FTT
+                    <input
+                      type="number"
+                      [value]="entry.fttPercentage"
+                      (input)="
+                        onNewEntryChange(
+                          entry.compartId,
+                          'fttPercentage',
+                          $any($event.target).value
+                        )
+                      "
+                      class="w-14 ml-1 px-1 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] text-xs"
+                    />%
+                  </label>
+                  <label
+                    >Payin
+                    <input
+                      type="number"
+                      [value]="entry.payinPercentage"
+                      (input)="
+                        onNewEntryChange(
+                          entry.compartId,
+                          'payinPercentage',
+                          $any($event.target).value
+                        )
+                      "
+                      class="w-14 ml-1 px-1 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] text-xs"
+                    />%
+                  </label>
+                  <label
+                    >Payout
+                    <input
+                      type="number"
+                      [value]="entry.payoutPercentage"
+                      (input)="
+                        onNewEntryChange(
+                          entry.compartId,
+                          'payoutPercentage',
+                          $any($event.target).value
+                        )
+                      "
+                      class="w-14 ml-1 px-1 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] text-xs"
+                    />%
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  (click)="removeNewEntry(entry.compartId)"
+                  class="text-[var(--color-danger)] hover:opacity-70 transition-all"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >close</span
+                  >
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

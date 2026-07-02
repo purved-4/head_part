@@ -108,6 +108,7 @@
               </div>
 
               <!-- IFSC -->
+              <!-- IFSC -->
               <div class="grid grid-cols-2 gap-3">
                 <p class="text-sm text-gray-500">IFSC Code</p>
 
@@ -117,13 +118,48 @@
                   </p>
                 </div>
 
-                <input
-                  *ngIf="isEditMode"
-                  appEnterKeyFocus
-                  [(ngModel)]="updateForm.ifsc"
-                  type="text"
-                  class="w-full uppercase border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                />
+                <div *ngIf="isEditMode" class="relative">
+                  <!-- Search icon left -->
+                  <span
+                    class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"
+                  >
+                    search
+                  </span>
+
+                  <input
+                    type="text"
+                    [value]="updateForm.ifsc"
+                    (input)="onIfscEditInput($event)"
+                    maxlength="11"
+                    placeholder="Search IFSC e.g. SBIN0000123"
+                    class="w-full uppercase border border-gray-300 rounded-lg pl-8 pr-8 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono"
+                  />
+
+                  <!-- Spinner jab fetch ho raha ho -->
+                  <span
+                    *ngIf="isBankNameFetching"
+                    class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 text-sm animate-spin"
+                    >refresh</span
+                  >
+
+                  <!-- Success tick jab bank name aa jaye -->
+                  <span
+                    *ngIf="
+                      !isBankNameFetching &&
+                      updateForm.bankName &&
+                      !isBankNameEditable
+                    "
+                    class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-green-500 text-sm"
+                    >check_circle</span
+                  >
+                </div>
+
+                <!-- Hint text -->
+                <div></div>
+                <p *ngIf="isEditMode" class="text-xs text-gray-400 mt-1">
+                  {{ updateForm.ifsc?.length || 0 }}/11 — bank name auto-fills
+                  on valid IFSC
+                </p>
               </div>
 
               <!-- ACCOUNT TYPE -->
@@ -252,6 +288,8 @@
         <div class="space-y-8">
           <!-- BANK INFO -->
           <!-- BANK NAME -->
+
+          <!-- BANK NAME -->
           <div class="grid grid-cols-2 gap-3 items-start">
             <p class="text-sm text-gray-500">Bank Name</p>
 
@@ -263,75 +301,77 @@
             </div>
 
             <!-- EDIT MODE -->
-            <div *ngIf="isEditMode">
-              <div class="space-y-1 relative">
-                <div class="relative">
-                  <input
-                    type="text"
-                    appEnterKeyFocus
-                    [(ngModel)]="updateForm.bankName"
-                    name="bankName"
-                    (input)="onUpdateBankInputChange()"
-                    (focus)="onUpdateBankInputFocus()"
-                    (blur)="onUpdateBankInputBlur()"
-                    placeholder="Search or enter bank name..."
-                    required
-                    class="w-full px-3 py-2 pl-10 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
-                  />
+            <div *ngIf="isEditMode" class="space-y-1 relative">
+              <div class="relative">
+                <input
+                  type="text"
+                  [(ngModel)]="updateForm.bankName"
+                  name="bankName"
+                  (input)="onUpdateBankInputChange()"
+                  (focus)="onUpdateBankInputFocus()"
+                  (blur)="onUpdateBankInputBlur()"
+                  [disabled]="
+                    !isBankNameEditable &&
+                    !isBankNameFetching &&
+                    !!updateForm.bankName
+                  "
+                  placeholder="Auto-filled from IFSC..."
+                  class="w-full px-3 py-2 pl-9 pr-9 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-gray-50"
+                />
 
-                  <button
-                    *ngIf="updateForm.bankName"
-                    type="button"
-                    (click)="clearUpdateBankSelection()"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-danger)]"
-                  >
-                    <span class="material-symbols-outlined text-sm">
-                      close
-                    </span>
-                  </button>
-                </div>
-
-                <!-- DROPDOWN -->
-                <div
-                  *ngIf="updateShowBankDropdown"
-                  class="absolute z-50 w-full mt-1 max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
+                <!-- Left icon -->
+                <span
+                  class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
                 >
-                  <!-- EXISTING -->
-                  <div
-                    *ngFor="let bank of updateFilteredBanks"
-                    (mousedown)="selectUpdateBank(bank)"
-                    class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-sm border-b border-[var(--color-border)]"
-                  >
-                    {{ bank }}
-                  </div>
+                  account_balance
+                </span>
 
-                  <!-- CUSTOM -->
-                  <div
-                    *ngIf="
-                      updateFilteredBanks.length === 0 &&
-                      updateBankSearchTerm.trim()
-                    "
-                    (mousedown)="selectUpdateCustomBank()"
-                    class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-sm text-[var(--color-primary)] flex items-center gap-1"
-                  >
-                    <span class="material-symbols-outlined text-sm"> add </span>
-
-                    Add "{{ updateBankSearchTerm }}" as custom bank
-                  </div>
-                </div>
-
-                <!-- CUSTOM TAG -->
-                <div
-                  *ngIf="updateIsCustomBank"
-                  class="text-xs text-[var(--color-primary)] mt-1 flex items-center gap-1"
+                <!-- Fetching state -->
+                <span
+                  *ngIf="isBankNameFetching"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 animate-pulse"
+                  >...</span
                 >
-                  <span class="material-symbols-outlined text-sm">
-                    add_circle
-                  </span>
 
-                  Custom bank: "{{ updateForm.bankName }}"
-                </div>
+                <!-- Edit button - bank name filled & not editable -->
+                <button
+                  *ngIf="
+                    !isBankNameFetching &&
+                    updateForm.bankName &&
+                    !isBankNameEditable
+                  "
+                  type="button"
+                  (click)="enableBankNameEdit()"
+                  title="Edit bank name"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-700"
+                >
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                </button>
               </div>
+
+              <!-- Auto-filled indicator -->
+              <p
+                *ngIf="
+                  updateForm.bankName &&
+                  !isBankNameEditable &&
+                  !isBankNameFetching
+                "
+                class="text-xs text-green-600 flex items-center gap-1"
+              >
+                <span class="material-symbols-outlined text-xs"
+                  >check_circle</span
+                >
+                Auto-filled — click edit to change
+              </p>
+
+              <!-- Manual edit indicator -->
+              <p
+                *ngIf="isBankNameEditable"
+                class="text-xs text-blue-500 flex items-center gap-1"
+              >
+                <span class="material-symbols-outlined text-xs">edit</span>
+                Editing manually
+              </p>
             </div>
           </div>
 
@@ -388,7 +428,7 @@
                 </div>
               </div>
 
-              <!-- REMAINING AMOUNT -->
+              <!-- REMAINING AMOUINT-->
               <div class="grid grid-cols-2 gap-3">
                 <p class="text-sm text-gray-500">Remaining Amount</p>
 
@@ -396,50 +436,6 @@
                   <p class="text-sm font-semibold text-gray-800">
                     ₹
                     {{ bankData?.remainingLimitAmount || 0 }}
-                  </p>
-                </div>
-
-                <input
-                  *ngIf="isEditMode"
-                  appEnterKeyFocus
-                  [(ngModel)]="updateForm.limitAmount"
-                  type="number"
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-
-              <!-- Total Amount -->
-              <div class="grid grid-cols-2 gap-3">
-                <p class="text-sm text-gray-500">Total Amount</p>
-
-                <div *ngIf="!isEditMode">
-                  <p class="text-sm font-semibold text-gray-800">
-                    ₹
-                    {{ bankData?.totalLimitAmount || 0 }}
-                  </p>
-                </div>
-
-                <input
-                  *ngIf="isEditMode"
-                  appEnterKeyFocus
-                  [(ngModel)]="updateForm.limitAmount"
-                  type="number"
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-
-              <!-- Used Amount -->
-              <div class="grid grid-cols-2 gap-3">
-                <p class="text-sm text-gray-500">Used Amount</p>
-
-                <div *ngIf="!isEditMode">
-                  <p class="text-sm font-semibold text-gray-800">
-                    ₹
-                    {{
-    (bankData?.totalAmount || 0) -
-    (bankData?.remainingAmount || 0)
-    | number
-  }}
                   </p>
                 </div>
 

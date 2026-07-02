@@ -1,0 +1,280 @@
+<div class="max-w-7xl mx-auto p-6 bg-[var(--color-bg)] min-h-screen">
+  <!-- Header Section -->
+  <div
+    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+  >
+    <h2 class="text-2xl font-semibold text-[var(--color-font)]">
+      Recycle Cryptos
+      <span class="ml-2 text-sm font-normal text-[var(--color-muted)]">
+        ({{ totalElements }} deleted)
+      </span>
+    </h2>
+
+    <!-- View Toggle -->
+    <div class="flex items-center gap-1 bg-[var(--color-hover)] p-1 rounded-lg">
+      <button
+        (click)="setView('table')"
+        class="w-8 h-8 flex items-center justify-center rounded-md transition-all duration-200"
+        [class]="
+          viewMode === 'table'
+            ? 'bg-[var(--color-surface)] text-[var(--color-primary)] shadow-sm'
+            : 'text-[var(--color-muted)] hover:text-[var(--color-font)]'
+        "
+      >
+        <span class="material-symbols-outlined text-xl">table_rows</span>
+      </button>
+
+      <button
+        (click)="setView('grid')"
+        class="w-8 h-8 flex items-center justify-center rounded-md transition-all duration-200"
+        [class]="
+          viewMode === 'grid'
+            ? 'bg-[var(--color-surface)] text-[var(--color-primary)] shadow-sm'
+            : 'text-[var(--color-muted)] hover:text-[var(--color-font)]'
+        "
+      >
+        <span class="material-symbols-outlined text-xl">grid_view</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div
+      class="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary)]"
+    ></div>
+  </div>
+
+  <!-- Table View -->
+  <div
+    *ngIf="!loading && viewMode === 'table' && cryptoAccounts.length > 0"
+    class="hidden sm:block bg-[var(--color-surface)] rounded-xl shadow-sm border border-[var(--color-border)] overflow-hidden"
+  >
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-[var(--color-border)]">
+        <thead class="bg-[var(--color-hover)]">
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase w-16"
+            >
+              #
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase"
+            >
+              Payment Method
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase"
+            >
+              Wallet Address
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-[var(--color-smuted)] uppercase"
+            >
+              Holder
+            </th>
+
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase w-24"
+            >
+              Action
+            </th>
+          </tr>
+        </thead>
+
+        <tbody
+          class="bg-[var(--color-surface)] divide-y divide-[var(--color-border)]"
+        >
+          <tr
+            *ngFor="let crypto of cryptoAccounts; let i = index"
+            class="hover:bg-[var(--color-hover)] transition-colors"
+          >
+            <td class="px-6 py-4 text-sm text-[var(--color-muted)]">
+              {{ (currentPage - 1) * pageSize + i + 1 }}
+            </td>
+
+            <td class="px-6 py-4 text-sm text-[var(--color-font)]">
+              <div class="flex items-center">
+                <span
+                  class="material-symbols-outlined text-[var(--color-muted)] mr-2"
+                  >language</span
+                >
+                {{ crypto.paymentMethod }}
+              </div>
+            </td>
+
+            <td class="px-6 py-4 text-sm font-mono text-[var(--color-font)]">
+              <div class="flex items-center">
+                <span
+                  class="material-symbols-outlined text-[var(--color-muted)] mr-2"
+                  >account_balance_wallet</span
+                >
+                {{ crypto.walletAddress }}
+              </div>
+            </td>
+
+            <td class="px-6 py-4 text-sm text-[var(--color-font)]">
+              <div class="flex items-center">
+                <span
+                  class="material-symbols-outlined text-[var(--color-muted)] mr-2"
+                  >person</span
+                >
+                {{ crypto.holderName }}
+              </div>
+            </td>
+
+            <td class="px-6 py-4 text-sm">
+              <button
+                (click)="reactivateCrypto(crypto.id)"
+                class="inline-flex items-center px-3 py-1.5 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 text-xs"
+              >
+                <span class="material-symbols-outlined mr-1">refresh</span>
+                Restore
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Grid View -->
+  <div
+    *ngIf="!loading && cryptoAccounts.length > 0"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+    [class.sm:hidden]="viewMode === 'table'"
+  >
+    <div
+      *ngFor="let crypto of cryptoAccounts; let i = index"
+      class="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-all group"
+    >
+      <div
+        class="bg-[var(--color-hover)] px-4 py-3 border-b border-[var(--color-border)]"
+      >
+        <div class="flex justify-between items-center">
+          <div class="flex items-center">
+            <span
+              class="material-symbols-outlined text-[var(--color-primary)] mr-2"
+              >currency_bitcoin</span
+            >
+            <span class="font-semibold text-[var(--color-font)]">{{
+              crypto.coinName
+            }}</span>
+          </div>
+          <span
+            class="text-xs text-[var(--color-muted)] bg-[var(--color-surface)] px-2 py-1 rounded-full border border-[var(--color-border)]"
+          >
+            #{{ (currentPage - 1) * pageSize + i + 1 }}
+          </span>
+        </div>
+      </div>
+
+      <div class="p-4 space-y-3">
+        <div class="flex">
+          <span class="material-symbols-outlined text-[var(--color-muted)] mr-2"
+            >language</span
+          >
+          <div>
+            <div class="text-xs text-[var(--color-muted)]">Portal</div>
+            <div class="text-sm text-[var(--color-font)]">
+              {{ crypto.paymentMethod }}
+            </div>
+          </div>
+        </div>
+
+        <div class="flex">
+          <span class="material-symbols-outlined text-[var(--color-muted)] mr-2"
+            >account_balance_wallet</span
+          >
+          <div>
+            <div class="text-xs text-[var(--color-muted)]">Wallet Address</div>
+            <div class="text-sm font-mono text-[var(--color-font)] break-all">
+              {{ crypto.walletAddress }}
+            </div>
+          </div>
+        </div>
+
+        <div class="flex">
+          <span class="material-symbols-outlined text-[var(--color-muted)] mr-2"
+            >person</span
+          >
+          <div>
+            <div class="text-xs text-[var(--color-muted)]">Account Holder</div>
+            <div class="text-sm text-[var(--color-font)]">
+              {{ crypto.holderName }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="px-4 py-3 bg-[var(--color-hover)] border-t border-[var(--color-border)]"
+      >
+        <button
+          (click)="reactivateCrypto(crypto.id)"
+          class="w-full flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+        >
+          <span class="material-symbols-outlined mr-1">refresh</span>
+          Restore
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty -->
+  <div
+    *ngIf="!loading && cryptoAccounts.length === 0"
+    class="bg-[var(--color-surface)] border border-[var(--color-border)] p-12 text-center rounded-xl"
+  >
+    <span
+      class="material-symbols-outlined text-6xl text-[var(--color-muted)] mb-4"
+      >delete_sweep</span
+    >
+    <h3 class="text-lg text-[var(--color-font)]">No deleted cryptos found</h3>
+    <p class="text-sm text-[var(--color-muted)]">
+      There are no cryptos in the recycle bin.
+    </p>
+  </div>
+
+  <!-- Pagination -->
+  <div
+    *ngIf="totalElements > 0"
+    class="flex flex-col sm:flex-row justify-between items-center gap-3 mt-6 pt-4 border-t border-[var(--color-border)]"
+  >
+    <div class="text-sm text-[var(--color-muted)]">
+      Showing {{ (currentPage - 1) * pageSize + 1 }} to
+      {{ Math.min(currentPage * pageSize, totalElements) }}
+      of {{ totalElements }}
+    </div>
+
+    <div class="flex gap-2">
+      <button
+        (click)="prevPage()"
+        class="w-8 h-8 border border-[var(--color-border)] text-[var(--color-muted)] rounded-md hover:bg-[var(--color-hover)]"
+      >
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+
+      <button
+        *ngFor="let page of getPageNumbers()"
+        (click)="goToPage(page)"
+        [class]="
+          page === currentPage
+            ? 'bg-[var(--color-primary)] text-white'
+            : 'border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)]'
+        "
+        class="w-8 h-8 rounded-md text-sm"
+      >
+        {{ page }}
+      </button>
+
+      <button
+        (click)="nextPage()"
+        class="w-8 h-8 border border-[var(--color-border)] text-[var(--color-muted)] rounded-md hover:bg-[var(--color-hover)]"
+      >
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </div>
+  </div>
+</div>

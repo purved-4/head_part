@@ -1,4 +1,3 @@
-
 import { Component, Input, Output, EventEmitter, OnInit } from "@angular/core";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { ChiefService } from "../../pages/services/chief.service";
@@ -17,7 +16,9 @@ export class CurrencyAllotmentComponent implements OnInit {
   entityId: any;
   entityType: any;
   @Output() close = new EventEmitter<void>();
-  currencies = ["INR", "USD"];
+
+  CURRENCIES = ["INR", "USD", "USDT"] as const;
+  currencies = [...this.CURRENCIES];
 
   // Radio button selection ke liye variables
   effectiveFrom: any = null;
@@ -31,6 +32,7 @@ export class CurrencyAllotmentComponent implements OnInit {
   existingData: any = {
     INR: null,
     USD: null,
+    USDT: null,
   };
 
   effectiveFromNew: any;
@@ -143,14 +145,11 @@ export class CurrencyAllotmentComponent implements OnInit {
   }
   // Default selection set karne ka method
   setDefaultSelection() {
-    // Pehle check karo agar INR ka data hai toh
-    if (this.existingData.INR) {
-      this.selectCurrency("INR");
-    } else if (this.existingData.USD) {
-      this.selectCurrency("USD");
-    } else {
-      this.selectCurrency("INR");
-    }
+    const selected =
+      this.CURRENCIES.find((currency) => this.existingData[currency]) ??
+      this.CURRENCIES[0];
+
+    this.selectCurrency(selected);
   }
 
   //   // Load existing data into store
@@ -403,8 +402,6 @@ export class CurrencyAllotmentComponent implements OnInit {
 
         // refresh selection
         this.selectCurrency(this.selectedCurrency!);
-
-
       },
 
       error: (err: any) => {

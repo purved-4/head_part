@@ -332,74 +332,72 @@ updateFavourite(
 //     `${baseUrl}/api/v1/user-bank-favourites/user/${userId}/payin/${payinId}`,
 //   );
 // }
-
 removeFavourite(
-   token: string,
-  sig: any,
-  userId: string,
-   payinId: string,
-): Observable<any> {
-  let params = new HttpParams();
- if (token) {
-    params = params.set('token', token);
-  }
-   if (sig) {
-    params = params.set('sig', sig);
-  }
+    token: string,
+    sig: any,
+    userId: string,
+    payinId: string,
+    portalId: string,
+  ): Observable<any> {
+    let params = new HttpParams();
+    if (token) {
+      params = params.set("token", token);
+    }
+    if (sig) {
+      params = params.set("sig", sig);
+    }
 
     if (userId) {
-    params = params.set('userId', userId);
-  }
-  if (payinId) {
-    params = params.set('payinId', payinId);
-  }
+      params = params.set("userId", userId);
+    }
+    if (payinId) {
+      params = params.set("payinId", payinId);
+    }
+    if (portalId) {
+      params = params.set("portalId", portalId);
+    }
 
-  return this.http.delete(
-    `${baseUrl}/anonymous/favourites/delete`,
-    { params },
-  );
-}
+    return this.http.delete(`${baseUrl}/anonymous/favourites/delete`, {
+      params,
+    });
+  }
 
 selectFavBank(
-  token: string,
-  sig: string,
-  payinId: string,
-  type: 'BANK' | 'UPI',
-  userId: string,
-  tempAmount: number
-): Observable<any> {
+    token: string,
+    sig: string,
+    payinId: string,
+    type: string,
+    userId: string,
+    tempAmount: number,
+  ): Observable<any> {
+    let params = new HttpParams();
 
-  let params = new HttpParams();
+    if (token) {
+      params = params.set("token", token);
+    }
 
-  if (token) {
-    params = params.set('token', token);
+    if (sig) {
+      params = params.set("sig", sig);
+    }
+
+    if (payinId) {
+      params = params.set("payinId", payinId);
+    }
+
+    if (type) {
+      params = params.set("type", type);
+    }
+
+    if (userId) {
+      params = params.set("userId", userId);
+    }
+
+    if (tempAmount != null) {
+      params = params.set("tempAmount", tempAmount.toString());
+    }
+
+    return this.http.post(`${baseUrl}/anonymous/selectFavBank`, {}, { params });
   }
-
-  if (sig) {
-    params = params.set('sig', sig);
-  }
-
-  if (payinId) {
-    params = params.set('payinId', payinId);
-  }
-
-  if (type) {
-    params = params.set('type', type);
-  }
-
-  if (userId) {
-    params = params.set('userId', userId);
-  }
-
-  if (tempAmount != null) {
-    params = params.set('tempAmount', tempAmount.toString());
-  }
-
-  return this.http.post(
-    `${baseUrl}/anonymous/selectFavBank`,
-    {},
-    { params }
-  );
-}
+ 
 
 }

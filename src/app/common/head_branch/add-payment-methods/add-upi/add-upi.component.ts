@@ -10,10 +10,10 @@ import {
 } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Subscription } from "rxjs";
-import { SnackbarService } from "../../snackbar/snackbar.service";
-import { UserStateService } from "../../../store/user-state.service";
-import { BankService } from "../../../pages/services/bank.service"; // reuse or UPI service
-import { UpiService } from "../../../pages/services/upi.service";
+import { SnackbarService } from "../../../snackbar/snackbar.service";
+import { UserStateService } from "../../../../store/user-state.service";
+import { UpiService } from "../../../../pages/services/upi.service";
+import { BankService } from "../../../../pages/services/bank.service";
 
 @Component({
   selector: "app-add-upi",
@@ -84,8 +84,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       bankId: [null, Validators.required],
       vpa: ["", [Validators.required]],
       limitAmount: ["", Validators.required],
-      min_tran_count: [null],
-      min_total_tran_amount: [null],
+      fttAcceptance: [true],
     });
   }
 
@@ -164,8 +163,22 @@ export class AddUpiComponent implements OnInit, OnDestroy {
   addRange() {
     const last = this.capacityRanges[this.capacityRanges.length - 1];
 
-    if (!last.minRange || !last.maxRange || !last.quantity) {
-      this.snack.show("Fill previous range first", false);
+    if (
+      last.minRange == null ||
+      last.maxRange == null ||
+      last.quantity == null
+    ) {
+      this.snack.show("Please fill previous range first.", false);
+      return;
+    }
+
+    if (last.minRange <= 0 || last.maxRange <= 0 || last.quantity <= 0) {
+      this.snack.show("Range values must be greater than 0.", false);
+      return;
+    }
+
+    if (last.maxRange <= last.minRange) {
+      this.snack.show("'To' must be greater than 'From'.", false);
       return;
     }
 
@@ -176,20 +189,35 @@ export class AddUpiComponent implements OnInit, OnDestroy {
     });
   }
 
-  removeRange(i: number) {
-    this.capacityRanges.splice(i, 1);
+  removeRange(index: number) {
+    this.capacityRanges.splice(index, 1);
+
+    if (this.capacityRanges.length === 0) {
+      this.capacityRanges = [
+        {
+          minRange: null,
+          maxRange: null,
+          quantity: null,
+        },
+      ];
+    }
   }
 
-  updateFrom(i: number, e: any) {
-    this.capacityRanges[i].minRange = Number(e.target.value);
+  updateFrom(index: number, event: Event) {
+    const value = (event.target as HTMLInputElement).value.trim();
+
+    this.capacityRanges[index].minRange = value === "" ? null : Number(value);
+  }
+  updateTo(index: number, event: Event) {
+    const value = (event.target as HTMLInputElement).value.trim();
+
+    this.capacityRanges[index].maxRange = value === "" ? null : Number(value);
   }
 
-  updateTo(i: number, e: any) {
-    this.capacityRanges[i].maxRange = Number(e.target.value);
-  }
+  updateQuantity(index: number, event: Event) {
+    const value = (event.target as HTMLInputElement).value.trim();
 
-  updateQuantity(i: number, e: any) {
-    this.capacityRanges[i].quantity = Number(e.target.value);
+    this.capacityRanges[index].quantity = value === "" ? null : Number(value);
   }
 
   // ---------------- SUBMIT ----------------
@@ -205,7 +233,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const payload = {
+    const payload: any = {
       entityId: this.currentRoleId,
       entityType: this.role,
       currency: this.currency?.currency,
@@ -213,8 +241,34 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       vpa: this.addUpiForm.value.vpa,
       limitAmount: this.addUpiForm.value.limitAmount,
       qrMode: this.qrMode,
-      ranges: this.capacityRanges,
+      fttAcceptance: this.addUpiForm.value.fttAcceptance,
     };
+    console.log(payload);
+
+    const validRanges = this.capacityRanges
+      .filter(
+        (r) =>
+          r.minRange != null &&
+          r.maxRange != null &&
+          r.quantity != null &&
+          r.minRange > 0 &&
+          r.maxRange > 0 &&
+          r.quantity > 0,
+      )
+      .map((r) => ({
+        minRange: r.minRange!,
+        maxRange: r.maxRange!,
+        quantity: r.quantity!,
+      }));
+    payload.ranges = validRanges.length ? validRanges : null;
+
+    if (validRanges.length > 0) {
+      payload.ranges = validRanges.map((r) => ({
+        minRange: Number(r.minRange),
+        maxRange: Number(r.maxRange),
+        quantity: Number(r.quantity),
+      }));
+    }
 
     const formData = new FormData();
 

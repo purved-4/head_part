@@ -27,7 +27,7 @@
   </div>
 
   <div class="px-6 py-5 space-y-6 max-h-[80vh] overflow-y-auto">
-    <!-- STEP 1 : Inventory Configuration -->
+    <!-- STEP 1: Inventory Configuration -->
     <div>
       <div class="flex items-center gap-2 mb-4">
         <span
@@ -37,92 +37,182 @@
               ? 'border-green-500 text-green-600 bg-green-50'
               : 'border-gray-300 text-gray-400'
           "
+          >1</span
         >
-          1
-        </span>
         <span class="text-sm font-semibold text-gray-800"
           >Inventory Configuration</span
         >
-        <!-- Currency Selection -->
-      </div>
-      <div class="space-y-3">
-        <label class="text-sm font-medium text-gray-700">
-          Select Currency
-        </label>
-
-        <select
-          class="w-full h-11 px-3 border border-gray-300 rounded-xl outline-none"
-          [(ngModel)]="selectedCurrency"
-          (ngModelChange)="selectCurrency($event)"
-        >
-          <option [ngValue]="null">Select Currency</option>
-
-          <option *ngFor="let currency of currencies" [ngValue]="currency">
-            {{ currency.currency }}
-          </option>
-        </select>
-      </div>
-      <div *ngIf="selectedCurrency" class="space-y-3">
-        <label class="text-sm font-medium text-gray-700"> Select Mode </label>
-
-        <select
-          class="w-full h-11 px-3 border border-gray-300 rounded-xl outline-none"
-          [(ngModel)]="selectedMode"
-          (ngModelChange)="selectMode($event)"
-        >
-          <option [ngValue]="null">Select Mode</option>
-
-          <option *ngFor="let mode of modes" [ngValue]="mode">
-            {{ mode }}
-          </option>
-        </select>
       </div>
 
-      <!-- STEP 2 : Details — shows after currency+mode selected -->
-      <ng-container *ngIf="showAddBankForm && selectedMode === 'BANK'">
-        <div class="border-t border-gray-100 pt-5">
-          <div class="flex items-center gap-2 mb-4">
-            <span
-              class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
-              >2</span
-            >
-            <span class="text-sm font-semibold text-gray-800">Details</span>
-          </div>
-          <app-add-bank
-            *ngIf="showAddBankForm && selectedMode === 'BANK'"
-            [currency]="selectedCurrency"
-            [mode]="selectedMode"
-            [embeddedMode]="true"
-            (formSubmitted)="onBankAdded()"
-            (formCancelled)="showAddBankForm = false"
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Currency -->
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-gray-700">Currency</label>
+          <select
+            class="w-full h-11 px-3 border border-gray-300 rounded-xl outline-none text-sm"
+            [(ngModel)]="selectedCurrency"
+            (ngModelChange)="selectCurrency($event)"
           >
-          </app-add-bank>
+            <option [ngValue]="null">Select Currency</option>
+            <option *ngFor="let currency of currencies" [ngValue]="currency">
+              {{ currency.currency }}
+            </option>
+          </select>
         </div>
-      </ng-container>
 
-      <!-- Future modes can go here -->
-      <ng-container *ngIf="showAddBankForm && selectedMode === 'UPI'">
-        <div class="border-t border-gray-100 pt-5">
-          <div class="flex items-center gap-2 mb-4">
-            <span
-              class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
-            >
-              2
-            </span>
-            <span class="text-sm font-semibold text-gray-800">UPI Details</span>
-          </div>
-
-          <!-- IMPORTANT: ONLY THIS COMPONENT -->
-          <app-add-upi
-            [embeddedMode]="true"
-            [currency]="selectedCurrency"
-            (formSubmitted)="onUpiAdded()"
-            (formSubmitted)="onUpiSubmitted($event)"
-            (formCancelled)="onUpiCancelled()"
+        <!-- Payment Method / Mode -->
+        <div class="space-y-1" *ngIf="selectedCurrency">
+          <label class="text-sm font-medium text-gray-700"
+            >Payment Method</label
           >
-          </app-add-upi>
+          <select
+            class="w-full h-11 px-3 border border-gray-300 rounded-xl outline-none text-sm"
+            [(ngModel)]="selectedMode"
+            (ngModelChange)="selectMode($event)"
+          >
+            <option [ngValue]="null">Select Mode</option>
+            <option *ngFor="let mode of modes" [ngValue]="mode">
+              {{ mode }}
+            </option>
+          </select>
         </div>
-      </ng-container>
+      </div>
     </div>
+
+    <!-- STEP 2: Details — conditionally rendered per mode -->
+
+    <!-- BANK -->
+    <ng-container *ngIf="showForm && selectedMode === 'BANK'">
+      <div class="border-t border-gray-100 pt-5">
+        <div class="flex items-center gap-2 mb-4">
+          <span
+            class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
+            >2</span
+          >
+          <span class="text-sm font-semibold text-gray-800">Details</span>
+        </div>
+        <app-add-bank
+          [currency]="selectedCurrency"
+          [mode]="selectedMode"
+          [embeddedMode]="true"
+          (formSubmitted)="onBankAdded()"
+          (formCancelled)="showForm = false"
+        ></app-add-bank>
+      </div>
+    </ng-container>
+
+    <!-- UPI -->
+    <ng-container *ngIf="showForm && selectedMode === 'UPI'">
+      <div class="border-t border-gray-100 pt-5">
+        <div class="flex items-center gap-2 mb-4">
+          <span
+            class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
+            >2</span
+          >
+          <span class="text-sm font-semibold text-gray-800">UPI Details</span>
+        </div>
+        <app-add-upi
+          [embeddedMode]="true"
+          [currency]="selectedCurrency"
+          (formSubmitted)="onUpiSubmitted($event)"
+          (formCancelled)="onUpiCancelled()"
+        ></app-add-upi>
+      </div>
+    </ng-container>
+
+    <!-- OMNI -->
+    <ng-container *ngIf="showForm && selectedMode === 'OMNI'">
+      <div class="border-t border-gray-100 pt-5">
+        <div class="flex items-center gap-2 mb-4">
+          <span
+            class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
+            >2</span
+          >
+          <span class="text-sm font-semibold text-gray-800">Details</span>
+        </div>
+        <app-add-omni
+          [currency]="selectedCurrency"
+          [embeddedMode]="true"
+          (formSubmitted)="onCryptoAdded($event)"
+          (formCancelled)="showForm = false"
+        ></app-add-omni>
+      </div>
+    </ng-container>
+
+    <!-- SPL -->
+    <ng-container *ngIf="showForm && selectedMode === 'SPL'">
+      <div class="border-t border-gray-100 pt-5">
+        <div class="flex items-center gap-2 mb-4">
+          <span
+            class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
+            >2</span
+          >
+          <span class="text-sm font-semibold text-gray-800">Details</span>
+        </div>
+        <app-add-spl
+          [currency]="selectedCurrency"
+          [embeddedMode]="true"
+          (formSubmitted)="onCryptoAdded($event)"
+          (formCancelled)="showForm = false"
+        ></app-add-spl>
+      </div>
+    </ng-container>
+
+    <!-- ERC-20 -->
+    <ng-container *ngIf="showForm && selectedMode === 'ERC20'">
+      <div class="border-t border-gray-100 pt-5">
+        <div class="flex items-center gap-2 mb-4">
+          <span
+            class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
+            >2</span
+          >
+          <span class="text-sm font-semibold text-gray-800">Details</span>
+        </div>
+        <app-add-erc20
+          [currency]="selectedCurrency"
+          [embeddedMode]="true"
+          (formSubmitted)="onCryptoAdded($event)"
+          (formCancelled)="showForm = false"
+        ></app-add-erc20>
+      </div>
+    </ng-container>
+
+    <!-- TRC-20 -->
+    <ng-container *ngIf="showForm && selectedMode === 'TRC20'">
+      <div class="border-t border-gray-100 pt-5">
+        <div class="flex items-center gap-2 mb-4">
+          <span
+            class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
+            >2</span
+          >
+          <span class="text-sm font-semibold text-gray-800">Details</span>
+        </div>
+        <app-add-trc20
+          [currency]="selectedCurrency"
+          [embeddedMode]="true"
+          (formSubmitted)="onCryptoAdded($event)"
+          (formCancelled)="showForm = false"
+        ></app-add-trc20>
+      </div>
+    </ng-container>
+
+    <!-- BEP-20 -->
+    <ng-container *ngIf="showForm && selectedMode === 'BEP20'">
+      <div class="border-t border-gray-100 pt-5">
+        <div class="flex items-center gap-2 mb-4">
+          <span
+            class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
+            >2</span
+          >
+          <span class="text-sm font-semibold text-gray-800">Details</span>
+        </div>
+        <app-add-bep20
+          [currency]="selectedCurrency"
+          [embeddedMode]="true"
+          (formSubmitted)="onCryptoAdded($event)"
+          (formCancelled)="showForm = false"
+        ></app-add-bep20>
+      </div>
+    </ng-container>
   </div>
 </div>

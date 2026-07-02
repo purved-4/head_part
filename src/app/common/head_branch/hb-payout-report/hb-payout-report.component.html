@@ -37,9 +37,9 @@
               </div>
             </div>
 
-            <!-- Filters Row (portal, filter dropdown, search, buttons) -->
+            <!-- Filters Row (comPart, filter dropdown, search, buttons) -->
             <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
-              <!-- Payout portal custom dropdown -->
+              <!-- Payout comPart custom dropdown -->
 
               <div class="relative min-w-[160px] flex-1 xl:flex-none">
                 <select
@@ -55,11 +55,11 @@
               </div>
               <div class="relative min-w-[160px] flex-1 xl:flex-none">
                 <button
-                  (click)="togglePortalDropdown('payout')"
+                  (click)="togglecomPartDropdown('payout')"
                   class="w-full text-sm border-0 rounded-2xl pl-10 pr-4 py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
                 >
                   <span class="truncate">
-                    {{ getSelectedPortalDomain("payout") }}
+                    {{ getSelectedcomPartDomain("payout") }}
                   </span>
                   <span class="material-symbols-outlined text-lg"
                     >arrow_drop_down</span
@@ -71,27 +71,21 @@
                 >
 
                 <div
-                  *ngIf="payoutPortalDropdownOpen"
+                  *ngIf="payoutcomPartDropdownOpen"
                   class="absolute left-0 mt-2 w-full rounded-2xl shadow-xl z-20 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] max-h-48 overflow-y-auto"
                 >
                   <button
-                    (click)="selectPortal('payout', '')"
-                    class="w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)]"
-                  >
-                    All compart
-                  </button>
-                  <button
-                    *ngFor="let portal of payoutPortals"
-                    (click)="selectPortal('payout', portal)"
+                    *ngFor="let comPart of payoutcomParts"
+                    (click)="selectcomPart('payout', comPart)"
                     class="w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)] truncate"
                   >
-                    {{ portal.domain }}
+                    {{ comPart.domain }}
                   </button>
                   <div
-                    *ngIf="payoutPortals.length === 0"
+                    *ngIf="payoutcomParts.length === 0"
                     class="px-4 py-2 text-sm text-[var(--color-muted)]"
                   >
-                    No portals
+                    No comParts
                   </div>
                 </div>
               </div>
@@ -199,7 +193,7 @@
                   <th
                     class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
                   >
-                    Portal
+                    comPart
                   </th>
                   <th
                     class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
@@ -254,7 +248,7 @@
                           >{{ w.portalDomain || "-" }}</span
                         >
                         <span class="text-xs text-[var(--color-muted)]"
-                          >Portal</span
+                          >comPart</span
                         >
                       </div>
                     </div>
@@ -367,7 +361,7 @@
                         No rejected payouts found
                       </p>
                       <p class="text-sm mt-2 text-[var(--color-muted)]">
-                        Please Select the portal first or Try adjusting your
+                        Please Select the comPart first or Try adjusting your
                         search criteria
                       </p>
                     </div>
@@ -385,7 +379,7 @@
               *ngFor="let w of pagedApprovedPayoutsData"
               class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-4 shadow-sm"
             >
-              <!-- Portal -->
+              <!-- comPart -->
               <div class="flex items-center gap-3 mb-3">
                 <div
                   class="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)] border border-[var(--color-border)]"
@@ -396,9 +390,9 @@
                 </div>
                 <div class="flex-1">
                   <div class="text-sm font-semibold">
-                    {{ w.portalDomain || "-" }}
+                    {{ w.comPartDomain || "-" }}
                   </div>
-                  <div class="text-xs text-[var(--color-muted)]">Portal</div>
+                  <div class="text-xs text-[var(--color-muted)]">comPart</div>
                 </div>
               </div>
 
@@ -968,7 +962,7 @@
               </div>
 
               <div class="text-xs text-gray-500 mt-1">
-                {{ msg?.createdAt | tz }}
+                {{ msg?.createdAt | date: "dd MMM yyyy hh:mm a" }}
               </div>
 
               <button

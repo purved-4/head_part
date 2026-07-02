@@ -34,7 +34,7 @@ export class WebhookDataComponent implements OnDestroy {
       }),
       switchMap(() =>
         this.poolingService.AdminPooling().pipe(
-          tap((resp) => console.log(resp)),
+          // tap((resp) => console.log(resp)),
           catchError((err) => {
             this.errorMessage = err?.message || JSON.stringify(err);
             return of([]);
@@ -86,7 +86,7 @@ export class WebhookDataComponent implements OnDestroy {
     this.poolingService
       .AdminPooling()
       .pipe(
-        tap((resp) => console.log(resp)),
+        // tap((resp) => console.log(resp)),
         catchError((err) => {
           this.errorMessage = err?.message || JSON.stringify(err);
           return of([]);

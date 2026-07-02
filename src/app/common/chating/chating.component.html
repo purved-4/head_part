@@ -348,7 +348,11 @@
                   (click)="showResendConfirmation(selectedNotification)"
                   [disabled]="isLoading"
                   class="px-3.5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-emerald-300 disabled:to-teal-300 text-white text-xs font-bold rounded-xl transition-all duration-300 shadow-md shadow-emerald-200/50 hover:shadow-lg hover:shadow-emerald-200/60 active:scale-95"
-                  title="Send to All Users Again"
+                  [title]="
+                    selectedNotification.threadType === 'payout'
+                      ? 'Send to Pool'
+                      : 'Resend to same user'
+                  "
                 >
                   <span class="material-symbols-outlined text-sm">refresh</span>
                 </button>
@@ -450,34 +454,111 @@
 
             <!-- Show Fund Action -->
             <div class="pt-2 border-t border-gray-200/60">
-  <button
-    (click)="showFundModel ? hideFundDetails() : showFundDetailForMessage(
-      selectedNotification.id,
-      selectedNotification.fundId,
-      selectedNotification.fundType
-    )"
-    class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-violet-50 hover:bg-violet-100 text-violet-700 font-medium rounded-xl transition-all duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-1"
-  >
-    <span class="material-symbols-outlined text-base">
-      {{ showFundModel ? 'visibility_off' : 'flash_on' }}
-    </span>
+              <button
+                (click)="
+                  showFundModel
+                    ? hideFundDetails()
+                    : showFundDetailForMessage(
+                        selectedNotification.id,
+                        selectedNotification.fundId,
+                        selectedNotification.fundType
+                      )
+                "
+                class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-violet-50 hover:bg-violet-100 text-violet-700 font-medium rounded-xl transition-all duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-1"
+              >
+                <span class="material-symbols-outlined text-base">
+                  {{ showFundModel ? "visibility_off" : "flash_on" }}
+                </span>
 
-    <span>
-      {{ showFundModel ? 'Hide Fund Details' : 'Show Fund Details' }}
-    </span>
-  </button>
-</div>
+                <span>
+                  {{
+                    showFundModel ? "Hide Fund Details" : "Show Fund Details"
+                  }}
+                </span>
+              </button>
+            </div>
 
             <!-- Fund Details -->
             <div
               *ngIf="showFundModel === true"
               class="mt-3 p-4 bg-violet-50/80 rounded-xl border border-violet-200 animate-slide-down"
             >
+              <!-- Display ID — highlighted at top -->
+              <div
+                class="flex items-center justify-between mb-3 pb-3 border-b border-violet-200"
+              >
+                <span class="text-sm font-medium text-violet-600"
+                  >Display ID</span
+                >
+                <span
+                  class="text-sm font-bold text-white bg-violet-600 px-3 py-1 rounded-full"
+                >
+                  {{ fundDetails.displayId }}
+                </span>
+              </div>
+
               <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-violet-600">Amount</span>
-
                 <span class="text-base font-bold text-violet-800">
                   {{ fundDetails.currencyWiseAmount }}
+                </span>
+              </div>
+
+              <!-- UPI: show VPA instead of account fields -->
+              <div
+                *ngIf="fundDetails.fundsType === 'UPI'"
+                class="flex items-center justify-between"
+              >
+                <span class="text-sm font-medium text-violet-600"
+                  >UPI ID (VPA)</span
+                >
+                <span class="text-base font-bold text-violet-800">
+                  {{ fundDetails.vpa }}
+                </span>
+              </div>
+
+              <!-- BANK: show account fields -->
+              <ng-container *ngIf="fundDetails.fundsType !== 'UPI'">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium text-violet-600"
+                    >Account No</span
+                  >
+                  <span class="text-base font-bold text-violet-800">
+                    {{ fundDetails.accountNo }}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium text-violet-600"
+                    >Account Holder</span
+                  >
+                  <span class="text-base font-bold text-violet-800">
+                    {{ fundDetails.bankAccountHolderName }}
+                  </span>
+                </div>
+              </ng-container>
+
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-violet-600"
+                  >Transaction Id</span
+                >
+                <span class="text-base font-bold text-violet-800">
+                  {{ fundDetails.transactionId }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-violet-600"
+                  >Exchange Rate</span
+                >
+                <span class="text-base font-bold text-violet-800">
+                  {{ fundDetails.currencyWiseAmount }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-violet-600"
+                  >Parent Currency</span
+                >
+                <span class="text-base font-bold text-violet-800">
+                  {{ fundDetails.currency }}
                 </span>
               </div>
             </div>
@@ -527,7 +608,7 @@
             <span
               class="px-5 py-1.5 text-[10px] font-bold text-violet-400 bg-white rounded-2xl border border-violet-100/60 mx-4 shadow-sm uppercase tracking-widest"
             >
-              {{ dateSep | tz}}
+              {{ dateSep | tz }}
             </span>
             <div class="flex-1 border-t border-violet-100/40"></div>
           </div>
@@ -780,18 +861,17 @@
               </div>
             </div>
 
-                  <!-- Scroll To Bottom Button -->
-      <button
-        *ngIf="showScrollToBottom"
-        (click)="scrollToBottom()"
-        class="fixed bottom-24 left-2/3 z-50 w-8 h-8 rounded-full bg-violet-500 hover:bg-violet-600 text-white flex items-center justify-center transition-all duration-300"
-      >
-        <span class="material-symbols-outlined">keyboard_arrow_down</span>
-      </button>
+            <!-- Scroll To Bottom Button -->
+            <button
+              *ngIf="showScrollToBottom"
+              (click)="scrollToBottom()"
+              class="fixed bottom-24 left-2/3 z-50 w-8 h-8 rounded-full bg-violet-500 hover:bg-violet-600 text-white flex items-center justify-center transition-all duration-300"
+            >
+              <span class="material-symbols-outlined">keyboard_arrow_down</span>
+            </button>
           </div>
         </ng-container>
       </div>
-
 
       <!-- Empty Messages -->
     </div>
@@ -1251,7 +1331,10 @@
                 Created
               </p>
               <p class="text-[13px] font-semibold text-gray-700">
-                {{ getFormattedDateTime(selectedNotification._raw?.createdAt) | tz}}
+                {{
+                  getFormattedDateTime(selectedNotification._raw?.createdAt)
+                    | tz
+                }}
               </p>
             </div>
           </div>
@@ -1274,7 +1357,10 @@
                 Last Activity
               </p>
               <p class="text-[13px] font-semibold text-gray-700">
-                {{ getFormattedDateTime(selectedNotification._raw?.updatedAt) | tz}}
+                {{
+                  getFormattedDateTime(selectedNotification._raw?.updatedAt)
+                    | tz
+                }}
               </p>
             </div>
           </div>
@@ -2094,44 +2180,57 @@
       ═══════════════════════════════════════ -->
 <div
   *ngIf="showResendModal"
-  class="fixed inset-0 bg-white/60 backdrop-blur-xl flex items-center justify-center z-50"
+  class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+  (click)="closeModals()"
 >
   <div
-    class="bg-white rounded-3xl shadow-2xl shadow-violet-200/30 max-w-sm w-full mx-4 border-2 border-violet-100/40 overflow-hidden"
+    class="bg-white rounded-3xl shadow-2xl max-w-sm w-full border border-cyan-100 overflow-hidden"
+    (click)="$event.stopPropagation()"
   >
     <div class="p-7">
+
       <div
-        class="flex items-center justify-center w-14 h-14 mx-auto bg-gradient-to-br from-cyan-100 to-sky-100 rounded-2xl mb-5 shadow-sm"
+        class="flex items-center justify-center w-14 h-14 mx-auto bg-gradient-to-br from-cyan-100 to-sky-100 rounded-2xl mb-5"
       >
-        <span class="material-symbols-outlined text-3xl text-cyan-500"
-          >refresh</span
-        >
+        <span class="material-symbols-outlined text-3xl text-cyan-500">
+          refresh
+        </span>
       </div>
 
+
       <div class="text-center mb-7">
-        <h3 class="text-lg font-extrabold text-gray-800 mb-2.5 tracking-tight">
+
+        <h3 class="text-lg font-extrabold text-gray-800 mb-2">
           Resend Thread
         </h3>
-        <p class="text-sm text-gray-400 leading-relaxed font-medium">
+
+        <p class="text-sm text-gray-500 leading-relaxed font-medium">
           Are you sure you want to resend this thread? This will attempt to
           re-send notifications / processing.
         </p>
+
       </div>
 
-      <div class="flex space-x-3">
+
+      <div class="flex gap-3">
+
         <button
           (click)="closeModals()"
-          class="flex-1 bg-gray-100/80 hover:bg-gray-200/80 text-gray-600 font-bold py-3 px-5 rounded-2xl transition-all duration-300 hover:shadow-sm"
+          class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-3 rounded-xl transition"
         >
           Cancel
         </button>
+
+
         <button
           (click)="confirmResend()"
-          class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 px-5 rounded-2xl transition-all duration-400 shadow-lg shadow-emerald-200/40 hover:shadow-xl hover:shadow-emerald-300/50 active:scale-95"
+          class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:opacity-90 transition active:scale-95"
         >
           Resend
         </button>
+
       </div>
+
     </div>
   </div>
 </div>
@@ -2141,44 +2240,57 @@
       ═══════════════════════════════════════ -->
 <div
   *ngIf="showRejectModal"
-  class="fixed inset-0 bg-white/60 backdrop-blur-xl flex items-center justify-center z-50"
+  class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+  (click)="closeModals()"
 >
   <div
-    class="bg-white rounded-3xl shadow-2xl shadow-rose-200/30 max-w-sm w-full mx-4 border-2 border-rose-100/40 overflow-hidden"
+    class="bg-white rounded-3xl shadow-2xl max-w-sm w-full border border-rose-100 overflow-hidden"
+    (click)="$event.stopPropagation()"
   >
     <div class="p-7">
+
       <div
-        class="flex items-center justify-center w-14 h-14 mx-auto bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl mb-5 shadow-sm"
+        class="flex items-center justify-center w-14 h-14 mx-auto bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl mb-5"
       >
-        <span class="material-symbols-outlined text-3xl text-rose-500"
-          >block</span
-        >
+        <span class="material-symbols-outlined text-3xl text-rose-500">
+          block
+        </span>
       </div>
 
+
       <div class="text-center mb-7">
-        <h3 class="text-lg font-extrabold text-gray-800 mb-2.5 tracking-tight">
+
+        <h3 class="text-lg font-extrabold text-gray-800 mb-2">
           Reject Thread
         </h3>
-        <p class="text-sm text-gray-400 leading-relaxed mb-4 font-medium">
+
+        <p class="text-sm text-gray-500 leading-relaxed font-medium">
           Are you sure you want to reject this thread? This action will mark it
           as rejected.
         </p>
+
       </div>
 
-      <div class="flex space-x-3">
+
+      <div class="flex gap-3">
+
         <button
           (click)="closeModals()"
-          class="flex-1 bg-gray-100/80 hover:bg-gray-200/80 text-gray-600 font-bold py-3 px-5 rounded-2xl transition-all duration-300 hover:shadow-sm"
+          class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-3 rounded-xl transition"
         >
           Cancel
         </button>
+
+
         <button
           (click)="confirmRejection()"
-          class="flex-1 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold py-3 px-5 rounded-2xl transition-all duration-400 shadow-lg shadow-rose-200/40 hover:shadow-xl hover:shadow-rose-300/50 active:scale-95"
+          class="flex-1 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:opacity-90 transition active:scale-95"
         >
           Reject
         </button>
+
       </div>
+
     </div>
   </div>
 </div>
@@ -2188,80 +2300,94 @@
       ═══════════════════════════════════════ -->
 <div
   *ngIf="showPayoutModal"
-  class="fixed inset-0 bg-white/60 backdrop-blur-xl flex items-center justify-center z-50"
+  class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+  (click)="closeModals()"
 >
   <div
-    class="bg-white rounded-3xl shadow-2xl shadow-violet-200/30 max-w-md w-full mx-4 border-2 border-violet-100/40 overflow-hidden"
+    class="bg-white rounded-3xl shadow-2xl max-w-md w-full border border-violet-100 overflow-hidden"
+    (click)="$event.stopPropagation()"
   >
     <div class="p-7">
+
       <div
-        class="flex items-center justify-center w-14 h-14 mx-auto bg-gradient-to-br from-violet-100 to-fuchsia-100 rounded-2xl mb-5 shadow-sm"
+        class="flex items-center justify-center w-14 h-14 mx-auto bg-gradient-to-br from-violet-100 to-fuchsia-100 rounded-2xl mb-5"
       >
-        <span class="material-symbols-outlined text-3xl text-violet-500"
-          >edit</span
-        >
+        <span class="material-symbols-outlined text-3xl text-violet-500">
+          edit
+        </span>
       </div>
 
       <div class="text-center mb-5">
-        <h3 class="text-lg font-extrabold text-gray-800 mb-2.5 tracking-tight">
+        <h3 class="text-lg font-extrabold text-gray-800 mb-2">
           Edit Payout Details
         </h3>
-        <p class="text-sm text-violet-400 font-medium leading-relaxed">
-          Edit account number and IFSC, add an optional reason, then send to the
-          user.
+
+        <p class="text-sm text-gray-500 leading-relaxed">
+          Edit account number and IFSC, add an optional reason, then send to the user.
         </p>
       </div>
 
       <div class="mb-5">
-        <label class="block text-sm font-bold text-gray-700 mb-2"
-          >Account Number *</label
-        >
+        <label class="block text-sm font-bold text-gray-700 mb-2">
+          Account Number *
+        </label>
+
         <input
           type="text"
           [(ngModel)]="payoutForm.accountNumber"
           placeholder="Account number"
-          class="w-full px-4 py-3 border-2 border-violet-100/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-300/40 focus:border-violet-300 transition-all duration-300 text-gray-700 placeholder-violet-300/60"
+          class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-300 outline-none"
         />
       </div>
 
+
       <div class="mb-5">
-        <label class="block text-sm font-bold text-gray-700 mb-2"
-          >IFSC Code *</label
-        >
+        <label class="block text-sm font-bold text-gray-700 mb-2">
+          IFSC Code *
+        </label>
+
         <input
           type="text"
           [(ngModel)]="payoutForm.ifsc"
           placeholder="IFSC code"
-          class="w-full px-4 py-3 border-2 border-violet-100/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-300/40 focus:border-violet-300 transition-all duration-300 text-gray-700 placeholder-violet-300/60"
+          class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-300 outline-none"
         />
       </div>
 
-      <div class="mb-7">
-        <label class="block text-sm font-bold text-gray-700 mb-2"
-          >Reason (optional)</label
-        >
+
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-gray-700 mb-2">
+          Reason (optional)
+        </label>
+
         <textarea
           [(ngModel)]="payoutForm.reason"
           rows="3"
           placeholder="Optional reason or note"
-          class="w-full px-4 py-3 border-2 border-violet-100/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-300/40 focus:border-violet-300 transition-all duration-300 resize-none text-gray-700 placeholder-violet-300/60"
+          class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-300 outline-none resize-none"
         ></textarea>
       </div>
 
-      <div class="flex space-x-3">
+
+      <div class="flex gap-3">
+
         <button
           (click)="closeModals()"
-          class="flex-1 bg-gray-100/80 hover:bg-gray-200/80 text-gray-600 font-bold py-3 px-5 rounded-2xl transition-all duration-300 hover:shadow-sm"
+          class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-3 rounded-xl transition"
         >
           Cancel
         </button>
+
+
         <button
           (click)="sendEditedPayout()"
-          class="flex-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-500 hover:from-violet-600 hover:via-fuchsia-600 hover:to-rose-600 text-white font-bold py-3 px-5 rounded-2xl transition-all duration-400 shadow-lg shadow-fuchsia-200/40 hover:shadow-xl hover:shadow-fuchsia-300/50 active:scale-95"
+          class="flex-1 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:opacity-90 transition"
         >
           Send
         </button>
+
       </div>
+
     </div>
   </div>
 </div>

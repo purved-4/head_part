@@ -68,20 +68,20 @@
                 class="px-3 py-2 rounded-xl text-xs sm:text-sm border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)]"
               >
                 <option value="PENDING">Pending</option>
-                <option value="  DISPUTE_ESCALATED">Dispute pending</option>
+                <option value=" DISPUTE_ESCALATED">Dispute pending</option>
                 <option value="ACCEPTED">Accepted</option>
                 <option value="CP_REJECTED">Rejected</option>
               </select>
-              <!-- Bank portal dropdown -->
+              <!-- Bank comPart dropdown -->
               <div
                 class="relative min-w-[140px] sm:min-w-[160px] flex-1 xl:flex-none"
               >
                 <button
-                  (click)="togglePortalDropdown('bank')"
+                  (click)="togglecomPartDropdown('bank')"
                   class="w-full text-xs sm:text-sm border-0 rounded-2xl pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 flex items-center justify-between focus:ring-2 transition-all duration-300 shadow-lg bg-white/20 text-[var(--color-bg)]"
                 >
                   <span class="truncate">
-                    {{ getSelectedPortalDomain("bank") || "All Portals" }}
+                    {{ getSelectedcomPartDomain("bank") || "All comParts" }}
                   </span>
                   <span class="material-symbols-outlined text-base sm:text-lg"
                     >arrow_drop_down</span
@@ -93,27 +93,21 @@
                 >
 
                 <div
-                  *ngIf="bankPortalDropdownOpen"
+                  *ngIf="bankcomPartDropdownOpen"
                   class="absolute left-0 mt-2 w-full rounded-2xl shadow-xl z-20 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] max-h-48 overflow-y-auto"
                 >
                   <button
-                    (click)="selectPortal('bank', null)"
-                    class="w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)]"
-                  >
-                    All compart
-                  </button>
-                  <button
-                    *ngFor="let portal of bankPortals"
-                    (click)="selectPortal('bank', portal)"
+                    *ngFor="let comPart of bankcomParts"
+                    (click)="selectcomPart('bank', comPart)"
                     class="w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-[var(--color-hover)] text-[var(--color-font)] truncate"
                   >
-                    {{ portal.domain }}
+                    {{ comPart.domain }}
                   </button>
                   <div
-                    *ngIf="bankPortals.length === 0"
+                    *ngIf="bankcomParts.length === 0"
                     class="px-4 py-2 text-xs sm:text-sm text-[var(--color-muted)]"
                   >
-                    No portals
+                    No comParts
                   </div>
                 </div>
               </div>
@@ -129,7 +123,7 @@
                   >
                   <span class="hidden xs:inline">Date Filter</span>
                   <span
-                    *ngIf="bankFilterActive || bankPortalFilter"
+                    *ngIf="bankFilterActive || bankcomPartFilter"
                     class="ml-1 w-2 h-2 rounded-full bg-[var(--color-accent)]"
                   ></span>
                 </button>
@@ -224,7 +218,7 @@
               *ngFor="let a of pagedBankPayinsData"
               class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-3 sm:p-4 shadow-sm"
             >
-              <!-- Portal -->
+              <!-- comPart -->
               <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
                 <div
                   class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)] border border-[var(--color-border)]"
@@ -235,10 +229,10 @@
                 </div>
                 <div class="flex-1">
                   <div class="text-xs sm:text-sm font-semibold">
-                    {{ a.raw.portalDomain || a.portalId || "-" }}
+                    {{ a.raw.portalDomain || a.comPartId || "-" }}
                   </div>
                   <div class="text-[10px] sm:text-xs text-[var(--color-muted)]">
-                    Portal
+                    comPart
                   </div>
                 </div>
               </div>
@@ -339,7 +333,7 @@
                   <th
                     class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
                   >
-                    Portal
+                    comPart
                   </th>
                   <th
                     class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
@@ -391,11 +385,11 @@
                       <div>
                         <span
                           class="text-xs sm:text-sm font-semibold block text-[var(--color-font)]"
-                          >{{ a.raw.portalDomain || a.portalId || "-" }}</span
+                          >{{ a.raw.portalDomain || a.comPartId || "-" }}</span
                         >
                         <span
                           class="text-[10px] sm:text-xs text-[var(--color-muted)]"
-                          >Portal</span
+                          >comPart</span
                         >
                       </div>
                     </div>
@@ -510,7 +504,7 @@
                       <p
                         class="text-xs sm:text-sm mt-1 sm:mt-2 text-[var(--color-muted)]"
                       >
-                        Please Select the portal first or Try adjusting your
+                        Please Select the comPart first or Try adjusting your
                         search criteria
                       </p>
                     </div>
@@ -877,11 +871,11 @@
           <div class="flex items-center justify-between mb-3">
             <div>
               <div class="font-bold text-[var(--color-font)]">
-                {{ msg?.createdByType  || "USER" }}
+                {{ msg?.createdByType || "USER" }}
               </div>
 
               <div class="text-xs text-gray-500">
-                {{ msg?.createdAt | tz }}
+                {{ msg?.createdAt | date: "dd MMM yyyy hh:mm a" }}
               </div>
 
               <button

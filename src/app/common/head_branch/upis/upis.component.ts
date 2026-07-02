@@ -1,4 +1,3 @@
-
 import {
   Component,
   OnInit,
@@ -46,6 +45,10 @@ export class UpisComponent implements OnInit {
   transactionMaxAmount: number | null = null;
   showPaymentDropdown = false;
   selectedMethod = "bank";
+  selectedLimitUpi: any = null;
+  hoveredLimitUpi: any = null;
+  limitTooltipPosition = { x: 0, y: 0 };
+  private limitHoverTimeout: any;
 
   showTxnModal = false;
   selectedTxnData: any = null;
@@ -97,6 +100,7 @@ export class UpisComponent implements OnInit {
     vpa: "",
     limitAmount: "",
     status: "active",
+    fttAcceptance: true,
   };
   updateManualQrFile: File | null = null;
   updateSelectedImage: string | null = null;
@@ -108,12 +112,45 @@ export class UpisComponent implements OnInit {
   originalVpa = "";
   updateQrError = "";
   showInventoryModal = false;
+  //CAPACITY
+  capacityPopupTop = 0;
+  capacityPopupLeft = 0;
+  selectedCapacityAccount: any = null;
 
   // ---------- USER / ROLE ----------
   currentRoleId: any;
   currentUserId: any;
   role: any;
   userId: any;
+
+  showLimitModal: boolean = false;
+  limitDateTime: any;
+  isSubmittingLimit: boolean = false;
+  monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  dayLabels = ["S", "M", "T", "W", "T", "F", "S"];
+  viewYear!: number;
+  viewMonth!: number;
+  pickerSelectedDay!: number;
+  pickerSelectedMonth!: number;
+  pickerSelectedYear!: number;
+  pickerHour!: number;
+  pickerMinute!: string;
+  pickerAmPm: "AM" | "PM" = "AM";
+  calendarCells: any[] = [];
+  minLimitDateTime: string = "";
 
   // ---------- PAGINATION ----------
   currentPage = 1;
@@ -187,6 +224,9 @@ export class UpisComponent implements OnInit {
       if (!res) return;
       this.selectedModeData = res;
     });
+    this.route.queryParams.subscribe((params) => {
+      this.preselectedBankId = params["bankId"] || null;
+    });
 
     this.getPayinStatus();
     this.updatePageNumbers();
@@ -197,10 +237,6 @@ export class UpisComponent implements OnInit {
     ) {
       this.viewMode = "grid";
     }
-
-    this.route.queryParams.subscribe((params) => {
-      this.preselectedBankId = params["bankId"] || null;
-    });
 
     this.loadBanks();
 
@@ -234,7 +270,7 @@ export class UpisComponent implements OnInit {
   }
 
   // =============================================
-  // ✅ FETCH UPIS — COMPLETE FIX
+  //  FETCH UPIS — COMPLETE FIX
   // =============================================
   fetchUpis(): void {
     if (!this.currentRoleId) return;
@@ -270,7 +306,7 @@ export class UpisComponent implements OnInit {
               ? responseData
               : [];
 
-          // ✅ STEP 1: MAP — normalizedStatus se isUpiActive bhi set karo
+          //  STEP 1: MAP — normalizedStatus se isUpiActive bhi set karo
           this.upis = rows.map((r: any) => {
             let parsedRanges: any[] = [];
             if (Array.isArray(r.ranges)) {
@@ -291,35 +327,39 @@ export class UpisComponent implements OnInit {
 
             const rawImagePath = r.qrImagePath || r.qrImageUrl || null;
 
-            // ✅ KEY FIX: normalizedStatus pehle calculate karo
+            //  KEY FIX: normalizedStatus pehle calculate karo
             const normalizedStatus = this.normalizeStatus(r);
 
             return {
               ...r,
-              status: r.status, // ✅ 'active' / 'inactive' string
-              isUpiActive: normalizedStatus === "active", // ✅ status se sync — r.upi nahi
+              status: r.status, //  'active' / 'inactive' string
+              isUpiActive: normalizedStatus === "active", //  status se sync — r.upi nahi
               liveAssigned: r.liveAssigned ?? false,
               portalDomain:
                 r.portalDomain || r.portalName || r.portal || r.bankId || "",
-              ranges: parsedRanges,
+              ranges: r.ranges ?? [],
               qrId: r.qrId || r.qr_id || r.id || "",
               imagePath: rawImagePath,
               qrImageUrl: null,
               limitAmount: r.limitAmount,
               currency: r.portalCurrency || "",
               vpa: r.vpa || r.upiId || "",
+              remainingLimitAmount: r.remainingLimitAmount ?? null,
+              totalLimitAmount: r.totalLimitAmount ?? null,
+              limitTime: r.limitTime ?? null,
+              fttAcceptance: r.fttAcceptance ?? true,
 
-              // ✅ Bank details
+              //  Bank details
               bankName: r.bankName || "",
               accountHolder: r.accountHolder || "",
 
-              // ✅ Time fields
+              //  Time fields
               upiTime: r.upiTime || null,
               liveTime: r.liveTime || null,
             };
           });
 
-          // ✅ STEP 2: LOAD IMAGES
+          //  STEP 2: LOAD IMAGES
           this.upis.forEach((upi: any) => {
             if (!upi.imagePath) return;
             if (upi.imagePath.startsWith("http")) {
@@ -332,7 +372,7 @@ export class UpisComponent implements OnInit {
             }
           });
 
-          // ✅ STEP 3: SORT
+          //  STEP 3: SORT
           const now = new Date().getTime();
           this.upis.sort((a: any, b: any) => {
             const timeA = a.limitTime ? new Date(a.limitTime).getTime() : 0;
@@ -358,10 +398,10 @@ export class UpisComponent implements OnInit {
   }
 
   // =============================================
-  // ✅ normalizeStatus — Boolean PEHLE check karo
+  //  normalizeStatus — Boolean PEHLE check karo
   // =============================================
   private normalizeStatus(item: any): string {
-    // ✅ Boolean check PEHLE — status: true/false handle karo
+    //  Boolean check PEHLE — status: true/false handle karo
     if (typeof item.status === "boolean") {
       return item.status ? "active" : "inactive";
     }
@@ -407,7 +447,6 @@ export class UpisComponent implements OnInit {
     this.transactionMaxAmount = null;
     this.showPortalDropdown = false;
     this.currentPage = 1;
-    this.fetchUpis();
   }
 
   // ---------- PORTAL FILTER ----------
@@ -552,6 +591,7 @@ export class UpisComponent implements OnInit {
       status: upi.status || "active",
       maxAmount: upi.maxAmount || "",
       minAmount: upi.minAmount || "",
+      fttAcceptance: upi.fttAcceptance ?? true,
     };
     this.originalVpa = (upi.vpa || "").trim().toLowerCase();
     this.vpaChanged = false;
@@ -594,66 +634,69 @@ export class UpisComponent implements OnInit {
       this.updateQrError = "";
     }
   }
-
   submitUpdate(): void {
     if (!this.editingUpi) return;
+
     const vpa = (this.updateForm.vpa || "").trim();
     const limit = parseFloat(this.updateForm.limitAmount) || 0;
 
-    if (!vpa) {
-      this.snack.show("UPI ID is required", false);
-      return;
-    }
-    if (!this.isValidUpiId(vpa)) {
-      this.snack.show("Please enter a valid UPI ID (e.g., name@bank)", false);
-      return;
-    }
-    if (limit <= 0) {
-      this.snack.show("Please enter a valid limit amount", false);
+    if (!vpa || !this.isValidUpiId(vpa)) {
+      this.snack.show("Valid UPI ID required", false);
       return;
     }
 
-    const statusBool = this.updateForm.status === "active";
+    if (limit <= 0) {
+      this.snack.show("Valid limit required", false);
+      return;
+    }
+
+    const qrFile = this.generatedUpdateFile || this.updateManualQrFile;
+
     const dtoPayload: any = {
       id: this.editingUpi.id || this.editingUpi.qrId,
       portal: this.editingUpi.portal,
       entityId: this.currentRoleId,
       entityType: this.role,
-      vpa: vpa,
+      vpa,
       limitAmount: limit.toString(),
-      active: statusBool,
+      active: this.updateForm.status === "active",
+      fttAcceptance: this.updateForm.fttAcceptance,
     };
-    if (this.currentRoleId) dtoPayload.branchId = this.currentRoleId;
-    if (this.userId) dtoPayload.userId = this.userId;
+
+    if (this.currentRoleId) {
+      dtoPayload.entityId = this.currentRoleId;
+    }
 
     const formData = new FormData();
-    const dtoBlob = new Blob([JSON.stringify(dtoPayload)], {
-      type: "application/json",
-    });
-    formData.append("dto", dtoBlob);
-    if (this.generatedUpdateFile) {
-      formData.append(
-        "file",
-        this.generatedUpdateFile,
-        this.generatedUpdateFile.name,
-      );
+
+    // DTO JSON blob
+    formData.append(
+      "dto",
+      new Blob([JSON.stringify(dtoPayload)], {
+        type: "application/json",
+      }),
+    );
+
+    // FILE (binary QR image with filename)
+    if (qrFile) {
+      formData.append("file", qrFile, qrFile.name);
     }
 
     this.isSubmitting = true;
+
     this.upiService.updateUpi(formData).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.isSubmitting = false;
         this.closeUpdateModal();
         this.fetchUpis();
-        this.snack.show("UPI updated successfully!", true);
+        this.snack.show(res?.message || "UPI updated successfully!", true);
       },
       error: (err: any) => {
         this.isSubmitting = false;
-        this.snack.show("Error updating UPI. Please try again.", false);
+        this.snack.show(err?.error?.message || "Error updating UPI", false);
       },
     });
   }
-
   // ---------- QR GENERATION ----------
   isValidUpiId(vpa: string): boolean {
     return this.vpaPattern.test(vpa);
@@ -810,6 +853,9 @@ export class UpisComponent implements OnInit {
       this.showUpiPortalDropdown = false;
     if (!target.closest(".payment-dropdown-wrapper"))
       this.showPaymentDropdown = false;
+    if (!target.closest(".capacity-popup") && !target.closest("button")) {
+      this.selectedCapacityAccount = null;
+    }
   }
 
   @HostListener("window:resize")
@@ -877,7 +923,7 @@ export class UpisComponent implements OnInit {
   }
 
   // =============================================
-  // ✅ TOGGLE CONFIRM — Click handler
+  //  TOGGLE CONFIRM — Click handler
   // =============================================
   openUpiToggleConfirm(upi: any, event: Event) {
     event.preventDefault();
@@ -891,34 +937,34 @@ export class UpisComponent implements OnInit {
   }
 
   // =============================================
-  // ✅ executeUpiToggle — upiTime check FIXED
+  //  executeUpiToggle — upiTime check FIXED
   // =============================================
   executeUpiToggle() {
     if (!this.toggleCandidateUpi) return;
 
     const upi = this.toggleCandidateUpi;
 
-    // ✅ Sirf ACTIVE → INACTIVE karne pe upiTime check karo
+    //  Sirf ACTIVE → INACTIVE karne pe upiTime check karo
     if (upi.status === "active") {
       const upiTime = upi.upiTime ? new Date(upi.upiTime).getTime() : null;
       const now = new Date().getTime();
 
       if (upiTime && upiTime > now) {
-        // ✅ upiTime future mein hai → inactive nahi karo
+        //  upiTime future mein hai → inactive nahi karo
         this.snack.show(
           "UPI Time abhi future mein hai, inactive nahi kar sakte!",
           false,
         );
         this.isToggleConfirmVisible = false;
         this.toggleCandidateUpi = null;
-        return; // ✅ return — API call nahi hogi
+        return; //  return — API call nahi hogi
       }
     }
 
-    // ✅ Normal flow — API call
+    //  Normal flow — API call
     this.upiService.toggleIsUpi(upi.id).subscribe({
       next: () => {
-        // ✅ Dono sync karo
+        //  Dono sync karo
         upi.isUpiActive = !upi.isUpiActive;
         upi.status = upi.status === "active" ? "inactive" : "active";
         this.isToggleConfirmVisible = false;
@@ -937,7 +983,7 @@ export class UpisComponent implements OnInit {
   }
 
   // =============================================
-  // ✅ isAssigned — liveTime future = Assigned
+  //  isAssigned — liveTime future = Assigned
   // =============================================
   isAssigned(upi: any): boolean {
     return upi.liveAssigned === true;
@@ -1060,11 +1106,11 @@ export class UpisComponent implements OnInit {
           this.filteredBanks = banks;
           if (this.preselectedBankId) {
             const matchedBank = this.banks.find(
-              (b: any) => b.id === this.preselectedBankId,
+              (b: any) => String(b.id) === String(this.preselectedBankId),
             );
+
             if (matchedBank) {
-              this.selectedBank = matchedBank;
-              this.bankSearchTerm = matchedBank.accountHolderName;
+              this.selectBank(matchedBank);
             }
           }
         },
@@ -1102,26 +1148,20 @@ export class UpisComponent implements OnInit {
   }
 
   // =============================================
-  // ✅ isLive — payinStatus + isUpiActive
+  //  isLive — payinStatus + isUpiActive
   // =============================================
   isLive(upi: any): boolean {
     const now = Date.now();
 
-    const upiTime = upi?.upiTime ? new Date(upi.upiTime).getTime() : null;
+    const limitTime = upi.limitTime ? new Date(upi.limitTime).getTime() : null;
 
-    // Payin OFF
-    if (!this.payinStatus) {
-      return false;
-    }
+    const upiTime = upi.upiTime ? new Date(upi.upiTime).getTime() : null;
 
-    // Status ON
-    if (upi.status === true) {
+    const status =
+      upi.status === true ? true : upiTime != null ? upiTime > now : false;
+
+    if (limitTime !== null && limitTime > now && status) {
       return true;
-    }
-
-    // Status OFF → upiTime decides
-    if (upi.status === false) {
-      return upiTime ? upiTime > now : false;
     }
 
     return false;
@@ -1168,5 +1208,252 @@ export class UpisComponent implements OnInit {
 
   closeInventoryModal() {
     this.showInventoryModal = false;
+  }
+
+  getUpiUsedAmount(upi: any): number {
+    const limitAmount = Number(upi.limitAmount || 0);
+    const remaining = Number(upi.remainingLimitAmount || 0);
+    return Math.max(limitAmount - remaining, 0);
+  }
+
+  showUpiLimitTooltip(upi: any, event: MouseEvent): void {
+    clearTimeout(this.limitHoverTimeout);
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    this.limitTooltipPosition = {
+      x: rect.left + rect.width / 2 - 144,
+      y: rect.bottom + 8,
+    };
+    this.hoveredLimitUpi = upi;
+  }
+
+  hideUpiLimitTooltip(): void {
+    this.limitHoverTimeout = setTimeout(() => {
+      this.hoveredLimitUpi = null;
+    }, 150);
+  }
+
+  clearUpiLimitHide(): void {
+    clearTimeout(this.limitHoverTimeout);
+  }
+
+  openUpiLimitDetails(upi: any): void {
+    this.selectedLimitUpi = upi;
+  }
+
+  closeUpiLimitDetails(): void {
+    this.selectedLimitUpi = null;
+  }
+  submitLimitTime() {
+    // Build limitDateTime from picker state
+    let hour = this.pickerHour;
+    if (this.pickerAmPm === "PM" && hour !== 12) hour += 12;
+    if (this.pickerAmPm === "AM" && hour === 12) hour = 0;
+
+    const selected = new Date(
+      this.pickerSelectedYear,
+      this.pickerSelectedMonth,
+      this.pickerSelectedDay,
+      hour,
+      Number(this.pickerMinute),
+      0,
+    );
+    this.limitDateTime = new Date(
+      selected.getTime() - selected.getTimezoneOffset() * 60000,
+    )
+      .toISOString()
+      .slice(0, 16);
+
+    if (!this.limitDateTime || !this.editingUpi) return;
+    const selectedTime = new Date(this.limitDateTime).getTime();
+    const nowTime = new Date().getTime();
+    if (selectedTime < nowTime) {
+      this.snack.show("Please select a future date and time", false);
+      return;
+    }
+    this.isSubmittingLimit = true;
+    const payload = { dateTime: this.limitDateTime };
+    const id = this.editingUpi.id;
+    this.upiService.setLimitTime(id, payload).subscribe({
+      next: (res) => {
+        this.snack.show("Limit time set successfully", true);
+        this.closeLimitModal();
+        this.isSubmittingLimit = false;
+        this.fetchUpis();
+      },
+      error: (err) => {
+        this.snack.show(
+          err?.error?.message || "Failed to set limit time",
+          false,
+        );
+        this.isSubmittingLimit = false;
+      },
+    });
+  }
+  openLimitModal(account: any) {
+    this.editingUpi = account;
+    this.showLimitModal = true;
+
+    const now = new Date();
+    this.viewYear = now.getFullYear();
+    this.viewMonth = now.getMonth();
+    this.pickerSelectedDay = now.getDate();
+    this.pickerSelectedMonth = now.getMonth();
+    this.pickerSelectedYear = now.getFullYear();
+
+    let h = now.getHours();
+    this.pickerAmPm = h >= 12 ? "PM" : "AM";
+    h = h % 12 || 12;
+    this.pickerHour = h;
+    this.pickerMinute = String(now.getMinutes()).padStart(2, "0");
+
+    this.buildCalendar();
+  }
+  buildCalendar(): void {
+    this.calendarCells = [];
+    const today = new Date();
+    const todayMid = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+    const firstDay = new Date(this.viewYear, this.viewMonth, 1).getDay();
+    const daysInMonth = new Date(
+      this.viewYear,
+      this.viewMonth + 1,
+      0,
+    ).getDate();
+    const prevDays = new Date(this.viewYear, this.viewMonth, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+      this.calendarCells.push({
+        day: prevDays - firstDay + 1 + i,
+        date: null,
+        isPast: true,
+        isToday: false,
+        isSelected: false,
+        isOtherMonth: true,
+      });
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cellDate = new Date(this.viewYear, this.viewMonth, d);
+      const isPast = cellDate < todayMid;
+      const isToday = cellDate.getTime() === todayMid.getTime();
+      const isSelected =
+        d === this.pickerSelectedDay &&
+        this.viewMonth === this.pickerSelectedMonth &&
+        this.viewYear === this.pickerSelectedYear;
+      this.calendarCells.push({
+        day: d,
+        date: cellDate,
+        isPast,
+        isToday,
+        isSelected,
+        isOtherMonth: false,
+      });
+    }
+    const remaining = 42 - this.calendarCells.length;
+    for (let d = 1; d <= remaining; d++) {
+      this.calendarCells.push({
+        day: d,
+        date: null,
+        isPast: true,
+        isToday: false,
+        isSelected: false,
+        isOtherMonth: true,
+      });
+    }
+  }
+
+  selectCalendarDay(cell: any): void {
+    if (!cell.date || cell.isPast || cell.isOtherMonth) return;
+    this.pickerSelectedDay = cell.day;
+    this.pickerSelectedMonth = this.viewMonth;
+    this.pickerSelectedYear = this.viewYear;
+    this.buildCalendar();
+  }
+
+  prevMonth(): void {
+    if (this.isCurrentMonthView()) return;
+    if (--this.viewMonth < 0) {
+      this.viewMonth = 11;
+      this.viewYear--;
+    }
+    this.buildCalendar();
+  }
+
+  nextMonth(): void {
+    if (++this.viewMonth > 11) {
+      this.viewMonth = 0;
+      this.viewYear++;
+    }
+    this.buildCalendar();
+  }
+
+  isCurrentMonthView(): boolean {
+    const now = new Date();
+    return (
+      this.viewMonth === now.getMonth() && this.viewYear === now.getFullYear()
+    );
+  }
+
+  clampPickerHour(): void {
+    let h = Number(this.pickerHour);
+    if (isNaN(h) || h < 1) h = 1;
+    if (h > 12) h = 12;
+    this.pickerHour = h;
+  }
+
+  clampPickerMinute(): void {
+    let m = Number(this.pickerMinute);
+    if (isNaN(m) || m < 0) m = 0;
+    if (m > 59) m = 59;
+    this.pickerMinute = String(m).padStart(2, "0");
+  }
+  closeLimitModal() {
+    this.showLimitModal = false;
+    this.limitDateTime = "";
+    this.minLimitDateTime = "";
+  }
+  openCapacityPreview(account: any, event: MouseEvent) {
+    console.log("ACCOUNT =>", account);
+    console.log("RANGES =>", account?.ranges);
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+
+    this.selectedCapacityAccount = account;
+
+    const popupWidth = 280;
+
+    // Approx dynamic height
+    const rows = account?.ranges?.length || 0;
+    const popupHeight = Math.max(120, rows * 56 + 70);
+
+    // Center align with clicked icon/button
+    let left = rect.left + rect.width / 2 - popupWidth / 2;
+    let top = rect.bottom + 8;
+
+    // If bottom overflow -> show above
+    if (top + popupHeight > window.innerHeight) {
+      top = rect.top - popupHeight - 8;
+    }
+
+    // If still going outside top
+    if (top < 10) {
+      top = 10;
+    }
+
+    // Horizontal boundaries
+    if (left < 10) {
+      left = 10;
+    }
+
+    if (left + popupWidth > window.innerWidth - 10) {
+      left = window.innerWidth - popupWidth - 10;
+    }
+
+    this.capacityPopupTop = top;
+    this.capacityPopupLeft = left;
+  }
+  closeCapacityPopup() {
+    this.selectedCapacityAccount = null;
   }
 }

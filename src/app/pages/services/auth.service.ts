@@ -103,14 +103,13 @@ export class AuthService {
       .post<any>(`${baseUrl}/logout`, {}, { headers, withCredentials: true })
       .pipe(
         tap(() => {
-          this.subjectRegistryService.destroyAll();
+        
+          // this.subjectRegistryService.destroyAll();
 
           token = null;
         }),
         map((res) => res),
         catchError((err) => {
-          this.subjectRegistryService.destroyAll();
-          // window.location.href = "/login"
           return throwError(() => err);
         }),
       );

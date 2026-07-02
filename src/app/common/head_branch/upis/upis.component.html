@@ -31,25 +31,7 @@
     >
       <div class="flex gap-2 w-full sm:w-auto">
         <!-- Payin Toggle -->
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-medium text-gray-600">Payin</span>
-          <button
-            (click)="changePayinStatus()"
-            class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors duration-300"
-            [ngClass]="payinStatus ? 'bg-green-500' : 'bg-gray-300'"
-          >
-            <span
-              class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300"
-              [ngClass]="payinStatus ? 'translate-x-5' : 'translate-x-1'"
-            ></span>
-          </button>
-          <span
-            class="text-xs font-semibold"
-            [ngClass]="payinStatus ? 'text-green-600' : 'text-gray-500'"
-          >
-            {{ payinStatus ? "ON" : "OFF" }}
-          </span>
-        </div>
+
         <!-- Reload -->
         <div class="flex-shrink-0">
           <app-reload (reload)="fetchUpis()"></app-reload>
@@ -418,7 +400,7 @@
           <th
             class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
-            #
+            Live
           </th>
           <th
             class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
@@ -438,12 +420,27 @@
           <th
             class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
+            Payin Type
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
             Limit
           </th>
           <th
             class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
             QR
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            Set Limit Time
+          </th>
+          <th
+            class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
+          >
+            Capacity Ranges
           </th>
           <th
             class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
@@ -505,7 +502,7 @@
                 class="w-2 h-2 rounded-full"
                 [ngClass]="upi.liveAssigned ? 'bg-blue-500' : 'bg-gray-500'"
               ></span>
-              {{ upi.liveAssigned ? "Yes" : "No" }}
+              {{ upi.liveAssigned ? "Assigned" : "Unassigned" }}
             </span>
           </td>
           <!--  BANK DETAILS — bankName + accountHolder -->
@@ -533,12 +530,26 @@
               </span>
             </div>
           </td>
-
+          <td class="px-4 py-3 whitespace-nowrap">
+            <span
+              class="text-xs font-semibold"
+              [ngClass]="
+                upi.fttAcceptance ? 'text-green-600' : 'text-orange-500'
+              "
+            >
+              {{ upi.fttAcceptance ? "PPI" : "RPI" }}
+            </span>
+          </td>
           <!-- LIMIT -->
           <td class="px-4 py-3 whitespace-nowrap">
-            <span class="text-sm text-[var(--color-font)] font-semibold"
-              >₹{{ upi.limitAmount || "0" }}</span
+            <button
+              (mouseenter)="showUpiLimitTooltip(upi, $event)"
+              (mouseleave)="hideUpiLimitTooltip()"
+              (click)="openUpiLimitDetails(upi)"
+              class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 transition"
             >
+              <span class="text-xs font-semibold">{{ upi.limitAmount }}</span>
+            </button>
           </td>
 
           <!-- QR -->
@@ -567,6 +578,44 @@
                 No QR
               </div>
             </div>
+          </td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <div class="flex items-start gap-2">
+              <span
+                class="material-symbols-outlined text-gray-400 text-[18px] mt-0.5"
+              >
+                calendar_month
+              </span>
+
+              <div class="flex flex-col leading-tight">
+                <span class="text-xs font-semibold text-[var(--color-font)]">
+                  {{ upi.limitTime ? (upi.limitTime | tz) : "Not Set" }}
+                </span>
+
+                <span class="text-[10px] text-gray-400">
+                  {{ upi.limitTime ? (upi.limitTime | tz) : "--:--" }}
+                </span>
+              </div>
+
+              <button
+                (click)="openLimitModal(upi)"
+                class="ml-1 p-1 rounded-md hover:bg-[var(--color-hover)] transition"
+              >
+                <span
+                  class="material-symbols-outlined text-[var(--color-primary)] text-[18px]"
+                >
+                  edit_calendar
+                </span>
+              </button>
+            </div>
+          </td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <button
+              (click)="openCapacityPreview(upi, $event)"
+              class="px-3 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100 transition"
+            >
+              Edit
+            </button>
           </td>
 
           <!--  STATUS — isUpiActive se chalega (normalizedStatus se sync) -->
@@ -756,6 +805,24 @@
       <div class="flex justify-between items-center mb-3">
         <!--  Assigned Badge in Grid -->
         <span
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold border"
+          [ngClass]="
+            isLive(upi)
+              ? 'bg-green-100 text-green-700 border-green-300'
+              : 'bg-red-100 text-red-700 border-red-300'
+          "
+        >
+          <span
+            class="w-2.5 h-2.5 rounded-full"
+            [ngClass]="isLive(upi) ? 'bg-green-500 blink-dot' : 'bg-red-500'"
+          ></span>
+
+          LIVE
+        </span>
+        <span class="text-[11px] font-semibold">
+          {{ getRemainingTime(upi) }}
+        </span>
+        <span
           class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border"
           [ngClass]="
             isAssigned(upi)
@@ -839,26 +906,6 @@
           >
             <span class="text-xs text-[var(--color-muted)]">Limit</span>
             <span class="font-semibold">₹{{ upi.limitAmount || "0" }}</span>
-          </div>
-
-          <div
-            class="bg-[var(--color-bg)] rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer"
-            (mousemove)="showTooltip($event, upi)"
-            (mouseleave)="hideTooltip()"
-            (click)="openTxnModal(upi)"
-          >
-            <span
-              class="text-xs text-[var(--color-muted)] flex items-center gap-1"
-            >
-              <span
-                class="material-symbols-outlined text-[14px] text-[var(--color-primary)]"
-                >info</span
-              >
-              Bank Details
-            </span>
-            <span class="text-xs text-[var(--color-primary)] font-medium"
-              >View</span
-            >
           </div>
 
           <!--  Status Toggle in Grid — isUpiActive se -->
@@ -1176,7 +1223,42 @@
               </div>
             </div>
           </div>
+          <div class="grid grid-cols-2 items-center gap-3">
+            <p class="text-sm text-gray-500">Payin Type</p>
 
+            <div class="flex items-center justify-end gap-3">
+              <span
+                class="text-xs font-semibold transition-all duration-300"
+                [ngClass]="
+                  updateForm.fttAcceptance
+                    ? 'text-green-600'
+                    : 'text-orange-600'
+                "
+              >
+                {{ updateForm.fttAcceptance ? "PPI" : "RPI" }}
+              </span>
+
+              <label class="relative inline-flex cursor-pointer items-center">
+                <input
+                  type="checkbox"
+                  appEnterKeyFocus
+                  class="peer sr-only"
+                  [(ngModel)]="updateForm.fttAcceptance"
+                  [ngModelOptions]="{ standalone: true }"
+                />
+
+                <!-- Track -->
+                <div
+                  class="h-7 w-14 rounded-full bg-gray-300 transition-all duration-300 peer-checked:bg-green-500"
+                ></div>
+
+                <!-- Thumb -->
+                <div
+                  class="absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow-md transition-all duration-300 ease-in-out peer-checked:translate-x-7"
+                ></div>
+              </label>
+            </div>
+          </div>
           <!-- Buttons -->
           <div class="pt-3 border-t border-[var(--color-border)]">
             <div class="flex gap-3">
@@ -1308,21 +1390,202 @@
   ></app-payin-capacity>
 </div>
 
-<!-- ========== TRANSACTION MODAL ========== -->
+<!-- ===== UPI LIMIT HOVER TOOLTIP ===== -->
 <div
-  *ngIf="showTxnModal"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+  *ngIf="hoveredLimitUpi"
+  [ngStyle]="{
+    top: limitTooltipPosition.y + 'px',
+    left: limitTooltipPosition.x + 'px',
+  }"
+  class="fixed z-[99999] w-72 p-3 text-xs bg-white border rounded-xl shadow-2xl pointer-events-none"
+  (mouseenter)="clearUpiLimitHide()"
 >
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
-    <button
-      (click)="closeTxnModal()"
-      class="absolute top-3 right-3 text-gray-500 hover:text-red-500"
-    >
-      <span class="material-icons">close</span>
-    </button>
-    <h2 class="text-lg font-semibold mb-4 text-[var(--color-font)]">
-      Transaction Details
-    </h2>
-    <div class="space-y-3 text-sm"></div>
+  <div class="space-y-2 text-xs">
+    <div class="flex justify-between">
+      <span>Upi Limit</span>
+      <span>{{ hoveredLimitUpi.limitAmount }}</span>
+    </div>
+    <div class="flex justify-between text-red-600">
+      <span>Used</span>
+      <span>{{ getUpiUsedAmount(hoveredLimitUpi) }}</span>
+    </div>
+    <div class="flex justify-between text-green-600">
+      <span>Remaining</span>
+      <span>{{ hoveredLimitUpi.remainingLimitAmount }}</span>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showLimitModal"
+  class="fixed inset-0 z-[70] flex items-center justify-center bg-black/30"
+  (click)="closeLimitModal()"
+>
+  <div
+    class="bg-white rounded-2xl shadow-xl w-[320px] p-4 select-none"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Month Navigation -->
+    <div class="flex items-center justify-between mb-4">
+      <span class="text-base font-semibold text-gray-900">
+        {{ monthNames[viewMonth] }}, {{ viewYear }}
+      </span>
+      <div class="flex gap-1.5">
+        <button
+          (click)="prevMonth()"
+          [disabled]="isCurrentMonthView()"
+          class="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center transition"
+          [class.opacity-30]="isCurrentMonthView()"
+          [class.cursor-not-allowed]="isCurrentMonthView()"
+          [class.bg-gray-50]="!isCurrentMonthView()"
+        >
+          <span
+            class="material-symbols-outlined text-gray-500"
+            style="font-size: 16px"
+            >chevron_left</span
+          >
+        </button>
+        <button
+          (click)="nextMonth()"
+          class="w-7 h-7 rounded-full border border-gray-200 bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition"
+        >
+          <span
+            class="material-symbols-outlined text-gray-500"
+            style="font-size: 16px"
+            >chevron_right</span
+          >
+        </button>
+      </div>
+    </div>
+
+    <!-- Day Labels -->
+    <div class="grid grid-cols-7 mb-1">
+      <div
+        *ngFor="let d of dayLabels"
+        class="text-center text-[11px] font-medium text-gray-400 py-1"
+      >
+        {{ d }}
+      </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="grid grid-cols-7 gap-y-0.5">
+      <div
+        *ngFor="let cell of calendarCells"
+        class="flex items-center justify-center"
+        style="aspect-ratio: 1"
+      >
+        <button
+          *ngIf="cell.day"
+          (click)="selectCalendarDay(cell)"
+          [disabled]="cell.isPast || cell.isOtherMonth"
+          class="w-8 h-8 rounded-full text-[13px] flex items-center justify-center transition relative"
+          [class.bg-green-500]="cell.isSelected"
+          [class.text-white]="cell.isSelected"
+          [class.font-semibold]="cell.isToday || cell.isSelected"
+          [class.text-gray-900]="
+            !cell.isSelected && !cell.isPast && !cell.isOtherMonth
+          "
+          [class.text-gray-300]="cell.isPast || cell.isOtherMonth"
+          [class.cursor-not-allowed]="cell.isPast || cell.isOtherMonth"
+        >
+          {{ cell.day }}
+          <span
+            *ngIf="cell.isToday"
+            class="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+            [class.bg-green-500]="!cell.isSelected"
+            [class.bg-white]="cell.isSelected"
+          >
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Time Picker -->
+    <div class="flex items-center gap-2 mt-4 pt-3 border-t border-gray-100">
+      <span class="text-sm text-gray-500 w-8">Time</span>
+      <input
+        type="number"
+        [(ngModel)]="pickerHour"
+        min="1"
+        max="12"
+        (change)="clampPickerHour()"
+        class="w-12 h-9 text-center border border-gray-200 rounded-lg text-sm font-medium text-gray-900 outline-none focus:border-green-500 transition"
+      />
+      <span class="text-base font-medium text-gray-400">:</span>
+      <input
+        type="number"
+        [(ngModel)]="pickerMinute"
+        min="0"
+        max="59"
+        (change)="clampPickerMinute()"
+        class="w-12 h-9 text-center border border-gray-200 rounded-lg text-sm font-medium text-gray-900 outline-none focus:border-green-500 transition"
+      />
+      <select
+        [(ngModel)]="pickerAmPm"
+        class="flex-1 h-9 border border-gray-200 rounded-lg text-sm text-gray-900 px-2 outline-none focus:border-green-500 bg-white transition"
+      >
+        <option value="AM">AM</option>
+        <option value="PM">PM</option>
+      </select>
+    </div>
+
+    <!-- Buttons -->
+    <div class="grid grid-cols-2 gap-2 mt-4">
+      <button
+        (click)="closeLimitModal()"
+        [disabled]="isSubmittingLimit"
+        class="h-10 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="submitLimitTime()"
+        [disabled]="isSubmittingLimit"
+        class="h-10 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition flex items-center justify-center gap-2"
+      >
+        <span
+          *ngIf="isSubmittingLimit"
+          class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+        ></span>
+        {{ isSubmittingLimit ? "Saving..." : "Apply" }}
+      </button>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="selectedCapacityAccount"
+  class="fixed z-[60] bg-white rounded-2xl border border-gray-200 shadow-2xl w-[280px] max-h-[70vh] overflow-y-auto"
+  [style.top.px]="capacityPopupTop"
+  [style.left.px]="capacityPopupLeft"
+>
+  <div class="p-4">
+    <ng-container *ngIf="selectedCapacityAccount.ranges?.length">
+      <div
+        *ngFor="let item of selectedCapacityAccount.ranges"
+        class="flex items-center justify-between py-3 border-b border-dashed border-gray-200 last:border-b-0"
+      >
+        <span class="text-[15px] font-medium text-gray-800">
+          ₹{{ item.minRange | number }} – ₹{{ item.maxRange | number }}
+        </span>
+
+        <span class="text-[15px] font-semibold text-slate-500">
+          Qty {{ item.quantity }}
+        </span>
+        <span class="text-[15px] font-semibold text-slate-500">
+          Avl Qty {{ item.availableQuantity }}
+        </span>
+      </div>
+    </ng-container>
+
+    <div class="flex justify-end pt-3">
+      <button
+        (click)="
+          openCapacity(selectedCapacityAccount, 'UPI'); closeCapacityPopup()
+        "
+        class="text-slate-500 hover:text-blue-600"
+      >
+        <span class="material-symbols-outlined text-[22px]"> edit </span>
+      </button>
+    </div>
   </div>
 </div>

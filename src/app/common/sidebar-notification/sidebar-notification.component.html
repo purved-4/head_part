@@ -173,7 +173,7 @@
 
       <!-- Notifications Content -->
       <!-- <div *ngIf="!isLoading" class="divide-y divide-[var(--color-border)]"> -->
-<div *ngIf="!isLoading">
+      <div *ngIf="!isLoading">
         <ng-container *ngFor="let cat of ['upi', 'bank', 'payout', 'other']">
           <!-- <div *ngIf="shouldShowCategory(cat)" class="py-2"> -->
           <div
@@ -274,9 +274,9 @@
                       <!-- {{
                         notification.createdAt || notification.updatedAt | tz
                       }} -->
-                        {{
-  (notification.createdAt || notification.updatedAt) | tz
-}}
+                      {{
+                        notification.createdAt || notification.updatedAt | tz
+                      }}
                     </span>
                   </div>
                   <div class="flex items-center justify-between mt-1">
@@ -290,18 +290,6 @@
                     <div
                       class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <button
-                        (click)="
-                          openDetailsPopupFromButton(notification, $event)
-                        "
-                        class="p-1 rounded hover:bg-[var(--color-bg-hover)] transition-colors"
-                        title="View Details"
-                      >
-                        <span
-                          class="material-icons text-sm text-[var(--color-primary)]"
-                          >visibility</span
-                        >
-                      </button>
                       <button
                         *ngIf="canRedirectToChat(notification)"
                         (click)="openChatAndMarkRead(notification, $event)"
@@ -343,7 +331,7 @@
 
     <!-- Details Panel -->
     <div
-      class="w-full lg:w-80 border-l border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col transition-all duration-300"
+      class="w-full border-l border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col transition-all duration-300"
       [class.absolute]="showDetailsPanel"
       [class.inset-0]="showDetailsPanel"
       [class.z-20]="showDetailsPanel"
@@ -352,28 +340,39 @@
     >
       <!-- Details Header -->
       <div
-        class="flex-shrink-0 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-bg)] flex items-center justify-between"
+        class="flex-shrink-0 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-bg)] grid grid-cols-3 items-center"
       >
-        <div class="flex items-center gap-2">
+        <!-- Left: Back Arrow -->
+        <div class="flex justify-start">
           <button
             *ngIf="showDetailsPanel"
             (click)="closeDetailsPanel()"
             class="p-1 rounded hover:bg-[var(--color-bg-hover)] transition-colors lg:hidden"
           >
-            <span class="material-icons text-[var(--color-muted)]"
-              >arrow_back</span
-            >
+            <span class="material-icons text-[var(--color-muted)]">
+              arrow_back
+            </span>
           </button>
-          <h3 class="font-semibold text-[var(--color-font)]">
+        </div>
+
+        <!-- Center: Heading -->
+        <div class="flex justify-center">
+          <h3 class="font-semibold text-[var(--color-font)] whitespace-nowrap">
             Notification Details
           </h3>
         </div>
-        <button
-          (click)="closeDetailsPanel()"
-          class="p-1 rounded hover:bg-[var(--color-bg-hover)] transition-colors hidden lg:block"
-        >
-          <span class="material-icons text-[var(--color-muted)]">close</span>
-        </button>
+
+        <!-- Right: Empty space for alignment -->
+        <div class="flex justify-end">
+          <button
+            (click)="closeDetailsPanel()"
+            class="p-1 rounded hover:bg-[var(--color-bg-hover)] transition-colors hidden lg:block"
+          >
+            <span class="material-icons text-[var(--color-muted)]">
+              close
+            </span>
+          </button>
+        </div>
       </div>
 
       <!-- Details Content -->
@@ -424,9 +423,6 @@
               <p class="font-semibold text-[var(--color-font)]">
                 {{ selectedNotification.type || "Notification" }}
               </p>
-              <p class="text-xs text-[var(--color-muted)]">
-                {{ selectedNotification.createdAt | tz }}
-              </p>
             </div>
           </div>
         </div>
@@ -442,25 +438,52 @@
 
         <!-- Details Grid -->
         <div class="space-y-3">
+          <!-- Created At -->
           <div
-            *ngFor="let field of getDisplayFields(selectedNotification)"
             class="flex items-start gap-3 p-2 rounded-lg hover:bg-[var(--color-bg-hover)]"
           >
             <span
               class="material-icons text-[var(--color-muted)] text-sm mt-0.5"
             >
-              {{ getFieldIcon(field.key) }}
+              schedule
             </span>
+
             <div class="flex-1 min-w-0">
               <p
                 class="text-xs text-[var(--color-muted)] uppercase tracking-wide"
               >
-                {{ field.key }}
+                Created At
               </p>
+
               <p
                 class="text-sm text-[var(--color-font)] font-medium break-words"
               >
-                {{ field.value }}
+                {{ selectedNotification.createdAt | tz }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Fund Type -->
+          <div
+            class="flex items-start gap-3 p-2 rounded-lg hover:bg-[var(--color-bg-hover)]"
+          >
+            <span
+              class="material-icons text-[var(--color-muted)] text-sm mt-0.5"
+            >
+              payments
+            </span>
+
+            <div class="flex-1 min-w-0">
+              <p
+                class="text-xs text-[var(--color-muted)] uppercase tracking-wide"
+              >
+                Fund Type
+              </p>
+
+              <p
+                class="text-sm text-[var(--color-font)] font-medium break-words"
+              >
+                {{ selectedNotification.title }}
               </p>
             </div>
           </div>
@@ -547,213 +570,5 @@
   </div>
 </div>
 
-<!-- Popup Modal -->
-<div
-  *ngIf="showDetailsPopup"
-  class="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-fadeIn"
-  (click)="closeDetailsPopup()"
->
-  <div
-    class="bg-[var(--color-surface)] rounded-2xl shadow-2xl w-full max-w-lg sm:max-w-xl h-[90vh] sm:max-h-[90vh] overflow-hidden border border-[var(--color-border)] transform transition-all animate-slideUp flex flex-col"
-    (click)="$event.stopPropagation()"
-  >
-    <!-- Modal Header -->
-    <div
-      class="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--color-border)]"
-      [ngClass]="{
-        'bg-gradient-to-r from-red-500 to-red-600': selectedNotification?.type
-          ?.toUpperCase()
-          .includes('REJECT'),
-        'bg-gradient-to-r from-green-500 to-green-600':
-          selectedNotification?.type?.toUpperCase().includes('APPROVED'),
-        'bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)]':
-          !selectedNotification?.type?.toUpperCase().includes('REJECT') &&
-          !selectedNotification?.type?.toUpperCase().includes('APPROVED'),
-      }"
-    >
-      <div class="flex items-center gap-3 min-w-0">
-        <div
-          class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0"
-        >
-          <span class="material-symbols-outlined text-white text-2xl">
-            {{
-              selectedNotification?.type?.toUpperCase().includes("REJECT")
-                ? "error"
-                : selectedNotification?.type?.toUpperCase().includes("APPROVED")
-                  ? "check_circle"
-                  : "notifications_active"
-            }}
-          </span>
-        </div>
-        <div class="min-w-0">
-          <h3 class="text-base sm:text-lg font-bold text-white truncate">
-            Notification Details
-          </h3>
-          <p class="text-xs sm:text-sm text-white/80 mt-0.5 break-words">
-            {{ selectedNotification?.type || "Notification" }}
-          </p>
-        </div>
-      </div>
 
-      <button
-        (click)="closeDetailsPopup()"
-        class="p-2 rounded-full hover:bg-white/20 transition-colors text-white flex-shrink-0"
-        title="Close"
-      >
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </div>
-
-    <!-- Modal Body -->
-    <div class="flex-1 p-4 sm:p-6 overflow-y-auto min-h-0">
-      <div *ngIf="selectedNotification" class="space-y-6">
-        <!-- Main fields grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <ng-container
-            *ngFor="let item of getDisplayFields(selectedNotification)"
-          >
-            <div
-              class="bg-[var(--color-bg)] p-4 rounded-xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-shadow duration-200"
-            >
-              <div class="flex items-start gap-3">
-                <div
-                  class="flex-shrink-0 w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]"
-                >
-                  <span class="material-symbols-outlined text-sm">
-                    {{ getFieldIcon(item.key) }}
-                  </span>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div
-                    class="text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide mb-1"
-                  >
-                    {{ item.key }}
-                  </div>
-                  <div
-                    class="text-sm font-semibold text-[var(--color-font)] break-words leading-relaxed"
-                  >
-                    <!-- {{ item.value }} -->
-      {{
-  item.key.toLowerCase().includes('date') || 
-  item.key.toLowerCase().includes('time') || 
-  item.key.toLowerCase().includes('created') || 
-  item.key.toLowerCase().includes('updated')
-    ? (item.value | tz)
-    : (item.value !== null && item.value !== undefined ? item.value : '-') 
-}}
-
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ng-container>
-        </div>
-
-        <!-- Bank Funds -->
-        <div *ngIf="selectedNotification.bankFunds">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-1 h-6 bg-blue-500 rounded-full"></div>
-            <span class="material-symbols-outlined text-blue-500"
-              >account_balance</span
-            >
-            <span class="text-sm font-bold text-[var(--color-font)] uppercase">
-              Bank Funds Details
-            </span>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div
-              *ngFor="
-                let field of getDisplayFields(selectedNotification.bankFunds)
-              "
-              class="bg-[var(--color-bg)] p-3 rounded-lg border border-[var(--color-border)]"
-            >
-              <div class="flex items-start gap-2">
-                <span
-                  class="material-symbols-outlined text-blue-500 text-sm mt-0.5"
-                >
-                  account_balance
-                </span>
-                <div class="flex-1 min-w-0">
-                  <div class="text-xs text-[var(--color-muted)]">
-                    {{ field.key }}
-                  </div>
-                  <div
-                    class="text-sm text-[var(--color-font)] font-semibold break-words leading-relaxed"
-                  >
-                    {{ field.value }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- UPI Funds -->
-        <div *ngIf="selectedNotification.upiFunds">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-1 h-6 bg-purple-500 rounded-full"></div>
-            <span class="material-symbols-outlined text-purple-500"
-              >smartphone</span
-            >
-            <span class="text-sm font-bold text-[var(--color-font)] uppercase">
-              UPI Funds Details
-            </span>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div
-              *ngFor="
-                let field of getDisplayFields(selectedNotification.upiFunds)
-              "
-              class="bg-[var(--color-bg)] p-3 rounded-lg border border-[var(--color-border)]"
-            >
-              <div class="flex items-start gap-2">
-                <span
-                  class="material-symbols-outlined text-purple-500 text-sm mt-0.5"
-                >
-                  smartphone
-                </span>
-                <div class="flex-1 min-w-0">
-                  <div class="text-xs text-[var(--color-muted)]">
-                    {{ field.key }}
-                  </div>
-                  <div
-                    class="text-sm text-[var(--color-font)] font-semibold break-words leading-relaxed"
-                  >
-                    {{ field.value }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Footer -->
-    <div
-      class="p-4 border-t border-[var(--color-border)] bg-[var(--color-bg)] flex flex-col sm:flex-row justify-end gap-3"
-    >
-      <button
-        (click)="closeDetailsPopup()"
-        class="w-full sm:w-auto px-6 py-2 rounded-lg bg-[var(--color-bg-hover)] hover:bg-gray-300 text-[var(--color-font)] font-semibold transition-colors flex items-center justify-center gap-2"
-      >
-        <span class="material-symbols-outlined text-sm">close</span>
-        <span>Close</span>
-      </button>
-
-      <button
-        *ngIf="canRedirectToChat(selectedNotification)"
-        (click)="
-          openChatAndMarkRead(selectedNotification, $event); closeDetailsPopup()
-        "
-        class="w-full sm:w-auto px-6 py-2 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold transition-colors flex items-center justify-center gap-2"
-      >
-        <span class="material-symbols-outlined text-sm">chat</span>
-        <span>View Chat</span>
-      </button>
-    </div>
-  </div>
-</div>
 

@@ -18,30 +18,9 @@
   </button>
 
   <div
-  *ngIf="showDropdown"
-  class="
-    fixed
-    left-1/2
-    top-20
-    z-50
-    w-[calc(100vw-1rem)]
-    -translate-x-1/2
-    overflow-hidden
-    rounded-2xl
-    border
-    border-slate-200
-    bg-white
-    shadow-xl
-
-    sm:absolute
-    sm:left-auto
-    sm:right-0
-    sm:top-auto
-    sm:mt-3
-    sm:w-[380px]
-    sm:translate-x-0
-  "
->
+    *ngIf="showDropdown"
+    class="fixed inset-x-4 top-20 z-50 bg-gradient-to-br from-white to-neutral-50 backdrop-blur-xl border border-neutral-200 rounded-3xl shadow-2xl shadow-neutral-400/20 overflow-hidden sm:absolute sm:right-0 sm:inset-x-auto sm:top-auto sm:mt-4 sm:w-[420px]"
+  >
     <!-- Header with primary gradient -->
     <div
       class="bg-gradient-to-br from-primary-500 via-primary-400 to-primary-600 px-6 py-5 relative overflow-hidden"
@@ -431,6 +410,51 @@
             </p>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+  <!-- PAYIN LOGOUT CONFIRMATION -->
+  <div
+    *ngIf="showPayinLogoutModal"
+    class="fixed inset-0 z-[99999] bg-black/60 flex items-center justify-center p-4"
+  >
+    <div
+      class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden"
+    >
+      <!-- Header -->
+      <div class="bg-red-600 text-white px-6 py-4">
+        <h3 class="text-lg font-bold">Logout Confirmation</h3>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6">
+        <p class="text-gray-700 text-sm leading-6">
+          Active Bank / UPI payment assignments are currently present.
+        </p>
+
+        <p class="text-red-600 text-sm font-medium mt-3">
+          If you continue, all active payment assignments will be released and
+          your PayIn data will be lost.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="cancelLogoutWithPayinCleanup()"
+          class="px-5 py-2 rounded-xl border border-gray-300 text-gray-700"
+        >
+          No
+        </button>
+
+        <button
+          type="button"
+          (click)="confirmLogoutWithPayinCleanup()"
+          class="px-5 py-2 rounded-xl bg-red-600 text-white"
+        >
+          Yes, Logout
+        </button>
       </div>
     </div>
   </div>

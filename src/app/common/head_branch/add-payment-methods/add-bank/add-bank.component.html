@@ -46,68 +46,71 @@
       </div>
 
       <!-- Bank Name -->
-      <div class="space-y-1 relative">
+      <div class="space-y-1">
         <label
-          class="text-sm font-semibold text-[var(--color-font)] flex items-center"
+          class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
         >
           <span
             class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
-            >account_balance</span
           >
-          Bank Name
-          <span class="text-[var(--color-danger)] ml-1">*</span>
+            password
+          </span>
+          IFSC Code <span class="text-[var(--color-danger)] ml-1">*</span>
         </label>
+
         <div class="relative">
-          <input
-            type="text"
-            formControlName="bankName"
-            (input)="onBankInputChange()"
-            (focus)="onBankInputFocus()"
-            (blur)="onBankInputBlur()"
-            placeholder="Search or enter bank name..."
-            class="w-full px-3 py-2 pl-10 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] bg-[var(--color-surface)] text-sm"
-          />
+          <!-- Search Icon left -->
           <span
             class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] text-sm"
-            >search</span
           >
-          <button
-            *ngIf="addBankForm.get('bankName')?.value"
-            type="button"
-            (click)="clearBankSelection()"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-danger)]"
+            search
+          </span>
+
+          <input
+            type="text"
+            formControlName="ifscCode"
+            (input)="onIfscInput($event)"
+            class="w-full px-3 py-2 pl-10 pr-10 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] font-mono uppercase text-sm"
+            placeholder="Search IFSC e.g. SBIN0000123"
+            maxlength="11"
+          />
+
+          <!-- Spinner jab fetch ho raha ho -->
+          <span
+            *ngIf="isBankNameFetching"
+            class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-primary)] text-sm animate-spin"
+            >refresh</span
           >
-            <span class="material-symbols-outlined text-sm">close</span>
-          </button>
+
+          <!-- Success tick jab bank name mil jaye -->
+          <span
+            *ngIf="!isBankNameFetching && addBankForm.get('bankName')?.value"
+            class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-success)] text-sm"
+            >check_circle</span
+          >
         </div>
-        <!-- Dropdown -->
-        <div
-          *ngIf="showBankDropdown"
-          class="absolute z-50 w-full mt-1 max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] shadow-lg"
-        >
-          <div
-            *ngFor="let bank of filteredBanks"
-            (mousedown)="selectBank(bank)"
-            class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-sm border-b border-[var(--color-border)]"
-          >
-            {{ bank }}
-          </div>
-          <div
-            *ngIf="filteredBanks.length === 0 && bankSearchTerm.trim()"
-            (mousedown)="selectCustomBank()"
-            class="px-3 py-2 hover:bg-[var(--color-hover)] cursor-pointer text-sm text-[var(--color-primary)] flex items-center gap-1"
-          >
-            <span class="material-symbols-outlined text-sm">add</span>
-            Add "{{ bankSearchTerm }}" as custom bank
-          </div>
+
+        <!-- Character count + hint -->
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-[var(--color-muted)]">
+            {{ addBankForm.get("ifscCode")?.value?.length || 0 }}/11 — Bank name
+            will auto-fill
+          </span>
         </div>
-        <!-- Custom bank indicator -->
+
         <div
-          *ngIf="isCustomBank"
-          class="text-xs text-[var(--color-primary)] mt-1 flex items-center gap-1"
+          *ngIf="
+            addBankForm.get('ifscCode')?.invalid &&
+            addBankForm.get('ifscCode')?.touched
+          "
+          class="text-[var(--color-danger)] text-xs"
         >
-          <span class="material-symbols-outlined text-sm">add_circle</span>
-          Adding custom bank: "{{ addBankForm.get("bankName")?.value }}"
+          <span *ngIf="addBankForm.get('ifscCode')?.errors?.['required']"
+            >IFSC code is required</span
+          >
+          <span *ngIf="addBankForm.get('ifscCode')?.errors?.['pattern']"
+            >Invalid IFSC format (e.g., SBIN0000123)</span
+          >
         </div>
       </div>
     </div>
@@ -148,37 +151,82 @@
           >
         </div>
       </div>
-
-      <div class="space-y-1">
+      <div class="space-y-1 relative">
         <label
-          class="text-sm font-semibold text-[var(--color-font)] mb-1 flex items-center"
+          class="text-sm font-semibold text-[var(--color-font)] flex items-center"
         >
           <span
             class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
-            >password</span
+            >account_balance</span
           >
-          IFSC Code <span class="text-[var(--color-danger)] ml-1">*</span>
+          Bank Name
+          <span class="text-[var(--color-danger)] ml-1">*</span>
         </label>
-        <input
-          type="text"
-          formControlName="ifscCode"
-          (input)="onIfscInput($event)"
-          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] font-mono uppercase text-sm"
-          placeholder="SBIN0000123"
-        />
+        <div class="relative">
+          <input
+            type="text"
+            formControlName="bankName"
+            placeholder="Auto-filled from IFSC..."
+            class="w-full px-3 py-2 pl-10 pr-10 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] bg-[var(--color-surface)] text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+          />
+          <!-- Left icon -->
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] text-sm"
+          >
+            {{ isBankNameFetching ? "sync" : "account_balance" }}
+          </span>
+          <!-- Fetching spinner text -->
+          <span
+            *ngIf="isBankNameFetching"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-muted)] animate-pulse"
+          >
+            Fetching...
+          </span>
+          <!-- Edit button (jab fetched ho aur editable nahi ho) -->
+          <button
+            *ngIf="
+              !isBankNameFetching &&
+              !isBankNameEditable &&
+              addBankForm.get('bankName')?.value
+            "
+            type="button"
+            (click)="enableBankNameEdit()"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-primary)] hover:text-[var(--color-primary-light)]"
+            title="Edit bank name"
+          >
+            <span class="material-symbols-outlined text-sm">edit</span>
+          </button>
+        </div>
+
+        <!-- Info: auto-filled indicator -->
         <div
           *ngIf="
-            addBankForm.get('ifscCode')?.invalid &&
-            addBankForm.get('ifscCode')?.touched
+            !isBankNameEditable &&
+            addBankForm.get('bankName')?.value &&
+            !isBankNameFetching
+          "
+          class="text-xs text-[var(--color-success)] flex items-center gap-1"
+        >
+          <span class="material-symbols-outlined text-sm">check_circle</span>
+          Auto-filled from IFSC. Click edit icon to change.
+        </div>
+        <!-- Editable indicator -->
+        <div
+          *ngIf="isBankNameEditable"
+          class="text-xs text-[var(--color-primary)] flex items-center gap-1"
+        >
+          <span class="material-symbols-outlined text-sm">edit</span>
+          Editing bank name manually
+        </div>
+
+        <div
+          *ngIf="
+            addBankForm.get('bankName')?.invalid &&
+            addBankForm.get('bankName')?.touched
           "
           class="text-[var(--color-danger)] text-xs"
         >
-          <span *ngIf="addBankForm.get('ifscCode')?.errors?.['required']"
-            >IFSC code is required</span
-          >
-          <span *ngIf="addBankForm.get('ifscCode')?.errors?.['pattern']"
-            >Invalid IFSC format (e.g., SBIN0000123)</span
-          >
+          Bank name is required
         </div>
       </div>
     </div>
@@ -302,10 +350,11 @@
       >
         <span
           class="material-symbols-outlined text-[var(--color-primary)] mr-2 text-base"
-          >sync_alt</span
         >
+          sync_alt
+        </span>
         Capacity Range
-        <span class="text-[var(--color-danger)] ml-1">*</span>
+        <span class="text-[var(--color-danger)] ml-1">(optional)</span>
       </label>
 
       <div
@@ -314,25 +363,28 @@
       >
         <input
           type="number"
-          [value]="range.minRange"
+          [value]="range.minRange ?? ''"
           (input)="updateFrom(i, $event)"
-          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-primary)]"
           placeholder="From"
+          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-primary)]"
         />
+
         <input
           type="number"
-          [value]="range.maxRange"
+          [value]="range.maxRange ?? ''"
           (input)="updateTo(i, $event)"
-          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-primary)]"
           placeholder="To"
+          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-primary)]"
         />
+
         <input
           type="number"
-          [value]="range.quantity"
+          [value]="range.quantity ?? ''"
           (input)="updateQuantity(i, $event)"
-          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-primary)]"
           placeholder="Qty"
+          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm bg-[var(--color-surface)] focus:ring-1 focus:ring-[var(--color-primary)]"
         />
+
         <button
           type="button"
           *ngIf="i === capacityRanges.length - 1"
@@ -341,6 +393,7 @@
         >
           +
         </button>
+
         <button
           type="button"
           *ngIf="capacityRanges.length > 1"

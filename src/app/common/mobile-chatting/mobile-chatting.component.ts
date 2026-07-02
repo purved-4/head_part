@@ -1,5 +1,3 @@
-
-
 import {
   Component,
   NgZone,
@@ -884,12 +882,12 @@ private loadResolvedThreadsPaginated(): void {
 
     this.compartServices.getAllQuestions().subscribe({
       next: (res: any) => {
-        console.log("API Response:", res); // DEBUG
+        // console.log("API Response:", res); // DEBUG
 
         this.questions = res?.content || []; //  FIX
         this.filteredQuestions = this.questions.slice(0, 6); //  IMPORTANT
 
-        console.log("Questions:", this.questions); // DEBUG
+        // console.log("Questions:", this.questions); // DEBUG
       },
       error: () => {
         this.questions = [];
@@ -1067,7 +1065,7 @@ private loadResolvedThreadsPaginated(): void {
     }
 
     this.selectedNotification = notification;
-    console.log(this.selectedNotification);
+
     notification.unread = 0;
     this.showParticipants = false;
     this.participantsMap.clear();

@@ -197,7 +197,7 @@ export class FundsService {
 bankSettleId: any,
 payload?: FormData
 ): Observable<any> {
-console.log(payload)
+// console.log(payload)
 
 return this.http.patch<any>(
     `${baseUrl}/funds/payout/${bankSettleId}/accept`,
@@ -261,7 +261,7 @@ return this.http.patch<any>(
 
   // websocket
 
-  broadcast(subAgenId: any, role: any): Observable<any> {
+broadcast(subAgenId: any, role: any): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/funds/webhook/broadcast/${subAgenId}/${role}`)
       .pipe(
@@ -352,8 +352,7 @@ updateProcessingStatus(fundId: any, branchId: any, entityType?: any) {
   }
 
 
-
-  getFundDataWithHeadAndBranchWithIdForOwner(ids: any): Observable<any> {
+getFundDataWithHeadAndBranchWithIdForOwner(ids: any): Observable<any> {
     let params = new HttpParams();
 
     // ids.forEach((id) => {
@@ -518,7 +517,7 @@ updateProcessingStatus(fundId: any, branchId: any, entityType?: any) {
  
 getAllPayoutFundWithEntityAndCpId(
     entityId: any,
-    portalId: any,
+    compartId: any,
     status: any,
     page: number = 0,
     pageSize: number = 10,
@@ -526,35 +525,42 @@ getAllPayoutFundWithEntityAndCpId(
     fromDate?: any,
     toDate?: any,
     role?: any,
-): Observable<any> {
+    isAll?: boolean,
+  ): Observable<any> {
     let params = new HttpParams()
-     .set("page", page.toString())
-     .set("size", pageSize.toString())
-     .set("status", status);
+      .set("page", page.toString())
+      .set("size", pageSize.toString())
+      .set("status", status);
 
     if (category !== null && category !== undefined) {
-     params = params.set("category", category.toString());
+      params = params.set("category", category.toString());
     }
 
     if (fromDate) {
-     params = params.set("fromDate", DateTimeUtil.toUtcISOString(fromDate));
+      params = params.set("fromDate", DateTimeUtil.toUtcISOString(fromDate));
     }
 
     if (toDate) {
-     params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
+      params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
+    }
+    if (isAll) {
+      params = params.set("isAll", true);
+    } else {
+      params = params.set("compartId", compartId);
+      params = params.set("isAll", false); // ✅ isAll=false bhi bhejo
     }
 
     return this.http
-     .get<any>(
-        `${baseUrl}/funds/getPayoutFundWithComPartIdAndEntityId/${portalId}/${entityId}/${role}`,
+      .get<any>(
+        `${baseUrl}/funds/getPayoutFundWithComPartIdAndEntityId/${entityId}/${role}`,
         { params },
-     )
-     .pipe(
+      )
+      .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(error)),
-     );
-}
-getPayinFundWithCpIdAndEntityId(
+      );
+  }
+  getPayinFundWithCpIdAndEntityId(
     entityId: any,
     compartId: any,
     status: any,
@@ -565,42 +571,49 @@ getPayinFundWithCpIdAndEntityId(
     toDate?: any,
     fundType?: any,
     role?: any,
-): Observable<any> {
+    isAll?: boolean,
+  ): Observable<any> {
     if (!compartId) {
-     throw new Error("portalId is required");
+      throw new Error("portalId is required");
     }
 
     let params = new HttpParams()
-     .set("page", page.toString())
-     .set("size", pageSize.toString())
-     .set("status", status);
+      .set("page", page.toString())
+      .set("size", pageSize.toString())
+      .set("status", status);
 
     if (category != null) {
-     params = params.set("category", category.toString());
+      params = params.set("category", category.toString());
     }
 
     if (fromDate) {
-     params = params.set("fromDate", DateTimeUtil.toUtcISOString(fromDate));
+      params = params.set("fromDate", DateTimeUtil.toUtcISOString(fromDate));
     }
 
     if (toDate) {
-     params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
+      params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
     }
 
     if (fundType) {
-     params = params.set("fundType", fundType);
+      params = params.set("fundType", fundType);
+    }
+    if (isAll) {
+      params = params.set("isAll", true);
+    } else {
+      params = params.set("compartId", compartId);
+      params = params.set("isAll", false); // ✅ isAll=false bhi bhejo
     }
 
     return this.http
-     .get<any>(
-        `${baseUrl}/funds/getPayInFundWithEntityIdEntityTypeAndComPartId/${compartId}/${entityId}/${role}`,
+      .get<any>(
+        `${baseUrl}/funds/getPayInFundWithEntityIdEntityTypeAndComPartId/${entityId}/${role}`,
         { params },
-     )
-     .pipe(
+      )
+      .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(error)),
-     );
-}
+      );
+  }
 
  getThreadByEntityIdTypeAndFund(
     entityId: string,

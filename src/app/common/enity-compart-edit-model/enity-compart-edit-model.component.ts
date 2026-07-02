@@ -23,6 +23,13 @@ interface CompartPercentageRow {
   [key: string]: any;
 }
 
+interface NewCompartEntry {
+  compartId: string;
+  compartUsername?: string;
+  fttPercentage: number;
+  payinPercentage: number;
+  payoutPercentage: number;
+}
 @Component({
   selector: "app-enity-compart-edit-model",
   templateUrl: "./enity-compart-edit-model.component.html",
@@ -50,7 +57,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
   availableComparts: any[] = [];
   allocatedPercentages: CompartPercentageRow[] = [];
   currentEntityType: any;
-
+  newCompartEntries: NewCompartEntry[] = [];
   // NEW: to show/hide parent comparts view
   showParentCompartsView = false;
 
@@ -87,17 +94,24 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
         parentCurrency: this.entityData.parentCurrency ?? "",
       });
     }
+    this.newCompartEntries = [];
+    this.allocatedPercentages = [];
+    this.availableComparts = [];
+    this.loadAllData();
   }
 
   buildForm(): void {
     this.editForm = this.fb.group({
       username: ["", Validators.required],
       info: [""],
-      compartId: ["", Validators.required],
+      parentCurrency: [""],
+
+      // 🔴 REQUIRED (missing in your code)
+      compartId: [""],
+
       payinPercentage: [0, [Validators.min(0)]],
       fttPercentage: [0, [Validators.min(0)]],
       payoutPercentage: [0, [Validators.min(0)]],
-      parentCurrency: [""],
     });
   }
 
@@ -298,12 +312,13 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     }
 
     // newly added compart from form
-    const selectedId = this.editForm?.value?.compartId;
-    if (selectedId) {
-      payload[selectedId] = {
-        payinPercentage: Number(this.editForm.value.payinPercentage ?? 0),
-        payoutPercentage: Number(this.editForm.value.payoutPercentage ?? 0),
-        fttPercentage: Number(this.editForm.value.fttPercentage ?? 0),
+
+    for (const entry of this.newCompartEntries) {
+      if (!entry.compartId) continue;
+      payload[entry.compartId] = {
+        payinPercentage: entry.payinPercentage,
+        payoutPercentage: entry.payoutPercentage,
+        fttPercentage: entry.fttPercentage,
       };
     }
 
@@ -333,6 +348,8 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     }
 
     this.save.emit(payload);
+    this.save.emit(payload);
+    this.newCompartEntries = []; // YE ADD KARO
   }
 
   trackByIndex(index: number): number {
@@ -371,5 +388,89 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
   isFieldInvalid(fieldName: string): boolean {
     const field = this.editForm.get(fieldName);
     return !!(field && field.invalid && field.touched);
+  }
+  addCompartEntry(): void {
+
+
+    const compartId = String(
+      this.editForm.get("compartId")?.value ?? "",
+    ).trim();
+
+
+
+    if (!compartId) return;
+
+    const alreadyAdded = this.newCompartEntries.some(
+      (e) => String(e.compartId) === compartId,
+    );
+
+    const alreadyAllocated = this.allocatedPercentages.some(
+      (e) => String(e.compartId) === compartId,
+    );
+
+    if (alreadyAdded || alreadyAllocated) return;
+
+    const found = this.parentComparts.find(
+      (c) => String(this.getCompartId(c)) === compartId,
+    );
+
+    this.newCompartEntries = [
+      ...this.newCompartEntries,
+      {
+        compartId,
+        compartUsername: found ? this.getCompartName(found) : compartId,
+        fttPercentage: Number(this.editForm.get("fttPercentage")?.value ?? 0),
+        payinPercentage: Number(
+          this.editForm.get("payinPercentage")?.value ?? 0,
+        ),
+        payoutPercentage: Number(
+          this.editForm.get("payoutPercentage")?.value ?? 0,
+        ),
+      },
+    ];
+
+    // reset form safely
+    this.editForm.patchValue({
+      compartId: "",
+      fttPercentage: 0,
+      payinPercentage: 0,
+      payoutPercentage: 0,
+    });
+  }
+
+  removeNewEntry(compartId: string): void {
+    compartId = String(compartId);
+
+    this.newCompartEntries = this.newCompartEntries.filter(
+      (e) => String(e.compartId) !== compartId,
+    );
+
+    const restored = this.parentComparts.find(
+      (c) => String(this.getCompartId(c)) === compartId,
+    );
+
+    if (restored) {
+      const exists = this.availableComparts.some(
+        (c) => String(this.getCompartId(c)) === compartId,
+      );
+
+      if (!exists) {
+        this.availableComparts = [...this.availableComparts, restored];
+      }
+    }
+  }
+
+  onNewEntryChange(
+    compartId: string,
+    field: "fttPercentage" | "payinPercentage" | "payoutPercentage",
+    value: any,
+  ): void {
+    compartId = String(compartId);
+
+    this.newCompartEntries = this.newCompartEntries.map((entry) =>
+      String(entry.compartId) === compartId
+        ? { ...entry, [field]: Number(value ?? 0) }
+        : entry,
+    );
   }
 }

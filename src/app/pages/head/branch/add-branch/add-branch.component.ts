@@ -249,11 +249,6 @@ export class AddBranchComponent implements OnInit {
 
     const compartIds: string[] = this.chiefForm.get("compartIds")?.value || [];
 
-    if (compartIds.length === 0) {
-      this.snackService.show("Please select at least one compart", false, 3000);
-      return;
-    }
-
     if (
       this.chiefForm.get("username")?.invalid ||
       this.chiefForm.get("userEmail")?.invalid ||
@@ -318,7 +313,6 @@ export class AddBranchComponent implements OnInit {
       createdById: this.currentUserId,
       createdByType: this.role,
     };
-
     this.loading = true;
 
     this.branchService.addBranch(payload).subscribe({

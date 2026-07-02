@@ -26,7 +26,7 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
   @Input() portalId!: string;
   @Input() bankId!: any;
 
-  @Input() mode!: "UPI" | "BANK";
+  @Input() mode!: "UPI" | "BANK" | "ERC20" | "TRC20" | "SPL" | "BEP20" | "OMNI";
   @Input() payinId!: string;
 
   @Output() close = new EventEmitter<void>();
@@ -35,55 +35,49 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
   limitAmount: number | null = null;
   isLoading: boolean = false;
   isEditing: boolean = false;
-
+  private cryptoModes = ["ERC20", "TRC20", "SPL", "BEP20", "OMNI"];
   constructor(
     private bankService: BankService,
     private upiService: UpiService,
     private snackBar: SnackbarService,
   ) {}
 
-  ngOnInit() {
-    this.fetchCapacity();
-  }
+  ngOnInit() {}
 
   // ================= AUTO FETCH =================
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.show && this.entityId && this.payinId) {
+    if (
+      this.show &&
+      this.entityId &&
+      this.payinId &&
+      (changes["show"]?.currentValue === true ||
+        changes["payinId"] ||
+        changes["mode"])
+    ) {
       this.fetchCapacity();
     }
   }
 
   // ================= FETCH =================
   fetchCapacity() {
-    console.log(" INPUTS:", {
-      entityId: this.entityId,
-      portalId: this.portalId,
-      payinId: this.payinId,
-      mode: this.mode,
-      entityType: this.entityType,
-    });
-
-    if (!this.entityId || !this.payinId) {
-      return;
-    }
+    if (!this.entityId || !this.payinId) return;
 
     this.isLoading = true;
 
-    if (this.mode === "BANK") {
+    const isCrypto = this.cryptoModes.includes(this.mode);
+
+    if (this.mode === "BANK" || isCrypto) {
       this.bankService
         .getPayinCapacity(
           this.entityType,
           this.entityId,
-          // this.portalId,
-          this.mode,
+          this.mode as any,
           this.payinId,
         )
         .subscribe({
           next: (res: any) => {
             this.capacityRanges = res.capacities || [];
-
             this.limitAmount = res.limitAmount || null;
-
             this.isLoading = false;
           },
           error: (err) => {
@@ -106,9 +100,7 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
         .subscribe({
           next: (res: any) => {
             this.capacityRanges = res.capacities || [];
-
             this.limitAmount = res.limitAmount || null;
-
             this.isLoading = false;
           },
           error: (err) => {
@@ -178,15 +170,15 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
       return;
     }
 
+    const isCrypto = this.cryptoModes.includes(this.mode);
+
     const payload = {
       entityType: this.entityType,
       entityId: this.entityId,
       portalId: this.portalId,
       mode: this.mode,
       payinId: this.payinId,
-
       limitAmount: Number(this.limitAmount),
-
       ranges: this.capacityRanges.map((r) => ({
         minRange: Number(r.minRange),
         maxRange: Number(r.maxRange),
@@ -196,13 +188,12 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
 
     this.isLoading = true;
 
-    if (this.mode === "BANK") {
+    // ================= BANK + CRYPTO =================
+    if (this.mode === "BANK" || isCrypto) {
       this.bankService.addPayinCapacity(payload).subscribe({
         next: () => {
           this.isLoading = false;
           this.isEditing = false;
-
-          //  refresh after save
           this.fetchCapacity();
         },
         error: (err: any) => {
@@ -213,13 +204,13 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
           );
         },
       });
+
+      // ================= UPI =================
     } else if (this.mode === "UPI") {
       this.upiService.addPayinCapacity(payload).subscribe({
         next: () => {
           this.isLoading = false;
           this.isEditing = false;
-
-          //  refresh after save
           this.fetchCapacity();
         },
         error: (err: any) => {

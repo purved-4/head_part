@@ -48,7 +48,7 @@
             Select Currency
           </label>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-3 gap-4">
             <!-- INR -->
             <div
               (click)="selectCurrency('INR')"
@@ -111,6 +111,37 @@
                     US Dollar
                   </h3>
                   <p class="text-xs text-[var(--color-muted)]">USD</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- USDT -->
+            <div
+              (click)="selectCurrency('USDT')"
+              class="cursor-pointer rounded-[var(--radius-lg)] border p-4 transition-all"
+              [ngClass]="
+                selectedCurrency === 'USDT'
+                  ? 'border-[var(--color-accent)] bg-[var(--color-hover)] shadow-[var(--shadow-sm)]'
+                  : 'border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)]'
+              "
+            >
+              <div class="flex items-center gap-3">
+                <input
+                  type="radio"
+                  [checked]="selectedCurrency === 'USDT'"
+                  class="w-4 h-4 accent-[var(--color-accent)]"
+                  readonly
+                />
+
+                <span
+                  class="material-symbols-outlined text-[var(--color-accent)]"
+                >
+                  toll
+                </span>
+
+                <div>
+                  <h3 class="font-semibold text-[var(--color-font)]">Tether</h3>
+                  <p class="text-xs text-[var(--color-muted)]">USDT</p>
                 </div>
               </div>
             </div>
@@ -271,6 +302,164 @@
             </label>
           </div>
 
+          <!-- USDT MODES (Blockchain Networks) -->
+          <div
+            *ngIf="
+              selectedCurrency === 'USDT' &&
+              (entityType === 'CHIEF' || entityType === 'PORTAL')
+            "
+          >
+            <label
+              class="block mb-2 text-sm font-medium text-[var(--color-font)]"
+            >
+              Blockchain Networks
+            </label>
+
+            <p class="mb-3 text-xs text-[var(--color-muted)]">
+              Select the supported USDT transfer networks
+            </p>
+
+            <div class="grid grid-cols-2 gap-3">
+              <!-- ERC20 -->
+              <label
+                class="flex items-center gap-3 p-3 rounded-[var(--radius-md)] border cursor-pointer transition-all"
+                [ngClass]="
+                  selectedModes.includes('ERC20')
+                    ? 'border-[var(--color-accent)] bg-[var(--color-hover)]'
+                    : 'border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)]'
+                "
+              >
+                <input
+                  type="checkbox"
+                  (change)="toggleMode('ERC20')"
+                  [checked]="selectedModes.includes('ERC20')"
+                  class="w-4 h-4 accent-[var(--color-accent)]"
+                />
+                <span
+                  class="material-symbols-outlined text-[var(--color-accent)]"
+                >
+                  hub
+                </span>
+                <div>
+                  <span class="text-[var(--color-font)] font-medium"
+                    >ERC20</span
+                  >
+                  <p class="text-xs text-[var(--color-muted)]">Ethereum</p>
+                </div>
+              </label>
+
+              <!-- BEP20 -->
+              <label
+                class="flex items-center gap-3 p-3 rounded-[var(--radius-md)] border cursor-pointer transition-all"
+                [ngClass]="
+                  selectedModes.includes('BEP20')
+                    ? 'border-[var(--color-accent)] bg-[var(--color-hover)]'
+                    : 'border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)]'
+                "
+              >
+                <input
+                  type="checkbox"
+                  (change)="toggleMode('BEP20')"
+                  [checked]="selectedModes.includes('BEP20')"
+                  class="w-4 h-4 accent-[var(--color-accent)]"
+                />
+                <span
+                  class="material-symbols-outlined text-[var(--color-accent)]"
+                >
+                  lan
+                </span>
+                <div>
+                  <span class="text-[var(--color-font)] font-medium"
+                    >BEP20</span
+                  >
+                  <p class="text-xs text-[var(--color-muted)]">
+                    BNB Smart Chain
+                  </p>
+                </div>
+              </label>
+
+              <!-- TRC20 -->
+              <label
+                class="flex items-center gap-3 p-3 rounded-[var(--radius-md)] border cursor-pointer transition-all"
+                [ngClass]="
+                  selectedModes.includes('TRC20')
+                    ? 'border-[var(--color-accent)] bg-[var(--color-hover)]'
+                    : 'border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)]'
+                "
+              >
+                <input
+                  type="checkbox"
+                  (change)="toggleMode('TRC20')"
+                  [checked]="selectedModes.includes('TRC20')"
+                  class="w-4 h-4 accent-[var(--color-accent)]"
+                />
+                <span
+                  class="material-symbols-outlined text-[var(--color-accent)]"
+                >
+                  settings_ethernet
+                </span>
+                <div>
+                  <span class="text-[var(--color-font)] font-medium"
+                    >TRC20</span
+                  >
+                  <p class="text-xs text-[var(--color-muted)]">TRON</p>
+                </div>
+              </label>
+
+              <!-- OMNI -->
+              <label
+                class="flex items-center gap-3 p-3 rounded-[var(--radius-md)] border cursor-pointer transition-all"
+                [ngClass]="
+                  selectedModes.includes('OMNI')
+                    ? 'border-[var(--color-accent)] bg-[var(--color-hover)]'
+                    : 'border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)]'
+                "
+              >
+                <input
+                  type="checkbox"
+                  (change)="toggleMode('OMNI')"
+                  [checked]="selectedModes.includes('OMNI')"
+                  class="w-4 h-4 accent-[var(--color-accent)]"
+                />
+                <span
+                  class="material-symbols-outlined text-[var(--color-accent)]"
+                >
+                  currency_bitcoin
+                </span>
+                <div>
+                  <span class="text-[var(--color-font)] font-medium">OMNI</span>
+                  <p class="text-xs text-[var(--color-muted)]">Bitcoin Omni</p>
+                </div>
+              </label>
+
+              <!-- SPL -->
+              <label
+                class="flex items-center gap-3 p-3 rounded-[var(--radius-md)] border cursor-pointer transition-all col-span-2"
+                [ngClass]="
+                  selectedModes.includes('SPL')
+                    ? 'border-[var(--color-accent)] bg-[var(--color-hover)]'
+                    : 'border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)]'
+                "
+              >
+                <input
+                  type="checkbox"
+                  (change)="toggleMode('SPL')"
+                  [checked]="selectedModes.includes('SPL')"
+                  class="w-4 h-4 accent-[var(--color-accent)]"
+                />
+                <span
+                  class="material-symbols-outlined text-[var(--color-accent)]"
+                >
+                  token
+                </span>
+                <div>
+                  <span class="text-[var(--color-font)] font-medium">SPL</span>
+                  <p class="text-xs text-[var(--color-muted)]">Solana</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
           <!-- Existing -->
           <div
             *ngIf="getExistingDataForCurrency(selectedCurrency)"
@@ -319,14 +508,12 @@
         </button>
 
         <button
-          appButtonLoader
+          appButtonLoader="Adding"
           type="button"
           (click)="submit()"
           class="flex-1 py-2.5 rounded-[var(--radius-md)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-font)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span class="material-symbols-outlined">
-            {{ getExistingDataForCurrency(selectedCurrency) }}
-          </span>
+          <span class="material-symbols-outlined"> add </span>
 
           Add
         </button>
@@ -334,3 +521,4 @@
     </div>
   </div>
 </form>
+

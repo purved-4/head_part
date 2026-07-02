@@ -1,3 +1,5 @@
+
+
 import { ThemeService } from './../../../../theme/theme.service';
 import {
   Component,
@@ -119,13 +121,6 @@ export class HeadNavSidebarComponent implements OnInit {
     },
 
     {
-      label: "Limits",
-      route: "/head/limit",
-      icon: "credit_card",
-      children: [{ label: "Limits", route: "/head/limit" }],
-    },
-
-    {
       label: "Branch Management",
       route: "/head/branch",
       icon: "business",
@@ -173,19 +168,24 @@ export class HeadNavSidebarComponent implements OnInit {
     },
     {
   label: "Settings",
-  route: "/head/override-currency-management", 
+  route: "/head/override-currency-management",
   icon: "settings",
   children: [
-     {
-         label: "User Profile",
-         route: "/head/sharedUserProfile",
-        },
+    {
+      label: "User Profile",
+      route: "/head/sharedUserProfile",
+      icon: "person"
+    },
     {
       label: "Currency Management",
-      route: "/head/override-currency-management", 
+      route: "/head/override-currency-management",
+      icon: "currency_exchange"
     },
-
-   
+    {
+      label: "Limits",
+      route: "/head/limit",
+      icon: "credit_card"
+    },
   ],
 },
  
@@ -522,10 +522,7 @@ export class HeadNavSidebarComponent implements OnInit {
       // Chats
       "/head/chat": "chat",
       "/head/chat/head": "chat",
-      "/head/chat/branch": "forum",
-
-      // Limits
-      "/head/limit": "credit_card",
+      "/head/chat/branch": "forum",      
 
       // Branch
       "/head/branch/add": "add_business",
@@ -537,9 +534,14 @@ export class HeadNavSidebarComponent implements OnInit {
       "/head/reports/funds-report": "pie_chart",
       "/head/reports/work-time": "schedule",
 
+      // Settings
+      "/head/sharedUserProfile": "person",
+      "/head/override-currency-management": "currency_exchange",
+      "/head/limit": "credit_card",
+
       // Approved Funds
        "/head/reports/funds/payin/bank": "account_balance",
-      "/head/reports/funds/payin/payout": "payment",
+      "/head/reports/funds/payout/payout": "payment",
 
      
     };

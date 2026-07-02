@@ -130,4 +130,13 @@ export class HeadService {
   toggleDashbaordPayin(headId: string): Observable<any> {
     return this.http.patch<any>(`${baseUrl}/head/${headId}/toggle-payin`, {});
   }
+
+  getHeadByChiefId(id: any): Observable<any[]> {
+    return this.http
+      .get<any[]>(`${baseUrl}/head/getHeadByChiefId/${id}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
 }

@@ -198,7 +198,7 @@
               <button
                 type="submit"
                 [disabled]="
-                  loading || chiefForm.get('compartIds')?.value?.length === 0
+                  loading
                 "
                 class="flex-1 px-4 py-2.5 bg-[var(--color-primary)] text-white font-medium rounded-[var(--radius-md)] text-sm hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-[var(--shadow-md)] hover:shadow-lg flex items-center justify-center gap-1.5"
               >
@@ -487,3 +487,9 @@
   (closed)="closeModal()"
 >
 </app-website-percentage-model>
+
+
+
+
+
+

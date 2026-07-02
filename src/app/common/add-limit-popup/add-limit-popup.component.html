@@ -1,162 +1,163 @@
-<div
-  class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-bg)]/70 backdrop-blur-sm"
->
-  <div
-    class="w-full max-w-md mx-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] overflow-hidden"
-  >
-    <!-- Header -->
-    <div
-      class="px-6 py-4 bg-[var(--color-primary)] flex items-center justify-between"
-    >
-      <h2 class="text-lg font-medium text-white">Add New Limit</h2>
 
-      <div class="grid grid-cols-3 gap-2 text-center">
-        <div>
-          <p class="text-[10px] uppercase tracking-wide text-white/70">Given</p>
-          <p class="text-sm font-medium text-white">
-            {{ totalGiven | number: "1.0-0" }}
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+  <div class="w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+    <!-- Header with blue gradient -->
+    <div class="relative bg-gradient-to-br from-blue-600 to-blue-800 px-5 py-4">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+          <span class="material-symbols-outlined text-2xl">add_card</span>
+          Add New Limit
+        </h2>
+        <button
+          type="button"
+          (click)="onCancel()"
+          class="text-white/70 hover:text-white hover:bg-white/10 rounded-full p-1.5 transition-all duration-200"
+        >
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <!-- Summary Stats with blue-tinted glassmorphism -->
+      <div class="grid grid-cols-3 gap-2 rounded-xl bg-white/15 backdrop-blur-sm px-3 py-2.5 border border-white/10 shadow-inner">
+        <div class="text-center">
+          <p class="text-[10px] uppercase tracking-wider text-white/80 flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">payments</span> Given
+          </p>
+          <p class="text-sm font-bold text-white drop-shadow-sm">
+            {{ totalGiven | number:'1.0-0' }}
           </p>
         </div>
-
-        <div>
-          <p class="text-[10px] uppercase tracking-wide text-white/70">
-            Reduced
+        <div class="text-center border-x border-white/20">
+          <p class="text-[10px] uppercase tracking-wider text-white/80 flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">trending_down</span> Reduced
           </p>
-          <p class="text-sm font-medium text-white">
-            {{ alreadyReduced | number: "1.0-0" }}
+          <p class="text-sm font-bold text-white drop-shadow-sm">
+            {{ alreadyReduced | number:'1.0-0' }}
           </p>
         </div>
-
-        <div>
-          <p class="text-[10px] uppercase tracking-wide text-white/70">
-            Recoverable
+        <div class="text-center">
+          <p class="text-[10px] uppercase tracking-wider text-white/80 flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">restore</span> Recoverable
           </p>
-          <p class="text-sm font-medium text-green-200">
-            {{ netRecoverable | number: "1.0-0" }}
+          <p class="text-sm font-bold text-blue-200 drop-shadow-sm">
+            {{ netRecoverable | number:'1.0-0' }}
           </p>
         </div>
       </div>
     </div>
 
     <!-- Content -->
-    <div class="px-6 py-6">
-      <!-- Self Limit -->
-      <div
-        class="mb-4 p-4 bg-[var(--color-hover)] border border-[var(--color-border)] rounded-[var(--radius-md)]"
-      >
-        <div class="flex items-center gap-2 mb-1">
-          <span
-            class="material-symbols-outlined text-lg text-[var(--color-muted)]"
-          >
-            person
-          </span>
-          <p class="text-sm text-[var(--color-muted)]">Self Limit</p>
+    <div class="p-5 bg-gray-50/50 dark:bg-gray-800/30">
+      <!-- Limit Cards - Blue accent updates -->
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <div class="p-4 rounded-xl bg-white dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-1.5 mb-1.5">
+            <span class="material-symbols-outlined text-sm text-blue-500 dark:text-blue-400">person</span>
+            <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Self Limit</span>
+          </div>
+          <p class="text-xl font-bold text-gray-800 dark:text-white tracking-tight">
+            {{ selfLimitRemainingAmount || 0 }}
+          </p>
+          <div class="mt-1 w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div class="h-full w-3/4 bg-blue-500 rounded-full"></div>
+          </div>
         </div>
-
-        <p class="text-2xl font-semibold text-[var(--color-font)]">
-          {{ selfLimitRemainingAmount || 0 }}
-        </p>
-      </div>
-
-      <!-- Current Limit -->
-      <div
-        class="mb-6 p-4 bg-[var(--color-hover)] border border-[var(--color-border)] rounded-[var(--radius-md)]"
-      >
-        <div class="flex items-center gap-2 mb-1">
-          <span
-            class="material-symbols-outlined text-lg text-[var(--color-muted)]"
-          >
-            account_balance_wallet
-          </span>
-          <p class="text-sm text-[var(--color-muted)]">Current Limit</p>
+        <div class="p-4 rounded-xl bg-white dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-1.5 mb-1.5">
+            <span class="material-symbols-outlined text-sm text-cyan-500 dark:text-cyan-400">account_balance_wallet</span>
+            <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Current Limit</span>
+          </div>
+          <p class="text-xl font-bold text-gray-800 dark:text-white tracking-tight">
+            {{ limitRemainingAmount || 0 }}
+          </p>
+          <div class="mt-1 w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div class="h-full w-1/2 bg-cyan-500 rounded-full"></div>
+          </div>
         </div>
-
-        <p class="text-2xl font-semibold text-[var(--color-font)]">
-          {{ limitRemainingAmount || 0 }}
-        </p>
       </div>
 
       <!-- Form -->
       <form (ngSubmit)="addLimit()" #limitForm="ngForm">
-        <!-- Amount -->
-        <div class="mb-6">
-          <label
-            for="transactionAmount"
-            class="flex items-center gap-1.5 mb-2 text-sm font-medium text-[var(--color-font)]"
-          >
-            <span class="material-symbols-outlined text-base"> payments </span>
+        <!-- Amount Input - Blue focus ring -->
+        <div class="mb-4">
+          <label class="block mb-1.5 text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[18px] text-blue-500">currency_rupee</span>
             Amount
           </label>
-
-          <input
-            type="number"
-            id="transactionAmount"
-            [(ngModel)]="transactionAmount"
-            name="transactionAmount"
-            placeholder="Enter Amount"
-            step="0.01"
-            min="0"
-            required
-            class="w-full px-4 py-3 bg-[var(--color-bg)] text-[var(--color-font)] placeholder:text-[var(--color-muted)] border border-[var(--color-border)] rounded-[var(--radius-md)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-light)] focus:border-[var(--color-primary)] transition-all"
-          />
-
-          <p class="mt-2 text-xs text-[var(--color-muted)]">
-            Please enter a valid Amount greater than 0
+          <div class="relative group">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 font-medium text-lg">₹</span>
+            <input
+              type="number"
+              [(ngModel)]="transactionAmount"
+              name="transactionAmount"
+              placeholder="Enter amount"
+              required
+              min="0"
+              class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600
+                     bg-white dark:bg-gray-800 text-gray-800 dark:text-white
+                     focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                     outline-none transition-all duration-200 shadow-sm hover:shadow
+                     placeholder:text-gray-400 dark:placeholder:text-gray-500"
+            />
+            <div class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+              INR
+            </div>
+          </div>
+          <p class="mt-1 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">info</span>
+            Enter a positive amount to add to your limit.
           </p>
         </div>
 
-        <!-- Error -->
+        <!-- Error Message -->
         <div
           *ngIf="errorMessage"
-          class="mb-4 p-3 bg-[var(--color-danger)]/10 border border-[var(--color-danger)] rounded-[var(--radius-md)] flex items-center gap-2"
+          class="mb-3 flex items-center gap-2.5 rounded-xl border border-red-400/40 bg-red-50 dark:bg-red-900/20 px-4 py-2.5 shadow-sm"
         >
-          <span
-            class="material-symbols-outlined text-base text-[var(--color-danger)]"
-          >
-            error
-          </span>
-          <p class="text-sm text-[var(--color-danger)]">
-            {{ errorMessage }}
-          </p>
+          <span class="material-symbols-outlined text-red-500 dark:text-red-400">error_outline</span>
+          <span class="text-sm text-red-700 dark:text-red-300 font-medium">{{ errorMessage }}</span>
         </div>
 
-        <!-- Success -->
+        <!-- Success Message -->
         <div
           *ngIf="successMessage"
-          class="mb-4 p-3 bg-[var(--color-success)]/10 border border-[var(--color-success)] rounded-[var(--radius-md)] flex items-center gap-2"
+          class="mb-3 flex items-center gap-2.5 rounded-xl border border-green-400/40 bg-green-50 dark:bg-green-900/20 px-4 py-2.5 shadow-sm"
         >
-          <span
-            class="material-symbols-outlined text-base text-[var(--color-success)]"
-          >
-            check_circle
-          </span>
-          <p class="text-sm text-[var(--color-success)]">
-            {{ successMessage }}
-          </p>
+          <span class="material-symbols-outlined text-green-500 dark:text-green-400">check_circle</span>
+          <span class="text-sm text-green-700 dark:text-green-300 font-medium">{{ successMessage }}</span>
         </div>
 
-        <!-- Buttons -->
-        <div class="flex gap-3">
+        <!-- Footer Actions - Blue primary button -->
+        <div class="flex flex-wrap gap-2.5 border-t border-gray-200/70 dark:border-gray-700/70 pt-4 mt-2">
           <button
             type="button"
             (click)="onCancel()"
-            class="flex-1 px-4 py-3 text-sm font-medium text-[var(--color-font)] bg-[var(--color-hover)] border border-[var(--color-border)] rounded-[var(--radius-md)] hover:bg-[var(--color-border)] transition-all"
+            class="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600
+                   text-sm font-medium text-gray-600 dark:text-gray-300
+                   hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200
+                   flex items-center gap-1.5"
           >
+            <span class="material-symbols-outlined text-[18px]">close</span>
             Cancel
           </button>
-
           <button
             type="button"
             (click)="removeLimit()"
-            class="flex-1 px-4 py-3 text-sm font-medium text-white bg-red-600 rounded-[var(--radius-md)] hover:bg-red-700 transition-all"
+            class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-medium
+                   transition-all duration-200 shadow-sm hover:shadow-md
+                   flex items-center gap-1.5"
           >
-            Remove Limit
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+            Remove
           </button>
-
           <button
             type="submit"
-            class="flex-1 px-4 py-3 text-sm font-medium text-[var(--color-font)] bg-[var(--color-primary)] rounded-[var(--radius-md)] hover:bg-[var(--color-primary-dark)] transition-all"
+            class="flex-1 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700
+                   hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold
+                   transition-all duration-200 shadow-sm hover:shadow-md
+                   flex items-center justify-center gap-1.5"
           >
+            <span class="material-symbols-outlined text-[18px]">add</span>
             Add Limit
           </button>
         </div>
@@ -164,3 +165,4 @@
     </div>
   </div>
 </div>
+```

@@ -1,13 +1,12 @@
-
 import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { FundsService } from "../../pages/services/funds.service";
-import { UserStateService } from "../../store/user-state.service";
-import { MultimediaService } from "../../pages/services/multimedia.service";
+import { FundsService } from "../../../pages/services/funds.service";
+import { UserStateService } from "../../../store/user-state.service";
+import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { catchError, of, Subscription } from "rxjs";
-import { DateTimeUtil } from "../../utils/date-time.utils";
-import { SnackbarService } from "../snackbar/snackbar.service";
-import { ComPartService } from "../../pages/services/com-part.service";
+import { DateTimeUtil } from "../../../utils/date-time.utils";
+import { SnackbarService } from "../../snackbar/snackbar.service";
+import { ComPartService } from "../../../pages/services/com-part.service";
 
 @Component({
   selector: "app-hb-payout-report",
@@ -41,23 +40,23 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   allRejectedPayouts: any[] = [];
   // Payout filters
   payoutSearchQuery = "";
-  payoutPortalFilter = "";
+  payoutcomPartFilter = "";
   payoutDateFrom = "";
   payoutDateTo = "";
-  payoutPortals: any[] = [];
+  payoutcomParts: any[] = [];
 
   // ========== PAGINATION (client‑side) ==========
 
   payoutApprovedPage = 0;
   payoutApprovedPageSize = 10;
   payoutApprovedPageSizes = [10, 20, 25, 50];
-  portalOptions: { id: string; domain: string }[] = [];
+  comPartOptions: { id: string; domain: string }[] = [];
   // ========== FILTER DROPDOWN STATE ==========
   filterDropdownOpen: string | null = null;
 
-  // ========== CUSTOM PORTAL DROPDOWN STATE ==========
+  // ========== CUSTOM comPart DROPDOWN STATE ==========
 
-  payoutPortalDropdownOpen = false;
+  payoutcomPartDropdownOpen = false;
 
   // ========== MODAL & LIGHTBOX STATE ==========
   showRecordModal = false;
@@ -66,7 +65,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
   // Colors based on role (already in template via data-role)
   colors: any = null;
-  headPortals: any[] = [];
+  headcomParts: any[] = [];
   constructor(
     private route: ActivatedRoute,
     private fundService: FundsService,
@@ -87,8 +86,9 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
     this.setColorsByRole();
 
-    //  load portals
+    //  load comParts
     this.loadAllComparts();
+    this.fetchAllRejectedPayouts();
 
     this.routeSub = this.route.paramMap.subscribe((params) => {
       const type = params.get("type") as "payout" | null;
@@ -116,15 +116,15 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     apiCall$
       .pipe(
         catchError(() => {
-          this.portalOptions = [];
+          this.comPartOptions = [];
 
-          this.payoutPortals = [];
-          this.snackbar.show("Failed to load portals", false);
+          this.payoutcomParts = [];
+          this.snackbar.show("Failed to load comParts", false);
           return of([]);
         }),
       )
       .subscribe((response: any) => {
-        const portalsData = Array.isArray(response?.data)
+        const comPartsData = Array.isArray(response?.data)
           ? response.data
           : Array.isArray(response)
             ? response
@@ -132,7 +132,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
         const uniqueMap = new Map<string, any>();
 
-        portalsData.forEach((item: any) => {
+        comPartsData.forEach((item: any) => {
           if (item?.compartId && item?.compartUsername) {
             uniqueMap.set(item.compartId, {
               id: item.compartId,
@@ -141,12 +141,15 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
           }
         });
 
-        const portals = Array.from(uniqueMap.values());
+        const comParts = [
+          { id: "", domain: "All" }, // ✅ yeh add karo
+          ...Array.from(uniqueMap.values()),
+        ];
 
         //  single source of truth
-        this.portalOptions = portals;
+        this.comPartOptions = comParts;
 
-        this.payoutPortals = portals;
+        this.payoutcomParts = comParts;
       });
   }
   formatDateWithFixedTime(dateStr: string, type: "start" | "end"): string {
@@ -175,11 +178,12 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
           new Date(new Date(this.payoutDateTo).setHours(23, 59, 59, 999)),
         )
       : undefined;
+    const isAll = !this.payoutcomPartFilter;
 
     this.fundService
       .getAllPayoutFundWithEntityAndCpId(
         this.entityId,
-        this.payoutPortalFilter || undefined,
+        this.payoutcomPartFilter || "ALL",
         this.selectedStatus,
         this.payoutApprovedPage, // ✅ current page
         this.payoutApprovedPageSize, // ✅ dynamic page size
@@ -187,6 +191,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
         fromDate,
         toDate,
         this.role,
+        isAll,
       )
       .pipe(
         catchError((err) => {
@@ -411,21 +416,21 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     this.applyPayoutFilters();
   }
 
-  // ============ PORTAL DROPDOWN CONTROLS ============
-  togglePortalDropdown(view: "upi" | "bank" | "payout") {
+  // ============ comPart DROPDOWN CONTROLS ============
+  togglecomPartDropdown(view: "upi" | "bank" | "payout") {
     if (view === "payout") {
-      this.payoutPortalDropdownOpen = !this.payoutPortalDropdownOpen;
+      this.payoutcomPartDropdownOpen = !this.payoutcomPartDropdownOpen;
     }
   }
 
-  selectPortal(view: "upi" | "bank" | "payout", portal: any) {
-    const portalId = portal?.id || "";
+  selectcomPart(view: "upi" | "bank" | "payout", comPart: any) {
+    const comPartId = !comPart || comPart.id === "" ? "" : comPart.id;
 
     if (view === "payout") {
-      this.payoutPortalFilter = portalId;
+      this.payoutcomPartFilter = comPartId;
 
       // ✅ close dropdown
-      this.payoutPortalDropdownOpen = false;
+      this.payoutcomPartDropdownOpen = false;
 
       // ✅ reset page
       this.payoutApprovedPage = 0;
@@ -453,7 +458,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   // }
   clearPayoutFilters() {
     this.payoutSearchQuery = "";
-    this.payoutPortalFilter = "";
+    this.payoutcomPartFilter = "";
     this.payoutDateFrom = "";
     this.payoutDateTo = "";
 
@@ -659,8 +664,8 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       case "upi":
         return [
           {
-            label: "Portal",
-            value: record.portal || record.raw?.portalDomain || "—",
+            label: "comPart",
+            value: record.comPart || record.raw?.comPartDomain || "—",
           },
           { label: "VPA / UPI ID", value: record.vpa || record.upiId || "—" },
           { label: "Transaction ID", value: record.transactionId || "—" },
@@ -689,8 +694,8 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       case "bank":
         return [
           {
-            label: "Portal",
-            value: record.portal || record.raw?.portalDomain || "—",
+            label: "comPart",
+            value: record.comPart || record.raw?.comPartDomain || "—",
           },
           { label: "Account Number", value: record.accountNo || "—" },
           { label: "Transaction ID", value: record.transactionId || "—" },
@@ -719,7 +724,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
       case "payout":
         return [
-          { label: "Portal", value: record.portalDomain || "—" },
+          { label: "comPart", value: record.comPartDomain || "—" },
           { label: "User ID", value: record.userId || "—" },
           { label: "Account Number", value: record.accountNo || "—" },
           { label: "IFSC Code", value: record.ifscCode || "—" },
@@ -771,12 +776,12 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     }
   }
 
-  getSelectedPortalDomain(view: "upi" | "bank" | "payout"): string {
+  getSelectedcomPartDomain(view: "upi" | "bank" | "payout"): string {
     let selectedId = "";
 
-    if (view === "payout") selectedId = this.payoutPortalFilter;
+    if (view === "payout") selectedId = this.payoutcomPartFilter;
 
-    const found = this.portalOptions.find((p) => p.id === selectedId);
+    const found = this.comPartOptions.find((p) => p.id === selectedId);
 
     return found ? found.domain : "All Comparts";
   }
@@ -837,12 +842,12 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
           ? "BANK"
           : "PAYOUT";
 
-    console.log({
-      entityId,
-      entityType,
-      fundId,
-      fundType,
-    });
+    // console.log({
+    //   entityId,
+    //   entityType,
+    //   fundId,
+    //   fundType,
+    // });
 
     if (!entityId || !entityType || !fundId || !fundType) {
 

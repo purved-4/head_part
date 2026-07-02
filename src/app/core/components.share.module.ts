@@ -36,8 +36,6 @@ import { SearchableDropdownComponent } from "../common/drop-down/drop-down.compo
 import { EnterKeyDirective } from "../directives/enter-key.directive";
 import { CurrencyAllotmentComponent } from "../common/currency-allotment/currency-allotment.component";
 import { BankDetailsComponent } from "../common/head_branch/bank-details/bank-details.component";
-import { HbPayoutReportComponent } from "../common/hb-payout-report/hb-payout-report.component";
-import { HbPayinReportComponent } from "../common/hb-payin-report/hb-payin-report.component";
 import { PendingThreadsComponent } from "../common/pending-threads/pending-threads.component";
 import { ChatpopupComponent } from "../common/chatpopup/chatpopup.component";
 import { CommonModule } from "@angular/common";
@@ -88,8 +86,7 @@ import { SharedUserProfileComponent } from "../common/shared-user-profile/shared
     EnterKeyDirective,
     CurrencyAllotmentComponent,
     BankDetailsComponent,
-    HbPayoutReportComponent,
-    HbPayinReportComponent,
+
     PendingThreadsComponent,
     ChatpopupComponent,
 
@@ -135,8 +132,7 @@ import { SharedUserProfileComponent } from "../common/shared-user-profile/shared
     EnterKeyDirective,
     CurrencyAllotmentComponent,
     BankDetailsComponent,
-    HbPayoutReportComponent,
-    HbPayinReportComponent,
+
     PendingThreadsComponent,
     ChatpopupComponent,
 

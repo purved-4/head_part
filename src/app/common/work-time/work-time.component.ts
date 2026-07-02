@@ -1,20 +1,13 @@
-import { Router } from "@angular/router";
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  Inject,
-  PLATFORM_ID,
-} from "@angular/core";
 
+import { Router } from "@angular/router";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { AuthService } from "../../pages/services/auth.service";
 import { BranchService } from "../../pages/services/branch.service";
 import { Subscription } from "rxjs";
 import { UserStateService } from "../../store/user-state.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { ComPartService } from "../../pages/services/com-part.service";
-import { isPlatformBrowser } from "@angular/common";
-
+import { forkJoin, of } from "rxjs";
 interface BreakPeriod {
   start: number;
   end?: number;
@@ -85,6 +78,8 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     "COM_PART",
   ];
 
+  showPayinLogoutModal = false;
+  private readonly PAYIN_STORAGE_KEY = "PAYIN_CARDS";
   constructor(
     private authService: AuthService,
     private BranchService: BranchService,
@@ -92,12 +87,8 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     private userStateService: UserStateService,
     private snack: SnackbarService,
     private compartService: ComPartService,
-    @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
-  private get isBrowser(): boolean {
-    return isPlatformBrowser(this.platformId);
-  }
   ngOnInit(): void {
     const s = this.userStateService.getUserId();
     this.userId = s;
@@ -173,18 +164,12 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   }
   // ---------- storage helpers ----------
   loadSessions(): void {
-    if (!this.isBrowser) return;
-
     const data = localStorage.getItem(this.SESSIONS_KEY);
-
     if (data) {
       try {
         this.sessions = JSON.parse(data) as WorkSession[];
         const active = this.sessions.find((s) => !s.clockOut);
-
-        if (active) {
-          this.activeSession = active;
-        }
+        if (active) this.activeSession = active;
       } catch {
         this.sessions = [];
       }
@@ -192,13 +177,10 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   }
 
   saveSessions(): void {
-    if (!this.isBrowser) return;
     localStorage.setItem(this.SESSIONS_KEY, JSON.stringify(this.sessions));
   }
 
   loadEvents(): void {
-    if (!this.isBrowser) return;
-
     const data = localStorage.getItem(this.EVENTS_KEY);
     if (data) {
       try {
@@ -210,25 +192,22 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   }
 
   saveEvents(): void {
-    if (!this.isBrowser) return;
     localStorage.setItem(this.EVENTS_KEY, JSON.stringify(this.events));
   }
 
   // ---------- pending logout persistence ----------
   private restorePendingLogoutState(): void {
-    if (!this.isBrowser) return;
-
     const data = localStorage.getItem(this.PENDING_LOGOUT_KEY);
     if (data) {
       try {
         const state: PendingLogoutState = JSON.parse(data);
         const now = Date.now();
 
-        console.log("Pending logout found in storage", {
-          targetTs: state.targetTs,
-          now: now,
-          remaining: state.targetTs - now,
-        });
+        // console.log("Pending logout found in storage", {
+        //   targetTs: state.targetTs,
+        //   now: now,
+        //   remaining: state.targetTs - now,
+        // });
 
         // Check if the pending timeout has already expired
         if (state.targetTs <= now) {
@@ -252,24 +231,20 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
   }
 
   private savePendingLogoutState(ev: UserEvent, targetTs: number): void {
-    if (!this.isBrowser) return;
-
     const state: PendingLogoutState = { event: ev, targetTs };
     localStorage.setItem(this.PENDING_LOGOUT_KEY, JSON.stringify(state));
-    console.log("Saved pending logout state", {
-      targetTs,
-      remaining: targetTs - Date.now(),
-    });
+    // console.log("Saved pending logout state", {
+      // targetTs,
+    //   remaining: targetTs - Date.now(),
+    // });
   }
 
   private clearPendingLogoutStateOnly(): void {
-    if (!this.isBrowser) return;
     localStorage.removeItem(this.PENDING_LOGOUT_KEY);
   }
 
   // ---------- Clear only sessions, not pending logout ----------
   private clearAllSessions(): void {
-    if (!this.isBrowser) return;
     localStorage.removeItem(this.SESSIONS_KEY);
     localStorage.removeItem(this.EVENTS_KEY);
     this.sessions = [];
@@ -281,7 +256,6 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
   // ---------- Complete clear (only when logout is confirmed) ----------
   private completeLogout(): void {
-    if (!this.isBrowser) return;
     localStorage.clear();
     localStorage.removeItem(this.SESSIONS_KEY);
     localStorage.removeItem(this.EVENTS_KEY);
@@ -390,6 +364,17 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
   // ---------- logout / pending behavior ----------
   clockOutAndStartPending(): void {
+    const storedCards = this.getValidPayinCards();
+    if (this.userRole === "COM_PART") {
+      const storedCards = this.getValidPayinCards();
+
+      if (storedCards.length > 0) {
+        this.showPayinLogoutModal = true;
+        return;
+      }
+    }
+
+    this.executeActualLogout();
     // Always clock out local session first
     if (this.activeSession && !this.activeSession.clockOut) {
       this.activeSession.clockOut = Date.now();
@@ -451,6 +436,133 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     });
   }
 
+  private getValidPayinCards(): any[] {
+    try {
+      const raw = localStorage.getItem(this.PAYIN_STORAGE_KEY);
+
+      if (!raw) {
+        return [];
+      }
+
+      const cards = JSON.parse(raw);
+
+      // return (cards || []).filter(
+      //   (c: any) => !c._isExpired && Number(c._remainingSeconds || 0) > 0,
+      // );
+      return (cards || []).filter((c: any) => {
+        if (!c.liveTime) {
+          return false;
+        }
+
+        return new Date(c.liveTime).getTime() > Date.now();
+      });
+    } catch {
+      return [];
+    }
+  }
+
+  confirmLogoutWithPayinCleanup(): void {
+    const cards = this.getValidPayinCards();
+
+    const requests = cards.map((card: any) => {
+      const payinType = card.mode;
+
+      return this.compartService.removeAssignment(
+        card.id,
+        payinType,
+        card.userId,
+        card.portalId,
+      );
+    });
+
+    const apiCall = requests.length > 0 ? forkJoin(requests) : of([]);
+
+    apiCall.subscribe({
+      // next: () => {
+      next: (res) => {
+
+        localStorage.removeItem(this.PAYIN_STORAGE_KEY);
+
+        this.showPayinLogoutModal = false;
+
+        this.executeActualLogout();
+      },
+      error: () => {
+        localStorage.removeItem(this.PAYIN_STORAGE_KEY);
+
+        this.showPayinLogoutModal = false;
+
+        this.executeActualLogout();
+      },
+    });
+  }
+
+  private executeActualLogout(): void {
+    // Always clock out local session first
+    if (this.activeSession && !this.activeSession.clockOut) {
+      this.activeSession.clockOut = Date.now();
+      this.saveSessions();
+    }
+
+    // Direct logout roles → immediate logout
+    if (this.isDirectLogoutRole) {
+      this.authService.logout().subscribe(() => {
+        this.completeLogout();
+        window.location.href = "/login";
+      });
+      return;
+    }
+
+    // Prevent duplicate pending
+    if (this.logoutPendingEvent) {
+      return;
+    }
+
+    this.authService.logout().subscribe({
+      next: (res: any) => {
+        if (!res.success) {
+          this.snack.show(res.message, res.success);
+          return;
+        }
+
+        const futureTime = res.data;
+        const futureTs = futureTime ? Date.parse(futureTime) : NaN;
+
+        if (Number.isNaN(futureTs)) {
+          this.completeLogout();
+          window.location.href = "/login";
+          return;
+        }
+
+        const pendingEvent: UserEvent = {
+          eventType: "LOGOUT_PENDING",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date(futureTs).toISOString(),
+          processed: false,
+          event_id: `local-${Date.now()}`,
+          message: futureTime,
+        };
+
+        this.savePendingLogoutState(pendingEvent, futureTs);
+
+        this.events.push(pendingEvent);
+        this.saveEvents();
+
+        this.logoutPendingEvent = pendingEvent;
+        this.startPendingTimer(pendingEvent);
+
+        this.snack.show("Logout scheduled", 200);
+      },
+      error: (err: any) => {
+        this.snack.show(err.error.message, err.error.status);
+      },
+    });
+  }
+
+  cancelLogoutWithPayinCleanup(): void {
+    this.showPayinLogoutModal = false;
+  }
+
   startPendingTimer(ev: UserEvent): void {
     this.stopPendingTimer();
     this.logoutPendingEvent = ev;
@@ -459,11 +571,11 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     const now = Date.now();
     const initialRemaining = targetTs - now;
 
-    console.log("Starting pending timer", {
-      targetTs,
-      now,
-      initialRemaining,
-    });
+    // console.log("Starting pending timer", {
+    //   targetTs,
+    //   now,
+    //   initialRemaining,
+    // });
 
     const tick = () => {
       const now = Date.now();

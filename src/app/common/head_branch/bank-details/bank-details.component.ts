@@ -7,11 +7,17 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
-import { Subscription } from "rxjs";
+
 import { BankService } from "../../../pages/services/bank.service";
 import { SnackbarService } from "../../snackbar/snackbar.service";
 import { UserStateService } from "../../../store/user-state.service";
 import { INDIAN_BANKS } from "../../../utils/constants";
+import {
+  Subscription,
+  Subject,
+  debounceTime,
+  distinctUntilChanged,
+} from "rxjs";
 
 @Component({
   selector: "app-bank-details",
@@ -23,6 +29,9 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
   @Input() fetchBankAccountsFn!: () => void;
 
   @Output() close = new EventEmitter<void>();
+  private ifscSubject = new Subject<string>();
+  isBankNameFetching = false;
+  isBankNameEditable = false;
 
   isEditMode = false;
   isSubmitting = false;
@@ -52,13 +61,25 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-
-    console.log("BANK DATA RECEIVED =>", this.bankData);
     this.entityId = this.userStateService.getCurrentEntityId();
-
     this.entityType = this.userStateService.getRole();
-
     this.patchForm();
+
+    // IFSC debounce listener
+    const ifscSub = this.ifscSubject
+      .pipe(debounceTime(600), distinctUntilChanged())
+      .subscribe((ifsc) => {
+        const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+        if (ifscPattern.test(ifsc)) {
+          this.fetchBankFromIfsc(ifsc);
+        } else {
+          // Incomplete pattern - reset
+          this.isBankNameFetching = false;
+          this.isBankNameEditable = false;
+          this.updateForm.bankName = "";
+        }
+      });
+    this.subs.add(ifscSub);
   }
 
   toggleEditMode(): void {
@@ -72,20 +93,17 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
   patchForm(): void {
     this.updateForm = {
       accountNo: this.bankData?.accountNo || "",
-
       accountHolderName: this.bankData?.accountHolderName || "",
-
       bankName: this.bankData?.bankName || "",
-
       ifsc: this.bankData?.ifsc || "",
-
       limitAmount: this.bankData?.limitAmount || 0,
-
       accountType: this.bankData?.accountType || "saving",
-
       fttAcceptance: this.bankData?.fttAcceptance || false,
-
     };
+
+    // Reset IFSC fetch state
+    this.isBankNameFetching = false;
+    this.isBankNameEditable = false;
   }
 
   closeModal(): void {
@@ -151,11 +169,9 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       accountType: this.updateForm.accountType,
 
       fttAcceptance: this.updateForm.fttAcceptance,
-
-      
     };
 
-    console.log("UPDATE PAYLOAD =>", payload);
+
 
     const sub = this.bankService.update(payload).subscribe({
       next: (res: any) => {
@@ -182,7 +198,7 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       error: (err: any) => {
         this.isSubmitting = false;
 
-        console.log("UPDATE ERROR =>", err);
+
 
         this.snack.show(
           err?.error?.message || "Error updating bank account",
@@ -261,5 +277,43 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
     this.updateForm.bankName = "";
     this.updateFilteredBanks = INDIAN_BANKS;
     this.updateIsCustomBank = false;
+  }
+  onIfscEditInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const formatted = input.value.replace(/\s/g, "").toUpperCase();
+    this.updateForm.ifsc = formatted;
+    input.value = formatted;
+
+    // Reset bank name state jab IFSC change ho
+    this.isBankNameEditable = false;
+    this.updateForm.bankName = "";
+
+    this.ifscSubject.next(formatted);
+  }
+
+  fetchBankFromIfsc(ifsc: string): void {
+    this.isBankNameFetching = true;
+    this.isBankNameEditable = false;
+
+    const sub = this.bankService.getIfsc(ifsc).subscribe({
+      next: (data) => {
+        this.isBankNameFetching = false;
+        this.updateForm.bankName = data?.bankName || data?.bank || "";
+      },
+      error: () => {
+        this.isBankNameFetching = false;
+        this.isBankNameEditable = true; // manually enter karne do
+        this.snack.show(
+          "Could not fetch bank name. Please enter manually.",
+          false,
+        );
+      },
+    });
+    this.subs.add(sub);
+  }
+
+  enableBankNameEdit(): void {
+    this.isBankNameEditable = true;
+    this.updateForm.bankName = "";
   }
 }

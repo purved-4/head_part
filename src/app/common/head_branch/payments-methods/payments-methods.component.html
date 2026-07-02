@@ -12,9 +12,16 @@
       <div class="relative">
         <select
           class="w-full h-9 rounded-lg border border-[var(--color-border)] px-3 text-sm font-medium text-[var(--color-font)] outline-none appearance-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all"
-          [value]="selectedCurrency?.currency"
-          (change)="onCurrencyChange($event)"
+          [ngModel]="selectedCurrency?.currency"
+          (ngModelChange)="onCurrencyChange($event)"
         >
+          <option
+            *ngIf="selectedCurrency && !isCurrencyInList()"
+            [value]="selectedCurrency.currency"
+          >
+            {{ selectedCurrency.currency }}
+          </option>
+
           <option *ngFor="let c of currencies" [value]="c.currency">
             {{ c.currency }}
           </option>

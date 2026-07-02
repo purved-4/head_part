@@ -1,3 +1,4 @@
+
 import {
   Component,
   EventEmitter,
@@ -32,10 +33,14 @@ export class PendingThreadsComponent implements OnInit, OnDestroy, OnChanges {
   page = 0;
   size = 20;
   hasMore = true;
+  searchQuery = '';
+
+
 
   /* ── Chat Popup state ── */
   chatPopupOpen = false;
   selectedChatThread: any = null;
+  showPendingThreads = false;
 
   /* ── Auto-refresh ── */
   private refreshInterval: any = null;
@@ -153,6 +158,8 @@ export class PendingThreadsComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+  
+
   loadMore(): void {
     this.page++;
     this.getThreads(false);
@@ -198,7 +205,7 @@ export class PendingThreadsComponent implements OnInit, OnDestroy, OnChanges {
     this.chatPopupOpen = true;
 
     // close pending threads panel
-    this.isOpen = false;
+    // this.isOpen = false;
 
     // notify parent
     this.chatOpened.emit(true);
@@ -208,6 +215,7 @@ export class PendingThreadsComponent implements OnInit, OnDestroy, OnChanges {
   closeChatPopup(): void {
     this.chatPopupOpen = false;
     this.selectedChatThread = null;
+    this.showPendingThreads = false;
     // Notify parent that chat is closed
     this.chatOpened.emit(false);
     // Refresh immediately to catch any updates

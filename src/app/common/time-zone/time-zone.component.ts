@@ -7,11 +7,8 @@ import {
   ViewChild,
 } from "@angular/core";
 import { Subscription, interval } from "rxjs";
-import {
-  TimeZoneOption,
-  TimeZoneServiceService,
-  TimeZoneState,
-} from "./time-zone-service.service";
+import { TimeZoneOption, TimeZoneServiceService, TimeZoneState } from "./time-zone-service.service";
+ 
 
 @Component({
   selector: "app-time-zone",

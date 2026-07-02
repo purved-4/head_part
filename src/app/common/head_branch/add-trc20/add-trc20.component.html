@@ -1,0 +1,194 @@
+<div class="space-y-4">
+  <!-- Wallet Address & Network -->
+  <div class="grid grid-cols-2 gap-4">
+    <div class="space-y-1">
+      <label class="text-sm font-medium text-gray-700">Wallet Address</label>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2">
+          <span class="material-symbols-outlined text-gray-400 text-base"
+            >content_copy</span
+          >
+        </span>
+        <input
+          type="text"
+          [(ngModel)]="walletAddress"
+          placeholder="Enter wallet address"
+          class="w-full h-11 pl-9 pr-3 border border-gray-300 rounded-xl text-sm outline-none focus:border-green-500 transition"
+        />
+      </div>
+      <button
+        type="button"
+        (click)="generateWalletAddress()"
+        class="px-4 h-11 rounded-xl bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition"
+      >
+        Generate
+      </button>
+    </div>
+    <div class="space-y-1">
+      <label class="text-sm font-medium text-gray-700">Network</label>
+      <input
+        type="text"
+        [value]="networkLabel"
+        readonly
+        class="w-full h-11 px-3 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500 outline-none cursor-not-allowed"
+      />
+    </div>
+  </div>
+
+  <!-- Account Holder Name & Wallet Limit -->
+  <div class="grid grid-cols-2 gap-4">
+    <div class="space-y-1">
+      <label class="text-sm font-medium text-gray-700"
+        >Account Holder Name</label
+      >
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2">
+          <span class="material-symbols-outlined text-gray-400 text-base"
+            >person</span
+          >
+        </span>
+        <input
+          type="text"
+          [(ngModel)]="accountHolderName"
+          placeholder="Name as per bank"
+          class="w-full h-11 pl-9 pr-3 border border-gray-300 rounded-xl text-sm outline-none focus:border-green-500 transition"
+        />
+      </div>
+    </div>
+    <div class="space-y-1">
+      <label class="text-sm font-medium text-gray-700">Wallet Limit</label>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2">
+          <span class="material-symbols-outlined text-gray-400 text-base"
+            >toll</span
+          >
+        </span>
+        <input
+          type="number"
+          [(ngModel)]="walletLimit"
+          placeholder="0.00"
+          class="w-full h-11 pl-9 pr-3 border border-gray-300 rounded-xl text-sm outline-none focus:border-green-500 transition"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Accepts PPI -->
+  <div class="flex items-center gap-2">
+    <input
+      type="checkbox"
+      id="acceptsPpi_trc20"
+      [(ngModel)]="acceptsPpi"
+      class="w-4 h-4 accent-green-600 rounded cursor-pointer"
+    />
+    <label
+      for="acceptsPpi_trc20"
+      class="text-sm font-medium text-gray-700 cursor-pointer"
+      >Accepts PPI</label
+    >
+  </div>
+
+  <!-- Capacity Range -->
+  <div class="border-t border-gray-100 pt-4">
+    <div class="flex items-center gap-2 mb-3">
+      <span
+        class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
+        >3</span
+      >
+      <span class="text-sm font-semibold text-gray-800">Capacity Range</span>
+    </div>
+    <div class="space-y-2">
+      <div
+        *ngFor="let range of capacityRanges; let i = index"
+        class="flex items-center gap-3"
+      >
+        <div class="flex-1 space-y-1">
+          <label *ngIf="i === 0" class="text-xs font-medium text-gray-500"
+            >From Amount</label
+          >
+          <div class="relative">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-red-500 font-bold text-xs"
+              >▽</span
+            >
+            <input
+              type="number"
+              [(ngModel)]="range.minRange"
+              class="w-full h-10 pl-7 pr-3 border border-gray-300 rounded-xl text-sm outline-none focus:border-green-500 transition"
+            />
+          </div>
+        </div>
+        <div class="flex-1 space-y-1">
+          <label *ngIf="i === 0" class="text-xs font-medium text-gray-500"
+            >To Amount</label
+          >
+          <div class="relative">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-red-500 font-bold text-xs"
+              >▽</span
+            >
+            <input
+              type="number"
+              [(ngModel)]="range.maxRange"
+              class="w-full h-10 pl-7 pr-3 border border-gray-300 rounded-xl text-sm outline-none focus:border-green-500 transition"
+            />
+          </div>
+        </div>
+        <div class="flex-1 space-y-1">
+          <label *ngIf="i === 0" class="text-xs font-medium text-gray-500"
+            >Quantity</label
+          >
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2">
+              <span class="material-symbols-outlined text-gray-400 text-sm"
+                >toll</span
+              >
+            </span>
+            <input
+              type="number"
+              [(ngModel)]="range.quantity"
+              class="w-full h-10 pl-8 pr-3 border border-gray-300 rounded-xl text-sm outline-none focus:border-green-500 transition"
+            />
+          </div>
+        </div>
+        <button
+          *ngIf="i === capacityRanges.length - 1"
+          (click)="addRange()"
+          class="mt-auto w-9 h-10 rounded-xl bg-green-50 hover:bg-green-100 border border-green-200 flex items-center justify-center transition"
+        >
+          <span class="material-symbols-outlined text-green-600 text-lg"
+            >add</span
+          >
+        </button>
+
+        <!-- REMOVE BUTTON (all rows if more than 1) -->
+        <button
+          *ngIf="capacityRanges.length > 1"
+          (click)="removeRange(i)"
+          class="mt-auto w-9 h-10 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 flex items-center justify-center transition"
+        >
+          <span class="material-symbols-outlined text-red-500 text-lg"
+            >remove</span
+          >
+        </button>
+        <div *ngIf="capacityRanges.length === 1 && i === 0" class="w-9"></div>
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button
+          (click)="onCancel()"
+          class="h-10 px-5 rounded-xl border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="onSubmit()"
+          [disabled]="isSubmitting"
+          class="h-10 px-5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium flex items-center gap-2 transition disabled:opacity-60"
+        >
+          <span class="material-symbols-outlined text-base">save</span>
+          {{ isSubmitting ? "Saving..." : "Save Inventory" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

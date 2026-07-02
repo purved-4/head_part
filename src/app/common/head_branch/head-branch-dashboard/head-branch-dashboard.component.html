@@ -2,20 +2,32 @@
   <div class="bg-[var(--color-bg)] min-h-screen p-2 md:p-2 lg:p-3">
     <!-- Header -->
     <div
-      class="hidden lg:flex flex-col lg:flex-row justify-between items-start lg:items-center mb-3 mt-6 gap-4"
+      class="hidden md:flex flex-col lg:flex-row justify-between items-start lg:items-center mb-3 gap-4"
     >
       <div class="flex justify-between items-start w-full mb-6">
         <!-- LEFT SIDE (unchanged) -->
         <div class="flex-1">
           <h1
-            class="text-lg md:text-2xl lg:text-3xl font-bold text-[var(--color-font)] tracking-tight mt-6"
+            class="hidden md:block text-lg md:text-2xl lg:text-3xl font-bold text-[var(--color-font)] tracking-tight"
           >
             Financial Dashboard
           </h1>
 
-          <p class="text-[var(--color-muted)] mt-1 text-[11px] md:text-sm">
+          <p
+            class="hidden md:block text-[var(--color-muted)] mt-1 text-[11px] md:text-sm"
+          >
             Monitor payins, payouts and transaction analytics in real-time
           </p>
+        </div>
+
+        <!-- RIGHT SIDE (force to extreme end) -->
+        <div class="ml-4 flex items-center gap-2">
+          <!-- Reload Button -->
+          <div class="ml-4 flex items-center gap-2">
+            <app-auto-refresh [refreshFn]="loadBroadcast.bind(this)">
+            </app-auto-refresh>
+          </div>
+          <!-- <app-reload (reload)="reloadDashboard()"></app-reload> -->
         </div>
       </div>
       <div class="flex items-center gap-2"></div>
@@ -126,7 +138,7 @@
 
                     <!-- Time -->
                     <p class="text-[11px] text-[var(--color-muted)] mt-0.5">
-                      {{ transaction.date | tz }}
+                      {{ transaction.date | date: "hh:mm a" }}
                     </p>
 
                     <!-- Currency conversion (if different) -->
@@ -318,7 +330,7 @@
 
                     <!-- Time -->
                     <p class="text-[11px] text-[var(--color-muted)] mt-1.5">
-                      {{ transaction.date | tz}}
+                      {{ transaction.date | date: "hh:mm a" }}
                     </p>
 
                     <!-- Currency conversion (if different) -->
@@ -372,7 +384,7 @@
                       'bg-red-100 text-red-700': !transaction.slabEligible,
                     }"
                   >
-                    Reward Eligibility {{ transaction.slabPercentage || 0 }}%
+                    Reward Eligibility {{ transaction.slabPercentage || 100 }}%
                   </span>
                 </div>
 
@@ -625,7 +637,7 @@
                     'bg-red-100 text-red-700': !transaction.slabEligible,
                   }"
                 >
-                  Reward Eligibility {{ transaction.slabPercentage || 0 }}%
+                  Reward Eligibility {{ transaction.slabPercentage || 100 }}%
                 </span>
               </div>
 
@@ -828,48 +840,48 @@
 
         <!-- Optional File Attachment -->
         <!-- Conditional File Attachment -->
-        <div class="mb-6" *ngIf="confirmTransaction?.type !== 'payout'">
+        <!-- Optional File Attachment -->
+        <!-- Conditional File Attachment -->
+        <div class="mb-6" *ngIf="confirmTransaction?.type === 'payin'">
           <div class="flex items-center justify-between mb-2">
             <label
               class="block text-[11px] text-[var(--color-muted)] font-semibold uppercase"
             >
-              {{
-                confirmTransaction?.type === "payin"
-                  ? "Attachment (Required)"
-                  : "Attachment (Optional)"
-              }}
+              Attachment (Required)
             </label>
             <span class="text-[11px] text-[var(--color-muted)]">Max 5MB</span>
           </div>
 
+          <!-- File upload area -->
           <div
-            class="relative border-2 border-dashed border-[var(--color-border)] rounded-lg p-4 text-center hover:border-[var(--color-primary)] transition-colors duration-200"
-            [class.border-[var(--color-primary)]]="editAmountData.isDragging"
-            (dragover)="onEditDragOver($event)"
-            (dragleave)="onEditDragLeave($event)"
-            (drop)="onEditFileDrop($event)"
+            class="relative border-2 border-dashed border-[var(--color-border)] rounded-lg p-4 text-center hover:border-[var(--color-danger)] transition-colors duration-200"
+            [class.border-[var(--color-danger)]]="isDragging"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onFileDrop($event)"
           >
             <input
               type="file"
-              id="editFileInput"
-              #editFileInput
-              (change)="onEditFileSelected($event)"
+              id="fileInput"
+              #fileInput
+              (change)="onFileSelected($event)"
               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               accept=".pdf,.jpg,.jpeg,.png,application/pdf"
               aria-label="Upload attachment"
             />
 
             <div class="pointer-events-none">
-              <div *ngIf="!editAmountData.file" class="space-y-2">
-                <div
-                  class="w-10 h-10 mx-auto mb-2 rounded-full bg-[var(--color-bg)] flex items-center justify-center"
+              <div
+                class="w-10 h-10 mx-auto mb-3 rounded-full bg-[var(--color-bg)] flex items-center justify-center"
+              >
+                <span
+                  class="material-symbols-outlined text-[var(--color-muted)]"
                 >
-                  <span
-                    class="material-symbols-outlined text-[var(--color-muted)]"
-                  >
-                    attach_file
-                  </span>
-                </div>
+                  attach_file
+                </span>
+              </div>
+
+              <div *ngIf="!selectedFile" class="space-y-2">
                 <p class="text-[12px] font-medium text-[var(--color-font)]">
                   Drop file here or click to upload
                 </p>
@@ -879,13 +891,13 @@
               </div>
 
               <!-- File preview when selected -->
-              <div *ngIf="editAmountData.file" class="space-y-3">
+              <div *ngIf="selectedFile" class="space-y-3">
                 <div class="flex items-center justify-center gap-2">
                   <div
-                    class="w-10 h-10 rounded-lg bg-[var(--color-primary-light)]/20 flex items-center justify-center"
+                    class="w-10 h-10 rounded-lg bg-[var(--color-danger)]/10 flex items-center justify-center"
                   >
                     <span
-                      class="material-symbols-outlined text-[var(--color-primary)]"
+                      class="material-symbols-outlined text-[var(--color-danger)]"
                     >
                       description
                     </span>
@@ -894,17 +906,16 @@
                     <p
                       class="text-[12px] font-medium text-[var(--color-font)] truncate"
                     >
-                      {{ editAmountData.file.name }}
+                      {{ selectedFile.name }}
                     </p>
                     <p class="text-[11px] text-[var(--color-muted)]">
-                      {{ (editAmountData.file.size / 1024 / 1024).toFixed(2) }}
-                      MB
+                      {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
                     </p>
                   </div>
                   <button
                     type="button"
-                    (click)="removeEditFile(); $event.stopPropagation()"
-                    class="text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors pointer-events-auto"
+                    (click)="removeFile(); $event.stopPropagation()"
+                    class="text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors"
                     aria-label="Remove file"
                   >
                     <span class="material-symbols-outlined text-sm">
@@ -912,12 +923,39 @@
                     </span>
                   </button>
                 </div>
+
+                <div class="flex items-center gap-2 text-[11px]">
+                  <div
+                    class="flex-1 h-2 bg-[var(--color-border)] rounded-full overflow-hidden"
+                  >
+                    <div
+                      class="h-full bg-[var(--color-danger)] rounded-full w-full"
+                    ></div>
+                  </div>
+                  <span class="text-[var(--color-muted)] font-medium"
+                    >Uploaded</span
+                  >
+                </div>
+
+                <!-- PDF Preview -->
+                <iframe
+                  *ngIf="previewDocument"
+                  [src]="previewUrl"
+                  class="w-full h-[300px] object-contain rounded-lg mt-1 border"
+                ></iframe>
+
+                <!-- Image Preview -->
+                <img
+                  *ngIf="!previewDocument"
+                  [src]="previewUrl"
+                  class="w-full h-[300px] object-contain rounded-lg mt-1 border"
+                />
               </div>
             </div>
           </div>
 
           <p class="text-[11px] mt-2 text-[var(--color-muted)]">
-            Add supporting documents like updated payment proof or screenshot
+            Attachment is mandatory for payin rejection.
           </p>
         </div>
 
@@ -1206,7 +1244,7 @@
 
     <div
       *ngIf="showRejectConfirm"
-      class="fixed inset-0 z-[60] flex justify-center bg-black/60 backdrop-blur-md overflow-y-auto py-8"
+      class="fixed inset-0 z-[55] flex justify-center bg-black/60 backdrop-blur-md overflow-y-auto py-8"
     >
       <div
         class="relative w-full max-w-lg bg-[var(--color-surface)] rounded-lg shadow-2xl max-h-[90vh] overflow-y-auto p-2.5 sm:p-6"
@@ -1312,7 +1350,7 @@
               class="block text-[11px] text-[var(--color-muted)] font-semibold uppercase"
             >
               {{
-                confirmTransaction?.type === "payin"
+                confirmTransaction?.type !== "payout"
                   ? "Attachment (Required)"
                   : "Attachment (Optional)"
               }}
@@ -1448,7 +1486,7 @@
             [disabled]="
               !reason ||
               (reason === 'other' && !customReason) ||
-              (confirmTransaction?.type === 'payin' && !selectedFile)
+              (confirmTransaction?.type !== 'payout' && !selectedFile)
             "
             [class.opacity-50]="
               !reason ||
@@ -1460,15 +1498,17 @@
               (reason === 'other' && !customReason) ||
               (confirmTransaction?.type === 'payin' && !selectedFile)
             "
-            class="flex-1 px-4 py-2.5 bg-[var(--color-danger)] text-white rounded-lg hover:from-[var(--color-danger)] hover:to-[var(--color-danger)] transition font-bold shadow-lg shadow-[var(--color-danger)]/30 disabled:shadow-none"
+            class="flex-1 px-4 py-2.5 bg-[var(--color-danger)] text-white rounded-lg transition font-bold shadow-lg shadow-[var(--color-danger)]/30 disabled:shadow-none"
           >
-            Reject
+            {{ isRejecting ? "Rejecting..." : "Reject" }}
           </button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Transaction Detail Modal -->
 
 <!-- Transaction Detail Modal -->
 <div
@@ -1483,47 +1523,100 @@
       class="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-white"
     >
       <div>
-        <h3 class="text-lg font-semibold text-gray-900">Transaction Details</h3>
+        <h3 class="text-lg font-semibold text-gray-900">Transaction details</h3>
         <p class="text-sm text-gray-500">Complete transaction information</p>
       </div>
-      <button
-        (click)="selectedTransaction = null"
-        class="p-2 rounded-lg hover:bg-gray-100 transition"
-      >
-        <span class="material-symbols-outlined">
-close
-</span>
-      </button>
+
+      <!-- Type badge + close -->
+      <div class="flex items-center gap-3">
+        <!-- UPI badge -->
+        <span
+          *ngIf="
+            selectedTransaction.fundtype === 'UPI' ||
+            selectedTransaction.mode === 'upi'
+          "
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-50 border border-violet-200 text-violet-700 text-sm font-medium"
+        >
+          <span class="material-symbols-outlined text-[14px]">swap_horiz</span>
+          UPI payin
+        </span>
+        <!-- Bank badge -->
+        <span
+          *ngIf="
+            (selectedTransaction.fundtype === 'BANK' ||
+              selectedTransaction.mode === 'bank') &&
+            selectedTransaction.type !== 'payout'
+          "
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-sm font-medium"
+        >
+          <span class="material-symbols-outlined text-[14px]"
+            >account_balance</span
+          >
+          Bank payin
+        </span>
+        <!-- Payout badge -->
+        <span
+          *ngIf="selectedTransaction.type === 'payout'"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium"
+        >
+          <span class="material-symbols-outlined text-[14px]"
+            >arrow_outward</span
+          >
+          Payout
+        </span>
+
+        <button
+          (click)="selectedTransaction = null"
+          class="p-2 rounded-lg hover:bg-gray-100 transition"
+        >
+          <svg
+            class="w-5 h-5 text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- Scrollable Content -->
     <div class="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-      <!-- Two Column Layout -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Left Column: Transaction Info -->
-        <div class="space-y-4">
-          <!-- Transaction ID Badge -->
-          <div
-            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-sm font-medium"
-          >
-            <span class="material-symbols-outlined">
-docs
-</span>
-            {{ selectedTransaction.fundDisplayId || "FF4D2B2" }}
-          </div>
-
-          <!-- Grid: UTR + Amount -->
+        <!-- LEFT COLUMN -->
+        <div class="space-y-3">
+          <!-- Display ID + Date always shown -->
           <div class="grid grid-cols-2 gap-3">
             <div class="p-4 rounded-xl border border-gray-200 bg-white">
               <p
                 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
               >
-                UTR Number
+                Display ID
               </p>
               <p class="font-bold text-gray-800">
-                {{ selectedTransaction.utrNumber || "126815351851" }}
+                {{ selectedTransaction.fundDisplayId || "—" }}
               </p>
             </div>
+            <div class="p-4 rounded-xl border border-gray-200 bg-white">
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+              >
+                Date & time
+              </p>
+              <p class="font-bold text-gray-800 text-sm">
+                {{ selectedTransaction.date | tz }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Amount always shown -->
+          <div class="grid grid-cols-2 gap-3">
             <div
               class="p-4 rounded-xl border border-emerald-100 bg-emerald-50/50"
             >
@@ -1535,7 +1628,7 @@ docs
                     Amount
                   </p>
                   <p class="font-bold text-emerald-600 text-lg">
-                    {{ selectedTransaction.amount || "1000" }}
+                    ₹{{ selectedTransaction.amount | number }}
                   </p>
                 </div>
                 <button
@@ -1544,81 +1637,258 @@ docs
                     selectedTransaction.mode === 'bank'
                   "
                   (click)="openEditAmountPopup()"
-                  class="p-2 rounded-lg hover:bg-white/50 transition"
-                  [ngClass]="{
-                    'hover:bg-violet-100': selectedTransaction.mode === 'upi',
-                    'hover:bg-blue-100': selectedTransaction.mode === 'bank',
-                  }"
+                  class="p-1.5 rounded-lg hover:bg-white/60 transition"
                 >
-                  <span class="material-symbols-outlined text-[12px]">
-                    edit
-                  </span>
+                  <span class="material-symbols-outlined text-[14px]"
+                    >edit</span
+                  >
                 </button>
               </div>
             </div>
+            <div class="p-4 rounded-xl border border-gray-200 bg-white">
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+              >
+                Exchange amount
+              </p>
+              <p class="font-bold text-gray-800">
+                {{ selectedTransaction.currencyWiseAmount | number }}
+                {{ selectedTransaction.currency }}
+              </p>
+            </div>
           </div>
 
-          <!-- Grid: Mode + Date -->
+          <!-- Currency -->
           <div class="grid grid-cols-2 gap-3">
             <div class="p-4 rounded-xl border border-gray-200 bg-white">
               <p
                 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
               >
-                Mode
+                Currency
               </p>
-              <p class="font-bold text-gray-800">Bank Transfer</p>
+              <p class="font-bold text-gray-800">
+                {{ selectedTransaction.currency || "—" }}
+              </p>
             </div>
             <div class="p-4 rounded-xl border border-gray-200 bg-white">
               <p
                 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
               >
-                Date & Time
+                Parent currency
               </p>
-              <p class="font-bold text-gray-800 text-sm">
-                {{ selectedTransaction.date | tz }}
+              <p class="font-bold text-gray-800">
+                {{ selectedTransaction.parentCurrency || "—" }}
               </p>
             </div>
           </div>
 
-          <!-- Account Number -->
-          <div class="p-4 rounded-xl border border-gray-200 bg-white">
-            <p
-              class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+          <!-- ── UPI FIELDS ── -->
+          <ng-container
+            *ngIf="
+              selectedTransaction.fundtype === 'UPI' ||
+              selectedTransaction.mode === 'upi'
+            "
+          >
+            <div
+              class="p-4 rounded-xl border border-violet-100 bg-violet-50/40"
             >
-              Account Number
-            </p>
-            <p class="font-bold text-emerald-600 text-lg">
-              {{ selectedTransaction.accountNo || "1235182252" }}
-            </p>
-          </div>
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+              >
+                UPI ID / VPA
+              </p>
+              <p class="font-bold text-violet-700 text-base">
+                {{
+                  selectedTransaction.upiId ||
+                    selectedTransaction.raw?.vpa ||
+                    "—"
+                }}
+              </p>
+            </div>
+            <div
+              *ngIf="selectedTransaction.utrNumber"
+              class="p-4 rounded-xl border border-gray-200 bg-white"
+            >
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+              >
+                UTR / Transaction ID
+              </p>
+              <p class="font-bold text-gray-800">
+                {{ selectedTransaction.utrNumber }}
+              </p>
+            </div>
+          </ng-container>
 
-          <!-- Remarks -->
-          <div>
+          <!-- ── BANK PAYIN FIELDS ── -->
+          <ng-container
+            *ngIf="
+              (selectedTransaction.fundtype === 'BANK' ||
+                selectedTransaction.mode === 'bank') &&
+              selectedTransaction.type !== 'payout'
+            "
+          >
+            <div
+              *ngIf="selectedTransaction.accountNo"
+              class="p-4 rounded-xl border border-blue-100 bg-blue-50/40"
+            >
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+              >
+                Account number
+              </p>
+              <p class="font-bold text-blue-700 text-base">
+                {{ selectedTransaction.accountNo }}
+              </p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div
+                *ngIf="selectedTransaction.holderName"
+                class="p-4 rounded-xl border border-gray-200 bg-white"
+              >
+                <p
+                  class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+                >
+                  Holder name
+                </p>
+                <p class="font-bold text-gray-800">
+                  {{ selectedTransaction.holderName }}
+                </p>
+              </div>
+              <div
+                *ngIf="selectedTransaction.ifscCode"
+                class="p-4 rounded-xl border border-gray-200 bg-white"
+              >
+                <p
+                  class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+                >
+                  IFSC
+                </p>
+                <p class="font-bold text-gray-800">
+                  {{ selectedTransaction.ifscCode }}
+                </p>
+              </div>
+            </div>
+            <div
+              *ngIf="selectedTransaction.utrNumber"
+              class="p-4 rounded-xl border border-gray-200 bg-white"
+            >
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+              >
+                UTR / Transaction ID
+              </p>
+              <p class="font-bold text-gray-800">
+                {{ selectedTransaction.utrNumber }}
+              </p>
+            </div>
+          </ng-container>
+
+          <!-- ── PAYOUT FIELDS ── -->
+          <ng-container *ngIf="selectedTransaction.type === 'payout'">
+            <div
+              *ngIf="selectedTransaction.accountNo"
+              class="p-4 rounded-xl border border-amber-100 bg-amber-50/40"
+            >
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+              >
+                Account number
+              </p>
+              <p class="font-bold text-amber-700 text-base">
+                {{ selectedTransaction.accountNo }}
+              </p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div
+                *ngIf="selectedTransaction.holderName"
+                class="p-4 rounded-xl border border-gray-200 bg-white"
+              >
+                <p
+                  class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+                >
+                  Holder name
+                </p>
+                <p class="font-bold text-gray-800">
+                  {{ selectedTransaction.holderName }}
+                </p>
+              </div>
+              <div
+                *ngIf="selectedTransaction.ifscCode"
+                class="p-4 rounded-xl border border-gray-200 bg-white"
+              >
+                <p
+                  class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+                >
+                  IFSC
+                </p>
+                <p class="font-bold text-gray-800">
+                  {{ selectedTransaction.ifscCode }}
+                </p>
+              </div>
+            </div>
+            <!-- Processing status for payout -->
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-4 rounded-xl border border-gray-200 bg-white">
+                <p
+                  class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+                >
+                  Processing
+                </p>
+                <p
+                  class="font-bold"
+                  [ngClass]="
+                    selectedTransaction.raw?.processing
+                      ? 'text-emerald-600'
+                      : 'text-gray-400'
+                  "
+                >
+                  {{
+                    selectedTransaction.raw?.processing
+                      ? "Active"
+                      : "Not started"
+                  }}
+                </p>
+              </div>
+              <div
+                *ngIf="selectedTransaction.raw?.processingTimeLimit"
+                class="p-4 rounded-xl border border-gray-200 bg-white"
+              >
+                <p
+                  class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+                >
+                  Processing deadline
+                </p>
+                <p class="font-bold text-gray-800 text-sm">
+                  {{ selectedTransaction.raw?.processingTimeLimit | tz }}
+                </p>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Remarks — shown only when non-empty -->
+          <div *ngIf="selectedTransaction.remarks">
             <p
               class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
             >
               Remarks
             </p>
             <div class="p-4 rounded-xl border border-gray-200 bg-emerald-50/30">
-              <p class="text-gray-700">
-                {{ selectedTransaction.remarks || "3213f" }}
-              </p>
+              <p class="text-gray-700">{{ selectedTransaction.remarks }}</p>
             </div>
           </div>
         </div>
 
-        <!-- Right Column: Screenshot & Upload -->
+        <!-- RIGHT COLUMN: Screenshot -->
         <div class="space-y-4">
-          <!-- Screenshot Box -->
           <div
             class="border border-gray-200 rounded-xl p-4 h-[400px] flex flex-col"
           >
             <p
               class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3"
             >
-              Transaction Screenshot
+              Transaction screenshot
             </p>
-
             <div
               class="flex-1 border-2 border-emerald-500 rounded-xl overflow-hidden relative group cursor-pointer"
               (click)="openImagePopup(selectedTransaction.fileUrl)"
@@ -1626,7 +1896,7 @@ docs
               <img
                 *ngIf="selectedTransaction.fileUrl"
                 [src]="selectedTransaction.fileUrl"
-                alt="Transaction Screenshot"
+                alt="Transaction screenshot"
                 class="w-full h-full object-contain bg-gray-50"
               />
               <div
@@ -1637,52 +1907,35 @@ docs
                   <div
                     class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3"
                   >
-                    <span class="material-symbols-outlined">
-docs
-</span>
+                    <svg
+                      class="w-8 h-8 text-emerald-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
                   </div>
                   <p class="text-sm text-gray-500">No screenshot available</p>
                 </div>
               </div>
-              <!-- Overlay -->
               <div
                 class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition flex items-center justify-center"
               >
                 <span
                   class="text-white font-medium bg-black/70 px-4 py-2 rounded-lg"
-                  >Click to view Full Screen</span
+                  >Click to view full screen</span
                 >
               </div>
             </div>
             <p class="text-center text-sm text-gray-500 mt-3">
-              Click to view Full Screen
+              Click to view full screen
             </p>
-          </div>
-
-          <!-- Upload CV Section -->
-          <div
-            class="border border-gray-200 rounded-xl p-4 flex items-center justify-between"
-          >
-            <div class="flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center"
-              >
-                <span class="material-symbols-outlined">
-upload
-</span>
-              </div>
-              <div>
-                <p class="font-medium text-gray-800">Upload Your CV</p>
-                <p class="text-xs text-gray-500">
-                  DOCX or PDF formats, up to 5MB.
-                </p>
-              </div>
-            </div>
-            <button
-              class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
-            >
-              Upload
-            </button>
           </div>
         </div>
       </div>
@@ -1693,9 +1946,9 @@ upload
           (click)="openApproveConfirm(selectedTransaction)"
           [disabled]="
             selectedTransaction.type === 'payout' &&
-            !selectedTransaction.processing
+            !selectedTransaction.raw?.processing
           "
-          class="px-6 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+          class="px-6 py-2.5 bg-white border border-gray-300 rounded-lg font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Approve
         </button>
@@ -1703,9 +1956,9 @@ upload
           (click)="openRejectConfirm(selectedTransaction)"
           [disabled]="
             selectedTransaction.type === 'payout' &&
-            !selectedTransaction.processing
+            !selectedTransaction.raw?.processing
           "
-          class="px-6 py-2.5 bg-red-500 rounded-lg font-medium text-white transition shadow-lg shadow-red-500/30 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-500 disabled:shadow-none"
+          class="px-6 py-2.5 bg-red-500 rounded-lg font-medium text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-500"
         >
           Reject
         </button>
@@ -1728,9 +1981,19 @@ upload
       (click)="closeImagePopup()"
       class="absolute top-4 right-4 z-10 bg-white/10 backdrop-blur rounded-full p-2 hover:bg-white/20 transition"
     >
-     <span class="material-symbols-outlined">
-close
-</span>
+      <svg
+        class="w-6 h-6 text-white"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        ></path>
+      </svg>
     </button>
     <img
       [src]="popupImageUrl"
@@ -1742,7 +2005,7 @@ close
 
 <div
   *ngIf="showImagePopup"
-  class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75"
+  class="fixed inset-0 z-[80] flex items-center justify-center bg-black/75"
   (click)="closeImagePopup()"
 >
   <div
@@ -1753,9 +2016,19 @@ close
       (click)="closeImagePopup()"
       class="absolute top-2 right-2 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 z-10"
     >
-      <span class="material-symbols-outlined">
-close
-</span>
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
     </button>
     <img
       [src]="popupImageUrl"
