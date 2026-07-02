@@ -20,12 +20,10 @@ export class UtilsServiceService {
     private headService: HeadService,
     private userService: BranchService,
     private portalService: PortalService,
-    private tpService: ComPartService,
+    private comPartService: ComPartService,
   ) {}
 
   getDataWithEntityTypeAndId(id: any, type: any, cheifToogle?: any): any {
-    console.log(id, type);
-
     switch (type.toString().toLowerCase()) {
       case "owner":
         return this.cnfService.getChiefsListByUserId(id).pipe(
@@ -40,7 +38,7 @@ export class UtilsServiceService {
             catchError((err) => throwError(() => err)),
           );
         } else if (cheifToogle === "B2C") {
-          return this.userService.getBranchWithHeadId(id).pipe(
+          return this.headService.getHeadByManagerId(id).pipe(
             map((res) => res),
             catchError((err) => throwError(() => err)),
           );
@@ -64,13 +62,22 @@ export class UtilsServiceService {
     }
   }
 
-  getRoleForDownLevelWithCurrentRoleId(type: String) {
+  getRoleForDownLevelWithCurrentRoleId(
+    type: String,
+    businessType?: string,
+  ): any {
     switch (type.toLowerCase()) {
       case "owner":
         return "chief";
 
       case "chief":
-        return "manager";
+        if (businessType === "b2c") {
+          return "head";
+        } else if (businessType === "b2b") {
+          return "manager";
+        } else {
+          return "manager"; // default agar type missing ho
+        }
 
       case "manager":
         return "head";
@@ -123,7 +130,7 @@ export class UtilsServiceService {
   getPortalByRoleIdAndRoleName(id: any, roleName: any): Observable<any[]> {
     switch (roleName.toString().toLowerCase()) {
       case "owner":
-        return this.tpService.getPortalByComPartId(id).pipe(
+        return this.portalService.getAllPortal().pipe(
           map((res) => res),
           catchError((err) => throwError(() => err)),
         );

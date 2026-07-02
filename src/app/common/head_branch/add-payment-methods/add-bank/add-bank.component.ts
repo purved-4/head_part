@@ -215,8 +215,7 @@ export class AddBankComponent implements OnInit, OnDestroy {
     }
 
     this.isAdding = true;
-
-    const formData = this.addBankForm.value;
+    const formData = this.addBankForm.getRawValue();
 
     // Sirf valid ranges
     const validRanges = this.capacityRanges
