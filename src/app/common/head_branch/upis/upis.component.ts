@@ -1133,13 +1133,29 @@ export class UpisComponent implements OnInit {
     this.selectedBank = bank;
     this.bankSearchTerm = bank.accountHolderName;
     this.showBankDropdown = false;
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { bankId: bank.id },
+      queryParamsHandling: "merge",
+      replaceUrl: true,
+    });
+
     this.onFilterChange();
   }
-
   clearBankFilter() {
     this.selectedBank = null;
     this.bankSearchTerm = "";
     this.filteredBanks = [...this.banks];
+
+    // URL se bankId hatao
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { bankId: null },
+      queryParamsHandling: "merge", // baaki params (currency, mode) rehne denge, sirf bankId nikalega
+      replaceUrl: true,
+    });
+
     this.onFilterChange();
   }
 
@@ -1188,18 +1204,6 @@ export class UpisComponent implements OnInit {
     }
 
     return `   ${minutes}m ${seconds}s`;
-  }
-
-  openTxnModal(upi: any) {
-    this.selectedTxnData = upi;
-    this.showTxnModal = true;
-    document.body.style.overflow = "hidden";
-  }
-
-  closeTxnModal() {
-    this.showTxnModal = false;
-    this.selectedTxnData = null;
-    document.body.style.overflow = "auto";
   }
 
   openAddUpiModal() {

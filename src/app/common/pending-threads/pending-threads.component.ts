@@ -1,4 +1,3 @@
-
 import {
   Component,
   EventEmitter,
@@ -27,7 +26,7 @@ export class PendingThreadsComponent implements OnInit, OnDestroy, OnChanges {
 
   @Output() close = new EventEmitter<void>();
   @Output() chatOpened = new EventEmitter<boolean>(); // Notify parent when chat opens
-
+  panelVisible = false;
   threads: any[] = [];
   loading = false;
   page = 0;
@@ -65,9 +64,11 @@ export class PendingThreadsComponent implements OnInit, OnDestroy, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes["isOpen"]) {
       if (this.isOpen) {
+        this.panelVisible = true;
         this.getThreads(true);
         this.startAutoRefresh();
       } else {
+        this.panelVisible = false;
         this.stopAutoRefresh();
       }
     }
@@ -203,7 +204,7 @@ export class PendingThreadsComponent implements OnInit, OnDestroy, OnChanges {
     };
 
     this.chatPopupOpen = true;
-
+    this.panelVisible = false;
     // close pending threads panel
     // this.isOpen = false;
 
@@ -219,6 +220,9 @@ export class PendingThreadsComponent implements OnInit, OnDestroy, OnChanges {
     // Notify parent that chat is closed
     this.chatOpened.emit(false);
     // Refresh immediately to catch any updates
+     if (this.isOpen) {
+      this.panelVisible = true;   // NEW
+    }
     this.getThreads(true);
   }
 }

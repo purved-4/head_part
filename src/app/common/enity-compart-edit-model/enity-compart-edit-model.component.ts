@@ -232,11 +232,15 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
   }
 
   getEntityLabel(data: any): string {
+
+    console.log(data);
+    
+
     switch (this.entityType) {
       case "OWNER":
         return "CHIEF";
       case "CHIEF":
-        return data?.businessType === "B2C" ? "BRANCH" : "MANAGER";
+        return data?.businessType === "B2C" ? "HEAD" : "MANAGER";
       case "MANAGER":
         return "HEAD";
       case "HEAD":

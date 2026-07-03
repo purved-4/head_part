@@ -497,6 +497,44 @@
                   {{ fundDetails?.currency }}
                 </span>
               </div>
+              <div
+                *ngIf="fundDetails.filePath || fundDetails.rejectionFilePath"
+                class="flex items-center gap-2 mt-3 pt-3 border-t border-violet-200"
+              >
+                <button
+                  *ngIf="fundDetails.filePath"
+                  (click)="
+                    openMediaViewer(
+                      fundDetails.filePath,
+                      'Accepted File',
+                      'file'
+                    )
+                  "
+                  class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium rounded-lg transition-all duration-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                >
+                  <span class="material-symbols-outlined text-sm"
+                    >description</span
+                  >
+                  <span>View File</span>
+                </button>
+
+                <button
+                  *ngIf="fundDetails.rejectionFilePath"
+                  (click)="
+                    openMediaViewer(
+                      fundDetails.rejectionFilePath,
+                      'Rejection File',
+                      'file'
+                    )
+                  "
+                  class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-red-50 hover:bg-red-100 text-red-700 font-medium rounded-lg transition-all duration-200 text-xs focus:outline-none focus:ring-2 focus:ring-red-300"
+                >
+                  <span class="material-symbols-outlined text-sm"
+                    >description</span
+                  >
+                  <span>View Rejection File</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -771,7 +809,7 @@
 
         <!-- Message Input Area - FIXED EMOJI & SEND -->
         <div
-          *ngIf="selectedNotification?.resolved !== true"
+          *ngIf="selectedNotification.resolved !== true"
           class="flex items-end space-x-2 question-dropdown-container relative"
         >
           <!-- Message Input with proper binding -->

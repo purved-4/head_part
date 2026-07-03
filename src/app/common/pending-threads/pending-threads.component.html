@@ -1,7 +1,7 @@
 <!-- RIGHT SLIDER PANEL -->
 
 <div
-  *ngIf="isOpen"
+  *ngIf="panelVisible"
   (click)="onClose()"
   class="inset-0 bg-black/30 z-[9998]"
 ></div>
@@ -22,8 +22,8 @@ flex
 flex-col
 "
   [ngClass]="{
-    'translate-x-0': isOpen,
-    'translate-x-full': !isOpen,
+    'translate-x-0': panelVisible,
+    'translate-x-full': !panelVisible,
   }"
 >
   <!-- HEADER -->
@@ -207,3 +207,10 @@ flex-col
   [thread]="selectedChatThread"
   (closePopup)="closeChatPopup()"
 ></app-chatpopup>
+
+
+
+
+
+
+

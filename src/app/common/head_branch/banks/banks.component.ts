@@ -1146,20 +1146,19 @@ export class BanksComponent implements OnInit, OnDestroy {
         });
     }
   }
-
-  viewUpi(account: any) {
+viewUpi(account: any) {
     const bankId = account?.id;
     if (!bankId) return;
 
     if (this.role === "HEAD") {
       this.router.navigate(["/head/upi"], {
-        queryParams: { bankId },
-        queryParamsHandling: "merge", // existing params ke saath merge hoga
+        queryParams: { bankId, mode: "upi", paymentMethod: null },
+        queryParamsHandling: "merge",
       });
     } else if (this.role === "BRANCH") {
       this.router.navigate(["/branch/upi"], {
-        queryParams: { bankId },
-        queryParamsHandling: "merge", // existing params ke saath merge hoga
+        queryParams: { bankId, mode: "upi", paymentMethod: null },
+        queryParamsHandling: "merge",
       });
     }
   }

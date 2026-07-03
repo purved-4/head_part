@@ -1,5 +1,3 @@
-
-
 import { Component, OnInit } from "@angular/core";
 import { LimitsService } from "../../pages/services/reports/limits.service";
 import { UserStateService } from "../../store/user-state.service";
@@ -204,12 +202,12 @@ export class LimitsComponent implements OnInit {
     this.actionType = action;
     this.selectedEntity = entity;
     this.transactionAmountToAdd = null;
-    if(action === "ADD"){
+    if (action === "ADD") {
       this.showAddTransactionAmountModal = true;
-    }else{
+    } else {
       this.showRemoveTransactionAmountModal = true;
     }
-    
+
     const entityType =
       entity.entityType ||
       this.utilSerivce.getRoleForDownLevelWithCurrentRoleId(
@@ -255,10 +253,10 @@ export class LimitsComponent implements OnInit {
     }
 
     if (this.actionType === "REMOVE") {
-  this.removingTransactionAmount = true;
-} else {
-  this.addingTransactionAmount = true;
-}
+      this.removingTransactionAmount = true;
+    } else {
+      this.addingTransactionAmount = true;
+    }
 
     // Determine entity type
     const entityType =
@@ -288,22 +286,23 @@ export class LimitsComponent implements OnInit {
     request.subscribe({
       next: (res) => {
         this.snackBar.show(
-  `${this.actionType === "REMOVE" ? "Removed" : "Added"} Transaction Amount ₹${this.transactionAmountToAdd} successfully`,
-  true,
-  3000
-);
+          `${this.actionType === "REMOVE" ? "Removed" : "Added"} Transaction Amount ₹${this.transactionAmountToAdd} successfully`,
+          true,
+          3000,
+        );
         this.closeAddTransactionAmountModal();
         this.addingTransactionAmount = false;
-  this.removingTransactionAmount = false;
+        this.removingTransactionAmount = false;
 
         // Refresh both data
         this.loadDownlevelData();
         this.loadCurrentUserLimits(); // Add this line
+        this.loadAdminLimitsData();
       },
       error: (err) => {
         // this.snackBar.show('Failed to add transactionAmount. Please try again.',false,3000);
         this.addingTransactionAmount = false;
-  this.removingTransactionAmount = false;
+        this.removingTransactionAmount = false;
 
         this.snackBar.show(err.error?.message, false);
       },
@@ -360,6 +359,9 @@ export class LimitsComponent implements OnInit {
         // Refresh both data
         this.loadDownlevelData();
         this.loadCurrentUserLimits(); // Add this line
+        setTimeout(() => {
+          this.loadAdminLimitsData();
+        }, 300);
       },
       error: (err) => {
         // this.snackBar.showError('Failed to add transactionAmount. Please try again.');

@@ -561,6 +561,54 @@
                   {{ fundDetails.currency }}
                 </span>
               </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-violet-600"
+                  >Parent Currency</span
+                >
+                <span class="text-base font-bold text-violet-800">
+                  {{ fundDetails.currency }}
+                </span>
+              </div>
+
+              <!-- Accept / Rejection Files -->
+              <div
+                *ngIf="fundDetails.filePath || fundDetails.rejectionFilePath"
+                class="flex items-center gap-2 mt-3 pt-3 border-t border-violet-200"
+              >
+                <button
+                  *ngIf="fundDetails.filePath"
+                  (click)="
+                    openMediaViewer(
+                      fundDetails.filePath,
+                      'Accepted File',
+                      'file'
+                    )
+                  "
+                  class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium rounded-lg transition-all duration-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                >
+                  <span class="material-symbols-outlined text-sm"
+                    >description</span
+                  >
+                  <span>View File</span>
+                </button>
+
+                <button
+                  *ngIf="fundDetails.rejectionFilePath"
+                  (click)="
+                    openMediaViewer(
+                      fundDetails.rejectionFilePath,
+                      'Rejection File',
+                      'file'
+                    )
+                  "
+                  class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-red-50 hover:bg-red-100 text-red-700 font-medium rounded-lg transition-all duration-200 text-xs focus:outline-none focus:ring-2 focus:ring-red-300"
+                >
+                  <span class="material-symbols-outlined text-sm"
+                    >description</span
+                  >
+                  <span>View Rejection File</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2188,7 +2236,6 @@
     (click)="$event.stopPropagation()"
   >
     <div class="p-7">
-
       <div
         class="flex items-center justify-center w-14 h-14 mx-auto bg-gradient-to-br from-cyan-100 to-sky-100 rounded-2xl mb-5"
       >
@@ -2197,23 +2244,16 @@
         </span>
       </div>
 
-
       <div class="text-center mb-7">
-
-        <h3 class="text-lg font-extrabold text-gray-800 mb-2">
-          Resend Thread
-        </h3>
+        <h3 class="text-lg font-extrabold text-gray-800 mb-2">Resend Thread</h3>
 
         <p class="text-sm text-gray-500 leading-relaxed font-medium">
           Are you sure you want to resend this thread? This will attempt to
           re-send notifications / processing.
         </p>
-
       </div>
 
-
       <div class="flex gap-3">
-
         <button
           (click)="closeModals()"
           class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-3 rounded-xl transition"
@@ -2221,16 +2261,13 @@
           Cancel
         </button>
 
-
         <button
           (click)="confirmResend()"
           class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:opacity-90 transition active:scale-95"
         >
           Resend
         </button>
-
       </div>
-
     </div>
   </div>
 </div>
@@ -2248,7 +2285,6 @@
     (click)="$event.stopPropagation()"
   >
     <div class="p-7">
-
       <div
         class="flex items-center justify-center w-14 h-14 mx-auto bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl mb-5"
       >
@@ -2257,23 +2293,16 @@
         </span>
       </div>
 
-
       <div class="text-center mb-7">
-
-        <h3 class="text-lg font-extrabold text-gray-800 mb-2">
-          Reject Thread
-        </h3>
+        <h3 class="text-lg font-extrabold text-gray-800 mb-2">Reject Thread</h3>
 
         <p class="text-sm text-gray-500 leading-relaxed font-medium">
           Are you sure you want to reject this thread? This action will mark it
           as rejected.
         </p>
-
       </div>
 
-
       <div class="flex gap-3">
-
         <button
           (click)="closeModals()"
           class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-3 rounded-xl transition"
@@ -2281,16 +2310,13 @@
           Cancel
         </button>
 
-
         <button
           (click)="confirmRejection()"
           class="flex-1 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:opacity-90 transition active:scale-95"
         >
           Reject
         </button>
-
       </div>
-
     </div>
   </div>
 </div>
@@ -2308,7 +2334,6 @@
     (click)="$event.stopPropagation()"
   >
     <div class="p-7">
-
       <div
         class="flex items-center justify-center w-14 h-14 mx-auto bg-gradient-to-br from-violet-100 to-fuchsia-100 rounded-2xl mb-5"
       >
@@ -2323,7 +2348,8 @@
         </h3>
 
         <p class="text-sm text-gray-500 leading-relaxed">
-          Edit account number and IFSC, add an optional reason, then send to the user.
+          Edit account number and IFSC, add an optional reason, then send to the
+          user.
         </p>
       </div>
 
@@ -2340,7 +2366,6 @@
         />
       </div>
 
-
       <div class="mb-5">
         <label class="block text-sm font-bold text-gray-700 mb-2">
           IFSC Code *
@@ -2353,7 +2378,6 @@
           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-300 outline-none"
         />
       </div>
-
 
       <div class="mb-6">
         <label class="block text-sm font-bold text-gray-700 mb-2">
@@ -2368,9 +2392,7 @@
         ></textarea>
       </div>
 
-
       <div class="flex gap-3">
-
         <button
           (click)="closeModals()"
           class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-3 rounded-xl transition"
@@ -2378,16 +2400,13 @@
           Cancel
         </button>
 
-
         <button
           (click)="sendEditedPayout()"
           class="flex-1 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:opacity-90 transition"
         >
           Send
         </button>
-
       </div>
-
     </div>
   </div>
 </div>
