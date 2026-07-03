@@ -1,5 +1,3 @@
-
-
 import {
   Component,
   Input,
@@ -191,7 +189,7 @@ export class HeadNavHeaderComponent implements OnInit {
   upiBalance: any = 0;
   isCountdownFinished: boolean = false;
   role: any;
-
+  private retryTimeout: any;
   payinTime: string | null = null;
   // Popup state
   portalPopupOpen = false;
@@ -254,6 +252,13 @@ export class HeadNavHeaderComponent implements OnInit {
           this.emitBalances();
         });
       });
+  }
+
+  ngOnDestroy(): void {
+    this.clearCountdown();
+    if (this.retryTimeout) {
+      clearTimeout(this.retryTimeout);
+    }
   }
 
   getCurrencySymbol(parentCurrency: string): string {
@@ -411,7 +416,6 @@ export class HeadNavHeaderComponent implements OnInit {
     return "₹" + Number(amount).toLocaleString("en-IN");
   }
 
-
   changePayinStatus() {
     this.headServices.toggleDashbaordPayin(this.headId).subscribe(() => {
       this.payinStatus = !this.payinStatus;
@@ -498,11 +502,33 @@ export class HeadNavHeaderComponent implements OnInit {
   getPayinStatus() {
     this.headServices.getHeadById(this.headId).subscribe((res: any) => {
       this.payinStatus = res?.payin ?? false;
-      this.payinTime = res?.payinTime ?? null;
+      const newPayinTime = res?.payinTime ?? null;
 
-      if (!this.payinStatus && this.payinTime) {
-        this.startCountdown(this.payinTime);
+      // Agar payinStatus false hai aur payinTime aaya hai, to check karo
+      // ki wo time genuinely future me hai ya already expire ho chuka hai
+      if (!this.payinStatus && newPayinTime) {
+        const target = new Date(newPayinTime).getTime();
+
+        if (target > Date.now()) {
+          // valid future time - countdown start karo
+          this.payinTime = newPayinTime;
+          this.isCountdownFinished = false;
+          this.startCountdown(newPayinTime);
+        } else {
+          // stale/expired time - backend abhi tak update nahi hua
+          // yahan loop rok do aur thodi der baad dobara check karo
+          this.payinTime = null;
+          this.isCountdownFinished = true;
+          this.clearCountdown();
+
+          setTimeout(() => {
+            this.getPayinStatus();
+          }, 15000); // 15 sec baad retry
+        }
       } else {
+        // payinStatus true hai ya payinTime hi nahi hai
+        this.payinTime = newPayinTime;
+        this.isCountdownFinished = false;
         this.clearCountdown();
       }
     });

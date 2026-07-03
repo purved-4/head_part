@@ -1,4 +1,3 @@
-
 import {
   AfterViewInit,
   Component,
@@ -19,6 +18,7 @@ import { HeadService } from "../../../pages/services/head.service";
 import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { ChiefService } from "../../../pages/services/chief.service";
 import { BranchService } from "../../../pages/services/branch.service";
+import { LoaderService } from "../../../pages/services/loader.service";
 
 Chart.register(...registerables);
 
@@ -204,6 +204,7 @@ export class HeadBranchDashboardComponent
     private multimediaService: MultimediaService,
     private chiefService: ChiefService,
     private branchService: BranchService,
+    private loaderService: LoaderService,
   ) {}
 
   ngOnInit(): void {
@@ -280,10 +281,13 @@ export class HeadBranchDashboardComponent
   }
 
   changePayinStatus() {
+    this.loaderService.showButtonLoader();
     if (this.role === "HEAD") {
       this.headService.toggleDashbaordPayin(this.entityId).subscribe(
         () => {
           this.payinStatus = !this.payinStatus;
+
+          this.loaderService.hideButtonLoader();
 
           this.snackbar.show(
             `Payin ${this.payinStatus ? "enabled" : "disabled"} successfully`,
@@ -291,6 +295,8 @@ export class HeadBranchDashboardComponent
           );
         },
         (err) => {
+          this.loaderService.hideButtonLoader();
+
           this.snackbar.show(
             err?.error?.message || "Failed to change payin status",
             false,
@@ -302,12 +308,16 @@ export class HeadBranchDashboardComponent
         () => {
           this.payinStatus = !this.payinStatus;
 
+          this.loaderService.hideButtonLoader();
+
           this.snackbar.show(
             `Payin ${this.payinStatus ? "enabled" : "disabled"} successfully`,
             true,
           );
         },
         (err) => {
+          this.loaderService.hideButtonLoader();
+
           this.snackbar.show(
             err?.error?.message || "Failed to change payin status",
             false,
@@ -1412,6 +1422,8 @@ export class HeadBranchDashboardComponent
   async approveTransaction(transaction: any): Promise<void> {
     if (!transaction) return;
 
+    this.loaderService.showButtonLoader();
+
     const t = this.normalizeTransaction(transaction) || transaction;
 
     const fundId =
@@ -1443,8 +1455,6 @@ export class HeadBranchDashboardComponent
         if (this.selectedFile) {
           formData.append("file", this.selectedFile, this.selectedFile.name);
         }
-
-
 
         await lastValueFrom(this.fundService.acceptPayout(fundId, formData));
       }
@@ -1507,6 +1517,8 @@ export class HeadBranchDashboardComponent
       this.updateChartsFromData();
       this.clampPages();
       this.ensureProcessingTimerState();
+
+      this.loaderService.hideButtonLoader();
     } catch (err: any) {
       const message =
         err?.error?.message || err?.error?.error || "Approval failed";
@@ -1539,6 +1551,8 @@ export class HeadBranchDashboardComponent
 
       this.resetRejectReason();
       this.refreshCachedLists();
+
+      this.loaderService.hideButtonLoader();
     }
   }
 
@@ -1562,6 +1576,8 @@ export class HeadBranchDashboardComponent
       return;
     }
 
+    this.loaderService.showButtonLoader();
+
     // Prepare update data
     const updateData = {
       fundId: this.selectedTransaction.id,
@@ -1574,7 +1590,18 @@ export class HeadBranchDashboardComponent
 
     this.fundService
       .updateAmount(updateData, this.editAmountData.file)
-      .subscribe((res) => {});
+      .subscribe({
+        next: (res) => {
+          this.loaderService.hideButtonLoader();
+        },
+        error: (err) => {
+          this.loaderService.hideButtonLoader();
+          this.snackbar.show(
+            err?.error?.message || "Failed to update amount",
+            false,
+          );
+        },
+      });
 
     // Update transaction in UI
     this.selectedTransaction.amount = this.editAmountData.newAmount;
@@ -1594,6 +1621,7 @@ export class HeadBranchDashboardComponent
     if (transaction.processing && label !== "Process") return;
 
     transaction._apiPending = true;
+    this.loaderService.showButtonLoader();
 
     this.fundService
       .updateProcessingStatus(transaction.id, this.entityId, this.role)
@@ -1636,6 +1664,7 @@ export class HeadBranchDashboardComponent
           }
 
           this.refreshCachedLists();
+          this.loaderService.hideButtonLoader();
         },
         error: (err) => {
           transaction._apiPending = false;
@@ -1645,6 +1674,7 @@ export class HeadBranchDashboardComponent
             err?.error?.message || err?.error?.error || "Processing failed";
           this.snackbar.show(message, false);
           this.ensureProcessingTimerState();
+          this.loaderService.hideButtonLoader();
         },
       });
   }
@@ -1766,6 +1796,8 @@ export class HeadBranchDashboardComponent
   ): Promise<void> {
     if (!transaction) return;
 
+    this.loaderService.showButtonLoader();
+
     const t = this.normalizeTransaction(transaction) || transaction;
     const fundId =
       t.fundId ||
@@ -1848,6 +1880,7 @@ export class HeadBranchDashboardComponent
       // Ensure file input reset etc.
       this.resetForm();
       this.refreshCachedLists();
+      this.loaderService.hideButtonLoader();
     }
   }
 

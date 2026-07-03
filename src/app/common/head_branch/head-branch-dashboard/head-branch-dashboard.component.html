@@ -204,6 +204,7 @@
                   >
                     <!-- Approve -->
                     <button
+                      appButtonLoader
                       (click)="openApproveConfirm(transaction)"
                       class="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center hover:bg-green-50 transition"
                     >
@@ -215,6 +216,7 @@
 
                     <!-- Reject -->
                     <button
+                      appButtonLoader
                       (click)="openRejectConfirm(transaction)"
                       class="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center hover:bg-red-50 transition"
                     >
@@ -351,6 +353,7 @@
                 <div class="flex items-center gap-2 flex-wrap mt-2">
                   <!-- Process timer button -->
                   <button
+                    appButtonLoader
                     (click)="
                       onProcessingClick(transaction); $event.stopPropagation()
                     "
@@ -411,6 +414,7 @@
                   >
                     <!-- Approve -->
                     <button
+                      appButtonLoader
                       (click)="openApproveConfirm(transaction)"
                       [disabled]="!transaction.processing"
                       class="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center hover:bg-green-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
@@ -423,6 +427,7 @@
 
                     <!-- Reject -->
                     <button
+                      appButtonLoader
                       (click)="openRejectConfirm(transaction)"
                       [disabled]="!transaction.processing"
                       class="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center hover:bg-red-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
@@ -609,6 +614,7 @@
               <div class="flex items-center gap-2 flex-wrap mt-2">
                 <!-- PROCESS BUTTON -->
                 <button
+                  appButtonLoader
                   *ngIf="transaction.type === 'payout'"
                   [disabled]="transaction.processing"
                   (click)="onProcessingClickMobile($event, transaction)"
@@ -672,6 +678,7 @@
                 >
                   <!-- APPROVE -->
                   <button
+                    appButtonLoader
                     (click)="openApproveConfirm(transaction)"
                     [disabled]="
                       transaction.type === 'payout' && !transaction.processing
@@ -687,6 +694,7 @@
 
                   <!-- REJECT -->
                   <button
+                    appButtonLoader
                     (click)="openRejectConfirm(transaction)"
                     [disabled]="
                       transaction.type === 'payout' && !transaction.processing
@@ -968,6 +976,7 @@
             Cancel
           </button>
           <button
+            appButtonLoader
             (click)="saveEditedAmount()"
             [disabled]="
               !editAmountData.newAmount || editAmountData.newAmount <= 0
@@ -1233,6 +1242,7 @@
           </button>
 
           <button
+            appButtonLoader
             (click)="confirmApprove()"
             class="flex-1 h-11 rounded-lg bg-[var(--color-success)] text-white text-[12px] font-bold shadow-lg shadow-[var(--color-success)]/20 hover:opacity-90 transition"
           >
@@ -1482,6 +1492,7 @@
           </button>
 
           <button
+            appButtonLoader
             (click)="confirmReject()"
             [disabled]="
               !reason ||
@@ -1943,6 +1954,7 @@
       <!-- Action Buttons -->
       <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
         <button
+          appButtonLoader
           (click)="openApproveConfirm(selectedTransaction)"
           [disabled]="
             selectedTransaction.type === 'payout' &&
@@ -1953,6 +1965,7 @@
           Approve
         </button>
         <button
+          appButtonLoader
           (click)="openRejectConfirm(selectedTransaction)"
           [disabled]="
             selectedTransaction.type === 'payout' &&
