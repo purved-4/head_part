@@ -1991,10 +1991,7 @@ export class HeadBranchDashboardComponent
 
     try {
       if (this.isPayoutActionBlocked(this.confirmTransaction)) {
-        this.snackbar.show(
-          "Processing complete hone ke baad reject kar sakte ho",
-          false,
-        );
+        this.snackbar.show("You can Approve after Processing", false);
         return;
       }
 

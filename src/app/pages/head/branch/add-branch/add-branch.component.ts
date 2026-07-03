@@ -262,6 +262,7 @@ export class AddBranchComponent implements OnInit {
       return;
     }
 
+    // Validate only filled percentage fields
     for (const compartId of compartIds) {
       const fttCtrl = this.chiefForm.get(`first_payin_${compartId}`);
       const payinCtrl = this.chiefForm.get(`payin_${compartId}`);
@@ -271,13 +272,23 @@ export class AddBranchComponent implements OnInit {
       payinCtrl?.markAsTouched();
       payoutCtrl?.markAsTouched();
 
+      const fttValue = fttCtrl?.value;
+      const payinValue = payinCtrl?.value;
+      const payoutValue = payoutCtrl?.value;
+
       if (
-        !this.isValidPercentage(fttCtrl?.value) ||
-        !this.isValidPercentage(payinCtrl?.value) ||
-        !this.isValidPercentage(payoutCtrl?.value)
+        (fttValue != null &&
+          fttValue !== "" &&
+          !this.isValidPercentage(fttValue)) ||
+        (payinValue != null &&
+          payinValue !== "" &&
+          !this.isValidPercentage(payinValue)) ||
+        (payoutValue != null &&
+          payoutValue !== "" &&
+          !this.isValidPercentage(payoutValue))
       ) {
         this.snackService.show(
-          "Please enter valid Payin, Payout & FTT percentages for all selected comparts",
+          "Please enter valid Payin, Payout & FTT percentages",
           false,
           4000,
         );
@@ -288,21 +299,42 @@ export class AddBranchComponent implements OnInit {
     const compartPercentages: Record<
       string,
       {
-        fttPercentage: number;
-        payinPercentage: number;
-        payoutPercentage: number;
+        fttPercentage?: number;
+        payinPercentage?: number;
+        payoutPercentage?: number;
       }
     > = {};
 
     compartIds.forEach((id) => {
-      compartPercentages[id] = {
-        fttPercentage: Number(this.chiefForm.get(`first_payin_${id}`)?.value),
-        payinPercentage: Number(this.chiefForm.get(`payin_${id}`)?.value),
-        payoutPercentage: Number(this.chiefForm.get(`payout_${id}`)?.value),
-      };
+      const ftt = this.chiefForm.get(`first_payin_${id}`)?.value;
+      const payin = this.chiefForm.get(`payin_${id}`)?.value;
+      const payout = this.chiefForm.get(`payout_${id}`)?.value;
+
+      const percentage: {
+        fttPercentage?: number;
+        payinPercentage?: number;
+        payoutPercentage?: number;
+      } = {};
+
+      if (ftt != null && ftt !== "") {
+        percentage.fttPercentage = Number(ftt);
+      }
+
+      if (payin != null && payin !== "") {
+        percentage.payinPercentage = Number(payin);
+      }
+
+      if (payout != null && payout !== "") {
+        percentage.payoutPercentage = Number(payout);
+      }
+
+      // Add only if at least one value is filled
+      if (Object.keys(percentage).length > 0) {
+        compartPercentages[id] = percentage;
+      }
     });
 
-    const payload: any = {
+    const payload = {
       username: this.chiefForm.value.username,
       userEmail: this.chiefForm.value.userEmail,
       userPassword: this.chiefForm.value.userPassword,
@@ -313,6 +345,7 @@ export class AddBranchComponent implements OnInit {
       createdById: this.currentUserId,
       createdByType: this.role,
     };
+
     this.loading = true;
 
     this.branchService.addBranch(payload).subscribe({
@@ -376,14 +409,4 @@ export class AddBranchComponent implements OnInit {
   closeModal() {
     this.showPercentageModal = false;
   }
-
-  // openCompartPercentModal() {
-  //   // this.selectedWebsiteId = website;
-
-  //   this.showCompartModal = true;
-  // }
-
-  // closeCompartPercentModal() {
-  //   this.showCompartModal = false;
-  // }
 }
