@@ -417,13 +417,16 @@ export class HeadNavHeaderComponent implements OnInit {
   }
 
   changePayinStatus() {
-    this.headServices.toggleDashbaordPayin(this.headId).subscribe(() => {
-      this.payinStatus = !this.payinStatus;
+    this.headServices.toggleDashbaordPayin(this.headId).subscribe({
+      next: () => {
+        this.snack.show("Payin status updated successfully", true);
 
-      this.snack.show(
-        `Payin ${this.payinStatus ? "enabled" : "disabled"} successfully`,
-        true,
-      );
+        // Latest status aur payinTime ek baar fetch karo
+        this.getPayinStatus();
+      },
+      error: () => {
+        this.snack.show("Failed to update payin status", false);
+      },
     });
   }
 
@@ -500,37 +503,35 @@ export class HeadNavHeaderComponent implements OnInit {
     return this.notificationUnreadCount;
   }
   getPayinStatus() {
-    this.headServices.getHeadById(this.headId).subscribe((res: any) => {
-      this.payinStatus = res?.payin ?? false;
-      const newPayinTime = res?.payinTime ?? null;
+    this.headServices.getHeadById(this.headId).subscribe({
+      next: (res: any) => {
+        this.payinStatus = res?.payin ?? false;
 
-      // Agar payinStatus false hai aur payinTime aaya hai, to check karo
-      // ki wo time genuinely future me hai ya already expire ho chuka hai
-      if (!this.payinStatus && newPayinTime) {
-        const target = new Date(newPayinTime).getTime();
+        const newPayinTime = res?.payinTime ?? null;
 
-        if (target > Date.now()) {
-          // valid future time - countdown start karo
-          this.payinTime = newPayinTime;
-          this.isCountdownFinished = false;
-          this.startCountdown(newPayinTime);
+        if (!this.payinStatus && newPayinTime) {
+          const target = new Date(newPayinTime).getTime();
+
+          if (target > Date.now()) {
+            this.payinTime = newPayinTime;
+            this.isCountdownFinished = false;
+            this.startCountdown(newPayinTime);
+          } else {
+            this.payinTime = null;
+            this.isCountdownFinished = true;
+            this.countdown = "";
+            this.clearCountdown();
+          }
         } else {
-          // stale/expired time - backend abhi tak update nahi hua
-          // yahan loop rok do aur thodi der baad dobara check karo
           this.payinTime = null;
-          this.isCountdownFinished = true;
+          this.countdown = "";
+          this.isCountdownFinished = false;
           this.clearCountdown();
-
-          setTimeout(() => {
-            this.getPayinStatus();
-          }, 15000); // 15 sec baad retry
         }
-      } else {
-        // payinStatus true hai ya payinTime hi nahi hai
-        this.payinTime = newPayinTime;
-        this.isCountdownFinished = false;
+      },
+      error: () => {
         this.clearCountdown();
-      }
+      },
     });
   }
   startCountdown(payinTime: string) {
@@ -544,7 +545,10 @@ export class HeadNavHeaderComponent implements OnInit {
       if (diff <= 0) {
         this.countdown = "";
         this.clearCountdown();
-        this.getPayinStatus(); // auto refresh
+
+        // Countdown khatam hone ke baad sirf ek baar refresh
+        this.getPayinStatus();
+
         return;
       }
 

@@ -35,15 +35,14 @@
 
     <!-- Quick Stats -->
 
-    <!-- MAIN GRID: Pending UPI, Pending Bank, Pending payouts -->
-    <!-- MAIN GRID: Pending PayIns + Pending Payouts -->
     <div class="hidden lg:flex gap-2.5 mb-4 md:mb-5 items-start">
+      <!-- ───────────── PENDING PAYINS ───────────── -->
       <!-- ───────────── PENDING PAYINS ───────────── -->
       <div class="w-[300px] flex-shrink-0">
         <div
           class="bg-[var(--color-surface)] rounded-lg overflow-hidden shadow-sm border border-[var(--color-border)]"
         >
-          <!-- Header -->
+          <!-- Main Header -->
           <div
             class="bg-[var(--color-secondary)]/20 p-2.5 border-b border-[var(--color-border)]"
           >
@@ -54,21 +53,25 @@
               <span
                 class="ml-2 text-[11px] font-bold px-2.5 py-1 rounded-full bg-[var(--color-info)]/20 text-[var(--color-secondary)] border border-[var(--color-info)]/50"
               >
-                {{ filteredPendingBank().length }}
+                {{
+                  filteredPendingUpi().length +
+                    filteredPendingBank().length +
+                    filteredPendingCrypto().length
+                }}
               </span>
             </h3>
             <p class="text-[11px] text-[var(--color-muted)] mt-1">
-              Awaiting approval for bank transfers
+              Awaiting approval for payins
             </p>
           </div>
 
-          <!-- Scrollable list -->
+          <!-- SINGLE SCROLL AREA — real-time order, no type sorting -->
           <div class="overflow-y-auto h-[600px] scrollbar-hide px-2">
             <div class="grid gap-2 py-1.5">
-              <!-- CARD -->
+              <!-- COMBINED LOOP: UPI + Bank + Crypto — jaisa data aaya waisa order -->
               <div
                 *ngFor="
-                  let transaction of cachedPendingBank;
+                  let transaction of cachedPendingPayinAll;
                   trackBy: trackById
                 "
                 (click)="viewTransactionDetails(transaction)"
@@ -76,24 +79,36 @@
               >
                 <!-- TOP ROW -->
                 <div class="flex items-start justify-between gap-2">
-                  <!-- LEFT -->
                   <div class="flex items-start gap-2 min-w-0">
-                    <!-- Icon -->
+                    <!-- ICON: mode ke hisaab se -->
                     <div
-                      class="w-9 h-9 rounded-lg bg-[var(--color-secondary)]/10 flex items-center justify-center flex-shrink-0"
+                      class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                      [ngClass]="{
+                        'bg-[var(--color-secondary)]/10':
+                          transaction.mode === 'upi' ||
+                          transaction.mode === 'bank',
+                        'bg-purple-100': transaction.mode === 'crypto',
+                      }"
                     >
                       <span
-                        class="material-symbols-outlined text-[var(--color-secondary)] text-[14px]"
+                        class="material-symbols-outlined text-[14px]"
+                        [ngClass]="{
+                          'text-[var(--color-secondary)]':
+                            transaction.mode === 'upi' ||
+                            transaction.mode === 'bank',
+                          'text-purple-600': transaction.mode === 'crypto',
+                        }"
                       >
                         {{
-                          transaction.fundtype === "UPI"
+                          transaction.mode === "upi"
                             ? "qr_code"
-                            : "account_balance"
+                            : transaction.mode === "crypto"
+                              ? "currency_bitcoin"
+                              : "account_balance"
                         }}
                       </span>
                     </div>
 
-                    <!-- Info -->
                     <div class="min-w-0">
                       <p
                         class="text-[13px] font-bold text-[var(--color-font)] truncate leading-tight"
@@ -105,45 +120,74 @@
                       >
                         {{ transaction.holderName || "Unknown" }}
                       </p>
+
+                      <!-- UPI sub-line -->
                       <p
+                        *ngIf="transaction.mode === 'upi'"
                         class="text-[11px] text-[var(--color-muted)] mt-0.5 truncate"
                       >
-                        {{ transaction.fundtype === "UPI" ? "UPI" : "Bank" }}-{{
-                          (transaction.fundtype === "UPI"
-                            ? transaction.upiId || transaction.vpa
-                            : transaction.accountNo) || "—"
-                        }}
+                        UPI-{{ transaction.upiId || transaction.vpa || "—" }}
                       </p>
+
+                      <!-- Bank sub-line -->
+                      <p
+                        *ngIf="transaction.mode === 'bank'"
+                        class="text-[11px] text-[var(--color-muted)] mt-0.5 truncate"
+                      >
+                        Bank-{{ transaction.accountNo || "—" }}
+                      </p>
+
+                      <!-- Crypto sub-line (badge) -->
+                      <span
+                        *ngIf="transaction.mode === 'crypto'"
+                        class="inline-block mt-0.5 text-[10px] font-bold px-1.5 py-[1px] rounded bg-purple-50 text-purple-600 border border-purple-200"
+                      >
+                        {{ transaction.cryptoType || transaction.raw?.type }}
+                      </span>
                     </div>
                   </div>
 
-                  <!-- RIGHT -->
                   <div class="text-right flex-shrink-0">
-                    <!-- Amount -->
                     <div
                       class="flex items-baseline justify-end gap-1 text-[16px] font-bold text-[var(--color-font)] leading-none"
                     >
                       <span class="text-[11px] opacity-70 uppercase">
-                        {{ transaction.parentCurrency }}
+                        {{
+                          transaction.mode === "crypto"
+                            ? transaction.currency
+                            : transaction.parentCurrency
+                        }}
                       </span>
-                      <span class="tabular-nums">{{ transaction.amount }}</span>
+                      <span class="tabular-nums">
+                        {{
+                          transaction.mode === "crypto"
+                            ? transaction.currencyWiseAmount
+                            : transaction.amount
+                        }}
+                      </span>
                     </div>
 
-                    <!-- UTR -->
+                    <!-- UTR only for UPI/Bank -->
                     <p
+                      *ngIf="transaction.mode !== 'crypto'"
                       class="text-[11px] text-[var(--color-muted)] font-medium whitespace-pre-line"
                     >
                       {{ formatUtrNumber(transaction.utrNumber) }}
                     </p>
 
-                    <!-- Time -->
                     <p class="text-[11px] text-[var(--color-muted)] mt-0.5">
-                      {{ transaction.date | date: "hh:mm a" }}
+                      {{ transaction.date | tz }}
                     </p>
 
-                    <!-- Currency conversion (if different) -->
+                    <span
+                      *ngIf="transaction.mode === 'crypto'"
+                      class="text-[11px] text-[var(--color-muted)]"
+                    >
+                      {{ transaction.parentCurrency }}-{{ transaction.amount }}
+                    </span>
                     <span
                       *ngIf="
+                        transaction.mode !== 'crypto' &&
                         transaction.amount !== transaction.currencyWiseAmount
                       "
                       class="text-[11px] text-[var(--color-muted)]"
@@ -157,7 +201,6 @@
 
                 <!-- MIDDLE TAGS -->
                 <div class="flex items-center gap-2 flex-wrap mt-2">
-                  <!-- Reward Eligibility -->
                   <span
                     class="px-2 py-[2px] rounded-lg text-[11px] font-semibold"
                     [ngClass]="{
@@ -176,9 +219,7 @@
 
                 <!-- BOTTOM ROW -->
                 <div class="flex items-center justify-between mt-2">
-                  <!-- Left tags -->
                   <div class="flex items-center gap-2">
-                    <!-- Time ago -->
                     <span
                       class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-blue-100 text-blue-700"
                     >
@@ -188,21 +229,18 @@
                           : getTimeAgo(transaction.date) + " ago"
                       }}
                     </span>
-
-                    <!-- PPI / RPI -->
                     <span
+                      *ngIf="transaction.mode !== 'crypto'"
                       class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700"
                     >
                       {{ transaction.ftt ? "RPI" : "PPI" }}
                     </span>
                   </div>
 
-                  <!-- Actions -->
                   <div
                     class="flex items-center gap-2"
                     (click)="$event.stopPropagation()"
                   >
-                    <!-- Approve -->
                     <button
                       appButtonLoader
                       (click)="openApproveConfirm(transaction)"
@@ -213,8 +251,6 @@
                         >check</span
                       >
                     </button>
-
-                    <!-- Reject -->
                     <button
                       appButtonLoader
                       (click)="openRejectConfirm(transaction)"
@@ -229,9 +265,9 @@
                 </div>
               </div>
 
-              <!-- EMPTY STATE -->
+              <!-- COMBINED EMPTY STATE -->
               <div
-                *ngIf="filteredPendingBank().length === 0"
+                *ngIf="cachedPendingPayinAll.length === 0"
                 class="flex flex-col items-center justify-center py-16"
               >
                 <div
@@ -246,7 +282,7 @@
                   No Pending Transactions
                 </p>
                 <p class="text-[11px] text-[var(--color-muted)] mt-1">
-                  All bank payins are completed
+                  All payins are completed
                 </p>
               </div>
             </div>
@@ -332,7 +368,7 @@
 
                     <!-- Time -->
                     <p class="text-[11px] text-[var(--color-muted)] mt-1.5">
-                      {{ transaction.date | date: "hh:mm a" }}
+                      {{ transaction.date | tz }}
                     </p>
 
                     <!-- Currency conversion (if different) -->
@@ -774,9 +810,7 @@
               >Type</span
             >
             <span class="font-bold text-[var(--color-font)]">
-              {{
-                selectedTransaction.mode === "upi" ? "UPI payin" : "Bank payin"
-              }}
+              {{ selectedTransaction.mode }}
             </span>
           </div>
           <div class="flex justify-between items-center">
@@ -1313,7 +1347,7 @@
               >Date</span
             >
             <span class="font-medium text-[var(--color-muted)] text-[12px]">{{
-              confirmTransaction.date | date: "short"
+              confirmTransaction.date | tz
             }}</span>
           </div>
         </div>
@@ -1521,7 +1555,6 @@
 
 <!-- Transaction Detail Modal -->
 
-<!-- Transaction Detail Modal -->
 <div
   *ngIf="selectedTransaction"
   class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn"
@@ -1551,6 +1584,7 @@
           <span class="material-symbols-outlined text-[14px]">swap_horiz</span>
           UPI payin
         </span>
+
         <!-- Bank badge -->
         <span
           *ngIf="
@@ -1565,6 +1599,20 @@
           >
           Bank payin
         </span>
+
+        <!-- Crypto badge -->
+        <span
+          *ngIf="selectedTransaction.mode === 'crypto'"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 border border-purple-200 text-purple-700 text-sm font-medium"
+        >
+          <span class="material-symbols-outlined text-[14px]"
+            >currency_bitcoin</span
+          >
+          Crypto payin ({{
+            selectedTransaction.cryptoType || selectedTransaction.raw?.type
+          }})
+        </span>
+
         <!-- Payout badge -->
         <span
           *ngIf="selectedTransaction.type === 'payout'"
@@ -1639,13 +1687,22 @@
                     Amount
                   </p>
                   <p class="font-bold text-emerald-600 text-lg">
-                    ₹{{ selectedTransaction.amount | number }}
+                    {{
+                      selectedTransaction.mode === "crypto"
+                        ? (selectedTransaction.currencyWiseAmount | number) +
+                          " " +
+                          selectedTransaction.currency
+                        : "₹" + (selectedTransaction.amount | number)
+                    }}
                   </p>
                 </div>
+
+                <!-- Edit button — UPI / Bank / Crypto teeno ke liye -->
                 <button
                   *ngIf="
                     selectedTransaction.mode === 'upi' ||
-                    selectedTransaction.mode === 'bank'
+                    selectedTransaction.mode === 'bank' ||
+                    selectedTransaction.mode === 'crypto'
                   "
                   (click)="openEditAmountPopup()"
                   class="p-1.5 rounded-lg hover:bg-white/60 transition"
@@ -1656,6 +1713,7 @@
                 </button>
               </div>
             </div>
+
             <div class="p-4 rounded-xl border border-gray-200 bg-white">
               <p
                 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
@@ -1790,6 +1848,73 @@
                 UTR / Transaction ID
               </p>
               <p class="font-bold text-gray-800">
+                {{ selectedTransaction.utrNumber }}
+              </p>
+            </div>
+          </ng-container>
+
+          <!-- ── CRYPTO FIELDS ── -->
+          <ng-container *ngIf="selectedTransaction.mode === 'crypto'">
+            <!-- Network / Crypto Type -->
+            <div
+              class="p-4 rounded-xl border border-purple-100 bg-purple-50/40"
+            >
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+              >
+                Network
+              </p>
+              <span
+                class="inline-block font-bold text-purple-700 text-base px-2 py-0.5 rounded bg-purple-100 border border-purple-200"
+              >
+                {{
+                  selectedTransaction.cryptoType ||
+                    selectedTransaction.raw?.type
+                }}
+              </span>
+            </div>
+
+            <!-- Wallet Address (MASKED) -->
+            <div class="p-4 rounded-xl border border-gray-200 bg-white">
+              <div class="flex items-center justify-between mb-1">
+                <p
+                  class="text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                >
+                  Wallet address
+                </p>
+
+                <button
+                  type="button"
+                  (click)="copyWalletAddress()"
+                  class="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Copy
+                </button>
+              </div>
+
+              <p
+                class="font-bold text-gray-800 text-base font-mono tracking-wide break-all"
+              >
+                {{
+                  maskWalletAddress(
+                    selectedTransaction.walletAddress ||
+                      selectedTransaction.raw?.walletAddress
+                  )
+                }}
+              </p>
+            </div>
+
+            <!-- Transaction Hash / UTR -->
+            <div
+              *ngIf="selectedTransaction.utrNumber"
+              class="p-4 rounded-xl border border-gray-200 bg-white"
+            >
+              <p
+                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
+              >
+                Transaction hash
+              </p>
+              <p class="font-bold text-gray-800 break-all">
                 {{ selectedTransaction.utrNumber }}
               </p>
             </div>
