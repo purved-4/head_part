@@ -42,8 +42,11 @@ export class ChiefManualService {
       .pipe(map((response: any) => response.data));
   }
 
-  approveManual(id: string, payload: any) {
-    return this.http.post(`${baseUrl}/manual/approve/${id}`, payload);
+  approveManual(id: string, headId: any, payload: any) {
+    return this.http.post(
+      `${baseUrl}/manual/approve/${id}?headId=${headId}`,
+      payload,
+    );
   }
 
   rejectManual(id: string) {

@@ -438,7 +438,7 @@ export class PendingAutoComponent implements OnInit {
 
     // Call approveManual with the payload
     this.chiefAutoService
-      .approveManual(this.pendingApprovalId, approvalPayload)
+      .approveManual(this.pendingApprovalId, this.userId, approvalPayload)
       .pipe(
         finalize(() => {
           this.modalLoading = false;
