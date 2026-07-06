@@ -1,0 +1,835 @@
+<div class="min-h-screen py-6 px-4 sm:px-6 lg:px-8 bg-[var(--color-bg)]">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+      >
+        <div class="flex items-center gap-3">
+          <div class="p-3 bg-[var(--color-primary)] rounded-lg shadow-sm">
+            <span class="material-symbols-outlined text-white text-2xl"
+              >pending_actions</span
+            >
+          </div>
+          <div>
+            <h1
+              class="text-2xl sm:text-3xl font-semibold text-[var(--color-font)]"
+            >
+              Auto Request Manager
+            </h1>
+            <p class="text-sm text-[var(--color-muted)] mt-1">
+              Review and manage auto requests
+            </p>
+          </div>
+        </div>
+        <div
+          class="flex items-center gap-2 px-4 py-3 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]"
+        >
+          <span
+            class="material-symbols-outlined text-2xl text-[var(--color-primary)]"
+            >assignment</span
+          >
+          <div>
+            <p class="text-xs text-[var(--color-muted)]">Total Requests</p>
+            <p class="text-2xl font-semibold text-[var(--color-font)]">
+              {{ totalItems }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div
+      class="mb-6 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] p-1"
+    >
+      <div class="flex gap-1">
+        <!-- Pending Tab -->
+        <button
+          (click)="switchTab('pending')"
+          class="flex-1 px-3 sm:px-4 py-2.5 text-sm font-medium rounded-md flex items-center justify-center gap-2"
+          [ngClass]="{
+            'bg-[var(--color-primary)] text-white': activeTab === 'pending',
+            'bg-[var(--color-border)] text-[var(--color-font)]':
+              activeTab !== 'pending',
+          }"
+        >
+          <span class="material-symbols-outlined text-base"
+            >pending_actions</span
+          >
+          <span class="hidden sm:inline">Pending</span>
+          <span
+            class="px-1.5 py-0.5 text-xs rounded-full"
+            [ngClass]="{
+              'bg-white text-[var(--color-primary)]': activeTab === 'pending',
+              'bg-[var(--color-muted)] text-white': activeTab !== 'pending',
+            }"
+          >
+            {{ getPendingCount() }}
+          </span>
+        </button>
+
+        <!-- Approved Tab -->
+        <button
+          (click)="switchTab('approved')"
+          class="flex-1 px-3 sm:px-4 py-2.5 text-sm font-medium rounded-md flex items-center justify-center gap-2"
+          [ngClass]="{
+            'bg-[var(--color-success)] text-white': activeTab === 'approved',
+            'bg-[var(--color-border)] text-[var(--color-font)]':
+              activeTab !== 'approved',
+          }"
+        >
+          <span class="material-symbols-outlined text-base">check_circle</span>
+          <span class="hidden sm:inline">Approved</span>
+          <span
+            class="px-1.5 py-0.5 text-xs rounded-full"
+            [ngClass]="{
+              'bg-white text-[var(--color-success)]': activeTab === 'approved',
+              'bg-[var(--color-muted)] text-white': activeTab !== 'approved',
+            }"
+          >
+            {{ getApprovedCount() }}
+          </span>
+        </button>
+
+        <!-- Rejected Tab -->
+        <button
+          (click)="switchTab('rejected')"
+          class="flex-1 px-3 sm:px-4 py-2.5 text-sm font-medium rounded-md flex items-center justify-center gap-2"
+          [ngClass]="{
+            'bg-[var(--color-danger)] text-white': activeTab === 'rejected',
+            'bg-[var(--color-border)] text-[var(--color-font)]':
+              activeTab !== 'rejected',
+          }"
+        >
+          <span class="material-symbols-outlined text-base">cancel</span>
+          <span class="hidden sm:inline">Rejected</span>
+          <span
+            class="px-1.5 py-0.5 text-xs rounded-full"
+            [ngClass]="{
+              'bg-white text-[var(--color-danger)]': activeTab === 'rejected',
+              'bg-[var(--color-muted)] text-white': activeTab !== 'rejected',
+            }"
+          >
+            {{ getRejectedCount() }}
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Card -->
+    <div
+      class="bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] overflow-hidden"
+    >
+      <!-- Filter Bar -->
+      <div
+        class="bg-[var(--color-bg)] px-6 py-4 border-b border-[var(--color-border)]"
+      >
+        <div class="space-y-3">
+          <!-- Row 1: Search and Filters -->
+          <div class="flex flex-col sm:flex-row gap-3">
+            <!-- Search Input -->
+            <div class="flex-1 relative">
+              <span
+                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-lg text-[var(--color-muted)]"
+                >search</span
+              >
+              <input
+                #searchInput
+                type="text"
+                placeholder="Search by name, email, phone..."
+                [value]="searchTerm"
+                (input)="onSearch($event)"
+                class="w-full pl-10 pr-4 py-2 border border-[var(--color-border)] rounded-md text-sm bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+              />
+            </div>
+
+            <!-- Date Filter -->
+            <select
+              [value]="dateFilter"
+              (change)="onDateFilterChange($event)"
+              class="px-4 py-2 border border-[var(--color-border)] rounded-md text-sm bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+            >
+              <option value="all">All Dates</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
+
+            <!-- View Toggle -->
+            <div
+              class="hidden sm:flex items-center gap-1 p-1 bg-[var(--color-surface)] rounded-md border border-[var(--color-border)]"
+            >
+              <button
+                (click)="viewMode = 'table'"
+                [class.bg-[var(--color-primary)]]="viewMode === 'table'"
+                [class.text-white]="viewMode === 'table'"
+                [class.text-[var(--color-font)]]="viewMode !== 'table'"
+                class="p-1.5 rounded transition-all duration-200"
+                title="Table View"
+              >
+                <span class="material-symbols-outlined text-base"
+                  >table_rows</span
+                >
+              </button>
+              <button
+                (click)="viewMode = 'grid'"
+                [class.bg-[var(--color-primary)]]="viewMode === 'grid'"
+                [class.text-white]="viewMode === 'grid'"
+                [class.text-[var(--color-font)]]="viewMode !== 'grid'"
+                class="p-1.5 rounded transition-all duration-200"
+                title="Grid View"
+              >
+                <span class="material-symbols-outlined text-base"
+                  >grid_view</span
+                >
+              </button>
+            </div>
+
+            <!-- Clear Button -->
+            <button
+              (click)="clearFilters()"
+              class="px-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)] rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 justify-center"
+            >
+              <span class="material-symbols-outlined text-base">clear</span>
+              <span class="hidden sm:inline">Clear</span>
+            </button>
+          </div>
+
+          <!-- Row 2: Results Info -->
+          <div
+            class="text-xs bg-[var(--color-hover)] text-[var(--color-muted)] px-3 py-2 rounded border border-[var(--color-border)]"
+          >
+            <span
+              >Showing
+              <span class="font-medium text-[var(--color-font)]">{{
+                (currentPage - 1) * pageSize + 1
+              }}</span>
+              to
+              <span class="font-medium text-[var(--color-font)]">{{
+                Math.min(currentPage * pageSize, totalItems)
+              }}</span>
+              of
+              <span class="font-medium text-[var(--color-font)]">{{
+                totalItems
+              }}</span>
+              requests</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Success Message -->
+      <div
+        *ngIf="successMessage"
+        class="bg-[var(--color-hover)] border-l-4 border-[var(--color-success)] px-4 py-3"
+      >
+        <div class="flex items-center gap-2">
+          <span
+            class="material-symbols-outlined text-lg text-[var(--color-success)]"
+            >check_circle</span
+          >
+          <p class="text-sm text-[var(--color-success)]">
+            {{ successMessage }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="p-12 text-center">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--color-hover)] mb-4"
+        >
+          <span
+            class="material-symbols-outlined text-3xl text-[var(--color-primary)] animate-spin"
+            >refresh</span
+          >
+        </div>
+        <p class="font-medium text-[var(--color-font)]">Loading requests...</p>
+      </div>
+
+      <!-- TABLE VIEW -->
+      <div
+        class="hidden sm:block overflow-x-auto"
+        *ngIf="!loading && paginatedBranches.length > 0 && viewMode === 'table'"
+      >
+        <table class="w-full divide-y divide-[var(--color-border)] text-sm">
+          <thead
+            class="bg-[var(--color-bg)] border-b border-[var(--color-border)]"
+          >
+            <tr>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium uppercase text-[var(--color-muted)]"
+              >
+                Name
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium uppercase text-[var(--color-muted)]"
+              >
+                Email
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium uppercase text-[var(--color-muted)]"
+              >
+                Phone
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium uppercase text-[var(--color-muted)]"
+              >
+                Status
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium uppercase text-[var(--color-muted)]"
+              >
+                Created
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium uppercase text-[var(--color-muted)]"
+              >
+                Updated
+              </th>
+              <th
+                *ngIf="activeTab === 'pending'"
+                class="px-6 py-3 text-center text-xs font-medium uppercase text-[var(--color-muted)]"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+
+          <tbody
+            class="bg-[var(--color-surface)] divide-y divide-[var(--color-border)]"
+          >
+            <tr
+              *ngFor="let branch of paginatedBranches"
+              class="hover:bg-[var(--color-hover)]"
+            >
+              <td class="px-6 py-3 whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-8 h-8 rounded bg-[var(--color-border)] flex items-center justify-center"
+                  >
+                    <span
+                      class="material-symbols-outlined text-base text-[var(--color-muted)]"
+                      >person</span
+                    >
+                  </div>
+                  <span class="font-medium text-[var(--color-font)]">{{
+                    parsePayload(branch.requestPayload)?.username || "—"
+                  }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-3 whitespace-nowrap">
+                <span class="text-[var(--color-muted)]">{{
+                  parsePayload(branch.requestPayload)?.email || "—"
+                }}</span>
+              </td>
+              <td class="px-6 py-3 whitespace-nowrap">
+                <span class="text-[var(--color-muted)]">{{
+                  parsePayload(branch.requestPayload)?.phone || "—"
+                }}</span>
+              </td>
+              <td class="px-6 py-3 whitespace-nowrap">
+                <span
+                  class="px-2 py-1 inline-flex items-center gap-1 text-xs font-medium rounded-full"
+                  [class.bg-[var(--color-success)]="branch.status === 'approved'"
+                  [class.bg-[var(--color-danger)]="branch.status === 'rejected'"
+                  [class.bg-[var(--color-warning)]="branch.status === 'pending'"
+                  [class.text-black]="true"
+                >
+                  <span class="material-symbols-outlined text-black text-xs">{{
+                    getStatusIcon(branch.status)
+                  }}</span>
+                  {{ branch.status | titlecase }}
+                </span>
+              </td>
+              <td class="px-6 py-3 whitespace-nowrap">
+                <span class="text-xs text-[var(--color-muted)]">{{
+                  formatDate(branch?.createdAt)
+                }}</span>
+              </td>
+              <td class="px-6 py-3 whitespace-nowrap">
+                <span class="text-xs text-[var(--color-muted)]">{{
+                  formatDate(branch?.updatedAt)
+                }}</span>
+              </td>
+              <td
+                *ngIf="activeTab === 'pending'"
+                class="px-6 py-3 whitespace-nowrap"
+              >
+                <div class="flex gap-2 justify-center">
+                  <button
+                    (click)="openApprovalModal(branch.id)"
+                    [disabled]="actionLoadingId === branch.id || showLimitModal"
+                    class="px-3 py-1.5 bg-[var(--color-success)] hover:bg-[var(--color-success)] text-white text-xs font-medium rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  >
+                    <span class="material-symbols-outlined text-sm"
+                      >check_circle</span
+                    >
+                    <span *ngIf="actionLoadingId !== branch.id">Approve</span>
+                    <span
+                      *ngIf="actionLoadingId === branch.id"
+                      class="flex items-center gap-1"
+                    >
+                      <span
+                        class="animate-spin material-symbols-outlined text-sm"
+                        >refresh</span
+                      >
+                      Processing
+                    </span>
+                  </button>
+                  <button
+                    (click)="reject(branch.id)"
+                    [disabled]="actionLoadingId === branch.id || showLimitModal"
+                    class="px-3 py-1.5 bg-[var(--color-danger)] hover:bg-[var(--color-danger)] text-white text-xs font-medium rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  >
+                    <span class="material-symbols-outlined text-sm"
+                      >cancel</span
+                    >
+                    <span *ngIf="actionLoadingId !== branch.id">Reject</span>
+                    <span
+                      *ngIf="actionLoadingId === branch.id"
+                      class="flex items-center gap-1"
+                    >
+                      <span
+                        class="animate-spin material-symbols-outlined text-sm"
+                        >refresh</span
+                      >
+                      Processing
+                    </span>
+                  </button>
+                </div>
+                <div
+                  *ngIf="actionErrorId === branch.id"
+                  class="text-xs text-[var(--color-danger)] mt-1 text-center"
+                >
+                  Failed to process
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MOBILE GRID VIEW -->
+      <div
+        class="block sm:hidden"
+        *ngIf="!loading && paginatedBranches.length > 0"
+      >
+        <div class="p-4 space-y-3">
+          <div
+            *ngFor="let branch of paginatedBranches"
+            class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden"
+          >
+            <div
+              class="p-3 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-8 h-8 rounded bg-[var(--color-border)] flex items-center justify-center"
+                  >
+                    <span
+                      class="material-symbols-outlined text-base text-[var(--color-muted)]"
+                      >person</span
+                    >
+                  </div>
+                  <span class="font-medium text-[var(--color-font)]">{{
+                    parsePayload(branch.requestPayload)?.name || "—"
+                  }}</span>
+                </div>
+                <span
+                  class="px-2 py-0.5 inline-flex items-center gap-1 text-xs font-medium rounded-full"
+                  [class.bg-[var(--color-success)]="branch.status === 'approved'"
+                  [class.bg-[var(--color-danger)]="branch.status === 'rejected'"
+                  [class.bg-[var(--color-warning)]="branch.status === 'pending'"
+                  [class.text-white]="true"
+                >
+                  <span class="material-symbols-outlined text-xs">{{
+                    getStatusIcon(branch.status)
+                  }}</span>
+                  {{ branch.status | titlecase }}
+                </span>
+              </div>
+            </div>
+            <div class="p-3 space-y-2 text-sm">
+              <div class="flex items-center gap-2">
+                <span
+                  class="material-symbols-outlined text-base text-[var(--color-muted)]"
+                  >email</span
+                >
+                <span class="text-[var(--color-muted)]">{{
+                  parsePayload(branch.requestPayload)?.email || "—"
+                }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="material-symbols-outlined text-base text-[var(--color-muted)]"
+                  >phone</span
+                >
+                <span class="text-[var(--color-muted)]">{{
+                  parsePayload(branch.requestPayload)?.phone || "—"
+                }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="material-symbols-outlined text-base text-[var(--color-muted)]"
+                  >calendar_today</span
+                >
+                <span class="text-[var(--color-muted)]">{{
+                  formatDate(branch?.createdAt)
+                }}</span>
+              </div>
+            </div>
+            <div
+              *ngIf="activeTab === 'pending'"
+              class="p-3 bg-[var(--color-bg)] border-t border-[var(--color-border)]"
+            >
+              <div class="flex gap-2">
+                <button
+                  (click)="openApprovalModal(branch.id)"
+                  [disabled]="actionLoadingId === branch.id || showLimitModal"
+                  class="flex-1 px-3 py-2 bg-[var(--color-success)] hover:bg-[var(--color-success)] text-white text-xs font-medium rounded-md disabled:opacity-50 flex items-center justify-center gap-1"
+                >
+                  <span class="material-symbols-outlined text-sm"
+                    >check_circle</span
+                  >
+                  <span>Approve</span>
+                </button>
+                <button
+                  (click)="reject(branch.id)"
+                  [disabled]="actionLoadingId === branch.id || showLimitModal"
+                  class="flex-1 px-3 py-2 bg-[var(--color-danger)] hover:bg-[var(--color-danger)] text-white text-xs font-medium rounded-md disabled:opacity-50 flex items-center justify-center gap-1"
+                >
+                  <span class="material-symbols-outlined text-sm">cancel</span>
+                  <span>Reject</span>
+                </button>
+              </div>
+              <div
+                *ngIf="actionErrorId === branch.id"
+                class="text-xs text-[var(--color-danger)] mt-2 text-center"
+              >
+                Failed to process
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESKTOP GRID VIEW -->
+      <div
+        class="hidden sm:block"
+        *ngIf="!loading && paginatedBranches.length > 0 && viewMode === 'grid'"
+      >
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            *ngFor="let branch of paginatedBranches"
+            class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+          >
+            <div
+              class="p-4 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded bg-[var(--color-border)] flex items-center justify-center"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[var(--color-muted)]"
+                      >person</span
+                    >
+                  </div>
+                  <span class="font-medium text-[var(--color-font)]">{{
+                    parsePayload(branch.requestPayload)?.name || "—"
+                  }}</span>
+                </div>
+                <span
+                  class="px-2 py-1 inline-flex items-center gap-1 text-xs font-medium rounded-full"
+                  [class.bg-[var(--color-success)]="branch.status === 'approved'"
+                  [class.bg-[var(--color-danger)]="branch.status === 'rejected'"
+                  [class.bg-[var(--color-warning)]="branch.status === 'pending'"
+                  [class.text-white]="true"
+                >
+                  <span class="material-symbols-outlined text-xs">{{
+                    getStatusIcon(branch.status)
+                  }}</span>
+                  {{ branch.status | titlecase }}
+                </span>
+              </div>
+            </div>
+            <div class="p-4 space-y-3">
+              <div class="flex items-center gap-2 text-sm">
+                <span
+                  class="material-symbols-outlined text-sm text-[var(--color-muted)]"
+                  >email</span
+                >
+                <span class="text-[var(--color-muted)]">{{
+                  parsePayload(branch.requestPayload)?.email || "—"
+                }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm">
+                <span
+                  class="material-symbols-outlined text-sm text-[var(--color-muted)]"
+                  >phone</span
+                >
+                <span class="text-[var(--color-muted)]">{{
+                  parsePayload(branch.requestPayload)?.phone || "—"
+                }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm">
+                <span
+                  class="material-symbols-outlined text-sm text-[var(--color-muted)]"
+                  >calendar_today</span
+                >
+                <span class="text-[var(--color-muted)]">{{
+                  formatDate(branch?.createdAt)
+                }}</span>
+              </div>
+            </div>
+            <div
+              *ngIf="activeTab === 'pending'"
+              class="p-4 bg-[var(--color-bg)] border-t border-[var(--color-border)]"
+            >
+              <div class="flex gap-2">
+                <button
+                  (click)="openApprovalModal(branch.id)"
+                  [disabled]="actionLoadingId === branch.id || showLimitModal"
+                  class="flex-1 px-3 py-2 bg-[var(--color-success)] hover:bg-[var(--color-success)] text-white text-xs font-medium rounded-md disabled:opacity-50 flex items-center justify-center gap-1"
+                >
+                  <span class="material-symbols-outlined text-sm"
+                    >check_circle</span
+                  >
+                  <span>Approve</span>
+                </button>
+                <button
+                  (click)="reject(branch.id)"
+                  [disabled]="actionLoadingId === branch.id || showLimitModal"
+                  class="flex-1 px-3 py-2 bg-[var(--color-danger)] hover:bg-[var(--color-danger)] text-white text-xs font-medium rounded-md disabled:opacity-50 flex items-center justify-center gap-1"
+                >
+                  <span class="material-symbols-outlined text-sm">cancel</span>
+                  <span>Reject</span>
+                </button>
+              </div>
+              <div
+                *ngIf="actionErrorId === branch.id"
+                class="text-xs text-[var(--color-danger)] mt-2 text-center"
+              >
+                Failed to process
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div
+        *ngIf="!loading && paginatedBranches.length === 0"
+        class="px-6 py-12 text-center"
+      >
+        <div class="inline-flex flex-col items-center">
+          <div
+            class="w-16 h-16 rounded-full bg-[var(--color-bg)] flex items-center justify-center mb-3"
+          >
+            <span
+              class="material-symbols-outlined text-3xl text-[var(--color-muted)]"
+              >assignment_late</span
+            >
+          </div>
+          <h3 class="text-lg font-medium text-[var(--color-font)] mb-1">
+            No requests found
+          </h3>
+          <p class="text-sm text-[var(--color-muted)] mb-4">
+            Try adjusting your search filters
+          </p>
+          <button
+            (click)="clearFilters()"
+            class="px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary)] text-white rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined text-sm">refresh</span>
+            Clear Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div
+        *ngIf="!loading && paginatedBranches.length > 0"
+        class="bg-[var(--color-bg)] px-6 py-3 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-center justify-between gap-3"
+      >
+        <div class="flex items-center gap-3 text-sm">
+          <select
+            [value]="pageSize"
+            (change)="onPageSizeChange($event)"
+            class="border border-[var(--color-border)] rounded px-2 py-1.5 bg-[var(--color-surface)] text-[var(--color-font)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+          >
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+          <span class="text-[var(--color-muted)]">per page</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            (click)="onPageChange(currentPage - 1)"
+            [disabled]="currentPage === 1"
+            class="p-1.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] hover:bg-[var(--color-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <span
+            class="text-sm text-[var(--color-font)] px-3 py-1.5 bg-[var(--color-surface)] rounded border border-[var(--color-border)]"
+          >
+            Page {{ currentPage }} of {{ totalPages || 1 }}
+          </span>
+          <button
+            (click)="onPageChange(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+            class="p-1.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] hover:bg-[var(--color-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Approve Modal -->
+<div
+  *ngIf="showLimitModal"
+  class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+>
+  <div
+    class="bg-[var(--color-surface)] rounded-lg max-w-md w-full border border-[var(--color-border)]"
+  >
+    <div class="bg-[var(--color-primary)] px-4 py-3 rounded-t-lg">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-white">thumb_up</span>
+          <h2 class="text-lg font-semibold text-white">Approve Request</h2>
+        </div>
+        <button
+          (click)="skipApproval()"
+          class="text-white hover:text-gray-200"
+          [disabled]="modalLoading"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="px-4 py-4 space-y-4">
+      <div
+        *ngIf="modalErrorMessage"
+        class="bg-[var(--color-danger)] border border-[var(--color-danger)] rounded p-3"
+      >
+        <p class="text-sm text-white">{{ modalErrorMessage }}</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-[var(--color-font)] mb-1">
+          Limit Amount <span class="text-[var(--color-danger)]">*</span>
+        </label>
+        <input
+          [(ngModel)]="limitValue"
+          type="number"
+          min="1"
+          step="0.01"
+          placeholder="Enter limit amount"
+          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-md bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-[var(--color-font)] mb-1"
+          >payin Percentage (%)</label
+        >
+        <input
+          [(ngModel)]="payinPercentage"
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          placeholder="0-100"
+          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-md bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-[var(--color-font)] mb-1"
+          >Payout Percentage (%)</label
+        >
+        <input
+          [(ngModel)]="payoutPercentage"
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          placeholder="0-100"
+          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-md bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-[var(--color-font)] mb-1"
+          >FTT Percentage (%)</label
+        >
+        <input
+          [(ngModel)]="fttPercentage"
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          placeholder="0-100"
+          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-md bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+
+      <div
+        *ngIf="payinPercentage + payoutPercentage + fttPercentage > 100"
+        class="bg-[var(--color-warning)] border border-[var(--color-warning)] rounded p-2"
+      >
+        <p class="text-xs text-white">
+          Total exceeds 100% ({{
+            payinPercentage + payoutPercentage + fttPercentage
+          }}%)
+        </p>
+      </div>
+    </div>
+
+    <div
+      class="bg-[var(--color-bg)] px-4 py-3 border-t border-[var(--color-border)] rounded-b-lg"
+    >
+      <div class="flex gap-2">
+        <button
+          (click)="skipApproval()"
+          [disabled]="modalLoading"
+          class="flex-1 px-3 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] font-medium rounded-md hover:bg-[var(--color-hover)] disabled:opacity-50"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="approve()"
+          [disabled]="
+            modalLoading ||
+            limitValue <= 0 ||
+            payinPercentage + payoutPercentage + fttPercentage > 100
+          "
+          class="flex-1 px-3 py-2 bg-[var(--color-success)] hover:bg-[var(--color-success)] text-white font-medium rounded-md disabled:opacity-50 flex items-center justify-center gap-1"
+        >
+          <span *ngIf="!modalLoading" class="material-symbols-outlined text-sm"
+            >check_circle</span
+          >
+          <span
+            *ngIf="modalLoading"
+            class="material-symbols-outlined text-sm animate-spin"
+            >refresh</span
+          >
+          <span>{{ modalLoading ? "Approving..." : "Approve" }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

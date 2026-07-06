@@ -58,15 +58,69 @@
       </div>
 
       <div class="space-y-0.5">
-        <h2 class="text-lg font-bold text-slate-800 capitalize">
-          {{ userInfo.name || "—" }}
-        </h2>
-        <p class="text-sm text-slate-500">{{ userInfo.email }}</p>
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800 capitalize">
+              {{ userInfo.name || "—" }}
+            </h2>
+            <p class="text-sm text-slate-500">{{ userInfo.email }}</p>
+          </div>
+
+          <!-- Promo Code Button — only for HEAD -->
+          <button
+            *ngIf="isHead"
+            (click)="generatePromoCode()"
+            [disabled]="isGeneratingCode"
+            class="flex-shrink-0 inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <span
+              *ngIf="isGeneratingCode"
+              class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"
+            ></span>
+            <span
+              class="material-symbols-outlined text-[16px]"
+              *ngIf="!isGeneratingCode"
+              >link</span
+            >
+            {{ isGeneratingCode ? "Generating..." : "Generate Promo Code" }}
+          </button>
+        </div>
+
         <span
           class="inline-block mt-1 text-xs font-semibold bg-indigo-50 text-indigo-600 px-2.5 py-0.5 rounded-full"
         >
           {{ roleLabel }}
         </span>
+      </div>
+
+      <!-- Promo Code Result -->
+      <div *ngIf="isHead && (promoCode || promoError)" class="mt-3">
+        <p *ngIf="promoError" class="text-sm text-red-500 font-medium">
+          {{ promoError }}
+        </p>
+
+        <div
+          *ngIf="promoCode"
+          class="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5"
+        >
+          <span class="text-sm font-medium text-slate-700 truncate flex-1">
+            {{ promoCode }}
+          </span>
+
+          <button
+            (click)="copyPromoCode()"
+            class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors flex-shrink-0"
+          >
+            {{ copiedCode ? "Copied!" : "Copy Code" }}
+          </button>
+
+          <button
+            (click)="copyPromoUrl()"
+            class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors flex-shrink-0"
+          >
+            {{ copiedLink ? "Copied!" : "Copy Link" }}
+          </button>
+        </div>
       </div>
     </div>
   </div>

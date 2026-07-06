@@ -17,9 +17,9 @@ export class ChiefManualService {
     );
   }
 
-  performManualAction(chiefId: string, portalId: string, payload: any) {
+  performManualAction(promoCode: string, payload: any) {
     return this.http.post(
-      `${baseUrl}/manual/performManualAction/${chiefId}/${portalId}`,
+      `${baseUrl}/manual/performManualAction?promoCode=${promoCode}`,
       payload,
     );
   }

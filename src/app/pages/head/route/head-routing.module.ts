@@ -32,6 +32,7 @@ import { HeadBranchDashboardComponent } from "../../../common/head_branch/head-b
 import { SharedUserProfileComponent } from "../../../common/shared-user-profile/shared-user-profile.component";
 import { RecycleManagementComponent } from "../../../common/head_branch/recycle-management/recycle-management.component";
 import { CryptoManagementComponent } from "../../../common/head_branch/crypto-management/crypto-management.component";
+import { PendingAutoComponent } from "../pending-auto/pending-auto.component";
 
 const routes: Routes = [
   {
@@ -56,6 +57,10 @@ const routes: Routes = [
       {
         path: "crypto", // ADD THIS BLOCK
         component: CryptoManagementComponent,
+      },
+      {
+        path: "pending-auto",
+        component: PendingAutoComponent,
       },
 
       // {

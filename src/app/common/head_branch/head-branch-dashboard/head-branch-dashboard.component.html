@@ -525,7 +525,7 @@
             </span>
           </h3>
           <p class="text-[11px] text-[var(--color-muted)] mt-1">
-            UPI, Bank & Payout transactions
+            UPI, Bank, Crypto & Payout transactions
           </p>
         </div>
 
@@ -545,7 +545,7 @@
               <div class="flex items-start justify-between gap-2">
                 <!-- LEFT -->
                 <div class="flex items-start gap-2 min-w-0">
-                  <!-- ICON -->
+                  <!-- ICON: mode ke hisaab se, crypto ke lieye purple -->
                   <div
                     class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                     [ngClass]="{
@@ -555,6 +555,8 @@
                       'bg-[var(--color-secondary)]/10':
                         transaction.mode === 'bank' &&
                         transaction.type === 'payin',
+
+                      'bg-purple-100': transaction.mode === 'crypto',
 
                       'bg-red-50': transaction.type === 'payout',
                     }"
@@ -569,6 +571,8 @@
                           transaction.mode === 'bank' &&
                           transaction.type === 'payin',
 
+                        'text-purple-600': transaction.mode === 'crypto',
+
                         'text-red-500': transaction.type === 'payout',
                       }"
                     >
@@ -577,7 +581,9 @@
                           ? "payments"
                           : transaction.mode === "upi"
                             ? "account_balance_wallet"
-                            : "account_balance"
+                            : transaction.mode === "crypto"
+                              ? "currency_bitcoin"
+                              : "account_balance"
                       }}
                     </span>
                   </div>
@@ -598,12 +604,21 @@
                       {{ transaction.holderName || getTxKind(transaction) }}
                     </p>
 
-                    <!-- UPI / ACCOUNT -->
+                    <!-- UPI / ACCOUNT sub-line - crypto ke lieye nahi -->
                     <p
+                      *ngIf="transaction.mode !== 'crypto'"
                       class="text-[11px] text-[var(--color-muted)] mt-0.5 truncate"
                     >
                       {{ transaction.upiId || transaction.accountNo || "—" }}
                     </p>
+
+                    <!-- CRYPTO badge sub-line -->
+                    <span
+                      *ngIf="transaction.mode === 'crypto'"
+                      class="inline-block mt-0.5 text-[10px] font-bold px-1.5 py-[1px] rounded bg-purple-50 text-purple-600 border border-purple-200"
+                    >
+                      {{ transaction.cryptoType || transaction.raw?.type }}
+                    </span>
                   </div>
                 </div>
 
@@ -616,18 +631,23 @@
                       'text-[var(--color-font)]':
                         transaction.mode === 'upi' ||
                         (transaction.mode === 'bank' &&
-                          transaction.type === 'payin'),
+                          transaction.type === 'payin') ||
+                        transaction.mode === 'crypto',
 
                       'text-red-black': transaction.type === 'payout',
                     }"
                   >
                     <span class="text-[13px] text-[var(--color-font)]">
-                      {{ transaction.parentCurrency }}-</span
+                      {{
+                        transaction.mode === "crypto"
+                          ? transaction.currency
+                          : transaction.parentCurrency
+                      }}-</span
                     >
                     <span>
                       {{
-                        transaction.type === "payout"
-                          ? transaction.amount
+                        transaction.mode === "crypto"
+                          ? transaction.currencyWiseAmount
                           : transaction.amount
                       }}
                     </span>
@@ -638,11 +658,15 @@
                     {{ transaction.date | tz }}
                   </p>
 
-                  <span
-                    >{{ transaction.currency }}-{{
+                  <!-- Conversion line: crypto ke lieye parentCurrency-amount, baaki ke lieye currency-currencyWiseAmount -->
+                  <span *ngIf="transaction.mode === 'crypto'">
+                    {{ transaction.parentCurrency }}-{{ transaction.amount }}
+                  </span>
+                  <span *ngIf="transaction.mode !== 'crypto'">
+                    {{ transaction.currency }}-{{
                       transaction.currencyWiseAmount
-                    }}</span
-                  >
+                    }}
+                  </span>
                 </div>
               </div>
 
@@ -679,7 +703,12 @@
                     'bg-red-100 text-red-700': !transaction.slabEligible,
                   }"
                 >
-                  Reward Eligibility {{ transaction.slabPercentage || 100 }}%
+                  Reward Eligibility
+                  {{
+                    (transaction.slabPercentage ?? 0) === 0
+                      ? 100
+                      : transaction.slabPercentage
+                  }}%
                 </span>
               </div>
 
@@ -698,9 +727,12 @@
                     }}
                   </span>
 
-                  <!-- PPI / RPI -->
+                  <!-- PPI / RPI - crypto ke lieye nahi dikhta -->
                   <span
-                    *ngIf="transaction.type !== 'payout'"
+                    *ngIf="
+                      transaction.type !== 'payout' &&
+                      transaction.mode !== 'crypto'
+                    "
                     class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700"
                   >
                     {{ transaction.ftt ? "RPI" : "PPI" }}

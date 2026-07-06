@@ -132,8 +132,14 @@ export class HeadService {
   }
 
   getHeadByChiefId(id: any): Observable<any[]> {
+    return this.http.get<any[]>(`${baseUrl}/head/getHeadByChiefId/${id}`).pipe(
+      map((response: any) => response.data),
+      catchError((error) => throwError(error)),
+    );
+  }
+  generatePromoCode(headId: string): Observable<any> {
     return this.http
-      .get<any[]>(`${baseUrl}/head/getHeadByChiefId/${id}`)
+      .post<any>(`${baseUrl}/head/generatePromoCode/${headId}`, {})
       .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(error)),

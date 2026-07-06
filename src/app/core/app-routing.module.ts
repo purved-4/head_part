@@ -14,7 +14,7 @@ const routes: Routes = [
   { path: "", component: WelcomeComponent },
 
   {
-    path: "register/:chiefId/:portalId",
+    path: "register/code",
     component: BranchRegisterComponent,
   },
 

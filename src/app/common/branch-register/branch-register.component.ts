@@ -1,4 +1,3 @@
-
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { ChiefManualService } from "../../pages/services/chief-manual.service";
@@ -8,7 +7,7 @@ import { SnackbarService } from "../snackbar/snackbar.service";
 @Component({
   selector: "app-branch-register",
   templateUrl: "./branch-register.component.html",
-  styleUrls: ["./branch-register.component.css"], // corrected to styleUrls
+  styleUrls: ["./branch-register.component.css"],
 })
 export class BranchRegisterComponent implements OnInit {
   email = "";
@@ -18,12 +17,9 @@ export class BranchRegisterComponent implements OnInit {
   address = "";
   showPassword = false;
 
-  chiefId: any;
-  portalId: any;
-
-  // null = not checked yet, true/false = result
-  autoEnabled: boolean | null = null;
-  loading = false;
+  promoCode: any | null = null;
+  isEditingPromo: boolean = false;
+  submitting: boolean = false;
 
   constructor(
     private ChiefManualService: ChiefManualService,
@@ -33,54 +29,15 @@ export class BranchRegisterComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // prefer route params if present, tpwise fall back
-    const routeChiefId = this.route.snapshot.paramMap.get("chiefId");
-    const routePortalId = this.route.snapshot.paramMap.get("portalId");
-
-    this.chiefId = routeChiefId;
-    this.portalId = routePortalId;
-
-    // call the API to get auto status
-    this.checkAutoStatus();
+    this.promoCode = this.route.snapshot.queryParamMap.get("code");
   }
 
-  private checkAutoStatus() {
-    if (!this.chiefId || !this.portalId) {
-      // if missing ids treat as disabled
-      this.autoEnabled = false;
-      return;
-    }
-
-    this.loading = true;
-    this.autoEnabled = null;
-
-    this.ChiefManualService.getManualStatus(
-      this.chiefId,
-      this.portalId,
-    ).subscribe({
-      next: (res: any) => {
-        // assume service returns boolean or something truthy/falsy at res
-        this.autoEnabled = !!res;
-        this.loading = false;
-      },
-      error: (err: any) => {
-        // consider false on error (you may want different behaviour)
-        this.autoEnabled = false;
-        this.loading = false;
-      },
-    });
+  togglePromoEdit(): void {
+    this.isEditingPromo = !this.isEditingPromo;
   }
 
   onSubmit() {
-    if (!this.email || !this.mobile || !this.username || !this.password) {
-      this.snackBar.show("Please fill all fields", false);
-      return;
-    }
-
-    if (!this.autoEnabled) {
-      this.snackBar.show("Auto mode OFF. Submission not allowed.", false);
-      return;
-    }
+    if (this.submitting) return;
 
     const payload = {
       email: this.email,
@@ -89,9 +46,11 @@ export class BranchRegisterComponent implements OnInit {
       password: this.password,
     };
 
+    this.submitting = true;
+
+    // Jo bhi current promoCode value hai (edited ya original), wahi bhejo
     this.ChiefManualService.performManualAction(
-      this.chiefId,
-      this.portalId,
+      this.promoCode,
       payload,
     ).subscribe({
       next: (res: any) => {
@@ -100,12 +59,15 @@ export class BranchRegisterComponent implements OnInit {
           true,
         );
         this.onClear();
+        this.submitting = false;
       },
       error: (err: any) => {
-        this.snackBar.show(err.error.message || "Submission failed", false);
+        this.snackBar.show(err?.error?.message || "Submission failed", false);
+        this.submitting = false;
       },
     });
   }
+
   onClear() {
     this.email = "";
     this.mobile = "";

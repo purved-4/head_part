@@ -123,7 +123,7 @@ export class HeadBranchDashboardComponent
   // filters
   pendingFilterType: "all" | "payin" | "payout" = "all";
   pendingFilterMethod: "all" | "upi" | "bank" = "all";
-  mobileFilter: "all" | "upi" | "bank" | "payout" = "all";
+  mobileFilter: "all" | "upi" | "bank" | "crypto" | "payout" = "all";
 
   approvedpayinsFilterMethod: "all" | "upi" | "bank" = "all";
   approvedpayoutsFilterMethod: "all" | "bank" = "all";
@@ -2543,6 +2543,7 @@ export class HeadBranchDashboardComponent
     return [
       ...(this.filteredPendingUpi?.() || []),
       ...(this.filteredPendingBank?.() || []),
+      ...(this.filteredPendingCrypto?.() || []),
       ...(this.filteredPendingpayouts?.() || []),
     ];
   }
@@ -2553,6 +2554,8 @@ export class HeadBranchDashboardComponent
     if (this.mobileFilter === "all") return allTransactions;
     if (this.mobileFilter === "upi") return this.filteredPendingUpi?.() || [];
     if (this.mobileFilter === "bank") return this.filteredPendingBank?.() || [];
+    if (this.mobileFilter === "crypto")
+      return this.filteredPendingCrypto?.() || [];
     if (this.mobileFilter === "payout")
       return this.filteredPendingpayouts?.() || [];
 

@@ -1,6 +1,4 @@
-
-
-import { ThemeService } from './../../../../theme/theme.service';
+import { ThemeService } from "./../../../../theme/theme.service";
 import {
   Component,
   Input,
@@ -69,7 +67,7 @@ export class HeadNavSidebarComponent implements OnInit {
       children: [{ label: "Dashboard", route: "/head/dashboard" }],
     },
     //new hai code ke sath mujhe bs yahi dena hai
-   {
+    {
       label: "Inventory Management",
       route: "/head/bank",
       icon: "account_balance_wallet",
@@ -135,7 +133,6 @@ export class HeadNavSidebarComponent implements OnInit {
       route: "/head/reports/funds/approved",
       icon: "task_alt",
       children: [
-        
         {
           label: "Payin Reports",
           route: "/head/reports/funds/payin/bank",
@@ -148,7 +145,6 @@ export class HeadNavSidebarComponent implements OnInit {
         },
       ],
     },
-   
 
     {
       label: "Reports",
@@ -167,28 +163,32 @@ export class HeadNavSidebarComponent implements OnInit {
       ],
     },
     {
-  label: "Settings",
-  route: "/head/override-currency-management",
-  icon: "settings",
-  children: [
-    {
-      label: "User Profile",
-      route: "/head/sharedUserProfile",
-      icon: "person"
-    },
-    {
-      label: "Currency Management",
+      label: "Settings",
       route: "/head/override-currency-management",
-      icon: "currency_exchange"
+      icon: "settings",
+      children: [
+        {
+          label: "User Profile",
+          route: "/head/sharedUserProfile",
+          icon: "person",
+        },
+        {
+          label: "Currency Management",
+          route: "/head/override-currency-management",
+          icon: "currency_exchange",
+        },
+        {
+          label: "Limits",
+          route: "/head/limit",
+          icon: "credit_card",
+        },
+        {
+          label: "Auto Pending",
+          route: "/head/pending-auto",
+          icon: "assignment",
+        },
+      ],
     },
-    {
-      label: "Limits",
-      route: "/head/limit",
-      icon: "credit_card"
-    },
-  ],
-},
- 
   ];
 
   branchId: any;
@@ -201,7 +201,7 @@ export class HeadNavSidebarComponent implements OnInit {
     private router: Router,
     private BranchService: BranchService,
     private userStateService: UserStateService,
-    public theme : ThemeService
+    public theme: ThemeService,
   ) {}
 
   ngOnInit() {
@@ -304,16 +304,12 @@ export class HeadNavSidebarComponent implements OnInit {
       if (this.recentItems.length > 3) {
         this.recentItems.pop();
       }
-
-      
     }
   }
 
   getRecentItems() {
     return this.recentItems;
   }
-
-
 
   getAllMenuItems(): MenuItem[] {
     const items: MenuItem[] = [];
@@ -509,7 +505,7 @@ export class HeadNavSidebarComponent implements OnInit {
     const map: Record<string, string> = {
       // Dashboard
       "/head/dashboard": "dashboard",
-"/head/payments-methods": "inventory_2",
+      "/head/payments-methods": "inventory_2",
       "/head/recycle-management": "recycling",
 
       // Management
@@ -522,7 +518,7 @@ export class HeadNavSidebarComponent implements OnInit {
       // Chats
       "/head/chat": "chat",
       "/head/chat/head": "chat",
-      "/head/chat/branch": "forum",      
+      "/head/chat/branch": "forum",
 
       // Branch
       "/head/branch/add": "add_business",
@@ -538,12 +534,11 @@ export class HeadNavSidebarComponent implements OnInit {
       "/head/sharedUserProfile": "person",
       "/head/override-currency-management": "currency_exchange",
       "/head/limit": "credit_card",
+      "/head/pending-auto": "assignment",
 
       // Approved Funds
-       "/head/reports/funds/payin/bank": "account_balance",
+      "/head/reports/funds/payin/bank": "account_balance",
       "/head/reports/funds/payout/payout": "payment",
-
-     
     };
 
     return map[route] || "chevron_right";
