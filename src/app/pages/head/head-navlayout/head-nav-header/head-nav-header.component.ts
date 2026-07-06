@@ -172,6 +172,7 @@ export class HeadNavHeaderComponent implements OnInit {
       icon: "person",
     },
   ];
+  selectedIndex = -1;
 
   showSearchDropdown = false;
   headId: any;
@@ -350,17 +351,66 @@ export class HeadNavHeaderComponent implements OnInit {
     );
 
     this.showSearchDropdown = this.searchResults.length > 0;
+    this.selectedIndex =
+  this.searchResults.length ? 0 : -1;
   }
 
-  onSearchEnter(event: KeyboardEvent) {
-    if (event.key !== "Enter") {
-      return;
-    }
+  onSearchKeyDown(event: KeyboardEvent) {
 
-    if (this.searchResults.length) {
-      this.navigateTo(this.searchResults[0].path);
-    }
+  if (!this.showSearchDropdown) {
+    return;
   }
+
+  switch (event.key) {
+
+    case "ArrowDown":
+
+      event.preventDefault();
+
+      this.selectedIndex =
+        (this.selectedIndex + 1) %
+        this.searchResults.length;
+
+      break;
+
+
+    case "ArrowUp":
+
+      event.preventDefault();
+
+      this.selectedIndex =
+        (this.selectedIndex - 1 + this.searchResults.length)
+        %
+        this.searchResults.length;
+
+      break;
+
+
+    case "Enter":
+
+      event.preventDefault();
+
+      if (this.selectedIndex >= 0) {
+
+        this.navigateTo(
+          this.searchResults[this.selectedIndex].path
+        );
+
+      }
+
+      break;
+
+
+    case "Escape":
+
+      this.showSearchDropdown = false;
+      this.selectedIndex = -1;
+
+      break;
+
+  }
+
+}
 
   navigateTo(path: string) {
     this.router.navigateByUrl(path);

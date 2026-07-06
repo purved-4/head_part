@@ -181,7 +181,7 @@
             placeholder="Search pages..."
             [value]="searchTerm"
             (input)="onSearchInput($event)"
-            (keydown)="onSearchEnter($event)"
+            (keydown)="onSearchKeyDown($event)"
             class="w-64 pl-10 pr-4 py-2 text-sm rounded-xl border"
           />
 
@@ -204,9 +204,11 @@
             class="absolute top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-50 overflow-hidden"
           >
             <div
-              *ngFor="let item of searchResults"
+              *ngFor="let item of searchResults; let i = index"
               (click)="navigateTo(item.path)"
-              class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100"
+              class="flex items-center gap-3 px-4 py-3 cursor-pointer transition"
+              [class.bg-blue-100]="i === selectedIndex"
+              [class.hover:bg-gray-100]="i !== selectedIndex"
             >
               <span class="material-symbols-outlined text-sm">
                 {{ item.icon }}
