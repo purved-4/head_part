@@ -635,18 +635,10 @@ export class HeadBranchDashboardComponent
   }
   isPayoutActionBlocked(tx: any): boolean {
     if (!tx) return true;
-
-    // sirf payout check karna hai
     if (tx.type !== "payout") return false;
-
-    // agar processing start hi nahi hui
     if (!tx.processing) return true;
-
     const deadline = this.parseProcessingDeadline(tx);
-
     if (!deadline) return true;
-
-    // agar processing time khatam ho gaya
     return Date.now() > deadline.getTime();
   }
 
@@ -1941,9 +1933,16 @@ export class HeadBranchDashboardComponent
   }
 
   openApproveConfirm(transaction: any) {
-    const portalId = transaction.raw.portalId;
-
     if (!transaction) return;
+
+    // ✅ GUARD: Payout ke case mein processing true hone se pehle modal hi na khule
+    if (transaction.type === "payout" && transaction.processing !== true) {
+      this.snackbar.show("Please start processing first", false);
+      return;
+    }
+
+    const portalId = transaction.raw?.portalId;
+
     const t = this.normalizeTransaction(transaction) || transaction;
     const src =
       t.type === "payout"
@@ -1956,7 +1955,6 @@ export class HeadBranchDashboardComponent
 
     this.confirmTransaction = { ...t, section: src };
     this.showApproveConfirm = true;
-    // keep reason untouched for approve, but ensure custom resets
     this.selectedPayoutMethod = "upi";
     this.selectedUpi = null;
     this.selectedBank = null;
@@ -1965,6 +1963,13 @@ export class HeadBranchDashboardComponent
 
   openRejectConfirm(tx: any) {
     if (!tx) return;
+
+    // ✅ GUARD: Payout ke case mein processing true hone se pehle modal hi na khule
+    if (tx.type === "payout" && tx.processing !== true) {
+      this.snackbar.show("Please start processing first", false);
+      return;
+    }
+
     const t = this.normalizeTransaction(tx) || tx;
     const src =
       t.type === "payout"
@@ -1977,15 +1982,11 @@ export class HeadBranchDashboardComponent
 
     this.confirmTransaction = { ...t, section: src };
     this.showRejectConfirm = true;
-    // RESET FILE STATE EVERY TIME MODAL OPENS
     this.selectedFile = null;
     this.previewUrl = null;
     this.previewDocument = false;
     this.isDragging = false;
 
-    this.showRejectConfirm = true;
-
-    // reset reason inputs so user sees a clean dialog every time
     this.resetRejectReason();
   }
 
@@ -2306,9 +2307,6 @@ export class HeadBranchDashboardComponent
   private processIncomingEvent(data: any) {
     if (!data) return;
 
-    // ✅ FIX: Config ab ngOnInit mein store ho rahi hai permanently
-    // Yahan sirf use karo — dobara set karne ki zaroorat nahi
-    // Agar kisi reason se config abhi tak nahi aayi toh data se le lo as fallback
     if (!this.dynamicPayinConfig && data?.DYNAMIC_PAYIN_TIME) {
       this.dynamicPayinConfig = structuredClone(data.DYNAMIC_PAYIN_TIME);
       this.latestDynamicPayin = this.dynamicPayinConfig;
@@ -2318,7 +2316,6 @@ export class HeadBranchDashboardComponent
       this.latestDynamicPayout = this.dynamicPayoutConfig;
     }
 
-    // ✅ Ab seedha stored config use karo — kabhi null nahi hogi agar ek baar aayi
     const dynamicPayin = this.dynamicPayinConfig;
     const dynamicPayout = this.dynamicPayoutConfig;
 
@@ -2400,7 +2397,10 @@ export class HeadBranchDashboardComponent
           {
             ...existing,
             ...f,
-            processing: f?.processing ?? existing?.processing ?? false,
+            // ✅ FIX: agar humne locally processing = true kiya tha (onProcessingClick se),
+            // toh socket ka stale/false value usse overwrite nahi karega.
+            // Sirf tabhi false hoga jab humare paas pehle se true nahi tha.
+            processing: existing?.processing === true ? true : !!f?.processing,
 
             processingTimeLimit:
               f?.processingTimeLimit ?? existing?.processingTimeLimit ?? null,

@@ -449,10 +449,11 @@
                     (click)="$event.stopPropagation()"
                   >
                     <!-- Approve -->
+                    <!-- Approve -->
                     <button
                       appButtonLoader
                       (click)="openApproveConfirm(transaction)"
-                      [disabled]="!transaction.processing"
+                      [disabled]="transaction.processing !== true"
                       class="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center hover:bg-green-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <span
@@ -465,7 +466,7 @@
                     <button
                       appButtonLoader
                       (click)="openRejectConfirm(transaction)"
-                      [disabled]="!transaction.processing"
+                      [disabled]="transaction.processing !== true"
                       class="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center hover:bg-red-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <span

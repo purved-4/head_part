@@ -1,5 +1,5 @@
 <div
-  class="w-full mx-auto bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6 shadow-lg"
+  class="w-full mx-auto bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6 shadow-lg min-h-[calc(100vh-6rem)] flex flex-col"
 >
   <!-- Header -->
   <div
@@ -246,7 +246,7 @@
 
   <!-- Loading Indicator -->
   <div *ngIf="loading" class="text-center py-12">
-    <div class="flex flex-col items-center justify-center">
+    <div class="flex flex-1 flex-col items-center justify-center">
       <div
         class="w-12 h-12 bg-[var(--color-primary)] rounded-xl flex items-center justify-center mb-3"
       >
