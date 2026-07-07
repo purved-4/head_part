@@ -23,12 +23,16 @@ export class PendingAutoComponent implements OnInit {
   filteredBranches: any[] = [];
   paginatedBranches: any[] = [];
 
+  showRejectModal = false;
+  selectedRejectId: string | null = null;
+
   //compart
   showUserPercentage = false;
   userPercentageLoading = false;
   userPercentageData: any = null;
   userPercentageError: string | null = null;
-
+  showPercentageModal = false;
+  id: any;
   entityId: any;
   userId: any;
   loading = false;
@@ -470,16 +474,22 @@ export class PendingAutoComponent implements OnInit {
 
   // ================= REJECT (Updated to refresh counts) =================
 
-  reject(id: string): void {
-    if (!id) {
-      this.showError("Invalid request ID");
-      return;
-    }
+  openRejectModal(id: string): void {
+    this.selectedRejectId = id;
+    this.showRejectModal = true;
+  }
 
-    // Confirmation dialog
-    if (!confirm("Are you sure you want to reject this request?")) {
-      return;
-    }
+  closeRejectModal(): void {
+    this.showRejectModal = false;
+    this.selectedRejectId = null;
+  }
+
+  confirmReject(id: any): void {
+    if (!this.selectedRejectId) return;
+
+    this.id = this.selectedRejectId;
+
+    this.showRejectModal = false;
 
     this.actionLoadingId = id;
     this.actionErrorId = null;
@@ -489,6 +499,7 @@ export class PendingAutoComponent implements OnInit {
       .pipe(
         finalize(() => {
           this.actionLoadingId = null;
+          this.selectedRejectId = null;
         }),
       )
       .subscribe({
@@ -498,19 +509,18 @@ export class PendingAutoComponent implements OnInit {
             true,
             4000,
           );
+
           this.removeFromList(id);
-          // Counts will auto-update via getter methods
         },
         error: (err) => {
           const message = err?.error?.message || "Something went wrong";
-          this.snackBar.show(message, false, 4000);
 
+          this.snackBar.show(message, false, 4000);
           this.actionErrorId = id;
           this.showError("Failed to reject request");
         },
       });
   }
-
   // ================= REMOVE FROM UI (Updated) =================
 
   removeFromList(id: string): void {
@@ -557,41 +567,7 @@ export class PendingAutoComponent implements OnInit {
   getEndIndex(): number {
     return Math.min(this.currentPage * this.pageSize, this.totalItems);
   }
-  toggleUserPercentage(): void {
-    // agar already open hai to bas hide kar do
-    if (this.showUserPercentage) {
-      this.showUserPercentage = false;
-      return;
-    }
 
-    if (!this.pendingApprovalId) {
-      this.showError("Invalid request ID");
-      return;
-    }
-
-    this.showUserPercentage = true;
-
-    // agar pehle se load ho chuka hai to dobara call mat kar
-    if (this.userPercentageData) {
-      return;
-    }
-
-    this.userPercentageLoading = true;
-    this.userPercentageError = null;
-
-    this.userService
-      .getUserFullDetail(this.pendingApprovalId)
-      .pipe(finalize(() => (this.userPercentageLoading = false)))
-      .subscribe({
-        next: (data: any) => {
-          this.userPercentageData = data;
-        },
-        error: (err) => {
-          this.userPercentageError =
-            err?.error?.message || "Failed to load percentage details";
-        },
-      });
-  }
   resetModalFields(): void {
     this.limitValue = 0;
     this.payinPercentage = 0;
@@ -601,5 +577,34 @@ export class PendingAutoComponent implements OnInit {
     this.showUserPercentage = false;
     this.userPercentageData = null;
     this.userPercentageError = null;
+  }
+  openPercentageModal(): void {
+    this.showPercentageModal = true;
+    this.userPercentageLoading = true;
+    this.userPercentageError = null;
+    this.userPercentageData = [];
+
+    this.userService
+      .getUserFullDetail(this.userId)
+      .pipe(finalize(() => (this.userPercentageLoading = false)))
+      .subscribe({
+        next: (res: any) => {
+          console.log("API Response:", res);
+
+          // Service already response.data return karti hai
+          this.userPercentageData = Array.isArray(res?.cpInfo)
+            ? res.cpInfo
+            : [];
+
+          console.log("CP INFO:", this.userPercentageData);
+        },
+        error: (err) => {
+          this.userPercentageError =
+            err?.error?.message || "Failed to load percentage";
+        },
+      });
+  }
+  closePercentageModal() {
+    this.showPercentageModal = false;
   }
 }

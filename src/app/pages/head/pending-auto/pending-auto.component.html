@@ -379,22 +379,25 @@
                     </span>
                   </button>
                   <button
-                    (click)="reject(branch.id)"
+                    (click)="openRejectModal(branch.id)"
                     [disabled]="actionLoadingId === branch.id || showLimitModal"
                     class="px-3 py-1.5 bg-[var(--color-danger)] hover:bg-[var(--color-danger)] text-white text-xs font-medium rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                   >
                     <span class="material-symbols-outlined text-sm"
                       >cancel</span
                     >
+
                     <span *ngIf="actionLoadingId !== branch.id">Reject</span>
+
                     <span
                       *ngIf="actionLoadingId === branch.id"
                       class="flex items-center gap-1"
                     >
                       <span
                         class="animate-spin material-symbols-outlined text-sm"
-                        >refresh</span
                       >
+                        refresh
+                      </span>
                       Processing
                     </span>
                   </button>
@@ -497,7 +500,7 @@
                   <span>Approve</span>
                 </button>
                 <button
-                  (click)="reject(branch.id)"
+                  (click)="confirmReject(branch.id)"
                   [disabled]="actionLoadingId === branch.id || showLimitModal"
                   class="flex-1 px-3 py-2 bg-[var(--color-danger)] hover:bg-[var(--color-danger)] text-white text-xs font-medium rounded-md disabled:opacity-50 flex items-center justify-center gap-1"
                 >
@@ -602,7 +605,7 @@
                   <span>Approve</span>
                 </button>
                 <button
-                  (click)="reject(branch.id)"
+                  (click)="confirmReject(branch.id)"
                   [disabled]="actionLoadingId === branch.id || showLimitModal"
                   class="flex-1 px-3 py-2 bg-[var(--color-danger)] hover:bg-[var(--color-danger)] text-white text-xs font-medium rounded-md disabled:opacity-50 flex items-center justify-center gap-1"
                 >
@@ -711,15 +714,7 @@
           <h2 class="text-lg font-semibold text-white">Approve Request</h2>
         </div>
         <div class="flex items-center gap-2">
-          <button
-            (click)="toggleUserPercentage()"
-            [disabled]="modalLoading"
-            class="flex items-center gap-1 text-white/90 hover:text-white text-xs border border-white/40 rounded px-2 py-1 hover:bg-white/10 disabled:opacity-50"
-            title="View existing percentage"
-          >
-            <span class="material-symbols-outlined text-sm">visibility</span>
-            <span>{{ showUserPercentage ? "Hide %" : "View %" }}</span>
-          </button>
+          <button (click)="openPercentageModal()">View Existing %</button>
           <button
             (click)="skipApproval()"
             class="text-white hover:text-gray-200"
@@ -732,6 +727,61 @@
     </div>
 
     <div class="px-4 py-4 space-y-4">
+      <!-- View Percentage Panel -->
+      <div
+        *ngIf="showUserPercentage"
+        class="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md p-3 text-sm"
+      >
+        <div
+          *ngIf="userPercentageLoading"
+          class="flex items-center gap-2 text-[var(--color-font)]"
+        >
+          <span class="material-symbols-outlined text-sm animate-spin"
+            >refresh</span
+          >
+          <span>Loading percentage details...</span>
+        </div>
+
+        <div
+          *ngIf="!userPercentageLoading && userPercentageError"
+          class="text-[var(--color-danger)]"
+        >
+          {{ userPercentageError }}
+        </div>
+
+        <div
+          *ngIf="
+            !userPercentageLoading && !userPercentageError && userPercentageData
+          "
+          class="space-y-1 text-[var(--color-font)]"
+        >
+          <div class="flex justify-between">
+            <span class="opacity-70">Name</span>
+            <span class="font-medium">{{
+              userPercentageData.compartUsername
+            }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="opacity-70">Payin %</span>
+            <span class="font-medium"
+              >{{ userPercentageData.payinPercentage }}%</span
+            >
+          </div>
+          <div class="flex justify-between">
+            <span class="opacity-70">Payout %</span>
+            <span class="font-medium"
+              >{{ userPercentageData.payoutPercentage }}%</span
+            >
+          </div>
+          <div class="flex justify-between">
+            <span class="opacity-70">FTT %</span>
+            <span class="font-medium"
+              >{{ userPercentageData.fttPercentage }}%</span
+            >
+          </div>
+        </div>
+      </div>
+
       <div
         *ngIf="modalErrorMessage"
         class="bg-[var(--color-danger)] border border-[var(--color-danger)] rounded p-3"
@@ -844,66 +894,220 @@
     </div>
   </div>
 </div>
-<div class="px-4 py-4 space-y-4">
-  <!-- View Percentage Panel -->
-  <div
-    *ngIf="showUserPercentage"
-    class="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md p-3 text-sm"
-  >
+
+<div
+  *ngIf="showPercentageModal"
+  class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+>
+  <div class="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <!-- Header -->
     <div
-      *ngIf="userPercentageLoading"
-      class="flex items-center gap-2 text-[var(--color-font)]"
+      class="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gray-50"
     >
-      <span class="material-symbols-outlined text-sm animate-spin"
-        >refresh</span
+      <div>
+        <h2 class="text-xl font-semibold text-gray-800">Existing Percentage</h2>
+        <p class="text-sm text-gray-500 mt-1">
+          Compart-wise percentage allocation
+        </p>
+      </div>
+
+      <button
+        (click)="closePercentageModal()"
+        class="w-10 h-10 rounded-lg hover:bg-gray-200 transition flex items-center justify-center"
       >
-      <span>Loading percentage details...</span>
+        <span class="material-symbols-outlined text-gray-600"> close </span>
+      </button>
     </div>
 
-    <div
-      *ngIf="!userPercentageLoading && userPercentageError"
-      class="text-[var(--color-danger)]"
-    >
-      {{ userPercentageError }}
+    <!-- Body -->
+    <div class="p-6 max-h-[500px] overflow-y-auto">
+      <!-- Loading -->
+      <div
+        *ngIf="userPercentageLoading"
+        class="flex flex-col items-center justify-center py-16"
+      >
+        <div
+          class="w-10 h-10 border-[3px] border-indigo-600 border-t-transparent rounded-full animate-spin"
+        ></div>
+
+        <p class="mt-4 text-sm text-gray-500">Fetching percentage details...</p>
+      </div>
+
+      <!-- Table -->
+      <div
+        *ngIf="!userPercentageLoading && userPercentageData?.length"
+        class="overflow-hidden rounded-xl border border-gray-200"
+      >
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-100">
+            <tr>
+              <th
+                class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-600"
+              >
+                Compart
+              </th>
+
+              <th
+                class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-600"
+              >
+                Payin
+              </th>
+
+              <th
+                class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-600"
+              >
+                Payout
+              </th>
+
+              <th
+                class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-600"
+              >
+                FTT
+              </th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-gray-100 bg-white">
+            <tr
+              *ngFor="let cp of userPercentageData"
+              class="hover:bg-gray-50 transition-colors duration-200"
+            >
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center"
+                  >
+                    <span
+                      class="material-symbols-outlined text-indigo-600 text-[20px]"
+                    >
+                      person
+                    </span>
+                  </div>
+
+                  <div>
+                    <p class="font-medium text-gray-800">
+                      {{ cp.compartUsername }}
+                    </p>
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-5 py-4 text-center">
+                <span
+                  class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700"
+                >
+                  {{ cp.payinPercentage }}%
+                </span>
+              </td>
+
+              <td class="px-5 py-4 text-center">
+                <span
+                  class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700"
+                >
+                  {{ cp.payoutPercentage }}%
+                </span>
+              </td>
+
+              <td class="px-5 py-4 text-center">
+                <span
+                  class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-semibold text-purple-700"
+                >
+                  {{ cp.fttPercentage }}%
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div
+        *ngIf="!userPercentageLoading && !userPercentageData?.length"
+        class="flex flex-col items-center justify-center py-16"
+      >
+        <div
+          class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center"
+        >
+          <span class="material-symbols-outlined text-5xl text-gray-400">
+            dataset
+          </span>
+        </div>
+
+        <h3 class="mt-5 text-lg font-semibold text-gray-800">
+          No Percentage Records
+        </h3>
+
+        <p class="mt-2 text-sm text-gray-500 text-center max-w-sm">
+          There are no percentage details available for this user at the moment.
+        </p>
+      </div>
     </div>
 
+    <!-- Footer -->
     <div
-      *ngIf="
-        !userPercentageLoading && !userPercentageError && userPercentageData
-      "
-      class="space-y-1 text-[var(--color-font)]"
+      class="flex justify-end items-center gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50"
     >
-      <div class="flex justify-between">
-        <span class="opacity-70">Name</span>
-        <span class="font-medium">{{
-          userPercentageData.compartUsername
-        }}</span>
-      </div>
-      <div class="flex justify-between">
-        <span class="opacity-70">Payin %</span>
-        <span class="font-medium"
-          >{{ userPercentageData.payinPercentage }}%</span
-        >
-      </div>
-      <div class="flex justify-between">
-        <span class="opacity-70">Payout %</span>
-        <span class="font-medium"
-          >{{ userPercentageData.payoutPercentage }}%</span
-        >
-      </div>
-      <div class="flex justify-between">
-        <span class="opacity-70">FTT %</span>
-        <span class="font-medium">{{ userPercentageData.fttPercentage }}%</span>
-      </div>
+      <button
+        (click)="closePercentageModal()"
+        class="px-5 py-2.5 rounded-lg bg-gray-800 text-white font-medium hover:bg-black transition"
+      >
+        Close
+      </button>
     </div>
   </div>
+</div>
+<div
+  *ngIf="showRejectModal"
+  class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
+>
+  <div class="bg-white rounded-xl shadow-xl w-[400px] overflow-hidden">
+    <!-- Header -->
+    <div class="px-6 py-4 border-b flex items-center gap-3">
+      <div
+        class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center"
+      >
+        <span class="material-symbols-outlined text-red-600"> warning </span>
+      </div>
 
-  <div
-    *ngIf="modalErrorMessage"
-    class="bg-[var(--color-danger)] border border-[var(--color-danger)] rounded p-3"
-  >
-    <p class="text-sm text-white">{{ modalErrorMessage }}</p>
+      <div>
+        <h2 class="text-lg font-semibold text-gray-800">Reject Request</h2>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="px-6 py-5">
+      <p class="text-sm text-gray-600">
+        Are you sure you want to reject this request?
+      </p>
+
+      <p class="text-sm text-red-600 mt-2">This action cannot be undone.</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t flex justify-end gap-3 bg-gray-50">
+      <button
+        (click)="closeRejectModal()"
+        class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+      >
+        Cancel
+      </button>
+
+      <button
+        (click)="confirmReject(null)"
+        [disabled]="actionLoadingId === selectedRejectId"
+        class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition disabled:opacity-50 flex items-center gap-2"
+      >
+        <ng-container *ngIf="actionLoadingId !== selectedRejectId">
+          Yes, Reject
+        </ng-container>
+
+        <ng-container *ngIf="actionLoadingId === selectedRejectId">
+          <span class="material-symbols-outlined animate-spin text-sm">
+            refresh
+          </span>
+          Processing...
+        </ng-container>
+      </button>
+    </div>
   </div>
-
-  <!-- baaki existing fields (limit amount, payin, payout, ftt) yahi rahenge -->
 </div>
