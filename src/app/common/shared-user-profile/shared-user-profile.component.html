@@ -67,9 +67,10 @@
           </div>
 
           <!-- Promo Code Button — only for HEAD -->
+          <!-- Promo Code Button — only for HEAD, hidden for B2B -->
           <button
-            *ngIf="isHead"
-            (click)="generatePromoCode()"
+            *ngIf="isHead && !isB2B"
+            (click)="onGenerateClick()"
             [disabled]="isGeneratingCode"
             class="flex-shrink-0 inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
@@ -82,7 +83,13 @@
               *ngIf="!isGeneratingCode"
               >link</span
             >
-            {{ isGeneratingCode ? "Generating..." : "Generate Promo Code" }}
+            {{
+              isGeneratingCode
+                ? "Generating..."
+                : promoCode
+                  ? "Generate New"
+                  : "Generate Promo Code"
+            }}
           </button>
         </div>
 
@@ -305,6 +312,42 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+<!-- Confirm Regenerate Modal -->
+<div
+  *ngIf="showConfirmModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+>
+  <div class="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
+    <div
+      class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mb-3"
+    >
+      <span class="material-symbols-outlined text-amber-500 text-xl"
+        >warning</span
+      >
+    </div>
+    <h3 class="text-base font-bold text-slate-800 mb-1.5">
+      Generate a new promo code?
+    </h3>
+    <p class="text-sm text-slate-500 mb-5">
+      Your existing promo code will stop working once a new one is generated.
+      Are you sure you want to continue?
+    </p>
+    <div class="flex gap-3 justify-end">
+      <button
+        (click)="cancelGenerateNew()"
+        class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="confirmGenerateNew()"
+        class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
+      >
+        Yes, Generate New
+      </button>
     </div>
   </div>
 </div>

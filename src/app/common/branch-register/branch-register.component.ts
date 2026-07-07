@@ -21,6 +21,9 @@ export class BranchRegisterComponent implements OnInit {
   isEditingPromo: boolean = false;
   submitting: boolean = false;
 
+  // --- Edit confirm modal ---
+  showEditConfirmModal: boolean = false;
+
   constructor(
     private ChiefManualService: ChiefManualService,
     private userStateService: UserStateService,
@@ -32,8 +35,22 @@ export class BranchRegisterComponent implements OnInit {
     this.promoCode = this.route.snapshot.queryParamMap.get("code");
   }
 
+  // Turning edit ON needs confirmation, turning it OFF (Done) doesn't
   togglePromoEdit(): void {
-    this.isEditingPromo = !this.isEditingPromo;
+    if (this.isEditingPromo) {
+      this.isEditingPromo = false;
+      return;
+    }
+    this.showEditConfirmModal = true;
+  }
+
+  confirmEditPromo(): void {
+    this.isEditingPromo = true;
+    this.showEditConfirmModal = false;
+  }
+
+  cancelEditPromo(): void {
+    this.showEditConfirmModal = false;
   }
 
   onSubmit() {
@@ -48,7 +65,6 @@ export class BranchRegisterComponent implements OnInit {
 
     this.submitting = true;
 
-    // Jo bhi current promoCode value hai (edited ya original), wahi bhejo
     this.ChiefManualService.performManualAction(
       this.promoCode,
       payload,

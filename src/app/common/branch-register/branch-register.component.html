@@ -243,3 +243,36 @@
     </div>
   </div>
 </div>
+<!-- Confirm Edit Promo Modal -->
+<div
+  *ngIf="showEditConfirmModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+>
+  <div class="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
+    <div
+      class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mb-3"
+    >
+      <span class="material-symbols-outlined text-amber-500 text-xl"
+        >warning</span
+      >
+    </div>
+    <h3 class="text-base font-bold text-slate-800 mb-1.5">Edit promo code?</h3>
+    <p class="text-sm text-slate-500 mb-5">
+      Are you sure you want to edit this promo code?
+    </p>
+    <div class="flex gap-3 justify-end">
+      <button
+        (click)="cancelEditPromo()"
+        class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="confirmEditPromo()"
+        class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
+      >
+        Yes, Edit
+      </button>
+    </div>
+  </div>
+</div>

@@ -22,9 +22,16 @@ export class SharedUserProfileComponent implements OnInit {
   promoCode: string | null = null;
   promoUrl: string | null = null;
   promoError: string | null = null;
-  copied: boolean = false;
   copiedCode: boolean = false;
   copiedLink: boolean = false;
+
+  // --- Head details (business type / existing promo code) ---
+  businessType: string | null = null;
+  private hadExistingCode: boolean = false;
+  isHeadDetailLoading: boolean = true;
+
+  // --- Confirm modal ---
+  showConfirmModal: boolean = false;
 
   constructor(
     private userService: UserService,
@@ -36,6 +43,7 @@ export class SharedUserProfileComponent implements OnInit {
   ngOnInit(): void {
     this.currentEntityId = this.userStateService.getCurrentEntityId();
     this.currentUserId = this.userStateService.getUserId();
+
     this.userService.getUserFullDetail(this.currentUserId).subscribe({
       next: (data: any) => {
         this.userFullDetail = data?.data || data;
@@ -47,6 +55,30 @@ export class SharedUserProfileComponent implements OnInit {
           false,
         );
         this.isLoading = false;
+      },
+    });
+
+    this.loadHeadDetail();
+  }
+
+  // NOTE: adjust id here if API expects currentUserId instead of currentEntityId
+  private loadHeadDetail(): void {
+    this.isHeadDetailLoading = true;
+    this.headService.getHeadById(this.currentEntityId).subscribe({
+      next: (data: any) => {
+        this.businessType = data?.businessType || null;
+
+        const existingCode = data?.promoCode || null;
+        if (existingCode) {
+          this.promoCode = existingCode;
+          this.promoUrl = `${uiUrl}/register/code?code=${existingCode}`;
+          this.hadExistingCode = true;
+        }
+        this.isHeadDetailLoading = false;
+      },
+      error: (err) => {
+        this.isHeadDetailLoading = false;
+        // silent fail is fine here, generate button will just behave as "no existing code"
       },
     });
   }
@@ -65,6 +97,11 @@ export class SharedUserProfileComponent implements OnInit {
 
   get isHead(): boolean {
     return this.userInfo?.role === "HEAD";
+  }
+
+  // B2B heads should not see the generate/new-link button
+  get isB2B(): boolean {
+    return this.businessType === "B2B";
   }
 
   get userInitials(): string {
@@ -105,6 +142,26 @@ export class SharedUserProfileComponent implements OnInit {
     });
   }
 
+  // Called on button click — decides whether to confirm first
+  onGenerateClick(): void {
+    if (this.isGeneratingCode) return;
+
+    if (this.hadExistingCode) {
+      this.showConfirmModal = true;
+    } else {
+      this.generatePromoCode();
+    }
+  }
+
+  confirmGenerateNew(): void {
+    this.showConfirmModal = false;
+    this.generatePromoCode();
+  }
+
+  cancelGenerateNew(): void {
+    this.showConfirmModal = false;
+  }
+
   generatePromoCode(): void {
     if (!this.currentUserId || this.isGeneratingCode) return;
 
@@ -117,7 +174,8 @@ export class SharedUserProfileComponent implements OnInit {
       next: (res: any) => {
         const code = res?.code || res?.promoCode || res;
         this.promoCode = code;
-        this.promoUrl = `${uiUrl}/register/code?code=${code}`; // <-- change yahan
+        this.promoUrl = `${uiUrl}/register/code?code=${code}`;
+        this.hadExistingCode = true;
         this.isGeneratingCode = false;
       },
       error: (err) => {

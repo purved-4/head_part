@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { ChiefManualService } from "../../services/chief-manual.service";
 import { UserStateService } from "../../../store/user-state.service";
 import { SnackbarService } from "../../../common/snackbar/snackbar.service";
+import { UserService } from "../../services/user.service";
 @Component({
   selector: "app-pending-auto",
   templateUrl: "./pending-auto.component.html",
@@ -22,6 +23,13 @@ export class PendingAutoComponent implements OnInit {
   filteredBranches: any[] = [];
   paginatedBranches: any[] = [];
 
+  //compart
+  showUserPercentage = false;
+  userPercentageLoading = false;
+  userPercentageData: any = null;
+  userPercentageError: string | null = null;
+
+  entityId: any;
   userId: any;
   loading = false;
   activeTab: "pending" | "approved" | "rejected" = "pending";
@@ -63,9 +71,11 @@ export class PendingAutoComponent implements OnInit {
     private router: Router,
     private snackBar: SnackbarService,
     private route: ActivatedRoute,
+    private userService: UserService,
   ) {}
   ngOnInit(): void {
-    this.userId = this.userStateService.getCurrentEntityId();
+    this.entityId = this.userStateService.getCurrentEntityId();
+    this.userId = this.userStateService.getUserId();
 
     this.route.queryParams.subscribe((params) => {
       this.token = params["token"];
@@ -103,14 +113,6 @@ export class PendingAutoComponent implements OnInit {
     this.showLimitModal = false;
     this.resetModalFields();
     this.pendingApprovalId = null;
-  }
-
-  resetModalFields(): void {
-    this.limitValue = 0;
-    this.payinPercentage = 0;
-    this.payoutPercentage = 0;
-    this.fttPercentage = 0;
-    this.modalErrorMessage = null;
   }
 
   // Validate form inputs
@@ -368,7 +370,7 @@ export class PendingAutoComponent implements OnInit {
   // ================= LOAD DATA (Updated) =================
 
   loadBranches(): void {
-    if (!this.userId) return;
+    if (!this.entityId) return;
 
     this.loading = true;
 
@@ -389,7 +391,7 @@ export class PendingAutoComponent implements OnInit {
     }
 
     this.chiefAutoService
-      .getManualByChiefManualPending(this.userId, status)
+      .getManualByChiefManualPending(this.entityId, status)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (res: any) => {
@@ -438,7 +440,7 @@ export class PendingAutoComponent implements OnInit {
 
     // Call approveManual with the payload
     this.chiefAutoService
-      .approveManual(this.pendingApprovalId, this.userId, approvalPayload)
+      .approveManual(this.pendingApprovalId, this.entityId, approvalPayload)
       .pipe(
         finalize(() => {
           this.modalLoading = false;
@@ -554,5 +556,50 @@ export class PendingAutoComponent implements OnInit {
 
   getEndIndex(): number {
     return Math.min(this.currentPage * this.pageSize, this.totalItems);
+  }
+  toggleUserPercentage(): void {
+    // agar already open hai to bas hide kar do
+    if (this.showUserPercentage) {
+      this.showUserPercentage = false;
+      return;
+    }
+
+    if (!this.pendingApprovalId) {
+      this.showError("Invalid request ID");
+      return;
+    }
+
+    this.showUserPercentage = true;
+
+    // agar pehle se load ho chuka hai to dobara call mat kar
+    if (this.userPercentageData) {
+      return;
+    }
+
+    this.userPercentageLoading = true;
+    this.userPercentageError = null;
+
+    this.userService
+      .getUserFullDetail(this.pendingApprovalId)
+      .pipe(finalize(() => (this.userPercentageLoading = false)))
+      .subscribe({
+        next: (data: any) => {
+          this.userPercentageData = data;
+        },
+        error: (err) => {
+          this.userPercentageError =
+            err?.error?.message || "Failed to load percentage details";
+        },
+      });
+  }
+  resetModalFields(): void {
+    this.limitValue = 0;
+    this.payinPercentage = 0;
+    this.payoutPercentage = 0;
+    this.fttPercentage = 0;
+    this.modalErrorMessage = null;
+    this.showUserPercentage = false;
+    this.userPercentageData = null;
+    this.userPercentageError = null;
   }
 }
