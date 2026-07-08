@@ -299,21 +299,6 @@ export class PendingAutoComponent implements OnInit {
     }
   }
 
-  formatDate(dateString: string): string {
-    if (!dateString) return "—";
-    try {
-      return new Date(dateString).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return dateString;
-    }
-  }
-
   getRequestsCount(status: string): number {
     if (status === "all") return this.branches.length;
     return this.branches.filter((b) => b.status === status).length;

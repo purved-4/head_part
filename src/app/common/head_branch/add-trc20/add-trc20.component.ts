@@ -41,6 +41,10 @@ export class AddTrc20Component implements OnInit, OnDestroy {
   selectedMode: any;
   showForm: any;
   modes: any;
+  // ---- QR ----
+  qrData: string = "";
+  generatedFile: File | null = null;
+  isGeneratingQr = false;
 
   entityId: any;
   entityType: any;
@@ -129,7 +133,11 @@ export class AddTrc20Component implements OnInit, OnDestroy {
       return;
     }
 
-    // sirf valid (fully filled, >0, to > from) ranges hi payload me jayenge
+    if (!this.generatedFile) {
+      this.snackBar.show("Please generate QR first.", false);
+      return;
+    }
+
     const validRanges = this.capacityRanges
       .filter(
         (r) =>
@@ -147,7 +155,7 @@ export class AddTrc20Component implements OnInit, OnDestroy {
         quantity: r.quantity!,
       }));
 
-    const payload = {
+    const payload: any = {
       entityId: this.entityId,
       entityType: this.entityType,
       paymentMethod: this.selectedMode,
@@ -160,17 +168,23 @@ export class AddTrc20Component implements OnInit, OnDestroy {
       ranges: validRanges.length ? validRanges : null,
     };
 
+    const formData = new FormData();
+    formData.append(
+      "dto",
+      new Blob([JSON.stringify(payload)], { type: "application/json" }),
+    );
+    formData.append("file", this.generatedFile, this.generatedFile.name);
+
     this.isSubmitting = true;
-    this.crypto.addCrypto(payload).subscribe({
+    this.crypto.addCrypto(formData).subscribe({
       next: (res) => {
         this.isSubmitting = false;
-        this.snackBar.show(res.message || "bep20 added successfully", true);
-
+        this.snackBar.show(res.message || "TRC-20 added successfully", true);
         this.formSubmitted.emit();
       },
       error: (err) => {
         this.isSubmitting = false;
-        this.snackBar.show(err?.error?.message || "Error adding bep20", false);
+        this.snackBar.show(err?.error?.message || "Error adding TRC-20", false);
       },
     });
   }
@@ -229,5 +243,51 @@ export class AddTrc20Component implements OnInit, OnDestroy {
 
     const index = Math.floor(Math.random() * addresses.length);
     return addresses[index];
+  }
+  generateQrCode(): void {
+    const address = this.walletAddress.trim();
+
+    if (!address) {
+      this.snackBar.show(
+        "Please enter or generate a wallet address first.",
+        false,
+      );
+      return;
+    }
+
+    this.isGeneratingQr = true;
+    this.qrData = address;
+
+    const filename = `qr_${this.networkLabel}_${Date.now()}.png`;
+
+    // qrcode component ko render hone ka time do
+    setTimeout(() => {
+      const canvas = document.querySelector(
+        "qrcode canvas",
+      ) as HTMLCanvasElement;
+
+      if (!canvas) {
+        this.snackBar.show("QR not rendered yet", false);
+        this.isGeneratingQr = false;
+        return;
+      }
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          this.generatedFile = new File([blob], filename, {
+            type: "image/png",
+          });
+          this.snackBar.show("QR generated successfully", true);
+        } else {
+          this.snackBar.show("Failed to generate QR", false);
+        }
+        this.isGeneratingQr = false;
+      }, "image/png");
+    }, 300);
+  }
+
+  removeQrCode(): void {
+    this.qrData = "";
+    this.generatedFile = null;
   }
 }

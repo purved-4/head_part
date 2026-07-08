@@ -1,4 +1,11 @@
-import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  HostListener,
+  ViewChild,
+  ElementRef,
+} from "@angular/core";
 import { Subscription, of } from "rxjs";
 import { catchError, debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { Subject } from "rxjs";
@@ -8,6 +15,7 @@ import { UserStateService } from "../../../store/user-state.service";
 import { SnackbarService } from "../../snackbar/snackbar.service";
 import { CurrencyBehaviourService } from "../payments-methods/currency-behaviour.service";
 import { ActivatedRoute } from "@angular/router";
+import { MultimediaService } from "../../../pages/services/multimedia.service";
 
 type StatusString = "active" | "inactive" | string;
 
@@ -26,6 +34,8 @@ interface CryptoAccount {
   entityType: string;
   entityId: string;
   isCryptoActive?: boolean;
+  qrImagePath?: string | null; // 👈 naya field
+  ranges?: any[];
 }
 
 @Component({
@@ -40,13 +50,11 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   loading = false;
   showInventoryModal = false;
 
-  // currency / mode (driven by app-payments-methods)
   currency: any = "";
   selectedModeData: string = "";
   private currencySub!: Subscription;
   private modeSub!: Subscription;
 
-  // filters
   searchTerm = "";
   draftSearchTerm = "";
   maxLimit: any | null = null;
@@ -55,6 +63,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   draftStatusFilter: string = "all";
   paymentMethodFilter: string = "all";
   draftPaymentMethodFilter: string = "all";
+
   // ===== EDIT ACCOUNT MODAL =====
   showEditAccountModal = false;
   editAccountForm: {
@@ -71,12 +80,42 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   accountBeingEdited: CryptoAccount | null = null;
   isSavingEdit = false;
 
+  // ===== QR (Edit modal) =====
+  @ViewChild("editQrWrapper", { static: false }) editQrWrapper!: ElementRef;
+  originalWalletAddress = "";
+  existingQrPreviewUrl: string | null = null; // existing QR (from server)
+  newQrData: string = ""; // triggers <qrcode> render for regeneration
+  newQrPreviewUrl: string | null = null; // captured new QR data url (for display)
+  newGeneratedQrFile: File | null = null; // file that will be sent to backend
+  isGeneratingNewQr = false;
+
+  get walletAddressChanged(): boolean {
+    return (
+      this.editAccountForm.walletAddress.trim() !==
+      this.originalWalletAddress.trim()
+    );
+  }
+
+  get canSaveEdit(): boolean {
+    // agar wallet address change hua hai to naya QR generate karna zaroori hai
+    if (this.walletAddressChanged && !this.newGeneratedQrFile) {
+      return false;
+    }
+    return true;
+  }
+
+  // ===== QR (Table thumbnail + preview modal) =====
+  qrImageUrls: { [accountId: string]: string } = {};
+  qrImageLoading: { [accountId: string]: boolean } = {};
+  showQrPreviewModal = false;
+  selectedQrAccount: CryptoAccount | null = null;
+
   // pagination
   currentPage = 1;
   pageSize = 6;
   pageNumbers: number[] = [];
   Math = Math;
-  //capacity
+
   capacityPopupTop = 0;
   capacityPopupLeft = 0;
   selectedCapacityAccount: any = null;
@@ -86,7 +125,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   selectedMode!: "UPI" | "BANK" | "ERC20" | "TRC20" | "SPL" | "BEP20" | "OMNI";
   viewMode: "table" | "grid" = "table";
 
-  // limit time modal (calendar picker - same as bank)
   showLimitModal = false;
   editingAccount: CryptoAccount | null = null;
   isSubmittingLimit = false;
@@ -118,21 +156,17 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   pickerAmPm: "AM" | "PM" = "AM";
   calendarCells: any[] = [];
 
-  // status confirm modal
   showStatusModal = false;
   selectedAccount: CryptoAccount | null = null;
   confirmStatusChecked = false;
   pendingToggleValue = false;
   toggleEvent: any = null;
 
-  // delete confirm modal
   isDeleteConfirmVisible = false;
   deleteCandidate: CryptoAccount | null = null;
 
-  // action dropdown
   activeActionDropdown: string | null = null;
 
-  // entity context
   currentRoleId: any;
   currentUserId: any;
   role: any;
@@ -143,14 +177,15 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
   private queryParamsSub!: Subscription;
 
-  // available crypto payment methods (5 modes)
   cryptoPaymentMethods: string[] = ["ERC20", "TRC20", "SPL", "BEP20", "OMNI"];
+
   constructor(
     private cryptoService: CryptoService,
     private userStateService: UserStateService,
     private snack: SnackbarService,
     private currencyBehaviourService: CurrencyBehaviourService,
     private route: ActivatedRoute,
+    private multiMedia: MultimediaService, // 👈 apna actual service inject karo
   ) {}
 
   ngOnInit(): void {
@@ -158,7 +193,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     this.currentUserId = this.userStateService.getUserId();
     this.role = this.userStateService.getRole();
 
-    // QUERY PARAMS — URL se paymentMethod / currency uthao
     this.queryParamsSub = this.route.queryParams.subscribe((params) => {
       if (params["paymentMethod"]) {
         this.paymentMethodFilter = params["paymentMethod"];
@@ -167,14 +201,12 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       if (params["currency"]) {
         this.currency = params["currency"];
       }
-      // jab bhi URL change ho (mode switch), list refresh karo
       if (this.currentRoleId) {
         this.currentPage = 1;
         this.fetchCryptoAccounts();
       }
     });
 
-    // CURRENCY service se bhi sync rakho (fallback / cross-component sync)
     this.currencySub = this.currencyBehaviourService
       .getCurrency()
       .subscribe((res) => {
@@ -199,6 +231,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       this.cryptoAccounts = [...this.cryptoAccounts];
     }, 1000);
   }
+
   ngOnDestroy(): void {
     this.subs.unsubscribe();
     if (this.currencySub) this.currencySub.unsubscribe();
@@ -206,6 +239,18 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     if (this.queryParamsSub) this.queryParamsSub.unsubscribe();
     if (this.countdownInterval) clearInterval(this.countdownInterval);
     this.currencyBehaviourService.resetAll();
+
+    // memory leak se bachne ke liye blob URLs revoke karo
+    Object.values(this.qrImageUrls).forEach((url) => {
+      try {
+        URL.revokeObjectURL(url);
+      } catch {}
+    });
+    if (this.existingQrPreviewUrl) {
+      try {
+        URL.revokeObjectURL(this.existingQrPreviewUrl);
+      } catch {}
+    }
   }
 
   fetchCryptoAccounts(): void {
@@ -232,7 +277,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       .subscribe((res: any) => {
         this.loading = false;
 
-        // Service already returns res.data
         const rows: any[] = Array.isArray(res?.content) ? res.content : [];
 
         let mapped: CryptoAccount[] = rows.map((r: any) => ({
@@ -251,12 +295,11 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
           entityId: r.entityId ?? "",
           isCryptoActive: !!r.status,
           ranges: r.ranges,
+          qrImagePath: r.qrImagePath ?? null, // 👈 naya field
         }));
 
-        // Search Filter
         if (this.searchTerm?.trim()) {
           const term = this.searchTerm.trim().toLowerCase();
-
           mapped = mapped.filter(
             (a) =>
               (a.walletAddress || "").toLowerCase().includes(term) ||
@@ -265,38 +308,32 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
           );
         }
 
-        // Status Filter
         if (this.statusFilter === "active") {
           mapped = mapped.filter((a) => a.status);
         } else if (this.statusFilter === "inactive") {
           mapped = mapped.filter((a) => !a.status);
         }
 
-        // Limit Filter
         if (this.maxLimit && this.maxLimit > 0) {
           mapped = mapped.filter(
             (a) => Number(a.limitAmount || 0) <= this.maxLimit,
           );
         }
 
-        // Remove Deleted
         mapped = mapped.filter((a) => !a.deleted);
 
-        // Sort Latest First
         mapped.sort((a, b) => {
           const aTime = a.limitTime ? new Date(a.limitTime).getTime() : 0;
           const bTime = b.limitTime ? new Date(b.limitTime).getTime() : 0;
           return bTime - aTime;
         });
 
-        // Pagination
         this.totalElements = mapped.length;
         this.totalPagesCount = Math.max(
           1,
           Math.ceil(mapped.length / this.pageSize),
         );
 
-        // Reset page if current page exceeds total pages
         if (this.currentPage > this.totalPagesCount) {
           this.currentPage = 1;
         }
@@ -306,9 +343,70 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
         this.cryptoAccounts = mapped.slice(start, start + this.pageSize);
 
         this.updatePageNumbers();
+
+        // is page ke accounts ke liye QR thumbnails load karo
+        this.loadQrThumbnails();
       });
 
     this.subs.add(sub);
+  }
+
+  // ---------------- QR THUMBNAILS (table) ----------------
+  private loadQrThumbnails(): void {
+    this.cryptoAccounts.forEach((account) => {
+      if (!account.qrImagePath) return;
+      if (this.qrImageUrls[account.id]) return; // already loaded
+
+      this.qrImageLoading[account.id] = true;
+
+      const sub = this.multiMedia
+        .getPrivateImage(account.qrImagePath)
+        .pipe(
+          catchError(() => {
+            this.qrImageLoading[account.id] = false;
+            return of(null);
+          }),
+        )
+        .subscribe((url) => {
+          this.qrImageLoading[account.id] = false;
+          if (url) {
+            this.qrImageUrls[account.id] = url;
+          }
+        });
+
+      this.subs.add(sub);
+    });
+  }
+
+  // ---------------- QR PREVIEW MODAL (table -> click) ----------------
+  openQrPreviewModal(account: CryptoAccount): void {
+    if (!account.qrImagePath) {
+      this.snack.show("No QR available for this account", false);
+      return;
+    }
+    this.selectedQrAccount = account;
+    this.showQrPreviewModal = true;
+  }
+
+  closeQrPreviewModal(): void {
+    this.showQrPreviewModal = false;
+    this.selectedQrAccount = null;
+  }
+
+  downloadQrImage(): void {
+    if (!this.selectedQrAccount) return;
+    const url = this.qrImageUrls[this.selectedQrAccount.id];
+    if (!url) {
+      this.snack.show("QR not loaded yet", false);
+      return;
+    }
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `qr_${this.selectedQrAccount.paymentMethod}_${this.selectedQrAccount.walletAddress.slice(0, 8)}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 
   isAccountActive(account: CryptoAccount): boolean {
@@ -328,6 +426,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
 
     return !!(limitTime !== null && limitTime > now && status);
   }
+
   get activeFilters(): number {
     let count = 0;
     if (this.searchTerm.trim()) count++;
@@ -336,6 +435,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     if (this.maxLimit !== null && this.maxLimit > 0) count++;
     return count;
   }
+
   getCryptoRemainingTime(account: CryptoAccount): string {
     if (!account?.cryptoTime) return "";
     const diff = new Date(account.cryptoTime).getTime() - Date.now();
@@ -355,7 +455,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     return new Date(limitTime).getTime() > new Date().getTime();
   }
 
-  // ========== FILTER ACTIONS ==========
   onSearchInput(value: string) {
     this.searchSubject.next(value);
   }
@@ -397,7 +496,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     this.fetchCryptoAccounts();
   }
 
-  // ========== PAGINATION ==========
   totalPages(): number {
     return this.totalPagesCount;
   }
@@ -442,7 +540,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     this.viewMode = mode;
   }
 
-  // ========== ACTION DROPDOWN ==========
   toggleActionDropdown(accountId: string, event?: MouseEvent) {
     if (event) {
       event.stopPropagation();
@@ -460,7 +557,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ========== UTILITY ==========
   maskWallet(address: string): string {
     if (!address) return "-";
     if (address.length <= 8) return address;
@@ -473,7 +569,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     this.snack.show(message, true);
   }
 
-  // ========== LIMIT TIME MODAL (calendar) ==========
   openLimitModal(account: CryptoAccount) {
     this.editingAccount = account;
     this.showLimitModal = true;
@@ -597,9 +692,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   }
 
   submitLimitTime() {
-    console.log("clickedd");
-    console.log(this.editingAccount);
-
     let hour = this.pickerHour;
     if (this.pickerAmPm === "PM" && hour !== 12) hour += 12;
     if (this.pickerAmPm === "AM" && hour === 12) hour = 0;
@@ -655,7 +747,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     this.editingAccount = null;
   }
 
-  // ========== STATUS TOGGLE ==========
   openStatusModal(account: CryptoAccount, event: any): void {
     event.preventDefault();
     this.selectedAccount = account;
@@ -707,7 +798,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ========== DELETE (toggleDeleted) ==========
   openDeleteConfirm(account: CryptoAccount, event?: Event): void {
     if (event) {
       event.preventDefault();
@@ -741,44 +831,36 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       },
     });
   }
+
   openAddCryptoModal() {
     this.showInventoryModal = true;
   }
+
   closeInventoryModal() {
     this.showInventoryModal = false;
   }
+
   openCapacityPreview(account: any, event: MouseEvent) {
-    console.log("ACCOUNT =>", account);
-    console.log("RANGES =>", account?.ranges);
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
 
     this.selectedCapacityAccount = account;
 
     const popupWidth = 280;
-
-    // Approx dynamic height
     const rows = account?.ranges?.length || 0;
     const popupHeight = Math.max(120, rows * 56 + 70);
 
-    // Center align with clicked icon/button
     let left = rect.left + rect.width / 2 - popupWidth / 2;
     let top = rect.bottom + 8;
 
-    // If bottom overflow -> show above
     if (top + popupHeight > window.innerHeight) {
       top = rect.top - popupHeight - 8;
     }
-
-    // If still going outside top
     if (top < 10) {
       top = 10;
     }
-
-    // Horizontal boundaries
     if (left < 10) {
       left = 10;
     }
-
     if (left + popupWidth > window.innerWidth - 10) {
       left = window.innerWidth - popupWidth - 10;
     }
@@ -786,41 +868,118 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     this.capacityPopupTop = top;
     this.capacityPopupLeft = left;
   }
+
   closeCapacityPopup() {
     this.selectedCapacityAccount = null;
   }
+
   openCapacity(item: any) {
     this.selectedId = item.id;
-
     this.selectedPayinId = item.id;
-
     this.selectedMode = item.paymentMethod;
-
-    console.log({
-      payinId: this.selectedPayinId,
-      mode: this.selectedMode,
-    });
-
     this.showCapacityModal = true;
   }
+
+  // ---------------- EDIT ACCOUNT MODAL ----------------
   openEditAccountModal(account: CryptoAccount, event?: Event) {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
     }
     this.accountBeingEdited = account;
+    this.originalWalletAddress = account.walletAddress;
+
     this.editAccountForm = {
       walletAddress: account.walletAddress,
       holderName: account.holderName,
       limitAmount: account.limitAmount,
       fttAcceptance: account.fttAcceptance,
     };
+
+    // reset QR regeneration state
+    this.newQrData = "";
+    this.newQrPreviewUrl = null;
+    this.newGeneratedQrFile = null;
+    this.isGeneratingNewQr = false;
+
+    // existing QR load karo (agar hai)
+    this.existingQrPreviewUrl = null;
+    if (account.qrImagePath) {
+      // agar table me already load ho chuka hai to wahi reuse karo
+      if (this.qrImageUrls[account.id]) {
+        this.existingQrPreviewUrl = this.qrImageUrls[account.id];
+      } else {
+        const sub = this.multiMedia
+          .getPrivateImage(account.qrImagePath)
+          .pipe(catchError(() => of(null)))
+          .subscribe((url: any) => {
+            this.existingQrPreviewUrl = url;
+          });
+        this.subs.add(sub);
+      }
+    }
+
     this.showEditAccountModal = true;
   }
 
   closeEditAccountModal() {
     this.showEditAccountModal = false;
     this.accountBeingEdited = null;
+    this.newQrData = "";
+    this.newQrPreviewUrl = null;
+    this.newGeneratedQrFile = null;
+  }
+
+  onEditWalletAddressChange(): void {
+    // wallet address change hote hi purana "new QR" state clear karo,
+    // taaki user dobara generate kare naye address ke liye
+    this.newQrData = "";
+    this.newQrPreviewUrl = null;
+    this.newGeneratedQrFile = null;
+  }
+
+  // naya QR generate karo current (edited) wallet address se
+  generateNewQrForEdit(): void {
+    const address = this.editAccountForm.walletAddress.trim();
+
+    if (!address) {
+      this.snack.show("Please enter a wallet address first.", false);
+      return;
+    }
+
+    this.isGeneratingNewQr = true;
+    this.newQrData = address;
+
+    const filename = `qr_${this.accountBeingEdited?.paymentMethod}_${Date.now()}.png`;
+
+    setTimeout(() => {
+      const canvas = this.editQrWrapper?.nativeElement?.querySelector(
+        "canvas",
+      ) as HTMLCanvasElement;
+
+      if (!canvas) {
+        this.snack.show("QR not rendered yet", false);
+        this.isGeneratingNewQr = false;
+        return;
+      }
+
+      this.newQrPreviewUrl = canvas.toDataURL("image/png");
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          this.newGeneratedQrFile = new File([blob], filename, {
+            type: "image/png",
+          });
+          this.snack.show(
+            "New QR generated. Click 'Save Changes' to apply.",
+            true,
+          );
+        } else {
+          this.snack.show("Failed to generate QR", false);
+        }
+        this.isGeneratingNewQr = false;
+      }, "image/png");
+    }, 300);
   }
 
   saveEditAccount() {
@@ -842,18 +1001,46 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // 🔒 VALIDATION: wallet address change hua hai lekin naya QR generate nahi kiya
+    if (this.walletAddressChanged && !this.newGeneratedQrFile) {
+      this.snack.show(
+        "Wallet address changed. Please click 'Generate New QR' before saving.",
+        false,
+      );
+      return;
+    }
+
     this.isSavingEdit = true;
 
-    const payload = {
+    const payload: any = {
       walletAddress: this.editAccountForm.walletAddress.trim(),
       holderName: this.editAccountForm.holderName.trim(),
       limitAmount: this.editAccountForm.limitAmount,
       fttAcceptance: this.editAccountForm.fttAcceptance,
-      // paymentMethod jaanboojhke nahi bhej rahe -> backend ko untouched chodna chahiye
     };
 
+    let body: any;
+
+    if (this.newGeneratedQrFile) {
+      // naya QR bhi bhejna hai -> FormData
+      const formData = new FormData();
+      formData.append(
+        "dto",
+        new Blob([JSON.stringify(payload)], { type: "application/json" }),
+      );
+      formData.append(
+        "file",
+        this.newGeneratedQrFile,
+        this.newGeneratedQrFile.name,
+      );
+      body = formData;
+    } else {
+      // QR change nahi hua -> plain JSON
+      body = payload;
+    }
+
     this.cryptoService
-      .updateCrypto(this.accountBeingEdited.id, payload)
+      .updateCrypto(this.accountBeingEdited.id, body)
       .subscribe({
         next: (res: any) => {
           this.snack.show(res?.message || "Account updated successfully", true);

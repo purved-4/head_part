@@ -1,5 +1,6 @@
 <div class="space-y-4">
   <!-- Wallet Address & Network -->
+  <!-- Wallet Address & Network -->
   <div class="grid grid-cols-2 gap-4">
     <div class="space-y-1">
       <label class="text-sm font-medium text-gray-700">Wallet Address</label>
@@ -12,17 +13,29 @@
         <input
           type="text"
           [(ngModel)]="walletAddress"
+          (ngModelChange)="qrData = ''; generatedFile = null"
           placeholder="Enter wallet address"
           class="w-full h-11 pl-9 pr-3 border border-gray-300 rounded-xl text-sm outline-none focus:border-green-500 transition"
         />
       </div>
-      <button
-        type="button"
-        (click)="generateWalletAddress()"
-        class="px-4 h-11 rounded-xl bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition"
-      >
-        Generate
-      </button>
+      <div class="flex gap-2">
+        <button
+          type="button"
+          (click)="generateWalletAddress()"
+          class="flex-1 px-4 h-11 rounded-xl bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition"
+        >
+          Generate Address
+        </button>
+        <button
+          type="button"
+          (click)="generateQrCode()"
+          [disabled]="isGeneratingQr"
+          class="flex-1 px-4 h-11 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition disabled:opacity-60 flex items-center justify-center gap-2"
+        >
+          <span class="material-symbols-outlined text-base">qr_code_2</span>
+          {{ isGeneratingQr ? "Generating..." : "Generate QR" }}
+        </button>
+      </div>
     </div>
     <div class="space-y-1">
       <label class="text-sm font-medium text-gray-700">Network</label>
@@ -33,6 +46,21 @@
         class="w-full h-11 px-3 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500 outline-none cursor-not-allowed"
       />
     </div>
+  </div>
+
+  <!-- QR Preview -->
+  <div
+    *ngIf="qrData"
+    class="flex flex-col items-center gap-2 border border-slate-100 rounded-xl p-4 bg-slate-50"
+  >
+    <qrcode [qrdata]="qrData" [width]="200"></qrcode>
+    <button
+      type="button"
+      (click)="removeQrCode()"
+      class="text-xs font-semibold text-red-500 hover:underline"
+    >
+      Remove QR
+    </button>
   </div>
 
   <!-- Account Holder Name & Wallet Limit -->

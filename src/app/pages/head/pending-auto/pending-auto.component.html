@@ -344,13 +344,13 @@
                 </span>
               </td>
               <td class="px-6 py-3 whitespace-nowrap">
-                <span class="text-xs text-[var(--color-muted)]">{{
-                  formatDate(branch?.createdAt)
-                }}</span>
+                <span class="text-xs text-[var(--color-muted)]">
+                  {{ branch.createdAt | tz }}
+                </span>
               </td>
               <td class="px-6 py-3 whitespace-nowrap">
                 <span class="text-xs text-[var(--color-muted)]">{{
-                  formatDate(branch?.updatedAt)
+                  branch.updatedAt | tz
                 }}</span>
               </td>
               <td
@@ -480,7 +480,7 @@
                   >calendar_today</span
                 >
                 <span class="text-[var(--color-muted)]">{{
-                  formatDate(branch?.createdAt)
+                  branch?.createdAt | tz
                 }}</span>
               </div>
             </div>
@@ -585,7 +585,7 @@
                   >calendar_today</span
                 >
                 <span class="text-[var(--color-muted)]">{{
-                  formatDate(branch?.createdAt)
+                  branch?.createdAt | tz
                 }}</span>
               </div>
             </div>
