@@ -12,6 +12,7 @@ import { UserStateService } from "../../../store/user-state.service";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { SnackbarService } from "../../../common/snackbar/snackbar.service";
+import { PortalService } from "../../../pages/services/portal.service";
 
 @Component({
   selector: "app-transaction-history-report",
@@ -26,12 +27,17 @@ export class TransactionHistoryReportComponent implements OnInit {
   hasSearched = false;
   errorMessage = "";
   successMessage = "";
+  exporting = false;
 
   // Report data
   reports: any[] = [];
   fromDate!: string;
   toDate!: string;
   totalCount = 0;
+
+  // Whether the last generated report was filtered/scoped to a specific portal.
+  // When true, the table shows the extra "Portal Opening" / "Portal Closing" columns.
+  isPortalReport = false;
 
   // Modal state
   showModal = false;
@@ -42,6 +48,9 @@ export class TransactionHistoryReportComponent implements OnInit {
   // Entity selection
   loadingEntities = false;
   entities: any[] = [];
+
+  loadingPortals = false;
+  portals: any[] = [];
 
   // Entity types mapping
   entityTypes: any = [];
@@ -57,6 +66,22 @@ export class TransactionHistoryReportComponent implements OnInit {
     statuses: ["All", "Success", "Failed", "Pending"],
     portals: ["All", "Portal1", "Portal2", "Portal3"],
   };
+
+  //date range dropdown
+  dateRangeOptions = [
+    {
+      id: "custom",
+      name: "Custom",
+    },
+    {
+      id: "month",
+      name: "Month",
+    },
+    {
+      id: "year",
+      name: "Year",
+    },
+  ];
 
   currentUserId: any;
   currentRole: any;
@@ -86,6 +111,7 @@ export class TransactionHistoryReportComponent implements OnInit {
     private utilService: UtilsServiceService,
     private stateService: UserStateService,
     private snackBar: SnackbarService,
+    private portalService: PortalService,
   ) {}
 
   ngOnInit(): void {
@@ -101,6 +127,9 @@ export class TransactionHistoryReportComponent implements OnInit {
     this.initializeForm();
     this.setupFormListeners();
     this.setDefaultDates();
+    if (this.currentRole === "OWNER") {
+      this.loadPortals();
+    }
 
     // Apply auto selection if entityType matches currentRole on load
     const initialRole = this.reportForm.get("entityType")?.value;
@@ -120,6 +149,7 @@ export class TransactionHistoryReportComponent implements OnInit {
         reportType: ["ENTITY", Validators.required],
         entityType: ["AGENT", Validators.required],
         entityId: ["", Validators.required],
+        // "" represents the "All" portal option - no portalId is sent to the API in that case
         portalId: [""],
         dateRangeMode: ["custom"],
         from: [""],
@@ -230,7 +260,7 @@ export class TransactionHistoryReportComponent implements OnInit {
 
   /**
    * If selected role equals the current user's role, set entityId to currentRoleId and disable the select.
-   * ComPartwise enable the control and fetch available entities for the role.
+   * Otherwise enable the control and fetch available entities for the role.
    */
   applyEntityAutoSelect(role: string): void {
     if (!role) {
@@ -243,7 +273,7 @@ export class TransactionHistoryReportComponent implements OnInit {
     const roleNormalized = role.toUpperCase();
     const currentRoleNormalized = (this.currentRole || "").toUpperCase();
 
-    //  Agar same role hai → auto select
+    //  Agar same role hai -> auto select
     if (roleNormalized === currentRoleNormalized && this.currentRoleId) {
       this.entities = [
         {
@@ -313,17 +343,17 @@ export class TransactionHistoryReportComponent implements OnInit {
     this.applyEntityAutoSelect(role);
   }
 
-  // Load report
-  loadReport(): void {
-    if (this.reportForm.invalid) {
-      this.markFormGroupTouched(this.reportForm);
-      return;
-    }
+  /**
+   * Resolves the effective {from, to} date range for the current form state,
+   * based on the selected dateRangeMode (custom / month / year).
+   * Returns null (and alerts the user) if the resolved range lands in the future.
+   */
+  private resolveDateRange(
+    formValue: any,
+  ): { from: string; to: string } | null {
+    let from: string;
+    let to: string;
 
-    const formValue = this.reportForm.getRawValue();
-
-    // Compute actual from and to dates based on mode
-    let from: string, to: string;
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth() + 1;
@@ -333,11 +363,14 @@ export class TransactionHistoryReportComponent implements OnInit {
         from = formValue.from;
         to = formValue.to;
         break;
-      case "month":
+
+      case "month": {
         const year = parseInt(formValue.selectedYear, 10);
         const fromMonth = parseInt(formValue.fromMonth, 10);
         const toMonth = parseInt(formValue.toMonth, 10);
+
         from = new Date(year, fromMonth - 1, 1).toISOString().split("T")[0];
+
         if (year === currentYear && toMonth === currentMonth) {
           to = today.toISOString().split("T")[0];
         } else {
@@ -345,65 +378,143 @@ export class TransactionHistoryReportComponent implements OnInit {
           to = new Date(year, toMonth - 1, lastDay).toISOString().split("T")[0];
         }
         break;
-      case "year":
-        const selYear = parseInt(formValue.selectedYear, 10);
-        from = new Date(selYear, 0, 1).toISOString().split("T")[0];
-        if (selYear === currentYear) {
+      }
+
+      case "year": {
+        const selectedYear = parseInt(formValue.selectedYear, 10);
+
+        from = new Date(selectedYear, 0, 1).toISOString().split("T")[0];
+
+        if (selectedYear === currentYear) {
           to = today.toISOString().split("T")[0];
         } else {
-          to = new Date(selYear, 11, 31).toISOString().split("T")[0];
+          to = new Date(selectedYear, 11, 31).toISOString().split("T")[0];
         }
         break;
+      }
+
       default:
         from = formValue.from;
         to = formValue.to;
     }
 
-    // Future date check
     if (from > this.getTodayDate() || to > this.getTodayDate()) {
       alert("Future dates are not allowed");
-      return;
+      return null;
     }
 
-    this.loading = true;
-    this.hasSearched = true;
-    this.errorMessage = "";
-    this.successMessage = "";
-    this.reports = [];
+    return { from, to };
+  }
 
-    // Prepare request based on report type
+  /**
+   * Builds the API request payload shared by the on-screen report and the exports.
+   * portalId is only included when a real portal is selected ("" / "All" is never sent).
+   */
+  private buildReportRequest(
+    formValue: any,
+    from: string,
+    to: string,
+    page: number,
+    pageSize: number,
+  ): any {
     const request: any = {
       entityType: formValue.entityType,
-      from: from,
-      to: to,
+      from,
+      to,
+      page,
+      pageSize,
     };
 
     if (formValue.reportType === "ENTITY") {
       request.entityId = formValue.entityId;
-    } else {
+    }
+
+    if (formValue.portalId) {
       request.portalId = formValue.portalId;
     }
 
-    // Add filters if not 'All'
     if (formValue.transactionType !== "All") {
       request.transactionType = formValue.transactionType;
     }
+
     if (formValue.status !== "All") {
       request.status = formValue.status;
     }
+
     if (formValue.searchTerm) {
       request.searchTerm = formValue.searchTerm;
     }
+
+    return request;
+  }
+
+  /**
+   * Load report.
+   * @param resetPage When true (new search / filter change), pagination resets to page 1.
+   *                  When false (pagination click / auto-refresh), the current page is kept.
+   */
+  loadReport(resetPage: boolean = true): void {
+    if (this.reportForm.invalid) {
+      this.markFormGroupTouched(this.reportForm);
+      return;
+    }
+
+    const formValue = this.reportForm.getRawValue();
+    const range = this.resolveDateRange(formValue);
+    if (!range) {
+      return;
+    }
+
+    if (resetPage) {
+      this.currentPage = 1;
+    }
+
+    this.loading = true;
+    this.hasSearched = true;
+
+    this.errorMessage = "";
+    this.successMessage = "";
+
+    this.reports = [];
+
+    const request = this.buildReportRequest(
+      formValue,
+      range.from,
+      range.to,
+      this.currentPage,
+      this.itemsPerPage,
+    );
+
+    // Remember whether this report is scoped to a specific portal so the
+    // table can show Portal Opening / Portal Closing instead of the regular
+    // Opening / Closing balance columns.
+    this.isPortalReport = !!request.portalId;
+
+    console.log("REPORT REQUEST", request);
 
     this.transactionService.getEntityReport(request).subscribe({
       next: (res: any) => {
         const data = res?.data || res;
 
-        this.reports = data?.entities || data || [];
-        this.fromDate = from;
-        this.toDate = to;
-        this.totalCount = data?.count || this.reports.length;
-        this.totalPages = Math.ceil(this.totalCount / this.itemsPerPage);
+        const records = data?.entities || data?.entity?.records || [];
+
+        this.reports = records.map((record: any) => {
+          return {
+            ...record,
+          };
+        });
+
+        console.log("TABLE RECORDS", this.reports);
+
+        this.fromDate = range.from;
+        this.toDate = range.to;
+
+        this.totalCount =
+          data?.count ?? data?.totalCount ?? this.reports.length;
+        this.totalPages = Math.max(
+          1,
+          Math.ceil(this.totalCount / this.itemsPerPage),
+        );
 
         if (this.reports.length === 0) {
           this.errorMessage = "No transactions found for the selected criteria";
@@ -413,9 +524,16 @@ export class TransactionHistoryReportComponent implements OnInit {
 
         this.loading = false;
       },
+
       error: (err) => {
+        console.error("REPORT ERROR", err);
+
         this.loading = false;
-        this.snackBar.show(err.error?.message, false);
+
+        this.snackBar.show(
+          err.error?.message || "Failed to generate report",
+          false,
+        );
       },
     });
   }
@@ -441,7 +559,30 @@ export class TransactionHistoryReportComponent implements OnInit {
 
     this.transactionService.getEntityReports(request).subscribe({
       next: (res: any) => {
-        this.showResponse = res?.data || res;
+        console.log("REPORT RESPONSE", res);
+
+        const response = res?.data;
+
+        this.showResponse = {
+          ...response,
+          entity: {
+            ...response.entity,
+            records: (response.entity?.records || []).map((record: any) => ({
+              ...record,
+
+              selfPercentage:
+                (Number(record.totalPercentage) || 0) -
+                (Number(record.distributedPercentage) || 0),
+
+              selfAmount:
+                Math.abs(Number(record.amount) || 0) -
+                (Number(record.distributedAmount) || 0),
+            })),
+          },
+        };
+
+        console.log("SHOW RESPONSE", this.showResponse);
+
         this.loadingShow = false;
       },
       error: (err) => {
@@ -451,36 +592,148 @@ export class TransactionHistoryReportComponent implements OnInit {
     });
   }
 
-  // Export report
-  exportReport(format: string): void {
-    if (!this.reports || this.reports.length === 0) {
+  /**
+   * Export report. Since the on-screen table only holds the current page,
+   * this fetches the FULL result set (all pages, same filters) before
+   * generating the CSV/PDF so the export always contains every row.
+   */
+  exportReport(format: "CSV" | "PDF"): void {
+    if (!this.hasSearched || this.totalCount === 0) {
+      alert("No data available to export");
+      return;
+    }
+
+    if (this.exporting) {
+      return;
+    }
+
+    // Current page already has everything - no need to refetch.
+    if (this.reports.length >= this.totalCount) {
+      this.runExport(format, this.reports);
+      return;
+    }
+
+    const formValue = this.reportForm.getRawValue();
+    const range = this.resolveDateRange(formValue);
+    if (!range) {
+      return;
+    }
+
+    this.exporting = true;
+
+    const request = this.buildReportRequest(
+      formValue,
+      range.from,
+      range.to,
+      1,
+      this.totalCount, // ask the API for every record in one page
+    );
+
+    this.transactionService.getEntityReport(request).subscribe({
+      next: (res: any) => {
+        const data = res?.data || res;
+        const records = data?.entities || data?.entity?.records || [];
+        this.exporting = false;
+        this.runExport(format, records);
+      },
+      error: (err) => {
+        this.exporting = false;
+        this.snackBar.show(
+          err.error?.message || "Failed to export report",
+          false,
+        );
+      },
+    });
+  }
+
+  private runExport(format: string, records: any[]): void {
+    if (!records || records.length === 0) {
       alert("No data available to export");
       return;
     }
 
     if (format === "CSV") {
-      this.exportToCSV();
+      this.exportToCSV(records);
     } else if (format === "PDF") {
-      this.exportToPDF();
+      this.exportToPDF(records);
     }
   }
 
-  private exportToCSV(): void {
-    const headers = [
-      "Entity Name",
-      "Type",
-      "Opening Balance",
-      "Closing Balance",
+  /**
+   * Column definitions shared by CSV and PDF export, mirroring exactly what
+   * is shown in the on-screen table (including the Portal Opening / Portal
+   * Closing swap when a specific portal is selected).
+   */
+  private getExportColumns(): {
+    header: string;
+    value: (r: any) => any;
+    currency?: boolean;
+  }[] {
+    return [
+      { header: "Transaction Date", value: (r) => r.createdAt || "" },
+      { header: "Fund ID", value: (r) => r.fundDisplayId || "" },
+      { header: "Type", value: (r) => r.fundsType || "" },
+      { header: "Category", value: (r) => r.category || "" },
+      { header: "Currency", value: (r) => r.currency || "" },
+      { header: "Rate", value: (r) => r.rate ?? 0 },
+      { header: "Total Amount", value: (r) => r.totalAmount ?? 0 },
+      { header: "Transaction Amount", value: (r) => r.transactionAmount ?? 0 },
+      {
+        header: "Currency Exchange Amount",
+        value: (r) => r.currencyExchangeAmount ?? 0,
+      },
+      { header: "Total %", value: (r) => r.totalPercentage ?? 0 },
+      { header: "Distributed %", value: (r) => r.distributedPercentage ?? 0 },
+      { header: "Self %", value: (r) => r.selfPercentage ?? 0 },
+      { header: "Penalty %", value: (r) => r.penaltyPercentage ?? 0 },
+      {
+        header: this.isPortalReport ? "Portal Opening" : "Opening Balance",
+        value: (r) =>
+          (this.isPortalReport ? r.portalBefore : r.balanceBefore) ?? 0,
+        currency: true,
+      },
+      {
+        header: "Distributed Amount",
+        value: (r) => r.distributedAmount ?? 0,
+        currency: true,
+      },
+      {
+        header: "Self Amount",
+        value: (r) => r.selfAmount ?? 0,
+        currency: true,
+      },
+      {
+        header: "Extra Amount",
+        value: (r) => r.extraAmount ?? 0,
+        currency: true,
+      },
+      {
+        header: this.isPortalReport ? "Portal Closing" : "Closing Balance",
+        value: (r) =>
+          (this.isPortalReport ? r.portalAfter : r.balanceAfter) ?? 0,
+        currency: true,
+      },
+      { header: "Remark", value: (r) => r.remark || "" },
     ];
+  }
 
-    const rows = this.reports.map((entity) => [
-      entity.name || "",
-      entity.type || "",
-      entity.openingBalance || 0,
-      entity.closingBalance || 0,
-    ]);
+  private exportToCSV(records: any[]): void {
+    const columns = this.getExportColumns();
+    const headers = columns.map((c) => c.header);
 
-    let csvContent =
+    const escapeCsv = (val: any): string => {
+      const str = String(val ?? "");
+      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    const rows = records.map((record) =>
+      columns.map((c) => escapeCsv(c.value(record))),
+    );
+
+    const csvContent =
       headers.join(",") + "\n" + rows.map((row) => row.join(",")).join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -492,25 +745,38 @@ export class TransactionHistoryReportComponent implements OnInit {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }
 
-  private exportToPDF(): void {
-    const doc = new jsPDF();
+  private exportToPDF(records: any[]): void {
+    const doc = new jsPDF({ orientation: "landscape" });
 
     doc.setFontSize(16);
     doc.text("Transaction History Report", 14, 15);
+    doc.setFontSize(9);
+    doc.setTextColor(100);
+    doc.text(
+      `${this.fromDate} to ${this.toDate}  |  ${records.length} records`,
+      14,
+      21,
+    );
 
-    const tableData = this.reports.map((entity) => [
-      entity.name || "",
-      entity.type || "",
-      this.formatCurrency(entity.openingBalance || 0),
-      this.formatCurrency(entity.closingBalance || 0),
-    ]);
+    const columns = this.getExportColumns();
+    const head = columns.map((c) => c.header);
+
+    const tableData = records.map((record) =>
+      columns.map((c) => {
+        const val = c.value(record);
+        return c.currency ? this.formatCurrency(val) : val;
+      }),
+    );
 
     autoTable(doc, {
-      head: [["Entity Name", "Type", "Opening", "Closing"]],
+      head: [head],
       body: tableData,
-      startY: 25,
+      startY: 26,
+      styles: { fontSize: 6.5, cellPadding: 1.5 },
+      headStyles: { fillColor: [30, 41, 59] },
     });
 
     doc.save("transaction-history-report.pdf");
@@ -532,11 +798,16 @@ export class TransactionHistoryReportComponent implements OnInit {
       transactionType: "All",
       status: "All",
       entityId: "",
+      portalId: "",
     });
     this.reports = [];
     this.hasSearched = false;
     this.errorMessage = "";
     this.successMessage = "";
+    this.isPortalReport = false;
+    this.currentPage = 1;
+    this.totalPages = 1;
+    this.totalCount = 0;
 
     // re-apply auto selection in case AGENT matches currentRole
     const role = this.reportForm.get("entityType")?.value;
@@ -547,12 +818,44 @@ export class TransactionHistoryReportComponent implements OnInit {
     this.toDate = this.reportForm.get("to")?.value;
   }
 
-  // Pagination
+  // Pagination - re-fetches the current page from the server, keeping filters intact
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      // You can implement pagination API call here if needed
+    if (page < 1 || page > this.totalPages || page === this.currentPage) {
+      return;
     }
+    this.currentPage = page;
+    this.loadReport(false);
+  }
+
+  /**
+   * Compact page-number list for the pagination bar, e.g. [1, '...', 4, 5, 6, '...', 20]
+   */
+  getPageNumbers(): (number | string)[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const delta = 1;
+    const range: (number | string)[] = [];
+
+    if (total <= 1) {
+      return [1];
+    }
+
+    const left = Math.max(2, current - delta);
+    const right = Math.min(total - 1, current + delta);
+
+    range.push(1);
+    if (left > 2) {
+      range.push("...");
+    }
+    for (let i = left; i <= right; i++) {
+      range.push(i);
+    }
+    if (right < total - 1) {
+      range.push("...");
+    }
+    range.push(total);
+
+    return range;
   }
 
   // Utility function to mark all fields as touched
@@ -616,8 +919,35 @@ export class TransactionHistoryReportComponent implements OnInit {
       this.reportForm.get("dateRangeMode")?.value === "month"
     );
   }
+
   autoRefreshWrapper = () => {
     if (!this.hasSearched) return;
-    this.loadReport();
+    this.loadReport(false);
   };
+
+  loadPortals(): void {
+    this.loadingPortals = true;
+
+    this.portalService.getAllPortal().subscribe({
+      next: (res: any) => {
+        const list = (res || []).map((item: any) => ({
+          id: item.id,
+          name: `${item.domain} (${item.comPartName})`,
+        }));
+
+        // "All" always comes first; its id is "" so it is never sent to the API.
+        this.portals = [{ id: "", name: "All" }, ...list];
+
+        this.loadingPortals = false;
+      },
+      error: (err) => {
+        this.loadingPortals = false;
+        this.portals = [{ id: "", name: "All" }];
+        this.snackBar.show(
+          err.error?.message || "Failed to load portals",
+          false,
+        );
+      },
+    });
+  }
 }

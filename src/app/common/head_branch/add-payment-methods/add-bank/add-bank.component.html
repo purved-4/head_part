@@ -68,7 +68,7 @@
 
           <input
             type="text"
-            formControlName="ifscCode"
+            formControlName="bankCode"
             (input)="onIfscInput($event)"
             class="w-full px-3 py-2 pl-10 pr-10 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200 bg-[var(--color-surface)] hover:border-[var(--color-primary-light)] font-mono uppercase text-sm"
             placeholder="Search IFSC e.g. SBIN0000123"
@@ -93,22 +93,22 @@
         <!-- Character count + hint -->
         <div class="flex justify-between items-center">
           <span class="text-xs text-[var(--color-muted)]">
-            {{ addBankForm.get("ifscCode")?.value?.length || 0 }}/11 — Bank name
+            {{ addBankForm.get("bankCode")?.value?.length || 0 }}/11 — Bank name
             will auto-fill
           </span>
         </div>
 
         <div
           *ngIf="
-            addBankForm.get('ifscCode')?.invalid &&
-            addBankForm.get('ifscCode')?.touched
+            addBankForm.get('bankCode')?.invalid &&
+            addBankForm.get('bankCode')?.touched
           "
           class="text-[var(--color-danger)] text-xs"
         >
-          <span *ngIf="addBankForm.get('ifscCode')?.errors?.['required']"
+          <span *ngIf="addBankForm.get('bankCode')?.errors?.['required']"
             >IFSC code is required</span
           >
-          <span *ngIf="addBankForm.get('ifscCode')?.errors?.['pattern']"
+          <span *ngIf="addBankForm.get('bankCode')?.errors?.['pattern']"
             >Invalid IFSC format (e.g., SBIN0000123)</span
           >
         </div>

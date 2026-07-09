@@ -1,4 +1,3 @@
-
 import {
   Component,
   EventEmitter,
@@ -48,7 +47,7 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
     accountNo: "",
     accountHolderName: "",
     bankName: "",
-    ifsc: "",
+    bankCode: "",
     limitAmount: 0,
     accountType: "",
     fttAcceptance: false,
@@ -68,10 +67,10 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
     // IFSC debounce listener
     const ifscSub = this.ifscSubject
       .pipe(debounceTime(600), distinctUntilChanged())
-      .subscribe((ifsc) => {
+      .subscribe((bankCode) => {
         const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
-        if (ifscPattern.test(ifsc)) {
-          this.fetchBankFromIfsc(ifsc);
+        if (ifscPattern.test(bankCode)) {
+          this.fetchBankFromIfsc(bankCode);
         } else {
           // Incomplete pattern - reset
           this.isBankNameFetching = false;
@@ -95,7 +94,7 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       accountNo: this.bankData?.accountNo || "",
       accountHolderName: this.bankData?.accountHolderName || "",
       bankName: this.bankData?.bankName || "",
-      ifsc: this.bankData?.ifsc || "",
+      bankCode: this.bankData?.bankCode || "",
       limitAmount: this.bankData?.limitAmount || 0,
       accountType: this.bankData?.accountType || "saving",
       fttAcceptance: this.bankData?.fttAcceptance || false,
@@ -135,7 +134,7 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.updateForm.ifsc?.trim()) {
+    if (!this.updateForm.bankCode?.trim()) {
       this.snack.show("IFSC Code is required", false);
       return;
     }
@@ -162,7 +161,7 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
 
       bankName: this.updateForm.bankName,
 
-      ifsc: this.updateForm.ifsc,
+      bankCode: this.updateForm.bankCode,
 
       limitAmount: Number(this.updateForm.limitAmount),
 
@@ -170,8 +169,6 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
 
       fttAcceptance: this.updateForm.fttAcceptance,
     };
-
-
 
     const sub = this.bankService.update(payload).subscribe({
       next: (res: any) => {
@@ -197,8 +194,6 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
 
       error: (err: any) => {
         this.isSubmitting = false;
-
-
 
         this.snack.show(
           err?.error?.message || "Error updating bank account",
@@ -281,7 +276,7 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
   onIfscEditInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const formatted = input.value.replace(/\s/g, "").toUpperCase();
-    this.updateForm.ifsc = formatted;
+    this.updateForm.bankCode = formatted;
     input.value = formatted;
 
     // Reset bank name state jab IFSC change ho
@@ -291,11 +286,11 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
     this.ifscSubject.next(formatted);
   }
 
-  fetchBankFromIfsc(ifsc: string): void {
+  fetchBankFromIfsc(bankCode: string): void {
     this.isBankNameFetching = true;
     this.isBankNameEditable = false;
 
-    const sub = this.bankService.getIfsc(ifsc).subscribe({
+    const sub = this.bankService.getIfsc(bankCode).subscribe({
       next: (data) => {
         this.isBankNameFetching = false;
         this.updateForm.bankName = data?.bankName || data?.bank || "";

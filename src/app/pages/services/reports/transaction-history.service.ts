@@ -46,14 +46,23 @@ export class TransactionHistoryService {
   getEntityReport(params: {
     entityId: string;
     entityType: string;
+    portalId?: string;
     from: string;
     to: string;
+    page?: number;
+    pageSize?: number;
   }): Observable<any> {
     let httpParams = new HttpParams()
       .set("entityId", params.entityId)
       .set("entityType", params.entityType.toUpperCase())
       .set("from", DateTimeUtil.toUtcISOString(params.from))
-      .set("to", DateTimeUtil.toUtcISOString(params.to));
+      .set("to", DateTimeUtil.toUtcISOString(params.to))
+      .set("page", String(params.page ?? 1))
+      .set("pageSize", String(params.pageSize ?? 10));
+
+    if (params.portalId) {
+      httpParams = httpParams.set("portalId", params.portalId);
+    }
 
     return this.http.get<any>(`${baseUrl}/balance-history/report`, {
       params: httpParams,

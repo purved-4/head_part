@@ -59,19 +59,19 @@ export class AddBankComponent implements OnInit, OnDestroy {
 
     // IFSC valueChanges pe debounce — most reliable way
     const ifscSub = this.addBankForm
-      .get("ifscCode")!
+      .get("bankCode")!
       .valueChanges.pipe(
         debounceTime(600),
         distinctUntilChanged(),
         map((val: string) => (val || "").toUpperCase().replace(/\s/g, "")),
       )
-      .subscribe((ifsc) => {
-        console.log("IFSC value changed:", ifsc); // debug ke liye
+      .subscribe((bankCode) => {
+        console.log("IFSC value changed:", bankCode); // debug ke liye
 
         const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
-        if (ifscPattern.test(ifsc)) {
+        if (ifscPattern.test(bankCode)) {
           console.log("Pattern matched, calling API..."); // debug
-          this.fetchBankFromIfsc(ifsc);
+          this.fetchBankFromIfsc(bankCode);
         } else {
           // Reset bank name jab pattern invalid ho
           this.isBankNameEditable = false;
@@ -94,7 +94,7 @@ export class AddBankComponent implements OnInit, OnDestroy {
           [Validators.required, Validators.pattern(/^\d{10,20}$/)],
         ],
         accountHolderName: ["", [Validators.required, Validators.minLength(3)]],
-        ifscCode: [
+        bankCode: [
           "",
           [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)],
         ],
@@ -119,7 +119,7 @@ export class AddBankComponent implements OnInit, OnDestroy {
       bankName: "",
       accountNumber: "",
       accountHolderName: "",
-      ifscCode: "",
+      bankCode: "",
       accountType: "",
       limitAmount: "",
       fttAcceptance: true,
@@ -143,7 +143,7 @@ export class AddBankComponent implements OnInit, OnDestroy {
       bankName: "",
       accountNumber: "",
       accountHolderName: "",
-      ifscCode: "",
+      bankCode: "",
       accountType: "",
       limitAmount: "",
       fttAcceptance: true,
@@ -242,7 +242,7 @@ export class AddBankComponent implements OnInit, OnDestroy {
       bankName: formData.bankName,
       accountNo: formData.accountNumber,
       accountHolderName: formData.accountHolderName,
-      ifsc: formData.ifscCode,
+      bankCode: formData.bankCode,
       accountType: formData.accountType,
       limitAmount: formData.limitAmount,
       status: true,
@@ -348,11 +348,11 @@ export class AddBankComponent implements OnInit, OnDestroy {
     const formattedValue = input.value.replace(/\s/g, "").toUpperCase();
 
     this.addBankForm
-      .get("ifscCode")
+      .get("bankCode")
       ?.setValue(formattedValue, { emitEvent: false });
     input.value = formattedValue;
     this.addBankForm
-      .get("ifscCode")
+      .get("bankCode")
       ?.setValue(formattedValue, { emitEvent: true }); // emitEvent: TRUE
     input.value = formattedValue;
 
@@ -368,12 +368,12 @@ export class AddBankComponent implements OnInit, OnDestroy {
     // Subject mein push karo, debounce handle karega
     this.ifscSubject.next(formattedValue);
   }
-  fetchBankFromIfsc(ifsc: string): void {
+  fetchBankFromIfsc(bankCode: string): void {
     this.isBankNameFetching = true;
     this.isBankNameEditable = false;
     this.addBankForm.get("bankName")?.disable();
 
-    const sub = this.bankService.getIfsc(ifsc).subscribe({
+    const sub = this.bankService.getIfsc(bankCode).subscribe({
       next: (data) => {
         this.isBankNameFetching = false;
         const bankName = data?.bankName || data?.bank || "";
