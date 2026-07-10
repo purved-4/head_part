@@ -16,6 +16,7 @@ import { SnackbarService } from "../../snackbar/snackbar.service";
 import { CurrencyBehaviourService } from "../payments-methods/currency-behaviour.service";
 import { ActivatedRoute } from "@angular/router";
 import { MultimediaService } from "../../../pages/services/multimedia.service";
+import { log } from "util";
 
 type StatusString = "active" | "inactive" | string;
 
@@ -85,9 +86,12 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   originalWalletAddress = "";
   existingQrPreviewUrl: string | null = null; // existing QR (from server)
   newQrData: string = ""; // triggers <qrcode> render for regeneration
-  newQrPreviewUrl: string | null = null; // captured new QR data url (for display)
-  newGeneratedQrFile: File | null = null; // file that will be sent to backend
+  newQrPreviewUrl: string | null = null; // single preview: generated (data URL) or uploaded (blob URL)
+  newGeneratedQrFile: File | null = null; // file that will be sent to backend (generated OR uploaded)
   isGeneratingNewQr = false;
+  qrUploadError = "";
+  /** true when newQrPreviewUrl is an object URL (from file upload) and must be revoked */
+  private newQrPreviewIsBlobUrl = false;
 
   get walletAddressChanged(): boolean {
     return (
@@ -97,7 +101,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   }
 
   get canSaveEdit(): boolean {
-    // agar wallet address change hua hai to naya QR generate karna zaroori hai
+    // agar wallet address change hua hai to naya QR generate/upload karna zaroori hai
     if (this.walletAddressChanged && !this.newGeneratedQrFile) {
       return false;
     }
@@ -251,6 +255,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
         URL.revokeObjectURL(this.existingQrPreviewUrl);
       } catch {}
     }
+    this.revokeNewQrPreviewIfBlob();
   }
 
   fetchCryptoAccounts(): void {
@@ -896,11 +901,13 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       fttAcceptance: account.fttAcceptance,
     };
 
-    // reset QR regeneration state
+    // reset QR regeneration/upload state
     this.newQrData = "";
+    this.revokeNewQrPreviewIfBlob();
     this.newQrPreviewUrl = null;
     this.newGeneratedQrFile = null;
     this.isGeneratingNewQr = false;
+    this.qrUploadError = "";
 
     // existing QR load karo (agar hai)
     this.existingQrPreviewUrl = null;
@@ -926,16 +933,39 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     this.showEditAccountModal = false;
     this.accountBeingEdited = null;
     this.newQrData = "";
+    this.revokeNewQrPreviewIfBlob();
     this.newQrPreviewUrl = null;
     this.newGeneratedQrFile = null;
+    this.qrUploadError = "";
   }
 
   onEditWalletAddressChange(): void {
     // wallet address change hote hi purana "new QR" state clear karo,
-    // taaki user dobara generate kare naye address ke liye
+    // taaki user dobara generate/upload kare naye address ke liye
     this.newQrData = "";
+    this.revokeNewQrPreviewIfBlob();
     this.newQrPreviewUrl = null;
     this.newGeneratedQrFile = null;
+    this.qrUploadError = "";
+  }
+
+  /** Naye generate ya upload se pehle purana "new QR" preview clear/revoke karo */
+  private revokeNewQrPreviewIfBlob(): void {
+    if (this.newQrPreviewIsBlobUrl && this.newQrPreviewUrl) {
+      try {
+        URL.revokeObjectURL(this.newQrPreviewUrl);
+      } catch {}
+    }
+    this.newQrPreviewIsBlobUrl = false;
+  }
+
+  /** User apni current session ka "new QR" discard karke wapas current/original QR pe aa sakta hai */
+  discardNewQr(): void {
+    this.newQrData = "";
+    this.revokeNewQrPreviewIfBlob();
+    this.newQrPreviewUrl = null;
+    this.newGeneratedQrFile = null;
+    this.qrUploadError = "";
   }
 
   // naya QR generate karo current (edited) wallet address se
@@ -946,6 +976,9 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       this.snack.show("Please enter a wallet address first.", false);
       return;
     }
+
+    this.qrUploadError = "";
+    this.revokeNewQrPreviewIfBlob();
 
     this.isGeneratingNewQr = true;
     this.newQrData = address;
@@ -964,6 +997,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       }
 
       this.newQrPreviewUrl = canvas.toDataURL("image/png");
+      this.newQrPreviewIsBlobUrl = false; // data URL, not an object URL
 
       canvas.toBlob((blob) => {
         if (blob) {
@@ -980,6 +1014,40 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
         this.isGeneratingNewQr = false;
       }, "image/png");
     }, 300);
+  }
+
+  // wallet ke liye QR image manually upload karo (generate ka alternative)
+  uploadNewQrForEdit(event: Event): void {
+    this.qrUploadError = "";
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      this.qrUploadError = "Only PNG, JPG or WEBP images are allowed.";
+      input.value = "";
+      return;
+    }
+
+    const maxSizeBytes = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSizeBytes) {
+      this.qrUploadError = "File must be smaller than 5MB.";
+      input.value = "";
+      return;
+    }
+
+    // purana generated/uploaded preview hata do — ek time pe ek hi "new" QR
+    this.newQrData = "";
+    this.revokeNewQrPreviewIfBlob();
+
+    this.newGeneratedQrFile = file;
+    this.newQrPreviewUrl = URL.createObjectURL(file);
+    this.newQrPreviewIsBlobUrl = true;
+
+    this.snack.show("QR image uploaded. Click 'Save Changes' to apply.", true);
+    input.value = "";
   }
 
   saveEditAccount() {
@@ -1001,10 +1069,9 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // 🔒 VALIDATION: wallet address change hua hai lekin naya QR generate nahi kiya
     if (this.walletAddressChanged && !this.newGeneratedQrFile) {
       this.snack.show(
-        "Wallet address changed. Please click 'Generate New QR' before saving.",
+        "Wallet address changed. Please generate or upload a new QR before saving.",
         false,
       );
       return;
@@ -1013,31 +1080,39 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     this.isSavingEdit = true;
 
     const payload: any = {
+      entityId: this.accountBeingEdited.entityId,
+      entityType: this.accountBeingEdited.entityType,
+
       walletAddress: this.editAccountForm.walletAddress.trim(),
       holderName: this.editAccountForm.holderName.trim(),
       limitAmount: this.editAccountForm.limitAmount,
       fttAcceptance: this.editAccountForm.fttAcceptance,
     };
+    console.log(payload);
 
-    let body: any;
+    const formData = new FormData();
+    formData.append(
+      "dto",
+      new Blob([JSON.stringify(payload)], { type: "application/json" }),
+    );
 
     if (this.newGeneratedQrFile) {
-      // naya QR bhi bhejna hai -> FormData
-      const formData = new FormData();
-      formData.append(
-        "dto",
-        new Blob([JSON.stringify(payload)], { type: "application/json" }),
-      );
+      // naya QR generate/upload hua -> uska file bhejo
       formData.append(
         "file",
         this.newGeneratedQrFile,
         this.newGeneratedQrFile.name,
       );
-      body = formData;
     } else {
-      // QR change nahi hua -> plain JSON
-      body = payload;
+      formData.append(
+        "file",
+        new Blob([], { type: "application/octet-stream" }),
+        "",
+      );
     }
+    console.log(formData);
+
+    const body: any = formData;
 
     this.cryptoService
       .updateCrypto(this.accountBeingEdited.id, body)

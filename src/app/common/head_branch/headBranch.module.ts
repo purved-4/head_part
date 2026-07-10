@@ -23,6 +23,7 @@ import { AddTrc20Component } from "./add-trc20/add-trc20.component";
 import { CryptoManagementComponent } from "./crypto-management/crypto-management.component";
 import { RecycleCryptoComponent } from "./recycle-crypto/recycle-crypto.component";
 import { RecycleManagementComponent } from "./recycle-management/recycle-management.component";
+import { AddCryptoComponent } from "./add-crypto/add-crypto.component";
 
 @NgModule({
   declarations: [
@@ -40,7 +41,9 @@ import { RecycleManagementComponent } from "./recycle-management/recycle-managem
     AddSplComponent,
     AddTrc20Component,
     CryptoManagementComponent,
-    RecycleCryptoComponent,RecycleManagementComponent
+    RecycleCryptoComponent,
+    RecycleManagementComponent,
+    AddCryptoComponent,
   ],
   exports: [
     InventoryConfigurationComponent,
@@ -51,14 +54,15 @@ import { RecycleManagementComponent } from "./recycle-management/recycle-managem
     HeadBranchDashboardComponent,
     HbPayinReportComponent,
     HbPayoutReportComponent,
-    AddBep20Component,
-    AddErc20Component,
-    AddOmniComponent,
-    AddSplComponent,
-    AddTrc20Component,
+    // AddBep20Component,
+    // AddErc20Component,
+    // AddOmniComponent,
+    // AddSplComponent,
+    // AddTrc20Component,
     CryptoManagementComponent,
     RecycleCryptoComponent,
-    RecycleManagementComponent
+    RecycleManagementComponent,
+    AddCryptoComponent,
   ],
   imports: [
     SharedModule,

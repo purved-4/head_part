@@ -17,11 +17,11 @@
         </button>
 
         <!-- Breadcrumb (hidden on mobile) -->
-        <div class="hidden lg:flex items-center space-x-4 md:space-x-6">
+        <!-- <div class="hidden lg:flex items-center space-x-4 md:space-x-6">
           <span class="text-[var(--color-font)] font-medium">{{
             pageTitle
           }}</span>
-        </div>
+        </div> -->
       </div>
 
       <div
@@ -41,19 +41,6 @@
           <div
             class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs z-45 min-w-[160px]"
           >
-            <!-- <div class="flex justify-between">
-              <span class="text-[var(--color-muted)]">Bank</span>
-              <span class="font-medium">
-                {{ formatFullAmount(bankBalance) }}
-              </span>
-            </div>
-
-            <div class="flex justify-between mt-1">
-              <span class="text-[var(--color-muted)]">UPI</span>
-              <span class="font-medium">
-                {{ formatFullAmount(upiBalance) }}
-              </span>
-            </div> -->
             <div class="flex justify-between">
               <span class="font-medium">
                 {{ getCurrencySymbol(parentCurrency) }}
@@ -104,21 +91,145 @@
           </div>
         </div>
 
-        <div class="stat-item relative group">
-          <div class="flex items-center space-x-2 cursor-pointer">
-            <div class="w-2 h-2 rounded-full bg-[var(--color-success)]"></div>
+        <div
+          class="stat-item relative inline-block"
+          (mouseenter)="onExposureHoverEnter()"
+          (mouseleave)="onExposureHoverLeave()"
+        >
+          <!-- Trigger -->
+          <div class="flex items-center gap-2 cursor-pointer">
+            <div class="h-2 w-2 rounded-full bg-[var(--color-success)]"></div>
+
             <span class="text-sm font-medium">
-              Exploser: {{ getCurrencySymbol(parentCurrency)
-              }}{{ exploser | crformat }}
+              Exploser :
+              {{ getCurrencySymbol(parentCurrency) }}{{ exploser | crformat }}
             </span>
           </div>
 
+          <!-- Popup -->
           <div
-            class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs z-45"
+            *ngIf="isExposureHovered"
+            (mouseenter)="onExposureHoverEnter()"
+            (mouseleave)="onExposureHoverLeave()"
+            class="absolute left-1/2 top-full z-[9999] mt-3 w-[360px] -translate-x-1/2 rounded-xl border border-gray-200 bg-white shadow-2xl"
           >
-            {{ exploser | crformat }}
+            <!-- Arrow -->
+            <div
+              class="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-l border-t border-gray-200 bg-white"
+            ></div>
+
+            <!-- Loading -->
+            <div
+              *ngIf="exposureLoading"
+              class="flex items-center justify-center gap-2 p-6"
+            >
+              <div
+                class="h-5 w-5 animate-spin rounded-full border-2 border-[#154474] border-t-transparent"
+              ></div>
+              <span class="text-sm text-gray-500">Loading...</span>
+            </div>
+
+            <!-- Data -->
+            <div *ngIf="!exposureLoading" class="p-4">
+              <ng-container *ngIf="exposureData; else noExposure">
+                <table class="w-full border-collapse text-xs">
+                  <thead>
+                    <tr class="bg-[#154474] text-white">
+                      <th class="rounded-l-lg px-3 py-2 text-left">
+                        Particular
+                      </th>
+
+                      <th class="px-3 py-2 text-right">Payin</th>
+
+                      <th class="rounded-r-lg px-3 py-2 text-right">Payout</th>
+                    </tr>
+                  </thead>
+
+                  <tbody class="divide-y divide-gray-200">
+                    <!-- Pending -->
+                    <tr class="transition hover:bg-gray-50">
+                      <td class="px-3 py-2 font-medium text-gray-700">
+                        Pending
+                      </td>
+
+                      <td class="px-3 py-2 text-right">
+                        {{ formatFullAmount(exposureData.payinPending ?? 0) }}
+                      </td>
+
+                      <td class="px-3 py-2 text-right">
+                        {{ formatFullAmount(exposureData.payoutPending ?? 0) }}
+                      </td>
+                    </tr>
+
+                    <!-- Dispute -->
+                    <tr class="transition hover:bg-gray-50">
+                      <td class="px-3 py-2 font-medium text-gray-700">
+                        Dispute
+                      </td>
+
+                      <td class="px-3 py-2 text-right">
+                        {{ formatFullAmount(exposureData.payinDispute ?? 0) }}
+                      </td>
+
+                      <td class="px-3 py-2 text-right">
+                        {{ formatFullAmount(exposureData.payoutDispute ?? 0) }}
+                      </td>
+                    </tr>
+
+                    <!-- Accepted -->
+                    <tr class="transition hover:bg-gray-50">
+                      <td class="px-3 py-2 font-medium text-gray-700">
+                        Accepted
+                      </td>
+
+                      <td class="px-3 py-2 text-right">
+                        {{ formatFullAmount(exposureData.payinAccepted ?? 0) }}
+                      </td>
+
+                      <td class="px-3 py-2 text-right">
+                        {{ formatFullAmount(exposureData.payoutAccepted ?? 0) }}
+                      </td>
+                    </tr>
+
+                    <!-- Total -->
+                    <tr class="bg-blue-50 font-semibold">
+                      <td class="px-3 py-2 text-[#154474]">Total</td>
+
+                      <td class="px-3 py-2 text-right text-[#154474]">
+                        {{ formatFullAmount(exposureData.payinTotal ?? 0) }}
+                      </td>
+
+                      <td class="px-3 py-2 text-right text-[#154474]">
+                        {{ formatFullAmount(exposureData.payoutTotal ?? 0) }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- Held Amount -->
+                <div
+                  class="mt-4 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-3 py-2"
+                >
+                  <span class="text-sm font-semibold text-red-600">
+                    Held Amount
+                  </span>
+
+                  <span class="text-sm font-bold text-red-600">
+                    {{ formatFullAmount(exposureData.heldAmount ?? 0) }}
+                  </span>
+                </div>
+              </ng-container>
+
+              <!-- Empty -->
+              <ng-template #noExposure>
+                <div class="py-6 text-center text-sm text-gray-500">
+                  No exposure data available
+                </div>
+              </ng-template>
+            </div>
           </div>
         </div>
+
         <div class="stat-item relative group">
           <div class="flex items-center space-x-2 cursor-pointer">
             <div class="w-2 h-2 rounded-full bg-[var(--color-success)]"></div>
@@ -240,18 +351,6 @@
         <app-time-zone></app-time-zone>
 
         <div class="relative inline-block" #limitsContainer>
-          <!-- Button -->
-          <!-- <button
-            (click)="toggleLimitsPopup()"
-            class="mt-2 p-2 rounded-full hover:bg-[var(--color-hover)] transition"
-            [class.bg-[var(--color-hover)]]="isLimitsOpen"
-          >
-            <span class="material-symbols-outlined text-[22px] text-slate-600">
-              account_balance_wallet
-            </span>
-          </button> -->
-
-          <!-- Popup -->
           <div
             *ngIf="isLimitsOpen"
             class="absolute right-0 mt-2 z-50 w-[750px]"

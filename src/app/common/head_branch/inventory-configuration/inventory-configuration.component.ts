@@ -30,7 +30,7 @@ export class InventoryConfigurationComponent implements OnInit {
   entityId: any;
   entityType: any;
 
-  /** Modes that use crypto wallet components */
+  /** Modes that are handled by the single combined <app-add-crypto> component */
   private readonly cryptoModes = new Set([
     "OMNI",
     "SPL",
@@ -91,6 +91,12 @@ export class InventoryConfigurationComponent implements OnInit {
 
     this.showForm = !!mode;
   }
+
+  /** Used in template to decide whether to render the combined app-add-crypto component */
+  isCryptoMode(mode: any): boolean {
+    return this.cryptoModes.has((mode || "").toUpperCase());
+  }
+
   // ─── BANK handlers ───────────────────────────────────────────
   onBankAdded(): void {
     this.refreshBankAccounts.emit();

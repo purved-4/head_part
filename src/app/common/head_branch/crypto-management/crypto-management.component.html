@@ -1138,37 +1138,46 @@
   (close)="showCapacityModal = false"
 ></app-payin-capacity>
 <!-- ========== EDIT ACCOUNT MODAL ========== -->
-<!-- ========== EDIT ACCOUNT MODAL ========== -->
+
 <div
   *ngIf="showEditAccountModal"
   class="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
   (click)="closeEditAccountModal()"
 >
   <div
-    class="bg-white rounded-2xl shadow-2xl w-[420px] max-h-[90vh] overflow-y-auto"
+    class="bg-white rounded-2xl shadow-2xl w-[440px] max-h-[90vh] overflow-y-auto"
     (click)="$event.stopPropagation()"
   >
     <!-- HEADER -->
     <div
       class="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10"
     >
-      <h2 class="text-lg font-semibold text-gray-900">Edit Crypto Account</h2>
+      <div>
+        <h2 class="text-base font-semibold text-gray-900">
+          Edit Crypto Account
+        </h2>
+        <p class="text-xs text-gray-400 mt-0.5">
+          Update wallet details and QR for this inventory
+        </p>
+      </div>
       <button
         (click)="closeEditAccountModal()"
-        class="text-gray-400 hover:text-gray-600"
+        class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition"
       >
-        <span class="material-symbols-outlined">close</span>
+        <span class="material-symbols-outlined text-gray-500 text-lg"
+          >close</span
+        >
       </button>
     </div>
 
-    <div class="p-6 space-y-4">
+    <div class="p-6 space-y-5">
       <!-- Payment method locked -->
       <div>
-        <label class="block text-xs font-medium text-gray-500 mb-1"
+        <label class="block text-xs font-medium text-gray-500 mb-1.5"
           >Payment Method</label
         >
         <div
-          class="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-indigo-50 border border-indigo-200"
+          class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-indigo-50 border border-indigo-200"
         >
           <span class="material-symbols-outlined text-indigo-600 text-[18px]"
             >currency_bitcoin</span
@@ -1177,7 +1186,7 @@
             {{ accountBeingEdited?.paymentMethod }}
           </span>
           <span
-            class="ml-auto text-[10px] uppercase tracking-wide text-indigo-400"
+            class="ml-auto text-[10px] font-semibold uppercase tracking-wide text-indigo-400 bg-white border border-indigo-100 px-2 py-0.5 rounded-full"
             >Locked</span
           >
         </div>
@@ -1185,59 +1194,60 @@
 
       <!-- Wallet Address -->
       <div>
-        <label class="block text-xs font-medium text-gray-500 mb-1"
+        <label class="block text-xs font-medium text-gray-500 mb-1.5"
           >Wallet Address</label
         >
         <input
           type="text"
           [(ngModel)]="editAccountForm.walletAddress"
           (ngModelChange)="onEditWalletAddressChange()"
-          class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500 transition"
+          class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-green-500 transition"
           placeholder="Enter wallet address"
         />
 
         <!-- Warning: address changed but QR not regenerated -->
         <div
           *ngIf="walletAddressChanged"
-          class="mt-2 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"
+          class="mt-2 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2"
         >
           <span
             class="material-symbols-outlined text-amber-500 text-[18px] mt-0.5"
             >warning</span
           >
           <p class="text-xs text-amber-700 leading-5">
-            Wallet address changed. Please click
-            <span class="font-semibold">"Generate New QR"</span> below before
+            Wallet address changed. Please
+            <span class="font-semibold">generate</span> or
+            <span class="font-semibold">upload</span> a new QR below before
             saving, otherwise the old QR will not match the new address.
           </p>
         </div>
       </div>
 
-      <!-- Holder Name -->
-      <div>
-        <label class="block text-xs font-medium text-gray-500 mb-1"
-          >Holder Name</label
-        >
-        <input
-          type="text"
-          [(ngModel)]="editAccountForm.holderName"
-          class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500 transition"
-          placeholder="Enter holder name"
-        />
-      </div>
-
-      <!-- Limit Amount -->
-      <div>
-        <label class="block text-xs font-medium text-gray-500 mb-1"
-          >Limit Amount</label
-        >
-        <input
-          type="number"
-          min="0"
-          [(ngModel)]="editAccountForm.limitAmount"
-          class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500 transition"
-          placeholder="Enter limit amount"
-        />
+      <!-- Holder Name & Limit Amount -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5"
+            >Holder Name</label
+          >
+          <input
+            type="text"
+            [(ngModel)]="editAccountForm.holderName"
+            class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-green-500 transition"
+            placeholder="Enter holder name"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1.5"
+            >Limit Amount</label
+          >
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="editAccountForm.limitAmount"
+            class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-green-500 transition"
+            placeholder="0.00"
+          />
+        </div>
       </div>
 
       <!-- Payin Type toggle -->
@@ -1278,7 +1288,7 @@
       </div>
 
       <!-- ============= QR SECTION ============= -->
-      <div class="border-t border-gray-100 pt-4">
+      <div class="border-t border-gray-100 pt-5">
         <div class="flex items-center justify-between mb-3">
           <label
             class="text-xs font-semibold text-gray-700 flex items-center gap-1.5"
@@ -1288,72 +1298,45 @@
             >
             Wallet QR Code
           </label>
+          <span
+            *ngIf="newGeneratedQrFile"
+            class="text-[10px] font-semibold uppercase tracking-wide text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full"
+          >
+            Pending Save
+          </span>
+        </div>
+
+        <!-- Action buttons: Generate / Upload -->
+        <div class="grid grid-cols-2 gap-2 mb-3">
           <button
             type="button"
             (click)="generateNewQrForEdit()"
             [disabled]="isGeneratingNewQr"
-            class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition disabled:opacity-60 flex items-center gap-1.5"
+            class="h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition disabled:opacity-60 flex items-center justify-center gap-1.5"
           >
             <span class="material-symbols-outlined text-[16px]">
               {{ isGeneratingNewQr ? "hourglass_empty" : "autorenew" }}
             </span>
             {{ isGeneratingNewQr ? "Generating..." : "Generate New QR" }}
           </button>
+
+          <label
+            class="h-10 rounded-xl bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <span class="material-symbols-outlined text-[16px]">upload</span>
+            Upload QR
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/webp"
+              class="hidden"
+              (change)="uploadNewQrForEdit($event)"
+            />
+          </label>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <!-- Existing QR -->
-          <div class="flex flex-col items-center gap-1.5">
-            <span
-              class="text-[10px] uppercase tracking-wide text-gray-400 font-medium"
-              >Current</span
-            >
-            <div
-              class="w-full aspect-square rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden"
-            >
-              <img
-                *ngIf="existingQrPreviewUrl"
-                [src]="existingQrPreviewUrl"
-                alt="Current QR"
-                class="w-full h-full object-contain p-2"
-              />
-              <span *ngIf="!existingQrPreviewUrl" class="text-gray-300 text-xs"
-                >No QR</span
-              >
-            </div>
-          </div>
-
-          <!-- New QR preview -->
-          <div class="flex flex-col items-center gap-1.5">
-            <span
-              class="text-[10px] uppercase tracking-wide font-medium"
-              [ngClass]="newQrPreviewUrl ? 'text-green-500' : 'text-gray-400'"
-            >
-              New (Preview)
-            </span>
-            <div
-              class="w-full aspect-square rounded-xl border flex items-center justify-center overflow-hidden"
-              [ngClass]="
-                newQrPreviewUrl
-                  ? 'border-green-300 bg-green-50'
-                  : 'border-dashed border-gray-300 bg-gray-50'
-              "
-            >
-              <img
-                *ngIf="newQrPreviewUrl"
-                [src]="newQrPreviewUrl"
-                alt="New QR"
-                class="w-full h-full object-contain p-2"
-              />
-              <span
-                *ngIf="!newQrPreviewUrl"
-                class="text-gray-300 text-[11px] text-center px-2"
-              >
-                Click "Generate New QR"
-              </span>
-            </div>
-          </div>
-        </div>
+        <p *ngIf="qrUploadError" class="text-[11px] text-red-500 mb-2">
+          {{ qrUploadError }}
+        </p>
 
         <!-- Hidden qrcode renderer used to capture new QR canvas -->
         <div #editQrWrapper class="hidden">
@@ -1365,9 +1348,56 @@
           ></qrcode>
         </div>
 
+        <!-- Single QR preview: shows the new one if present, else the current one -->
+        <div class="flex flex-col items-center gap-2">
+          <span
+            class="text-[10px] uppercase tracking-wide font-medium"
+            [ngClass]="newQrPreviewUrl ? 'text-green-600' : 'text-gray-400'"
+          >
+            {{ newQrPreviewUrl ? "New QR (not saved yet)" : "Current QR" }}
+          </span>
+
+          <div
+            class="w-40 aspect-square rounded-xl border flex items-center justify-center overflow-hidden"
+            [ngClass]="
+              newQrPreviewUrl
+                ? 'border-green-300 bg-green-50'
+                : 'border-gray-200 bg-gray-50'
+            "
+          >
+            <img
+              *ngIf="newQrPreviewUrl"
+              [src]="newQrPreviewUrl"
+              alt="New QR"
+              class="w-full h-full object-contain p-2"
+            />
+            <img
+              *ngIf="!newQrPreviewUrl && existingQrPreviewUrl"
+              [src]="existingQrPreviewUrl"
+              alt="Current QR"
+              class="w-full h-full object-contain p-2"
+            />
+            <span
+              *ngIf="!newQrPreviewUrl && !existingQrPreviewUrl"
+              class="text-gray-300 text-[11px] text-center px-2"
+            >
+              No QR available
+            </span>
+          </div>
+
+          <button
+            *ngIf="newQrPreviewUrl"
+            type="button"
+            (click)="discardNewQr()"
+            class="text-[11px] font-semibold text-red-500 hover:underline"
+          >
+            Discard new QR
+          </button>
+        </div>
+
         <p
           *ngIf="newGeneratedQrFile"
-          class="text-[11px] text-green-600 mt-2 flex items-center gap-1"
+          class="text-[11px] text-green-600 mt-3 flex items-center justify-center gap-1"
         >
           <span class="material-symbols-outlined text-[14px]"
             >check_circle</span
@@ -1378,18 +1408,20 @@
     </div>
 
     <!-- FOOTER -->
-    <div class="grid grid-cols-2 gap-3 px-6 pb-6 pt-2 sticky bottom-0 bg-white">
+    <div
+      class="grid grid-cols-2 gap-3 px-6 pb-6 pt-3 border-t border-gray-100 sticky bottom-0 bg-white"
+    >
       <button
         (click)="closeEditAccountModal()"
         [disabled]="isSavingEdit"
-        class="h-10 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition"
+        class="h-10 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition disabled:opacity-60"
       >
         Cancel
       </button>
       <button
         (click)="saveEditAccount()"
         [disabled]="isSavingEdit || !canSaveEdit"
-        class="h-10 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="h-10 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
       >
         <span
           *ngIf="isSavingEdit"

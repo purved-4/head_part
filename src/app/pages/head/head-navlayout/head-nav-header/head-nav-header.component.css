@@ -31,7 +31,9 @@
 
 /* Enhanced shadows */
 .shadow-lg {
-  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 25px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* Smooth transitions */
@@ -65,7 +67,7 @@ button {
   .user-info-mobile {
     padding: 0.5rem;
   }
-  
+
   .header-title {
     font-size: 1.125rem;
   }
@@ -110,7 +112,7 @@ button {
   .main-content {
     transition: margin-left 0.3s ease;
   }
-  
+
   .main-content.mobile-content {
     opacity: 0.5;
     pointer-events: none;
@@ -126,4 +128,28 @@ button {
 /* Prevent body scroll when mobile menu is open */
 body.menu-open {
   overflow: hidden;
+}
+@keyframes exposureFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes exposureSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.exposure-popup {
+  animation: exposureFadeIn 0.15s ease-out;
+}
+
+.exposure-spinner {
+  animation: exposureSpin 0.6s linear infinite;
 }

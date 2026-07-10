@@ -120,8 +120,8 @@
       </div>
     </ng-container>
 
-    <!-- OMNI -->
-    <ng-container *ngIf="showForm && selectedMode === 'OMNI'">
+    <!-- CRYPTO: OMNI / SPL / ERC20 / TRC20 / BEP20 — single combined component -->
+    <ng-container *ngIf="showForm && isCryptoMode(selectedMode)">
       <div class="border-t border-gray-100 pt-5">
         <div class="flex items-center gap-2 mb-4">
           <span
@@ -130,88 +130,13 @@
           >
           <span class="text-sm font-semibold text-gray-800">Details</span>
         </div>
-        <app-add-omni
+        <app-add-crypto
           [currency]="selectedCurrency"
+          [mode]="selectedMode"
           [embeddedMode]="true"
           (formSubmitted)="onCryptoAdded($event)"
           (formCancelled)="showForm = false"
-        ></app-add-omni>
-      </div>
-    </ng-container>
-
-    <!-- SPL -->
-    <ng-container *ngIf="showForm && selectedMode === 'SPL'">
-      <div class="border-t border-gray-100 pt-5">
-        <div class="flex items-center gap-2 mb-4">
-          <span
-            class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
-            >2</span
-          >
-          <span class="text-sm font-semibold text-gray-800">Details</span>
-        </div>
-        <app-add-spl
-          [currency]="selectedCurrency"
-          [embeddedMode]="true"
-          (formSubmitted)="onCryptoAdded($event)"
-          (formCancelled)="showForm = false"
-        ></app-add-spl>
-      </div>
-    </ng-container>
-
-    <!-- ERC-20 -->
-    <ng-container *ngIf="showForm && selectedMode === 'ERC20'">
-      <div class="border-t border-gray-100 pt-5">
-        <div class="flex items-center gap-2 mb-4">
-          <span
-            class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
-            >2</span
-          >
-          <span class="text-sm font-semibold text-gray-800">Details</span>
-        </div>
-        <app-add-erc20
-          [currency]="selectedCurrency"
-          [embeddedMode]="true"
-          (formSubmitted)="onCryptoAdded($event)"
-          (formCancelled)="showForm = false"
-        ></app-add-erc20>
-      </div>
-    </ng-container>
-
-    <!-- TRC-20 -->
-    <ng-container *ngIf="showForm && selectedMode === 'TRC20'">
-      <div class="border-t border-gray-100 pt-5">
-        <div class="flex items-center gap-2 mb-4">
-          <span
-            class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
-            >2</span
-          >
-          <span class="text-sm font-semibold text-gray-800">Details</span>
-        </div>
-        <app-add-trc20
-          [currency]="selectedCurrency"
-          [embeddedMode]="true"
-          (formSubmitted)="onCryptoAdded($event)"
-          (formCancelled)="showForm = false"
-        ></app-add-trc20>
-      </div>
-    </ng-container>
-
-    <!-- BEP-20 -->
-    <ng-container *ngIf="showForm && selectedMode === 'BEP20'">
-      <div class="border-t border-gray-100 pt-5">
-        <div class="flex items-center gap-2 mb-4">
-          <span
-            class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
-            >2</span
-          >
-          <span class="text-sm font-semibold text-gray-800">Details</span>
-        </div>
-        <app-add-bep20
-          [currency]="selectedCurrency"
-          [embeddedMode]="true"
-          (formSubmitted)="onCryptoAdded($event)"
-          (formCancelled)="showForm = false"
-        ></app-add-bep20>
+        ></app-add-crypto>
       </div>
     </ng-container>
   </div>

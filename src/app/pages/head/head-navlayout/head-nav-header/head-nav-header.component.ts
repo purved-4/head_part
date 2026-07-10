@@ -56,6 +56,12 @@ export class HeadNavHeaderComponent implements OnInit {
   };
 
   searchTerm = "";
+  // --- Exposure hover popup state ---
+  exposureData: any = null;
+  exposureLoading = false;
+  isExposureHovered = false;
+  private exposureEnterTimer: any;
+  private exposureLeaveTimer: any;
 
   searchResults: any[] = [];
 
@@ -253,6 +259,7 @@ export class HeadNavHeaderComponent implements OnInit {
           this.emitBalances();
         });
       });
+    this.fetchExposureData();
   }
 
   ngOnDestroy(): void {
@@ -351,66 +358,48 @@ export class HeadNavHeaderComponent implements OnInit {
     );
 
     this.showSearchDropdown = this.searchResults.length > 0;
-    this.selectedIndex =
-  this.searchResults.length ? 0 : -1;
+    this.selectedIndex = this.searchResults.length ? 0 : -1;
   }
 
   onSearchKeyDown(event: KeyboardEvent) {
+    if (!this.showSearchDropdown) {
+      return;
+    }
 
-  if (!this.showSearchDropdown) {
-    return;
+    switch (event.key) {
+      case "ArrowDown":
+        event.preventDefault();
+
+        this.selectedIndex =
+          (this.selectedIndex + 1) % this.searchResults.length;
+
+        break;
+
+      case "ArrowUp":
+        event.preventDefault();
+
+        this.selectedIndex =
+          (this.selectedIndex - 1 + this.searchResults.length) %
+          this.searchResults.length;
+
+        break;
+
+      case "Enter":
+        event.preventDefault();
+
+        if (this.selectedIndex >= 0) {
+          this.navigateTo(this.searchResults[this.selectedIndex].path);
+        }
+
+        break;
+
+      case "Escape":
+        this.showSearchDropdown = false;
+        this.selectedIndex = -1;
+
+        break;
+    }
   }
-
-  switch (event.key) {
-
-    case "ArrowDown":
-
-      event.preventDefault();
-
-      this.selectedIndex =
-        (this.selectedIndex + 1) %
-        this.searchResults.length;
-
-      break;
-
-
-    case "ArrowUp":
-
-      event.preventDefault();
-
-      this.selectedIndex =
-        (this.selectedIndex - 1 + this.searchResults.length)
-        %
-        this.searchResults.length;
-
-      break;
-
-
-    case "Enter":
-
-      event.preventDefault();
-
-      if (this.selectedIndex >= 0) {
-
-        this.navigateTo(
-          this.searchResults[this.selectedIndex].path
-        );
-
-      }
-
-      break;
-
-
-    case "Escape":
-
-      this.showSearchDropdown = false;
-      this.selectedIndex = -1;
-
-      break;
-
-  }
-
-}
 
   navigateTo(path: string) {
     this.router.navigateByUrl(path);
@@ -617,5 +606,58 @@ export class HeadNavHeaderComponent implements OnInit {
       clearInterval(this.timerInterval);
       this.timerInterval = null;
     }
+  }
+
+  onExposureHoverEnter() {
+    clearTimeout(this.exposureLeaveTimer);
+
+    this.exposureEnterTimer = setTimeout(() => {
+      this.isExposureHovered = true;
+
+      // Har hover pe latest data fetch hoga
+      this.fetchExposureData();
+    }, 2000);
+  }
+
+  onExposureHoverLeave() {
+    clearTimeout(this.exposureEnterTimer);
+
+    this.exposureLeaveTimer = setTimeout(() => {
+      this.isExposureHovered = false;
+    }, 150);
+  }
+
+  private fetchExposureData() {
+    this.exposureLoading = true;
+
+    this.fundService.getExposure(this.currentRoleId, "ENTITY").subscribe({
+      next: (res: any) => {
+        console.log("ecskhdklha", res);
+
+        const data = res ?? {};
+
+        this.exposureData = {
+          payinPending: data.payinFunds?.pending ?? 0,
+          payinDispute: data.payinFunds?.disputeEscalated ?? 0,
+          payinAccepted: data.payinFunds?.accepted ?? 0,
+          payinTotal: data.payinFunds?.total ?? 0,
+
+          payoutPending: data.payoutFunds?.pending ?? 0,
+          payoutDispute: data.payoutFunds?.disputeEscalated ?? 0,
+          payoutAccepted: data.payoutFunds?.accepted ?? 0,
+          payoutTotal: data.payoutFunds?.total ?? 0,
+
+          heldAmount: data.heldAmount ?? 0,
+        };
+
+        console.log(this.exposureData);
+
+        this.exposureLoading = false;
+      },
+      error: () => {
+        this.exposureLoading = false;
+        this.exposureData = null;
+      },
+    });
   }
 }

@@ -1,4 +1,3 @@
-
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
@@ -29,7 +28,7 @@ interface BankAccount {
   accountNo: string;
   accountType: string;
   status: StatusString;
-  ifsc?: any;
+  bankCode?: any;
   bankRange?: string;
   createdAt?: Date | string | null;
   limitAmount: string;
@@ -375,7 +374,7 @@ export class BanksComponent implements OnInit, OnDestroy {
               accountNo: r.accountNo ?? r.accountNumber ?? "",
               accountType,
               status,
-              ifsc: r.ifsc ?? "",
+              bankCode: r.bankCode ?? "",
               bankRange: r.bankRange ?? r.range ?? "",
               createdAt: r.createdAt ? new Date(r.createdAt) : null,
               limitAmount: r.limitAmount ?? "",
@@ -548,7 +547,7 @@ export class BanksComponent implements OnInit, OnDestroy {
           [Validators.required, Validators.pattern(/^\d{10,20}$/)],
         ],
         accountHolderName: ["", [Validators.required, Validators.minLength(3)]],
-        ifscCode: [
+        bankCode: [
           "",
           [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)],
         ],
@@ -1080,7 +1079,7 @@ export class BanksComponent implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const formattedValue = input.value.replace(/\s/g, "").toUpperCase();
 
-    this.addBankForm.get("ifscCode")?.setValue(formattedValue, {
+    this.addBankForm.get("bankCode")?.setValue(formattedValue, {
       emitEvent: false,
     });
 
@@ -1146,7 +1145,7 @@ export class BanksComponent implements OnInit, OnDestroy {
         });
     }
   }
-viewUpi(account: any) {
+  viewUpi(account: any) {
     const bankId = account?.id;
     if (!bankId) return;
 
