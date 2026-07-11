@@ -25,7 +25,7 @@ interface CryptoAccount {
   paymentMethod: string;
   walletAddress: string;
   limitAmount: string;
-  holderName: string;
+
   currency: string;
   fttAcceptance: boolean;
   limitTime: string | null;
@@ -37,6 +37,7 @@ interface CryptoAccount {
   isCryptoActive?: boolean;
   qrImagePath?: string | null; // 👈 naya field
   ranges?: any[];
+  liveAssigned?: boolean;
 }
 
 @Component({
@@ -69,12 +70,12 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   showEditAccountModal = false;
   editAccountForm: {
     walletAddress: string;
-    holderName: string;
+    // holderName: string;
     limitAmount: any;
     fttAcceptance: boolean;
   } = {
     walletAddress: "",
-    holderName: "",
+    // holderName: "",
     limitAmount: null,
     fttAcceptance: true,
   };
@@ -289,7 +290,9 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
           paymentMethod: r.paymentMethod ?? "",
           walletAddress: r.walletAddress ?? "",
           limitAmount: r.limitAmount ?? "",
-          holderName: r.holderName ?? "",
+          liveAssigned: r.liveAssigned ?? false,
+
+          // holderName: r.holderName ?? "",
           currency: r.currency ?? "",
           fttAcceptance: r.fttAcceptance ?? true,
           limitTime: r.limitTime ?? null,
@@ -308,7 +311,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
           mapped = mapped.filter(
             (a) =>
               (a.walletAddress || "").toLowerCase().includes(term) ||
-              (a.holderName || "").toLowerCase().includes(term) ||
               (a.paymentMethod || "").toLowerCase().includes(term),
           );
         }
@@ -896,7 +898,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
 
     this.editAccountForm = {
       walletAddress: account.walletAddress,
-      holderName: account.holderName,
+      // holderName: account.holderName,
       limitAmount: account.limitAmount,
       fttAcceptance: account.fttAcceptance,
     };
@@ -1057,10 +1059,10 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       this.snack.show("Wallet address is required", false);
       return;
     }
-    if (!this.editAccountForm.holderName?.trim()) {
-      this.snack.show("Holder name is required", false);
-      return;
-    }
+    // if (!this.editAccountForm.holderName?.trim()) {
+    //   this.snack.show("Holder name is required", false);
+    //   return;
+    // }
     if (
       !this.editAccountForm.limitAmount ||
       Number(this.editAccountForm.limitAmount) <= 0
@@ -1084,7 +1086,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       entityType: this.accountBeingEdited.entityType,
 
       walletAddress: this.editAccountForm.walletAddress.trim(),
-      holderName: this.editAccountForm.holderName.trim(),
+      // holderName: this.editAccountForm.holderName.trim(),
       limitAmount: this.editAccountForm.limitAmount,
       fttAcceptance: this.editAccountForm.fttAcceptance,
     };

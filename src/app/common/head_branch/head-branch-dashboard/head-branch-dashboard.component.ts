@@ -1480,12 +1480,10 @@ export class HeadBranchDashboardComponent
 
         const formData = new FormData();
 
-        // ACCOUNT ID
         if (accountId) {
           formData.append("accountId", String(accountId));
         }
 
-        // FILE
         if (this.selectedFile) {
           formData.append("file", this.selectedFile, this.selectedFile.name);
         }
@@ -1508,6 +1506,17 @@ export class HeadBranchDashboardComponent
       }
 
       // =====================================================
+      // CRYPTO PAYIN  ✅ NEW
+      // =====================================================
+      else if (t.mode === "crypto") {
+        await lastValueFrom(this.fundService.settleCryptoFund(fundId));
+      } else {
+        this.snackbar.show("Unknown transaction type, cannot approve", false);
+        this.loaderService.hideButtonLoader();
+        return;
+      }
+
+      // =====================================================
       // SUCCESS
       // =====================================================
 
@@ -1526,15 +1535,11 @@ export class HeadBranchDashboardComponent
 
       if (approvedTx.type === "payout") {
         this.addApprovedUnique(this.approvedTransactions, approvedTx);
-
         this.addApprovedUnique(this.approvedpayouts, approvedTx);
-
         this.recentpayouts = [...this.approvedpayouts];
       } else {
         this.addApprovedUnique(this.approvedTransactions, approvedTx);
-
         this.addApprovedUnique(this.approvedpayins, approvedTx);
-
         this.recentpayins = [...this.approvedpayins];
       }
 
@@ -1866,8 +1871,16 @@ export class HeadBranchDashboardComponent
           reason,
           file,
         );
+      } else if (t.mode === "crypto") {
+        // ✅ NEW
+        rejectObservable = this.fundService.rejectCryptoFund(
+          fundId,
+          reason,
+          file,
+        );
       } else {
         this.snackbar.show("Unknown transaction type, cannot reject", false);
+        this.loaderService.hideButtonLoader();
         return;
       }
 
@@ -1915,17 +1928,13 @@ export class HeadBranchDashboardComponent
         err?.error?.message || err?.error?.error || "Rejection failed";
       this.snackbar.show(message, false);
 
-      // Optionally, you could still remove from pending here if desired
       this.removeFromPendingListsByTx(t);
-      // Add to recent failed if needed
-      // ...
-      // Clear confirm state
+
       this.confirmTransaction = null;
       this.showRejectConfirm = false;
       this.selectedTransaction = null;
       this.resetRejectReason();
     } finally {
-      // Ensure file input reset etc.
       this.resetForm();
       this.refreshCachedLists();
       this.loaderService.hideButtonLoader();
@@ -1935,7 +1944,6 @@ export class HeadBranchDashboardComponent
   openApproveConfirm(transaction: any) {
     if (!transaction) return;
 
-    // ✅ GUARD: Payout ke case mein processing true hone se pehle modal hi na khule
     if (transaction.type === "payout" && transaction.processing !== true) {
       this.snackbar.show("Please start processing first", false);
       return;
@@ -1951,7 +1959,9 @@ export class HeadBranchDashboardComponent
           ? "upi"
           : t.mode === "bank"
             ? "bank"
-            : "none";
+            : t.mode === "crypto"
+              ? "crypto" // ✅ NEW
+              : "none";
 
     this.confirmTransaction = { ...t, section: src };
     this.showApproveConfirm = true;
@@ -1964,7 +1974,6 @@ export class HeadBranchDashboardComponent
   openRejectConfirm(tx: any) {
     if (!tx) return;
 
-    // ✅ GUARD: Payout ke case mein processing true hone se pehle modal hi na khule
     if (tx.type === "payout" && tx.processing !== true) {
       this.snackbar.show("Please start processing first", false);
       return;
@@ -1978,7 +1987,9 @@ export class HeadBranchDashboardComponent
           ? "upi"
           : t.mode === "bank"
             ? "bank"
-            : "none";
+            : t.mode === "crypto"
+              ? "crypto" // ✅ NEW
+              : "none";
 
     this.confirmTransaction = { ...t, section: src };
     this.showRejectConfirm = true;

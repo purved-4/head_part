@@ -221,7 +221,7 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
       currency: this.selectedCurrency?.currency ?? this.currency?.currency,
       network: this.mode || this.selectedMode,
       walletAddress: this.walletAddress,
-      holderName: this.accountHolderName,
+      // holderName: this.accountHolderName,
       limitAmount: this.walletLimit,
       fttAcceptance: this.acceptsPpi || true,
       ranges: validRanges.length ? validRanges : null,

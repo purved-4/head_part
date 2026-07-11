@@ -161,7 +161,7 @@
                       <span class="tabular-nums">
                         {{
                           transaction.mode === "crypto"
-                            ? transaction.currencyWiseAmount
+                            ? transaction.amount
                             : transaction.amount
                         }}
                       </span>
@@ -1722,7 +1722,7 @@
                   <p class="font-bold text-emerald-600 text-lg">
                     {{
                       selectedTransaction.mode === "crypto"
-                        ? (selectedTransaction.currencyWiseAmount | number) +
+                        ? (selectedTransaction.amount | number) +
                           " " +
                           selectedTransaction.currency
                         : "₹" + (selectedTransaction.amount | number)

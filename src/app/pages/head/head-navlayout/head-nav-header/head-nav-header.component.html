@@ -101,7 +101,7 @@
             <div class="h-2 w-2 rounded-full bg-[var(--color-success)]"></div>
 
             <span class="text-sm font-medium">
-              Exploser :
+              Exposure :
               {{ getCurrencySymbol(parentCurrency) }}{{ exploser | crformat }}
             </span>
           </div>
@@ -136,7 +136,7 @@
                   <thead>
                     <tr class="bg-[#154474] text-white">
                       <th class="rounded-l-lg px-3 py-2 text-left">
-                        Particular
+                        Exposure List
                       </th>
 
                       <th class="px-3 py-2 text-right">Payin</th>
@@ -177,19 +177,6 @@
                     </tr>
 
                     <!-- Accepted -->
-                    <tr class="transition hover:bg-gray-50">
-                      <td class="px-3 py-2 font-medium text-gray-700">
-                        Accepted
-                      </td>
-
-                      <td class="px-3 py-2 text-right">
-                        {{ formatFullAmount(exposureData.payinAccepted ?? 0) }}
-                      </td>
-
-                      <td class="px-3 py-2 text-right">
-                        {{ formatFullAmount(exposureData.payoutAccepted ?? 0) }}
-                      </td>
-                    </tr>
 
                     <!-- Total -->
                     <tr class="bg-blue-50 font-semibold">

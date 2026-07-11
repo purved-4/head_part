@@ -49,7 +49,7 @@ export class FundsService {
 
   settleUpiFund(upiSettleId: any): Observable<any> {
     return this.http
-      .patch<any>(`${baseUrl}/funds/upi/${upiSettleId}/accept`, {})
+      .patch<any>(`${baseUrl}/funds/payment/${upiSettleId}/accept`, {})
       .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(error)),
@@ -64,7 +64,14 @@ export class FundsService {
         catchError((error) => throwError(error)),
       );
   }
-
+  settleCryptoFund(cryptoSettleId: any): Observable<any> {
+    return this.http
+      .patch<any>(`${baseUrl}/funds/payment/${cryptoSettleId}/accept`, {})
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
   getAllFund(): Observable<any> {
     return this.http.get<any>(`${baseUrl}/funds/getAllData`).pipe(
       map((response: any) => response.data),
@@ -228,7 +235,7 @@ export class FundsService {
     formData.append("file", file);
 
     return this.http
-      .patch<any>(`${baseUrl}/funds/upi/${bankSettleId}/reject`, formData)
+      .patch<any>(`${baseUrl}/funds/payment/${bankSettleId}/reject`, formData)
       .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(() => error)),
@@ -236,6 +243,22 @@ export class FundsService {
   }
 
   rejectBankFund(
+    bankSettleId: string,
+    reason: string,
+    file: any,
+  ): Observable<any> {
+    const formData = new FormData();
+    formData.append("reason", reason);
+    formData.append("file", file);
+
+    return this.http
+      .patch<any>(`${baseUrl}/funds/payment/${bankSettleId}/reject`, formData)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+  rejectCryptoFund(
     bankSettleId: string,
     reason: string,
     file: any,

@@ -382,7 +382,7 @@ export class BanksComponent implements OnInit, OnDestroy {
               ranges: r.ranges ?? [],
               limitTime: r.limitTime ?? null,
               fttAcceptance: r.fttAcceptance ?? true,
-              totalLimitAmount: r.totalLimitAmount,
+
               remainingLimitAmount: r.remainingLimitAmount,
 
               upiCount: r.upiCount ?? null,
