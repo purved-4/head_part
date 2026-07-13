@@ -42,8 +42,7 @@ export interface PortalWiseReport {
 @Injectable({ providedIn: "root" })
 export class TransactionHistoryService {
   constructor(private http: HttpClient) {}
-
-  getEntityReport(params: {
+getEntityReport(params: {
     entityId: string;
     entityType: string;
     portalId?: string;

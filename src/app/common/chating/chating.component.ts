@@ -1,3 +1,4 @@
+
 import {
   Component,
   NgZone,
@@ -113,8 +114,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   isLoading = false;
-  resolvedNotificatninService:any
-
+  resolvedNotificatninService: any;
 
   /* subscriptions */
   private realTimeSub: Subscription | null = null;
@@ -229,14 +229,16 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.role = this.userStateService.getRole();
 
     this.chatMode = this.role === "HEAD" ? "head" : "branch";
-    this.resolvedNotificatninService = this.role === "COM_PART" ? this.comPartService : this.notificationChatService
+    this.resolvedNotificatninService =
+      this.role === "COM_PART"
+        ? this.comPartService
+        : this.notificationChatService;
 
     if (this.currrentEntityId) {
       this.loadThreads();
     }
 
     // this.route.queryParams.subscribe((params) => {
-
 
     //   this.threadId = params["threadId"];
     // });
@@ -612,7 +614,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadResolvedThreadsPaginated();
   }
 
-private loadResolvedThreadsPaginated(): void {
+  private loadResolvedThreadsPaginated(): void {
     this.resolvedNotificatninService
       .getAllThreadCombinedPaginate(
         this.currrentEntityId,
@@ -1076,42 +1078,44 @@ private loadResolvedThreadsPaginated(): void {
 
   loadChatMembers(threadId: any): void {
     this.loadingMembers = true;
-    this.resolvedNotificatninService.getChatMembersByThreadId(threadId).subscribe({
-      next: (membersRes: any) => {
-        const members = Array.isArray(membersRes)
-          ? membersRes
-          : membersRes
-            ? [membersRes]
-            : [];
+    this.resolvedNotificatninService
+      .getChatMembersByThreadId(threadId)
+      .subscribe({
+        next: (membersRes: any) => {
+          const members = Array.isArray(membersRes)
+            ? membersRes
+            : membersRes
+              ? [membersRes]
+              : [];
 
-        const mappedMembers: GroupParticipant[] = members.map((m: any) => ({
-          id: m.id,
-          userId: m.userId,
-          userName: m.memberName || "Unknown",
-          avatar: this.getInitials(m.memberName || "U"),
-          online: !!m.online,
-          role: m.entityType || m.userRole || null,
-        }));
+          const mappedMembers: GroupParticipant[] = members.map((m: any) => ({
+            id: m.id,
+            userId: m.userId,
+            userName: m.memberName || "Unknown",
+            avatar: this.getInitials(m.memberName || "U"),
+            online: !!m.online,
+            role: m.entityType || m.userRole || null,
+          }));
 
-        mappedMembers.forEach((member) => {
-          this.participantsMap.set(member.userId, member);
-        });
+          mappedMembers.forEach((member) => {
+            this.participantsMap.set(member.userId, member);
+          });
 
-        this.zone.run(() => {
-          if (
-            this.selectedNotification &&
-            this.selectedNotification.id === threadId
-          ) {
-            this.selectedNotification.participants = mappedMembers;
-            this.selectedNotification.participantCount = mappedMembers.length;
-          }
+          this.zone.run(() => {
+            if (
+              this.selectedNotification &&
+              this.selectedNotification.id === threadId
+            ) {
+              this.selectedNotification.participants = mappedMembers;
+              this.selectedNotification.participantCount = mappedMembers.length;
+            }
+            this.loadingMembers = false;
+          });
+        },
+        error: () => {
           this.loadingMembers = false;
-        });
-      },
-      error: () => {
-        this.loadingMembers = false;
-      },
-    });
+        },
+      });
   }
 
   /* ════════════════════════════════════════════
@@ -1262,8 +1266,6 @@ private loadResolvedThreadsPaginated(): void {
       .subscribe((data: any) => {
         if (!data) return;
 
-
-
         // backend kabhi threadId, kabhi id, kabhi nested deta hai
         const incomingThreadId =
           data.threadId ||
@@ -1320,8 +1322,8 @@ private loadResolvedThreadsPaginated(): void {
 
   private handleRealTimeMessage(rtMsg: any, threadId: string): void {
     if (!rtMsg) return;
-// console.log(rtMsg )
-      const gm = this.mapBackendMessageToGroupMessage(rtMsg);
+    // console.log(rtMsg )
+    const gm = this.mapBackendMessageToGroupMessage(rtMsg);
 
     if (!this.selectedNotification) return;
 
@@ -1359,17 +1361,15 @@ private loadResolvedThreadsPaginated(): void {
     //   return;
     // }
 
-   if (hasFile && !text) {
-this.snackBar.show("Please enter a message to send.", false);
-return;
-}
+    if (hasFile && !text) {
+      this.snackBar.show("Please enter a message to send.", false);
+      return;
+    }
 
-if (!text && !hasFile) {
-this.snackBar.show("Please enter a message or attach a file.", false);
-return;
-}
-
-
+    if (!text && !hasFile) {
+      this.snackBar.show("Please enter a message or attach a file.", false);
+      return;
+    }
 
     const threadId = this.selectedNotification.id;
 
@@ -1606,50 +1606,49 @@ return;
   // }
 
   openMediaViewer(
-  mediaUrl: any,
-  name: string = "",
-  type: string = "file",
-): void {
+    mediaUrl: any,
+    name: string = "",
+    type: string = "file",
+  ): void {
+    if (!mediaUrl) {
+      this.snackBar.show("No media to preview", false);
+      return;
+    }
 
-  if (!mediaUrl) {
-    this.snackBar.show("No media to preview", false);
-    return;
+    this.currentMediaName = name || "";
+
+    const fileUrl = mediaUrl.startsWith("http")
+      ? mediaUrl
+      : `${fileBaseUrl}/${mediaUrl}`;
+
+    this.multimediaService.getImageByUrlBlob(fileUrl).subscribe({
+      next: (blob: Blob) => {
+        // CREATE BLOB URL
+        const blobUrl = URL.createObjectURL(blob);
+
+        this.currentMediaUrl = blobUrl;
+
+        // DETECT MEDIA TYPE USING MIME
+        if (blob.type.startsWith("image/")) {
+          this.currentMediaType = "image";
+        } else if (blob.type.startsWith("video/")) {
+          this.currentMediaType = "video";
+        } else if (blob.type.startsWith("audio/")) {
+          this.currentMediaType = "audio";
+        } else {
+          this.currentMediaType = "file";
+        }
+
+        this.isZoomed = false;
+        this.zoomLevel = 1;
+        this.showMediaViewer = true;
+      },
+
+      error: () => {
+        this.snackBar.show("Failed to load media", false);
+      },
+    });
   }
-
-  this.currentMediaName = name || "";
-
-  this.multimediaService.getImageByUrlBlob(mediaUrl).subscribe({
-    next: (blob: Blob) => {
-
-      // CREATE BLOB URL
-      const blobUrl = URL.createObjectURL(blob);
-
-      this.currentMediaUrl = blobUrl;
-
-      // DETECT MEDIA TYPE USING MIME
-      if (blob.type.startsWith("image/")) {
-        this.currentMediaType = "image";
-      }
-      else if (blob.type.startsWith("video/")) {
-        this.currentMediaType = "video";
-      }
-      else if (blob.type.startsWith("audio/")) {
-        this.currentMediaType = "audio";
-      }
-      else {
-        this.currentMediaType = "file";
-      }
-
-      this.isZoomed = false;
-      this.zoomLevel = 1;
-      this.showMediaViewer = true;
-    },
-
-    error: () => {
-      this.snackBar.show("Failed to load media", false);
-    },
-  });
-}
 
   // closeMediaViewer(): void {
   //   this.showMediaViewer = false;
@@ -1660,19 +1659,18 @@ return;
   //   this.zoomLevel = 1;
   // }
   closeMediaViewer(): void {
+    // CLEANUP BLOB MEMORY
+    if (this.currentMediaUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(this.currentMediaUrl);
+    }
 
-  // CLEANUP BLOB MEMORY
-  if (this.currentMediaUrl?.startsWith("blob:")) {
-    URL.revokeObjectURL(this.currentMediaUrl);
+    this.showMediaViewer = false;
+    this.currentMediaUrl = "";
+    this.currentMediaName = "";
+    this.currentMediaType = "text";
+    this.isZoomed = false;
+    this.zoomLevel = 1;
   }
-
-  this.showMediaViewer = false;
-  this.currentMediaUrl = "";
-  this.currentMediaName = "";
-  this.currentMediaType = "text";
-  this.isZoomed = false;
-  this.zoomLevel = 1;
-}
 
   toggleZoom(): void {
     this.isZoomed = !this.isZoomed;
@@ -1722,17 +1720,17 @@ return;
   // }
 
   loadImage(url: string) {
-  if (!url) return;
+    if (!url) return;
 
-  this.multimediaService.getImageByUrlBlob(url).subscribe({
-    next: (blob: Blob) => {
-      this.currentMediaUrl = URL.createObjectURL(blob);
-    },
-    error: () => {
-      this.snackBar.show("Image load failed", false);
-    },
-  });
-} 
+    this.multimediaService.getImageByUrlBlob(url).subscribe({
+      next: (blob: Blob) => {
+        this.currentMediaUrl = URL.createObjectURL(blob);
+      },
+      error: () => {
+        this.snackBar.show("Image load failed", false);
+      },
+    });
+  }
 
   isImage(url: string | null | undefined): boolean {
     return !!(url && String(url).match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i));
@@ -2236,7 +2234,10 @@ return;
         rejectCall = this.rejectPayoutThread(thread.id);
         break;
       default:
-        rejectCall = this.comPartService.acceptRejectThread(thread.id, "REJECT");
+        rejectCall = this.comPartService.acceptRejectThread(
+          thread.id,
+          "REJECT",
+        );
     }
 
     rejectCall?.subscribe({
@@ -2323,7 +2324,8 @@ return;
   }
 
   private getFundWithId(threadId: any, fundId: any, fundType: any) {
-    const resolvedService = this.role === "COM_PART" ? this.comPartService : this.fundService
+    const resolvedService =
+      this.role === "COM_PART" ? this.comPartService : this.fundService;
     return resolvedService.getByThreadIdFundIdAndType(
       threadId,
       fundId,
@@ -2334,10 +2336,9 @@ return;
   fundDetails: any;
   showFundModel: boolean = false;
   hideFundDetails() {
-  this.showFundModel = false;
-}
+    this.showFundModel = false;
+  }
   showFundDetailForMessage(threadId: any, fundId: any, fundType: any) {
-
     this.getFundWithId(threadId, fundId, fundType).subscribe((res) => {
       this.fundDetails = res;
       this.showFundModel = true;
@@ -2362,5 +2363,3 @@ return;
     this.showScrollToBottom = false;
   }
 }
-
-

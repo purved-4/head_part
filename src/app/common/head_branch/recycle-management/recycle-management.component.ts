@@ -41,7 +41,7 @@ export class RecycleManagementComponent implements OnInit, OnDestroy {
         );
       },
       error: (err) => {
-        console.error("Currency/Mode subscription error:", err);
+
       },
     });
   }

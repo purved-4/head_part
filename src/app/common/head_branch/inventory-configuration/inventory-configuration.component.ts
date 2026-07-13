@@ -1,3 +1,4 @@
+
 import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { CurrencyService } from "../../../pages/services/currency.service";
 import { UserStateService } from "../../../store/user-state.service";
@@ -60,7 +61,7 @@ export class InventoryConfigurationComponent implements OnInit {
           this.currencies = res?.data || [];
         },
         error: (err) => {
-          console.error("Currency API failed:", err);
+
           this.snackBar.show(
             err.error.message || "Failed to load currencies. Please try again.",
             false,
@@ -85,7 +86,7 @@ export class InventoryConfigurationComponent implements OnInit {
   selectMode(mode: any): void {
     this.selectedMode = mode?.toUpperCase();
 
-    console.log("Setting Mode:", this.selectedMode);
+
 
     this.currencyBehaviour.setMode(this.selectedMode);
 
@@ -105,7 +106,7 @@ export class InventoryConfigurationComponent implements OnInit {
 
   // ─── UPI handlers ────────────────────────────────────────────
   onUpiSubmitted(event: any): void {
-    console.log("UPI Saved", event);
+
     this.refreshUpis.emit();
     this.showForm = false;
     this.close.emit();
@@ -121,7 +122,7 @@ export class InventoryConfigurationComponent implements OnInit {
       ...payload,
       currency: this.selectedCurrency?.currency,
     };
-    console.log("Crypto wallet saved:", finalPayload);
+
     this.refreshCryptoWallets.emit();
     this.close.emit();
   }

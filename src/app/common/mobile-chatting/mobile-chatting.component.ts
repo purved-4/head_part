@@ -1,3 +1,4 @@
+
 import {
   Component,
   NgZone,
@@ -116,8 +117,6 @@ export class MobileChattingComponent
 
   showThreadInfo = false;
 
-  
-
   /* subscriptions */
   private realTimeSub: Subscription | null = null;
   private listSub: Subscription | null = null;
@@ -202,7 +201,7 @@ export class MobileChattingComponent
   JSON: any = JSON;
   paramThreadId: any;
   paramChatType: any;
-  resolvedNotificatninService:any
+  resolvedNotificatninService: any;
 
   /* computed media gallery */
   get mediaGallery(): GroupMessage[] {
@@ -231,7 +230,7 @@ export class MobileChattingComponent
     private fundService: FundsService,
     private route: ActivatedRoute,
     private compartServices: ComPartService,
-    private multimediaService : MultimediaService
+    private multimediaService: MultimediaService,
   ) {}
 
   /* ════════════════════════════════════════════
@@ -246,7 +245,10 @@ export class MobileChattingComponent
 
     // default mode based on role
     this.chatMode = this.role === "HEAD" ? "head" : "branch";
-    this.resolvedNotificatninService = this.role === "COM_PART" ? this.compartServices : this.notificationChatService
+    this.resolvedNotificatninService =
+      this.role === "COM_PART"
+        ? this.compartServices
+        : this.notificationChatService;
 
     if (this.branchId) {
       this.loadThreads();
@@ -417,7 +419,6 @@ export class MobileChattingComponent
     return r.includes("head") || r.includes("branch");
   }
 
-
   /* ════════════════════════════════════════════
      UI HELPERS
      ════════════════════════════════════════════ */
@@ -573,8 +574,8 @@ export class MobileChattingComponent
   fundDetails: any;
   showFundModel: boolean = false;
   hideFundDetails() {
-  this.showFundModel = false;
-}
+    this.showFundModel = false;
+  }
   showFundDetailForMessage(threadId: any, fundId: any, fundType: any) {
     this.fundDetails = null;
     this.showFundModel = false;
@@ -645,7 +646,7 @@ export class MobileChattingComponent
     this.loadResolvedThreadsPaginated();
   }
 
-private loadResolvedThreadsPaginated(): void {
+  private loadResolvedThreadsPaginated(): void {
     this.resolvedNotificatninService
       .getAllThreadCombinedPaginate(
         this.headId,
@@ -667,7 +668,7 @@ private loadResolvedThreadsPaginated(): void {
         },
       });
   }
-  
+
   private onThreadLoadError(): void {
     this.loadingThreads = false;
     this.loadingMoreThreads = false;
@@ -969,7 +970,8 @@ private loadResolvedThreadsPaginated(): void {
      ════════════════════════════════════════════ */
 
   private mapThreadToNotification(t: any): Notification {
-    const rawName = t.queryMessage || t.displayId || t.title || t.fundsType || "Thread";
+    const rawName =
+      t.queryMessage || t.displayId || t.title || t.fundsType || "Thread";
     const groupName =
       rawName.length > 30 ? rawName.slice(0, 30) + "…" : rawName;
 
@@ -1094,42 +1096,44 @@ private loadResolvedThreadsPaginated(): void {
 
   loadChatMembers(threadId: any): void {
     this.loadingMembers = true;
-    this.resolvedNotificatninService.getChatMembersByThreadId(threadId).subscribe({
-      next: (membersRes: any) => {
-        const members = Array.isArray(membersRes)
-          ? membersRes
-          : membersRes
-            ? [membersRes]
-            : [];
+    this.resolvedNotificatninService
+      .getChatMembersByThreadId(threadId)
+      .subscribe({
+        next: (membersRes: any) => {
+          const members = Array.isArray(membersRes)
+            ? membersRes
+            : membersRes
+              ? [membersRes]
+              : [];
 
-        const mappedMembers: GroupParticipant[] = members.map((m: any) => ({
-          id: m.id,
-          userId: m.userId,
-          userName: m.memberName || "Unknown",
-          avatar: this.getInitials(m.memberName || "U"),
-          online: !!m.online,
-          role: m.entityType || m.userRole || null,
-        }));
+          const mappedMembers: GroupParticipant[] = members.map((m: any) => ({
+            id: m.id,
+            userId: m.userId,
+            userName: m.memberName || "Unknown",
+            avatar: this.getInitials(m.memberName || "U"),
+            online: !!m.online,
+            role: m.entityType || m.userRole || null,
+          }));
 
-        mappedMembers.forEach((member) => {
-          this.participantsMap.set(member.userId, member);
-        });
+          mappedMembers.forEach((member) => {
+            this.participantsMap.set(member.userId, member);
+          });
 
-        this.zone.run(() => {
-          if (
-            this.selectedNotification &&
-            this.selectedNotification.id === threadId
-          ) {
-            this.selectedNotification.participants = mappedMembers;
-            this.selectedNotification.participantCount = mappedMembers.length;
-          }
+          this.zone.run(() => {
+            if (
+              this.selectedNotification &&
+              this.selectedNotification.id === threadId
+            ) {
+              this.selectedNotification.participants = mappedMembers;
+              this.selectedNotification.participantCount = mappedMembers.length;
+            }
+            this.loadingMembers = false;
+          });
+        },
+        error: () => {
           this.loadingMembers = false;
-        });
-      },
-      error: () => {
-        this.loadingMembers = false;
-      },
-    });
+        },
+      });
   }
 
   onDetailTabChange(tab: "details" | "members" | "attachments") {
@@ -1608,115 +1612,103 @@ private loadResolvedThreadsPaginated(): void {
   //   }
   // }
 
-sendMessage(event?: any): void {
-if (event) {
-event.preventDefault();
-event.stopPropagation();
-}
+  sendMessage(event?: any): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
 
-if (!this.selectedNotification) {
-this.snackBar.show("No conversation selected", false);
-return;
-}
+    if (!this.selectedNotification) {
+      this.snackBar.show("No conversation selected", false);
+      return;
+    }
 
-const text = (this.newMessage || "").toString().trim();
-const hasFile = !!this.selectedUploadFile;
+    const text = (this.newMessage || "").toString().trim();
+    const hasFile = !!this.selectedUploadFile;
 
-// FILE WITHOUT MESSAGE
-if (hasFile && !text) {
-this.snackBar.show("Please enter a message to send.", false);
-return;
-}
+    // FILE WITHOUT MESSAGE
+    if (hasFile && !text) {
+      this.snackBar.show("Please enter a message to send.", false);
+      return;
+    }
 
-if (!text && !hasFile) {
-this.snackBar.show("Please enter a message or attach a file", false);
-return;
-}
+    if (!text && !hasFile) {
+      this.snackBar.show("Please enter a message or attach a file", false);
+      return;
+    }
 
-const threadId = this.selectedNotification.id;
+    const threadId = this.selectedNotification.id;
 
-// FILE MESSAGE
-if (hasFile) {
-this.uploadingFile = true;
-this.uploadError = null;
+    // FILE MESSAGE
+    if (hasFile) {
+      this.uploadingFile = true;
+      this.uploadError = null;
 
+      this.resolvedNotificatninService
+        .uploadAttachment(threadId, this.selectedUploadFile!)
+        .subscribe({
+          next: (res: any) => {
+            const fileId =
+              res?.fileId || res?.id || (typeof res === "string" ? res : null);
 
-this.resolvedNotificatninService
-  .uploadAttachment(threadId, this.selectedUploadFile!)
-  .subscribe({
-    next: (res: any) => {
+            const fileUrl = fileId
+              ? `${fileBaseUrl}/${fileId}`
+              : res?.downloadUrl;
 
-      const fileId =
-        res?.fileId ||
-        res?.id ||
-        (typeof res === "string" ? res : null);
+            const payload = {
+              senderId: this.branchId,
+              message: text,
+              fileUrl: fileUrl,
+              senderType: this.role,
+              roleId: this.branchId,
+              type: "FILE",
+            };
 
-      const fileUrl = fileId
-        ? `${fileBaseUrl}/${fileId}`
-        : res?.downloadUrl;
+            this.socketConfigService.sendMessage(threadId, payload);
 
-      const payload = {
-        senderId: this.branchId,
-        message: text,
-        fileUrl: fileUrl,
-        senderType: this.role,
-        roleId: this.branchId,
-        type: "FILE",
-      };
+            // RESET
+            this.newMessage = "";
+            this.uploadingFile = false;
+            this.removeInlineFile();
+            this.selectedQuestion = null;
+            this.questionSearchTerm = "";
+            this.showQuestionDropDown = false;
 
+            setTimeout(() => this.scrollToBottom(), 80);
+          },
+
+          error: () => {
+            this.uploadingFile = false;
+            this.snackBar.show("Upload failed", false);
+          },
+        });
+
+      return;
+    }
+
+    // NORMAL TEXT MESSAGE
+    const payload = {
+      senderId: this.branchId,
+      message: text,
+      fileUrl: null,
+      senderType: this.role,
+      roleId: this.branchId,
+    };
+
+    try {
       this.socketConfigService.sendMessage(threadId, payload);
 
-      // RESET
       this.newMessage = "";
-      this.uploadingFile = false;
-      this.removeInlineFile();
       this.selectedQuestion = null;
       this.questionSearchTerm = "";
       this.showQuestionDropDown = false;
 
       setTimeout(() => this.scrollToBottom(), 80);
-    },
+    } catch {
+      this.snackBar.show("Failed to send message", false);
+    }
+  }
 
-    error: () => {
-      this.uploadingFile = false;
-      this.snackBar.show("Upload failed", false);
-    },
-  });
-
-return;
-
-
-}
-
-// NORMAL TEXT MESSAGE
-const payload = {
-senderId: this.branchId,
-message: text,
-fileUrl: null,
-senderType: this.role,
-roleId: this.branchId,
-};
-
-try {
-this.socketConfigService.sendMessage(threadId, payload);
-
-
-this.newMessage = "";
-this.selectedQuestion = null;
-this.questionSearchTerm = "";
-this.showQuestionDropDown = false;
-
-setTimeout(() => this.scrollToBottom(), 80);
-
-
-} catch {
-this.snackBar.show("Failed to send message", false);
-}
-}
-
-
-
-  
   // // FIX: Improved scrollToBottom method
   // private scrollToBottom(): void {
   //   try {
@@ -1784,51 +1776,49 @@ this.snackBar.show("Failed to send message", false);
   //   this.zoomLevel = 1;
   //   this.showMediaViewer = true;
   // }
-openMediaViewer(
-  mediaUrl: any,
-  name: string = "",
-  type: string = "file",
-): void {
+  openMediaViewer(
+    mediaUrl: any,
+    name: string = "",
+    type: string = "file",
+  ): void {
+    if (!mediaUrl) {
+      this.snackBar.show("No media to preview", false);
+      return;
+    }
 
-  if (!mediaUrl) {
-    this.snackBar.show("No media to preview", false);
-    return;
+    this.currentMediaName = name || "";
+
+    const finalUrl = mediaUrl.startsWith("http")
+      ? mediaUrl
+      : `${fileBaseUrl}/${mediaUrl}`;
+
+    this.multimediaService.getImageByUrlBlob(finalUrl).subscribe({
+      next: (blob: Blob) => {
+        const blobUrl = URL.createObjectURL(blob);
+
+        this.currentMediaUrl = blobUrl;
+
+        //  DETECT FROM MIME TYPE
+        if (blob.type.startsWith("image/")) {
+          this.currentMediaType = "image";
+        } else if (blob.type.startsWith("video/")) {
+          this.currentMediaType = "video";
+        } else if (blob.type.startsWith("audio/")) {
+          this.currentMediaType = "audio";
+        } else {
+          this.currentMediaType = "file";
+        }
+
+        this.isZoomed = false;
+        this.zoomLevel = 1;
+        this.showMediaViewer = true;
+      },
+
+      error: () => {
+        this.snackBar.show("Failed to load media", false);
+      },
+    });
   }
-
-  this.currentMediaName = name || "";
-
-  this.multimediaService.getImageByUrlBlob(mediaUrl).subscribe({
-    next: (blob: Blob) => {
-
-      const blobUrl = URL.createObjectURL(blob);
-
-      this.currentMediaUrl = blobUrl;
-
-      //  DETECT FROM MIME TYPE
-      if (blob.type.startsWith("image/")) {
-        this.currentMediaType = "image";
-      }
-      else if (blob.type.startsWith("video/")) {
-        this.currentMediaType = "video";
-      }
-      else if (blob.type.startsWith("audio/")) {
-        this.currentMediaType = "audio";
-      }
-      else {
-        this.currentMediaType = "file";
-      }
-
-      this.isZoomed = false;
-      this.zoomLevel = 1;
-      this.showMediaViewer = true;
-    },
-
-    error: () => {
-      this.snackBar.show("Failed to load media", false);
-    },
-  });
-}
-
 
   // closeMediaViewer(): void {
   //   this.showMediaViewer = false;
@@ -1840,18 +1830,17 @@ openMediaViewer(
   // }
 
   closeMediaViewer(): void {
+    if (this.currentMediaUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(this.currentMediaUrl);
+    }
 
-  if (this.currentMediaUrl?.startsWith("blob:")) {
-    URL.revokeObjectURL(this.currentMediaUrl);
+    this.showMediaViewer = false;
+    this.currentMediaUrl = "";
+    this.currentMediaName = "";
+    this.currentMediaType = "text";
+    this.isZoomed = false;
+    this.zoomLevel = 1;
   }
-
-  this.showMediaViewer = false;
-  this.currentMediaUrl = "";
-  this.currentMediaName = "";
-  this.currentMediaType = "text";
-  this.isZoomed = false;
-  this.zoomLevel = 1;
-}
 
   toggleZoom(): void {
     this.isZoomed = !this.isZoomed;
@@ -2297,8 +2286,6 @@ openMediaViewer(
       });
   }
 
-
-
   showRejectConfirmation(thread: any): void {
     this.selectedThread = thread;
     this.showRejectModal = true;
@@ -2352,7 +2339,10 @@ openMediaViewer(
         rejectCall = this.rejectPayoutThread(thread.id);
         break;
       default:
-        rejectCall = this.compartServices.acceptRejectThread(thread.id, "REJECT");
+        rejectCall = this.compartServices.acceptRejectThread(
+          thread.id,
+          "REJECT",
+        );
     }
 
     rejectCall?.subscribe({
@@ -2427,7 +2417,8 @@ openMediaViewer(
   }
 
   private getFundWithId(threadId: any, fundId: any, fundType: any) {
-        const resolvedService = this.role === "COM_PART" ? this.compartServices : this.fundService
+    const resolvedService =
+      this.role === "COM_PART" ? this.compartServices : this.fundService;
 
     return resolvedService.getByThreadIdFundIdAndType(
       threadId,

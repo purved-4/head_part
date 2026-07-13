@@ -80,7 +80,20 @@
       </div>
 
       <!-- ================= B2B ================= -->
-      <div *ngIf="selectedChief?.businessType === 'B2B'" class="space-y-6">
+      <div class="space-y-6">
+        <div
+          *ngIf="!managers.length"
+          class="flex flex-col items-center justify-center py-10 text-center"
+        >
+          <span
+            class="material-symbols-outlined text-4xl text-[var(--color-muted)] mb-2"
+            >group_off</span
+          >
+          <p class="font-medium text-[var(--color-font)]">No Managers Found</p>
+          <p class="text-xs text-[var(--color-muted)] mt-1">
+            No managers have been created yet.
+          </p>
+        </div>
         <!-- ================= MANAGERS ================= -->
         <div
           *ngIf="managers.length && !selectedManager && !selectedHead"
@@ -176,6 +189,20 @@
             </span>
           </div>
 
+          <div
+            *ngIf="!heads.length"
+            class="flex flex-col items-center justify-center py-10 text-center"
+          >
+            <span
+              class="material-symbols-outlined text-4xl text-[var(--color-muted)] mb-2"
+              >group_off</span
+            >
+            <p class="font-medium text-[var(--color-font)]">No Heads Found</p>
+            <p class="text-xs text-[var(--color-muted)] mt-1">
+              This manager has no heads assigned.
+            </p>
+          </div>
+
           <table class="min-w-full">
             <tbody class="divide-y divide-[var(--color-border)]">
               <tr
@@ -256,6 +283,22 @@
             </span>
           </div>
 
+          <div
+            *ngIf="!branches.length"
+            class="flex flex-col items-center justify-center py-10 text-center"
+          >
+            <span
+              class="material-symbols-outlined text-4xl text-[var(--color-muted)] mb-2"
+              >storefront</span
+            >
+            <p class="font-medium text-[var(--color-font)]">
+              No Branches Found
+            </p>
+            <p class="text-xs text-[var(--color-muted)] mt-1">
+              This head has no branches assigned.
+            </p>
+          </div>
+
           <table class="min-w-full">
             <tbody class="divide-y divide-[var(--color-border)]">
               <tr
@@ -316,7 +359,6 @@
 
       <!-- ================= B2C ================= -->
       <div
-        *ngIf="selectedChief?.businessType === 'B2C'"
         class="bg-white/5 rounded-xl border border-[var(--color-border)] p-5"
       >
         <div class="flex items-center mb-4">

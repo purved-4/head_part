@@ -4,6 +4,8 @@ import {
   NgZone,
   OnInit,
   OnDestroy,
+  OnChanges,
+  SimpleChanges,
   ChangeDetectorRef,
   Input,
   Output,
@@ -96,7 +98,7 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     this.currentRoleId = this.userStateService.getCurrentEntityId();
 
 
-    this.getAllNotifications();
+    // this.getAllNotifications();
 
     this.socketConfigService.subscribeNotifications(this.currentRoleId);
 
@@ -110,6 +112,12 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
         this.handleSseUpdate(data);
       }
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes["isOpen"] && this.isOpen) {
+      this.getAllNotifications();
+    }
   }
 
   ngOnDestroy(): void {

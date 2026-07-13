@@ -1419,8 +1419,8 @@ export class UpisComponent implements OnInit {
     this.minLimitDateTime = "";
   }
   openCapacityPreview(account: any, event: MouseEvent) {
-    console.log("ACCOUNT =>", account);
-    console.log("RANGES =>", account?.ranges);
+
+
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
 
     this.selectedCapacityAccount = account;

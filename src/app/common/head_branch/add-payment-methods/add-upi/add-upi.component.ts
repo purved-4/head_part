@@ -243,7 +243,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       qrMode: this.qrMode,
       fttAcceptance: this.addUpiForm.value.fttAcceptance,
     };
-    console.log(payload);
+
 
     const validRanges = this.capacityRanges
       .filter(

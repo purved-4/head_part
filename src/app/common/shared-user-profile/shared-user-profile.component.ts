@@ -170,7 +170,7 @@ export class SharedUserProfileComponent implements OnInit {
     this.copiedCode = false;
     this.copiedLink = false;
 
-    this.headService.generatePromoCode(this.currentEntityId).subscribe({
+    this.headService.generatePromoCode(this.currentEntityId,null).subscribe({
       next: (res: any) => {
         const code = res?.code || res?.promoCode || res;
         this.promoCode = code;

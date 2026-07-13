@@ -433,7 +433,10 @@
                 </span>
               </div>
 
-              <div class="flex items-center justify-between">
+              <div
+                *ngIf="fundDetails?.currencyWiseAmount != null"
+                class="flex items-center justify-between"
+              >
                 <span class="text-sm font-medium text-violet-600">Amount</span>
                 <span class="text-base font-bold text-violet-800">
                   {{ fundDetails?.currencyWiseAmount }}
@@ -442,7 +445,7 @@
 
               <!-- UPI: show VPA instead of account fields -->
               <div
-                *ngIf="fundDetails?.fundsType === 'UPI'"
+                *ngIf="fundDetails?.fundsType === 'UPI' && fundDetails?.vpa"
                 class="flex items-center justify-between"
               >
                 <span class="text-sm font-medium text-violet-600"
@@ -454,8 +457,18 @@
               </div>
 
               <!-- BANK: show account fields -->
-              <ng-container *ngIf="fundDetails?.fundsType !== 'UPI'">
-                <div class="flex items-center justify-between">
+              <ng-container
+                *ngIf="
+                  fundDetails?.fundsType !== 'UPI' &&
+                  (fundDetails?.accountNo ||
+                    fundDetails?.bankAccountHolderName ||
+                    fundDetails?.holder)
+                "
+              >
+                <div
+                  *ngIf="fundDetails?.accountNo"
+                  class="flex items-center justify-between"
+                >
                   <span class="text-sm font-medium text-violet-600"
                     >Account No</span
                   >
@@ -463,17 +476,27 @@
                     {{ fundDetails?.accountNo }}
                   </span>
                 </div>
-                <div class="flex items-center justify-between">
+                <div
+                  *ngIf="
+                    fundDetails?.bankAccountHolderName || fundDetails?.holder
+                  "
+                  class="flex items-center justify-between"
+                >
                   <span class="text-sm font-medium text-violet-600"
                     >Account Holder</span
                   >
                   <span class="text-base font-bold text-violet-800">
-                    {{ fundDetails?.bankAccountHolderName }}
+                    {{
+                      fundDetails?.bankAccountHolderName || fundDetails?.holder
+                    }}
                   </span>
                 </div>
               </ng-container>
 
-              <div class="flex items-center justify-between">
+              <div
+                *ngIf="fundDetails?.transactionId"
+                class="flex items-center justify-between"
+              >
                 <span class="text-sm font-medium text-violet-600"
                   >Transaction Id</span
                 >
@@ -481,15 +504,22 @@
                   {{ fundDetails?.transactionId }}
                 </span>
               </div>
-              <div class="flex items-center justify-between">
+              <div
+                *ngIf="fundDetails?.rate != null"
+                class="flex items-center justify-between"
+              >
                 <span class="text-sm font-medium text-violet-600"
                   >Exchange Rate</span
                 >
                 <span class="text-base font-bold text-violet-800">
-                  {{ fundDetails?.currencyWiseAmount }}
+                  <!-- {{ fundDetails?.currencyWiseAmount  }} -->
+                  {{ fundDetails?.rate }}
                 </span>
               </div>
-              <div class="flex items-center justify-between">
+              <div
+                *ngIf="fundDetails?.parentCurrency || fundDetails?.currency"
+                class="flex items-center justify-between"
+              >
                 <span class="text-sm font-medium text-violet-600"
                   >Parent Currency</span
                 >

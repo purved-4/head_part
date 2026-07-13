@@ -259,6 +259,7 @@
   <!-- ═══════════════════════════════════════
        MAIN CHAT AREA
        ═══════════════════════════════════════ -->
+
   <div
     class="flex-1 flex flex-col min-w-0 h-full bg-white"
     *ngIf="selectedNotification"
@@ -497,7 +498,10 @@
                 </span>
               </div>
 
-              <div class="flex items-center justify-between">
+              <div
+                *ngIf="fundDetails.currencyWiseAmount != null"
+                class="flex items-center justify-between"
+              >
                 <span class="text-sm font-medium text-violet-600">Amount</span>
                 <span class="text-base font-bold text-violet-800">
                   {{ fundDetails.currencyWiseAmount }}
@@ -506,7 +510,7 @@
 
               <!-- UPI: show VPA instead of account fields -->
               <div
-                *ngIf="fundDetails.fundsType === 'UPI'"
+                *ngIf="fundDetails.fundsType === 'UPI' && fundDetails.vpa"
                 class="flex items-center justify-between"
               >
                 <span class="text-sm font-medium text-violet-600"
@@ -518,8 +522,21 @@
               </div>
 
               <!-- BANK: show account fields -->
-              <ng-container *ngIf="fundDetails.fundsType !== 'UPI'">
-                <div class="flex items-center justify-between">
+              <ng-container
+                *ngIf="
+                  fundDetails.fundsType !== 'UPI' &&
+                  (fundDetails.accountNo ||
+                    fundDetails.bankAccountHolderName ||
+                    fundDetails.holder)
+                "
+              >
+                <div
+                  *ngIf="
+                    fundDetails.accountNo &&
+                    fundDetails.accountNo.toString().trim() !== ''
+                  "
+                  class="flex items-center justify-between"
+                >
                   <span class="text-sm font-medium text-violet-600"
                     >Account No</span
                   >
@@ -527,17 +544,31 @@
                     {{ fundDetails.accountNo }}
                   </span>
                 </div>
-                <div class="flex items-center justify-between">
+                <div
+                  *ngIf="
+                    (fundDetails.bankAccountHolderName &&
+                      fundDetails.bankAccountHolderName.toString().trim() !==
+                        '') ||
+                    (fundDetails.holder &&
+                      fundDetails.holder.toString().trim() !== '')
+                  "
+                  class="flex items-center justify-between"
+                >
                   <span class="text-sm font-medium text-violet-600"
                     >Account Holder</span
                   >
                   <span class="text-base font-bold text-violet-800">
-                    {{ fundDetails.bankAccountHolderName }}
+                    {{
+                      fundDetails.bankAccountHolderName || fundDetails.holder
+                    }}
                   </span>
                 </div>
               </ng-container>
 
-              <div class="flex items-center justify-between">
+              <div
+                *ngIf="fundDetails.transactionId"
+                class="flex items-center justify-between"
+              >
                 <span class="text-sm font-medium text-violet-600"
                   >Transaction Id</span
                 >
@@ -545,7 +576,10 @@
                   {{ fundDetails.transactionId }}
                 </span>
               </div>
-              <div class="flex items-center justify-between">
+              <div
+                *ngIf="fundDetails.rate != null"
+                class="flex items-center justify-between"
+              >
                 <span class="text-sm font-medium text-violet-600"
                   >Exchange Rate</span
                 >
@@ -553,15 +587,10 @@
                   {{ fundDetails.currencyWiseAmount }}
                 </span>
               </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-medium text-violet-600"
-                  >Parent Currency</span
-                >
-                <span class="text-base font-bold text-violet-800">
-                  {{ fundDetails.currency }}
-                </span>
-              </div>
-              <div class="flex items-center justify-between">
+              <div
+                *ngIf="fundDetails.parentCurrency || fundDetails.currency"
+                class="flex items-center justify-between"
+              >
                 <span class="text-sm font-medium text-violet-600"
                   >Parent Currency</span
                 >
@@ -925,8 +954,8 @@
     </div>
 
     <!-- ════════════════════════════════════════════
-          INPUT BAR
-          ════════════════════════════════════════════ -->
+      INPUT BAR
+      ════════════════════════════════════════════ -->
     <div
       class="px-5 py-4 bg-gradient-to-r from-violet-50/60 via-fuchsia-50/40 to-rose-50/30 border-t border-violet-100/40 flex-shrink-0"
       *ngIf="selectedNotification.resolved !== true"
@@ -1172,6 +1201,7 @@
   <!-- ═══════════════════════════════════════
         RIGHT SIDEBAR — Thread Details
         ═══════════════════════════════════════ -->
+
   <div
     *ngIf="selectedNotification && showRightPanel"
     class="w-[320px] min-w-[320px] bg-white/95 backdrop-blur-md border-l border-violet-100/40 flex flex-col h-full overflow-hidden shadow-[-4px_0_24px_-8px_rgba(139,92,246,0.08)]"
@@ -1670,6 +1700,7 @@
   <!-- ═══════════════════════════════════════
         EMPTY STATE — No Thread Selected
         ═══════════════════════════════════════ -->
+
   <div
     *ngIf="!selectedNotification"
     class="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-white via-violet-50/20 to-fuchsia-50/10"
@@ -1760,6 +1791,7 @@
 <!-- ═══════════════════════════════════════
       UPLOAD POPUP
       ═══════════════════════════════════════ -->
+
 <div
   *ngIf="showUploadPopup"
   class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6"
@@ -1773,6 +1805,7 @@
   ></div>
 
   <!-- Modal Container -->
+
   <div
     class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl shadow-violet-200/30 border-2 border-violet-100/40 overflow-hidden z-60 transform transition-all duration-400 scale-100"
     @fadeIn
@@ -2068,6 +2101,7 @@
 <!-- ═══════════════════════════════════════
       MEDIA VIEWER POPUP — White theme
       ═══════════════════════════════════════ -->
+
 <div
   *ngIf="showMediaViewer"
   class="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
@@ -2093,6 +2127,7 @@
   </div>
 
   <!-- Modal Container -->
+
   <div
     class="relative z-[101] w-full max-w-5xl mx-4 md:mx-8 flex flex-col items-center animate-in fade-in zoom-in duration-300"
   >
@@ -2226,6 +2261,7 @@
 <!-- ═══════════════════════════════════════
       Resend Confirmation Modal — White Theme
       ═══════════════════════════════════════ -->
+
 <div
   *ngIf="showResendModal"
   class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
@@ -2275,6 +2311,7 @@
 <!-- ═══════════════════════════════════════
       Reject Confirmation Modal — White Theme
       ═══════════════════════════════════════ -->
+
 <div
   *ngIf="showRejectModal"
   class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
@@ -2324,6 +2361,7 @@
 <!-- ═══════════════════════════════════════
       Payout Edit & Send Modal — White Theme
       ═══════════════════════════════════════ -->
+
 <div
   *ngIf="showPayoutModal"
   class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
@@ -2410,3 +2448,4 @@
     </div>
   </div>
 </div>
+

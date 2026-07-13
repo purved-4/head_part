@@ -399,5 +399,69 @@ selectFavBank(
     return this.http.post(`${baseUrl}/anonymous/selectFavBank`, {}, { params });
   }
  
+  getCryptoDetailsByAmountAnonymous(
+    portalId: any,
+    amount?: any,
+    currency?: any,
+    userId?: string,
+    isSkip?: boolean,
+    isNew?: boolean,
+    paymentMode?: any,
+    currentPayinId?: string,
+    reason?: string,
+    token?: any,
+    sig?: any,
+  ) {
+    let params = new HttpParams();
+
+    if (amount != null && amount > 0) {
+      params = params.set("amount", amount);
+    }
+
+    if (currency != null) {
+      params = params.set("currency", currency);
+    }
+
+    if (userId != null) {
+      params = params.set("userId", userId);
+    }
+
+    if (isSkip != null) {
+      params = params.set("isSkip", isSkip);
+    }
+
+    if (isNew != null) {
+      params = params.set("isNew", isNew);
+    }
+
+    if (paymentMode != null) {
+      params = params.set("paymentMode", paymentMode);
+    }
+
+    if (currentPayinId != null) {
+      params = params.set("currentPayinId", currentPayinId);
+    }
+
+    if (reason != null) {
+      params = params.set("reason", reason);
+    }
+
+    if (token != null) {
+      params = params.set("token", token);
+    }
+
+    if (sig != null) {
+      params = params.set("sig", sig);
+    }
+
+    return this.http
+      .get(`${baseUrl}/anonymous/getCryptoDetailsByAmountRange/${portalId}`, {
+        params,
+      })
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 
 }

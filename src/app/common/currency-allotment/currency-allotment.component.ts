@@ -552,6 +552,9 @@ export class CurrencyAllotmentComponent implements OnInit {
   updateMinDateTime() {
     const now = new Date();
 
+    now.setMinutes(now.getMinutes() + 2);
+
+
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
 
     this.minDateTime = now.toISOString().slice(0, 16);

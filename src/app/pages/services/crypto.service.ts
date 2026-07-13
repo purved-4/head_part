@@ -43,7 +43,7 @@ export class CryptoService {
       .pipe(
         tap((res) => console.log("SERVICE RESPONSE =>", res)),
         map((res) => {
-          console.log("SERVICE DATA =>", res.data.content);
+
           return res.data;
         }),
         catchError(this.handleError),
@@ -109,7 +109,7 @@ export class CryptoService {
       .pipe(
         tap((res) => console.log("SERVICE RESPONSE =>", res)),
         map((res) => {
-          console.log("SERVICE DATA =>", res.data);
+
           return res.data;
         }),
         catchError(this.handleError),
@@ -135,7 +135,7 @@ export class CryptoService {
       );
   }
 
-   getCryptoByAmountManual(
+getCryptoByAmountManual(
     portalId: any,
     amount?: any,
     currency?: any,
@@ -144,6 +144,7 @@ export class CryptoService {
     isNew?: boolean,
     paymentMode?: string,
     currentPayinId?: string,
+    reason?: string,
   ) {
     let params = new HttpParams();
 
@@ -175,6 +176,10 @@ export class CryptoService {
       params = params.set("currentPayinId", currentPayinId);
     }
 
+    if (reason != null) {
+      params = params.set("reason", reason);
+    }
+
     return this.http
       .get(`${baseUrl}/manual/getCryptoDetailsByAmountRange/${portalId}`, {
         params,
@@ -184,4 +189,6 @@ export class CryptoService {
         catchError((error) => throwError(() => error)),
       );
   }
+
+
 }

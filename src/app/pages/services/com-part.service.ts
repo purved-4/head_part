@@ -1047,11 +1047,20 @@ export class ComPartService {
     );
   }
 
-  markFundAsProcessed(id: string): Observable<any> {
-    return this.http.patch(`${baseUrl}/comPart/${id}/mark-cp`, {});
+ markFundAsProcessed(id: string, type: string): Observable<any> {
+    return this.http.patch(`${baseUrl}/comPart/mark-cp/${id}/${type}`, {}).pipe(
+      map((response: any) => response),
+      catchError((error) => throwError(() => error)),
+    );
   }
-  updateUserId(id: string, payload: any): Observable<any> {
-    return this.http.patch(`${baseUrl}/comPart/${id}/update-user`, payload);
+
+  updateUserId(id: string, type: string, payload: any): Observable<any> {
+    return this.http
+      .patch(`${baseUrl}/comPart/update-user/${id}/${type}`, payload)
+      .pipe(
+        map((response: any) => response),
+        catchError((error) => throwError(() => error)),
+      );
   }
 
   removeAssignment(
@@ -1207,5 +1216,60 @@ restoreBankAndUpi(comPartId: any): Observable<any> {
       );;
     }
  
+    getAllPayInAndPayoutCombine(
+    compartId: any,
+    status: any,
+    fundType: any,
+    page: number = 0,
+    pageSize: number = 10,
+    category?: any,
+    from?: string,
+    to?: string,
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set("page", page.toString())
+      .set("size", pageSize.toString());
+
+    if (category !== null && category !== undefined) {
+      params = params.set("category", category.toString());
+    }
+    if (fundType !== null && fundType !== undefined) {
+      params = params.set("fundType", fundType.toString());
+    }
+    if (from) {
+      params = params.set("from", from);
+    }
+
+    if (to) {
+      params = params.set("to", to);
+    }
+    return this.http
+      .get<any>(
+        `${baseUrl}/comPart/funds/getFundsByCompartId/${compartId}/${status}`,
+        {
+          params,
+        },
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
  
+
+  getAnonymousLinksPaginated(
+    portalId: any,
+    pageNo?: number,
+    pageSize?: number,
+  ): Observable<any> {
+    return this.http
+      .get<any>(
+        `${baseUrl}/api/v1/internal/links/paginated/${portalId}?pageNo=${pageNo}&pageSize=${pageSize}`,
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
 }

@@ -1,3 +1,4 @@
+
 import {
   Component,
   OnInit,
@@ -275,7 +276,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       .getCrypto(this.currentRoleId, this.role, paymentMethod)
       .pipe(
         catchError((err) => {
-          console.error("CRYPTO FETCH ERROR:", err);
+
           this.loading = false;
           return of([]);
         }),
@@ -1090,7 +1091,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       limitAmount: this.editAccountForm.limitAmount,
       fttAcceptance: this.editAccountForm.fttAcceptance,
     };
-    console.log(payload);
+
 
     const formData = new FormData();
     formData.append(
@@ -1112,7 +1113,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
         "",
       );
     }
-    console.log(formData);
+
 
     const body: any = formData;
 

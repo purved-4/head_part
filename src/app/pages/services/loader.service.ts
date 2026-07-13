@@ -4,8 +4,9 @@ import { Injectable, signal } from "@angular/core";
 export class LoaderService {
   private activeRequests = 0;
   isLoading = signal<boolean>(false);
+  private activeButton = signal<string | null>(null);
 
-  // Existing code ke NEECHE add karo — upar kuch mat chhedna
+  activeButtonLoader = this.activeButton.asReadonly();
 
   private activeMutations = 0;
   isButtonLoading = signal<boolean>(false);
@@ -32,20 +33,35 @@ export class LoaderService {
     this.isLoading.set(false);
   }
 
-  showButtonLoader(): void {
-    this.activeMutations++;
-    if (this.activeMutations === 1) {
-      this.isButtonLoading.set(true);
+  // showButtonLoader(): void {
+
+
+  //   this.activeMutations++;
+  //   if (this.activeMutations === 1) {
+  //     this.isButtonLoading.set(true);
+  //   }
+  // }
+
+  // hideButtonLoader(): void {
+  //   if (this.activeMutations > 0) this.activeMutations--;
+  //   if (this.activeMutations === 0) this.isButtonLoading.set(false);
+  // }
+
+  // resetButtonLoader(): void {
+  //   this.activeMutations = 0;
+  //   this.isButtonLoading.set(false);
+  // }
+  showButtonLoader(key?: any): void {
+    this.activeButton.set(key);
+  }
+
+  hideButtonLoader(key?: string): void {
+    if (!key || this.activeButton() === key) {
+      this.activeButton.set(null);
     }
   }
 
-  hideButtonLoader(): void {
-    if (this.activeMutations > 0) this.activeMutations--;
-    if (this.activeMutations === 0) this.isButtonLoading.set(false);
-  }
-
   resetButtonLoader(): void {
-    this.activeMutations = 0;
-    this.isButtonLoading.set(false);
+    this.activeButton.set(null);
   }
 }

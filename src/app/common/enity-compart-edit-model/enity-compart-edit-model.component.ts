@@ -1,4 +1,7 @@
 
+
+
+
 import {
   Component,
   EventEmitter,
@@ -60,6 +63,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
   newCompartEntries: NewCompartEntry[] = [];
   // NEW: to show/hide parent comparts view
   showParentCompartsView = false;
+  private originalAllocatedPercentages: CompartPercentageRow[] = [];
 
   constructor(
     private compartService: ComPartService,
@@ -97,6 +101,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     this.newCompartEntries = [];
     this.allocatedPercentages = [];
     this.availableComparts = [];
+    this.originalAllocatedPercentages = [];
     this.loadAllData();
   }
 
@@ -166,6 +171,11 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
 
         this.allocatedPercentages = this.extractChildRows(child);
 
+         // NEW: snapshot for dirty comparison
+    this.originalAllocatedPercentages = this.allocatedPercentages.map(
+      (row) => ({ ...row }),
+    );
+
         this.refreshAvailableComparts();
 
         if (
@@ -233,7 +243,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
 
   getEntityLabel(data: any): string {
 
-    console.log(data);
+
     
 
     switch (this.entityType) {
@@ -282,23 +292,48 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     return found ? this.getCompartName(found) : "-";
   }
 
+  
+
   // UPDATED: existing allotted compartment ko edit karne ke liye
   onAllocatedPercentageChange(
-    compartId: string,
-    field: "payinPercentage" | "payoutPercentage" | "fttPercentage",
-    value: any,
-  ): void {
-    const idx = this.allocatedPercentages.findIndex(
-      (x) => x.compartId === compartId,
+  compartId: string,
+  field: "payinPercentage" | "payoutPercentage" | "fttPercentage",
+  value: any,
+): void {
+  const idx = this.allocatedPercentages.findIndex(
+    (x) => x.compartId === compartId,
+  );
+
+  if (idx === -1) return;
+
+  this.allocatedPercentages[idx] = {
+    ...this.allocatedPercentages[idx],
+    [field]: Number(value ?? 0),
+  };
+}
+
+get allocatedPercentagesChanged(): boolean {
+  if (
+    this.allocatedPercentages.length !==
+    this.originalAllocatedPercentages.length
+  ) {
+    return true;
+  }
+
+  return this.allocatedPercentages.some((row) => {
+    const original = this.originalAllocatedPercentages.find(
+      (o) => o.compartId === row.compartId,
     );
 
-    if (idx === -1) return;
+    if (!original) return true;
 
-    this.allocatedPercentages[idx] = {
-      ...this.allocatedPercentages[idx],
-      [field]: Number(value ?? 0),
-    };
-  }
+    return (
+      Number(row.payinPercentage) !== Number(original.payinPercentage) ||
+      Number(row.payoutPercentage) !== Number(original.payoutPercentage) ||
+      Number(row.fttPercentage) !== Number(original.fttPercentage)
+    );
+  });
+}
 
   private buildCompartPercentagesPayload(): any {
     const payload: any = {};
@@ -352,17 +387,53 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     }
 
     this.save.emit(payload);
-    this.save.emit(payload);
-    this.newCompartEntries = []; // YE ADD KARO
+    this.newCompartEntries = [];
+    this.originalAllocatedPercentages = this.allocatedPercentages.map(
+    (row) => ({ ...row }),
+  );
   }
 
   trackByIndex(index: number): number {
     return index;
   }
 
-  trackByCompartId(index: number, item: any): string {
-    return this.getCompartId(item);
+  onCompartSelected(compartId: string): void {
+  if (!compartId) return;
+
+  // Prevent adding the same compart twice
+  if (this.newCompartEntries.some((e) => e.compartId === compartId)) {
+    return;
   }
+
+  const compart = this.availableComparts.find(
+    (item) => this.getCompartId(item) === compartId,
+  );
+
+  if (!compart) return;
+
+  this.newCompartEntries.push({
+    compartId: this.getCompartId(compart),
+    compartUsername: this.getCompartName(compart),
+    fttPercentage: 0,
+    payinPercentage: 0,
+    payoutPercentage: 0,
+  });
+}
+
+// Excludes comparts already added to the pending list
+getSelectableComparts(): any[] {
+  return this.availableComparts.filter(
+    (item) =>
+      !this.newCompartEntries.some(
+        (e) => e.compartId === this.getCompartId(item),
+      ),
+  );
+}
+
+trackByCompartId(index: number, item: { compartId: string }): string {
+  return item.compartId;
+}
+
   openParentModal() {
     this.showParentModal = true;
 

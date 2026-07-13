@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
@@ -665,7 +666,7 @@ export class BanksComponent implements OnInit, OnDestroy {
         this.fetchBankAccounts();
       },
       error: (err) => {
-        console.error(err);
+
 
         this.snack.show(
           err.error?.message || "failed to delete the bank",
@@ -1459,8 +1460,8 @@ export class BanksComponent implements OnInit, OnDestroy {
   }
 
   openCapacityPreview(account: any, event: MouseEvent) {
-    console.log("ACCOUNT =>", account);
-    console.log("RANGES =>", account?.ranges);
+
+
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
 
     this.selectedCapacityAccount = account;

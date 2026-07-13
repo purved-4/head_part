@@ -25,6 +25,10 @@ export class HeadService {
     return this.http.patch<any>(`${baseUrl}/head/changeStatus/${id}`, {});
   }
 
+  changeHeadPromostatus(id: any): Observable<any> {
+    return this.http.patch<any>(`${baseUrl}/head/changePromo/${id}`, {});
+  }
+
   changeHeadUserStatus(HeadId: any, userId: any): Observable<any> {
     return this.http.patch<any>(
       `${baseUrl}/head/changeStatusByUser/${HeadId}/${userId}`,
@@ -96,6 +100,7 @@ export class HeadService {
         catchError((error) => throwError(() => error)),
       );
   }
+  
   changeHeadPortalStatus(portalId: any, HeadId: string): Observable<any> {
     return this.http.patch<any>(
       `${baseUrl}/head/changeStatus/${HeadId}/${portalId}`,
@@ -132,14 +137,17 @@ export class HeadService {
   }
 
   getHeadByChiefId(id: any): Observable<any[]> {
-    return this.http.get<any[]>(`${baseUrl}/head/getHeadByChiefId/${id}`).pipe(
-      map((response: any) => response.data),
-      catchError((error) => throwError(error)),
-    );
-  }
-  generatePromoCode(headId: string): Observable<any> {
     return this.http
-      .post<any>(`${baseUrl}/head/generatePromoCode/${headId}`, {})
+      .get<any[]>(`${baseUrl}/head/getHeadByChiefId/${id}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(error)),
+      );
+  }
+
+  generatePromoCode(headId: string,data:any): Observable<any> {
+    return this.http
+      .post<any>(`${baseUrl}/head/generatePromoCode/${headId}`, data)
       .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(error)),

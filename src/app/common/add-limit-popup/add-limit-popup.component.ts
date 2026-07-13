@@ -11,7 +11,6 @@ import { UserStateService } from "../../store/user-state.service";
 import { LimitsService } from "../../pages/services/reports/limits.service";
 import { UtilsServiceService } from "../../utils/utils-service.service";
 import { ComPartService } from "../../pages/services/com-part.service";
-import { ThemeService } from "../../theme/theme.service";
 
 @Component({
   selector: "app-add-limit-popup",
@@ -54,7 +53,6 @@ export class AddLimitPopupComponent implements OnInit, OnChanges {
     private limitService: LimitsService,
     private utilService: UtilsServiceService,
     private comPartService: ComPartService,
-    public theme: ThemeService,
   ) {}
 
   ngOnInit(): void {

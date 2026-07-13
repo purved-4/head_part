@@ -137,7 +137,7 @@
 
           <div class="space-y-3">
             <div
-              *ngFor="let percent of allocatedPercentages"
+              *ngFor="let percent of allocatedPercentages; trackBy: trackByCompartId"
               class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3"
             >
               <div
@@ -205,238 +205,180 @@
           </div>
         </div>
 
-        <!-- Add New Compart -->
-        <div
-          class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-hover)] p-4 sm:p-5"
-        >
-          <div class="flex items-center justify-between gap-3 mb-4">
-            <div>
-              <h3
-                class="text-sm sm:text-base font-semibold text-[var(--color-font)]"
-              >
-                Add New Compart
-              </h3>
-              <p class="text-xs text-[var(--color-muted)] mt-1">
-                Select compart and assign percentage values
-              </p>
-            </div>
+       <!-- Add New Compart -->
+<div
+  class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-hover)] p-4 sm:p-5"
+>
+  <div class="flex items-center justify-between gap-3 mb-4">
+    <div>
+      <h3 class="text-sm sm:text-base font-semibold text-[var(--color-font)]">
+        Add New Compart
+      </h3>
+      <p class="text-xs text-[var(--color-muted)] mt-1">
+        Select a compart to add it, then set its percentage values
+      </p>
+    </div>
 
+    <span
+      class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-[var(--color-primary)] text-white"
+    >
+      New Entry
+    </span>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <!-- Compart Selector -->
+    <div class="sm:col-span-2">
+      <label class="block text-sm font-medium text-[var(--color-font)] mb-1.5">
+        Compart
+      </label>
+
+      <select
+        #compartSelect
+        (change)="onCompartSelected(compartSelect.value); compartSelect.value = ''"
+        class="w-full h-11 px-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all"
+      >
+        <option value="">Select compart</option>
+
+        <option
+          *ngFor="let item of getSelectableComparts(); trackBy: trackByIndex"
+          [value]="getCompartId(item)"
+        >
+          {{ getCompartName(item) }}
+        </option>
+      </select>
+
+      <p
+        *ngIf="getSelectableComparts().length === 0"
+        class="text-xs text-[var(--color-muted)] mt-1.5"
+      >
+        All available comparts have been added.
+      </p>
+    </div>
+
+    <!-- PENDING ENTRIES GRID -->
+    <div
+      *ngIf="newCompartEntries.length > 0"
+      class="sm:col-span-2 mt-1"
+    >
+      <p class="text-xs font-medium text-[var(--color-muted)] mb-2">
+        Comparts to save ({{ newCompartEntries.length }}):
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div
+          *ngFor="let entry of newCompartEntries; trackBy: trackByCompartId"
+          class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 flex flex-col gap-2.5"
+        >
+          <div class="flex items-center justify-between gap-2">
             <span
-              class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-[var(--color-primary)] text-white"
+              class="text-sm font-medium text-[var(--color-font)] truncate"
             >
-              New Entry
+              {{ entry.compartUsername }}
             </span>
+
+            <button
+              type="button"
+              (click)="removeNewEntry(entry.compartId)"
+              class="text-[var(--color-danger)] hover:opacity-70 transition-all shrink-0"
+            >
+              <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <!-- Compart -->
-            <div class="sm:col-span-2">
-              <label
-                class="block text-sm font-medium text-[var(--color-font)] mb-1.5"
-              >
-                Compart
-              </label>
-
-              <select
-                formControlName="compartId"
-                class="w-full h-11 px-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all"
-              >
-                <option value="">Select compart</option>
-
-                <option
-                  *ngFor="let item of availableComparts; trackBy: trackByIndex"
-                  [value]="getCompartId(item)"
-                >
-                  {{ getCompartName(item) }}
-                </option>
-              </select>
-            </div>
-
-            <!-- FTT -->
+          <div class="grid grid-cols-3 gap-2">
             <div>
-              <label
-                class="block text-sm font-medium text-[var(--color-font)] mb-1.5"
-              >
+              <label class="block text-[10px] text-[var(--color-muted)] mb-0.5">
                 FTT %
               </label>
-
-              <div class="relative">
-                <input
-                  type="number"
-                  formControlName="fttPercentage"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  class="w-full h-11 px-3 pr-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all"
-                />
-                <span
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-muted)]"
-                >
-                  %
-                </span>
-              </div>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                [value]="entry.fttPercentage"
+                (input)="
+                  onNewEntryChange(
+                    entry.compartId,
+                    'fttPercentage',
+                    $any($event.target).value
+                  )
+                "
+                class="w-full px-1.5 py-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+              />
             </div>
 
-            <!-- Payin -->
             <div>
-              <label
-                class="block text-sm font-medium text-[var(--color-font)] mb-1.5"
-              >
+              <label class="block text-[10px] text-[var(--color-muted)] mb-0.5">
                 Payin %
               </label>
-
-              <div class="relative">
-                <input
-                  type="number"
-                  formControlName="payinPercentage"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  class="w-full h-11 px-3 pr-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all"
-                />
-                <span
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-muted)]"
-                >
-                  %
-                </span>
-              </div>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                [value]="entry.payinPercentage"
+                (input)="
+                  onNewEntryChange(
+                    entry.compartId,
+                    'payinPercentage',
+                    $any($event.target).value
+                  )
+                "
+                class="w-full px-1.5 py-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+              />
             </div>
 
-            <!-- Payout -->
-            <div class="sm:col-span-2">
-              <label
-                class="block text-sm font-medium text-[var(--color-font)] mb-1.5"
-              >
+            <div>
+              <label class="block text-[10px] text-[var(--color-muted)] mb-0.5">
                 Payout %
               </label>
-
-              <div class="relative">
-                <input
-                  type="number"
-                  formControlName="payoutPercentage"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  class="w-full h-11 px-3 pr-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all"
-                />
-                <span
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-muted)]"
-                >
-                  %
-                </span>
-              </div>
-            </div>
-            <!-- ADD TO LIST BUTTON -->
-            <div class="sm:col-span-2 flex justify-end mt-2">
-              <button
-                type="button"
-                (click)="addCompartEntry()"
-                class="px-4 py-2 rounded-xl bg-[var(--color-primary)] text-white text-sm font-medium disabled:opacity-40 flex items-center gap-1 transition-all"
-              >
-                <span class="material-symbols-outlined text-[16px]">add</span>
-                Add to List
-              </button>
-            </div>
-
-            <!-- PENDING ENTRIES LIST -->
-            <div
-              *ngIf="newCompartEntries.length > 0"
-              class="sm:col-span-2 space-y-2 mt-3"
-            >
-              <p class="text-xs font-medium text-[var(--color-muted)]">
-                Pending to save:
-              </p>
-              <div
-                *ngFor="let entry of newCompartEntries"
-                class="flex flex-wrap items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3"
-              >
-                <span
-                  class="text-sm font-medium text-[var(--color-font)] flex-1 truncate"
-                >
-                  {{ entry.compartUsername }}
-                </span>
-                <div
-                  class="flex items-center gap-2 text-xs text-[var(--color-muted)]"
-                >
-                  <label
-                    >FTT
-                    <input
-                      type="number"
-                      [value]="entry.fttPercentage"
-                      (input)="
-                        onNewEntryChange(
-                          entry.compartId,
-                          'fttPercentage',
-                          $any($event.target).value
-                        )
-                      "
-                      class="w-14 ml-1 px-1 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] text-xs"
-                    />%
-                  </label>
-                  <label
-                    >Payin
-                    <input
-                      type="number"
-                      [value]="entry.payinPercentage"
-                      (input)="
-                        onNewEntryChange(
-                          entry.compartId,
-                          'payinPercentage',
-                          $any($event.target).value
-                        )
-                      "
-                      class="w-14 ml-1 px-1 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] text-xs"
-                    />%
-                  </label>
-                  <label
-                    >Payout
-                    <input
-                      type="number"
-                      [value]="entry.payoutPercentage"
-                      (input)="
-                        onNewEntryChange(
-                          entry.compartId,
-                          'payoutPercentage',
-                          $any($event.target).value
-                        )
-                      "
-                      class="w-14 ml-1 px-1 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] text-xs"
-                    />%
-                  </label>
-                </div>
-                <button
-                  type="button"
-                  (click)="removeNewEntry(entry.compartId)"
-                  class="text-[var(--color-danger)] hover:opacity-70 transition-all"
-                >
-                  <span class="material-symbols-outlined text-[18px]"
-                    >close</span
-                  >
-                </button>
-              </div>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                [value]="entry.payoutPercentage"
+                (input)="
+                  onNewEntryChange(
+                    entry.compartId,
+                    'payoutPercentage',
+                    $any($event.target).value
+                  )
+                "
+                class="w-full px-1.5 py-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+              />
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Footer Buttons -->
-        <div
-          class="grid grid-cols-2 gap-3 pt-2 border-t border-[var(--color-border)]"
-        >
-          <button
-            type="button"
-            (click)="closeModal()"
-            class="py-3 rounded-xl border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)] transition-all"
-          >
-            Cancel
-          </button>
+    <!-- EMPTY STATE -->
+    <div
+      *ngIf="newCompartEntries.length === 0"
+      class="sm:col-span-2 text-center text-xs text-[var(--color-muted)] py-4 border border-dashed border-[var(--color-border)] rounded-xl"
+    >
+      No comparts added yet. Select one from the dropdown above.
+    </div>
+  </div>
+</div>
 
-          <button
-            type="submit"
-            class="py-3 rounded-xl bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] transition-all"
-          >
-            Save Changes
-          </button>
-        </div>
+<!-- Footer Buttons -->
+<div class="grid grid-cols-2 gap-3 pt-2 border-t border-[var(--color-border)]">
+  <button
+    type="button"
+    (click)="closeModal()"
+    class="py-3 rounded-xl border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)] transition-all"
+  >
+    Cancel
+  </button>
+
+  <button
+    type="submit"
+    [disabled]="newCompartEntries.length === 0 && !allocatedPercentagesChanged"
+    class="py-3 rounded-xl bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-dark)] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[var(--color-primary)]"
+  >
+    Save Changes
+  </button>
+</div>
       </form>
     </div>
   </div>
@@ -545,3 +487,9 @@
     </div>
   </div>
 </div>
+
+
+
+
+
+

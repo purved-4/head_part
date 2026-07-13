@@ -69,7 +69,7 @@ export class AddBep20Component implements OnInit, OnDestroy {
 
     this.subs.add(
       this.currencyBehaviour.getMode().subscribe((res) => {
-        console.log("Received Mode:", res);
+
         this.selectedMode = res;
       }),
     );

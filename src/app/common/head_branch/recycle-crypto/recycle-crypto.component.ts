@@ -47,7 +47,7 @@ export class RecycleCryptoComponent implements OnInit, OnDestroy {
         this.fetchDeletedCryptos();
       },
       error: (err) => {
-        console.error("Mode subscription error:", err);
+
       },
     });
   }
