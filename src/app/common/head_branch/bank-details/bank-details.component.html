@@ -429,24 +429,6 @@
               </div>
 
               <!-- REMAINING AMOUINT-->
-              <div class="grid grid-cols-2 gap-3">
-                <p class="text-sm text-gray-500">Remaining Amount</p>
-
-                <div *ngIf="!isEditMode">
-                  <p class="text-sm font-semibold text-gray-800">
-                    ₹
-                    {{ bankData?.remainingLimitAmount || 0 }}
-                  </p>
-                </div>
-
-                <input
-                  *ngIf="isEditMode"
-                  appEnterKeyFocus
-                  [(ngModel)]="updateForm.limitAmount"
-                  type="number"
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
             </div>
           </div>
 

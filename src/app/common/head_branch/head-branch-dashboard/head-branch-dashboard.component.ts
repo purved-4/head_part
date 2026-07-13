@@ -436,6 +436,7 @@ export class HeadBranchDashboardComponent
           utrNumber: fund.transactionId || fund.utr || null,
           parentCurrency: fund.parentCurrency,
           currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,
+          rate: fund.rate || 1,
           mode: mode,
           accountNo: fund.accountNo || null,
           bankId: fund.bankId || null,
@@ -513,6 +514,7 @@ export class HeadBranchDashboardComponent
           parentCurrency: w.parentCurrency || null, // ✅ FIX
           currency: w.currency || null, // ✅ FIX
           currencyWiseAmount: Number(w.currencyWiseAmount) || 0,
+          rate: w.rate || 1,
           mode: "bank",
           accountNo: w.accountNo || w.accountNumber || null,
           bankId: w.bankId || null,
@@ -2258,6 +2260,7 @@ export class HeadBranchDashboardComponent
 
       currency: fund.currency,
       currencyRate: fund.currencyRate,
+      rate: fund.rate || 1,
 
       amount: Number(fund.amount) || 0,
       currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,

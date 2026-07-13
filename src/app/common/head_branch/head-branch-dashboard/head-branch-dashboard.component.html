@@ -169,7 +169,6 @@
 
                     <!-- UTR only for UPI/Bank -->
                     <p
-                      *ngIf="transaction.mode !== 'crypto'"
                       class="text-[11px] text-[var(--color-muted)] font-medium whitespace-pre-line"
                     >
                       {{ formatUtrNumber(transaction.utrNumber) }}
@@ -179,20 +178,10 @@
                       {{ transaction.date | tz }}
                     </p>
 
-                    <span
-                      *ngIf="transaction.mode === 'crypto'"
-                      class="text-[11px] text-[var(--color-muted)]"
-                    >
-                      {{ transaction.parentCurrency }}-{{ transaction.amount }}
-                    </span>
-                    <span
-                      *ngIf="
-                        transaction.mode !== 'crypto' &&
-                        transaction.amount !== transaction.currencyWiseAmount
-                      "
-                      class="text-[11px] text-[var(--color-muted)]"
-                    >
-                      {{ transaction.currency }}-{{
+                    <p>Rate-{{ transaction.rate }}</p>
+
+                    <span class="text-[11px] text-[var(--color-muted)]">
+                      {{ transaction.parentCurrency }}-{{
                         transaction.currencyWiseAmount
                       }}
                     </span>
@@ -655,16 +644,19 @@
                   </div>
 
                   <!-- TIME -->
+                  <p
+                    class="text-[11px] text-[var(--color-muted)] font-medium whitespace-pre-line"
+                  >
+                    {{ formatUtrNumber(transaction.utrNumber) }}
+                  </p>
+
                   <p class="text-[11px] text-[var(--color-muted)] mt-2">
                     {{ transaction.date | tz }}
                   </p>
 
-                  <!-- Conversion line: crypto ke lieye parentCurrency-amount, baaki ke lieye currency-currencyWiseAmount -->
-                  <span *ngIf="transaction.mode === 'crypto'">
-                    {{ transaction.parentCurrency }}-{{ transaction.amount }}
-                  </span>
-                  <span *ngIf="transaction.mode !== 'crypto'">
-                    {{ transaction.currency }}-{{
+                  <p>Rate-{{ transaction.rate }}</p>
+                  <span>
+                    {{ transaction.parentCurrency }}-{{
                       transaction.currencyWiseAmount
                     }}
                   </span>
@@ -678,7 +670,7 @@
                   appButtonLoader
                   *ngIf="transaction.type === 'payout'"
                   [disabled]="transaction.processing"
-                  (click)="onProcessingClickMobile($event, transaction)"
+                  (click)="onProcessingClick(transaction)"
                   [ngClass]="{
                     'bg-orange-100 text-orange-600': transaction.processing,
 
@@ -1755,7 +1747,7 @@
               </p>
               <p class="font-bold text-gray-800">
                 {{ selectedTransaction.currencyWiseAmount | number }}
-                {{ selectedTransaction.currency }}
+                {{ selectedTransaction.parentCurrency }}
               </p>
             </div>
           </div>
@@ -1945,7 +1937,7 @@
               <p
                 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1"
               >
-                Transaction hash
+                Transaction Id
               </p>
               <p class="font-bold text-gray-800 break-all">
                 {{ selectedTransaction.utrNumber }}
