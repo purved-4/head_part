@@ -46,6 +46,7 @@ import { QRCodeComponent } from "angularx-qrcode";
 import { OverrideCurrencyRateComponent } from "../common/head_branch/override-currency-rate/override-currency-rate.component";
 import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods/payments-methods.component";
 import { SharedUserProfileComponent } from "../common/shared-user-profile/shared-user-profile.component";
+import { GlobalCompartPercentageComponent } from "../common/global-compart-percentage/global-compart-percentage.component";
 
 @NgModule({
   declarations: [
@@ -93,6 +94,7 @@ import { SharedUserProfileComponent } from "../common/shared-user-profile/shared
     OverrideCurrencyRateComponent,
     PaymentsMethodsComponent,
     SharedUserProfileComponent,
+    GlobalCompartPercentageComponent,
   ],
   exports: [
     WebhookDataComponent,
@@ -139,6 +141,7 @@ import { SharedUserProfileComponent } from "../common/shared-user-profile/shared
     OverrideCurrencyRateComponent,
     PaymentsMethodsComponent,
     SharedUserProfileComponent,
+    GlobalCompartPercentageComponent,
   ],
   imports: [
     SharedModule,

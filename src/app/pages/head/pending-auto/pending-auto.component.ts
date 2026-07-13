@@ -6,6 +6,7 @@ import { ChiefManualService } from "../../services/chief-manual.service";
 import { UserStateService } from "../../../store/user-state.service";
 import { SnackbarService } from "../../../common/snackbar/snackbar.service";
 import { UserService } from "../../services/user.service";
+import { ComPartService } from "../../services/com-part.service";
 @Component({
   selector: "app-pending-auto",
   templateUrl: "./pending-auto.component.html",
@@ -32,9 +33,12 @@ export class PendingAutoComponent implements OnInit {
   userPercentageData: any = null;
   userPercentageError: string | null = null;
   showPercentageModal = false;
+  minPercentageData: any = null; // 👈 naya property MIN row ke liye
+
   id: any;
   entityId: any;
   userId: any;
+  entityType: any;
   loading = false;
   activeTab: "pending" | "approved" | "rejected" = "pending";
 
@@ -49,6 +53,8 @@ export class PendingAutoComponent implements OnInit {
   totalItems = 0;
   totalPages = 1;
 
+  modalErrorMessage: string | null = null;
+  fieldsEditable: boolean = false;
   // Action states
   actionLoadingId: string | null = null;
   actionErrorId: string | null = null;
@@ -62,7 +68,6 @@ export class PendingAutoComponent implements OnInit {
   payoutPercentage: number = 0;
   fttPercentage: number = 0;
   modalLoading = false;
-  modalErrorMessage: string | null = null;
 
   Math = Math;
   pendingCount = 0;
@@ -76,10 +81,12 @@ export class PendingAutoComponent implements OnInit {
     private snackBar: SnackbarService,
     private route: ActivatedRoute,
     private userService: UserService,
+    private compartService: ComPartService,
   ) {}
   ngOnInit(): void {
     this.entityId = this.userStateService.getCurrentEntityId();
     this.userId = this.userStateService.getUserId();
+    this.entityType = this.userStateService.getRole();
 
     this.route.queryParams.subscribe((params) => {
       this.token = params["token"];
@@ -106,9 +113,28 @@ export class PendingAutoComponent implements OnInit {
       return;
     }
 
+    const branch = this.branches.find((b) => b.id === id);
+    if (!branch) {
+      this.showError("Request not found");
+      return;
+    }
+
     this.pendingApprovalId = id;
     this.resetModalFields();
+
+    // 👇 Auto-set fields from the already-fetched API data
+    this.limitValue = branch.balance ?? 0;
+    this.payinPercentage = branch.payinPercentage ?? 0;
+    this.payoutPercentage = branch.payoutPercentage ?? 0;
+    this.fttPercentage = branch.fttPercentage ?? 0;
+    this.fieldsEditable = false; // locked when modal opens
+
     this.showLimitModal = true;
+  }
+
+  // 👇 NEW: toggle to unlock/lock fields for editing
+  toggleEditFields(): void {
+    this.fieldsEditable = !this.fieldsEditable;
   }
 
   // ================= LIMIT MODAL HANDLERS =================
@@ -472,15 +498,15 @@ export class PendingAutoComponent implements OnInit {
   confirmReject(id: any): void {
     if (!this.selectedRejectId) return;
 
-    this.id = this.selectedRejectId;
+    const rejectId = this.selectedRejectId;
 
     this.showRejectModal = false;
 
-    this.actionLoadingId = id;
+    this.actionLoadingId = rejectId;
     this.actionErrorId = null;
 
     this.chiefAutoService
-      .rejectManual(id)
+      .rejectManual(rejectId)
       .pipe(
         finalize(() => {
           this.actionLoadingId = null;
@@ -495,13 +521,13 @@ export class PendingAutoComponent implements OnInit {
             4000,
           );
 
-          this.removeFromList(id);
+          this.removeFromList(rejectId); // 👈 yahan bhi
         },
         error: (err) => {
           const message = err?.error?.message || "Something went wrong";
 
           this.snackBar.show(message, false, 4000);
-          this.actionErrorId = id;
+          this.actionErrorId = rejectId; // 👈 yahan bhi
           this.showError("Failed to reject request");
         },
       });
@@ -562,26 +588,25 @@ export class PendingAutoComponent implements OnInit {
     this.showUserPercentage = false;
     this.userPercentageData = null;
     this.userPercentageError = null;
+    this.fieldsEditable = false;
   }
   openPercentageModal(): void {
     this.showPercentageModal = true;
     this.userPercentageLoading = true;
     this.userPercentageError = null;
-    this.userPercentageData = [];
+    this.minPercentageData = null;
 
-    this.userService
-      .getUserFullDetail(this.userId)
+    this.compartService
+      .getPercentageByEntityId(this.entityId, this.entityType)
       .pipe(finalize(() => (this.userPercentageLoading = false)))
       .subscribe({
         next: (res: any) => {
           console.log("API Response:", res);
 
-          // Service already response.data return karti hai
-          this.userPercentageData = Array.isArray(res?.cpInfo)
-            ? res.cpInfo
-            : [];
+          // Sirf minPercentage chahiye
+          this.minPercentageData = res?.minPercentage || null;
 
-          console.log("CP INFO:", this.userPercentageData);
+          console.log("MIN:", this.minPercentageData);
         },
         error: (err) => {
           this.userPercentageError =
@@ -589,6 +614,7 @@ export class PendingAutoComponent implements OnInit {
         },
       });
   }
+
   closePercentageModal() {
     this.showPercentageModal = false;
   }

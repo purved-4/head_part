@@ -1,4 +1,3 @@
-
 <div class="min-h-screen bg-[var(--color-bg)] py-4 px-4 sm:px-6 lg:px-8">
   <div class="max-w-7xl mx-auto">
     <div
@@ -9,7 +8,7 @@
           Create New Branch
         </h1>
         <p class="text-[var(--color-muted)] text-sm mt-0.5">
-          Add a new branch with compart permissions and commission rates
+          Add a new branch with commission rates
         </p>
       </div>
 
@@ -27,469 +26,306 @@
     </div>
 
     <form [formGroup]="chiefForm" (ngSubmit)="onSubmit()">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:items-start">
-        <div class="lg:col-span-2 space-y-4" style="height: fit-content">
-          <div
-            class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-5 border border-[var(--color-border)]"
-          >
-            <div class="flex items-center gap-2 mb-4">
-              <div class="p-2 rounded-[var(--radius-md)] bg-[var(--color-bg)]">
+      <div class="space-y-4">
+        <div
+          class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-5 border border-[var(--color-border)]"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div
+                class="p-2 rounded-lg bg-gradient-to-br from-[var(--color-bg-primary)] to-[var(--color-surface)]"
+              >
                 <span
-                  class="material-symbols-outlined text-[var(--color-primary)]"
+                  class="material-icons text-xl text-[var(--color-primary)]"
                 >
                   person
                 </span>
               </div>
-              <h2 class="text-lg font-bold text-[var(--color-font)]">
+
+              <h2 class="text-base font-bold text-[var(--color-font)]">
                 Branch Information
               </h2>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="space-y-1">
-                <label
-                  class="text-xs font-semibold text-[var(--color-font)] flex items-center gap-1"
-                >
-                  Full Name
-                  <span class="text-[var(--color-danger)]">*</span>
-                </label>
-                <input
-                  formControlName="username"
-                  type="text"
-                  [class.border-[var(--color-danger)]]="
-                    isFieldInvalid('username')
-                  "
-                  [class.border-[var(--color-primary)]]="
-                    chiefForm.get('username')?.valid &&
-                    chiefForm.get('username')?.touched
-                  "
-                  class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] placeholder-[var(--color-muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter branch's full name"
-                />
-                <div
-                  *ngIf="isFieldInvalid('username')"
-                  class="text-[var(--color-danger)] text-xs mt-0.5"
-                >
-                  Name is required
-                </div>
-              </div>
+            <app-global-compart-percentage
+              [entityId]="currentUserId"
+              [role]="role"
+            >
+            </app-global-compart-percentage>
+          </div>
 
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-[var(--color-font)]">
-                  Account Status
-                </label>
-
-                <div
-                  class="flex items-center justify-between px-3 h-[38px] bg-[var(--color-bg)] rounded-[var(--radius-md)] border border-[var(--color-border)]"
-                >
-                  <div class="flex items-center gap-2">
-                    <div class="relative flex items-center">
-                      <input
-                        type="checkbox"
-                        id="active"
-                        formControlName="isActive"
-                        class="sr-only"
-                      />
-                      <label
-                        for="active"
-                        [ngClass]="{
-                          'bg-[var(--color-primary)]':
-                            chiefForm.get('isActive')?.value,
-                          'bg-[var(--color-border)]':
-                            !chiefForm.get('isActive')?.value,
-                        }"
-                        class="block w-9 h-5 rounded-full cursor-pointer transition-all duration-300"
-                      >
-                        <span
-                          [ngClass]="{
-                            'translate-x-4': chiefForm.get('isActive')?.value,
-                            'translate-x-0': !chiefForm.get('isActive')?.value,
-                          }"
-                          class="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full shadow transition-transform duration-300"
-                        ></span>
-                      </label>
-                    </div>
-
-                    <span class="text-xs font-medium text-[var(--color-font)]">
-                      {{
-                        chiefForm.get("isActive")?.value ? "Active" : "Inactive"
-                      }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-4 space-y-1">
-              <label class="text-xs font-semibold text-[var(--color-font)]">
-                Additional Information
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label
+                class="text-xs font-semibold text-[var(--color-font)] flex items-center gap-1"
+              >
+                Full Name
+                <span class="text-[var(--color-danger)]">*</span>
               </label>
-              <textarea
-                formControlName="info"
-                rows="2"
-                class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] placeholder-[var(--color-muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30 focus:border-transparent transition-all duration-200 resize-none"
-                placeholder="Add any additional notes..."
-              ></textarea>
+              <input
+                formControlName="username"
+                type="text"
+                [class.border-[var(--color-danger)]]="
+                  isFieldInvalid('username')
+                "
+                [class.border-[var(--color-primary)]]="
+                  chiefForm.get('username')?.valid &&
+                  chiefForm.get('username')?.touched
+                "
+                class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] placeholder-[var(--color-muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30 focus:border-transparent transition-all duration-200"
+                placeholder="Enter branch's full name"
+              />
+              <div
+                *ngIf="isFieldInvalid('username')"
+                class="text-[var(--color-danger)] text-xs mt-0.5"
+              >
+                Name is required
+              </div>
             </div>
 
-            <div class="mt-3 pt-3 border-t border-[var(--color-border)]"></div>
+            <div class="space-y-1">
+              <label class="text-xs font-semibold text-[var(--color-font)]">
+                Account Status
+              </label>
 
-            <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-[var(--color-font)]">
-                  User Email
-                  <span class="text-[var(--color-danger)]">*</span>
-                </label>
+              <div
+                class="flex items-center justify-between px-3 h-[38px] bg-[var(--color-bg)] rounded-[var(--radius-md)] border border-[var(--color-border)]"
+              >
+                <div class="flex items-center gap-2">
+                  <div class="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      id="active"
+                      formControlName="isActive"
+                      class="sr-only"
+                    />
+                    <label
+                      for="active"
+                      [ngClass]="{
+                        'bg-[var(--color-primary)]':
+                          chiefForm.get('isActive')?.value,
+                        'bg-[var(--color-border)]':
+                          !chiefForm.get('isActive')?.value,
+                      }"
+                      class="block w-9 h-5 rounded-full cursor-pointer transition-all duration-300"
+                    >
+                      <span
+                        [ngClass]="{
+                          'translate-x-4': chiefForm.get('isActive')?.value,
+                          'translate-x-0': !chiefForm.get('isActive')?.value,
+                        }"
+                        class="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full shadow transition-transform duration-300"
+                      ></span>
+                    </label>
+                  </div>
 
-                <input
-                  formControlName="userEmail"
-                  type="email"
-                  placeholder="Enter user email"
-                  class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] text-sm bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30"
-                />
-
-                <div
-                  *ngIf="isFieldInvalid('userEmail')"
-                  class="text-[var(--color-danger)] text-xs"
-                >
-                  Valid user email is required
-                </div>
-              </div>
-
-              <div class="space-y-1">
-                <label class="text-xs font-semibold text-[var(--color-font)]">
-                  User Password
-                  <span class="text-[var(--color-danger)]">*</span>
-                </label>
-
-                <input
-                  formControlName="userPassword"
-                  type="password"
-                  placeholder="Enter password"
-                  class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] text-sm bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30"
-                />
-
-                <div
-                  *ngIf="isFieldInvalid('userPassword')"
-                  class="text-[var(--color-danger)] text-xs"
-                >
-                  Password is required
+                  <span class="text-xs font-medium text-[var(--color-font)]">
+                    {{
+                      chiefForm.get("isActive")?.value ? "Active" : "Inactive"
+                    }}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div
-            class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-4 border border-[var(--color-border)]"
-          >
-            <div class="flex flex-col sm:flex-row gap-3">
-              <button
-                type="button"
-                (click)="clearForm()"
-                [disabled]="loading"
-                class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-font)] font-medium rounded-[var(--radius-md)] text-sm hover:bg-[var(--color-hover)] hover:border-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-1.5"
-              >
-                <span class="material-symbols-outlined text-base">
-                  delete
-                </span>
-                Clear All
-              </button>
+          <div class="mt-4 space-y-1">
+            <label class="text-xs font-semibold text-[var(--color-font)]">
+              Additional Information
+            </label>
+            <textarea
+              formControlName="info"
+              rows="2"
+              class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] placeholder-[var(--color-muted)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30 focus:border-transparent transition-all duration-200 resize-none"
+              placeholder="Add any additional notes..."
+            ></textarea>
+          </div>
 
-              <button
-                type="submit"
-                [disabled]="
-                  loading
-                "
-                class="flex-1 px-4 py-2.5 bg-[var(--color-primary)] text-white font-medium rounded-[var(--radius-md)] text-sm hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-[var(--shadow-md)] hover:shadow-lg flex items-center justify-center gap-1.5"
+          <div class="mt-3 pt-3 border-t border-[var(--color-border)]"></div>
+
+          <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-xs font-semibold text-[var(--color-font)]">
+                User Email
+                <span class="text-[var(--color-danger)]">*</span>
+              </label>
+
+              <input
+                formControlName="userEmail"
+                type="email"
+                placeholder="Enter user email"
+                class="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] text-sm bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30"
+              />
+
+              <div
+                *ngIf="isFieldInvalid('userEmail')"
+                class="text-[var(--color-danger)] text-xs"
               >
-                <span *ngIf="!loading" class="flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-base"> add </span>
-                  Create
-                </span>
-                <span *ngIf="loading" class="flex items-center gap-1.5">
-                  <span
-                    class="material-symbols-outlined text-base animate-spin"
-                  >
-                    sync
+                Valid user email is required
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-xs font-semibold text-[var(--color-font)]">
+                User Password
+                <span class="text-[var(--color-danger)]">*</span>
+              </label>
+
+              <div class="relative">
+                <input
+                  formControlName="userPassword"
+                  [type]="showPassword ? 'text' : 'password'"
+                  placeholder="Enter password"
+                  class="w-full px-3 py-2.5 pr-10 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] text-sm bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30"
+                />
+                <button
+                  type="button"
+                  (click)="togglePasswordVisibility()"
+                  class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors"
+                  [attr.aria-label]="
+                    showPassword ? 'Hide password' : 'Show password'
+                  "
+                >
+                  <span class="material-symbols-outlined text-lg">
+                    {{ showPassword ? "visibility_off" : "visibility" }}
                   </span>
-                  Creating...
-                </span>
-              </button>
+                </button>
+              </div>
+
+              <div
+                *ngIf="isFieldInvalid('userPassword')"
+                class="text-[var(--color-danger)] text-xs"
+              >
+                Password is required
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 pt-3 border-t border-[var(--color-border)]"></div>
+
+          <div class="mt-3">
+            <h3 class="text-sm font-semibold text-[var(--color-font)] mb-3">
+              Commission Percentages
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-[var(--color-font)]">
+                  Payin %
+                  <span class="text-[var(--color-danger)]">*</span>
+                </label>
+                <div class="relative">
+                  <input
+                    formControlName="payinPercentage"
+                    type="number"
+                    min="0"
+                    max="100"
+                    placeholder="Enter payin %"
+                    class="w-full px-3 py-2.5 pr-8 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] text-sm bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30"
+                  />
+                  <span
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-muted)]"
+                    >%</span
+                  >
+                </div>
+                <div
+                  *ngIf="isFieldInvalid('payinPercentage')"
+                  class="text-[var(--color-danger)] text-xs"
+                >
+                  Valid payin percentage is required
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-[var(--color-font)]">
+                  Payout %
+                  <span class="text-[var(--color-danger)]">*</span>
+                </label>
+                <div class="relative">
+                  <input
+                    formControlName="payoutPercentage"
+                    type="number"
+                    min="0"
+                    max="100"
+                    placeholder="Enter payout %"
+                    class="w-full px-3 py-2.5 pr-8 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] text-sm bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30"
+                  />
+                  <span
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-muted)]"
+                    >%</span
+                  >
+                </div>
+                <div
+                  *ngIf="isFieldInvalid('payoutPercentage')"
+                  class="text-[var(--color-danger)] text-xs"
+                >
+                  Valid payout percentage is required
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <label class="text-xs font-semibold text-[var(--color-font)]">
+                  FTT %
+                  <span class="text-[var(--color-danger)]">*</span>
+                </label>
+                <div class="relative">
+                  <input
+                    formControlName="fttPercentage"
+                    type="number"
+                    min="0"
+                    max="100"
+                    placeholder="Enter FTT %"
+                    class="w-full px-3 py-2.5 pr-8 border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-font)] text-sm bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-opacity-30"
+                  />
+                  <span
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-muted)]"
+                    >%</span
+                  >
+                </div>
+                <div
+                  *ngIf="isFieldInvalid('fttPercentage')"
+                  class="text-[var(--color-danger)] text-xs"
+                >
+                  Valid FTT percentage is required
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="lg:col-span-1" style="height: 100%">
-          <div
-            class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-4 border border-[var(--color-border)] sticky top-4 flex flex-col h-full"
-            style="max-height: calc(100vh - 120px); overflow: hidden"
-          >
-            <div class="mb-3">
-              <h2 class="text-base font-semibold text-[var(--color-font)] mb-1">
-                Compart Assignment
-              </h2>
-              <div class="flex items-center gap-2 text-xs">
-                <span
-                  class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-white font-medium"
-                >
-                  {{ getSelectedComparts().length }} Selected
-                </span>
-                <span class="text-[var(--color-muted)]">
-                  of {{ comparts.length }} total
-                </span>
-              </div>
-            </div>
-
-            <div
-              class="flex bg-[var(--color-bg)] rounded-lg p-0.5 mb-3 text-xs"
+        <div
+          class="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] p-4 border border-[var(--color-border)]"
+        >
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              (click)="clearForm()"
+              [disabled]="loading"
+              class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-font)] font-medium rounded-[var(--radius-md)] text-sm hover:bg-[var(--color-hover)] hover:border-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-1.5"
             >
-              <button
-                type="button"
-                (click)="setActiveTab('available')"
-                class="flex-1 py-1.5 rounded-md transition-all"
-                [class.bg-[var(--color-surface)]]="activeTab === 'available'"
-                [class.text-[var(--color-primary)]]="activeTab === 'available'"
-                [class.font-semibold]="activeTab === 'available'"
-                [class.shadow-sm]="activeTab === 'available'"
-              >
-                Available
-              </button>
-              <button
-                type="button"
-                (click)="setActiveTab('selected')"
-                class="flex-1 py-1.5 rounded-md transition-all"
-                [class.bg-[var(--color-surface)]]="activeTab === 'selected'"
-                [class.text-[var(--color-primary)]]="activeTab === 'selected'"
-                [class.font-semibold]="activeTab === 'selected'"
-                [class.shadow-sm]="activeTab === 'selected'"
-              >
-                Selected
-              </button>
-            </div>
+              <span class="material-symbols-outlined text-base"> delete </span>
+              Clear All
+            </button>
 
-            <div class="mb-3">
-              <div class="relative">
-                <span
-                  class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-[var(--color-muted)] text-sm"
-                >
-                  search
-                </span>
-                <input
-                  type="text"
-                  [value]="
-                    activeTab === 'available'
-                      ? availableSearchTerm
-                      : selectedSearchTerm
-                  "
-                  (input)="onSearch($event)"
-                  placeholder="Search comparts..."
-                  class="w-full border border-[var(--color-border)] rounded-md pl-8 pr-2.5 py-1.5 text-xs bg-[var(--color-bg)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] transition-all"
-                />
-              </div>
-            </div>
-
-            <div
-              class="flex-1 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar"
-              style="min-height: 0"
+            <button
+              type="submit"
+              [disabled]="loading"
+              class="flex-1 px-4 py-2.5 bg-[var(--color-primary)] text-white font-medium rounded-[var(--radius-md)] text-sm hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-[var(--shadow-md)] hover:shadow-lg flex items-center justify-center gap-1.5"
             >
-              <div
-                *ngIf="activeTab === 'available'"
-                class="flex flex-col gap-1.5"
-              >
-                <div
-                  *ngIf="getAvailableComparts().length === 0"
-                  class="text-center text-xs text-[var(--color-muted)] py-8"
-                >
-                  <span
-                    class="material-symbols-outlined text-2xl mb-2 block opacity-50"
-                  >
-                    inventory_2
-                  </span>
-                  No available comparts
-                </div>
-
-                <div
-                  *ngFor="
-                    let compart of getAvailableComparts();
-                    trackBy: trackByCompartId
-                  "
-                  class="group flex items-center justify-between border border-[var(--color-border)] rounded-md px-3 py-2 text-xs hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all cursor-pointer"
-                >
-                  <div class="min-w-0 flex-1">
-                    <div class="truncate font-medium">
-                      {{ compart.compartUsername }}
-                    </div>
-                    <div
-                      *ngIf="compart.info"
-                      class="truncate text-[10px] text-[var(--color-muted)] mt-0.5"
-                    >
-                      {{ compart.info }}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    (click)="selectCompart(compart.compartId)"
-                    class="opacity-0 group-hover:opacity-100 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-full w-6 h-6 flex items-center justify-center transition-all ml-2 flex-shrink-0"
-                    title="Add compart"
-                  >
-                    <span class="material-symbols-outlined text-base">
-                      add
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              <div *ngIf="activeTab === 'selected'" class="flex flex-col gap-2">
-                <div
-                  *ngIf="getSelectedComparts().length === 0"
-                  class="text-center text-xs text-[var(--color-muted)] py-8"
-                >
-                  <span
-                    class="material-symbols-outlined text-2xl mb-2 block opacity-50"
-                  >
-                    deselect
-                  </span>
-                  No comparts selected
-                </div>
-
-                <div
-                  *ngFor="
-                    let compart of getSelectedComparts();
-                    trackBy: trackByCompartId
-                  "
-                  class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)] hover:border-[var(--color-primary)]/50 transition-all"
-                >
-                  <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-2 min-w-0 flex-1">
-                      <div
-                        class="w-7 h-7 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center flex-shrink-0"
-                      >
-                        <span
-                          class="material-symbols-outlined text-[var(--color-primary)] text-sm"
-                        >
-                          language
-                        </span>
-                      </div>
-
-                      <div class="min-w-0">
-                        <div class="text-xs font-medium truncate">
-                          {{ compart.compartUsername }}
-                        </div>
-                        <div
-                          *ngIf="compart.info"
-                          class="text-[10px] text-[var(--color-muted)] truncate mt-0.5"
-                        >
-                          {{ compart.info }}
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      (click)="removeCompart(compart.compartId)"
-                      class="text-[var(--color-muted)] hover:text-red-500 hover:bg-red-50 rounded-full w-6 h-6 flex items-center justify-center transition-all ml-2 flex-shrink-0"
-                      title="Remove compart"
-                    >
-                      <span class="material-symbols-outlined text-base">
-                        close
-                      </span>
-                    </button>
-                  </div>
-
-                  <div class="grid grid-cols-3 gap-2 text-xs">
-                    <div>
-                      <label
-                        class="block mb-1 text-[var(--color-muted)] text-[10px] font-medium"
-                      >
-                        Payin
-                      </label>
-                      <div class="relative">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          [placeholder]="
-                            ' ' + (compart.payinPercentage ?? 0) + '%'
-                          "
-                          [formControlName]="'payin_' + compart.compartId"
-                          class="w-full border border-[var(--color-border)] rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all"
-                        />
-                        <span
-                          class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-muted)]"
-                          >%</span
-                        >
-                      </div>
-                    </div>
-
-                    <div>
-                      <label
-                        class="block mb-1 text-[var(--color-muted)] text-[10px] font-medium"
-                      >
-                        Payout
-                      </label>
-                      <div class="relative">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          [placeholder]="
-                            ' ' + (compart.payoutPercentage ?? 0) + '%'
-                          "
-                          [formControlName]="'payout_' + compart.compartId"
-                          class="w-full border border-[var(--color-border)] rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all"
-                        />
-                        <span
-                          class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-muted)]"
-                          >%</span
-                        >
-                      </div>
-                    </div>
-
-                    <div>
-                      <label
-                        class="block mb-1 text-[var(--color-muted)] text-[10px] font-medium"
-                      >
-                        FTT
-                      </label>
-                      <div class="relative">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          [placeholder]="
-                            ' ' + (compart.fttPercentage ?? 0) + '%'
-                          "
-                          [formControlName]="'first_payin_' + compart.compartId"
-                          class="w-full border border-[var(--color-border)] rounded px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all"
-                        />
-                        <span
-                          class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-muted)]"
-                          >%</span
-                        >
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              <span *ngIf="!loading" class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base"> add </span>
+                Create
+              </span>
+              <span *ngIf="loading" class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base animate-spin">
+                  sync
+                </span>
+                Creating...
+              </span>
+            </button>
           </div>
         </div>
       </div>
     </form>
   </div>
 </div>
-
-<app-website-percentage-model
-  *ngIf="showPercentageModal"
-  [entityId]="currentUserId"
-  [entityType]="role"
-  (closed)="closeModal()"
->
-</app-website-percentage-model>
-
-
-
-
-
-

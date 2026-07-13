@@ -381,7 +381,7 @@
                   <button
                     (click)="openRejectModal(branch.id)"
                     [disabled]="actionLoadingId === branch.id || showLimitModal"
-                    class="px-3 py-1.5 bg-[var(--color-danger)] hover:bg-[var(--color-danger)] text-white text-xs font-medium rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                    class="flex-1 px-3 py-2 bg-[var(--color-danger)] hover:bg-[var(--color-danger)] text-white text-xs font-medium rounded-md disabled:opacity-50 flex items-center justify-center gap-1"
                   >
                     <span class="material-symbols-outlined text-sm"
                       >cancel</span
@@ -500,7 +500,7 @@
                   <span>Approve</span>
                 </button>
                 <button
-                  (click)="confirmReject(branch.id)"
+                  (click)="openRejectModal(branch.id)"
                   [disabled]="actionLoadingId === branch.id || showLimitModal"
                   class="flex-1 px-3 py-2 bg-[var(--color-danger)] hover:bg-[var(--color-danger)] text-white text-xs font-medium rounded-md disabled:opacity-50 flex items-center justify-center gap-1"
                 >
@@ -605,7 +605,7 @@
                   <span>Approve</span>
                 </button>
                 <button
-                  (click)="confirmReject(branch.id)"
+                  (click)="openRejectModal(branch.id)"
                   [disabled]="actionLoadingId === branch.id || showLimitModal"
                   class="flex-1 px-3 py-2 bg-[var(--color-danger)] hover:bg-[var(--color-danger)] text-white text-xs font-medium rounded-md disabled:opacity-50 flex items-center justify-center gap-1"
                 >
@@ -705,29 +705,44 @@
   class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
 >
   <div
-    class="bg-[var(--color-surface)] rounded-lg max-w-md w-full border border-[var(--color-border)]"
+    class="bg-[var(--color-surface)] rounded-xl max-w-md w-full border border-[var(--color-border)] shadow-2xl overflow-hidden"
   >
-    <div class="bg-[var(--color-primary)] px-4 py-3 rounded-t-lg">
+    <!-- Header -->
+    <div class="bg-[var(--color-primary)] px-4 py-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-white">thumb_up</span>
-          <h2 class="text-lg font-semibold text-white">Approve Request</h2>
+          <div>
+            <h2 class="text-base font-semibold text-white leading-tight">
+              Approve Request
+            </h2>
+            <p class="text-[11px] text-white/80 leading-tight">
+              Review the auto-filled details before approving
+            </p>
+          </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button (click)="openPercentageModal()">View Existing %</button>
+        <div class="flex items-center gap-1">
+          <button
+            (click)="openPercentageModal()"
+            title="View Existing % (Compart)"
+            class="text-white/90 hover:text-white text-xs px-2 py-1 rounded-md hover:bg-white/10 flex items-center gap-1"
+          >
+            <span class="material-symbols-outlined text-sm">globe</span>
+            <span class="hidden sm:inline">Global %</span>
+          </button>
           <button
             (click)="skipApproval()"
-            class="text-white hover:text-gray-200"
+            class="text-white hover:text-gray-200 p-1 rounded-md hover:bg-white/10"
             [disabled]="modalLoading"
           >
-            <span class="material-symbols-outlined">close</span>
+            <span class="material-symbols-outlined text-lg">close</span>
           </button>
         </div>
       </div>
     </div>
 
-    <div class="px-4 py-4 space-y-4">
-      <!-- View Percentage Panel -->
+    <div class="px-4 py-4 space-y-4 max-h-[75vh] overflow-y-auto">
+      <!-- View Percentage Panel (Compart lookup) -->
       <div
         *ngIf="showUserPercentage"
         class="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md p-3 text-sm"
@@ -789,63 +804,139 @@
         <p class="text-sm text-white">{{ modalErrorMessage }}</p>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-[var(--color-font)] mb-1">
-          Limit Amount <span class="text-[var(--color-danger)]">*</span>
-        </label>
-        <input
-          [(ngModel)]="limitValue"
-          type="number"
-          min="1"
-          step="0.01"
-          placeholder="Enter limit amount"
-          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-md bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-        />
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-[var(--color-font)] mb-1"
-          >payin Percentage (%)</label
+      <!-- Request Details Card with Edit toggle -->
+      <div
+        class="border rounded-lg overflow-hidden transition-colors"
+        [ngClass]="
+          fieldsEditable
+            ? 'border-[var(--color-primary)]'
+            : 'border-[var(--color-border)]'
+        "
+      >
+        <div
+          class="flex items-center justify-between px-3 py-2 bg-[var(--color-bg)] border-b border-[var(--color-border)]"
         >
-        <input
-          [(ngModel)]="payinPercentage"
-          type="number"
-          min="0"
-          max="100"
-          step="0.01"
-          placeholder="0-100"
-          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-md bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-        />
-      </div>
+          <div
+            class="flex items-center gap-1.5 text-xs font-medium text-[var(--color-font)]"
+          >
+            <span class="material-symbols-outlined text-sm">
+              {{ fieldsEditable ? "lock_open" : "lock" }}
+            </span>
+            <span>{{
+              fieldsEditable ? "Editing mode" : "Auto-filled from request"
+            }}</span>
+          </div>
+          <button
+            type="button"
+            (click)="toggleEditFields()"
+            [disabled]="modalLoading"
+            class="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md transition-colors"
+            [ngClass]="
+              fieldsEditable
+                ? 'bg-[var(--color-primary)] text-white'
+                : 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-font)] hover:bg-[var(--color-hover)]'
+            "
+          >
+            <span class="material-symbols-outlined text-sm">
+              {{ fieldsEditable ? "check" : "edit" }}
+            </span>
+            <span>{{ fieldsEditable ? "Done" : "Edit" }}</span>
+          </button>
+        </div>
 
-      <div>
-        <label class="block text-sm font-medium text-[var(--color-font)] mb-1"
-          >Payout Percentage (%)</label
-        >
-        <input
-          [(ngModel)]="payoutPercentage"
-          type="number"
-          min="0"
-          max="100"
-          step="0.01"
-          placeholder="0-100"
-          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-md bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-        />
-      </div>
+        <div class="p-3 space-y-3">
+          <!-- Limit Amount -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-1"
+            >
+              Limit Amount <span class="text-[var(--color-danger)]">*</span>
+            </label>
+            <input
+              [(ngModel)]="limitValue"
+              [disabled]="!fieldsEditable || modalLoading"
+              type="number"
+              min="1"
+              step="0.01"
+              placeholder="Enter limit amount"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] transition-colors"
+              [ngClass]="
+                !fieldsEditable
+                  ? 'bg-[var(--color-bg)] border-[var(--color-border)] text-[var(--color-font)] opacity-70 cursor-not-allowed'
+                  : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-font)]'
+              "
+            />
+          </div>
 
-      <div>
-        <label class="block text-sm font-medium text-[var(--color-font)] mb-1"
-          >FTT Percentage (%)</label
-        >
-        <input
-          [(ngModel)]="fttPercentage"
-          type="number"
-          min="0"
-          max="100"
-          step="0.01"
-          placeholder="0-100"
-          class="w-full px-3 py-2 border border-[var(--color-border)] rounded-md bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-        />
+          <!-- Payin -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-1"
+              >Payin Percentage (%)</label
+            >
+            <input
+              [(ngModel)]="payinPercentage"
+              [disabled]="!fieldsEditable || modalLoading"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="0-100"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] transition-colors"
+              [ngClass]="
+                !fieldsEditable
+                  ? 'bg-[var(--color-bg)] border-[var(--color-border)] text-[var(--color-font)] opacity-70 cursor-not-allowed'
+                  : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-font)]'
+              "
+            />
+          </div>
+
+          <!-- Payout -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-1"
+              >Payout Percentage (%)</label
+            >
+            <input
+              [(ngModel)]="payoutPercentage"
+              [disabled]="!fieldsEditable || modalLoading"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="0-100"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] transition-colors"
+              [ngClass]="
+                !fieldsEditable
+                  ? 'bg-[var(--color-bg)] border-[var(--color-border)] text-[var(--color-font)] opacity-70 cursor-not-allowed'
+                  : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-font)]'
+              "
+            />
+          </div>
+
+          <!-- FTT -->
+          <div>
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-1"
+              >FTT Percentage (%)</label
+            >
+            <input
+              [(ngModel)]="fttPercentage"
+              [disabled]="!fieldsEditable || modalLoading"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="0-100"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] transition-colors"
+              [ngClass]="
+                !fieldsEditable
+                  ? 'bg-[var(--color-bg)] border-[var(--color-border)] text-[var(--color-font)] opacity-70 cursor-not-allowed'
+                  : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-font)]'
+              "
+            />
+          </div>
+        </div>
       </div>
 
       <div
@@ -860,8 +951,9 @@
       </div>
     </div>
 
+    <!-- Footer -->
     <div
-      class="bg-[var(--color-bg)] px-4 py-3 border-t border-[var(--color-border)] rounded-b-lg"
+      class="bg-[var(--color-bg)] px-4 py-3 border-t border-[var(--color-border)]"
     >
       <div class="flex gap-2">
         <button
@@ -905,7 +997,7 @@
       class="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gray-50"
     >
       <div>
-        <h2 class="text-xl font-semibold text-gray-800">Existing Percentage</h2>
+        <h2 class="text-xl font-semibold text-gray-800">Global Percentage</h2>
         <p class="text-sm text-gray-500 mt-1">
           Compart-wise percentage allocation
         </p>
@@ -935,30 +1027,22 @@
 
       <!-- Table -->
       <div
-        *ngIf="!userPercentageLoading && userPercentageData?.length"
+        *ngIf="!userPercentageLoading && minPercentageData"
         class="overflow-hidden rounded-xl border border-gray-200"
       >
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-100">
             <tr>
               <th
-                class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-600"
-              >
-                Compart
-              </th>
-
-              <th
                 class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-600"
               >
                 Payin
               </th>
-
               <th
                 class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-600"
               >
                 Payout
               </th>
-
               <th
                 class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-600"
               >
@@ -968,35 +1052,15 @@
           </thead>
 
           <tbody class="divide-y divide-gray-100 bg-white">
+            <!-- Sirf MIN row -->
             <tr
-              *ngFor="let cp of userPercentageData"
-              class="hover:bg-gray-50 transition-colors duration-200"
+              class="bg-yellow-50 hover:bg-yellow-100 transition-colors duration-200"
             >
-              <td class="px-5 py-4">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center"
-                  >
-                    <span
-                      class="material-symbols-outlined text-indigo-600 text-[20px]"
-                    >
-                      person
-                    </span>
-                  </div>
-
-                  <div>
-                    <p class="font-medium text-gray-800">
-                      {{ cp.compartUsername }}
-                    </p>
-                  </div>
-                </div>
-              </td>
-
               <td class="px-5 py-4 text-center">
                 <span
                   class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700"
                 >
-                  {{ cp.payinPercentage }}%
+                  {{ minPercentageData.payinPercentage }}%
                 </span>
               </td>
 
@@ -1004,7 +1068,7 @@
                 <span
                   class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700"
                 >
-                  {{ cp.payoutPercentage }}%
+                  {{ minPercentageData.payoutPercentage }}%
                 </span>
               </td>
 
@@ -1012,7 +1076,7 @@
                 <span
                   class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-semibold text-purple-700"
                 >
-                  {{ cp.fttPercentage }}%
+                  {{ minPercentageData.fttPercentage }}%
                 </span>
               </td>
             </tr>
@@ -1022,7 +1086,7 @@
 
       <!-- Empty State -->
       <div
-        *ngIf="!userPercentageLoading && !userPercentageData?.length"
+        *ngIf="!userPercentageLoading && !minPercentageData"
         class="flex flex-col items-center justify-center py-16"
       >
         <div
@@ -1042,20 +1106,10 @@
         </p>
       </div>
     </div>
-
-    <!-- Footer -->
-    <div
-      class="flex justify-end items-center gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50"
-    >
-      <button
-        (click)="closePercentageModal()"
-        class="px-5 py-2.5 rounded-lg bg-gray-800 text-white font-medium hover:bg-black transition"
-      >
-        Close
-      </button>
-    </div>
   </div>
 </div>
+
+<!-- Reject Modal -->
 <div
   *ngIf="showRejectModal"
   class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
