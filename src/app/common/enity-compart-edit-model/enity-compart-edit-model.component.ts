@@ -1,7 +1,3 @@
-
-
-
-
 import {
   Component,
   EventEmitter,
@@ -29,10 +25,14 @@ interface CompartPercentageRow {
 interface NewCompartEntry {
   compartId: string;
   compartUsername?: string;
-  fttPercentage: number;
+}
+
+interface MinPercentage {
   payinPercentage: number;
   payoutPercentage: number;
+  fttPercentage: number;
 }
+
 @Component({
   selector: "app-enity-compart-edit-model",
   templateUrl: "./enity-compart-edit-model.component.html",
@@ -60,10 +60,32 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
   availableComparts: any[] = [];
   allocatedPercentages: CompartPercentageRow[] = [];
   currentEntityType: any;
+
+  // multi-select "add new compart" ke liye
   newCompartEntries: NewCompartEntry[] = [];
-  // NEW: to show/hide parent comparts view
+  sharedPercentage = {
+    payinPercentage: 0,
+    payoutPercentage: 0,
+    fttPercentage: 0,
+  };
+
+  // minPercentage jo child API se aata hai — YEH hi cheez edit hoti hai
+  // (individual compart ka percentage edit nahi hota, sirf yeh minimum floor)
+  minPercentage: MinPercentage | null = null;
+  parentMinPercentage: MinPercentage | null = null;
+
+  // Edit button dabane par true hota hai, tab hi inputs enable hote hain
+  isEditingMinPercentage = false;
+  minPercentageDraft: MinPercentage = {
+    payinPercentage: 0,
+    payoutPercentage: 0,
+    fttPercentage: 0,
+  };
+
   showParentCompartsView = false;
-  private originalAllocatedPercentages: CompartPercentageRow[] = [];
+
+  // ngOnChanges + ngOnInit dono se loadAllData() double na chale, isliye guard
+  private hasLoadedOnce = false;
 
   constructor(
     private compartService: ComPartService,
@@ -73,15 +95,21 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.currentEntityType = this.userStateService.getRole();
-    this.buildForm();
+
+    if (!this.editForm) {
+      this.buildForm();
+    }
 
     if (this.data) {
       this.entityData = this.data;
-
       this.patchEntityForm();
     }
 
-    this.loadAllData();
+    // Agar ngOnChanges (firstChange) already load nahi kar chuka, tab hi yahan se load karo.
+    if (!this.hasLoadedOnce && this.entityId) {
+      this.loadAllData();
+      this.hasLoadedOnce = true;
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -91,18 +119,38 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
 
     if (changes["data"] && this.data) {
       this.entityData = this.data;
-
-      this.editForm.patchValue({
-        username: this.entityData.username ?? "",
-        info: this.entityData.info ?? "",
-        parentCurrency: this.entityData.parentCurrency ?? "",
-      });
+      this.patchEntityForm();
     }
-    this.newCompartEntries = [];
-    this.allocatedPercentages = [];
-    this.availableComparts = [];
-    this.originalAllocatedPercentages = [];
-    this.loadAllData();
+
+    // Pehli baar (component create hote waqt) ngOnChanges pehle chalta hai,
+    // ngOnInit ke baad. Isko yahin par ek baar load kar dete hain, taaki
+    // ngOnInit dobara load na kare (guard flag ke through).
+    const isFirstDataChange =
+      changes["data"]?.firstChange ||
+      changes["entityId"]?.firstChange ||
+      changes["entityType"]?.firstChange;
+
+    const isSubsequentRealChange =
+      !isFirstDataChange &&
+      (changes["data"] || changes["entityId"] || changes["entityType"]);
+
+    if (isFirstDataChange && this.entityId && !this.hasLoadedOnce) {
+      this.newCompartEntries = [];
+      this.allocatedPercentages = [];
+      this.availableComparts = [];
+      this.resetSharedPercentage();
+      this.loadAllData();
+      this.hasLoadedOnce = true;
+      return;
+    }
+
+    if (isSubsequentRealChange) {
+      this.newCompartEntries = [];
+      this.allocatedPercentages = [];
+      this.availableComparts = [];
+      this.resetSharedPercentage();
+      this.loadAllData();
+    }
   }
 
   buildForm(): void {
@@ -110,13 +158,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       username: ["", Validators.required],
       info: [""],
       parentCurrency: [""],
-
-      // 🔴 REQUIRED (missing in your code)
-      compartId: [""],
-
-      payinPercentage: [0, [Validators.min(0)]],
-      fttPercentage: [0, [Validators.min(0)]],
-      payoutPercentage: [0, [Validators.min(0)]],
     });
   }
 
@@ -130,35 +171,36 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     });
   }
 
+  resetSharedPercentage(): void {
+    this.sharedPercentage = {
+      payinPercentage: 0,
+      payoutPercentage: 0,
+      fttPercentage: 0,
+    };
+  }
+
+  // Sirf OWNER hi naya compart assign kar sakta hai.
+  // Baaki sab roles sirf already-assigned comparts ka percentage edit kar sakte hain.
+  get canAddNewCompart(): boolean {
+    return this.currentEntityType === "OWNER";
+  }
+
   loadAllData(): void {
+    if (!this.entityId) return;
+
     this.loadingComparts = true;
     this.loadingPercentages = true;
 
-    const parent$ =
-      // this.entityType === "OWNER"
-      //   ? this.compartService.getAllComPartByOwner(this.entityId).pipe(
-      //       catchError((err) => {
+    const parent$ = this.compartService
+      .getPercentageByEntityId(this.entityId, this.entityType)
+      .pipe(catchError(() => of(null)));
 
-      //         return of(null);
-      //       }),
-      //     )
-      //   :
-      this.compartService
-        .getPercentageByEntityId(this.entityId, this.entityType)
-        .pipe(
-          catchError((err) => {
-            return of(null);
-          }),
-        );
-
+    // OWNER ke case me naya compart add karne ka option hi hai, isliye
+    // sirf tab child$ call karo jab yeh OWNER na ho ya data.id available ho.
     const child$ = this.data?.id
       ? this.compartService
           .getPercentageByEntityId(this.data.id, this.getEntityLabel(this.data))
-          .pipe(
-            catchError((err) => {
-              return of(null);
-            }),
-          )
+          .pipe(catchError(() => of(null)))
       : of(null);
 
     forkJoin({
@@ -166,43 +208,39 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       child: child$,
     }).subscribe({
       next: ({ parent, child }) => {
-        this.parentData = parent ?? [];
-        this.parentComparts = parent ?? [];
+        // parent -> OWNER ke saare available comparts (list + minPercentage)
+        this.parentComparts = this.extractRows(parent);
+        this.parentData = this.parentComparts;
+        this.parentMinPercentage = this.extractMinPercentage(parent);
 
-        this.allocatedPercentages = this.extractChildRows(child);
-
-         // NEW: snapshot for dirty comparison
-    this.originalAllocatedPercentages = this.allocatedPercentages.map(
-      (row) => ({ ...row }),
-    );
+        // child -> current entity ko already allocated comparts (list + minPercentage)
+        this.allocatedPercentages = this.extractRows(child);
+        this.minPercentage = this.extractMinPercentage(child);
+        this.isEditingMinPercentage = false;
 
         this.refreshAvailableComparts();
-
-        if (
-          !this.editForm.get("compartId")?.value &&
-          this.availableComparts.length > 0
-        ) {
-          this.editForm.patchValue({
-            compartId: this.getCompartId(this.availableComparts[0]),
-          });
-        }
 
         this.loadingComparts = false;
         this.loadingPercentages = false;
       },
-      error: (err) => {
+      error: () => {
         this.loadingComparts = false;
         this.loadingPercentages = false;
       },
     });
   }
 
-  extractChildRows(res: any): CompartPercentageRow[] {
-    const raw = Array.isArray(res)
-      ? res
-      : Array.isArray(res?.data)
-        ? res.data
-        : [];
+  // "data.list" format handle karta hai (fallback purane formats ke liye bhi)
+  extractRows(res: any): CompartPercentageRow[] {
+    const raw = Array.isArray(res?.data?.list)
+      ? res.data.list
+      : Array.isArray(res?.list)
+        ? res.list
+        : Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res)
+            ? res
+            : [];
 
     return raw
       .map((item: any) => ({
@@ -216,6 +254,18 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       .filter((item: CompartPercentageRow) => !!item.compartId);
   }
 
+  // "data.minPercentage" se sirf payin/payout/ftt fields uthata hai
+  extractMinPercentage(res: any): MinPercentage | null {
+    const min = res?.data?.minPercentage ?? res?.minPercentage ?? null;
+    if (!min) return null;
+
+    return {
+      payinPercentage: Number(min?.payinPercentage ?? 0),
+      payoutPercentage: Number(min?.payoutPercentage ?? 0),
+      fttPercentage: Number(min?.fttPercentage ?? 0),
+    };
+  }
+
   refreshAvailableComparts(): void {
     const allocatedIds = new Set(
       this.allocatedPercentages.map((x) => x.compartId),
@@ -226,26 +276,12 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     );
   }
 
-  // NEW: Get the percentage for a specific compart from allocated percentages
-  getCompartPercentage(compartId: string): CompartPercentageRow | undefined {
-    return this.allocatedPercentages.find((x) => x.compartId === compartId);
-  }
-
-  // NEW: Toggle parent comparts visibility
-  toggleParentCompartsView(): void {
-    this.showParentCompartsView = !this.showParentCompartsView;
-  }
-
   closeModal(): void {
     this.showModal = false;
     this.close.emit();
   }
 
   getEntityLabel(data: any): string {
-
-
-    
-
     switch (this.entityType) {
       case "OWNER":
         return "CHIEF";
@@ -261,122 +297,161 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
   }
 
   getCompartId(item: any): string {
-    return item?.id || item?.compartId || item?._id || "-";
+    return item?.compartId || item?.id || item?._id || "-";
   }
 
   getCompartName(item: any): string {
     return (
+      item?.compartUsername ||
       item?.comPartType ||
       item?.username ||
       item?.title ||
-      item?.compartUsername ||
       "Unnamed"
     );
   }
 
-  isEnabled(item: any): boolean {
-    return !!item?.enabled;
+  // ---------- Minimum Percentage editing ----------
+  // Individual assigned compart ka percentage edit NAHI hota. Sirf yeh
+  // ek "minimum" floor value edit hoti hai — OWNER aur baaki sab roles
+  // ke liye same behaviour hai. Edit button dabao -> inputs khulte hain.
+  enableMinPercentageEdit(): void {
+    this.minPercentageDraft = {
+      payinPercentage: this.minPercentage?.payinPercentage ?? 0,
+      payoutPercentage: this.minPercentage?.payoutPercentage ?? 0,
+      fttPercentage: this.minPercentage?.fttPercentage ?? 0,
+    };
+    this.isEditingMinPercentage = true;
   }
 
-  getSelectedCompartName(): string {
-    const selectedId = this.editForm?.get("compartId")?.value;
-    if (!selectedId) return "-";
-
-    const found = this.availableComparts.find(
-      (c: any) =>
-        c?.id === selectedId ||
-        c?.compartId === selectedId ||
-        c?._id === selectedId,
-    );
-
-    return found ? this.getCompartName(found) : "-";
+  cancelMinPercentageEdit(): void {
+    this.isEditingMinPercentage = false;
   }
 
-  
-
-  // UPDATED: existing allotted compartment ko edit karne ke liye
-  onAllocatedPercentageChange(
-  compartId: string,
-  field: "payinPercentage" | "payoutPercentage" | "fttPercentage",
-  value: any,
-): void {
-  const idx = this.allocatedPercentages.findIndex(
-    (x) => x.compartId === compartId,
-  );
-
-  if (idx === -1) return;
-
-  this.allocatedPercentages[idx] = {
-    ...this.allocatedPercentages[idx],
-    [field]: Number(value ?? 0),
-  };
-}
-
-get allocatedPercentagesChanged(): boolean {
-  if (
-    this.allocatedPercentages.length !==
-    this.originalAllocatedPercentages.length
-  ) {
-    return true;
+  onMinPercentageDraftChange(
+    field: "payinPercentage" | "payoutPercentage" | "fttPercentage",
+    value: any,
+  ): void {
+    this.minPercentageDraft = {
+      ...this.minPercentageDraft,
+      [field]: Number(value ?? 0),
+    };
   }
 
-  return this.allocatedPercentages.some((row) => {
-    const original = this.originalAllocatedPercentages.find(
-      (o) => o.compartId === row.compartId,
+  saveMinPercentageEdit(): void {
+    this.minPercentage = { ...this.minPercentageDraft };
+    this.isEditingMinPercentage = false;
+  }
+
+  private buildMinPercentagePayload(): MinPercentage | null {
+    if (!this.minPercentage) return null;
+
+    return {
+      payinPercentage: Number(this.minPercentage.payinPercentage ?? 0),
+      payoutPercentage: Number(this.minPercentage.payoutPercentage ?? 0),
+      fttPercentage: Number(this.minPercentage.fttPercentage ?? 0),
+    };
+  }
+
+  // ---------- Add New Compart (multi-select + shared percentage) ----------
+  // Yeh sirf OWNER ke liye hi HTML me render hota hai (canAddNewCompart guard),
+  // lekin methods yahan safe hi hain agar galti se call ho bhi jaayein.
+  isCompartSelected(compartId: string): boolean {
+    return this.newCompartEntries.some((e) => e.compartId === compartId);
+  }
+
+  toggleCompartSelection(item: any): void {
+    if (!this.canAddNewCompart) return;
+
+    const compartId = this.getCompartId(item);
+    const idx = this.newCompartEntries.findIndex(
+      (e) => e.compartId === compartId,
     );
 
-    if (!original) return true;
-
-    return (
-      Number(row.payinPercentage) !== Number(original.payinPercentage) ||
-      Number(row.payoutPercentage) !== Number(original.payoutPercentage) ||
-      Number(row.fttPercentage) !== Number(original.fttPercentage)
-    );
-  });
-}
-
-  private buildCompartPercentagesPayload(): any {
-    const payload: any = {};
-
-    // already allocated rows — editable, not removable
-    for (const item of this.allocatedPercentages || []) {
-      const id = item?.compartId;
-      if (!id) continue;
-
-      payload[id] = {
-        payinPercentage: Number(item?.payinPercentage ?? 0),
-        payoutPercentage: Number(item?.payoutPercentage ?? 0),
-        fttPercentage: Number(item?.fttPercentage ?? 0),
-      };
+    if (idx > -1) {
+      this.newCompartEntries = this.newCompartEntries.filter(
+        (e) => e.compartId !== compartId,
+      );
+    } else {
+      this.newCompartEntries = [
+        ...this.newCompartEntries,
+        {
+          compartId,
+          compartUsername: this.getCompartName(item),
+        },
+      ];
     }
-
-    // newly added compart from form
-
-    for (const entry of this.newCompartEntries) {
-      if (!entry.compartId) continue;
-      payload[entry.compartId] = {
-        payinPercentage: entry.payinPercentage,
-        payoutPercentage: entry.payoutPercentage,
-        fttPercentage: entry.fttPercentage,
-      };
-    }
-
-    return payload;
   }
 
+  removeNewEntry(compartId: string): void {
+    this.newCompartEntries = this.newCompartEntries.filter(
+      (e) => e.compartId !== compartId,
+    );
+  }
+
+  private buildNewCompartAllocation(): {
+    compartIds: string[];
+    percentage: any;
+  } | null {
+    if (!this.canAddNewCompart) return null;
+    if (!this.newCompartEntries.length) return null;
+
+    return {
+      compartIds: this.newCompartEntries.map((e) => e.compartId),
+      percentage: {
+        payinPercentage: Number(this.sharedPercentage.payinPercentage ?? 0),
+        payoutPercentage: Number(this.sharedPercentage.payoutPercentage ?? 0),
+        fttPercentage: Number(this.sharedPercentage.fttPercentage ?? 0),
+      },
+    };
+  }
+
+  trackByIndex(index: number): number {
+    return index;
+  }
+
+  trackByCompartId(index: number, item: { compartId: string }): string {
+    return item.compartId;
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.editForm.get(fieldName);
+    return !!(field && field.invalid && field.touched);
+  }
+
+  // ---------- Submit ----------
   onSubmit(): void {
-    let payload: any = {
+    if (this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      return;
+    }
+
+    // Agar user Edit mode me values type karke seedha "Save Changes" dabata hai
+    // (andar wala green Save button nahi dabata), to draft yahan commit karo
+    // taaki purani (stale) minPercentage payload me na chali jaaye.
+    if (this.isEditingMinPercentage) {
+      this.minPercentage = { ...this.minPercentageDraft };
+      this.isEditingMinPercentage = false;
+    }
+
+    const payload: any = {
       id: this.data?.id ?? this.entityId,
       username: this.editForm.value.username,
       info: this.editForm.value.info,
       parentCurrency: this.editForm.value.parentCurrency,
       active: !!(this.entityData?.active ?? this.data?.active),
-      compartPercentages: this.buildCompartPercentagesPayload(),
+      percentage: this.buildMinPercentagePayload(),
 
       businessType: this.entityData?.businessType,
       createdById: this.entityData?.createdById,
       createdByType: this.entityData?.createdByType,
     };
+
+    // Naye multi-select comparts ka shared percentage payload — sirf OWNER
+    const newAllocation = this.buildNewCompartAllocation();
+    if (newAllocation) {
+      payload.compartIds = newAllocation.compartIds;
+      payload.newCompartPercentage = newAllocation.percentage;
+    }
 
     if (this.entityType === "CHIEF") {
       payload.chiefId = this.entityData?.chiefId;
@@ -387,165 +462,17 @@ get allocatedPercentagesChanged(): boolean {
     }
 
     this.save.emit(payload);
+
     this.newCompartEntries = [];
-    this.originalAllocatedPercentages = this.allocatedPercentages.map(
-    (row) => ({ ...row }),
-  );
+    this.resetSharedPercentage();
   }
 
-  trackByIndex(index: number): number {
-    return index;
-  }
-
-  onCompartSelected(compartId: string): void {
-  if (!compartId) return;
-
-  // Prevent adding the same compart twice
-  if (this.newCompartEntries.some((e) => e.compartId === compartId)) {
-    return;
-  }
-
-  const compart = this.availableComparts.find(
-    (item) => this.getCompartId(item) === compartId,
-  );
-
-  if (!compart) return;
-
-  this.newCompartEntries.push({
-    compartId: this.getCompartId(compart),
-    compartUsername: this.getCompartName(compart),
-    fttPercentage: 0,
-    payinPercentage: 0,
-    payoutPercentage: 0,
-  });
-}
-
-// Excludes comparts already added to the pending list
-getSelectableComparts(): any[] {
-  return this.availableComparts.filter(
-    (item) =>
-      !this.newCompartEntries.some(
-        (e) => e.compartId === this.getCompartId(item),
-      ),
-  );
-}
-
-trackByCompartId(index: number, item: { compartId: string }): string {
-  return item.compartId;
-}
-
+  // ---------- Parent modal ----------
   openParentModal() {
     this.showParentModal = true;
-
-    // const child$ = this.data?.id
-    //   ? this.compartService.getPercentageByEntityId(
-    //       this.data.id,
-    //       this.getEntityLabel(this.data),
-    //     )
-    //   : of(null);
-
-    // child$.subscribe({
-    //   next: (res: any) => {
-
-    //     //  mapping bhi same use kar
-    //     this.parentData = this.extractChildRows(res);
-    //   },
-    //   error: () => {
-    //     this.parentData = [];
-    //     this.showParentModal = false;
-    //   },
-    // });
   }
+
   closeParentModal() {
     this.showParentModal = false;
-  }
-
-  isFieldInvalid(fieldName: string): boolean {
-    const field = this.editForm.get(fieldName);
-    return !!(field && field.invalid && field.touched);
-  }
-  addCompartEntry(): void {
-
-
-    const compartId = String(
-      this.editForm.get("compartId")?.value ?? "",
-    ).trim();
-
-
-
-    if (!compartId) return;
-
-    const alreadyAdded = this.newCompartEntries.some(
-      (e) => String(e.compartId) === compartId,
-    );
-
-    const alreadyAllocated = this.allocatedPercentages.some(
-      (e) => String(e.compartId) === compartId,
-    );
-
-    if (alreadyAdded || alreadyAllocated) return;
-
-    const found = this.parentComparts.find(
-      (c) => String(this.getCompartId(c)) === compartId,
-    );
-
-    this.newCompartEntries = [
-      ...this.newCompartEntries,
-      {
-        compartId,
-        compartUsername: found ? this.getCompartName(found) : compartId,
-        fttPercentage: Number(this.editForm.get("fttPercentage")?.value ?? 0),
-        payinPercentage: Number(
-          this.editForm.get("payinPercentage")?.value ?? 0,
-        ),
-        payoutPercentage: Number(
-          this.editForm.get("payoutPercentage")?.value ?? 0,
-        ),
-      },
-    ];
-
-    // reset form safely
-    this.editForm.patchValue({
-      compartId: "",
-      fttPercentage: 0,
-      payinPercentage: 0,
-      payoutPercentage: 0,
-    });
-  }
-
-  removeNewEntry(compartId: string): void {
-    compartId = String(compartId);
-
-    this.newCompartEntries = this.newCompartEntries.filter(
-      (e) => String(e.compartId) !== compartId,
-    );
-
-    const restored = this.parentComparts.find(
-      (c) => String(this.getCompartId(c)) === compartId,
-    );
-
-    if (restored) {
-      const exists = this.availableComparts.some(
-        (c) => String(this.getCompartId(c)) === compartId,
-      );
-
-      if (!exists) {
-        this.availableComparts = [...this.availableComparts, restored];
-      }
-    }
-  }
-
-  onNewEntryChange(
-    compartId: string,
-    field: "fttPercentage" | "payinPercentage" | "payoutPercentage",
-    value: any,
-  ): void {
-    compartId = String(compartId);
-
-    this.newCompartEntries = this.newCompartEntries.map((entry) =>
-      String(entry.compartId) === compartId
-        ? { ...entry, [field]: Number(value ?? 0) }
-        : entry,
-    );
   }
 }

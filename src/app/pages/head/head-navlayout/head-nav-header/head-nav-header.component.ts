@@ -19,6 +19,7 @@ import { HeadService } from "../../../services/head.service";
 // import { PortalSharingService } from "../../../services/portal-sharing.service";
 import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
 import { ThemeService } from "../../../../theme/theme.service";
+import { ComPartService } from "../../../services/com-part.service";
 
 @Component({
   selector: "app-head-nav-header",
@@ -54,7 +55,20 @@ export class HeadNavHeaderComponent implements OnInit {
     payin: "₹50,000",
     reward: "500 pts",
   };
+  hoverTimeout: any;
 
+  loadingTooltipTimer: any;
+  apiTimer: any;
+
+  showTooltip = false;
+  loadingPercentages = false;
+  hasLoaded = false;
+
+  percentages = {
+    payinPercentage: 0,
+    payoutPercentage: 0,
+    fttPercentage: 0,
+  };
   searchTerm = "";
   // --- Exposure hover popup state ---
   exposureData: any = null;
@@ -215,6 +229,7 @@ export class HeadNavHeaderComponent implements OnInit {
     private socketService: SocketConfigService,
     private fundService: FundsService,
     private headServices: HeadService,
+    private compartService: ComPartService,
     // private portalState: PortalSharingService,
     private snack: SnackbarService,
     private ngZone: NgZone,
@@ -659,5 +674,41 @@ export class HeadNavHeaderComponent implements OnInit {
         this.exposureData = null;
       },
     });
+  }
+  onPercentageHover() {
+    // Already loaded -> show instantly
+    if (this.hasLoaded) {
+      this.showTooltip = true;
+      return;
+    }
+
+    // After 300ms show loading tooltip
+    this.loadingTooltipTimer = setTimeout(() => {
+      this.showTooltip = true;
+      this.loadingPercentages = true;
+    }, 300);
+
+    // After 2 seconds call API
+    this.apiTimer = setTimeout(() => {
+      this.compartService
+        .getPercentageByEntityId(this.currentRoleId, this.currentUserRole)
+        .subscribe({
+          next: (res: any) => {
+            this.percentages = res.minPercentage;
+            this.loadingPercentages = false;
+            this.hasLoaded = true;
+          },
+          error: () => {
+            this.loadingPercentages = false;
+          },
+        });
+    }, 2000);
+  }
+
+  onPercentageLeave() {
+    clearTimeout(this.loadingTooltipTimer);
+    clearTimeout(this.apiTimer);
+
+    this.showTooltip = false;
   }
 }
