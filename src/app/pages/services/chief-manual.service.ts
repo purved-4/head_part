@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import baseUrl from "./helper";
 import { map, Observable } from "rxjs";
@@ -17,11 +17,16 @@ export class ChiefManualService {
     );
   }
 
-  performManualAction(promoCode: string, payload: any) {
-    return this.http.post(
-      `${baseUrl}/manual/performManualAction?promoCode=${promoCode}`,
-      payload,
-    );
+  performManualAction(promoCode: string | null, payload: any) {
+    let params = new HttpParams();
+
+    if (promoCode?.trim()) {
+      params = params.set("promoCode", promoCode);
+    }
+
+    return this.http.post(`${baseUrl}/manual/performManualAction`, payload, {
+      params,
+    });
   }
 
   getManualStatus(chiefId: any, portalId: any) {

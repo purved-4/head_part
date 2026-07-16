@@ -1,4 +1,3 @@
-
 import {
   Component,
   NgZone,
@@ -9,7 +8,7 @@ import {
   ChangeDetectorRef,
   Input,
   Output,
-  EventEmitter
+  EventEmitter,
 } from "@angular/core";
 import { CommonModule, DatePipe } from "@angular/common";
 import { Router } from "@angular/router";
@@ -19,7 +18,13 @@ import { SnackbarService } from "../snackbar/snackbar.service";
 import { UserStateService } from "../../store/user-state.service";
 import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
 import { TimeZoneServiceService } from "../time-zone/time-zone-service.service";
-
+import { BulkUpdateService } from "../../pages/services/bulk-update.service";
+import { Observable } from "rxjs";
+import {
+  BulkManagerUpdatePayload,
+  BulkHeadUpdatePayload,
+  BulkBranchUpdatePayload,
+} from "../../pages/services/bulk-update.service";
 interface BackendThread {
   bankFunds?: any;
   upiFunds?: any;
@@ -59,14 +64,14 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
   @Input() isOpen = false;
   @Output() close = new EventEmitter<void>();
   @Output() notificationClick = new EventEmitter<BackendThread>();
-@Output() unreadCountChange = new EventEmitter<number>();
+  @Output() unreadCountChange = new EventEmitter<number>();
   notifications: SidebarNotification[] = [];
   groupedNotifications: {
     data: Record<string, SidebarNotification[]>;
   } = {
     data: { upi: [], bank: [], payout: [], other: [] },
   };
-  
+
   activeCategory: string = "all";
   activeTab: "branch" = "branch";
   currentUserId: any;
@@ -77,9 +82,23 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
   // Selected notification for details view
   selectedNotification: any | null = null;
   showDetailsPanel = false;
+  showPercentageModal = false;
 
+  selectedPercentageNotification: any = null;
+
+  percentageData = {
+    payin: 0,
+    payout: 0,
+    ftt: 0,
+    maxAllowed: 0,
+  };
+
+  percentageForm = {
+    payinPercentage: 0,
+    payoutPercentage: 0,
+    fttPercentage: 0,
+  };
   ws: any;
-
   constructor(
     private notificationChatService: NotificationChatService,
     private authService: AuthService,
@@ -88,6 +107,7 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     private userStateService: UserStateService,
     private socketConfigService: SocketConfigService,
     private ngZone: NgZone,
+    private bulkUpdateService: BulkUpdateService,
     private cdr: ChangeDetectorRef,
     private tzService: TimeZoneServiceService,
   ) {}
@@ -96,7 +116,6 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     this.currentUserId = this.userStateService.getUserId();
     this.currentRoleName = this.userStateService.getRole();
     this.currentRoleId = this.userStateService.getCurrentEntityId();
-
 
     // this.getAllNotifications();
 
@@ -141,7 +160,7 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
         error: () => {
           this.isLoading = false;
           this.cdr.detectChanges();
-        }
+        },
       });
   }
 
@@ -197,7 +216,7 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     });
 
     this.sortNotificationsByDate();
-      this.unreadCountChange.emit(this.getUnreadCount());
+    this.unreadCountChange.emit(this.getUnreadCount());
 
     this.cdr.detectChanges();
   }
@@ -259,28 +278,241 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     return chatRedirectTypes.includes(type);
   }
 
-onNotificationSelect(notification: SidebarNotification) {
-  // Mark as selected
-  this.notifications.forEach(n => n.isSelected = false);
-  notification.isSelected = true;
-  
-  // Mark as read
-  if (!notification.isRead) {
-    notification.isRead = true;
-    notification.unreadCount = 0;
-    this.markAsRead(notification.id || notification.fundsId || "");
+  onNotificationSelect(notification: SidebarNotification) {
+    // Mark as selected
+    this.notifications.forEach((n) => (n.isSelected = false));
+    notification.isSelected = true;
+
+    // Mark as read
+    if (!notification.isRead) {
+      notification.isRead = true;
+      notification.unreadCount = 0;
+      this.markAsRead(notification.id || notification.fundsId || "");
+    }
+    if (notification.type === "PERCENTAGE_ADJUSTMENT_REQUIRED") {
+      this.openPercentageModal(notification);
+
+      this.notificationClick.emit(notification);
+
+      this.cdr.detectChanges();
+
+      return;
+    }
+
+    // If you want to keep the details panel, keep this:
+    this.selectedNotification = notification;
+    this.showDetailsPanel = true;
+
+    // OR if you want to open popup on main click instead, use:
+    // this.openDetailsPopup(notification);
+
+    this.notificationClick.emit(notification);
+    this.cdr.detectChanges();
   }
-  
-  // If you want to keep the details panel, keep this:
-  this.selectedNotification = notification;
-  this.showDetailsPanel = true;
-  
-  // OR if you want to open popup on main click instead, use:
-  // this.openDetailsPopup(notification);
-  
-  this.notificationClick.emit(notification);
-  this.cdr.detectChanges();
-}
+
+  openPercentageModal(notification: any) {
+    this.selectedPercentageNotification = notification;
+
+    const data = this.extractPercentage(notification.message);
+
+    this.percentageData = data;
+
+    this.percentageForm = {
+      payinPercentage: 0,
+      payoutPercentage: 0,
+      fttPercentage: 0,
+    };
+
+    // ADD THESE
+    this.showDetailsPanel = false;
+    this.selectedNotification = null;
+
+    this.showPercentageModal = true;
+  }
+
+  extractPercentage(message: string) {
+    const payin = Number(message.match(/payin=(\d+(\.\d+)?)/)?.[1] || 0);
+
+    const payout = Number(message.match(/payout=(\d+(\.\d+)?)/)?.[1] || 0);
+
+    const ftt = Number(message.match(/ftt=(\d+(\.\d+)?)/)?.[1] || 0);
+
+    return {
+      payin,
+      payout,
+      ftt,
+      maxAllowed: Math.min(payin, payout, ftt),
+    };
+  }
+
+  validatePercentage(field: keyof typeof this.percentageForm) {
+    if (this.percentageForm[field] > this.percentageData.maxAllowed) {
+      this.percentageForm[field] = this.percentageData.maxAllowed;
+
+      this.snackBar.show(
+        `Maximum allowed percentage is ${this.percentageData.maxAllowed}`,
+        false,
+      );
+    }
+
+    if (this.percentageForm[field] < 0) {
+      this.percentageForm[field] = 0;
+    }
+  }
+
+  closePercentageModal() {
+    this.showPercentageModal = false;
+
+    this.selectedPercentageNotification = null;
+  }
+
+  // submitPercentageUpdate() {
+  //   const max = this.percentageData.maxAllowed;
+
+  //   if (
+  //     this.percentageForm.payinPercentage > max ||
+  //     this.percentageForm.payoutPercentage > max ||
+  //     this.percentageForm.fttPercentage > max
+  //   ) {
+  //     this.snackBar.show(`Maximum allowed percentage is ${max}`, false);
+  //     return;
+  //   }
+  //   // if (
+  //   //   this.selectedPercentageNotification.generateForType === "MANAGER" &&
+  //   //   !this.selectedPercentageNotification.parentType
+  //   // ) {
+  //   //   this.snackBar.show("Parent type not found.", false);
+  //   //   return;
+  //   // }
+  //   // switch (this.selectedPercentageNotification.generateForType) {
+  //   //   case "CHIEF":
+  //   //     this.bulkUpdateService
+  //   //       .updateBulkManager({
+  //   //           parentId: this.currentRoleId,
+  //   //         percentage: this.percentageForm,
+  //   //       })
+  //   //       // .subscribe(() => {
+  //   //       //   this.closePercentageModal();
+
+  //   //       //   this.refreshNotifications();
+  //   //       // });
+  //   //       .subscribe({
+  //   //         next: () => {
+  //   //           this.markAsRead(this.selectedPercentageNotification.id);
+
+  //   //           this.closePercentageModal();
+
+  //   //           this.refreshNotifications();
+
+  //   //           this.snackBar.show("Percentage updated successfully", true);
+  //   //         },
+  //   //         error: (err) => {
+  //   //           this.snackBar.show(err?.error?.message || "Update failed", false);
+  //   //         },
+  //   //       });
+
+  //   //     break;
+
+  //   //   case "MANAGER":
+  //   //     this.bulkUpdateService
+  //   //       .updateBulkHead({
+  //   //         parentId: this.currentRoleId,
+
+  //   //         parentType: this.selectedPercentageNotification.parentType,
+
+  //   //         percentage: this.percentageForm,
+  //   //       })
+  //   //       // .subscribe(() => {
+  //   //       //   this.closePercentageModal();
+
+  //   //       //   this.refreshNotifications();
+  //   //       // });
+  //   //       .subscribe({
+  //   //         next: () => {
+  //   //           this.markAsRead(this.selectedPercentageNotification.id);
+
+  //   //           this.closePercentageModal();
+
+  //   //           this.refreshNotifications();
+
+  //   //           this.snackBar.show("Percentage updated successfully", true);
+  //   //         },
+  //   //         error: (err) => {
+  //   //           this.snackBar.show(err?.error?.message || "Update failed", false);
+  //   //         },
+  //   //       });
+
+  //   //     break;
+
+  //   //   case "HEAD":
+  //   //     this.bulkUpdateService
+  //   //       .updateBulkBranch({
+  //   //         parentId: this.currentRoleId,
+
+  //   //         parentType: this.selectedPercentageNotification.parentType,
+
+  //   //         percentage: this.percentageForm,
+  //   //       })
+  //   //       // .subscribe(() => {
+  //   //       //   this.closePercentageModal();
+
+  //   //       //   this.refreshNotifications();
+  //   //       // });
+  //   //       .subscribe({
+  //   //         next: () => {
+  //   //           this.markAsRead(this.selectedPercentageNotification.id);
+
+  //   //           this.closePercentageModal();
+
+  //   //           this.refreshNotifications();
+
+  //   //           this.snackBar.show("Percentage updated successfully", true);
+  //   //         },
+  //   //         error: (err) => {
+  //   //           this.snackBar.show(err?.error?.message || "Update failed", false);
+  //   //         },
+  //   //       });
+
+  //   //     break;
+  //   // }
+
+  //   switch (this.selectedPercentageNotification.generateForType) {
+  //     case "CHIEF":
+  //       this.bulkUpdateService
+  //         .updateBulkManager({
+  //           chiefId: this.currentRoleId, // was parentId
+  //           percentage: this.percentageForm,
+  //         })
+  //         .subscribe({
+  //           /* unchanged */
+  //         });
+  //       break;
+
+  //     case "MANAGER":
+  //       this.bulkUpdateService
+  //         .updateBulkManager({
+  //           parentId: this.currentRoleId,
+  //           parentType: "MANAGER",
+  //           percentage: this.percentageForm,
+  //         })
+  //         .subscribe({
+  //           /* unchanged */
+  //         });
+  //       break;
+
+  //     case "HEAD":
+  //       this.bulkUpdateService
+  //         .updateBulkHead({
+  //           parentId: this.currentRoleId, // was parentId
+  //           parentType: "CHIEF",
+  //           percentage: this.percentageForm, // drop parentType entirely, DTO has no such field
+  //         })
+  //         .subscribe({
+  //           /* unchanged */
+  //         });
+  //       break;
+  //   }
+  // }
 
   // private markAsRead(notificationId: string) {
   //   this.notificationChatService.SendNotificationAsRead(notificationId).subscribe({
@@ -289,23 +521,97 @@ onNotificationSelect(notification: SidebarNotification) {
   //   });
   // }
 
+  submitPercentageUpdate() {
+    const max = this.percentageData.maxAllowed;
+
+    if (
+      this.percentageForm.payinPercentage > max ||
+      this.percentageForm.payoutPercentage > max ||
+      this.percentageForm.fttPercentage > max
+    ) {
+      this.snackBar.show(`Maximum allowed percentage is ${max}`, false);
+      return;
+    }
+
+    const actingRole = this.currentRoleName?.toUpperCase(); // who is logged in
+    const targetLevel =
+      this.selectedPercentageNotification?.generateForType?.toUpperCase(); // which level to bulk-update
+
+    let request$: Observable<any> | null = null;
+
+    // CHIEF -> can update MANAGER level or HEAD level
+    if (actingRole === "CHIEF" && targetLevel === "MANAGER") {
+      request$ = this.bulkUpdateService.updateBulkManager({
+        chiefId: this.currentRoleId,
+        percentage: this.percentageForm,
+      });
+    } else if (actingRole === "CHIEF" && targetLevel === "HEAD") {
+      request$ = this.bulkUpdateService.updateBulkHead({
+        parentId: this.currentRoleId,
+        parentType: "CHIEF",
+        percentage: this.percentageForm,
+      });
+    }
+
+    // MANAGER -> can update HEAD level
+    else if (actingRole === "MANAGER" && targetLevel === "HEAD") {
+      request$ = this.bulkUpdateService.updateBulkHead({
+        parentId: this.currentRoleId,
+        parentType: "MANAGER",
+        percentage: this.percentageForm,
+      });
+    }
+
+    // HEAD -> can update BRANCH level
+    else if (actingRole === "HEAD" && targetLevel === "BRANCH") {
+      request$ = this.bulkUpdateService.updateBulkBranch({
+        headId: this.currentRoleId,
+        percentage: this.percentageForm,
+      });
+    }
+
+    if (!request$) {
+      this.snackBar.show(
+        `Your role (${actingRole}) cannot perform a bulk update for ${targetLevel}.`,
+        false,
+      );
+      console.error(
+        `Unhandled bulk update combination: actingRole="${actingRole}", targetLevel="${targetLevel}"`,
+      );
+      return;
+    }
+
+    request$.subscribe({
+      next: () => {
+        this.markAsRead(this.selectedPercentageNotification.id);
+        this.closePercentageModal();
+        this.refreshNotifications();
+        this.snackBar.show("Percentage updated successfully", true);
+      },
+      error: (err) => {
+        this.snackBar.show(err?.error?.message || "Update failed", false);
+      },
+    });
+  }
   private markAsRead(notificationId: string) {
-  if (!notificationId) return;
-  
-  this.notificationChatService.SendNotificationAsRead(notificationId).subscribe({
-    next: () => {
-      // Update local state
-      this.unreadCountChange.emit(this.getUnreadCount());
-      this.getUnreadCount();
-      this.cdr.detectChanges();
-    },
-    error: (err) => console.error("Failed to mark notification read", err),
-  });
-}
+    if (!notificationId) return;
+
+    this.notificationChatService
+      .SendNotificationAsRead(notificationId)
+      .subscribe({
+        next: () => {
+          // Update local state
+          this.unreadCountChange.emit(this.getUnreadCount());
+          this.getUnreadCount();
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error("Failed to mark notification read", err),
+      });
+  }
 
   // openChat(notification: BackendThread, event: Event) {
   //   event.stopPropagation();
-    
+
   //   if (!this.canRedirectToChat(notification)) {
   //     this.onNotificationSelect(notification as SidebarNotification);
   //     return;
@@ -321,48 +627,50 @@ onNotificationSelect(notification: SidebarNotification) {
 
   //   this.closeSidebar();
   // }
-openChat(notification: BackendThread, event?: Event) {
-  if (event) {
-    event.stopPropagation();
+  openChat(notification: BackendThread, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    if (!this.canRedirectToChat(notification)) {
+      this.onNotificationSelect(notification as SidebarNotification);
+      return;
+    }
+
+    const threadId = notification.relatedEntityId || "";
+    const entity = (notification.createdByEntityType || "BRANCH").toLowerCase();
+    // const role = (this.currentRoleName || "branch").toLowerCase();
+    const roleMap: any = {
+      COM_PART: "comPart",
+      BRANCH: "branch",
+      HEAD: "head",
+      OWNER: "owner",
+    };
+
+    const role =
+      roleMap[this.currentRoleName] ||
+      (this.currentRoleName || "branch").toLowerCase();
+
+    this.router.navigate([`/${role}/chat`], {
+      queryParams: { threadId: threadId, chatType: entity },
+    });
+
+    this.closeSidebar();
   }
-  
-  if (!this.canRedirectToChat(notification)) {
-    this.onNotificationSelect(notification as SidebarNotification);
-    return;
-  }
-
-  const threadId = notification.relatedEntityId || "";
-  const entity = (notification.createdByEntityType || "BRANCH").toLowerCase();
-  // const role = (this.currentRoleName || "branch").toLowerCase();
-  const roleMap: any = {
-  COM_PART: "comPart",
-  BRANCH: "branch",
-  HEAD: "head",
-  OWNER:"owner",
-  
-};
-
-const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").toLowerCase();
-
-  this.router.navigate([`/${role}/chat`], {
-    queryParams: { threadId: threadId, chatType: entity },
-  });
-
-  this.closeSidebar();
-}
-
 
   markAllAsRead() {
-    this.notificationChatService.markNotificationAsRead(this.currentRoleId).subscribe({
-      next: () => {
-        this.notifications.forEach((n) => {
-          n.isRead = true;
-          n.unreadCount = 0;
-        });
-              this.unreadCountChange.emit(0);
-        this.cdr.detectChanges();
-      },
-    });
+    this.notificationChatService
+      .markNotificationAsRead(this.currentRoleId)
+      .subscribe({
+        next: () => {
+          this.notifications.forEach((n) => {
+            n.isRead = true;
+            n.unreadCount = 0;
+          });
+          this.unreadCountChange.emit(0);
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   getUnreadCount(): number {
@@ -386,67 +694,78 @@ const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").
     if (this.activeCategory === "all") {
       return this.groupedNotifications.data[category].length > 0;
     }
-    return this.activeCategory === category && this.groupedNotifications.data[category].length > 0;
+    return (
+      this.activeCategory === category &&
+      this.groupedNotifications.data[category].length > 0
+    );
   }
 
   getMaterialIcon(fundsType?: string): string {
     const type = (fundsType || "").toLowerCase();
     if (type.includes("upi")) return "smartphone";
     if (type.includes("bank")) return "account_balance";
-    if (type.includes("payout") || type.includes("payment") || type.includes("pay")) return "payments";
+    if (
+      type.includes("payout") ||
+      type.includes("payment") ||
+      type.includes("pay")
+    )
+      return "payments";
     return "notifications";
   }
 
   getCategoryColor(category: string): string {
-    switch(category) {
-      case 'upi': return 'purple';
-      case 'bank': return 'blue';
-      case 'payout': return 'green';
-      default: return 'gray';
+    switch (category) {
+      case "upi":
+        return "purple";
+      case "bank":
+        return "blue";
+      case "payout":
+        return "green";
+      default:
+        return "gray";
     }
   }
 
   getDisplayFields(obj: any): { key: string; value: any }[] {
     if (!obj || typeof obj !== "object") return [];
-    return Object.keys(obj)
-      // .filter((key) => {
-      //   const lower = key.toLowerCase();
-      //   return (
-      //     !lower.includes("id") &&
-      //     ![
-      //       "fundsid",
-      //       "createdbyid",
-      //       "createdbyentityid",
-      //       "updatedbyid",
-      //       "isread",
-      //       "read",
-      //       "unreadcount",
-      //       "rejectedby",
-      //       "rejectionreason",
-      //     ].includes(lower) &&
-      //     obj[key] !== null &&
-      //     obj[key] !== undefined &&
-      //     typeof obj[key] !== "object"
-      //   );
-      // })
+    return (
+      Object.keys(obj)
+        // .filter((key) => {
+        //   const lower = key.toLowerCase();
+        //   return (
+        //     !lower.includes("id") &&
+        //     ![
+        //       "fundsid",
+        //       "createdbyid",
+        //       "createdbyentityid",
+        //       "updatedbyid",
+        //       "isread",
+        //       "read",
+        //       "unreadcount",
+        //       "rejectedby",
+        //       "rejectionreason",
+        //     ].includes(lower) &&
+        //     obj[key] !== null &&
+        //     obj[key] !== undefined &&
+        //     typeof obj[key] !== "object"
+        //   );
+        // })
 
-      .filter((key) => {
-  const lower = key.toLowerCase();
-  return (
-    ![
-      "isread",
-      "title"
-    ].includes(lower) &&
-    obj[key] !== null &&
-    obj[key] !== undefined &&
-    typeof obj[key] !== "object"
-  );
-})
-      .map((key) => ({
-        key: this.formatKey(key),
-        // value: this.formatValue(obj[key]),
-        value: obj[key],
-      }));
+        .filter((key) => {
+          const lower = key.toLowerCase();
+          return (
+            !["isread", "title"].includes(lower) &&
+            obj[key] !== null &&
+            obj[key] !== undefined &&
+            typeof obj[key] !== "object"
+          );
+        })
+        .map((key) => ({
+          key: this.formatKey(key),
+          // value: this.formatValue(obj[key]),
+          value: obj[key],
+        }))
+    );
   }
 
   private formatKey(key: string): string {
@@ -470,38 +789,43 @@ const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").
     return String(value);
   }
 
-//   private formatValue(value: any, key?: string): string {
-//   if (value === null || value === undefined) return "—";
+  //   private formatValue(value: any, key?: string): string {
+  //   if (value === null || value === undefined) return "—";
 
-//   // Detect ISO date string
-//   if (typeof value === "string" && value.includes("T") && value.includes("Z")) {
-//     const date = new Date(value);
-//     if (!isNaN(date.getTime())) {
-//       const timeZone = this.tzService.getActiveTimeZone();
+  //   // Detect ISO date string
+  //   if (typeof value === "string" && value.includes("T") && value.includes("Z")) {
+  //     const date = new Date(value);
+  //     if (!isNaN(date.getTime())) {
+  //       const timeZone = this.tzService.getActiveTimeZone();
 
-//       return new Intl.DateTimeFormat("en-GB", {
-//         timeZone,
-//         day: "2-digit",
-//         month: "short",
-//         year: "numeric",
-//         hour: "2-digit",
-//         minute: "2-digit",
-//         hour12: true,
-//       }).format(date);
-//     }
-//   }
+  //       return new Intl.DateTimeFormat("en-GB", {
+  //         timeZone,
+  //         day: "2-digit",
+  //         month: "short",
+  //         year: "numeric",
+  //         hour: "2-digit",
+  //         minute: "2-digit",
+  //         hour12: true,
+  //       }).format(date);
+  //     }
+  //   }
 
-//   if (typeof value === "boolean") return value ? "Yes" : "No";
+  //   if (typeof value === "boolean") return value ? "Yes" : "No";
 
-//   return String(value);
-// }
+  //   return String(value);
+  // }
 
   getFieldIcon(fieldKey: string): string {
     const key = fieldKey.toLowerCase();
     if (key.includes("type")) return "category";
     if (key.includes("title")) return "title";
     if (key.includes("message")) return "message";
-    if (key.includes("date") || key.includes("time") || key.includes("created") || key.includes("updated"))
+    if (
+      key.includes("date") ||
+      key.includes("time") ||
+      key.includes("created") ||
+      key.includes("updated")
+    )
       return "schedule";
     if (key.includes("name")) return "person";
     if (key.includes("amount")) return "attach_money";
@@ -515,7 +839,7 @@ const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").
   closeDetailsPanel() {
     this.showDetailsPanel = false;
     this.selectedNotification = null;
-    this.notifications.forEach(n => n.isSelected = false);
+    this.notifications.forEach((n) => (n.isSelected = false));
     this.cdr.detectChanges();
   }
 
@@ -523,11 +847,16 @@ const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").
     if (!eventData) return;
 
     const threadId = eventData.threadId || eventData.fundsId || eventData.id;
-    const message = eventData.queryMessage || eventData.message || eventData.query_message || null;
+    const message =
+      eventData.queryMessage ||
+      eventData.message ||
+      eventData.query_message ||
+      null;
     const type = eventData.type || eventData.fundsType || null;
     const title = eventData.title || eventData.fundsType || null;
     const createdAt = eventData.createdAt || new Date().toISOString();
-    const createdByEntityType = eventData.createdByEntityType || eventData.createdByType || null;
+    const createdByEntityType =
+      eventData.createdByEntityType || eventData.createdByType || null;
 
     if (eventData.threadId && !eventData.fundsId) {
       this.removeThread(threadId);
@@ -539,7 +868,9 @@ const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").
       return;
     }
 
-    const existing = this.notifications.find(n => n.fundsId === threadId || n.id === threadId);
+    const existing = this.notifications.find(
+      (n) => n.fundsId === threadId || n.id === threadId,
+    );
 
     if (existing) {
       existing.updatedAt = createdAt;
@@ -588,10 +919,13 @@ const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").
     }
 
     const fundsKey = this.normalizeFundsType("");
-    if (this.groupedNotifications["data"] && this.groupedNotifications["data"][fundsKey]) {
-      this.groupedNotifications["data"][fundsKey] = this.groupedNotifications["data"][fundsKey].filter(
-        (t) => t.fundsId !== threadId && t.id !== threadId
-      );
+    if (
+      this.groupedNotifications["data"] &&
+      this.groupedNotifications["data"][fundsKey]
+    ) {
+      this.groupedNotifications["data"][fundsKey] = this.groupedNotifications[
+        "data"
+      ][fundsKey].filter((t) => t.fundsId !== threadId && t.id !== threadId);
     }
 
     this.cdr.detectChanges();
@@ -603,8 +937,8 @@ const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").
 
   // Date formatting methods (alternative to DatePipe)
   formatTime(dateString: string): string {
-    if (!dateString) return '';
-    
+    if (!dateString) return "";
+
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -614,71 +948,73 @@ const role = roleMap[this.currentRoleName] ||(this.currentRoleName || "branch").
 
     // Today: show time
     if (diffDays === 0 && date.getDate() === now.getDate()) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     }
     // Yesterday
     if (diffDays === 1) {
-      return 'Yesterday';
+      return "Yesterday";
     }
     // Within 7 days: show day name
     if (diffDays < 7) {
-      return date.toLocaleDateString([], { weekday: 'short' });
+      return date.toLocaleDateString([], { weekday: "short" });
     }
     // Older: show date
-    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString([], { month: "short", day: "numeric" });
   }
 
   formatFullDate(dateString: string): string {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleString([], { 
-      year: 'numeric',
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleString([], {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   }
 
   showDetailsPopup = false;
 
-openDetailsPopup(notification: any) {
-  this.selectedNotification = notification;
-  this.showDetailsPopup = true;
-  this.cdr.detectChanges();
-}
-
-closeDetailsPopup() {
-  this.showDetailsPopup = false;
-  this.selectedNotification = null;
-  this.cdr.detectChanges();
-}
-
-// Add this method to open popup from the button without triggering the parent click
-openDetailsPopupFromButton(notification: any, event: Event) {
-  event.stopPropagation(); // Prevent triggering the parent div click
-  this.openDetailsPopup(notification);
-}
-
-openChatAndMarkRead(notification: any, event?: Event) {
-  if (event) {
-    event.stopPropagation();
+  openDetailsPopup(notification: any) {
+    this.selectedNotification = notification;
+    this.showDetailsPopup = true;
+    this.cdr.detectChanges();
   }
-  
-  // Mark notification as read first
-  if (!notification.isRead) {
-    notification.isRead = true;
-    notification.unreadCount = 0;
-    this.markAsRead(notification.id || notification.fundsId || "");
-  } 
 
-  
-  // Then open the chat - pass event as optional
-  this.openChat(notification, event);
-  this.showDetailsPanel = false;
-}
+  closeDetailsPopup() {
+    this.showDetailsPopup = false;
+    this.selectedNotification = null;
+    this.cdr.detectChanges();
+  }
 
-refreshNotifications() {
-  this.getAllNotifications();
-}
+  // Add this method to open popup from the button without triggering the parent click
+  openDetailsPopupFromButton(notification: any, event: Event) {
+    event.stopPropagation(); // Prevent triggering the parent div click
+    this.openDetailsPopup(notification);
+  }
+
+  openChatAndMarkRead(notification: any, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    // Mark notification as read first
+    if (!notification.isRead) {
+      notification.isRead = true;
+      notification.unreadCount = 0;
+      this.markAsRead(notification.id || notification.fundsId || "");
+    }
+
+    // Then open the chat - pass event as optional
+    this.openChat(notification, event);
+    this.showDetailsPanel = false;
+  }
+
+  refreshNotifications() {
+    this.getAllNotifications();
+  }
 }

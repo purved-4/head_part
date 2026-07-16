@@ -157,4 +157,13 @@ export class OwnerService {
   private handleError(error: any) {
     return throwError(() => error);
   }
+
+  selfRegister(id: any): Observable<any> {
+    return this.http
+      .patch<any>(`${baseUrl}/chief/toggleSelfRegistration/${id}`, {})
+      .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+      );
+  }
 }
