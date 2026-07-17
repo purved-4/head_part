@@ -1,12 +1,17 @@
-import { Component, Input, OnInit } from "@angular/core";
-import { ComPartService } from "../../pages/services/com-part.service";
-import { UserStateService } from "../../store/user-state.service";
-import { SnackbarService } from "../snackbar/snackbar.service";
+
+
+
+
+
+import { Component, Input, OnInit } from '@angular/core';
+import { ComPartService } from '../../pages/services/com-part.service';
+import { UserStateService } from '../../store/user-state.service';
+import { SnackbarService } from '../snackbar/snackbar.service';
 
 @Component({
-  selector: "app-global-compart-percentage",
-  templateUrl: "./global-compart-percentage.component.html",
-  styleUrl: "./global-compart-percentage.component.css",
+  selector: 'app-global-compart-percentage',
+  templateUrl: './global-compart-percentage.component.html',
+  styleUrl: './global-compart-percentage.component.css'
 })
 export class GlobalCompartPercentageComponent implements OnInit {
   minPercentage: any = null;
@@ -21,11 +26,12 @@ export class GlobalCompartPercentageComponent implements OnInit {
   public constructor(
     private userStateService: UserStateService,
     private compartService: ComPartService,
-    private snackService: SnackbarService,
+    private snackService: SnackbarService
   ) {}
 
   ngOnInit(): void {
-    console.log(this.entityId, this.role);
+    
+    console.log(this.entityId,this.role)
   }
 
   open(): void {
@@ -41,21 +47,19 @@ export class GlobalCompartPercentageComponent implements OnInit {
     this.loading = true;
     this.minPercentage = null;
 
-    this.compartService
-      .getPercentageByEntityId(this.entityId, this.role)
-      .subscribe({
-        next: (res: any) => {
-          this.minPercentage = res?.minPercentage || null;
-          this.loading = false;
-        },
-        error: (err: any) => {
-          this.loading = false;
-          this.snackService.show(
-            err.error?.message || "Failed to retrieve min percentages",
-            false,
-            3000,
-          );
-        },
-      });
+    this.compartService.getPercentageByEntityId(this.entityId, this.role).subscribe({
+      next: (res: any) => {
+        this.minPercentage = res?.minPercentage || null;
+        this.loading = false;
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.snackService.show(
+          err.error?.message || "Failed to retrieve min percentages",
+          false,
+          3000,
+        );
+      },
+    });
   }
 }

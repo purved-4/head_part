@@ -158,12 +158,14 @@ export class OwnerService {
     return throwError(() => error);
   }
 
+
   selfRegister(id: any): Observable<any> {
     return this.http
-      .patch<any>(`${baseUrl}/chief/toggleSelfRegistration/${id}`, {})
-      .pipe(
+     .patch<any>(`${baseUrl}/chief/toggleSelfRegistration/${id}`, {})
+     .pipe(
         map((res) => res.data),
         catchError(this.handleError),
-      );
-  }
+     );
+}
+
 }

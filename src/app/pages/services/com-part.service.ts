@@ -801,17 +801,16 @@ export class ComPartService {
       );
   }
 
-  generateAnonymousLink(
+generateAnonymousLink(
     portalId: any,
-    currency?: any,
     expireMinute?: any,
     userType?: any,
-  ): Observable<any> {
+): Observable<any> {
     return this.http.post(
-      `${baseUrl}/api/v1/internal/links/generate/${portalId}`,
-      { currency, expireMinute, userType },
+     `${baseUrl}/api/v1/internal/links/generate/${portalId}`,
+     { expireMinute, userType },
     );
-  }
+}
 
   getAnonymousLinks(portalId: any): Observable<any> {
     return this.http

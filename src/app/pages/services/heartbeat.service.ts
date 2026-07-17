@@ -29,8 +29,8 @@ export class HeartbeatService implements OnDestroy {
     if (!this.isBrowser) return; // Server pe kuch mat karo
     if (this.intervalId) return; // Already running
 
-    // this.send();
-    // this.intervalId = setInterval(() => this.send(), 30_000);
+    this.send();
+    this.intervalId = setInterval(() => this.send(), 30_000);
   }
 
   stop(): void {
@@ -41,11 +41,11 @@ export class HeartbeatService implements OnDestroy {
     }
   }
 
-  // private send(): void {
-  //   this.http.post(`${baseUrl}/api/heartbeat`, {}).subscribe({
-  //     error: () => {},
-  //   });
-  // }
+  private send(): void {
+    this.http.post(`${baseUrl}/api/heartbeat`, {}).subscribe({
+      error: () => {},
+    });
+  }
 
   ngOnDestroy(): void {
     this.stop();

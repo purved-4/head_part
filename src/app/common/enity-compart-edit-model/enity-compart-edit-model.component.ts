@@ -84,7 +84,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
 
   showParentCompartsView = false;
 
-  // ngOnChanges + ngOnInit dono se loadAllData() double na chale, isliye guard
   private hasLoadedOnce = false;
 
   constructor(
@@ -105,7 +104,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       this.patchEntityForm();
     }
 
-    // Agar ngOnChanges (firstChange) already load nahi kar chuka, tab hi yahan se load karo.
     if (!this.hasLoadedOnce && this.entityId) {
       this.loadAllData();
       this.hasLoadedOnce = true;
@@ -122,9 +120,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       this.patchEntityForm();
     }
 
-    // Pehli baar (component create hote waqt) ngOnChanges pehle chalta hai,
-    // ngOnInit ke baad. Isko yahin par ek baar load kar dete hain, taaki
-    // ngOnInit dobara load na kare (guard flag ke through).
     const isFirstDataChange =
       changes["data"]?.firstChange ||
       changes["entityId"]?.firstChange ||
@@ -179,8 +174,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     };
   }
 
-  // Sirf OWNER hi naya compart assign kar sakta hai.
-  // Baaki sab roles sirf already-assigned comparts ka percentage edit kar sakte hain.
   get canAddNewCompart(): boolean {
     return this.currentEntityType === "OWNER";
   }
@@ -195,8 +188,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       .getPercentageByEntityId(this.entityId, this.entityType)
       .pipe(catchError(() => of(null)));
 
-    // OWNER ke case me naya compart add karne ka option hi hai, isliye
-    // sirf tab child$ call karo jab yeh OWNER na ho ya data.id available ho.
     const child$ = this.data?.id
       ? this.compartService
           .getPercentageByEntityId(this.data.id, this.getEntityLabel(this.data))
@@ -208,12 +199,10 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       child: child$,
     }).subscribe({
       next: ({ parent, child }) => {
-        // parent -> OWNER ke saare available comparts (list + minPercentage)
         this.parentComparts = this.extractRows(parent);
         this.parentData = this.parentComparts;
         this.parentMinPercentage = this.extractMinPercentage(parent);
 
-        // child -> current entity ko already allocated comparts (list + minPercentage)
         this.allocatedPercentages = this.extractRows(child);
         this.minPercentage = this.extractMinPercentage(child);
         this.isEditingMinPercentage = false;
@@ -230,7 +219,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     });
   }
 
-  // "data.list" format handle karta hai (fallback purane formats ke liye bhi)
   extractRows(res: any): CompartPercentageRow[] {
     const raw = Array.isArray(res?.data?.list)
       ? res.data.list
@@ -254,7 +242,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       .filter((item: CompartPercentageRow) => !!item.compartId);
   }
 
-  // "data.minPercentage" se sirf payin/payout/ftt fields uthata hai
   extractMinPercentage(res: any): MinPercentage | null {
     const min = res?.data?.minPercentage ?? res?.minPercentage ?? null;
     if (!min) return null;
@@ -310,10 +297,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     );
   }
 
-  // ---------- Minimum Percentage editing ----------
-  // Individual assigned compart ka percentage edit NAHI hota. Sirf yeh
-  // ek "minimum" floor value edit hoti hai — OWNER aur baaki sab roles
-  // ke liye same behaviour hai. Edit button dabao -> inputs khulte hain.
   enableMinPercentageEdit(): void {
     this.minPercentageDraft = {
       payinPercentage: this.minPercentage?.payinPercentage ?? 0,
@@ -352,9 +335,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     };
   }
 
-  // ---------- Add New Compart (multi-select + shared percentage) ----------
-  // Yeh sirf OWNER ke liye hi HTML me render hota hai (canAddNewCompart guard),
-  // lekin methods yahan safe hi hain agar galti se call ho bhi jaayein.
   isCompartSelected(compartId: string): boolean {
     return this.newCompartEntries.some((e) => e.compartId === compartId);
   }
@@ -425,9 +405,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       return;
     }
 
-    // Agar user Edit mode me values type karke seedha "Save Changes" dabata hai
-    // (andar wala green Save button nahi dabata), to draft yahan commit karo
-    // taaki purani (stale) minPercentage payload me na chali jaaye.
     if (this.isEditingMinPercentage) {
       this.minPercentage = { ...this.minPercentageDraft };
       this.isEditingMinPercentage = false;
@@ -446,11 +423,10 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       createdByType: this.entityData?.createdByType,
     };
 
-    // Naye multi-select comparts ka shared percentage payload — sirf OWNER
     const newAllocation = this.buildNewCompartAllocation();
     if (newAllocation) {
       payload.compartIds = newAllocation.compartIds;
-      payload.newCompartPercentage = newAllocation.percentage;
+      payload.percentage = newAllocation.percentage;
     }
 
     if (this.entityType === "CHIEF") {

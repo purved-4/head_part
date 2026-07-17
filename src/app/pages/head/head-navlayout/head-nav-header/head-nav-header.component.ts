@@ -20,6 +20,7 @@ import { HeadService } from "../../../services/head.service";
 import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
 import { ThemeService } from "../../../../theme/theme.service";
 import { ComPartService } from "../../../services/com-part.service";
+import { BulkUpdateService } from "../../../services/bulk-update.service";
 
 @Component({
   selector: "app-head-nav-header",
@@ -213,6 +214,8 @@ export class HeadNavHeaderComponent implements OnInit {
   private retryTimeout: any;
   payinTime: string | null = null;
   // Popup state
+
+  userId: any;
   portalPopupOpen = false;
   portalPercentages: any[] = [];
   loadingPortalPercent = false;
@@ -235,12 +238,14 @@ export class HeadNavHeaderComponent implements OnInit {
     private ngZone: NgZone,
     public theme: ThemeService,
     private router: Router,
+    private bulkService: BulkUpdateService,
   ) {}
 
   ngOnInit(): void {
     this.headId = this.userStateService.getCurrentEntityId();
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.currentUserRole = this.userStateService.getRole();
+    this.userId = this.userStateService.getUserId();
     this.getPayinStatus();
 
     this.socketService.subscribeLatestBalance(
@@ -712,3 +717,4 @@ export class HeadNavHeaderComponent implements OnInit {
     this.showTooltip = false;
   }
 }
+
