@@ -186,6 +186,10 @@ export class HeadNavSidebarComponent implements OnInit {
           route: "/head/limit",
           icon: "credit_card",
         },
+        {
+          label: "Resolved Notification",
+          route: "/head/resolved-notification",
+        },
         // {
         //   label: "Auto Pending",
         //   route: "/head/pending-auto",

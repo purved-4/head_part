@@ -214,7 +214,7 @@ export class HeadNavHeaderComponent implements OnInit {
   private retryTimeout: any;
   payinTime: string | null = null;
   // Popup state
-
+  showPercentagesModal = false;
   userId: any;
   portalPopupOpen = false;
   portalPercentages: any[] = [];
@@ -499,11 +499,12 @@ export class HeadNavHeaderComponent implements OnInit {
 
   // Combined HostListener for Escape key
   @HostListener("document:keydown.escape")
-  onEscapeKeydown() {
-    if (this.isProfileOpen) this.closeProfile();
-    if (this.portalPopupOpen) this.closePortalPopup();
-    if (this.isPortalOpen) this.isPortalOpen = false;
-  }
+onEscapeKeydown() {
+  if (this.isProfileOpen) this.closeProfile();
+  if (this.portalPopupOpen) this.closePortalPopup();
+  if (this.isPortalOpen) this.isPortalOpen = false;
+  if (this.showPercentagesModal) this.closePercentagesModal();
+}
 
   // Combined HostListener for clicks outside
   @HostListener("document:click", ["$event"])
@@ -517,6 +518,14 @@ export class HeadNavHeaderComponent implements OnInit {
         this.closeProfile();
       }
     }
+
+    // Close percentages tooltip
+  if (this.showPercentagesModal && this.percentagesContainer) {
+    const clickedInside = this.percentagesContainer.nativeElement.contains(event.target);
+    if (!clickedInside) {
+      this.showPercentagesModal = false;
+    }
+  }
 
     // Close limits popup
     if (this.isLimitsOpen && this.limitsContainer) {
@@ -680,41 +689,35 @@ export class HeadNavHeaderComponent implements OnInit {
       },
     });
   }
-  onPercentageHover() {
-    // Already loaded -> show instantly
-    if (this.hasLoaded) {
-      this.showTooltip = true;
-      return;
-    }
 
-    // After 300ms show loading tooltip
-    this.loadingTooltipTimer = setTimeout(() => {
-      this.showTooltip = true;
-      this.loadingPercentages = true;
-    }, 300);
+// 1. Add a ViewChild to detect outside clicks
+@ViewChild("percentagesContainer") percentagesContainer!: ElementRef;
 
-    // After 2 seconds call API
-    this.apiTimer = setTimeout(() => {
-      this.compartService
-        .getPercentageByEntityId(this.currentRoleId, this.currentUserRole)
-        .subscribe({
-          next: (res: any) => {
-            this.percentages = res.minPercentage;
-            this.loadingPercentages = false;
-            this.hasLoaded = true;
-          },
-          error: () => {
-            this.loadingPercentages = false;
-          },
-        });
-    }, 2000);
+// 2. Replace openPercentagesModal() with togglePercentages()
+togglePercentages(event: MouseEvent) {
+  event.stopPropagation();
+  this.showPercentagesModal = !this.showPercentagesModal;
+
+  if (this.showPercentagesModal) {
+    this.loadingPercentages = true;
+
+    this.compartService
+      .getPercentageByEntityId(this.currentRoleId, this.currentUserRole)
+      .subscribe({
+        next: (res: any) => {
+          this.percentages = res.minPercentage;
+          console.log(res);
+          this.loadingPercentages = false;
+        },
+        error: () => {
+          this.loadingPercentages = false;
+        },
+      });
   }
+}
 
-  onPercentageLeave() {
-    clearTimeout(this.loadingTooltipTimer);
-    clearTimeout(this.apiTimer);
-
-    this.showTooltip = false;
-  }
+closePercentagesModal() {
+  this.showPercentagesModal = false;
+}
 }
 

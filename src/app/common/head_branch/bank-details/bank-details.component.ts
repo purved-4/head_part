@@ -62,6 +62,7 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.entityId = this.userStateService.getCurrentEntityId();
     this.entityType = this.userStateService.getRole();
+    console.log(this.bankData);
     this.patchForm();
 
     // IFSC debounce listener
@@ -98,6 +99,8 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       limitAmount: this.bankData?.limitAmount || 0,
       accountType: this.bankData?.accountType || "saving",
       fttAcceptance: this.bankData?.fttAcceptance || false,
+      partialPayinEnabled: this.bankData?.partialPayinEnabled || false,
+      partialPayinMinRange: this.bankData?.partialPayinMinRange || 0
     };
 
     // Reset IFSC fetch state
@@ -168,6 +171,10 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       accountType: this.updateForm.accountType,
 
       fttAcceptance: this.updateForm.fttAcceptance,
+
+      partialPayinEnabled: this.updateForm.partialPayinEnabled,
+
+      partialPayinMinRange:this.updateForm.partialPayinMinRange
     };
 
     const sub = this.bankService.update(payload).subscribe({

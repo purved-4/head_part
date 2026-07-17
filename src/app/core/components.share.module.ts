@@ -47,6 +47,7 @@ import { OverrideCurrencyRateComponent } from "../common/head_branch/override-cu
 import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods/payments-methods.component";
 import { SharedUserProfileComponent } from "../common/shared-user-profile/shared-user-profile.component";
 import { GlobalCompartPercentageComponent } from "../common/global-compart-percentage/global-compart-percentage.component";
+import { ReslovedNotificationComponent } from "../common/resolved-notification/resolved-notification.component";
 
 @NgModule({
   declarations: [
@@ -90,7 +91,7 @@ import { GlobalCompartPercentageComponent } from "../common/global-compart-perce
 
     PendingThreadsComponent,
     ChatpopupComponent,
-
+    ReslovedNotificationComponent,
     OverrideCurrencyRateComponent,
     PaymentsMethodsComponent,
     SharedUserProfileComponent,

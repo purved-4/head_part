@@ -48,6 +48,8 @@ interface BankAccount {
   liveAssigned?: boolean; // ADD THIS
   remainingLimitAmount: any;
   totalLimitAmount: any;
+  partialPayinEnabled:boolean;
+  partialPayinMinRange:any;
 }
 
 interface Portal {
@@ -344,6 +346,8 @@ export class BanksComponent implements OnInit, OnDestroy {
             ? res.data
             : [];
 
+            console.log(res);
+
         this.bankAccounts = rows
           .map((r: any) => {
             let status: StatusString = "inactive";
@@ -388,6 +392,9 @@ export class BanksComponent implements OnInit, OnDestroy {
 
               upiCount: r.upiCount ?? null,
               bankTime: r.bankTime ?? null, // ADD
+
+              partialPayinEnabled: r.partialPayinEnabled,
+              partialPayinMinRange:r.partialPayinMinRange,
 
               isBankActive,
             } as BankAccount;
