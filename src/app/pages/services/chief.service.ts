@@ -197,38 +197,40 @@ export class ChiefService {
     );
   }
 
+ 
+
   getCurrencies(chieftId: any): Observable<any> {
     return this.http.get<any>(`${baseUrl}/chief/currencies/${chieftId}`).pipe(
-      map((response) => response),
-      catchError((error) => throwError(() => error)),
+     map((response) => response),
+     catchError((error) => throwError(() => error)),
     );
-  }
+}
 
-  // POST (Add + Update)
-  saveCurrencies(chieftId: any, payload: any): Observable<any> {
+// POST (Add + Update)
+saveCurrencies(chieftId: any, payload: any): Observable<any> {
     return this.http
-      .post<any>(`${baseUrl}/chief/currencies/${chieftId}`, payload)
-      .pipe(
+     .post<any>(`${baseUrl}/chief/currencies/${chieftId}`, payload)
+     .pipe(
         map((response) => response),
         catchError((error) => throwError(() => error)),
-      );
-  }
+     );
+}
 
-  getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
-    return this.http
-      .get<any>(`${baseUrl}/chief/currencies`, {
-        params: {
-          entityId: entityId,
-          entityType: entityRole,
-        },
-      })
-      .pipe(
-        map((response) => response),
-        catchError((error) => throwError(() => error)),
-      );
-  }
+getCurrenciesByEntity(entityId: any, entityRole: any): Observable<any> {
+  return this.http
+    .get<any>(`${baseUrl}/chief/currencies`, {
+      params: {
+        entityId: entityId,
+        entityType: entityRole,
+      },
+    })
+    .pipe(
+      map((response) => response),
+      catchError((error) => throwError(() => error))
+    );
+}
 
-  getChiefsListByUserIdPaginated(
+getChiefsListByUserIdPaginated(
     user: any,
     page: number = 0,
     pageSize: number = 20,
@@ -243,6 +245,7 @@ export class ChiefService {
       );
   }
 
+
   changeBranchHeadCurrencyStatus(payload: any) {
     return this.http.patch(
       `${baseUrl}/chief/changeBranchHeadCurrencyStatus`,
@@ -250,7 +253,7 @@ export class ChiefService {
     );
   }
 
-  createLink(payload: { chiefId: string; compartIds: string[] }) {
+    createLink(payload: { chiefId: string; compartIds: string[] }) {
     return this.http.post(`${baseUrl}/chief/link`, payload);
   }
 
@@ -259,11 +262,12 @@ export class ChiefService {
     return this.http.get(`${baseUrl}/chief/link/${chiefId}`);
   }
 
-  deleteLink(linkId: string) {
+deleteLink(linkId: string) {
     return this.http.delete(`${baseUrl}/chief/link/${linkId}`);
-  }
+}
 
-  getSelfRegistrationEligibility(chiefId: string): Observable<any> {
+
+getSelfRegistrationEligibility(chiefId: string): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/chief/${chiefId}/self-registration/eligibility`)
       .pipe(
@@ -296,4 +300,5 @@ export class ChiefService {
       .put<any>(`${baseUrl}/dynamic-distribution/${batchId}/deactivate`, {})
       .pipe(catchError((error) => throwError(() => error)));
   }
+  
 }

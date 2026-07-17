@@ -57,4 +57,12 @@ export class BulkUpdateService {
       catchError((error) => throwError(() => error)),
     );
   }
+  getAllResolvedNotification(createdBy: string): Observable<any> {
+    return this.http
+      .get(`${baseUrl}/percentage-change-request/${createdBy}/latest`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 }

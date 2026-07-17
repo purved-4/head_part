@@ -1,3 +1,5 @@
+
+
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { ChiefManualService } from "../../pages/services/chief-manual.service";
@@ -18,6 +20,7 @@ export class BranchRegisterComponent implements OnInit {
   showPassword = false;
 
   promoCode: any | null = null;
+  promoLocked: boolean = false;
   isEditingPromo: boolean = false;
   submitting: boolean = false;
 
@@ -32,11 +35,14 @@ export class BranchRegisterComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.promoCode = this.route.snapshot.queryParamMap.get("code");
+  const codeFromUrl = this.route.snapshot.queryParamMap.get("code");
+  this.promoCode = codeFromUrl;
+  this.promoLocked = !!codeFromUrl;
   }
 
   // Turning edit ON needs confirmation, turning it OFF (Done) doesn't
   togglePromoEdit(): void {
+     if (this.promoLocked) return;
     if (this.isEditingPromo) {
       this.isEditingPromo = false;
       return;
@@ -91,3 +97,5 @@ export class BranchRegisterComponent implements OnInit {
     this.password = "";
   }
 }
+
+

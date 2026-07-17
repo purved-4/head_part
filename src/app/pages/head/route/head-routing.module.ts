@@ -18,7 +18,7 @@ import { ManageBranchUserComponent } from "../branch/manage-branch-user/manage-b
 // import { RejectedFundsComponent } from "../../branch/rejected-funds/rejected-funds.component";
 import { HeadBranchCapacityComponent } from "../../../components/head-branch-capacity/head-branch-capacity.component";
 import { HeadNavDashboardLayoutComponent } from "../head-navlayout/head-nav-dashboard-layout/head-nav-dashboard-layout.component";
-import { ChatingComponent } from "../../../common/chating/chating.component";
+import {ChatingComponent} from "../../../common/chating/chating.component";
 import { RecycleUpiComponent } from "../../../common/recycle-upi/recycle-upi.component";
 import { RecycleBankComponent } from "../../../common/recycle-bank/recycle-bank.component";
 import { ChatResponsiveComponent } from "../../../common/chat-responsive/chat-responsive.component";
@@ -26,41 +26,34 @@ import { PaymentsMethodsComponent } from "../../../common/head_branch/payments-m
 import { UpisComponent } from "../../../common/head_branch/upis/upis.component";
 import { BanksComponent } from "../../../common/head_branch/banks/banks.component";
 import { OverrideCurrencyRateComponent } from "../../../common/head_branch/override-currency-rate/override-currency-rate.component";
-import { HbPayinReportComponent } from "../../../common/head_branch/hb-payin-report/hb-payin-report.component";
+ import { HbPayinReportComponent } from "../../../common/head_branch/hb-payin-report/hb-payin-report.component";
 import { HbPayoutReportComponent } from "../../../common/head_branch/hb-payout-report/hb-payout-report.component";
 import { HeadBranchDashboardComponent } from "../../../common/head_branch/head-branch-dashboard/head-branch-dashboard.component";
 import { SharedUserProfileComponent } from "../../../common/shared-user-profile/shared-user-profile.component";
 import { RecycleManagementComponent } from "../../../common/head_branch/recycle-management/recycle-management.component";
 import { CryptoManagementComponent } from "../../../common/head_branch/crypto-management/crypto-management.component";
-import { PendingAutoComponent } from "../pending-auto/pending-auto.component";
 
 const routes: Routes = [
   {
     path: "",
     component: HeadNavDashboardLayoutComponent,
     children: [
+    
       {
         path: "",
         redirectTo: "dashboard",
         pathMatch: "full",
       },
-
-      {
+     
+       {
         path: "dashboard",
         component: HeadBranchDashboardComponent,
       },
 
+    
       {
         path: "override-currency-management",
         component: OverrideCurrencyRateComponent,
-      },
-      {
-        path: "crypto", // ADD THIS BLOCK
-        component: CryptoManagementComponent,
-      },
-      {
-        path: "pending-auto",
-        component: PendingAutoComponent,
       },
 
       // {
@@ -106,7 +99,8 @@ const routes: Routes = [
 
       {
         path: "chat",
-        component: ChatResponsiveComponent,
+        component:ChatResponsiveComponent
+
       },
 
       {
@@ -147,12 +141,18 @@ const routes: Routes = [
             path: "funds/payout/:type",
             component: HbPayoutReportComponent,
           },
+          
           // { path: "funds/accepted", component: ApprovedFundsComponent },
           // { path: "funds/rejected", component: RejectedFundsComponent },
         ],
       },
-      { path: "capacity", component: HeadBranchCapacityComponent },
+     
       {
+        path: "crypto", // ADD THIS BLOCK
+        component: CryptoManagementComponent,
+      },
+      { path: "capacity", component: HeadBranchCapacityComponent },
+       {
         path: "bank",
         component: BanksComponent,
       },
@@ -162,8 +162,8 @@ const routes: Routes = [
       },
       {
         path: "sharedUserProfile",
-        component: SharedUserProfileComponent,
-      },
+        component: SharedUserProfileComponent
+     },
       {
         path: "",
         redirectTo: "bank",
@@ -171,6 +171,8 @@ const routes: Routes = [
       },
     ],
   },
+
+ 
 ];
 
 @NgModule({

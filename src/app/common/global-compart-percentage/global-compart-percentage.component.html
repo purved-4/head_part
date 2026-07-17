@@ -3,8 +3,8 @@
   (click)="open()"
   class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[var(--color-primary)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 rounded-lg transition-all duration-200 whitespace-nowrap"
 >
-  <span class="material-symbols-outlined text-sm">info</span>
-  Min Percentages
+  <span class="material-symbols-outlined text-sm">globe</span>
+  Global Percentages
 </button>
 
 <div
@@ -17,12 +17,8 @@
     class="relative z-10 w-full max-w-sm bg-white rounded-xl shadow-2xl"
     (click)="$event.stopPropagation()"
   >
-    <div
-      class="p-4 md:p-5 border-b border-gray-100 flex items-center justify-between"
-    >
-      <h3 class="text-base font-semibold text-gray-900">
-        Minimum Allowed Percentages
-      </h3>
+    <div class="p-4 md:p-5 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="text-base font-semibold text-gray-900">Global Percentages</h3>
       <button
         (click)="close()"
         class="p-1 hover:bg-gray-100 rounded-lg transition-colors"
@@ -32,42 +28,37 @@
     </div>
 
     <div class="p-4 md:p-5">
-      <div *ngIf="loading" class="flex items-center justify-center gap-2 py-6">
-        <div
-          class="w-4 h-4 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"
-        ></div>
-        <span class="text-xs text-gray-500">Loading...</span>
-      </div>
+  <div *ngIf="loading" class="flex items-center justify-center gap-2 py-6">
+    <div class="w-4 h-4 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
+    <span class="text-xs text-gray-500">Loading...</span>
+  </div>
 
-      <div *ngIf="!loading && minPercentage" class="grid grid-cols-3 gap-3">
-        <div class="p-3 bg-gray-50 rounded-lg text-center">
-          <div class="text-xs text-gray-500 mb-1">Payin</div>
-          <div class="text-base font-semibold text-[var(--color-primary)]">
-            {{ minPercentage.payinPercentage }}%
-          </div>
-        </div>
-
-        <div class="p-3 bg-gray-50 rounded-lg text-center">
-          <div class="text-xs text-gray-500 mb-1">Payout</div>
-          <div class="text-base font-semibold text-[var(--color-primary)]">
-            {{ minPercentage.payoutPercentage }}%
-          </div>
-        </div>
-
-        <div class="p-3 bg-gray-50 rounded-lg text-center">
-          <div class="text-xs text-gray-500 mb-1">FTT</div>
-          <div class="text-base font-semibold text-[var(--color-primary)]">
-            {{ minPercentage.fttPercentage }}%
-          </div>
-        </div>
-      </div>
-
-      <div
-        *ngIf="!loading && !minPercentage"
-        class="text-center py-4 text-sm text-gray-400"
-      >
-        No minimum percentage data available.
+  <div *ngIf="!loading && minPercentage" class="grid grid-cols-3 gap-3">
+    <div class="p-3 bg-gray-50 rounded-lg text-center">
+      <div class="text-xs text-gray-500 mb-1">Payin</div>
+      <div class="text-base font-semibold text-[var(--color-primary)]">
+        {{ minPercentage.payinPercentage }}%
       </div>
     </div>
+
+    <div class="p-3 bg-gray-50 rounded-lg text-center">
+      <div class="text-xs text-gray-500 mb-1">Payout</div>
+      <div class="text-base font-semibold text-[var(--color-primary)]">
+        {{ minPercentage.payoutPercentage }}%
+      </div>
+    </div>
+
+    <div class="p-3 bg-gray-50 rounded-lg text-center">
+      <div class="text-xs text-gray-500 mb-1">FTT</div>
+      <div class="text-base font-semibold text-[var(--color-primary)]">
+        {{ minPercentage.fttPercentage }}%
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !minPercentage" class="text-center py-4 text-sm text-gray-400">
+    No minimum percentage data available.
+  </div>
+</div>
   </div>
 </div>

@@ -17,17 +17,19 @@ export class ChiefManualService {
     );
   }
 
-  performManualAction(promoCode: string | null, payload: any) {
-    let params = new HttpParams();
+performManualAction(promoCode: string | null, payload: any) {
+  let params = new HttpParams();
 
-    if (promoCode?.trim()) {
-      params = params.set("promoCode", promoCode);
-    }
-
-    return this.http.post(`${baseUrl}/manual/performManualAction`, payload, {
-      params,
-    });
+  if (promoCode?.trim()) {
+    params = params.set('promoCode', promoCode);
   }
+
+  return this.http.post(
+    `${baseUrl}/manual/performManualAction`,
+    payload,
+    { params }
+  );
+}
 
   getManualStatus(chiefId: any, portalId: any) {
     return this.http

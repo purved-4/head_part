@@ -51,7 +51,7 @@ export class AuthService {
   }
 
  public getCurrentUser(): Observable<any> {
-  return this.http.get(`${baseUrl}/current-user`).pipe(
+  return this.http.get(`${baseUrl}/current-user`, { withCredentials: true }).pipe(
 
     tap((res: any) => {
       const message =

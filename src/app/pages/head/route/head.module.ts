@@ -10,13 +10,12 @@ import { AddBranchComponent } from "../branch/add-branch/add-branch.component";
 import { AddBranchUserComponent } from "../branch/add-branch-user/add-branch-user.component";
 import { ManageBranchComponent } from "../branch/manage-branch/manage-branch.component";
 import { ManageBranchUserComponent } from "../branch/manage-branch-user/manage-branch-user.component";
-import { HeadNavSidebarComponent } from "../head-navlayout/head-nav-sidebar/head-nav-sidebar.component";
+ import { HeadNavSidebarComponent } from "../head-navlayout/head-nav-sidebar/head-nav-sidebar.component";
 import { HeadNavHeaderComponent } from "../head-navlayout/head-nav-header/head-nav-header.component";
 import { HeadNavDashboardLayoutComponent } from "../head-navlayout/head-nav-dashboard-layout/head-nav-dashboard-layout.component";
 import { HeadMobileFooterComponent } from "../head-navlayout/head-mobile-footer/head-mobile-footer.component";
 import { RecycleManagementComponent } from "../recycle-management/recycle-management.component";
 import { ComponentSharedModule } from "../../../core/components.share.module";
-import { PendingAutoComponent } from "../pending-auto/pending-auto.component";
 
 @NgModule({
   declarations: [
@@ -30,7 +29,6 @@ import { PendingAutoComponent } from "../pending-auto/pending-auto.component";
     HeadNavDashboardLayoutComponent,
     HeadMobileFooterComponent,
     RecycleManagementComponent,
-    PendingAutoComponent,
   ],
   imports: [
     CommonModule,
@@ -39,7 +37,7 @@ import { PendingAutoComponent } from "../pending-auto/pending-auto.component";
     FormsModule,
     ReactiveFormsModule,
     ComponentSharedModule,
-  ],
+   ],
   exports: [SharedModule],
 })
 export class HeadModule {}
