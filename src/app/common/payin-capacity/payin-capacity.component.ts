@@ -121,10 +121,6 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
     if (this.capacityRanges.length === 0) {
       this.addRange();
     }
-
-    if (this.limitAmount == null) {
-      this.limitAmount = 0;
-    }
   }
 
   // ================= ADD =================
@@ -178,7 +174,6 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
       portalId: this.portalId,
       mode: this.mode,
       payinId: this.payinId,
-      limitAmount: Number(this.limitAmount),
       ranges: this.capacityRanges.map((r) => ({
         minRange: Number(r.minRange),
         maxRange: Number(r.maxRange),

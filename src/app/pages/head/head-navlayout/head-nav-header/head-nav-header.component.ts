@@ -71,12 +71,11 @@ export class HeadNavHeaderComponent implements OnInit {
     fttPercentage: 0,
   };
   searchTerm = "";
-  // --- Exposure hover popup state ---
-  exposureData: any = null;
-  exposureLoading = false;
-  isExposureHovered = false;
-  private exposureEnterTimer: any;
-  private exposureLeaveTimer: any;
+ @ViewChild("exposureContainer") exposureContainer!: ElementRef;
+
+exposureData: any = null;
+exposureLoading = false;
+isExposureOpen = false;
 
   searchResults: any[] = [];
 
@@ -504,6 +503,7 @@ onEscapeKeydown() {
   if (this.portalPopupOpen) this.closePortalPopup();
   if (this.isPortalOpen) this.isPortalOpen = false;
   if (this.showPercentagesModal) this.closePercentagesModal();
+  if (this.isExposureOpen) this.closeExposurePopup();
 }
 
   // Combined HostListener for clicks outside
@@ -546,6 +546,14 @@ onEscapeKeydown() {
         this.isPortalOpen = false;
       }
     }
+
+    // Close exposure popup
+  if (this.isExposureOpen && this.exposureContainer) {
+    const clickedInside = this.exposureContainer.nativeElement.contains(event.target);
+    if (!clickedInside) {
+      this.isExposureOpen = false;
+    }
+  }
   }
 
   togglePortalPopup() {
@@ -637,24 +645,21 @@ onEscapeKeydown() {
     }
   }
 
-  onExposureHoverEnter() {
-    clearTimeout(this.exposureLeaveTimer);
+ 
+toggleExposure(event: MouseEvent) {
+  event.stopPropagation();
+  this.isExposureOpen = !this.isExposureOpen;
 
-    this.exposureEnterTimer = setTimeout(() => {
-      this.isExposureHovered = true;
-
-      // Har hover pe latest data fetch hoga
-      this.fetchExposureData();
-    }, 2000);
+  if (this.isExposureOpen) {
+    this.fetchExposureData();
   }
+}
 
-  onExposureHoverLeave() {
-    clearTimeout(this.exposureEnterTimer);
+closeExposurePopup() {
+  this.isExposureOpen = false;
+}
 
-    this.exposureLeaveTimer = setTimeout(() => {
-      this.isExposureHovered = false;
-    }, 150);
-  }
+
 
   private fetchExposureData() {
     this.exposureLoading = true;

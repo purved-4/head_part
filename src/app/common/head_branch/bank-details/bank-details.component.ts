@@ -147,6 +147,14 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       return;
     }
 
+      if (this.isPartialPayinMinRangeInvalid) {
+    this.snack.show(
+      `Partial Payin Min Range cannot exceed smallest capacity range (${this.smallestCapacityRangeLimit}).`,
+      false,
+    );
+    return;
+  }
+
     this.isSubmitting = true;
 
     const payload = {
@@ -318,4 +326,23 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
     this.isBankNameEditable = true;
     this.updateForm.bankName = "";
   }
+
+  get smallestCapacityRangeLimit(): number | null {
+  const ranges = this.bankData?.ranges || [];
+  const validRanges = ranges.filter(
+    (r: any) => r.minRange != null && r.minRange > 0
+  );
+  if (!validRanges.length) return null;
+  return Math.min(...validRanges.map((r: any) => r.minRange));
+}
+
+get isPartialPayinMinRangeInvalid(): boolean {
+  if (!this.updateForm?.partialPayinEnabled) return false;
+
+  const max = this.smallestCapacityRangeLimit;
+  if (max == null) return false; // no ranges to compare against — don't block
+
+  const val = this.updateForm?.partialPayinMinRange;
+  return val != null && Number(val) >= max;
+}
 }

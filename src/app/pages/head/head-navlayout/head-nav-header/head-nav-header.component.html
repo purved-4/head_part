@@ -79,15 +79,13 @@
           </div>
         </div>
 
-        <div
-          class="stat-item relative inline-block"
-          (mouseenter)="onExposureHoverEnter()"
-          (mouseleave)="onExposureHoverLeave()"
-        >
+        <div class="stat-item relative inline-block" #exposureContainer>
           <!-- Trigger -->
-          <div class="flex items-center gap-2 cursor-pointer">
+          <div
+            class="flex items-center gap-2 cursor-pointer"
+            (click)="toggleExposure($event)"
+          >
             <div class="h-2 w-2 rounded-full bg-[var(--color-success)]"></div>
-
             <span class="text-sm font-medium">
               Exposure :
               {{ getCurrencySymbol(parentCurrency) }}{{ exploser | crformat }}
@@ -96,9 +94,7 @@
 
           <!-- Popup -->
           <div
-            *ngIf="isExposureHovered"
-            (mouseenter)="onExposureHoverEnter()"
-            (mouseleave)="onExposureHoverLeave()"
+            *ngIf="isExposureOpen"
             class="absolute left-1/2 top-full z-[9999] mt-3 w-[360px] -translate-x-1/2 rounded-xl border border-gray-200 bg-white shadow-2xl"
           >
             <!-- Arrow -->
