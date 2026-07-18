@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { BulkUpdateService } from "../../pages/services/bulk-update.service";
 import { UserStateService } from "../../store/user-state.service";
+import { SnackbarService } from "../snackbar/snackbar.service";
 
 interface PercentageChangeRequestDTO {
   id: string;
@@ -39,14 +40,14 @@ interface PercentageChangeRequestWithBlockersDTO {
   selector: "app-resolved-notification",
   templateUrl: "./resolved-notification.component.html",
 })
-export class ReslovedNotificationComponent implements OnInit {
+export class ResolvedNotificationComponent implements OnInit {
   notifications: PercentageChangeRequestDTO[] = [];
   isLoading = false;
   errorMessage = "";
 
   currentEntityId: any;
   userId: any;
-
+  isRefreshing = false;
   isModalOpen = false;
   isDetailLoading = false;
   detailError = "";
@@ -55,6 +56,7 @@ export class ReslovedNotificationComponent implements OnInit {
   constructor(
     private bulkService: BulkUpdateService,
     private authService: UserStateService,
+    private snackBar: SnackbarService,
   ) {}
 
   ngOnInit(): void {
@@ -63,26 +65,33 @@ export class ReslovedNotificationComponent implements OnInit {
     this.loadResolvedNotifications();
   }
 
-  loadResolvedNotifications(): void {
-    this.isLoading = true;
+  loadResolvedNotifications(isBackgroundRefresh = false) {
+    if (isBackgroundRefresh) {
+      this.isRefreshing = true;
+    } else {
+      this.isLoading = true;
+    }
     this.errorMessage = "";
 
     this.bulkService
       .getAllResolvedNotification(this.currentEntityId)
       .subscribe({
-        next: (data: PercentageChangeRequestDTO[]) => {
-          this.notifications = data || [];
+        next: (data) => {
+          this.notifications = data;
           this.isLoading = false;
+          this.isRefreshing = false;
         },
         error: (err) => {
-          this.errorMessage = "Failed to load resolved notifications.";
+          this.snackBar.show(
+            err.error?.message || "Failed to load resolved notifications",
+            false,
+          );
+          this.errorMessage = "Failed to load resolved notifications";
           this.isLoading = false;
-          console.error(err);
+          this.isRefreshing = false;
         },
       });
   }
-
-  // item.id list se aata hai -> yahi requestId ke roop me detail API ko jayega
   viewDetails(id: string): void {
     this.isModalOpen = true;
     this.isDetailLoading = true;
