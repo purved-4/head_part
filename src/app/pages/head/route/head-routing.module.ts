@@ -1,3 +1,4 @@
+import { ResolvedNotificationComponent } from './../../../common/resolved-notification/resolved-notification.component';
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AddBranchComponent } from "../branch/add-branch/add-branch.component";
@@ -164,6 +165,10 @@ const routes: Routes = [
         path: "sharedUserProfile",
         component: SharedUserProfileComponent
      },
+     {
+        path: "resolved-notification",
+        component: ResolvedNotificationComponent,
+      },
       {
         path: "",
         redirectTo: "bank",

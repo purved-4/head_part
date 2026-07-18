@@ -356,6 +356,10 @@ export class UpisComponent implements OnInit {
               //  Time fields
               upiTime: r.upiTime || null,
               liveTime: r.liveTime || null,
+
+              //Partial Payin
+              partialPayinEnabled: r.partialPayinEnabled || false,
+              partialPayinMinRange: r.partialPayinMinRange || 0,
             };
           });
 
@@ -592,6 +596,8 @@ export class UpisComponent implements OnInit {
       maxAmount: upi.maxAmount || "",
       minAmount: upi.minAmount || "",
       fttAcceptance: upi.fttAcceptance ?? true,
+      partialPayinEnabled: upi.partialPayinEnabled ?? true,
+      partialPayinMinRange: upi.partialPayinMinRange ?? 0,
     };
     this.originalVpa = (upi.vpa || "").trim().toLowerCase();
     this.vpaChanged = false;
@@ -606,7 +612,14 @@ export class UpisComponent implements OnInit {
   closeUpdateModal(): void {
     this.showUpdateModal = false;
     this.editingUpi = null;
-    this.updateForm = { vpa: "", limitAmount: "", status: "active" };
+    this.updateForm = {
+      vpa: "",
+      limitAmount: "",
+      status: "active",
+      fttAcceptance: true,
+      partialPayinEnabled: true,
+      partialPayinMinRange: 0,
+    };
     this.originalVpa = "";
     this.updateQrData = null;
     this.generatedUpdateFile = null;
@@ -650,6 +663,14 @@ export class UpisComponent implements OnInit {
       return;
     }
 
+    if (this.isUpdatePartialPayinMinRangeInvalid) {
+      this.snack.show(
+        `Partial Payin Min Range must be less than the smallest capacity range (${this.smallestUpdateCapacityRangeLimit}).`,
+        false,
+      );
+      return;
+    }
+
     const qrFile = this.generatedUpdateFile || this.updateManualQrFile;
 
     const dtoPayload: any = {
@@ -661,6 +682,8 @@ export class UpisComponent implements OnInit {
       limitAmount: limit.toString(),
       active: this.updateForm.status === "active",
       fttAcceptance: this.updateForm.fttAcceptance,
+      partialPayinEnabled: this.updateForm.partialPayinEnabled,
+      partialPayinMinRange: this.updateForm.partialPayinMinRange,
     };
 
     if (this.currentRoleId) {
@@ -1419,8 +1442,6 @@ export class UpisComponent implements OnInit {
     this.minLimitDateTime = "";
   }
   openCapacityPreview(account: any, event: MouseEvent) {
-
-
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
 
     this.selectedCapacityAccount = account;
@@ -1459,5 +1480,24 @@ export class UpisComponent implements OnInit {
   }
   closeCapacityPopup() {
     this.selectedCapacityAccount = null;
+  }
+
+  get smallestUpdateCapacityRangeLimit(): number | null {
+    const ranges = this.editingUpi?.ranges || [];
+    const validRanges = ranges.filter(
+      (r: any) => r.minRange != null && r.minRange > 0,
+    );
+    if (!validRanges.length) return null;
+    return Math.min(...validRanges.map((r: any) => r.minRange));
+  }
+
+  get isUpdatePartialPayinMinRangeInvalid(): boolean {
+    if (!this.updateForm?.partialPayinEnabled) return false;
+
+    const max = this.smallestUpdateCapacityRangeLimit;
+    if (max == null) return false;
+
+    const val = this.updateForm?.partialPayinMinRange;
+    return val != null && Number(val) >= max; // >= per your earlier requirement
   }
 }

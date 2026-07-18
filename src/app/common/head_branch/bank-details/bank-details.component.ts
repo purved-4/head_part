@@ -62,6 +62,7 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.entityId = this.userStateService.getCurrentEntityId();
     this.entityType = this.userStateService.getRole();
+    console.log(this.bankData);
     this.patchForm();
 
     // IFSC debounce listener
@@ -98,6 +99,8 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       limitAmount: this.bankData?.limitAmount || 0,
       accountType: this.bankData?.accountType || "saving",
       fttAcceptance: this.bankData?.fttAcceptance || false,
+      partialPayinEnabled: this.bankData?.partialPayinEnabled || false,
+      partialPayinMinRange: this.bankData?.partialPayinMinRange || 0
     };
 
     // Reset IFSC fetch state
@@ -144,6 +147,14 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       return;
     }
 
+      if (this.isPartialPayinMinRangeInvalid) {
+    this.snack.show(
+      `Partial Payin Min Range cannot exceed smallest capacity range (${this.smallestCapacityRangeLimit}).`,
+      false,
+    );
+    return;
+  }
+
     this.isSubmitting = true;
 
     const payload = {
@@ -168,6 +179,10 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       accountType: this.updateForm.accountType,
 
       fttAcceptance: this.updateForm.fttAcceptance,
+
+      partialPayinEnabled: this.updateForm.partialPayinEnabled,
+
+      partialPayinMinRange:this.updateForm.partialPayinMinRange
     };
 
     const sub = this.bankService.update(payload).subscribe({
@@ -311,4 +326,23 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
     this.isBankNameEditable = true;
     this.updateForm.bankName = "";
   }
+
+  get smallestCapacityRangeLimit(): number | null {
+  const ranges = this.bankData?.ranges || [];
+  const validRanges = ranges.filter(
+    (r: any) => r.minRange != null && r.minRange > 0
+  );
+  if (!validRanges.length) return null;
+  return Math.min(...validRanges.map((r: any) => r.minRange));
+}
+
+get isPartialPayinMinRangeInvalid(): boolean {
+  if (!this.updateForm?.partialPayinEnabled) return false;
+
+  const max = this.smallestCapacityRangeLimit;
+  if (max == null) return false; // no ranges to compare against — don't block
+
+  const val = this.updateForm?.partialPayinMinRange;
+  return val != null && Number(val) >= max;
+}
 }

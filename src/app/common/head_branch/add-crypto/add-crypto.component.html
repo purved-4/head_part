@@ -18,13 +18,13 @@
         />
       </div>
       <div class="flex gap-2">
-        <!-- <button
+        <button
           type="button"
           (click)="generateWalletAddress()"
           class="flex-1 px-4 h-11 rounded-xl bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition"
         >
           Generate Address
-        </button> -->
+        </button>
       </div>
     </div>
     <div class="space-y-1">
@@ -230,6 +230,46 @@
         <div *ngIf="capacityRanges.length === 1 && i === 0" class="w-9"></div>
       </div>
 
+        <!-- Partial Payin Status -->
+<div class="flex items-center gap-2">
+  <input
+    type="checkbox"
+    id="partialPayinEnabled_crypto"
+    [(ngModel)]="partialPayinEnabled"
+    class="w-4 h-4 accent-green-600 rounded cursor-pointer"
+  />
+  <label
+    for="partialPayinEnabled_crypto"
+    class="text-sm font-medium text-gray-700 cursor-pointer"
+    >Enable Partial Payin</label
+  >
+</div>
+
+<!-- Partial Pay Min Range -->
+<div *ngIf="partialPayinEnabled" class="space-y-1">
+  <label class="text-sm font-medium text-gray-700">Partial Pay Min Range</label>
+  <div class="relative">
+    <span
+      class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-xs"
+      [ngClass]="networkColorClass"
+      >{{ networkSymbol }}</span
+    >
+    <input
+      type="number"
+      [(ngModel)]="partialPayinMinRange"
+      [max]="smallestCapacityRangeLimit"
+      placeholder="Max: {{ smallestCapacityRangeLimit ?? 'N/A' }}"
+      class="w-full h-11 pl-7 pr-3 border border-gray-300 rounded-xl text-sm outline-none focus:border-green-500 transition"
+    />
+  </div>
+  <p
+    *ngIf="partialPayinMinRange != null && smallestCapacityRangeLimit != null && partialPayinMinRange > smallestCapacityRangeLimit"
+    class="text-xs text-red-500"
+  >
+    Cannot exceed smallest capacity range ({{ smallestCapacityRangeLimit }})
+  </p>
+</div>
+
       <div class="flex justify-end gap-3 pt-2">
         <button
           (click)="onCancel()"
@@ -249,3 +289,7 @@
     </div>
   </div>
 </div>
+
+
+
+

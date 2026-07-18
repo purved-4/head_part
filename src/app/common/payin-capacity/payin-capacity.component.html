@@ -33,19 +33,9 @@
         </div>
         <div class="text-lg font-bold text-[var(--color-text-main)]">
           Limit:
-
-          <!-- VIEW MODE -->
-          <span *ngIf="!isEditing">
+          <span>
             {{ limitAmount | currency: "INR" : "symbol" }}
           </span>
-
-          <!-- EDIT MODE -->
-          <input
-            *ngIf="isEditing"
-            type="number"
-            [(ngModel)]="limitAmount"
-            class="border rounded px-2 py-1 w-40 text-black"
-          />
         </div>
         <button
           *ngIf="!isEditing"

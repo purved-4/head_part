@@ -6,7 +6,7 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from "@angular/forms";
 import { debounceTime, distinctUntilChanged, map, Subscription } from "rxjs";
 import { INDIAN_BANKS } from "../../../../utils/constants";
 import { BankService } from "../../../../pages/services/bank.service";
@@ -105,6 +105,8 @@ export class AddBankComponent implements OnInit, OnDestroy {
         ],
 
         fttAcceptance: [true],
+        partialPayinEnabled: [true],
+    partialPayinMinRange: [{ value: null, disabled: false }],
       },
       // { validators: this.accountNumberMatchValidator },
     );
@@ -123,6 +125,8 @@ export class AddBankComponent implements OnInit, OnDestroy {
       accountType: "",
       limitAmount: "",
       fttAcceptance: true,
+      partialPayinEnabled:false,
+      partialPayinMinRange:null
     });
     this.addBankForm.markAsUntouched();
     this.bankSearchTerm = "";
@@ -147,6 +151,8 @@ export class AddBankComponent implements OnInit, OnDestroy {
       accountType: "",
       limitAmount: "",
       fttAcceptance: true,
+      partialPayinEnabled:true,
+      partialPayinMinRange:null
     });
     this.isAdding = false;
 
@@ -209,10 +215,10 @@ export class AddBankComponent implements OnInit, OnDestroy {
       this.addBankForm.get(key)?.markAsTouched(),
     );
 
-    if (this.addBankForm.invalid) {
-      this.snack.show("Please fill in all required fields correctly.", false);
-      return;
-    }
+    // if (this.addBankForm.invalid) {
+    //   this.snack.show("Please fill in all required fields correctly.", false);
+    //   return;
+    // }
 
     this.isAdding = true;
     const formData = this.addBankForm.getRawValue();
@@ -248,6 +254,8 @@ export class AddBankComponent implements OnInit, OnDestroy {
       status: true,
       fttAcceptance: formData.fttAcceptance,
       ranges: validRanges.length ? validRanges : null,
+      partialPayinEnabled:formData.partialPayinEnabled,
+      partialPayinMinRange:formData.partialPayinMinRange
     };
     const sub = this.bankService.addBank(payload).subscribe({
       next: (res) => {
@@ -286,6 +294,8 @@ export class AddBankComponent implements OnInit, OnDestroy {
 
     this.capacityRanges[index].minRange =
       value === "" || value === null ? null : Number(value);
+
+       this.revalidatepartialPayinMinRange();
   }
 
   updateTo(index: number, event: any) {
@@ -293,6 +303,8 @@ export class AddBankComponent implements OnInit, OnDestroy {
 
     this.capacityRanges[index].maxRange =
       value === "" || value === null ? null : Number(value);
+
+       this.revalidatepartialPayinMinRange();
   }
 
   updateQuantity(index: number, event: any) {
@@ -328,6 +340,7 @@ export class AddBankComponent implements OnInit, OnDestroy {
       maxRange: null,
       quantity: null,
     });
+     this.revalidatepartialPayinMinRange();
   }
 
   removeRange(index: number) {
@@ -342,6 +355,7 @@ export class AddBankComponent implements OnInit, OnDestroy {
         },
       ];
     }
+     this.revalidatepartialPayinMinRange();
   }
   onIfscInput(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -398,4 +412,44 @@ export class AddBankComponent implements OnInit, OnDestroy {
     this.addBankForm.get("bankName")?.enable();
     this.addBankForm.get("bankName")?.setValue("");
   }
+  get smallestCapacityRangeLimit(): number | null {
+  const validRanges = this.capacityRanges.filter(
+    (r) => r.minRange != null && r.minRange > 0
+  );
+  if (!validRanges.length) return null;
+  return Math.min(...validRanges.map((r) => r.minRange));
+}
+private partialPayinMinRangeValidator = (control: AbstractControl): ValidationErrors | null => {
+  if (!this.addBankForm?.get("partialPayinEnabled")?.value) return null;
+
+  const max = this.smallestCapacityRangeLimit;
+  if (max == null) return { noCapacityRanges: true };
+
+  if (control.value == null || control.value === "") return { required: true };
+  const val = Number(control.value);
+  if (val <= 0) return { min: true };
+  if (val > max) return { exceedsMax: { max } };
+
+  return null;
+};
+onPartialPayinToggle(): void {
+  const enabled = this.addBankForm.get("partialPayinEnabled")?.value;
+  const limitControl = this.addBankForm.get("partialPayinMinRange");
+
+  if (enabled) {
+    limitControl?.enable();
+    // limitControl?.setValidators([this.partialPayinMinRangeValidator]);
+  } else {
+    limitControl?.disable();
+    limitControl?.clearValidators();
+    limitControl?.setValue(null);
+  }
+  limitControl?.updateValueAndValidity();
+}
+private revalidatepartialPayinMinRange(): void {
+  const limitControl = this.addBankForm.get("partialPayinMinRange");
+  if (limitControl?.enabled) {
+    limitControl.updateValueAndValidity();
+  }
+}
 }

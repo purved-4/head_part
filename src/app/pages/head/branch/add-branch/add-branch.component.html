@@ -227,6 +227,13 @@
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-muted)]"
                     >%</span
                   >
+
+                  <div
+                    *ngIf="minPercentage"
+                    class="mt-1 text-xs text-[var(--color-muted)]"
+                  >
+                    Max Allowed: {{ minPercentage.payinPercentage ?? 0 }}%
+                  </div>
                 </div>
                 <div
                   *ngIf="isFieldInvalid('payinPercentage')"
@@ -254,6 +261,13 @@
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-muted)]"
                     >%</span
                   >
+
+                  <div
+                    *ngIf="minPercentage"
+                    class="mt-1 text-xs text-[var(--color-muted)]"
+                  >
+                    Max Allowed: {{ minPercentage.payoutPercentage ?? 0 }}%
+                  </div>
                 </div>
                 <div
                   *ngIf="isFieldInvalid('payoutPercentage')"
@@ -281,6 +295,12 @@
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-muted)]"
                     >%</span
                   >
+                  <div
+                    *ngIf="minPercentage"
+                    class="mt-1 text-xs text-[var(--color-muted)]"
+                  >
+                    Max Allowed: {{ minPercentage.fttPercentage ?? 0 }}%
+                  </div>
                 </div>
                 <div
                   *ngIf="isFieldInvalid('fttPercentage')"

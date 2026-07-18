@@ -427,8 +427,98 @@
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
 
-            
+          <!-- PARTIAL PAYIN -->
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+              Partial Payin
+            </h3>
+
+            <div class="space-y-4">
+              <!-- partial payin status -->
+              <div class="grid grid-cols-2 gap-3 items-center">
+                <p class="text-sm text-gray-500">Partial Payin Status</p>
+
+                <!-- View mode -->
+                <div *ngIf="!isEditMode">
+                  <span
+                    class="text-sm font-semibold"
+                    [ngClass]="
+                      bankData?.partialPayinEnabled
+                        ? 'text-green-600'
+                        : 'text-gray-500'
+                    "
+                  >
+                    {{ bankData?.partialPayinEnabled ? "Enabled" : "Disabled" }}
+                  </span>
+                </div>
+
+                <!-- Edit mode -->
+                <div *ngIf="isEditMode" class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    (click)="
+                      updateForm.partialPayinEnabled =
+                        !updateForm.partialPayinEnabled
+                    "
+                    class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors duration-300"
+                    [ngClass]="
+                      updateForm.partialPayinEnabled
+                        ? 'bg-green-500'
+                        : 'bg-gray-300'
+                    "
+                  >
+                    <span
+                      class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300"
+                      [ngClass]="
+                        updateForm.partialPayinEnabled
+                          ? 'translate-x-5'
+                          : 'translate-x-1'
+                      "
+                    ></span>
+                  </button>
+
+                  <span
+                    class="text-xs font-semibold"
+                    [ngClass]="
+                      updateForm.partialPayinEnabled
+                        ? 'text-green-600'
+                        : 'text-gray-500'
+                    "
+                  >
+                    {{ updateForm.partialPayinEnabled ? "ON" : "OFF" }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- CAPACITY RANGE -->
+              <div class="grid grid-cols-2 gap-3">
+                <p class="text-sm text-gray-500">Partial Payin Min Range</p>
+
+                <div *ngIf="!isEditMode">
+                  <p class="text-sm font-semibold text-gray-800">
+                    {{ bankData?.partialPayinMinRange || 0 }}
+                  </p>
+                </div>
+
+                <div *ngIf="isEditMode">
+                  <input
+                    appEnterKeyFocus
+                    [(ngModel)]="updateForm.partialPayinMinRange"
+                    type="number"
+                    [max]="smallestCapacityRangeLimit"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                  <p
+                    *ngIf="isPartialPayinMinRangeInvalid"
+                    class="text-xs text-red-500 mt-1"
+                  >
+                     Must be less than smallest capacity range ({{ smallestCapacityRangeLimit }})
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -472,7 +562,7 @@
       <button
         *ngIf="isEditMode"
         (click)="submitUpdate()"
-        [disabled]="isSubmitting"
+        [disabled]="isSubmitting || isPartialPayinMinRangeInvalid"
         class="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
       >
         {{ isSubmitting ? "Updating..." : "Update Account" }}

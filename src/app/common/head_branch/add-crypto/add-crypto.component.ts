@@ -1,4 +1,3 @@
-
 import {
   Component,
   EventEmitter,
@@ -56,6 +55,8 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
   accountHolderName = "";
   walletLimit: number | null = null;
   acceptsPpi = true;
+  partialPayinEnabled = true;
+  partialPayinMinRange: number | null = null;
   isSubmitting = false;
 
   selectedCurrency: any = null;
@@ -198,6 +199,28 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
+     if (this.partialPayinEnabled) {
+    const max = this.smallestCapacityRangeLimit;
+
+    if (max == null) {
+      this.snackBar.show("Add at least one valid capacity range first.", false);
+      return;
+    }
+
+    if (this.partialPayinMinRange == null || this.partialPayinMinRange <= 0) {
+      this.snackBar.show("Partial pay min range is required.", false);
+      return;
+    }
+
+    if (this.partialPayinMinRange > max) {
+      this.snackBar.show(
+        `Partial pay min range cannot exceed smallest capacity range (${max}).`,
+        false,
+      );
+      return;
+    }
+  }
+
     const validRanges = this.capacityRanges
       .filter(
         (r) =>
@@ -226,6 +249,8 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
       limitAmount: this.walletLimit,
       fttAcceptance: this.acceptsPpi || true,
       ranges: validRanges.length ? validRanges : null,
+       partialPayinEnabled: this.partialPayinEnabled,
+  partialPayinMinRange: this.partialPayinEnabled ? this.partialPayinMinRange : null,
     };
 
     const formData = new FormData();
@@ -426,4 +451,11 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
       this.uploadedPreviewUrl = null;
     }
   }
+  get smallestCapacityRangeLimit(): number | null {
+  const validRanges = this.capacityRanges.filter(
+    (r) => r.minRange != null && r.minRange > 0
+  );
+  if (!validRanges.length) return null;
+  return Math.min(...validRanges.map((r) => r.minRange!));
+}
 }

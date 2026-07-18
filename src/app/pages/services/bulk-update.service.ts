@@ -65,4 +65,13 @@ export class BulkUpdateService {
         catchError((error) => throwError(() => error)),
       );
   }
+  getReslovedNotificationById(requestId: any): Observable<any> {
+    return this.http
+      .get(`${baseUrl}/percentage-change-request/${requestId}`)
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+  
 }

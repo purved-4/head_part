@@ -5,6 +5,7 @@ import { Router } from "@angular/router";
 import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
 import { UserStateService } from "../../../../store/user-state.service";
 import { BranchService } from "../../../services/branch.service";
+import { ComPartService } from "../../../services/com-part.service";
 
 @Component({
   selector: "app-add-branch",
@@ -18,13 +19,14 @@ export class AddBranchComponent implements OnInit {
 
   currentUserId: string | null = "";
   role: string | null = "";
-
+  minPercentage: any = null;
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private snackService: SnackbarService,
     private userStateService: UserStateService,
     private branchService: BranchService,
+    private comPartService: ComPartService,
   ) {
     this.chiefForm = this.fb.group({
       username: ["", Validators.required],
@@ -50,8 +52,24 @@ export class AddBranchComponent implements OnInit {
   ngOnInit(): void {
     this.currentUserId = this.userStateService.getCurrentEntityId();
     this.role = this.userStateService.getRole();
+
+    if (this.currentUserId && this.role) {
+      this.loadMinPercentages();
+    }
   }
 
+  loadMinPercentages(): void {
+    this.comPartService
+      .getPercentageByEntityId(this.currentUserId, this.role)
+      .subscribe({
+        next: (res: any) => {
+          this.minPercentage = res?.minPercentage || {};
+        },
+        error: () => {
+          this.minPercentage = null;
+        },
+      });
+  }
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }

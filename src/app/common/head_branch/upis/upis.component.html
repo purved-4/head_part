@@ -439,7 +439,7 @@
           <th
             class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
           >
-            Capacity Ranges
+            Capacity
           </th>
           <th
             class="px-4 py-3 text-left text-xs font-semibold text-[var(--color-font)] uppercase tracking-wider"
@@ -1258,6 +1258,65 @@
               </label>
             </div>
           </div>
+          <div class="grid grid-cols-2 items-center gap-3">
+            <p class="text-sm text-gray-500">Partial Payin Status</p>
+
+            <div class="flex items-center justify-end gap-3">
+              <span
+                class="text-xs font-semibold transition-all duration-300"
+                [ngClass]="
+                  updateForm.partialPayinEnabled
+                    ? 'text-green-600'
+                    : 'text-gray-500'
+                "
+              >
+                {{ updateForm.partialPayinEnabled ? "ON" : "OFF" }}
+              </span>
+
+              <label class="relative inline-flex cursor-pointer items-center">
+                <input
+                  type="checkbox"
+                  appEnterKeyFocus
+                  class="peer sr-only"
+                  [(ngModel)]="updateForm.partialPayinEnabled"
+                  [ngModelOptions]="{ standalone: true }"
+                />
+                <div
+                  class="h-7 w-14 rounded-full bg-gray-300 transition-all duration-300 peer-checked:bg-green-500"
+                ></div>
+                <div
+                  class="absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow-md transition-all duration-300 ease-in-out peer-checked:translate-x-7"
+                ></div>
+              </label>
+            </div>
+          </div>
+          <!-- Partial Payin Min Range -->
+          <div *ngIf="updateForm.partialPayinEnabled">
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-1"
+            >
+              Partial Payin Min Range
+              <span class="text-[var(--color-danger)]">*</span>
+            </label>
+            <input
+              type="number"
+              [(ngModel)]="updateForm.partialPayinMinRange"
+              name="partialPayinMinRange"
+              [ngModelOptions]="{ standalone: true }"
+              [max]="smallestUpdateCapacityRangeLimit"
+              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+              placeholder="Max: {{ smallestUpdateCapacityRangeLimit ?? 'N/A' }}"
+            />
+            <div
+              *ngIf="isUpdatePartialPayinMinRangeInvalid"
+              class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
+            >
+              <span class="material-icons mr-1 text-sm">error</span>
+              Must be less than smallest capacity range ({{
+                smallestUpdateCapacityRangeLimit
+              }})
+            </div>
+          </div>
           <!-- Buttons -->
           <div class="pt-3 border-t border-[var(--color-border)]">
             <div class="flex gap-3">
@@ -1266,7 +1325,8 @@
                 [disabled]="
                   isSubmitting ||
                   !isValidUpiId(updateForm.vpa) ||
-                  (vpaChanged && !newQrGenerated && !updateManualQrFile)
+                  (vpaChanged && !newQrGenerated && !updateManualQrFile) ||
+                  isUpdatePartialPayinMinRangeInvalid
                 "
                 class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50"
               >
