@@ -1,4 +1,3 @@
-
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
@@ -116,6 +115,10 @@ export class AddBranchComponent implements OnInit {
       return;
     }
 
+    if (!this.validateMaxAllowedPercentage()) {
+      return;
+    }
+
     const payload = {
       username: this.chiefForm.value.username,
       userEmail: this.chiefForm.value.userEmail,
@@ -173,5 +176,27 @@ export class AddBranchComponent implements OnInit {
   isFieldInvalid(fieldName: string): boolean {
     const field = this.chiefForm.get(fieldName);
     return !!field && field.invalid && field.touched;
+  }
+
+  private validateMaxAllowedPercentage(): boolean {
+    const payin = Number(this.chiefForm.get("payinPercentage")?.value);
+    const payout = Number(this.chiefForm.get("payoutPercentage")?.value);
+    const ftt = Number(this.chiefForm.get("fttPercentage")?.value);
+
+    if (
+      this.minPercentage &&
+      (payin > (this.minPercentage.payinPercentage ?? 100) ||
+        payout > (this.minPercentage.payoutPercentage ?? 100) ||
+        ftt > (this.minPercentage.fttPercentage ?? 100))
+    ) {
+      this.snackService.show(
+        "Entered percentage exceeds the maximum allowed percentage.",
+        false,
+        3000,
+      );
+      return false;
+    }
+
+    return true;
   }
 }

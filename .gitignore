@@ -6,3 +6,4 @@ bun.lock
 dummy.txt
 backups/
 .VSCodeCounter/
+helper.ts/
