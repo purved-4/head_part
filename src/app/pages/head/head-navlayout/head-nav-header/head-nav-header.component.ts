@@ -724,5 +724,24 @@ togglePercentages(event: MouseEvent) {
 closePercentagesModal() {
   this.showPercentagesModal = false;
 }
+
+claimRewards() {
+  this.fundService.claimRewards().subscribe({
+    next: (res: any) => {
+      this.rewards = res.released;
+      this.snack.show(
+        res?.message || 'Rewards claimed successfully',
+        true
+      );
+
+    },
+    error: (err) => {
+      this.snack.show(
+        err?.error?.message || 'Failed to claim rewards',
+        false
+      );
+    },
+  });
+}
 }
 

@@ -59,7 +59,8 @@
         </div>
 
         <div class="stat-item relative group">
-          <div class="flex items-center space-x-2 cursor-pointer">
+          <div class="flex items-center space-x-2 cursor-pointer"
+          (click)="claimRewards()">
             <div class="w-2 h-2 rounded-full bg-[var(--color-info)]"></div>
             <!-- <span class="text-sm font-medium">
               Reward: ₹{{ formatIndianAmount(rewards) }}

@@ -661,5 +661,15 @@ rejectCryptoFund(
         catchError((error) => throwError(() => error)),
       );
   }
+
+  claimRewards() {
+  return this.http.post(
+    `${baseUrl}/payout-rewards/claim`,
+    {}
+  ).pipe(
+          map((response: any) => response.data),
+          catchError((error) => throwError(() => error)),
+       );
+}
  
 }
