@@ -101,7 +101,10 @@
           </div>
           <!-- Register link -->
           <!-- Register link -->
-          <p class="text-center text-gray-500 text-sm pt-2">
+          <p
+            class="text-center text-gray-500 text-sm pt-2"
+            *ngIf="selfRegisterEnabled; else registrationClosed"
+          >
             Don't have an account?
             <a
               routerLink="/register/code"
@@ -110,6 +113,15 @@
               Register
             </a>
           </p>
+
+          <ng-template #registrationClosed>
+            <p class="text-center text-gray-500 text-sm pt-2">
+              Registration is
+              <span class="font-semibold text-red-500"
+                >temporarily closed.</span
+              >
+            </p>
+          </ng-template>
         </form>
       </div>
     </div>
@@ -222,3 +234,4 @@
     </div>
   </div>
 </div>
+

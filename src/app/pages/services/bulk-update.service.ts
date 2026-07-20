@@ -73,5 +73,4 @@ export class BulkUpdateService {
         catchError((error) => throwError(() => error)),
       );
   }
-  
 }

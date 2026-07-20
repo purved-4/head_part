@@ -1,5 +1,3 @@
-
-
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { ChiefManualService } from "../../pages/services/chief-manual.service";
@@ -24,6 +22,10 @@ export class BranchRegisterComponent implements OnInit {
   isEditingPromo: boolean = false;
   submitting: boolean = false;
 
+  // affiliate link coming from the URL, e.g. /register/affiliateLink?affiliateLink=B1DFB26ADC
+  // this is ALWAYS locked/read-only when present, unlike the promo code
+  affiliateLink: string | null = null;
+
   // --- Edit confirm modal ---
   showEditConfirmModal: boolean = false;
 
@@ -35,14 +37,18 @@ export class BranchRegisterComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-  const codeFromUrl = this.route.snapshot.queryParamMap.get("code");
-  this.promoCode = codeFromUrl;
-  this.promoLocked = !!codeFromUrl;
+    const codeFromUrl = this.route.snapshot.queryParamMap.get("code");
+    this.promoCode = codeFromUrl;
+    this.promoLocked = !!codeFromUrl;
+
+    const affiliateLinkFromUrl =
+      this.route.snapshot.queryParamMap.get("affiliateLink");
+    this.affiliateLink = affiliateLinkFromUrl;
   }
 
   // Turning edit ON needs confirmation, turning it OFF (Done) doesn't
   togglePromoEdit(): void {
-     if (this.promoLocked) return;
+    if (this.promoLocked) return;
     if (this.isEditingPromo) {
       this.isEditingPromo = false;
       return;
@@ -72,7 +78,8 @@ export class BranchRegisterComponent implements OnInit {
     this.submitting = true;
 
     this.ChiefManualService.performManualAction(
-      this.promoCode,
+      null,
+      this.affiliateLink,
       payload,
     ).subscribe({
       next: (res: any) => {
@@ -97,5 +104,3 @@ export class BranchRegisterComponent implements OnInit {
     this.password = "";
   }
 }
-
-

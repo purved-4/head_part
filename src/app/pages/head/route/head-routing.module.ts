@@ -1,4 +1,3 @@
-import { ResolvedNotificationComponent } from './../../../common/resolved-notification/resolved-notification.component';
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AddBranchComponent } from "../branch/add-branch/add-branch.component";
@@ -33,6 +32,7 @@ import { HeadBranchDashboardComponent } from "../../../common/head_branch/head-b
 import { SharedUserProfileComponent } from "../../../common/shared-user-profile/shared-user-profile.component";
 import { RecycleManagementComponent } from "../../../common/head_branch/recycle-management/recycle-management.component";
 import { CryptoManagementComponent } from "../../../common/head_branch/crypto-management/crypto-management.component";
+import { ResolvedNotificationComponent } from "../../../common/resolved-notification/resolved-notification.component";
 
 const routes: Routes = [
   {
@@ -165,14 +165,14 @@ const routes: Routes = [
         path: "sharedUserProfile",
         component: SharedUserProfileComponent
      },
-     {
-        path: "resolved-notification",
-        component: ResolvedNotificationComponent,
-      },
       {
         path: "",
         redirectTo: "bank",
         pathMatch: "full",
+      },
+      {
+        path: "resolved-notification",
+        component: ResolvedNotificationComponent,
       },
     ],
   },

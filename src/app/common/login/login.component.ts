@@ -7,6 +7,7 @@ import { UserStateService } from "../../store/user-state.service";
 import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
 import { AuthMemoryService } from "../../pages/services/auth-memory.service";
 import { SubjectRegistryService } from "../../registery/subject-registry.service";
+import { ChiefService } from "../../pages/services/chief.service";
 
 @Component({
   selector: "app-login",
@@ -18,18 +19,18 @@ export class LoginComponent implements OnInit {
     email: "",
     password: "",
   };
-  isMenuOpen=false;
+  isMenuOpen = false;
 
-   stats = [
-  { title: 'Balance', value: 0, target: 845620},
-  { title: 'Savings', value: 0, target: 210000 },
-  { title: 'Income', value: 0, target: 125000 },
-  { title: 'Expenses', value: 0, target: 48200 },
-  { title: 'Investments', value: 0, target: 375000 }
-];
+  stats = [
+    { title: "Balance", value: 0, target: 845620 },
+    { title: "Savings", value: 0, target: 210000 },
+    { title: "Income", value: 0, target: 125000 },
+    { title: "Expenses", value: 0, target: 48200 },
+    { title: "Investments", value: 0, target: 375000 },
+  ];
 
   showPassword = false;
-
+  selfRegisterEnabled = false;
   constructor(
     private authService: AuthService,
     private router: Router,
@@ -39,38 +40,38 @@ export class LoginComponent implements OnInit {
     private socketConfigService: SocketConfigService,
     private memoryService: AuthMemoryService,
     private subjectService: SubjectRegistryService,
+    private chiefService: ChiefService,
   ) {}
- 
 
-   ngOnInit(): void {
+  ngOnInit(): void {
     this.socketConfigService.destroyAll();
     this.memoryService.setAccessToken(null);
     this.userStateService.setCurrentUser(null);
-
-     this.stats.forEach(stat => {
-    this.animate(stat);
-  });
+    this.chiefService.checkSelfRegister().subscribe({
+      next: (res: boolean) => {
+        this.selfRegisterEnabled = res;
+      },
+      error: () => {
+        this.selfRegisterEnabled = false;
+      },
+    });
+    this.stats.forEach((stat) => {
+      this.animate(stat);
+    });
   }
- 
 
-animate(stat: any) {
+  animate(stat: any) {
+    const increment = stat.target / 100;
 
-  const increment = stat.target / 100;
+    const timer = setInterval(() => {
+      stat.value += increment;
 
-  const timer = setInterval(() => {
-
-    stat.value += increment;
-
-    if (stat.value >= stat.target) {
-      stat.value = stat.target;
-      clearInterval(timer);
-    }
-
-  }, 20);
-}
-
-
- 
+      if (stat.value >= stat.target) {
+        stat.value = stat.target;
+        clearInterval(timer);
+      }
+    }, 20);
+  }
 
   formSubmit() {
     if (!this.loginData.email || this.loginData.email.trim() === "") {
@@ -86,7 +87,7 @@ animate(stat: any) {
     this.authService.loginAndLoadUser(this.loginData).subscribe({
       next: (res: any) => {
         this.navigateToRoleHome(res?.role[0]?.name);
-         this.snackbarService.show("Login Successful", true, 4000);
+        this.snackbarService.show("Login Successful", true, 4000);
       },
       error: (err) => {
         const msg =
@@ -134,7 +135,7 @@ animate(stat: any) {
     }
   }
 
-   toggleMobileMenu() {
+  toggleMobileMenu() {
     this.isMenuOpen = !this.isMenuOpen;
   }
 }

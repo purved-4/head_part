@@ -17,19 +17,25 @@ export class ChiefManualService {
     );
   }
 
-performManualAction(promoCode: string | null, payload: any) {
-  let params = new HttpParams();
+performManualAction(
+    promoCode: string | null,
+    affiliateLink: any,
+    payload: any,
+  ) {
+    let params = new HttpParams();
 
-  if (promoCode?.trim()) {
-    params = params.set('promoCode', promoCode);
+    if (promoCode?.trim()) {
+      params = params.set("promoCode", promoCode);
+    }
+
+    if (affiliateLink?.trim()) {
+      params = params.set("affiliateLink", affiliateLink);
+    }
+
+    return this.http.post(`${baseUrl}/manual/performManualAction`, payload, {
+      params,
+    });
   }
-
-  return this.http.post(
-    `${baseUrl}/manual/performManualAction`,
-    payload,
-    { params }
-  );
-}
 
   getManualStatus(chiefId: any, portalId: any) {
     return this.http

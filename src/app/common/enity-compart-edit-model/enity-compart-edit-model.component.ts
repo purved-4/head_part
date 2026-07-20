@@ -153,6 +153,10 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       username: ["", Validators.required],
       info: [""],
       parentCurrency: [""],
+      payoutAcceptTime: [
+        null,
+        [Validators.required, Validators.min(1), Validators.max(60)],
+      ],
     });
   }
 
@@ -163,6 +167,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       username: this.entityData.username ?? "",
       info: this.entityData.info ?? "",
       parentCurrency: this.entityData.parentCurrency || "",
+      payoutAcceptTime: this.entityData.payoutAcceptTime ?? null,
     });
   }
 
@@ -414,6 +419,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       id: this.data?.id ?? this.entityId,
       username: this.editForm.value.username,
       info: this.editForm.value.info,
+      payoutAcceptTime: this.editForm.value.payoutAcceptTime,
       parentCurrency: this.editForm.value.parentCurrency,
       active: !!(this.entityData?.active ?? this.data?.active),
       percentage: this.buildMinPercentagePayload(),

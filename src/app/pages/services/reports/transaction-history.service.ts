@@ -43,24 +43,58 @@ export interface PortalWiseReport {
 export class TransactionHistoryService {
   constructor(private http: HttpClient) {}
 getEntityReport(params: {
-    entityId: string;
+    entityId?: string;
     entityType: string;
     portalId?: string;
     from: string;
     to: string;
     page?: number;
     pageSize?: number;
+    transactionType?: string;
+    status?: string;
+    searchTerm?: string;
   }): Observable<any> {
-    let httpParams = new HttpParams()
-      .set("entityId", params.entityId)
-      .set("entityType", params.entityType.toUpperCase())
-      .set("from", DateTimeUtil.toUtcISOString(params.from))
-      .set("to", DateTimeUtil.toUtcISOString(params.to))
-      .set("page", String(params.page ?? 1))
-      .set("pageSize", String(params.pageSize ?? 10));
+    let httpParams = new HttpParams();
+
+    if (params.entityType) {
+      httpParams = httpParams.set(
+        "entityType",
+        params.entityType.toUpperCase(),
+      );
+    }
+
+    if (params.from) {
+      httpParams = httpParams.set(
+        "from",
+        DateTimeUtil.toUtcISOString(params.from),
+      );
+    }
+
+    if (params.to) {
+      httpParams = httpParams.set("to", DateTimeUtil.toUtcISOString(params.to));
+    }
+
+    httpParams = httpParams.set("page", String(params.page ?? 0));
+    httpParams = httpParams.set("pageSize", String(params.pageSize ?? 10));
+
+    if (params.entityId) {
+      httpParams = httpParams.set("entityId", params.entityId);
+    }
 
     if (params.portalId) {
       httpParams = httpParams.set("portalId", params.portalId);
+    }
+
+    if (params.transactionType) {
+      httpParams = httpParams.set("transactionType", params.transactionType);
+    }
+
+    if (params.status) {
+      httpParams = httpParams.set("status", params.status);
+    }
+
+    if (params.searchTerm) {
+      httpParams = httpParams.set("searchTerm", params.searchTerm);
     }
 
     return this.http.get<any>(`${baseUrl}/balance-history/report`, {

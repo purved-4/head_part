@@ -114,6 +114,36 @@
               <option value="USD">USD</option>
             </select>
           </div>
+          <div *ngIf="currentEntityType === 'OWNER'">
+            <label
+              class="block text-sm font-medium text-[var(--color-font)] mb-1.5"
+            >
+              Payout Accept Time
+            </label>
+            <input
+              type="number"
+              formControlName="payoutAcceptTime"
+              class="w-full px-2 py-2 border rounded-lg bg-[var(--color-surface)] text-[var(--color-font)] border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-xs sm:text-sm"
+              placeholder="Enter time"
+              min="1"
+              max="60"
+            />
+
+            <p
+              *ngIf="isFieldInvalid('payoutAcceptTime')"
+              class="text-red-500 text-xs"
+            >
+              Value must be between 1 and 60
+            </p>
+
+            <p
+              *ngIf="
+                editForm.get('payoutAcceptTime')?.invalid &&
+                editForm.get('payoutAcceptTime')?.touched
+              "
+              class="text-xs text-[var(--color-danger)] mt-1"
+            ></p>
+          </div>
         </div>
 
         <!-- Loading state for percentages -->

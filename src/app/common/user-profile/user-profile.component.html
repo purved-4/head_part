@@ -32,7 +32,7 @@
         </button>
 
         <button
-          *ngIf="role === 'HEAD' || role === 'BRANCH'"
+          *ngIf="role === 'HEAD' || role === 'BRANCH' || role === 'CHIEF'"
           (click)="selectSection('cp')"
           class="group relative flex items-center justify-center sm:justify-start gap-1 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-all duration-200"
           [class.bg-white]="selectedSection === 'cp'"

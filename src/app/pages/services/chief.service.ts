@@ -300,5 +300,11 @@ getSelfRegistrationEligibility(chiefId: string): Observable<any> {
       .put<any>(`${baseUrl}/dynamic-distribution/${batchId}/deactivate`, {})
       .pipe(catchError((error) => throwError(() => error)));
   }
+
+  checkSelfRegister(): Observable<any> {
+    return this.http
+      .get(`${baseUrl}/chief/self-registration/check`)
+      .pipe(catchError((error) => throwError(() => error)));
+  }
   
 }

@@ -76,10 +76,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     glow: "rgba(90,11,149,0.50)",
   };
 
-  roleColorMap = {
-    /* ... same as before ... */
-  };
-
   private subs: Subscription[] = [];
 
   constructor(
@@ -165,8 +161,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.cpIdToDomain = {};
     for (const w of this.cpInfo) {
       if (w.cpId)
-        this.cpIdToDomain[w.cpId] =
-          w.cpDomain || w._raw?.name || w.cpId;
+        this.cpIdToDomain[w.cpId] = w.cpDomain || w._raw?.name || w.cpId;
     }
 
     this.rewards = [];
@@ -271,9 +266,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         ? w.processingTime
         : w.processing_time || w._processingTime || [];
       out.push({
-        cpId:  w.compartId  ?? w.cpId ?? null,
-        compartUsername:
-         w.compartUsername ?? w.domain  ?? "unknown",
+        cpId: w.compartId ?? w.cpId ?? null,
+        compartUsername: w.compartUsername ?? w.domain ?? "unknown",
         fttPercentage:
           w.fttPercentage ?? w.ftt_percentage ?? w.firstPayinPercentage ?? null,
         payinPercentage: w.payinPercentage ?? w.payin_percentage ?? null,

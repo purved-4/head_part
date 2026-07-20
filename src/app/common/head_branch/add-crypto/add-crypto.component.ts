@@ -212,13 +212,13 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    if (this.partialPayinMinRange > max) {
-      this.snackBar.show(
-        `Partial pay min range cannot exceed smallest capacity range (${max}).`,
-        false,
-      );
-      return;
-    }
+    if (this.partialPayinMinRange >= max) {
+  this.snackBar.show(
+    `Partial pay min range must be less than smallest capacity range (${max}).`,
+    false,
+  );
+  return;
+}
   }
 
     const validRanges = this.capacityRanges
