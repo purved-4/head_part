@@ -115,10 +115,6 @@ export class AddBranchComponent implements OnInit {
       return;
     }
 
-    if (!this.validateMaxAllowedPercentage()) {
-      return;
-    }
-
     const payload = {
       username: this.chiefForm.value.username,
       userEmail: this.chiefForm.value.userEmail,
@@ -144,13 +140,36 @@ export class AddBranchComponent implements OnInit {
         this.clearForm();
       },
       error: (err) => {
-        this.loading = false;
+  this.loading = false;
+
+  this.comPartService
+    .getPercentageByEntityId(this.currentUserId, this.role)
+    .subscribe({
+      next: (res: any) => {
+        if (res?.minPercentage) {
+          this.minPercentage = res.minPercentage;
+
+          ["payinPercentage", "payoutPercentage", "fttPercentage"].forEach(
+            (field: any) => this.validatePercentage(field)
+          );
+        }
+
+        this.snackService.show(
+          err?.error?.message ||
+            "Allowed percentages have changed. Please review the highlighted fields.",
+          false,
+          4000
+        );
+      },
+      error: () => {
         this.snackService.show(
           err?.error?.message || "Failed to create branch",
           false,
-          3000,
+          3000
         );
       },
+    });
+}
     });
   }
 
@@ -178,25 +197,31 @@ export class AddBranchComponent implements OnInit {
     return !!field && field.invalid && field.touched;
   }
 
-  private validateMaxAllowedPercentage(): boolean {
-    const payin = Number(this.chiefForm.get("payinPercentage")?.value);
-    const payout = Number(this.chiefForm.get("payoutPercentage")?.value);
-    const ftt = Number(this.chiefForm.get("fttPercentage")?.value);
 
-    if (
-      this.minPercentage &&
-      (payin > (this.minPercentage.payinPercentage ?? 100) ||
-        payout > (this.minPercentage.payoutPercentage ?? 100) ||
-        ftt > (this.minPercentage.fttPercentage ?? 100))
-    ) {
-      this.snackService.show(
-        "Entered percentage exceeds the maximum allowed percentage.",
-        false,
-        3000,
-      );
-      return false;
+
+  validatePercentage(
+  field: "payinPercentage" | "payoutPercentage" | "fttPercentage"
+): void {
+  const control = this.chiefForm.get(field);
+
+  if (!control || !this.minPercentage) return;
+
+  const entered = Number(control.value ?? 0);
+  const allowed = Number(this.minPercentage[field] ?? 0);
+
+  if (entered > allowed) {
+    control.setErrors({
+      ...(control.errors || {}),
+      exceededLimit: true,
+    });
+  } else {
+    if (control.hasError("exceededLimit")) {
+      const errors = { ...(control.errors || {}) };
+      delete errors["exceededLimit"];
+      control.setErrors(Object.keys(errors).length ? errors : null);
     }
-
-    return true;
   }
+
+  control.markAsTouched();
+}
 }

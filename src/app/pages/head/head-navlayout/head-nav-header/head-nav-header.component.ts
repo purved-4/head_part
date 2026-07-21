@@ -191,6 +191,12 @@ isExposureOpen = false;
       keywords: ["profile", "user"],
       icon: "person",
     },
+        {
+      label: "Resolved Notification",
+      path: "/head/resolved-notification",
+      keywords: ["resolved", "notification"],
+      icon: "notifications_unread",
+    },
   ];
   selectedIndex = -1;
 
