@@ -302,6 +302,25 @@
               <span class="material-icons text-sm">swap_horiz</span>
             </button>
 
+            <!-- Edit -->
+            <button
+              (click)="openCompartModal(agent)"
+              class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              title="Edit"
+            >
+              <span class="material-icons text-sm">edit</span>
+            </button>
+
+            <!-- View Users -->
+            <button
+              *ngIf="agent.id"
+              [routerLink]="['/head/branch-user/manage', agent.id]"
+              class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
+              title="View Users"
+            >
+              <span class="material-icons text-sm">group</span>
+            </button>
+
             <!-- Limits -->
             <button
               *ngIf="agent.id"
@@ -312,24 +331,6 @@
               <span class="material-icons text-sm">account_balance_wallet</span>
             </button>
 
-            <!-- View Users -->
-            <button
-              *ngIf="agent.id"
-              [routerLink]="['/head/branch-user/manage', agent.id]"
-              class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
-              title="View Users"
-            >
-              <span class="material-icons text-sm">visibility</span>
-            </button>
-
-            <!-- Edit -->
-            <button
-              (click)="openCompartModal(agent)"
-              class="inline-flex items-center justify-center p-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 whitespace-nowrap flex-1 min-w-[40px]"
-              title="Edit"
-            >
-              <span class="material-icons text-sm">edit_square</span>
-            </button>
           </div>
         </div>
       </div>
@@ -354,7 +355,7 @@
                   <th class="px-4 py-2 text-left">Branch</th>
                   <!-- <th class="px-4 py-2 text-left">Email</th>
                 <th class="px-4 py-2 text-left">Phone</th> -->
-                  <th class="px-4 py-2 text-left">Status</th>
+                  <th class="px-4 py-2 text-center">Status</th>
                   <th class="px-4 py-2 text-right">Actions</th>
                 </tr>
               </thead>
@@ -421,7 +422,29 @@
                   <!-- Actions -->
                   <td class="px-4 py-2">
                     <div class="flex items-center justify-end gap-2">
+
+                       <button
+                        (click)="openCompartModal(agent)"
+                        class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
+                        title="Edit"
+                      >
+                        <span class="material-icons text-[16px]"
+                          >edit</span
+                        >
+                      </button>
+
                       <button
+                        *ngIf="agent.id"
+                        [routerLink]="['/head/branch-user/manage', agent.id]"
+                        class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
+                        title="View Users"
+                      >
+                        <span class="material-icons text-[16px]"
+                          >group</span
+                        >
+                      </button>
+
+                       <button
                         *ngIf="agent.id"
                         (click)="
                           openLimitPopup(agent); $event.stopPropagation()
@@ -434,26 +457,6 @@
                         >
                       </button>
 
-                      <button
-                        *ngIf="agent.id"
-                        [routerLink]="['/head/branch-user/manage', agent.id]"
-                        class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
-                        title="View Users"
-                      >
-                        <span class="material-icons text-[16px]"
-                          >visibility</span
-                        >
-                      </button>
-
-                      <button
-                        (click)="openCompartModal(agent)"
-                        class="w-7 h-7 inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-200"
-                        title="Edit"
-                      >
-                        <span class="material-icons text-[16px]"
-                          >edit_square</span
-                        >
-                      </button>
                     </div>
                   </td>
                 </tr>

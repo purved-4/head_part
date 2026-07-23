@@ -1,3 +1,5 @@
+
+
 import {
   Component,
   Input,
@@ -88,13 +90,6 @@ isExposureOpen = false;
     },
 
     {
-      label: "Override Currency",
-      path: "/head/override-currency-management",
-      keywords: ["currency", "rate", "exchange"],
-      icon: "currency_exchange",
-    },
-
-    {
       label: "Recycle UPI",
       path: "/head/recycle-management",
       keywords: ["recycle", "upi"],
@@ -151,27 +146,6 @@ isExposureOpen = false;
     },
 
     {
-      label: "Entity Report",
-      path: "/head/reports/entity-report",
-      keywords: ["entity", "report"],
-      icon: "bar_chart",
-    },
-
-    {
-      label: "Funds Report",
-      path: "/head/reports/funds-report",
-      keywords: ["fund", "report"],
-      icon: "account_balance_wallet",
-    },
-
-    {
-      label: "Work Time Report",
-      path: "/head/reports/work-time",
-      keywords: ["work", "time"],
-      icon: "schedule",
-    },
-
-    {
       label: "Banks",
       path: "/head/bank",
       keywords: ["bank", "accounts"],
@@ -186,17 +160,32 @@ isExposureOpen = false;
     },
 
     {
-      label: "Shared User Profile",
+      label: "User Profile",
       path: "/head/sharedUserProfile",
       keywords: ["profile", "user"],
       icon: "person",
     },
+
         {
-      label: "Resolved Notification",
+      label: "Resolved Notifications",
       path: "/head/resolved-notification",
-      keywords: ["resolved", "notification"],
+      keywords: ["resolved", "notifications"],
       icon: "notifications_unread",
     },
+
+        {
+      label: "Payin Reports",
+      path: "/head/reports/funds/payin/bank",
+      keywords: ["payin", "reports"],
+      icon: "account_balance",
+    },
+       {
+      label: "Payout Reports",
+      path: "/head/reports/funds/payout/payout",
+      keywords: ["payout", "reports"],
+      icon: "payment",
+    },
+
   ];
   selectedIndex = -1;
 
@@ -382,8 +371,8 @@ isExposureOpen = false;
         route.keywords.some((k: string) => k.includes(value)),
     );
 
-    this.showSearchDropdown = this.searchResults.length > 0;
-    this.selectedIndex = this.searchResults.length ? 0 : -1;
+    this.showSearchDropdown = true;
+    this.selectedIndex = -1;
   }
 
   onSearchKeyDown(event: KeyboardEvent) {

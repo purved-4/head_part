@@ -548,6 +548,7 @@ export class HeadNavSidebarComponent implements OnInit {
       "/head/override-currency-management": "currency_exchange",
       "/head/limit": "credit_card",
       "/head/pending-auto": "assignment",
+      "/head/resolved-notification": "notifications_unread",
 
       // Approved Funds
       "/head/reports/funds/payin/bank": "account_balance",
