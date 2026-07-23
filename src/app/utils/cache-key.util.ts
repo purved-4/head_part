@@ -1,8 +1,8 @@
-import { HttpRequest, HttpParams } from '@angular/common/http';
+import { HttpRequest, HttpParams } from "@angular/common/http";
 
 export function buildCacheKey(req: HttpRequest<any>): string {
   const method = req.method.toUpperCase();
-  const url = req.url.replace(/\/+$/, '');
+  const url = req.url.replace(/\/+$/, "");
 
   const params = normalizeParams(req.params);
 
@@ -12,31 +12,10 @@ export function buildCacheKey(req: HttpRequest<any>): string {
 function normalizeParams(params: HttpParams): string {
   const keys = params.keys().sort();
 
-  if (!keys.length) return '';
+  if (!keys.length) return "";
 
-  return keys
-    .map((key) => `${key}=${params.get(key)}`)
-    .join('&');
+  return keys.map((key) => `${key}=${params.get(key)}`).join("&");
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import { Injectable } from '@angular/core';
 // import { HttpClient } from '@angular/common/http';
@@ -50,7 +29,7 @@ function normalizeParams(params: HttpParams): string {
 //     private cache: HttpCacheService
 //   ) {}
 
-//   // ✅ Normal cached call
+//   //  Normal cached call
 //   getBankDataWithEntityIdAndPortalId(
 //     id: string,
 //     portalId: string
@@ -65,7 +44,7 @@ function normalizeParams(params: HttpParams): string {
 //       );
 //   }
 
-//   // ✅ REAL FORCE REFRESH (BEST PRACTICE)
+//   //  REAL FORCE REFRESH (BEST PRACTICE)
 //   refreshBankData(id: string, portalId: string): Observable<any> {
 //     const tag = `BANKS:${id}:${portalId}`;
 
@@ -77,9 +56,6 @@ function normalizeParams(params: HttpParams): string {
 //   }
 // }
 
-
-
-
 // Normal cached usage
 // this.bankService
 //   .getBankDataWithEntityIdAndPortalId(this.id, this.portalId)
@@ -87,15 +63,12 @@ function normalizeParams(params: HttpParams): string {
 //     this.bankData = data;
 //   });
 
-
 //   Real force refresh usage
 // this.bankService
 //   .refreshBankData(this.id, this.portalId)
 //   .subscribe((data) => {
 //     this.bankData = data;
 //   });
-
-
 
 //   First call
 // Component → API → Cache saved

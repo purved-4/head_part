@@ -1,12 +1,11 @@
-import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
 import { FundsService } from "../../../pages/services/funds.service";
 import { UserStateService } from "../../../store/user-state.service";
 import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { catchError, of, Subscription } from "rxjs";
 import { DateTimeUtil } from "../../../utils/date-time.utils";
 import { SnackbarService } from "../../snackbar/snackbar.service";
-import { ComPartService } from "../../../pages/services/com-part.service";
+import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
 
 @Component({
   selector: "app-hb-payout-report",
@@ -43,7 +42,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   payoutcomPartFilter = "";
   payoutDateFrom = "";
   payoutDateTo = "";
-  payoutcomParts: any[] = [];
 
   // ========== PAGINATION (client‑side) ==========
 
@@ -72,7 +70,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     private userStateService: UserStateService,
     private multimediaService: MultimediaService,
     private snackbar: SnackbarService,
-    private compartService: ComPartService,
+
     private router: Router,
   ) {}
 
@@ -86,8 +84,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
     this.setColorsByRole();
 
-    //  load comParts
-    this.loadAllComparts();
     this.fetchAllRejectedPayouts();
 
     this.routeSub = this.route.paramMap.subscribe((params) => {
@@ -103,55 +99,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadAllComparts(): void {
-    if (!this.entityId || !this.role) return;
-
-    let apiCall$;
-
-    apiCall$ = this.compartService.getPercentageByEntityId(
-      this.entityId,
-      this.role,
-    );
-
-    apiCall$
-      .pipe(
-        catchError(() => {
-          this.comPartOptions = [];
-
-          this.payoutcomParts = [];
-          this.snackbar.show("Failed to load comParts", false);
-          return of([]);
-        }),
-      )
-      .subscribe((response: any) => {
-        const comPartsData = Array.isArray(response?.data)
-          ? response.data
-          : Array.isArray(response)
-            ? response
-            : [];
-
-        const uniqueMap = new Map<string, any>();
-
-        comPartsData.forEach((item: any) => {
-          if (item?.compartId && item?.compartUsername) {
-            uniqueMap.set(item.compartId, {
-              id: item.compartId,
-              domain: item.compartUsername,
-            });
-          }
-        });
-
-        const comParts = [
-          { id: "", domain: "All" }, // ✅ yeh add karo
-          ...Array.from(uniqueMap.values()),
-        ];
-
-        //  single source of truth
-        this.comPartOptions = comParts;
-
-        this.payoutcomParts = comParts;
-      });
-  }
   formatDateWithFixedTime(dateStr: string, type: "start" | "end"): string {
     const date = new Date(dateStr);
 
@@ -183,7 +130,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     this.fundService
       .getAllPayoutFundWithEntityAndCpId(
         this.entityId,
-        this.payoutcomPartFilter || "ALL",
+
         this.selectedStatus,
         this.payoutApprovedPage, // ✅ current page
         this.payoutApprovedPageSize, // ✅ dynamic page size
@@ -191,7 +138,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
         fromDate,
         toDate,
         this.role,
-        isAll,
       )
       .pipe(
         catchError((err) => {
@@ -656,97 +602,44 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   getDisplayFields(record: any): any[] {
     if (!record) return [];
 
-    const mode =
-      record.mode ||
-      (record.vpa ? "upi" : record.accountNo ? "bank" : "payout");
+    return [
+      { label: "User ID", value: record.userId || "—" },
 
-    switch (mode) {
-      case "upi":
-        return [
-          {
-            label: "comPart",
-            value: record.comPart || record.raw?.comPartDomain || "—",
-          },
-          { label: "VPA / UPI ID", value: record.vpa || record.upiId || "—" },
-          { label: "Transaction ID", value: record.transactionId || "—" },
-          { label: "Amount", value: `₹ ${this.formatCurrency(record.amount)}` },
-          { label: "Query Text", value: record.queryText || "—" },
+      {
+        label: "Account Number",
+        value: record.accountNo || record.accountNumber || "—",
+      },
 
-          {
-            label: "Settlement Status",
-            value:
-              record.settled === true
-                ? "Settled"
-                : record.settled === false
-                  ? "Pending"
-                  : "—",
-          },
-          // {
-          //   label: "Review Status",
-          //   value: record.reviewStatus || record.status || "—",
-          // },
-          {
-            label: "Date",
-            value: record.date ? new Date(record.date).toLocaleString() : "—",
-          },
-        ];
+      {
+        label: "IFSC Code",
+        value: record.ifsc || record.ifscCode || record.bankCode || "—",
+      },
 
-      case "bank":
-        return [
-          {
-            label: "comPart",
-            value: record.comPart || record.raw?.comPartDomain || "—",
-          },
-          { label: "Account Number", value: record.accountNo || "—" },
-          { label: "Transaction ID", value: record.transactionId || "—" },
-          { label: "Amount", value: `₹ ${this.formatCurrency(record.amount)}` },
-          { label: "Account Holder", value: record.holder || "—" },
-          { label: "Query Text", value: record.queryText || "—" },
+      {
+        label: "Account Holder",
+        value:
+          record.holder ||
+          record.accountHolder ||
+          record.accountHolderName ||
+          "—",
+      },
 
-          {
-            label: "Settlement Status",
-            value:
-              record.settled === true
-                ? "Settled"
-                : record.settled === false
-                  ? "Pending"
-                  : "—",
-          },
-          // {
-          //   label: "Review Status",
-          //   value: record.reviewStatus || record.status || "—",
-          // },
-          {
-            label: "Date",
-            value: record.date ? new Date(record.date).toLocaleString() : "—",
-          },
-        ];
+      {
+        label: "Amount",
+        value: `₹ ${this.formatCurrency(record.amount)}`,
+      },
 
-      case "payout":
-        return [
-          { label: "comPart", value: record.comPartDomain || "—" },
-          { label: "User ID", value: record.userId || "—" },
-          { label: "Account Number", value: record.accountNo || "—" },
-          { label: "IFSC Code", value: record.ifscCode || "—" },
-          { label: "Account Holder", value: record.holder || "—" },
-          { label: "Amount", value: `₹ ${this.formatCurrency(record.amount)}` },
-          { label: "Status", value: record.status || "—" },
-          // { label: "Review Status", value: record.reviewStatus || "—" },
-          { label: "Remarks", value: record.remarks || "—" },
-          { label: "Query Text", value: record.queryText || "—" },
-          // {
-          //   label: "Rejection File Path",
-          //   value: record.rejectionFilePath || "—",
-          // },
-          {
-            label: "Date",
-            value: record.date ? new Date(record.date).toLocaleString() : "—",
-          },
-        ];
+      { label: "Status", value: record.status || "—" },
 
-      default:
-        return [];
-    }
+      { label: "Remarks", value: record.remarks || "—" },
+
+      { label: "Query Text", value: record.queryText || "—" },
+
+      {
+        label: "Date",
+        value: record.date ? new Date(record.date).toLocaleString() : "—",
+      },
+    ];
   }
 
   ngOnDestroy(): void {
@@ -811,8 +704,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   openChatModal(record: any) {
     if (!record) return;
 
-
-
     this.selectedRecord = record;
 
     this.showChatModal = true;
@@ -850,8 +741,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     // });
 
     if (!entityId || !entityType || !fundId || !fundType) {
-
-
       return;
     }
 
@@ -861,8 +750,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       .getThreadByEntityIdTypeAndFund(entityId, entityType, fundId, fundType)
       .subscribe({
         next: (res: any) => {
-
-
           this.loadingThreads = false;
 
           this.threadMessages = Array.isArray(res?.data) ? res.data : [];
@@ -874,8 +761,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
         },
 
         error: (err) => {
-
-
           this.loadingThreads = false;
 
           this.threadMessages = [];
@@ -948,10 +833,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   goToThread(msg: any) {
     const threadId = msg?.id;
 
-
-
     if (!threadId) {
-
       return;
     }
 

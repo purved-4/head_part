@@ -63,6 +63,21 @@ export class EntityReportComponent implements OnInit {
   reportGenerated = false;
 
   // Date range options
+  //date range dropdown
+  dateRangeOptions = [
+    {
+      id: "custom",
+      name: "Custom",
+    },
+    {
+      id: "month",
+      name: "Month",
+    },
+    {
+      id: "year",
+      name: "Year",
+    },
+  ];
   months = [
     { value: 1, name: "January" },
     { value: 2, name: "February" },

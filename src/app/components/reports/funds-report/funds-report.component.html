@@ -30,16 +30,22 @@
           <span class="font-medium text-gray-700 whitespace-nowrap"
             >Date Range:</span
           >
-          <select
+          <app-drop-down
             [ngModel]="reportForm.get('dateRangeMode')?.value"
-            (ngModelChange)="reportForm.patchValue({ dateRangeMode: $event })"
-            class="px-2 py-1.5 border border-gray-200 rounded-md text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 shadow-sm"
+            (selectionChange)="reportForm.patchValue({ dateRangeMode: $event })"
             [ngModelOptions]="{ standalone: true }"
-          >
-            <option value="custom">Custom</option>
-            <option value="month">Month</option>
-            <option value="year">Year</option>
-          </select>
+            [options]="dateRangeOptions"
+            [placeholder]="'Select range'"
+            [idField]="'id'"
+            [nameField]="'name'"
+            [inputClass]="
+              'px-2 py-1.5 border border-gray-200 rounded-md text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 shadow-sm'
+            "
+            [listClass]="'rounded-md'"
+            [highlightedClass]="'bg-blue-50 text-blue-600'"
+            [dropdownMaxHeightMode]="'scale-input'"
+            [dropdownScale]="6"
+          ></app-drop-down>
         </div>
         <!-- Reset Button -->
         <button
@@ -69,31 +75,21 @@
                 >person</span
               >
             </div>
-            <select
+            <app-drop-down
               formControlName="entityType"
-              (change)="onRoleChange()"
-              class="w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 appearance-none cursor-pointer hover:border-gray-300"
-              [class.border-red-400]="
-                reportForm.get('entityType')?.invalid &&
-                reportForm.get('entityType')?.touched
+              [options]="entityTypes"
+              [placeholder]="'Select Entity Type'"
+              [idField]="'id'"
+              [nameField]="'name'"
+              [inputClass]="
+                'w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 cursor-pointer hover:border-gray-300'
               "
-            >
-              <option value="" disabled class="text-gray-400">
-                Select Entity Type
-              </option>
-              <option
-                *ngFor="let type of entityTypes"
-                [value]="type.id"
-                class="text-gray-900"
-              >
-                {{ type.name }}
-              </option>
-            </select>
-            <div
-              class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none"
-            >
-              <span class="material-icons text-gray-400">arrow_drop_down</span>
-            </div>
+              [listClass]="'rounded-lg'"
+              [highlightedClass]="'bg-blue-50 text-blue-600'"
+              [dropdownMaxHeightMode]="'scale-input'"
+              [dropdownScale]="6"
+              (selectionChange)="onRoleChange()"
+            ></app-drop-down>
           </div>
           <div
             *ngIf="
@@ -121,33 +117,21 @@
                 >badge</span
               >
             </div>
-            <select
+            <app-drop-down
               formControlName="entityId"
-              (change)="onEntityChange()"
-              class="w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 appearance-none cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed hover:border-gray-300"
-              [class.border-red-400]="
-                reportForm.get('entityId')?.invalid &&
-                reportForm.get('entityId')?.touched
+              [options]="entities"
+              [placeholder]="'Select Entity'"
+              [idField]="'id'"
+              [nameField]="'name'"
+              [inputClass]="
+                'w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 cursor-pointer hover:border-gray-300'
               "
+              [listClass]="'rounded-lg'"
+              [highlightedClass]="'bg-blue-50 text-blue-600'"
+              [dropdownMaxHeightMode]="'scale-input'"
+              [dropdownScale]="6"
               [disabled]="loadingEntities || entities.length === 0"
-            >
-              <option value="" disabled class="text-gray-400">
-                Select Entity
-              </option>
-              <option
-                *ngFor="let entity of entities"
-                [value]="entity.id"
-                class="text-gray-900"
-              >
-                {{ entity.name }}
-              </option>
-            </select>
-            <div
-              *ngIf="!loadingEntities"
-              class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none"
-            >
-              <span class="material-icons text-gray-400">arrow_drop_down</span>
-            </div>
+            ></app-drop-down>
             <div
               *ngIf="loadingEntities"
               class="absolute inset-y-0 right-0 pr-3 flex items-center"
@@ -194,26 +178,21 @@
                 >language</span
               >
             </div>
-            <select
+            <app-drop-down
               formControlName="portalId"
-              class="w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 appearance-none cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed hover:border-gray-300"
+              [options]="portals"
+              [placeholder]="'All Portals'"
+              [idField]="'id'"
+              [nameField]="'name'"
+              [inputClass]="
+                'w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 cursor-pointer hover:border-gray-300'
+              "
+              [listClass]="'rounded-lg'"
+              [highlightedClass]="'bg-blue-50 text-blue-600'"
+              [dropdownMaxHeightMode]="'scale-input'"
+              [dropdownScale]="6"
               [disabled]="loadingPortals || portals.length === 0"
-            >
-              <option value="" class="text-gray-900">All Portals</option>
-              <option
-                *ngFor="let portal of portals"
-                [value]="portal.id"
-                class="text-gray-900"
-              >
-                {{ portal.name }}
-              </option>
-            </select>
-            <div
-              *ngIf="!loadingPortals"
-              class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none"
-            >
-              <span class="material-icons text-gray-400">arrow_drop_down</span>
-            </div>
+            ></app-drop-down>
             <div
               *ngIf="loadingPortals"
               class="absolute inset-y-0 right-0 pr-3 flex items-center"
@@ -239,20 +218,20 @@
                 >description</span
               >
             </div>
-            <select
+            <app-drop-down
               formControlName="reportType"
-              class="w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 appearance-none cursor-pointer hover:border-gray-300"
-            >
-              <option value="ALL">All Transactions</option>
-              <option value="UPI">UPI Funds</option>
-              <option value="BANK">Bank Funds</option>
-              <option value="WITHDRAWAL">Payout Funds</option>
-            </select>
-            <div
-              class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none"
-            >
-              <span class="material-icons text-gray-400">arrow_drop_down</span>
-            </div>
+              [options]="reportTypeOptions"
+              [placeholder]="'Select Report Type'"
+              [idField]="'id'"
+              [nameField]="'name'"
+              [inputClass]="
+                'w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 cursor-pointer hover:border-gray-300'
+              "
+              [listClass]="'rounded-lg'"
+              [highlightedClass]="'bg-blue-50 text-blue-600'"
+              [dropdownMaxHeightMode]="'scale-input'"
+              [dropdownScale]="6"
+            ></app-drop-down>
           </div>
         </div>
 
@@ -338,15 +317,18 @@
                     >calendar_month</span
                   >
                 </div>
-                <select
-                  formControlName="fromMonth"
-                  class="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900"
-                >
-                  <option value="" disabled>Select</option>
-                  <option *ngFor="let month of months" [value]="month.value">
-                    {{ month.name }}
-                  </option>
-                </select>
+                <app-drop-down
+  formControlName="fromMonth"
+  [options]="months"
+  [placeholder]="'Select'"
+  [idField]="'value'"
+  [nameField]="'name'"
+  [inputClass]="'w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900'"
+  [listClass]="'rounded-lg'"
+  [highlightedClass]="'bg-blue-50 text-blue-600'"
+  [dropdownMaxHeightMode]="'scale-input'"
+  [dropdownScale]="6"
+></app-drop-down>
               </div>
               <div
                 *ngIf="
@@ -371,15 +353,18 @@
                     >calendar_month</span
                   >
                 </div>
-                <select
-                  formControlName="toMonth"
-                  class="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900"
-                >
-                  <option value="" disabled>Select</option>
-                  <option *ngFor="let month of months" [value]="month.value">
-                    {{ month.name }}
-                  </option>
-                </select>
+               <app-drop-down
+  formControlName="fromMonth"
+  [options]="months"
+  [placeholder]="'Select'"
+  [idField]="'value'"
+  [nameField]="'name'"
+  [inputClass]="'w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900'"
+  [listClass]="'rounded-lg'"
+  [highlightedClass]="'bg-blue-50 text-blue-600'"
+  [dropdownMaxHeightMode]="'scale-input'"
+  [dropdownScale]="6"
+></app-drop-down>
               </div>
               <div
                 *ngIf="
@@ -404,15 +389,18 @@
                     >event</span
                   >
                 </div>
-                <select
-                  formControlName="selectedYear"
-                  class="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900"
-                >
-                  <option value="" disabled>Select</option>
-                  <option *ngFor="let year of years" [value]="year">
-                    {{ year }}
-                  </option>
-                </select>
+                <app-drop-down
+  formControlName="selectedYear"
+  [options]="yearOptions"
+  [placeholder]="'Select'"
+  [idField]="'id'"
+  [nameField]="'name'"
+  [inputClass]="'w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900'"
+  [listClass]="'rounded-lg'"
+  [highlightedClass]="'bg-blue-50 text-blue-600'"
+  [dropdownMaxHeightMode]="'scale-input'"
+  [dropdownScale]="6"
+></app-drop-down>
               </div>
               <div
                 *ngIf="
@@ -441,15 +429,18 @@
                     >event</span
                   >
                 </div>
-                <select
-                  formControlName="selectedYear"
-                  class="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900"
-                >
-                  <option value="" disabled>Select Year</option>
-                  <option *ngFor="let year of years" [value]="year">
-                    {{ year }}
-                  </option>
-                </select>
+                <app-drop-down
+  formControlName="selectedYear"
+  [options]="yearOptions"
+  [placeholder]="'Select'"
+  [idField]="'id'"
+  [nameField]="'name'"
+  [inputClass]="'w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900'"
+  [listClass]="'rounded-lg'"
+  [highlightedClass]="'bg-blue-50 text-blue-600'"
+  [dropdownMaxHeightMode]="'scale-input'"
+  [dropdownScale]="6"
+></app-drop-down>
               </div>
               <div
                 *ngIf="
@@ -482,20 +473,18 @@
                 >rate_review</span
               >
             </div>
-            <select
-              formControlName="reviewStatus"
-              class="w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 appearance-none cursor-pointer hover:border-gray-300"
-            >
-              <option value="ALL">All Status</option>
-              <option value="ACCEPTED">Accepted</option>
-              <option value="PENDING">Pending</option>
-              <option value="REJECTED">Rejected</option>
-            </select>
-            <div
-              class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none"
-            >
-              <span class="material-icons text-gray-400">arrow_drop_down</span>
-            </div>
+           <app-drop-down
+  formControlName="reviewStatus"
+  [options]="reviewStatusOptions"
+  [placeholder]="'Select Status'"
+  [idField]="'id'"
+  [nameField]="'name'"
+  [inputClass]="'w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 cursor-pointer hover:border-gray-300'"
+  [listClass]="'rounded-lg'"
+  [highlightedClass]="'bg-blue-50 text-blue-600'"
+  [dropdownMaxHeightMode]="'scale-input'"
+  [dropdownScale]="6"
+></app-drop-down>
           </div>
         </div>
       </div>
@@ -1331,3 +1320,8 @@
     </div>
   </div>
 </div>
+
+
+
+
+

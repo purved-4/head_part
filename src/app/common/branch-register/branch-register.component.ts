@@ -22,11 +22,8 @@ export class BranchRegisterComponent implements OnInit {
   isEditingPromo: boolean = false;
   submitting: boolean = false;
 
-  // affiliate link coming from the URL, e.g. /register/affiliateLink?affiliateLink=B1DFB26ADC
-  // this is ALWAYS locked/read-only when present, unlike the promo code
   affiliateLink: string | null = null;
 
-  // --- Edit confirm modal ---
   showEditConfirmModal: boolean = false;
 
   constructor(
@@ -46,13 +43,12 @@ export class BranchRegisterComponent implements OnInit {
     this.affiliateLink = affiliateLinkFromUrl;
   }
 
-  // Turning edit ON needs confirmation, turning it OFF (Done) doesn't
   togglePromoEdit(): void {
-    if (this.promoLocked) return;
     if (this.isEditingPromo) {
       this.isEditingPromo = false;
       return;
     }
+
     this.showEditConfirmModal = true;
   }
 
@@ -77,9 +73,15 @@ export class BranchRegisterComponent implements OnInit {
 
     this.submitting = true;
 
+    const promoCodeToSend = this.promoCode?.trim() ? this.promoCode : null;
+    const affiliateLinkToSend =
+      !promoCodeToSend && this.affiliateLink?.trim()
+        ? this.affiliateLink
+        : null;
+
     this.ChiefManualService.performManualAction(
-      null,
-      this.affiliateLink,
+      promoCodeToSend,
+      affiliateLinkToSend,
       payload,
     ).subscribe({
       next: (res: any) => {

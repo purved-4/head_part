@@ -88,6 +88,66 @@ export class FundsReportComponent implements OnInit {
   ];
   years: number[] = [];
 
+  yearOptions = this.years.map((year) => ({
+  id: year,
+  name: year,
+}));
+
+dateRangeOptions = [
+    {
+      id: "custom",
+      name: "Custom",
+    },
+    {
+      id: "month",
+      name: "Month",
+    },
+    {
+      id: "year",
+      name: "Year",
+    },
+  ];
+
+  //report type dropdown
+  reportTypeOptions = [
+    {
+      id: "ALL",
+      name: "All Transactions",
+    },
+    {
+      id: "UPI",
+      name: "UPI Funds",
+    },
+    {
+      id: "BANK",
+      name: "Bank Funds",
+    },
+    {
+      id: "WITHDRAWAL",
+      name: "Payout Funds",
+    },
+  ];
+
+  //review status options
+  reviewStatusOptions = [
+  {
+    id: "ALL",
+    name: "All Status",
+  },
+  {
+    id: "ACCEPTED",
+    name: "Accepted",
+  },
+  {
+    id: "PENDING",
+    name: "Pending",
+  },
+  {
+    id: "REJECTED",
+    name: "Rejected",
+  },
+];
+
   constructor(
     private reportService: TransactionHistoryService,
     private userService: UserService,

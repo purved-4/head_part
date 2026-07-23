@@ -83,15 +83,26 @@
       </div>
       <!-- Fund Type Filters -->
       <div class="flex space-x-1.5">
-        <button
+        <!-- <button
           *ngFor="
             let ft of [
               { id: 'all', label: 'All Types' },
               { id: 'upi', label: 'UPI' },
               { id: 'bank', label: 'Bank' },
               { id: 'payout', label: 'Payout' },
+              { id: 'comPartDispute', label: 'CP' },
             ]
           "
+          [class]="
+            fundTypeFilter === ft.id
+              ? 'px-3 py-1.5 text-[11px] font-bold text-fuchsia-700 bg-gradient-to-r from-fuchsia-50 to-violet-50 rounded-xl ring-1 ring-fuchsia-200/80 shadow-sm transition-all duration-300'
+              : 'px-3 py-1.5 text-[11px] font-medium text-gray-400 rounded-xl hover:text-fuchsia-600 hover:bg-fuchsia-50/40 transition-all duration-300'
+          "
+          (click)="changeFundTypeFilter(ft.id)"
+        > -->
+
+        <button
+          *ngFor="let ft of fundTypeFilterOptions"
           [class]="
             fundTypeFilter === ft.id
               ? 'px-3 py-1.5 text-[11px] font-bold text-fuchsia-700 bg-gradient-to-r from-fuchsia-50 to-violet-50 rounded-xl ring-1 ring-fuchsia-200/80 shadow-sm transition-all duration-300'
@@ -173,9 +184,16 @@
                   >
                     {{ notification.displayId }}
                   </span>
-                  <span
+                  <!-- <span
                     *ngIf="notification.fundType"
                     [class]="getStatusBadgeClass(notification.fundType)"
+                    class="px-2 py-0.5 text-[9px] font-extrabold rounded-lg flex-shrink-0 uppercase tracking-wider"
+                  >
+                    {{ notification.fundType }}
+                  </span> -->
+                  <span
+                    *ngIf="notification.fundType"
+                    [class]="getStatusBadgeClass(notification)"
                     class="px-2 py-0.5 text-[9px] font-extrabold rounded-lg flex-shrink-0 uppercase tracking-wider"
                   >
                     {{ notification.fundType }}
@@ -305,9 +323,16 @@
                   }}
                 </span>
               </h2>
-              <span
+              <!-- <span
                 *ngIf="selectedNotification.fundType"
                 [class]="getStatusBadgeClass(selectedNotification.fundType)"
+                class="px-2.5 py-0.5 text-[9px] font-extrabold rounded-lg uppercase flex-shrink-0 tracking-wider"
+              >
+                {{ selectedNotification.fundType }}
+              </span> -->
+              <span
+                *ngIf="selectedNotification.fundType"
+                [class]="getStatusBadgeClass(selectedNotification)"
                 class="px-2.5 py-0.5 text-[9px] font-extrabold rounded-lg uppercase flex-shrink-0 tracking-wider"
               >
                 {{ selectedNotification.fundType }}
@@ -1336,8 +1361,14 @@
               >
                 Fund Type
               </p>
-              <span
+              <!-- <span
                 [class]="getStatusBadgeClass(selectedNotification.fundType)"
+                class="inline-block px-3 py-1.5 text-xs font-extrabold rounded-xl uppercase tracking-wider"
+              >
+                {{ selectedNotification.fundType }}
+              </span> -->
+              <span
+                [class]="getStatusBadgeClass(selectedNotification)"
                 class="inline-block px-3 py-1.5 text-xs font-extrabold rounded-xl uppercase tracking-wider"
               >
                 {{ selectedNotification.fundType }}
@@ -2448,4 +2479,5 @@
     </div>
   </div>
 </div>
+
 

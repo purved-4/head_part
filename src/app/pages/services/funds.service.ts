@@ -517,7 +517,7 @@ getFundDataWithHeadAndBranchWithIdForOwner(ids: any): Observable<any> {
  
 getAllPayoutFundWithEntityAndCpId(
     entityId: any,
-    compartId: any,
+
     status: any,
     page: number = 0,
     pageSize: number = 10,
@@ -525,7 +525,6 @@ getAllPayoutFundWithEntityAndCpId(
     fromDate?: any,
     toDate?: any,
     role?: any,
-    isAll?: boolean,
   ): Observable<any> {
     let params = new HttpParams()
       .set("page", page.toString())
@@ -543,12 +542,6 @@ getAllPayoutFundWithEntityAndCpId(
     if (toDate) {
       params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
     }
-    if (isAll) {
-      params = params.set("isAll", true);
-    } else {
-      params = params.set("compartId", compartId);
-      params = params.set("isAll", false); // ✅ isAll=false bhi bhejo
-    }
 
     return this.http
       .get<any>(
@@ -562,8 +555,7 @@ getAllPayoutFundWithEntityAndCpId(
   }
   getPayinFundWithCpIdAndEntityId(
     entityId: any,
-    compartId: any,
-    status: any,
+
     page: number = 0,
     pageSize: number = 10,
     category?: any,
@@ -571,37 +563,30 @@ getAllPayoutFundWithEntityAndCpId(
     toDate?: any,
     fundType?: any,
     role?: any,
-    isAll?: boolean,
+    status?: string,
   ): Observable<any> {
-    if (!compartId) {
-      throw new Error("portalId is required");
-    }
-
     let params = new HttpParams()
       .set("page", page.toString())
-      .set("size", pageSize.toString())
-      .set("status", status);
+      .set("size", pageSize.toString());
+
+    if (status) {
+      params = params.set("status", status);
+    }
 
     if (category != null) {
       params = params.set("category", category.toString());
     }
 
     if (fromDate) {
-      params = params.set("fromDate", DateTimeUtil.toUtcISOString(fromDate));
+      params = params.set("fromDate", fromDate);
     }
 
     if (toDate) {
-      params = params.set("toDate", DateTimeUtil.toUtcISOString(toDate));
+      params = params.set("toDate", toDate);
     }
 
     if (fundType) {
       params = params.set("fundType", fundType);
-    }
-    if (isAll) {
-      params = params.set("isAll", true);
-    } else {
-      params = params.set("compartId", compartId);
-      params = params.set("isAll", false); // ✅ isAll=false bhi bhejo
     }
 
     return this.http
@@ -611,7 +596,7 @@ getAllPayoutFundWithEntityAndCpId(
       )
       .pipe(
         map((response: any) => response.data),
-        catchError((error) => throwError(error)),
+        catchError((error) => throwError(() => error)),
       );
   }
 

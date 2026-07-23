@@ -614,25 +614,6 @@
                 <th class="px-4 py-4 text-left font-semibold whitespace-nowrap">
                   Category
                 </th>
-
-                <th
-                  class="px-4 py-4 text-center font-semibold whitespace-nowrap"
-                >
-                  Currency
-                </th>
-
-                <th
-                  class="px-4 py-4 text-right font-semibold whitespace-nowrap"
-                >
-                  Rate
-                </th>
-
-                <th
-                  class="px-4 py-4 text-right font-semibold whitespace-nowrap"
-                >
-                  Total Amount
-                </th>
-
                 <th
                   class="px-4 py-4 text-right font-semibold whitespace-nowrap"
                 >
@@ -642,31 +623,38 @@
                 <th
                   class="px-4 py-4 text-right font-semibold whitespace-nowrap"
                 >
-                  Currency Exchange
+                  Rate
                 </th>
 
+                <th
+                  class="px-4 py-4 text-center font-semibold whitespace-nowrap"
+                >
+                  Currency
+                </th>
+                <th
+                  class="px-4 py-4 text-right font-semibold whitespace-nowrap"
+                >
+                  Currency Exchange
+                </th>
                 <th
                   class="px-4 py-4 text-center font-semibold whitespace-nowrap"
                 >
                   Total %
                 </th>
-
+                <th
+                  class="px-4 py-4 text-right font-semibold whitespace-nowrap"
+                >
+                  Total Amount
+                </th>
                 <th
                   class="px-4 py-4 text-center font-semibold whitespace-nowrap"
                 >
                   Distributed %
                 </th>
-
                 <th
-                  class="px-4 py-4 text-center font-semibold whitespace-nowrap"
+                  class="px-4 py-4 text-right font-semibold whitespace-nowrap"
                 >
-                  Self %
-                </th>
-
-                <th
-                  class="px-4 py-4 text-center font-semibold whitespace-nowrap"
-                >
-                  Penalty %
+                  Distributed Amount
                 </th>
 
                 <th
@@ -677,15 +665,20 @@
                 </th>
 
                 <th
-                  class="px-4 py-4 text-right font-semibold whitespace-nowrap"
+                  class="px-4 py-4 text-center font-semibold whitespace-nowrap"
                 >
-                  Distributed Amount
+                  Self %
                 </th>
-
                 <th
                   class="px-4 py-4 text-right font-semibold whitespace-nowrap"
                 >
                   Self Amount
+                </th>
+
+                <th
+                  class="px-4 py-4 text-center font-semibold whitespace-nowrap"
+                >
+                  Penalty %
                 </th>
 
                 <th
@@ -750,6 +743,18 @@
                 <td class="px-4 py-4 text-gray-700 font-medium">
                   {{ record.category || "-" }}
                 </td>
+                <td class="px-4 py-4 text-right">
+                  {{
+                    record.transactionAmount != null
+                      ? (record.transactionAmount | number: "1.2-2")
+                      : "-"
+                  }}
+                </td>
+                <td class="px-4 py-4 text-right font-medium text-gray-700">
+                  {{
+                    record.rate != null ? (record.rate | number: "1.2-2") : "-"
+                  }}
+                </td>
 
                 <!-- Currency -->
 
@@ -762,15 +767,24 @@
                 </td>
 
                 <!-- Rate -->
-
-                <td class="px-4 py-4 text-right font-medium text-gray-700">
+                <td class="px-4 py-4 text-right">
                   {{
-                    record.rate != null ? (record.rate | number: "1.2-2") : "-"
+                    record.currencyExchangeAmount != null
+                      ? (record.currencyExchangeAmount | number: "1.2-2")
+                      : "-"
                   }}
                 </td>
 
                 <!-- Total Amount -->
-
+                <td class="px-4 py-4 text-center">
+                  <span class="font-semibold text-gray-700">
+                    {{
+                      record.totalPercentage != null
+                        ? (record.totalPercentage | number: "1.2-2") + "%"
+                        : "-"
+                    }}
+                  </span>
+                </td>
                 <td class="px-4 py-4 text-right font-semibold text-gray-900">
                   {{
                     record.totalAmount != null
@@ -781,35 +795,9 @@
 
                 <!-- Transaction Amount -->
 
-                <td class="px-4 py-4 text-right">
-                  {{
-                    record.transactionAmount != null
-                      ? (record.transactionAmount | number: "1.2-2")
-                      : "-"
-                  }}
-                </td>
-
                 <!-- Currency Exchange -->
 
-                <td class="px-4 py-4 text-right">
-                  {{
-                    record.currencyExchangeAmount != null
-                      ? (record.currencyExchangeAmount | number: "1.2-2")
-                      : "-"
-                  }}
-                </td>
-
                 <!-- Total % -->
-
-                <td class="px-4 py-4 text-center">
-                  <span class="font-semibold text-gray-700">
-                    {{
-                      record.totalPercentage != null
-                        ? (record.totalPercentage | number: "1.2-2") + "%"
-                        : "-"
-                    }}
-                  </span>
-                </td>
 
                 <!-- Distributed -->
 
@@ -824,37 +812,13 @@
                     }}
                   </span>
                 </td>
-
-                <!-- Self -->
-
-                <td class="px-4 py-4 text-center">
-                  <span
-                    class="rounded-full bg-blue-100 px-3 py-1 text-blue-700 font-semibold text-xs"
-                  >
-                    {{
-                      record.selfPercentage != null
-                        ? (record.selfPercentage | number: "1.2-2") + "%"
-                        : "-"
-                    }}
-                  </span>
+                <td class="px-4 py-4 text-right font-semibold text-green-600">
+                  {{
+                    record.distributedAmount != null
+                      ? (record.distributedAmount | number: "1.2-2")
+                      : "-"
+                  }}
                 </td>
-
-                <!-- Penalty -->
-
-                <td class="px-4 py-4 text-center">
-                  <span
-                    class="rounded-full bg-red-100 px-3 py-1 text-red-700 font-semibold text-xs"
-                  >
-                    {{
-                      record.penaltyPercentage != null
-                        ? (record.penaltyPercentage | number: "1.2-2") + "%"
-                        : "-"
-                    }}
-                  </span>
-                </td>
-
-                <!-- Opening -->
-
                 <td
                   class="px-4 py-4 text-right font-semibold"
                   [ngClass]="
@@ -875,18 +839,19 @@
                   }}
                 </td>
 
-                <!-- Distributed Amount -->
+                <!-- Self -->
 
-                <td class="px-4 py-4 text-right font-semibold text-green-600">
-                  {{
-                    record.distributedAmount != null
-                      ? (record.distributedAmount | number: "1.2-2")
-                      : "-"
-                  }}
+                <td class="px-4 py-4 text-center">
+                  <span
+                    class="rounded-full bg-blue-100 px-3 py-1 text-blue-700 font-semibold text-xs"
+                  >
+                    {{
+                      record.selfPercentage != null
+                        ? (record.selfPercentage | number: "1.2-2") + "%"
+                        : "-"
+                    }}
+                  </span>
                 </td>
-
-                <!-- Self Amount -->
-
                 <td class="px-4 py-4 text-right font-semibold text-blue-600">
                   {{
                     record.selfAmount != null
@@ -894,6 +859,25 @@
                       : "-"
                   }}
                 </td>
+                <!-- Penalty -->
+
+                <td class="px-4 py-4 text-center">
+                  <span
+                    class="rounded-full bg-red-100 px-3 py-1 text-red-700 font-semibold text-xs"
+                  >
+                    {{
+                      record.penaltyPercentage != null
+                        ? (record.penaltyPercentage | number: "1.2-2") + "%"
+                        : "-"
+                    }}
+                  </span>
+                </td>
+
+                <!-- Opening -->
+
+                <!-- Distributed Amount -->
+
+                <!-- Self Amount -->
 
                 <!-- Extra -->
 

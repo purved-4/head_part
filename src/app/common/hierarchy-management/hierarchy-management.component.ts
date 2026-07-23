@@ -10,6 +10,7 @@ import {
 import { HierarchyManagementService } from "../../pages/services/hierarchy-management.service";
 import { HeartbeatService } from "../../pages/services/heartbeat.service";
 import { UserStateService } from "../../store/user-state.service";
+import { HeadService } from "../../pages/services/head.service";
 
 @Component({
   selector: "app-hierarchy-management",
@@ -24,43 +25,50 @@ export class HierarchyManagementComponent implements OnChanges, OnInit {
   // ================= STATE =================
   selectedChief: any = null;
 
+  // Chief level data
   managers: any[] = [];
-  heads: any[] = [];
+  chiefHeads: any[] = []; // heads directly under chief
+
+  // Manager -> Head flow data
+  heads: any[] = []; // heads under a selected manager
+
+  // Common branches (final step for both flows)
   branches: any[] = [];
 
-  // Navigation State
+  // Navigation state
   selectedManager: any = null;
   selectedHead: any = null;
 
-  loading = false;
+  // Loading flags
+  managersLoading = false;
+  chiefHeadsLoading = false;
   headsLoading = false;
   branchesLoading = false;
+
   ownerId: any;
+
   constructor(
     private Hierarchy: HierarchyManagementService,
     private hearbeat: HeartbeatService,
+    private headService: HeadService,
     private userStateService: UserStateService,
   ) {}
 
-  // ================= MAIN TRIGGER =================
+  // ================= INIT =================
   ngOnInit(): void {
     this.ownerId = this.userStateService.getCurrentEntityId();
 
     if (this.selectedChief) {
       this.hearbeat.chiefHeartbeat(this.selectedChief.id).subscribe({
-        next: (res: any) => {
-
-        },
-        error: (err: any) => {
-
-        },
+        next: () => {},
+        error: () => {},
       });
     }
   }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes["chiefs"] && changes["chiefs"].currentValue) {
       this.selectedChief = this.chiefs;
-
       this.resetAllData();
       this.loadHierarchy();
     }
@@ -69,45 +77,68 @@ export class HierarchyManagementComponent implements OnChanges, OnInit {
   // ================= RESET ALL DATA =================
   resetAllData() {
     this.managers = [];
+    this.chiefHeads = [];
     this.heads = [];
     this.branches = [];
     this.selectedManager = null;
     this.selectedHead = null;
   }
 
-  // ================= LOAD BASED ON TYPE =================
+  // ================= LOAD CHIEF LEVEL DATA (Managers + Heads together) =================
   loadHierarchy() {
     if (!this.selectedChief?.id) return;
 
-    this.loading = true;
-
-    if (this.selectedChief.businessType === "B2B") {
-      this.getManagers(this.selectedChief.id);
-    } else {
-      this.getBranchesByChief(this.selectedChief.id);
-    }
+    this.getManagers(this.selectedChief.id);
+    this.getHeadsByChief(this.selectedChief.id);
   }
 
-  // ================= API 1: MANAGERS =================
+  // ================= API: MANAGERS UNDER CHIEF =================
   getManagers(chiefId: string) {
+    this.managersLoading = true;
+
     this.Hierarchy.getManagersByChiefIdPaginated(chiefId).subscribe({
       next: (res: any) => {
         this.managers = res?.data?.content || res || [];
 
-        // AUTO HEARTBEAT FOR ALL MANAGERS
         this.managers.forEach((manager: any) => {
           this.checkManagerHeartbeat(manager);
         });
 
-        this.loading = false;
+        this.managersLoading = false;
       },
-      error: (err) => {
-        this.loading = false;
+      error: () => {
+        this.managersLoading = false;
       },
     });
   }
 
-  // ================= API 2: HEADS (when manager clicked) =================
+  // ================= API: HEADS DIRECTLY UNDER CHIEF =================
+  getHeadsByChief(chiefId: string) {
+    this.chiefHeadsLoading = true;
+
+    this.headService.getHeadByChiefId(chiefId).subscribe({
+      next: (res: any) => {
+        this.chiefHeads = res || [];
+
+        this.chiefHeads.forEach((h: any) => {
+          this.checkHeadHeartbeat(h);
+        });
+
+        this.chiefHeadsLoading = false;
+      },
+      error: () => {
+        this.chiefHeadsLoading = false;
+      },
+    });
+  }
+
+  // ================= FLOW 1: CHIEF -> HEAD (direct) -> BRANCH =================
+  selectChiefHead(head: any) {
+    this.selectedManager = null; // isse pata chalega ye manager wala flow nahi hai
+    this.getBranchesByHead(head);
+  }
+
+  // ================= FLOW 2: CHIEF -> MANAGER -> HEAD -> BRANCH =================
   getHeads(manager: any) {
     this.selectedManager = manager;
     this.selectedHead = null;
@@ -115,7 +146,6 @@ export class HierarchyManagementComponent implements OnChanges, OnInit {
     this.heads = [];
     this.branches = [];
 
-    // HEARTBEAT
     this.checkManagerHeartbeat(manager);
 
     this.Hierarchy.getHeadByManagerId(manager.id).subscribe({
@@ -123,23 +153,22 @@ export class HierarchyManagementComponent implements OnChanges, OnInit {
         this.heads = res?.data || [];
         this.headsLoading = false;
 
-        // OPTIONAL: sab heads ka heartbeat auto call
         this.heads.forEach((h: any) => {
           this.checkHeadHeartbeat(h);
         });
       },
-      error: (err) => {
+      error: () => {
         this.headsLoading = false;
       },
     });
   }
-  // ================= API 3: BRANCH (when head clicked) =================
+
+  // ================= COMMON: BRANCH BY HEAD (used by both flows) =================
   getBranchesByHead(head: any) {
     this.selectedHead = head;
     this.branchesLoading = true;
     this.branches = [];
 
-    // HEARTBEAT
     this.checkHeadHeartbeat(head);
 
     this.Hierarchy.getBranchByHeadId(head.id).subscribe({
@@ -147,31 +176,12 @@ export class HierarchyManagementComponent implements OnChanges, OnInit {
         this.branches = res?.data || [];
         this.branchesLoading = false;
 
-        // OPTIONAL: all branches heartbeat
         this.branches.forEach((b: any) => {
           this.checkBranchHeartbeat(b);
         });
       },
-      error: (err) => {
+      error: () => {
         this.branchesLoading = false;
-      },
-    });
-  }
-
-  // ================= B2C DIRECT BRANCH =================
-  getBranchesByChief(chiefId: string) {
-    this.Hierarchy.getBranchByChiefId(chiefId).subscribe({
-      next: (res: any) => {
-        this.branches = res?.data || [];
-
-        this.branches.forEach((b: any) => {
-          this.checkBranchHeartbeat(b);
-        });
-
-        this.loading = false;
-      },
-      error: (err) => {
-        this.loading = false;
       },
     });
   }
@@ -183,42 +193,14 @@ export class HierarchyManagementComponent implements OnChanges, OnInit {
 
   goBack(): void {
     if (this.selectedHead) {
-      // Go back to heads list
+      // Branches se wapas -> agar manager flow tha to Heads-under-manager pe,
+      // warna seedha Chief level (managers + chiefHeads) pe
       this.selectedHead = null;
       this.branches = [];
     } else if (this.selectedManager) {
-      // Go back to managers list
+      // Heads-under-manager se wapas -> Chief level
       this.selectedManager = null;
       this.heads = [];
-    }
-  }
-
-  getCurrentViewTitle(): string {
-    if (this.selectedHead) {
-      return "Branches";
-    } else if (this.selectedManager) {
-      return "Heads";
-    } else {
-      return "Managers";
-    }
-  }
-
-  getCurrentUserName(): string {
-    if (this.selectedHead) {
-      return this.selectedHead.username || this.selectedHead.info || "";
-    } else if (this.selectedManager) {
-      return this.selectedManager.username || this.selectedManager.info || "";
-    }
-    return "";
-  }
-
-  hasAnyData(): boolean {
-    if (this.selectedHead) {
-      return this.branches.length > 0;
-    } else if (this.selectedManager) {
-      return this.heads.length > 0;
-    } else {
-      return this.managers.length > 0;
     }
   }
 
@@ -228,17 +210,15 @@ export class HierarchyManagementComponent implements OnChanges, OnInit {
     } else if (this.selectedManager) {
       return this.headsLoading;
     } else {
-      return this.loading;
+      return this.managersLoading || this.chiefHeadsLoading;
     }
   }
 
   // ================= HEARTBEAT HELPERS =================
-
   checkManagerHeartbeat(manager: any) {
     this.hearbeat.managerHeartbeat(manager.id).subscribe({
       next: (res: any) => {
         const user = res?.[0];
-
         manager.onlineStatus = user?.online || false;
         manager.lastActive = user?.lastActive || null;
       },
@@ -252,7 +232,6 @@ export class HierarchyManagementComponent implements OnChanges, OnInit {
     this.hearbeat.headHeartbeat(head.id).subscribe({
       next: (res: any) => {
         const user = res?.[0];
-
         head.onlineStatus = user?.online || false;
         head.lastActive = user?.lastActive || null;
       },
@@ -266,7 +245,6 @@ export class HierarchyManagementComponent implements OnChanges, OnInit {
     this.hearbeat.branchHeartbeat(branch.id).subscribe({
       next: (res: any) => {
         const user = res?.[0];
-
         branch.onlineStatus = user?.online || false;
         branch.lastActive = user?.lastActive || null;
       },
@@ -275,6 +253,7 @@ export class HierarchyManagementComponent implements OnChanges, OnInit {
       },
     });
   }
+
   // ================= CLOSE MODAL =================
   closeModal() {
     this.resetAllData();

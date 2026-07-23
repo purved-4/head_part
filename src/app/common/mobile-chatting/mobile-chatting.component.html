@@ -195,14 +195,7 @@
     <!-- LINE 2: FUND TYPES -->
     <div class="flex gap-2 flex-wrap">
       <button
-        *ngFor="
-          let ft of [
-            { id: 'all', label: 'All' },
-            { id: 'upi', label: 'UPI' },
-            { id: 'bank', label: 'Bank' },
-            { id: 'payout', label: 'Payout' },
-          ]
-        "
+        *ngFor="let ft of fundTypeFilterOptions"
         (click)="changeFundTypeFilter(ft.id)"
         [class]="
           fundTypeFilter === ft.id
@@ -282,8 +275,14 @@
 
             <!-- Status & Type -->
             <div class="flex items-center space-x-2 mt-1">
-              <span
+              <!-- <span
                 [class]="getStatusBadgeClass(notification.fundType || '')"
+                class="px-2 py-0.5 text-[10px] font-medium rounded-full"
+              >
+                {{ notification.fundType || "General" }}
+              </span> -->
+              <span
+                [class]="getStatusBadgeClass(notification)"
                 class="px-2 py-0.5 text-[10px] font-medium rounded-full"
               >
                 {{ notification.fundType || "General" }}
@@ -1020,8 +1019,14 @@
                 </div>
                 <div>
                   <p class="text-xs text-gray-400">Fund Type</p>
-                  <span
+                  <!-- <span
                     [class]="getStatusBadgeClass(selectedNotification.fundType)"
+                    class="px-2 py-1 text-xs rounded-lg inline-block"
+                  >
+                    {{ selectedNotification.fundType }}
+                  </span> -->
+                  <span
+                    [class]="getStatusBadgeClass(selectedNotification)"
                     class="px-2 py-1 text-xs rounded-lg inline-block"
                   >
                     {{ selectedNotification.fundType }}
@@ -1452,3 +1457,5 @@
     </div>
   </div>
 </div>
+
+

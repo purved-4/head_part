@@ -306,5 +306,11 @@ getSelfRegistrationEligibility(chiefId: string): Observable<any> {
       .get(`${baseUrl}/chief/self-registration/check`)
       .pipe(catchError((error) => throwError(() => error)));
   }
+
+  checkUpdateStatus(chiefId: any): Observable<any> {
+    return this.http
+      .get(`${baseUrl}/chief/checkUpdateStatus/${chiefId}`)
+      .pipe(catchError((error) => throwError(() => error)));
+  }
   
 }

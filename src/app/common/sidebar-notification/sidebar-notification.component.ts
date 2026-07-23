@@ -86,19 +86,40 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
 
   selectedPercentageNotification: any = null;
 
-  percentageData = {
-    payin: 0,
-    payout: 0,
-    ftt: 0,
-    maxAllowed: 0,
-  };
-
-  percentageForm = {
+  percentageForm: {
+    payinPercentage: number | null;
+    payoutPercentage: number | null;
+    fttPercentage: number | null;
+  } = {
     payinPercentage: 0,
     payoutPercentage: 0,
     fttPercentage: 0,
   };
+
+  percentageData = {
+    payin: 0,
+    payout: 0,
+    ftt: 0,
+  };
+
+  percentageErrors = {
+    payinPercentage: "",
+    payoutPercentage: "",
+    fttPercentage: "",
+  };
+
+  private percentageFieldMaxMap: {
+    payinPercentage: "payin";
+    payoutPercentage: "payout";
+    fttPercentage: "ftt";
+  } = {
+    payinPercentage: "payin",
+    payoutPercentage: "payout",
+    fttPercentage: "ftt",
+  };
+
   ws: any;
+
   constructor(
     private notificationChatService: NotificationChatService,
     private authService: AuthService,
@@ -323,6 +344,12 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
       fttPercentage: 0,
     };
 
+    this.percentageErrors = {
+      payinPercentage: "",
+      payoutPercentage: "",
+      fttPercentage: "",
+    };
+
     // ADD THESE
     this.showDetailsPanel = false;
     this.selectedNotification = null;
@@ -337,27 +364,51 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
 
     const ftt = Number(message.match(/ftt=(\d+(\.\d+)?)/)?.[1] || 0);
 
-    return {
-      payin,
-      payout,
-      ftt,
-      maxAllowed: Math.min(payin, payout, ftt),
-    };
+    return { payin, payout, ftt };
   }
 
   validatePercentage(field: keyof typeof this.percentageForm) {
-    if (this.percentageForm[field] > this.percentageData.maxAllowed) {
-      this.percentageForm[field] = this.percentageData.maxAllowed;
+    const maxKey = this.percentageFieldMaxMap[field];
+    const max = this.percentageData[maxKey];
+    const value = this.percentageForm[field];
 
-      this.snackBar.show(
-        `Maximum allowed percentage is ${this.percentageData.maxAllowed}`,
-        false,
+    if (
+      value === null ||
+      value === undefined ||
+      (value as any) === "" ||
+      isNaN(value as any)
+    ) {
+      this.percentageErrors[field] = "This field is required";
+    } else if (value < 0) {
+      this.percentageErrors[field] = "Percentage cannot be negative";
+    } else if (value > max) {
+      this.percentageErrors[field] = `Cannot exceed ${max}%`;
+    } else {
+      this.percentageErrors[field] = "";
+    }
+  }
+
+  isPercentageFormValid(): boolean {
+    const fields: (keyof typeof this.percentageForm)[] = [
+      "payinPercentage",
+      "payoutPercentage",
+      "fttPercentage",
+    ];
+
+    return fields.every((field) => {
+      const maxKey = this.percentageFieldMaxMap[field];
+      const max = this.percentageData[maxKey];
+      const value = this.percentageForm[field];
+
+      return (
+        value !== null &&
+        value !== undefined &&
+        (value as any) !== "" &&
+        !isNaN(value as any) &&
+        value >= 0 &&
+        value <= max
       );
-    }
-
-    if (this.percentageForm[field] < 0) {
-      this.percentageForm[field] = 0;
-    }
+    });
   }
 
   closePercentageModal() {
@@ -521,52 +572,117 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
   //   });
   // }
 
-  submitPercentageUpdate() {
-    const max = this.percentageData.maxAllowed;
+  // submitPercentageUpdate() {
+  //   if (!this.isPercentageFormValid()) {
+  //     this.snackBar.show(
+  //       `Please fix the highlighted fields before submitting.`,
+  //       false,
+  //     );
+  //     return;
+  //   }
+  //   const actingRole = this.currentRoleName?.toUpperCase(); // who is logged in
+  //   const targetLevel =
+  //     this.selectedPercentageNotification?.generateForType?.toUpperCase(); // which level to bulk-update
 
-    if (
-      this.percentageForm.payinPercentage > max ||
-      this.percentageForm.payoutPercentage > max ||
-      this.percentageForm.fttPercentage > max
-    ) {
-      this.snackBar.show(`Maximum allowed percentage is ${max}`, false);
+  //   let request$: Observable<any> | null = null;
+
+  //   // CHIEF -> can update MANAGER level or HEAD level
+  //   if (actingRole === "CHIEF" && targetLevel === "MANAGER") {
+  //     request$ = this.bulkUpdateService.updateBulkManager({
+  //       chiefId: this.currentRoleId,
+  //       percentage: this.percentageForm,
+  //     });
+  //   } else if (actingRole === "CHIEF" && targetLevel === "HEAD") {
+  //     request$ = this.bulkUpdateService.updateBulkHead({
+  //       parentId: this.currentRoleId,
+  //       parentType: "CHIEF",
+  //       percentage: this.percentageForm,
+  //     });
+  //   }
+
+  //   // MANAGER -> can update HEAD level
+  //   else if (actingRole === "MANAGER" && targetLevel === "HEAD") {
+  //     request$ = this.bulkUpdateService.updateBulkHead({
+  //       parentId: this.currentRoleId,
+  //       parentType: "MANAGER",
+  //       percentage: this.percentageForm,
+  //     });
+  //   }
+
+  //   // HEAD -> can update BRANCH level
+  //   else if (actingRole === "HEAD" && targetLevel === "BRANCH") {
+  //     request$ = this.bulkUpdateService.updateBulkBranch({
+  //       headId: this.currentRoleId,
+  //       percentage: this.percentageForm,
+  //     });
+  //   }
+
+  //   if (!request$) {
+  //     this.snackBar.show(
+  //       `Your role (${actingRole}) cannot perform a bulk update for ${targetLevel}.`,
+  //       false,
+  //     );
+  //     console.error(
+  //       `Unhandled bulk update combination: actingRole="${actingRole}", targetLevel="${targetLevel}"`,
+  //     );
+  //     return;
+  //   }
+
+  //   request$.subscribe({
+  //     next: () => {
+  //       this.markAsRead(this.selectedPercentageNotification.id);
+  //       this.closePercentageModal();
+  //       this.refreshNotifications();
+  //       this.snackBar.show("Percentage updated successfully", true);
+  //     },
+  //     error: (err) => {
+  //       this.snackBar.show(err?.error?.message || "Update failed", false);
+  //     },
+  //   });
+  // }
+
+  submitPercentageUpdate() {
+    if (!this.isPercentageFormValid()) {
+      this.snackBar.show(
+        `Please fix the highlighted fields before submitting.`,
+        false,
+      );
       return;
     }
 
-    const actingRole = this.currentRoleName?.toUpperCase(); // who is logged in
+    const percentagePayload = {
+      payinPercentage: this.percentageForm.payinPercentage as number,
+      payoutPercentage: this.percentageForm.payoutPercentage as number,
+      fttPercentage: this.percentageForm.fttPercentage as number,
+    };
+
+    const actingRole = this.currentRoleName?.toUpperCase();
     const targetLevel =
-      this.selectedPercentageNotification?.generateForType?.toUpperCase(); // which level to bulk-update
+      this.selectedPercentageNotification?.generateForType?.toUpperCase();
 
     let request$: Observable<any> | null = null;
 
-    // CHIEF -> can update MANAGER level or HEAD level
     if (actingRole === "CHIEF" && targetLevel === "MANAGER") {
       request$ = this.bulkUpdateService.updateBulkManager({
         chiefId: this.currentRoleId,
-        percentage: this.percentageForm,
+        percentage: percentagePayload,
       });
     } else if (actingRole === "CHIEF" && targetLevel === "HEAD") {
       request$ = this.bulkUpdateService.updateBulkHead({
         parentId: this.currentRoleId,
         parentType: "CHIEF",
-        percentage: this.percentageForm,
+        percentage: percentagePayload,
       });
-    }
-
-    // MANAGER -> can update HEAD level
-    else if (actingRole === "MANAGER" && targetLevel === "HEAD") {
+    } else if (actingRole === "MANAGER" && targetLevel === "HEAD") {
       request$ = this.bulkUpdateService.updateBulkHead({
         parentId: this.currentRoleId,
         parentType: "MANAGER",
-        percentage: this.percentageForm,
+        percentage: percentagePayload,
       });
-    }
-
-    // HEAD -> can update BRANCH level
-    else if (actingRole === "HEAD" && targetLevel === "BRANCH") {
+    } else if (actingRole === "HEAD" && targetLevel === "BRANCH") {
       request$ = this.bulkUpdateService.updateBulkBranch({
         headId: this.currentRoleId,
-        percentage: this.percentageForm,
+        percentage: percentagePayload,
       });
     }
 

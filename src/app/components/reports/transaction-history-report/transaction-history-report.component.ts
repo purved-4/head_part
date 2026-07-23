@@ -22,52 +22,42 @@ import { PortalService } from "../../../pages/services/portal.service";
 export class TransactionHistoryReportComponent implements OnInit {
   reportForm!: FormGroup;
 
-  // Report state
   loading = false;
   hasSearched = false;
   errorMessage = "";
   successMessage = "";
   exporting = false;
 
-  // Report data
   reports: any[] = [];
   fromDate!: string;
   toDate!: string;
   totalCount = 0;
 
-  // Whether the last generated report was filtered/scoped to a specific portal.
-  // When true, the table shows the extra "Portal Opening" / "Portal Closing" columns.
   isPortalReport = false;
 
-  // Modal state
   showModal = false;
   loadingShow = false;
   showResponse: any = null;
   activeEntity: any = null;
 
-  // Entity selection
   loadingEntities = false;
   entities: any[] = [];
 
   loadingPortals = false;
   portals: any[] = [];
 
-  // Entity types mapping
   entityTypes: any = [];
 
-  // Pagination
   currentPage = 1;
   itemsPerPage = 10;
   totalPages = 1;
 
-  // Filter options
   filterOptions = {
     transactionTypes: ["All", "payin", "payout", "Commission", "Reward"],
     statuses: ["All", "Success", "Failed", "Pending"],
     portals: ["All", "Portal1", "Portal2", "Portal3"],
   };
 
-  //date range dropdown
   dateRangeOptions = [
     {
       id: "custom",
@@ -87,7 +77,6 @@ export class TransactionHistoryReportComponent implements OnInit {
   currentRole: any;
   currentRoleId: any;
 
-  // Date range options
   months = [
     { value: 1, name: "January" },
     { value: 2, name: "February" },
@@ -131,7 +120,6 @@ export class TransactionHistoryReportComponent implements OnInit {
       this.loadPortals();
     }
 
-    // Apply auto selection if entityType matches currentRole on load
     const initialRole = this.reportForm.get("entityType")?.value;
     this.applyEntityAutoSelect(initialRole);
   }
@@ -149,7 +137,7 @@ export class TransactionHistoryReportComponent implements OnInit {
         reportType: ["ENTITY", Validators.required],
         entityType: ["AGENT", Validators.required],
         entityId: ["", Validators.required],
-        // "" represents the "All" portal option - no portalId is sent to the API in that case
+
         portalId: [""],
         dateRangeMode: ["custom"],
         from: [""],
@@ -165,7 +153,6 @@ export class TransactionHistoryReportComponent implements OnInit {
     );
   }
 
-  // Custom validator for month range
   monthRangeValidator(group: AbstractControl): { [key: string]: any } | null {
     const mode = group.get("dateRangeMode")?.value;
     if (mode !== "month") return null;
@@ -247,7 +234,7 @@ export class TransactionHistoryReportComponent implements OnInit {
     this.reportForm.patchValue({
       from: fromISO,
       to: toISO,
-      dateRangeMode: "custom", // default mode
+      dateRangeMode: "custom",
     });
 
     this.fromDate = fromISO;
@@ -273,7 +260,6 @@ export class TransactionHistoryReportComponent implements OnInit {
     const roleNormalized = role.toUpperCase();
     const currentRoleNormalized = (this.currentRole || "").toUpperCase();
 
-    //  Agar same role hai -> auto select
     if (roleNormalized === currentRoleNormalized && this.currentRoleId) {
       this.entities = [
         {
@@ -288,7 +274,6 @@ export class TransactionHistoryReportComponent implements OnInit {
 
       this.reportForm.get("entityId")?.disable();
     } else {
-      //  Otherwise fetch list
       this.reportForm.get("entityId")?.enable();
       this.reportForm.patchValue({ entityId: "" });
 
@@ -309,7 +294,6 @@ export class TransactionHistoryReportComponent implements OnInit {
       .getByRole(this.currentRoleId, role.toUpperCase())
       .subscribe({
         next: (res: any) => {
-          //  SMART EXTRACTION (handles all cases)
           let list = [];
 
           if (Array.isArray(res)) {
@@ -322,7 +306,6 @@ export class TransactionHistoryReportComponent implements OnInit {
             list = res.data.data.data;
           }
 
-          //  normalize
           this.entities = list.map((item: any) => ({
             id: String(item.id),
             name: item.name,
@@ -338,7 +321,6 @@ export class TransactionHistoryReportComponent implements OnInit {
       });
   }
 
-  // (Deprecated name onRoleChange kept for compatibility if template calls it)
   onRoleChange(role: string): void {
     this.applyEntityAutoSelect(role);
   }
@@ -406,10 +388,6 @@ export class TransactionHistoryReportComponent implements OnInit {
     return { from, to };
   }
 
-  /**
-   * Builds the API request payload shared by the on-screen report and the exports.
-   * portalId is only included when a real portal is selected ("" / "All" is never sent).
-   */
   private buildReportRequest(
     formValue: any,
     from: string,
@@ -481,13 +459,10 @@ export class TransactionHistoryReportComponent implements OnInit {
       formValue,
       range.from,
       range.to,
-      this.currentPage,
+      this.currentPage - 1,
       this.itemsPerPage,
     );
 
-    // Remember whether this report is scoped to a specific portal so the
-    // table can show Portal Opening / Portal Closing instead of the regular
-    // Opening / Closing balance columns.
     this.isPortalReport = !!request.portalId;
 
     console.log("REPORT REQUEST", request);
@@ -538,7 +513,6 @@ export class TransactionHistoryReportComponent implements OnInit {
     });
   }
 
-  // Show entity details
   showDetails(entity: any): void {
     this.showModal = true;
     this.loadingShow = true;
@@ -592,11 +566,6 @@ export class TransactionHistoryReportComponent implements OnInit {
     });
   }
 
-  /**
-   * Export report. Since the on-screen table only holds the current page,
-   * this fetches the FULL result set (all pages, same filters) before
-   * generating the CSV/PDF so the export always contains every row.
-   */
   exportReport(format: "CSV" | "PDF"): void {
     if (!this.hasSearched || this.totalCount === 0) {
       alert("No data available to export");
@@ -607,7 +576,6 @@ export class TransactionHistoryReportComponent implements OnInit {
       return;
     }
 
-    // Current page already has everything - no need to refetch.
     if (this.reports.length >= this.totalCount) {
       this.runExport(format, this.reports);
       return;
@@ -625,8 +593,8 @@ export class TransactionHistoryReportComponent implements OnInit {
       formValue,
       range.from,
       range.to,
-      1,
-      this.totalCount, // ask the API for every record in one page
+      0,
+      this.totalCount,
     );
 
     this.transactionService.getEntityReport(request).subscribe({
@@ -782,9 +750,7 @@ export class TransactionHistoryReportComponent implements OnInit {
     doc.save("transaction-history-report.pdf");
   }
 
-  // Reset form
   resetForm(): void {
-    // re-enable entityId control first so reset can set value properly
     this.reportForm.get("entityId")?.enable();
 
     this.reportForm.reset({
@@ -809,16 +775,13 @@ export class TransactionHistoryReportComponent implements OnInit {
     this.totalPages = 1;
     this.totalCount = 0;
 
-    // re-apply auto selection in case AGENT matches currentRole
     const role = this.reportForm.get("entityType")?.value;
     this.applyEntityAutoSelect(role);
 
-    // update component-level dates
     this.fromDate = this.reportForm.get("from")?.value;
     this.toDate = this.reportForm.get("to")?.value;
   }
 
-  // Pagination - re-fetches the current page from the server, keeping filters intact
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages || page === this.currentPage) {
       return;
@@ -858,7 +821,6 @@ export class TransactionHistoryReportComponent implements OnInit {
     return range;
   }
 
-  // Utility function to mark all fields as touched
   private markFormGroupTouched(formGroup: FormGroup): void {
     Object.values(formGroup.controls).forEach((control) => {
       control.markAsTouched();
@@ -868,14 +830,12 @@ export class TransactionHistoryReportComponent implements OnInit {
     });
   }
 
-  // Close modal
   closeShowModal(): void {
     this.showModal = false;
     this.showResponse = null;
     this.activeEntity = null;
   }
 
-  // Get status badge class
   getStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
       case "success":
@@ -889,7 +849,6 @@ export class TransactionHistoryReportComponent implements OnInit {
     }
   }
 
-  // Get transaction type class
   getTransactionTypeClass(type: string): string {
     switch (type?.toLowerCase()) {
       case "payin":
@@ -903,7 +862,6 @@ export class TransactionHistoryReportComponent implements OnInit {
     }
   }
 
-  // Format currency
   formatCurrency(amount: any): string {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -912,7 +870,6 @@ export class TransactionHistoryReportComponent implements OnInit {
     }).format(amount || 0);
   }
 
-  // Get month range error
   getMonthRangeError(): boolean {
     return (
       this.reportForm.hasError("monthRangeInvalid") &&
@@ -935,7 +892,6 @@ export class TransactionHistoryReportComponent implements OnInit {
           name: `${item.domain} (${item.comPartName})`,
         }));
 
-        // "All" always comes first; its id is "" so it is never sent to the API.
         this.portals = [{ id: "", name: "All" }, ...list];
 
         this.loadingPortals = false;

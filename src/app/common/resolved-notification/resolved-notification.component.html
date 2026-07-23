@@ -417,6 +417,140 @@
           </span>
         </div>
 
+        <!-- Top action buttons: resolve MANAGER / HEAD blockers -->
+        <div
+          *ngIf="
+            showBulkUpdateSection &&
+            (hasUnresolvedManagerBlocker || hasUnresolvedHeadBlocker)
+          "
+          class="flex items-center gap-2 mb-4 sm:mb-5"
+        >
+          <button
+            *ngIf="hasUnresolvedManagerBlocker"
+            type="button"
+            (click)="toggleResolveTarget('MANAGER')"
+            class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors"
+            [ngClass]="
+              activeBlockerType === 'MANAGER'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+            "
+          >
+            <span class="material-symbols-outlined !text-base">tune</span>
+            Resolve Manager
+          </button>
+
+          <button
+            *ngIf="hasUnresolvedHeadBlocker"
+            type="button"
+            (click)="toggleResolveTarget('HEAD')"
+            class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors"
+            [ngClass]="
+              activeBlockerType === 'HEAD'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+            "
+          >
+            <span class="material-symbols-outlined !text-base">tune</span>
+            Resolve Head
+          </button>
+        </div>
+
+        <!-- Inline update form, opens when either button above is active -->
+        <div
+          *ngIf="activeBlockerType"
+          class="bg-white border border-indigo-100 rounded-xl px-4 sm:px-5 py-4 sm:py-5 space-y-4 mb-4 sm:mb-5"
+        >
+          <p class="text-xs sm:text-sm font-semibold text-gray-700">
+            Updating percentage for
+            <span class="text-indigo-600">{{ activeBlockerType }}</span>
+          </p>
+
+          <!-- Payin -->
+          <div>
+            <label class="block text-sm font-medium mb-1">
+              Payin % (max {{ selectedRequest.requestedPayin }}%)
+            </label>
+            <input
+              type="number"
+              min="0"
+              [max]="selectedRequest.requestedPayin"
+              [(ngModel)]="percentageForm.payinPercentage"
+              [ngModelOptions]="{ standalone: true }"
+              (input)="validatePercentage('payinPercentage')"
+              class="w-full border rounded-lg px-3 py-2"
+              [class.border-red-500]="percentageErrors.payinPercentage"
+            />
+            <p
+              *ngIf="percentageErrors.payinPercentage"
+              class="text-xs text-red-600 mt-1"
+            >
+              {{ percentageErrors.payinPercentage }}
+            </p>
+          </div>
+
+          <!-- Payout -->
+          <div>
+            <label class="block text-sm font-medium mb-1">
+              Payout % (max {{ selectedRequest.requestedPayout }}%)
+            </label>
+            <input
+              type="number"
+              min="0"
+              [max]="selectedRequest.requestedPayout"
+              [(ngModel)]="percentageForm.payoutPercentage"
+              [ngModelOptions]="{ standalone: true }"
+              (input)="validatePercentage('payoutPercentage')"
+              class="w-full border rounded-lg px-3 py-2"
+              [class.border-red-500]="percentageErrors.payoutPercentage"
+            />
+            <p
+              *ngIf="percentageErrors.payoutPercentage"
+              class="text-xs text-red-600 mt-1"
+            >
+              {{ percentageErrors.payoutPercentage }}
+            </p>
+          </div>
+
+          <!-- FTT -->
+          <div>
+            <label class="block text-sm font-medium mb-1">
+              FTT % (max {{ selectedRequest.requestedFtt }}%)
+            </label>
+            <input
+              type="number"
+              min="0"
+              [max]="selectedRequest.requestedFtt"
+              [(ngModel)]="percentageForm.fttPercentage"
+              [ngModelOptions]="{ standalone: true }"
+              (input)="validatePercentage('fttPercentage')"
+              class="w-full border rounded-lg px-3 py-2"
+              [class.border-red-500]="percentageErrors.fttPercentage"
+            />
+            <p
+              *ngIf="percentageErrors.fttPercentage"
+              class="text-xs text-red-600 mt-1"
+            >
+              {{ percentageErrors.fttPercentage }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            (click)="submitBulkUpdate()"
+            [disabled]="!isPercentageFormValid() || isSubmittingBulkUpdate"
+            [class.opacity-50]="
+              !isPercentageFormValid() || isSubmittingBulkUpdate
+            "
+            [class.cursor-not-allowed]="
+              !isPercentageFormValid() || isSubmittingBulkUpdate
+            "
+            class="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-colors"
+          >
+            {{ isSubmittingBulkUpdate ? "Updating..." : "Update" }}
+          </button>
+        </div>
+
         <!-- Section: Requested Changes -->
         <p
           class="text-[11px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 sm:mb-2.5"
@@ -575,3 +709,5 @@
     </div>
   </div>
 </div>
+
+

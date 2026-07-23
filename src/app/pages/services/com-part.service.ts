@@ -1270,5 +1270,39 @@ restoreBankAndUpi(comPartId: any): Observable<any> {
         catchError((error) => throwError(() => error)),
       );
   }
+rejectPayoutReward(
+    fundId: string,
+    reason?: string,
+    id?: any,
+  ): Observable<any> {
+    let params = new HttpParams();
 
+    if (reason?.trim()) {
+      params = params.set("reason", reason.trim());
+    }
+
+    if (id?.trim()) {
+      params = params.set("id", id.trim());
+    }
+
+    return this.http
+      .post<any>(
+        `${baseUrl}/payout-rewards/cp/${fundId}/reject`,
+        {},
+        { params },
+      )
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+  acceptPayoutReward(fundId: string): Observable<any> {
+    return this.http
+     .post<any>(`${baseUrl}/payout-rewards/cp/${fundId}/accept-now`, {})
+      .pipe(
+        map((response: any) => response.data),
+        catchError((error) => throwError(() => error)),
+      );
+  }
 }

@@ -77,7 +77,7 @@
         </button>
 
         <!-- Percentages Button -->
-        <button
+        <!-- <button
           (click)="setActiveSection('percentages')"
           class="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer"
           [ngClass]="{
@@ -87,7 +87,7 @@
           title="Percentages"
         >
           <span class="material-symbols-outlined text-[22px]">percent</span>
-        </button>
+        </button> -->
 
         <!-- Exposure List Button -->
         <button
@@ -166,7 +166,7 @@
         </div>
 
         <!-- Percentages Section -->
-        <div *ngIf="activeSection === 'percentages'" class="space-y-2">
+        <!-- <div *ngIf="activeSection === 'percentages'" class="space-y-2">
           <div *ngIf="loadingPercentages" class="text-xs text-slate-500 text-center py-2">
             Loading...
           </div>
@@ -200,7 +200,7 @@
           <div *ngIf="!loadingPercentages && !percentages" class="text-xs text-red-500 text-center py-2">
             Failed to load percentages
           </div>
-        </div>
+        </div> -->
 
         <!-- Exposure List Section -->
         <div *ngIf="activeSection === 'exposure'" class="space-y-4">
@@ -278,3 +278,7 @@
   (chatOpened)="onChatPanelStateChange($event)"
 >
 </app-pending-threads>
+
+
+
+

@@ -41,16 +41,24 @@
             <span class="font-medium text-[var(--color-font)] whitespace-nowrap"
               >Date Range:</span
             >
-            <select
+            <app-drop-down
               [ngModel]="reportForm.get('dateRangeMode')?.value"
-              (ngModelChange)="reportForm.patchValue({ dateRangeMode: $event })"
-              class="px-2 py-1 border border-[var(--color-border)] rounded-md text-sm focus:ring-2 focus:ring-[var(--color-primary-light)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-font)]"
+              (selectionChange)="
+                reportForm.patchValue({ dateRangeMode: $event })
+              "
               [ngModelOptions]="{ standalone: true }"
-            >
-              <option value="custom">Custom</option>
-              <option value="month">Month</option>
-              <option value="year">Year</option>
-            </select>
+              [options]="dateRangeOptions"
+              [placeholder]="'Select range'"
+              [idField]="'id'"
+              [nameField]="'name'"
+              [inputClass]="
+                'px-2 py-1.5 border border-gray-200 rounded-md text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 shadow-sm'
+              "
+              [listClass]="'rounded-md'"
+              [highlightedClass]="'bg-blue-50 text-blue-600'"
+              [dropdownMaxHeightMode]="'scale-input'"
+              [dropdownScale]="6"
+            ></app-drop-down>
           </div>
 
           <!-- Clear All button -->
@@ -78,21 +86,21 @@
             >
               Entity Type <span class="text-[var(--color-danger)]">*</span>
             </label>
-            <select
+            <app-drop-down
               formControlName="entityType"
-              (change)="onRoleChange(reportForm.get('entityType')?.value)"
-              class="w-full px-3 py-2 text-sm border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary-light)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-font)]"
-              [ngClass]="{
-                'border-[var(--color-danger)]':
-                  reportForm.get('entityType')?.invalid &&
-                  reportForm.get('entityType')?.touched,
-              }"
-            >
-              <option value="" disabled>Select Entity Type</option>
-              <option *ngFor="let type of entityTypes" [value]="type.id">
-                {{ type.name }}
-              </option>
-            </select>
+              [options]="entityTypes"
+              [placeholder]="'Select Entity Type'"
+              [idField]="'id'"
+              [nameField]="'name'"
+              [inputClass]="
+                'w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 cursor-pointer hover:border-gray-300'
+              "
+              [listClass]="'rounded-lg'"
+              [highlightedClass]="'bg-blue-50 text-blue-600'"
+              [dropdownMaxHeightMode]="'scale-input'"
+              [dropdownScale]="6"
+              (selectionChange)="onRoleChange($event)"
+            ></app-drop-down>
             <div
               *ngIf="
                 reportForm.get('entityType')?.invalid &&
@@ -113,21 +121,21 @@
               Entity <span class="text-[var(--color-danger)]">*</span>
             </label>
             <div class="relative">
-              <select
+              <app-drop-down
                 formControlName="entityId"
-                class="w-full px-3 py-2 text-sm border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary-light)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-font)]"
-                [ngClass]="{
-                  'border-[var(--color-danger)]':
-                    reportForm.get('entityId')?.invalid &&
-                    reportForm.get('entityId')?.touched,
-                }"
+                [options]="entities"
+                [placeholder]="'Select Entity'"
+                [idField]="'id'"
+                [nameField]="'name'"
+                [inputClass]="
+                  'w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 cursor-pointer hover:border-gray-300'
+                "
+                [listClass]="'rounded-lg'"
+                [highlightedClass]="'bg-blue-50 text-blue-600'"
+                [dropdownMaxHeightMode]="'scale-input'"
+                [dropdownScale]="6"
                 [disabled]="loadingEntities || entities.length === 0"
-              >
-                <option value="" disabled>Select Entity</option>
-                <option *ngFor="let entity of entities" [value]="entity.id">
-                  {{ entity.name }}
-                </option>
-              </select>
+              ></app-drop-down>
               <div *ngIf="loadingEntities" class="absolute right-2 top-2">
                 <span
                   class="material-icons animate-spin text-[var(--color-primary)] text-base"
@@ -779,3 +787,9 @@
     </div>
   </div>
 </div>
+
+
+
+
+
+

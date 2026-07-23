@@ -90,7 +90,7 @@ export class UtilsServiceService {
     }
   }
 
-  getRoleForDownLevelWithCurrentRoleIdAll(type: any) {
+ getRoleForDownLevelWithCurrentRoleIdAll(type: any) {
     switch (type.toString().toLowerCase()) {
       case "owner":
         return [
@@ -119,6 +119,11 @@ export class UtilsServiceService {
       case "head":
         return [
           { id: "head", name: "Head", value: "head" },
+          { id: "branch", name: "Branch", value: "branch" },
+        ];
+
+      case "branch":
+        return [
           { id: "branch", name: "Branch", value: "branch" },
         ];
 

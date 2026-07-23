@@ -1,4 +1,3 @@
-
 import {
   Component,
   NgZone,
@@ -65,8 +64,15 @@ interface Notification {
   threadType?: string;
   name?: string;
   displayId?: string;
+  threadKind?: string;
 }
 
+interface FundTypeFilterOption {
+  id: string;
+  label: string;
+  matchField: "fundType" | "threadKind";
+  matchValue: string;
+}
 @Component({
   selector: "app-mobile-chatting",
   templateUrl: "./mobile-chatting.component.html",
@@ -174,10 +180,27 @@ export class MobileChattingComponent
   resolvedNotifications: Notification[] = [];
   unresolvedNotifications: Notification[] = [];
   rejectedNotifications: Notification[] = [];
-  fundTypeFilter: "all" | "upi" | "bank" | "payout" = "all";
+  fundTypeFilter: "all" | "upi" | "bank" | "payout" | "comPartDispute" = "all";
   searchTerm = "";
   filteredNotifications: Notification[] = [];
-
+  fundTypeFilterOptions: FundTypeFilterOption[] = [
+    { id: "all", label: "All", matchField: "fundType", matchValue: "" },
+    { id: "upi", label: "UPI", matchField: "fundType", matchValue: "upi" },
+    { id: "bank", label: "Bank", matchField: "fundType", matchValue: "bank" },
+    {
+      id: "payout",
+      label: "Payout",
+      matchField: "fundType",
+      matchValue: "payout",
+    },
+    {
+      id: "comPartDispute",
+      label: "CP",
+      matchField: "threadKind",
+      matchValue: "cp_accept_rejection",
+    },
+    // future: add one row here per new type
+  ];
   /* thread pagination */
   threadPage = 0;
   threadPageSize = 10;
@@ -423,17 +446,20 @@ export class MobileChattingComponent
      UI HELPERS
      ════════════════════════════════════════════ */
 
-  getStatusBadgeClass(type: string): string {
-    switch (type?.toLowerCase()) {
-      case "upi":
-        return "bg-purple-100 text-purple-700";
-      case "bank":
-        return "bg-blue-100 text-blue-700";
-      case "payout":
-        return "bg-emerald-100 text-emerald-700";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
+  private readonly badgeClassByKind: Record<string, string> = {
+    upi: "bg-purple-100 text-purple-700",
+    bank: "bg-blue-100 text-blue-700",
+    payout: "bg-emerald-100 text-emerald-700",
+    cp_accept_rejection: "bg-orange-100 text-orange-700",
+  };
+
+  getStatusBadgeClass(notification: Notification): string {
+    const key = (
+      notification.threadKind ||
+      notification.fundType ||
+      ""
+    ).toLowerCase();
+    return this.badgeClassByKind[key] || "bg-gray-100 text-gray-600";
   }
 
   getStatusFromNotification(notification: Notification): string {
@@ -730,12 +756,23 @@ export class MobileChattingComponent
         break;
     }
 
-    if (this.fundTypeFilter !== "all") {
-      notifications = notifications.filter(
-        (n) => n.fundType?.toLowerCase() === this.fundTypeFilter,
-      );
-    }
+    // if (this.fundTypeFilter !== "all") {
+    //   notifications = notifications.filter(
+    //     (n) => n.fundType?.toLowerCase() === this.fundTypeFilter,
+    //   );
+    // }
 
+    if (this.fundTypeFilter !== "all") {
+      const option = this.fundTypeFilterOptions.find(
+        (o) => o.id === this.fundTypeFilter,
+      );
+      if (option) {
+        notifications = notifications.filter((n) => {
+          const value = (n[option.matchField] || "").toString().toLowerCase();
+          return value === option.matchValue;
+        });
+      }
+    }
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.toLowerCase().trim();
       notifications = notifications.filter(
@@ -1026,6 +1063,7 @@ export class MobileChattingComponent
       portalId: t.portalId,
       resolved: t.resolved,
       fundId: t.fundsId,
+      threadKind: t.threadKind || null,
       fundType: t.fundsType,
       threadType,
       name: rawName,

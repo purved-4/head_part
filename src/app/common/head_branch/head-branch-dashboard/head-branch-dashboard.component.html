@@ -231,7 +231,6 @@
                     (click)="$event.stopPropagation()"
                   >
                     <button
-                      appButtonLoader
                       (click)="openApproveConfirm(transaction)"
                       class="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center hover:bg-green-50 transition"
                     >
@@ -241,7 +240,6 @@
                       >
                     </button>
                     <button
-                      appButtonLoader
                       (click)="openRejectConfirm(transaction)"
                       class="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center hover:bg-red-50 transition"
                     >
@@ -432,37 +430,67 @@
                     </span>
                   </div>
 
-                  <!-- Actions -->
                   <div
                     class="flex items-center gap-2"
                     (click)="$event.stopPropagation()"
                   >
-                    <!-- Approve -->
-                    <!-- Approve -->
-                    <button
-                      appButtonLoader
-                      (click)="openApproveConfirm(transaction)"
-                      [disabled]="transaction.processing !== true"
-                      class="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center hover:bg-green-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      <span
-                        class="material-symbols-outlined text-green-600 text-[14px]"
-                        >check</span
+                    <!-- APPROVE -->
+                    <div class="relative w-8 h-8">
+                      <button
+                        (click)="openApproveConfirm(transaction)"
+                        [disabled]="transaction.processing !== true"
+                        class="w-8 h-8 rounded-full border-2 flex items-center justify-center transition border-green-500 hover:bg-green-50 disabled:border-gray-300 disabled:hover:bg-transparent disabled:opacity-40"
                       >
-                    </button>
+                        <span
+                          class="material-symbols-outlined text-[14px]"
+                          [ngClass]="
+                            transaction.processing === true
+                              ? 'text-green-600'
+                              : 'text-gray-400'
+                          "
+                          >check</span
+                        >
+                      </button>
 
-                    <!-- Reject -->
-                    <button
-                      appButtonLoader
-                      (click)="openRejectConfirm(transaction)"
-                      [disabled]="transaction.processing !== true"
-                      class="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center hover:bg-red-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      <span
-                        class="material-symbols-outlined text-red-600 text-[14px]"
-                        >close</span
+                      <!-- Blocker overlay -->
+                      <div
+                        *ngIf="transaction.processing !== true"
+                        class="absolute inset-0 rounded-full cursor-not-allowed z-10"
+                        title="Start processing first"
+                        (click)="
+                          $event.stopPropagation(); $event.preventDefault()
+                        "
+                      ></div>
+                    </div>
+
+                    <!-- REJECT -->
+                    <div class="relative w-8 h-8">
+                      <button
+                        (click)="openRejectConfirm(transaction)"
+                        [disabled]="transaction.processing !== true"
+                        class="w-8 h-8 rounded-full border-2 flex items-center justify-center transition border-red-500 hover:bg-red-50 disabled:border-gray-300 disabled:hover:bg-transparent disabled:opacity-40"
                       >
-                    </button>
+                        <span
+                          class="material-symbols-outlined text-[14px]"
+                          [ngClass]="
+                            transaction.processing === true
+                              ? 'text-red-600'
+                              : 'text-gray-400'
+                          "
+                          >close</span
+                        >
+                      </button>
+
+                      <!-- Blocker overlay -->
+                      <div
+                        *ngIf="transaction.processing !== true"
+                        class="absolute inset-0 rounded-full cursor-not-allowed z-10"
+                        title="Start processing first"
+                        (click)="
+                          $event.stopPropagation(); $event.preventDefault()
+                        "
+                      ></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2200,3 +2228,4 @@
     />
   </div>
 </div>
+

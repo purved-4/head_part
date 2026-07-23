@@ -1,4 +1,3 @@
-
 import {
   Component,
   NgZone,
@@ -66,6 +65,14 @@ interface Notification {
   threadType?: string;
   name?: string;
   displayId?: string;
+  threadKind?: string | null;
+}
+
+interface FundTypeFilterOption {
+  id: string; // used in fundTypeFilter, matches button click
+  label: string; // UI label
+  matchField: "fundType" | "threadKind"; // which field on Notification to compare
+  matchValue: string; // lowercase value to compare against
 }
 
 @Component({
@@ -121,6 +128,25 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   private listSub: Subscription | null = null;
   private participantsMap: Map<string, GroupParticipant> = new Map();
 
+  fundTypeFilterOptions: FundTypeFilterOption[] = [
+    { id: "all", label: "All Types", matchField: "fundType", matchValue: "" },
+    { id: "upi", label: "UPI", matchField: "fundType", matchValue: "upi" },
+    { id: "bank", label: "Bank", matchField: "fundType", matchValue: "bank" },
+    {
+      id: "payout",
+      label: "Payout",
+      matchField: "fundType",
+      matchValue: "payout",
+    },
+    {
+      id: "comPartDispute",
+      label: "CP",
+      matchField: "threadKind",
+      matchValue: "cp_accept_rejection",
+    },
+    // future: just add a new row here, e.g.
+    // { id: "someNewType", label: "New Type", matchField: "threadKind", matchValue: "some_new_kind" },
+  ];
   /* message pagination */
   pageSize = 15;
   currentPage = 0;
@@ -166,7 +192,7 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   resolvedNotifications: Notification[] = [];
   unresolvedNotifications: Notification[] = [];
   rejectedNotifications: Notification[] = [];
-  fundTypeFilter: "all" | "upi" | "bank" | "payout" = "all";
+  fundTypeFilter: "all" | "upi" | "bank" | "payout" | "comPartDispute" = "all";
   searchTerm = "";
   filteredNotifications: Notification[] = [];
 
@@ -427,18 +453,18 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
      UI HELPERS
      ════════════════════════════════════════════ */
 
-  getStatusBadgeClass(type: string): string {
-    switch (type?.toLowerCase()) {
-      case "upi":
-        return "bg-purple-100 text-purple-700";
-      case "bank":
-        return "bg-blue-100 text-blue-700";
-      case "payout":
-        return "bg-emerald-100 text-emerald-700";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  }
+  // getStatusBadgeClass(type: string): string {
+  //   switch (type?.toLowerCase()) {
+  //     case "upi":
+  //       return "bg-purple-100 text-purple-700";
+  //     case "bank":
+  //       return "bg-blue-100 text-blue-700";
+  //     case "payout":
+  //       return "bg-emerald-100 text-emerald-700";
+  //     default:
+  //       return "bg-gray-100 text-gray-600";
+  //   }
+  // }
 
   getStatusFromNotification(notification: Notification): string {
     if (notification.resolved === true) return "Resolved";
@@ -703,6 +729,53 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
      FILTERS
      ════════════════════════════════════════════ */
 
+  // applyFilters(): void {
+  //   let notifications: Notification[] = [];
+
+  //   switch (this.activeTab) {
+  //     case "accept":
+  //       notifications = [...this.resolvedNotifications];
+  //       break;
+  //     case "pending":
+  //       notifications = [...this.unresolvedNotifications];
+  //       break;
+  //     case "reject":
+  //       notifications = [...this.rejectedNotifications];
+  //       break;
+  //   }
+
+  //   // if (this.fundTypeFilter !== "all") {
+  //   //   notifications = notifications.filter(
+  //   //     (n) => n.fundType?.toLowerCase() === this.fundTypeFilter,
+  //   //   );
+  //   // }
+
+  //   if (this.fundTypeFilter !== "all") {
+  //     const filterVal = this.fundTypeFilter.toLowerCase();
+  //     notifications = notifications.filter(
+  //       (n) => n.fundType?.toLowerCase() === filterVal,
+  //     );
+  //   }
+
+  //   if (this.searchTerm.trim()) {
+  //     const term = this.searchTerm.toLowerCase().trim();
+  //     notifications = notifications.filter(
+  //       (n) =>
+  //         n.groupName.toLowerCase().includes(term) ||
+  //         n.lastMessage.toLowerCase().includes(term) ||
+  //         n.lastSender.toLowerCase().includes(term) ||
+  //         (n.name || "").toLowerCase().includes(term),
+  //     );
+  //   }
+
+  //   notifications.sort((a, b) => {
+  //     if (a.unread !== b.unread) return b.unread - a.unread;
+  //     return new Date(b.time).getTime() - new Date(a.time).getTime();
+  //   });
+
+  //   this.filteredNotifications = notifications;
+  // }
+
   applyFilters(): void {
     let notifications: Notification[] = [];
 
@@ -719,9 +792,15 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.fundTypeFilter !== "all") {
-      notifications = notifications.filter(
-        (n) => n.fundType?.toLowerCase() === this.fundTypeFilter,
+      const option = this.fundTypeFilterOptions.find(
+        (o) => o.id === this.fundTypeFilter,
       );
+      if (option) {
+        notifications = notifications.filter((n) => {
+          const value = (n[option.matchField] || "").toString().toLowerCase();
+          return value === option.matchValue;
+        });
+      }
     }
 
     if (this.searchTerm.trim()) {
@@ -741,6 +820,22 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.filteredNotifications = notifications;
+  }
+
+  private readonly badgeClassByKind: Record<string, string> = {
+    upi: "bg-purple-100 text-purple-700",
+    bank: "bg-blue-100 text-blue-700",
+    payout: "bg-emerald-100 text-emerald-700",
+    cp_accept_rejection: "bg-orange-100 text-orange-700",
+  };
+
+  getStatusBadgeClass(notification: Notification): string {
+    const key = (
+      notification.threadKind ||
+      notification.fundType ||
+      ""
+    ).toLowerCase();
+    return this.badgeClassByKind[key] || "bg-gray-100 text-gray-600";
   }
 
   switchTab(tab: any): void {
@@ -1004,6 +1099,8 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       portalId: t.portalId,
       resolved: t.resolved,
       fundId: t.fundsId,
+      threadKind: t.threadKind || null,
+
       fundType: t.fundsType,
       threadType,
       name: rawName,

@@ -15,4 +15,17 @@ export class AffiliateService {
       catchError((error) => throwError(() => error)),
     );
   }
+  getAffiliateByHeadId(headId: any): Observable<any> {
+    return this.http.get(`${baseUrl}/affiliate/getByHead/${headId}`).pipe(
+      map((response: any) => response.data),
+      catchError((error) => throwError(() => error)),
+    );
+  }
+
+  toggleAffiliateStatus(id: any): Observable<any> {
+  return this.http.patch(`${baseUrl}/affiliate/toggleStatus/${id}`, {}).pipe(
+    map((response: any) => response.data),
+    catchError((error) => throwError(() => error)),
+  );
+}
 }

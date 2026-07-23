@@ -9,25 +9,23 @@
       class="flex items-center justify-between px-6 py-5 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
     >
       <div class="flex flex-col gap-2">
-        <!-- Title Row -->
         <div class="flex items-center gap-3">
           <button
             *ngIf="canGoBack()"
             (click)="goBack()"
             class="p-2 rounded-full hover:bg-[var(--color-primary)]/10 transition"
           >
-            <span class="material-symbols-outlined text-[var(--color-primary)]">
-              arrow_back
-            </span>
+            <span class="material-symbols-outlined text-[var(--color-primary)]"
+              >arrow_back</span
+            >
           </button>
 
           <h2
             class="text-xl font-semibold text-[var(--color-font)] flex items-center gap-2"
           >
-            <span class="material-symbols-outlined text-[var(--color-primary)]">
-              account_tree
-            </span>
-
+            <span class="material-symbols-outlined text-[var(--color-primary)]"
+              >account_tree</span
+            >
             Hierarchy Management
           </h2>
         </div>
@@ -37,24 +35,28 @@
           class="flex items-center gap-2 text-xs ml-10 text-[var(--color-muted)]"
         >
           <span *ngIf="!selectedManager && !selectedHead">
-            Managers
-
-            <span *ngIf="selectedChief?.username">
-              / {{ selectedChief?.username }}
+            Chief
+            <span *ngIf="selectedChief?.username || selectedChief?.info">
+              / {{ selectedChief?.username || selectedChief?.info }}
             </span>
           </span>
 
           <span *ngIf="selectedManager && !selectedHead">
-            Managers
-
+            Chief / Managers /
             <span class="text-[var(--color-primary)] font-medium">
               {{ selectedManager?.username || selectedManager?.info }}
             </span>
           </span>
 
-          <span *ngIf="selectedHead">
-            Managers / Heads /
+          <span *ngIf="selectedHead && selectedManager">
+            Chief / Managers / Heads /
+            <span class="text-[var(--color-primary)] font-medium">
+              {{ selectedHead?.username || selectedHead?.info }}
+            </span>
+          </span>
 
+          <span *ngIf="selectedHead && !selectedManager">
+            Chief / Heads /
             <span class="text-[var(--color-primary)] font-medium">
               {{ selectedHead?.username || selectedHead?.info }}
             </span>
@@ -79,32 +81,33 @@
         ></div>
       </div>
 
-      <!-- ================= B2B ================= -->
-      <div class="space-y-6">
+      <!-- ================= LEVEL 0: CHIEF (Managers + Direct Heads) ================= -->
+      <ng-container *ngIf="!selectedManager && !selectedHead && !isLoading()">
+        <!-- Empty state agar dono khali hain -->
         <div
-          *ngIf="!managers.length"
+          *ngIf="!managers.length && !chiefHeads.length"
           class="flex flex-col items-center justify-center py-10 text-center"
         >
           <span
             class="material-symbols-outlined text-4xl text-[var(--color-muted)] mb-2"
             >group_off</span
           >
-          <p class="font-medium text-[var(--color-font)]">No Managers Found</p>
+          <p class="font-medium text-[var(--color-font)]">No Data Found</p>
           <p class="text-xs text-[var(--color-muted)] mt-1">
-            No managers have been created yet.
+            This chief has no managers or heads assigned.
           </p>
         </div>
-        <!-- ================= MANAGERS ================= -->
+
+        <!-- MANAGERS -->
         <div
-          *ngIf="managers.length && !selectedManager && !selectedHead"
+          *ngIf="managers.length"
           class="bg-white/5 rounded-xl border border-[var(--color-border)] p-5"
         >
           <div class="flex items-center mb-4">
             <h3 class="font-semibold text-[var(--color-font)]">Managers</h3>
-
-            <span class="ml-auto text-sm text-[var(--color-muted)]">
-              {{ managers.length }}
-            </span>
+            <span class="ml-auto text-sm text-[var(--color-muted)]">{{
+              managers.length
+            }}</span>
           </div>
 
           <div class="overflow-hidden rounded-lg">
@@ -114,23 +117,19 @@
                   *ngFor="let m of managers"
                   class="hover:bg-[var(--color-hover)] transition"
                 >
-                  <!-- USER -->
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-3">
                       <div
                         class="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center"
                       >
-                        <span class="material-symbols-outlined text-blue-600">
-                          person
-                        </span>
+                        <span class="material-symbols-outlined text-blue-600"
+                          >person</span
+                        >
                       </div>
-
                       <div class="flex items-center gap-2">
-                        <span class="font-medium">
-                          {{ m.username || m.info || "No Name" }}
-                        </span>
-
-                        <!-- LIVE STATUS -->
+                        <span class="font-medium">{{
+                          m.username || m.info || "No Name"
+                        }}</span>
                         <span
                           class="h-2.5 w-2.5 rounded-full animate-pulse shadow-lg"
                           [ngClass]="
@@ -139,7 +138,6 @@
                               : 'bg-red-500 shadow-red-400'
                           "
                         ></span>
-
                         <span
                           class="text-xs font-medium"
                           [ngClass]="
@@ -152,16 +150,13 @@
                     </div>
                   </td>
 
-                  <!-- ROLE -->
                   <td class="px-4 py-3">
                     <span
                       class="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded-full"
+                      >Manager</span
                     >
-                      Manager
-                    </span>
                   </td>
 
-                  <!-- ACTION -->
                   <td class="px-4 py-3 text-right">
                     <button
                       (click)="getHeads(m)"
@@ -176,200 +171,190 @@
           </div>
         </div>
 
-        <!-- ================= HEADS ================= -->
+        <!-- HEADS DIRECTLY UNDER CHIEF -->
         <div
-          *ngIf="heads.length && selectedManager && !selectedHead"
+          *ngIf="chiefHeads.length"
           class="bg-white/5 rounded-xl border border-[var(--color-border)] p-5"
         >
           <div class="flex items-center mb-4">
             <h3 class="font-semibold text-[var(--color-font)]">Heads</h3>
-
-            <span class="ml-auto text-sm text-[var(--color-muted)]">
-              {{ heads.length }}
-            </span>
+            <span class="ml-auto text-sm text-[var(--color-muted)]">{{
+              chiefHeads.length
+            }}</span>
           </div>
 
-          <div
-            *ngIf="!heads.length"
-            class="flex flex-col items-center justify-center py-10 text-center"
-          >
-            <span
-              class="material-symbols-outlined text-4xl text-[var(--color-muted)] mb-2"
-              >group_off</span
-            >
-            <p class="font-medium text-[var(--color-font)]">No Heads Found</p>
-            <p class="text-xs text-[var(--color-muted)] mt-1">
-              This manager has no heads assigned.
-            </p>
-          </div>
-
-          <table class="min-w-full">
-            <tbody class="divide-y divide-[var(--color-border)]">
-              <tr
-                *ngFor="let h of heads"
-                class="hover:bg-[var(--color-hover)] transition"
-              >
-                <!-- USER -->
-                <td class="px-4 py-3">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="h-9 w-9 rounded-full bg-purple-100 flex items-center justify-center"
-                    >
-                      <span class="material-symbols-outlined text-purple-600">
-                        crown
-                      </span>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                      <span class="font-medium">
-                        {{ h.username || h.info }}
-                      </span>
-
-                      <!-- LIVE STATUS -->
-                      <span
-                        class="h-2.5 w-2.5 rounded-full animate-pulse shadow-lg"
-                        [ngClass]="
-                          h.onlineStatus
-                            ? 'bg-green-500 shadow-green-400'
-                            : 'bg-red-500 shadow-red-400'
-                        "
-                      ></span>
-
-                      <span
-                        class="text-xs font-medium"
-                        [ngClass]="
-                          h.onlineStatus ? 'text-green-500' : 'text-red-500'
-                        "
+          <div class="overflow-hidden rounded-lg">
+            <table class="min-w-full">
+              <tbody class="divide-y divide-[var(--color-border)]">
+                <tr
+                  *ngFor="let h of chiefHeads"
+                  class="hover:bg-[var(--color-hover)] transition"
+                >
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="h-9 w-9 rounded-full bg-purple-100 flex items-center justify-center"
                       >
-                        {{ h.onlineStatus ? "Online" : "Offline" }}
-                      </span>
+                        <span class="material-symbols-outlined text-purple-600"
+                          >workspace_premium</span
+                        >
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="font-medium">{{
+                          h.username || h.info || "No Name"
+                        }}</span>
+                        <span
+                          class="h-2.5 w-2.5 rounded-full animate-pulse shadow-lg"
+                          [ngClass]="
+                            h.onlineStatus
+                              ? 'bg-green-500 shadow-green-400'
+                              : 'bg-red-500 shadow-red-400'
+                          "
+                        ></span>
+                        <span
+                          class="text-xs font-medium"
+                          [ngClass]="
+                            h.onlineStatus ? 'text-green-500' : 'text-red-500'
+                          "
+                        >
+                          {{ h.onlineStatus ? "Online" : "Offline" }}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </td>
+                  </td>
 
-                <!-- ROLE -->
-                <td class="px-4 py-3">
-                  <span
-                    class="text-xs px-2 py-1 bg-purple-100 text-purple-600 rounded-full"
-                  >
-                    Head
-                  </span>
-                </td>
+                  <td class="px-4 py-3">
+                    <span
+                      class="text-xs px-2 py-1 bg-purple-100 text-purple-600 rounded-full"
+                      >Head</span
+                    >
+                  </td>
 
-                <!-- ACTION -->
-                <td class="px-4 py-3 text-right">
-                  <button
-                    (click)="getBranchesByHead(h)"
-                    class="px-3 py-1.5 text-sm rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition"
-                  >
-                    View
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <td class="px-4 py-3 text-right">
+                    <button
+                      (click)="selectChiefHead(h)"
+                      class="px-3 py-1.5 text-sm rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition"
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ================= LEVEL 1: HEADS UNDER SELECTED MANAGER ================= -->
+      <div
+        *ngIf="selectedManager && !selectedHead && !isLoading()"
+        class="bg-white/5 rounded-xl border border-[var(--color-border)] p-5"
+      >
+        <div class="flex items-center mb-4">
+          <h3 class="font-semibold text-[var(--color-font)]">Heads</h3>
+          <span class="ml-auto text-sm text-[var(--color-muted)]">{{
+            heads.length
+          }}</span>
         </div>
 
-        <!-- ================= BRANCHES ================= -->
         <div
-          *ngIf="branches.length && selectedHead"
-          class="bg-white/5 rounded-xl border border-[var(--color-border)] p-5"
+          *ngIf="!heads.length"
+          class="flex flex-col items-center justify-center py-10 text-center"
         >
-          <div class="flex items-center mb-4">
-            <h3 class="font-semibold text-[var(--color-font)]">Branches</h3>
-
-            <span class="ml-auto text-sm text-[var(--color-muted)]">
-              {{ branches.length }}
-            </span>
-          </div>
-
-          <div
-            *ngIf="!branches.length"
-            class="flex flex-col items-center justify-center py-10 text-center"
+          <span
+            class="material-symbols-outlined text-4xl text-[var(--color-muted)] mb-2"
+            >group_off</span
           >
-            <span
-              class="material-symbols-outlined text-4xl text-[var(--color-muted)] mb-2"
-              >storefront</span
-            >
-            <p class="font-medium text-[var(--color-font)]">
-              No Branches Found
-            </p>
-            <p class="text-xs text-[var(--color-muted)] mt-1">
-              This head has no branches assigned.
-            </p>
-          </div>
-
-          <table class="min-w-full">
-            <tbody class="divide-y divide-[var(--color-border)]">
-              <tr
-                *ngFor="let b of branches"
-                class="hover:bg-[var(--color-hover)] transition"
-              >
-                <!-- USER -->
-                <td class="px-4 py-3">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center"
-                    >
-                      <span class="material-symbols-outlined text-green-600">
-                        store
-                      </span>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                      <span class="font-medium">
-                        {{ b.username || b.info }}
-                      </span>
-
-                      <!-- LIVE STATUS -->
-                      <span
-                        class="h-2.5 w-2.5 rounded-full animate-pulse shadow-lg"
-                        [ngClass]="
-                          b.onlineStatus
-                            ? 'bg-green-500 shadow-green-400'
-                            : 'bg-red-500 shadow-red-400'
-                        "
-                      ></span>
-
-                      <span
-                        class="text-xs font-medium"
-                        [ngClass]="
-                          b.onlineStatus ? 'text-green-500' : 'text-red-500'
-                        "
-                      >
-                        {{ b.onlineStatus ? "Online" : "Offline" }}
-                      </span>
-                    </div>
-                  </div>
-                </td>
-
-                <!-- ROLE -->
-                <td class="px-4 py-3">
-                  <span
-                    class="text-xs px-2 py-1 bg-green-100 text-green-600 rounded-full"
-                  >
-                    Branch
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <p class="font-medium text-[var(--color-font)]">No Heads Found</p>
+          <p class="text-xs text-[var(--color-muted)] mt-1">
+            This manager has no heads assigned.
+          </p>
         </div>
+
+        <table *ngIf="heads.length" class="min-w-full">
+          <tbody class="divide-y divide-[var(--color-border)]">
+            <tr
+              *ngFor="let h of heads"
+              class="hover:bg-[var(--color-hover)] transition"
+            >
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="h-9 w-9 rounded-full bg-purple-100 flex items-center justify-center"
+                  >
+                    <span class="material-symbols-outlined text-purple-600"
+                      >workspace_premium</span
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium">{{ h.username || h.info }}</span>
+                    <span
+                      class="h-2.5 w-2.5 rounded-full animate-pulse shadow-lg"
+                      [ngClass]="
+                        h.onlineStatus
+                          ? 'bg-green-500 shadow-green-400'
+                          : 'bg-red-500 shadow-red-400'
+                      "
+                    ></span>
+                    <span
+                      class="text-xs font-medium"
+                      [ngClass]="
+                        h.onlineStatus ? 'text-green-500' : 'text-red-500'
+                      "
+                    >
+                      {{ h.onlineStatus ? "Online" : "Offline" }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-4 py-3">
+                <span
+                  class="text-xs px-2 py-1 bg-purple-100 text-purple-600 rounded-full"
+                  >Head</span
+                >
+              </td>
+
+              <td class="px-4 py-3 text-right">
+                <button
+                  (click)="getBranchesByHead(h)"
+                  class="px-3 py-1.5 text-sm rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition"
+                >
+                  View
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <!-- ================= B2C ================= -->
+      <!-- ================= LEVEL FINAL: BRANCHES (common for both flows) ================= -->
       <div
+        *ngIf="selectedHead && !isLoading()"
         class="bg-white/5 rounded-xl border border-[var(--color-border)] p-5"
       >
         <div class="flex items-center mb-4">
           <h3 class="font-semibold text-[var(--color-font)]">Branches</h3>
-
-          <span class="ml-auto text-sm text-[var(--color-muted)]">
-            {{ branches.length }}
-          </span>
+          <span class="ml-auto text-sm text-[var(--color-muted)]">{{
+            branches.length
+          }}</span>
         </div>
 
-        <table class="min-w-full">
+        <div
+          *ngIf="!branches.length"
+          class="flex flex-col items-center justify-center py-10 text-center"
+        >
+          <span
+            class="material-symbols-outlined text-4xl text-[var(--color-muted)] mb-2"
+            >storefront</span
+          >
+          <p class="font-medium text-[var(--color-font)]">No Branches Found</p>
+          <p class="text-xs text-[var(--color-muted)] mt-1">
+            This head has no branches assigned.
+          </p>
+        </div>
+
+        <table *ngIf="branches.length" class="min-w-full">
           <tbody class="divide-y divide-[var(--color-border)]">
             <tr
               *ngFor="let b of branches"
@@ -378,21 +363,14 @@
               <td class="px-4 py-3">
                 <div class="flex items-center gap-3">
                   <div
-                    class="h-9 w-9 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center"
+                    class="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center"
                   >
-                    <span
-                      class="material-symbols-outlined text-[var(--color-primary)]"
+                    <span class="material-symbols-outlined text-green-600"
+                      >store</span
                     >
-                      store
-                    </span>
                   </div>
-
                   <div class="flex items-center gap-2">
-                    <span class="font-medium">
-                      {{ b.username || b.info }}
-                    </span>
-
-                    <!-- LIVE STATUS -->
+                    <span class="font-medium">{{ b.username || b.info }}</span>
                     <span
                       class="h-2.5 w-2.5 rounded-full animate-pulse shadow-lg"
                       [ngClass]="
@@ -401,7 +379,6 @@
                           : 'bg-red-500 shadow-red-400'
                       "
                     ></span>
-
                     <span
                       class="text-xs font-medium"
                       [ngClass]="
@@ -412,6 +389,13 @@
                     </span>
                   </div>
                 </div>
+              </td>
+
+              <td class="px-4 py-3">
+                <span
+                  class="text-xs px-2 py-1 bg-green-100 text-green-600 rounded-full"
+                  >Branch</span
+                >
               </td>
             </tr>
           </tbody>

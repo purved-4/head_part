@@ -1,3 +1,4 @@
+
 import {
   Component,
   EventEmitter,
@@ -69,8 +70,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     fttPercentage: 0,
   };
 
-  // minPercentage jo child API se aata hai — YEH hi cheez edit hoti hai
-  // (individual compart ka percentage edit nahi hota, sirf yeh minimum floor)
   minPercentage: MinPercentage | null = null;
   parentMinPercentage: MinPercentage | null = null;
 
@@ -153,10 +152,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
       username: ["", Validators.required],
       info: [""],
       parentCurrency: [""],
-      payoutAcceptTime: [
-        null,
-        [Validators.required, Validators.min(1), Validators.max(60)],
-      ],
     });
   }
 
@@ -315,15 +310,27 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     this.isEditingMinPercentage = false;
   }
 
-  onMinPercentageDraftChange(
-    field: "payinPercentage" | "payoutPercentage" | "fttPercentage",
-    value: any,
-  ): void {
-    this.minPercentageDraft = {
-      ...this.minPercentageDraft,
-      [field]: Number(value ?? 0),
-    };
-  }
+onMinPercentageDraftChange(
+  field: "payinPercentage" | "payoutPercentage" | "fttPercentage",
+  value: any,
+): void {
+  this.minPercentageDraft = {
+    ...this.minPercentageDraft,
+    [field]: Number(value ?? 0),
+  };
+}
+
+// naya helper — HTML mein parent ka max dikhane ke liye
+getParentMax(field: "payinPercentage" | "payoutPercentage" | "fttPercentage"): number {
+  return this.parentMinPercentage?.[field] ?? 0;
+}
+
+// agar draft value parent ke max se zyada hai toh true
+isOverMax(field: "payinPercentage" | "payoutPercentage" | "fttPercentage"): boolean {
+  const maxAllowed = this.parentMinPercentage?.[field];
+  if (maxAllowed === undefined || maxAllowed === null) return false;
+  return Number(this.minPercentageDraft[field] ?? 0) > maxAllowed;
+}
 
   saveMinPercentageEdit(): void {
     this.minPercentage = { ...this.minPercentageDraft };
@@ -404,7 +411,7 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
   }
 
   // ---------- Submit ----------
-  onSubmit(): void {
+ onSubmit(): void {
     if (this.editForm.invalid) {
       this.editForm.markAllAsTouched();
       return;
@@ -432,7 +439,6 @@ export class EnityCompartEditModelComponent implements OnInit, OnChanges {
     const newAllocation = this.buildNewCompartAllocation();
     if (newAllocation) {
       payload.compartIds = newAllocation.compartIds;
-      payload.percentage = newAllocation.percentage;
     }
 
     if (this.entityType === "CHIEF") {

@@ -1175,17 +1175,21 @@ export const AVAILABLE_CURRENCIES: CurrencyConfig[] = [
     currency: "INR",
     display: "Indian Rupee",
     icon: "currency_rupee",
+    networks: [
+      { code: "BANK", icon: "account_balance", label: "BANK" },
+      { code: "UPI", icon: "qr_code_scanner", label: "UPI" },
+    ],
   },
   {
     currency: "USDT",
     display: "Tether",
     icon: "toll",
     networks: [
-      { code: "ERC20", icon: "hub", label: "Ethereum" },
-      { code: "BEP20", icon: "lan", label: "BNB Smart Chain" },
-      { code: "TRC20", icon: "settings_ethernet", label: "TRON" },
-      { code: "OMNI", icon: "currency_bitcoin", label: "Bitcoin Omni" },
-      { code: "SPL", icon: "token", label: "Solana" },
+      { code: "ERC20", icon: "hub", label: "ERC20" },
+      { code: "BEP20", icon: "lan", label: "BEP20" },
+      { code: "TRC20", icon: "settings_ethernet", label: "TRC20" },
+      { code: "OMNI", icon: "currency_bitcoin", label: "OMNI" },
+      { code: "SPL", icon: "token", label: "SPL" },
     ],
   },
 ];
