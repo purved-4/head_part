@@ -78,6 +78,7 @@ export class HeadNavHeaderComponent implements OnInit {
   isExposureOpen = false;
 
   searchResults: any[] = [];
+  showMobileSearch = false;
 
   allRoutes = [
     {
@@ -419,6 +420,7 @@ export class HeadNavHeaderComponent implements OnInit {
     this.searchResults = [];
 
     this.showSearchDropdown = false;
+    this.showMobileSearch = false;
   }
 
   getUserInitials(): string {
@@ -731,4 +733,15 @@ export class HeadNavHeaderComponent implements OnInit {
       },
     });
   }
+
+  toggleMobileSearch() {
+  this.showMobileSearch = !this.showMobileSearch;
+
+  if (!this.showMobileSearch) {
+    this.searchTerm = "";
+    this.searchResults = [];
+    this.showSearchDropdown = false;
+    this.selectedIndex = -1;
+  }
+}
 }
