@@ -1283,13 +1283,9 @@ getAllPayInAndPayoutCombine(
         catchError((error) => throwError(() => error)),
       );
   }
-<<<<<<< HEAD
-rejectPayoutReward(
-=======
   
  rejectPayoutReward(
  
->>>>>>> e2a343c (code update)
     fundId: string,
     reason?: string,
     id?: any,
