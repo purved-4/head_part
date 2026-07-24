@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute, Route, Router } from "@angular/router";
 import { of, Subscription } from "rxjs";
@@ -24,7 +25,8 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   payinTotalRecords = 0;
 
   // Mode filter
-  selectedMode: "upi" | "bank" = "bank";
+  selectedMode: "upi" | "BEP20" | "TRC20" | "ERC20" | "SPL" | "OMNI" | "bank" =
+    "bank";
 
   // Status filter
   selectedStatus: "ACCEPTED" | "REJECTED" | "PENDING" = "PENDING";
@@ -625,7 +627,9 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
 
     return found?.domain || "All Compart";
   }
-  onModeChange(mode: "upi" | "bank") {
+  onModeChange(
+    mode: "upi" | "BEP20" | "TRC20" | "ERC20" | "SPL" | "OMNI" | "bank",
+  ) {
     this.selectedMode = mode;
 
     this.payinPage = 0;

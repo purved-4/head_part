@@ -1,5 +1,3 @@
-
-
 import {
   Component,
   Input,
@@ -73,11 +71,11 @@ export class HeadNavHeaderComponent implements OnInit {
     fttPercentage: 0,
   };
   searchTerm = "";
- @ViewChild("exposureContainer") exposureContainer!: ElementRef;
+  @ViewChild("exposureContainer") exposureContainer!: ElementRef;
 
-exposureData: any = null;
-exposureLoading = false;
-isExposureOpen = false;
+  exposureData: any = null;
+  exposureLoading = false;
+  isExposureOpen = false;
 
   searchResults: any[] = [];
 
@@ -165,27 +163,25 @@ isExposureOpen = false;
       keywords: ["profile", "user"],
       icon: "person",
     },
-
-        {
+    {
       label: "Resolved Notifications",
       path: "/head/resolved-notification",
       keywords: ["resolved", "notifications"],
       icon: "notifications_unread",
     },
 
-        {
+    {
       label: "Payin Reports",
       path: "/head/reports/funds/payin/bank",
       keywords: ["payin", "reports"],
       icon: "account_balance",
     },
-       {
+    {
       label: "Payout Reports",
       path: "/head/reports/funds/payout/payout",
       keywords: ["payout", "reports"],
       icon: "payment",
     },
-
   ];
   selectedIndex = -1;
 
@@ -493,13 +489,13 @@ isExposureOpen = false;
 
   // Combined HostListener for Escape key
   @HostListener("document:keydown.escape")
-onEscapeKeydown() {
-  if (this.isProfileOpen) this.closeProfile();
-  if (this.portalPopupOpen) this.closePortalPopup();
-  if (this.isPortalOpen) this.isPortalOpen = false;
-  if (this.showPercentagesModal) this.closePercentagesModal();
-  if (this.isExposureOpen) this.closeExposurePopup();
-}
+  onEscapeKeydown() {
+    if (this.isProfileOpen) this.closeProfile();
+    if (this.portalPopupOpen) this.closePortalPopup();
+    if (this.isPortalOpen) this.isPortalOpen = false;
+    if (this.showPercentagesModal) this.closePercentagesModal();
+    if (this.isExposureOpen) this.closeExposurePopup();
+  }
 
   // Combined HostListener for clicks outside
   @HostListener("document:click", ["$event"])
@@ -515,12 +511,14 @@ onEscapeKeydown() {
     }
 
     // Close percentages tooltip
-  if (this.showPercentagesModal && this.percentagesContainer) {
-    const clickedInside = this.percentagesContainer.nativeElement.contains(event.target);
-    if (!clickedInside) {
-      this.showPercentagesModal = false;
+    if (this.showPercentagesModal && this.percentagesContainer) {
+      const clickedInside = this.percentagesContainer.nativeElement.contains(
+        event.target,
+      );
+      if (!clickedInside) {
+        this.showPercentagesModal = false;
+      }
     }
-  }
 
     // Close limits popup
     if (this.isLimitsOpen && this.limitsContainer) {
@@ -543,12 +541,14 @@ onEscapeKeydown() {
     }
 
     // Close exposure popup
-  if (this.isExposureOpen && this.exposureContainer) {
-    const clickedInside = this.exposureContainer.nativeElement.contains(event.target);
-    if (!clickedInside) {
-      this.isExposureOpen = false;
+    if (this.isExposureOpen && this.exposureContainer) {
+      const clickedInside = this.exposureContainer.nativeElement.contains(
+        event.target,
+      );
+      if (!clickedInside) {
+        this.isExposureOpen = false;
+      }
     }
-  }
   }
 
   togglePortalPopup() {
@@ -640,21 +640,18 @@ onEscapeKeydown() {
     }
   }
 
- 
-toggleExposure(event: MouseEvent) {
-  event.stopPropagation();
-  this.isExposureOpen = !this.isExposureOpen;
+  toggleExposure(event: MouseEvent) {
+    event.stopPropagation();
+    this.isExposureOpen = !this.isExposureOpen;
 
-  if (this.isExposureOpen) {
-    this.fetchExposureData();
+    if (this.isExposureOpen) {
+      this.fetchExposureData();
+    }
   }
-}
 
-closeExposurePopup() {
-  this.isExposureOpen = false;
-}
-
-
+  closeExposurePopup() {
+    this.isExposureOpen = false;
+  }
 
   private fetchExposureData() {
     this.exposureLoading = true;
@@ -690,53 +687,48 @@ closeExposurePopup() {
     });
   }
 
-// 1. Add a ViewChild to detect outside clicks
-@ViewChild("percentagesContainer") percentagesContainer!: ElementRef;
+  // 1. Add a ViewChild to detect outside clicks
+  @ViewChild("percentagesContainer") percentagesContainer!: ElementRef;
 
-// 2. Replace openPercentagesModal() with togglePercentages()
-togglePercentages(event: MouseEvent) {
-  event.stopPropagation();
-  this.showPercentagesModal = !this.showPercentagesModal;
+  // 2. Replace openPercentagesModal() with togglePercentages()
+  togglePercentages(event: MouseEvent) {
+    event.stopPropagation();
+    this.showPercentagesModal = !this.showPercentagesModal;
 
-  if (this.showPercentagesModal) {
-    this.loadingPercentages = true;
+    if (this.showPercentagesModal) {
+      this.loadingPercentages = true;
 
-    this.compartService
-      .getPercentageByEntityId(this.currentRoleId, this.currentUserRole)
-      .subscribe({
-        next: (res: any) => {
-          this.percentages = res.minPercentage;
-          console.log(res);
-          this.loadingPercentages = false;
-        },
-        error: () => {
-          this.loadingPercentages = false;
-        },
-      });
+      this.compartService
+        .getPercentageByEntityId(this.currentRoleId, this.currentUserRole)
+        .subscribe({
+          next: (res: any) => {
+            this.percentages = res.minPercentage;
+            console.log(res);
+            this.loadingPercentages = false;
+          },
+          error: () => {
+            this.loadingPercentages = false;
+          },
+        });
+    }
+  }
+
+  closePercentagesModal() {
+    this.showPercentagesModal = false;
+  }
+
+  claimRewards() {
+    this.fundService.claimRewards().subscribe({
+      next: (res: any) => {
+        this.rewards = res.released;
+        this.snack.show(res?.message || "Rewards claimed successfully", true);
+      },
+      error: (err) => {
+        this.snack.show(
+          err?.error?.message || "Failed to claim rewards",
+          false,
+        );
+      },
+    });
   }
 }
-
-closePercentagesModal() {
-  this.showPercentagesModal = false;
-}
-
-claimRewards() {
-  this.fundService.claimRewards().subscribe({
-    next: (res: any) => {
-      this.rewards = res.released;
-      this.snack.show(
-        res?.message || 'Rewards claimed successfully',
-        true
-      );
-
-    },
-    error: (err) => {
-      this.snack.show(
-        err?.error?.message || 'Failed to claim rewards',
-        false
-      );
-    },
-  });
-}
-}
-

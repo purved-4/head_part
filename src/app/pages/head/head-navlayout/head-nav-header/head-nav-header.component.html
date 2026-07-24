@@ -221,6 +221,7 @@
             {{ limitRemainingAmount | crformat }}
           </div>
         </div>
+        <<<<<<< HEAD ======= >>>>>>> 7ffbf0e (pushed its)
         <!-- Toggle -->
 
         <div class="flex items-center gap-2">
@@ -283,6 +284,7 @@
 
           <div
             *ngIf="showSearchDropdown"
+            *ngIf="showSearchDropdown"
             class="absolute top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-50 overflow-hidden"
           >
             <div
@@ -297,6 +299,15 @@
               </span>
 
               <span>{{ item.label }}</span>
+            </div>
+            <div
+              *ngIf="searchResults.length === 0"
+              class="flex items-center justify-center gap-2 px-4 py-6 text-sm text-gray-500"
+            >
+              <span class="material-symbols-outlined text-base"
+                >search_off</span
+              >
+              <span>No such page found</span>
             </div>
             <div
               *ngIf="searchResults.length === 0"

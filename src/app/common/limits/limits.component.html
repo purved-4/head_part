@@ -747,7 +747,7 @@
 
   <!-- Add Amount Modal -->
   <div
-    *ngIf="showAddTransactionAmountModal"
+    *ngIf="showAddTransactionAmountModal || showRemoveTransactionAmountModal"
     class="fixed inset-0 z-50 overflow-y-auto"
     aria-labelledby="modal-title"
     role="dialog"
@@ -772,10 +772,18 @@
           <div class="flex items-start justify-between mb-5">
             <div>
               <h3 class="text-xl font-semibold text-[var(--color-text-main)]">
-                Add Amount to {{ selectedEntity?.username }}
+                <!-- Add Amount to {{ selectedEntity?.username }} -->
+                {{
+                  actionType === "REMOVE"
+                    ? "Remove Amount from"
+                    : "Add Amount to"
+                }}
+                {{ selectedEntity?.username }}
               </h3>
               <p class="text-sm text-[var(--color-text-muted)] mt-1">
-                Enter the amount to allocate to this entity
+                Enter the amount to
+                {{ actionType === "REMOVE" ? "deduct from" : "allocate to" }}
+                this entity
               </p>
             </div>
 
@@ -881,7 +889,8 @@
               for="transactionTransactionAmount"
               class="block text-sm font-medium text-[var(--color-text-main)]"
             >
-              TransactionAmount to Add
+              TransactionAmount to
+              {{ actionType === "REMOVE" ? "Remove" : "Add" }}
             </label>
 
             <div class="relative">
@@ -931,9 +940,16 @@
           <button
             (click)="submitAddTransactionAmount()"
             [disabled]="transactionAmountToAdd <= 0 || addingTransactionAmount"
-            class="px-6 py-2.5 rounded-lg bg-[var(--color-primary)] text-white font-medium hover:opacity-90 disabled:opacity-50"
+            [ngClass]="
+              actionType === 'REMOVE'
+                ? 'bg-red-600 hover:bg-red-700'
+                : 'bg-[var(--color-primary)] hover:opacity-90'
+            "
+            class="px-6 py-2.5 rounded-lg text-white font-medium disabled:opacity-50"
           >
-            <span *ngIf="!addingTransactionAmount">Add Amount</span>
+            <span *ngIf="!addingTransactionAmount">{{
+              actionType === "REMOVE" ? "Remove Amount" : "Add Amount"
+            }}</span>
 
             <span
               *ngIf="addingTransactionAmount"
@@ -1706,4 +1722,3 @@
     </div>
   </div>
 </div>
-

@@ -398,6 +398,9 @@ export class ComPartService {
       .set("page", page.toString())
       .set("size", pageSize.toString());
 
+    if (status !== null && status !== undefined) {
+      params = params.set("status", status.toString());
+    }
     if (category !== null && category !== undefined) {
       params = params.set("category", category.toString());
     }
@@ -407,7 +410,8 @@ export class ComPartService {
 
     return this.http
       .get<any>(
-        `${baseUrl}/comPart/funds/getPayinFundsByComPartId/${compartId}/${status}`,
+        // `${baseUrl}/comPart/funds/getPayinFundsByComPartId/${compartId}/${status}`,
+        `${baseUrl}/comPart/funds/getPayinFundsByComPartId/${compartId}`,
         {
           params,
         },
@@ -418,7 +422,7 @@ export class ComPartService {
       );
   }
 
-  getAllPayOutFundWithCompartId(
+getAllPayOutFundWithCompartId(
     compartId: any,
     status: any,
     page: number = 0,
@@ -428,6 +432,9 @@ export class ComPartService {
     let params = new HttpParams()
       .set("page", page.toString())
       .set("size", pageSize.toString());
+    if (status !== null && status !== undefined) {
+      params = params.set("status", status.toString());
+    }
 
     if (category !== null && category !== undefined) {
       params = params.set("category", category.toString());
@@ -435,7 +442,8 @@ export class ComPartService {
 
     return this.http
       .get<any>(
-        `${baseUrl}/comPart/funds/getPayoutFundsByComPartId/${compartId}/${status}`,
+        // `${baseUrl}/comPart/funds/getPayoutFundsByComPartId/${compartId}/${status}`,
+        `${baseUrl}/comPart/funds/getPayoutFundsByComPartId/${compartId}`,
         {
           params,
         },
@@ -1215,7 +1223,7 @@ restoreBankAndUpi(comPartId: any): Observable<any> {
       );;
     }
  
-    getAllPayInAndPayoutCombine(
+getAllPayInAndPayoutCombine(
     compartId: any,
     status: any,
     fundType: any,
@@ -1228,6 +1236,10 @@ restoreBankAndUpi(comPartId: any): Observable<any> {
     let params = new HttpParams()
       .set("page", page.toString())
       .set("size", pageSize.toString());
+
+    if (status !== null && status !== undefined) {
+      params = params.set("status", status.toString());
+    }
 
     if (category !== null && category !== undefined) {
       params = params.set("category", category.toString());
@@ -1244,7 +1256,8 @@ restoreBankAndUpi(comPartId: any): Observable<any> {
     }
     return this.http
       .get<any>(
-        `${baseUrl}/comPart/funds/getFundsByCompartId/${compartId}/${status}`,
+        // `${baseUrl}/comPart/funds/getFundsByCompartId/${compartId}/${status}`,
+        `${baseUrl}/comPart/funds/getFundsByCompartId/${compartId}?status=PENDING`,
         {
           params,
         },
@@ -1270,7 +1283,13 @@ restoreBankAndUpi(comPartId: any): Observable<any> {
         catchError((error) => throwError(() => error)),
       );
   }
+<<<<<<< HEAD
 rejectPayoutReward(
+=======
+  
+ rejectPayoutReward(
+ 
+>>>>>>> e2a343c (code update)
     fundId: string,
     reason?: string,
     id?: any,

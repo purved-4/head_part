@@ -1,3 +1,4 @@
+
 import { Component, OnInit } from "@angular/core";
 import { LimitsService } from "../../pages/services/reports/limits.service";
 import { UserStateService } from "../../store/user-state.service";
@@ -81,7 +82,8 @@ export class LimitsComponent implements OnInit {
 
     if (this.role === "CHIEF") {
       this.chiefService.getChiefsById(this.currentRoleId).subscribe((res) => {
-        this.chiefBuisnessType = res.businessType;
+        // this.chiefBuisnessType = res.businessType;
+        this.chiefBuisnessType = res?.businessType ?? null;
         if (this.chiefBuisnessType === "B2C") {
           this.activeTab = "branch";
         } else {
@@ -116,49 +118,108 @@ export class LimitsComponent implements OnInit {
       });
   }
 
+  // loadDownlevelData() {
+  //   this.loading = true;
+  //   this.error = null;
+
+  //   if (this.currentRoleId && this.role) {
+  //     if (this.role === "CHIEF") {
+  //       // Make separate API calls for managers and branches
+  //       this.utilSerivce
+  //         .getDataWithEntityTypeAndId(
+  //           this.currentRoleId,
+  //           this.role.toLowerCase(),
+  //           this.chiefBuisnessType,
+  //         )
+  //         .subscribe({
+  //           next: (res: any) => {
+  //             // if (this.chiefBuisnessType === "B2C") {
+  //             //   this.branchesData = Array.isArray(res)
+  //             //     ? res
+  //             //     : res
+  //             //       ? [res]
+  //             //       : [];
+  //             // } else if (this.chiefBuisnessType === "B2B") {
+  //             //   this.managersData = Array.isArray(res)
+  //             //     ? res
+  //             //     : res
+  //             //       ? [res]
+  //             //       : [];
+  //             // }
+  //             // this.downlevelData = [...this.managersData, ...this.branchesData];
+  //             // this.currentPage = 0;
+  //             // this.updatePagination();
+  //             // this.loading = false;
+
+  //             this.downlevelData = Array.isArray(res) ? res : [res];
+  //             this.currentPage = 0;
+  //             this.updatePagination();
+  //             this.loading = false;
+  //           },
+  //           error: (err: any) => {
+  //             this.snackBar.show(err.error?.message, false);
+  //             this.loading = false;
+  //           },
+  //         });
+  //     } else {
+  //       // For non-CHIEF roles, make single API call
+  //       this.utilSerivce
+  //         .getDataWithEntityTypeAndId(
+  //           this.currentRoleId,
+  //           this.role.toLowerCase(),
+  //         )
+  //         .subscribe({
+  //           next: (res: any) => {
+  //             this.downlevelData = Array.isArray(res) ? res : [res];
+  //             this.currentPage = 0;
+  //             this.updatePagination();
+  //             this.loading = false;
+  //           },
+  //           error: (err: any) => {
+  //             this.snackBar.show(err.error?.message, false);
+  //             this.loading = false;
+  //           },
+  //         });
+  //     }
+  //   } else {
+  //     this.snackBar.show("User role information not available", false);
+  //     this.loading = false;
+  //   }
+  // }
+
   loadDownlevelData() {
     this.loading = true;
     this.error = null;
 
     if (this.currentRoleId && this.role) {
       if (this.role === "CHIEF") {
-        // Make separate API calls for managers and branches
-        this.utilSerivce
-          .getDataWithEntityTypeAndId(
-            this.currentRoleId,
-            this.role.toLowerCase(),
-            this.chiefBuisnessType,
-          )
-          .subscribe({
-            next: (res: any) => {
-              // if (this.chiefBuisnessType === "B2C") {
-              //   this.branchesData = Array.isArray(res)
-              //     ? res
-              //     : res
-              //       ? [res]
-              //       : [];
-              // } else if (this.chiefBuisnessType === "B2B") {
-              //   this.managersData = Array.isArray(res)
-              //     ? res
-              //     : res
-              //       ? [res]
-              //       : [];
-              // }
-              // this.downlevelData = [...this.managersData, ...this.branchesData];
-              // this.currentPage = 0;
-              // this.updatePagination();
-              // this.loading = false;
+        const request$ = this.utilSerivce.getDataWithEntityTypeAndId(
+          this.currentRoleId,
+          this.role.toLowerCase(),
+          this.chiefBuisnessType,
+        );
 
-              this.downlevelData = Array.isArray(res) ? res : [res];
-              this.currentPage = 0;
-              this.updatePagination();
-              this.loading = false;
-            },
-            error: (err: any) => {
-              this.snackBar.show(err.error?.message, false);
-              this.loading = false;
-            },
-          });
+        if (!request$) {
+          this.loading = false;
+          this.snackBar.show(
+            "Unable to determine business type for this Chief account",
+            false,
+          );
+          return;
+        }
+
+        request$.subscribe({
+          next: (res: any) => {
+            this.downlevelData = Array.isArray(res) ? res : [res];
+            this.currentPage = 0;
+            this.updatePagination();
+            this.loading = false;
+          },
+          error: (err: any) => {
+            this.snackBar.show(err.error?.message, false);
+            this.loading = false;
+          },
+        });
       } else {
         // For non-CHIEF roles, make single API call
         this.utilSerivce

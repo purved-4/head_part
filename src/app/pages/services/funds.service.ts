@@ -50,7 +50,7 @@ export class FundsService {
 
   settleUpiFund(upiSettleId: any): Observable<any> {
     return this.http
-      .patch<any>(`${baseUrl}/funds/upi/${upiSettleId}/accept`, {})
+      .patch<any>(`${baseUrl}/funds/payment/${upiSettleId}/accept`, {})
       .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(error)),

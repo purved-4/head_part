@@ -172,13 +172,20 @@ export class HeadBranchDashboardComponent
   confirmTransaction: any = null;
   reason: any = "rejects";
 
-  rejectReasons: string[] = [
-    "Insufficient funds",
-    "Suspicious activity",
-    "Mismatch details",
-    "Duplicate transaction",
-    "other",
+  // NAYA — isse replace karo
+  payinRejectReasons: string[] = [
+    "Amount Not Recieved",
+    "Duplicate Transaction (Used Transaction Reciept)",
+    "Transaction in Inactive Account",
+    "Suspicious Account Activity",
   ];
+
+  payoutRejectReasons: string[] = [
+    "Invalid beneficiary account details",
+    "Beneficiary account limit reached",
+    "Inactive Beneficiary (Amount refunded)",
+  ];
+
   customReason: string = "";
   sse: any;
   banks: any;
@@ -729,7 +736,6 @@ export class HeadBranchDashboardComponent
   private resetRejectReason(): void {
     // restore your default and clear custom input
     this.reason = "rejects";
-    this.customReason = "";
   }
 
   private initTrendChart(): void {
@@ -1469,9 +1475,6 @@ export class HeadBranchDashboardComponent
       null;
 
     try {
-      // =====================================================
-      // PAYOUT
-      // =====================================================
       if (t.type === "payout") {
         const accountId =
           this.selectedPayoutMethod === "upi"
@@ -1491,36 +1494,17 @@ export class HeadBranchDashboardComponent
         }
 
         await lastValueFrom(this.fundService.acceptPayout(fundId, formData));
-      }
-
-      // =====================================================
-      // UPI PAYIN
-      // =====================================================
-      else if (t.mode === "upi") {
+      } else if (t.mode === "upi") {
         await lastValueFrom(this.fundService.settleUpiFund(fundId));
-      }
-
-      // =====================================================
-      // BANK PAYIN
-      // =====================================================
-      else if (t.mode === "bank") {
+      } else if (t.mode === "bank") {
         await lastValueFrom(this.fundService.settleBankFund(fundId));
-      }
-
-      // =====================================================
-      // CRYPTO PAYIN  ✅ NEW
-      // =====================================================
-      else if (t.mode === "crypto") {
+      } else if (t.mode === "crypto") {
         await lastValueFrom(this.fundService.settleCryptoFund(fundId));
       } else {
         this.snackbar.show("Unknown transaction type, cannot approve", false);
         this.loaderService.hideButtonLoader();
         return;
       }
-
-      // =====================================================
-      // SUCCESS
-      // =====================================================
 
       this.snackbar.show("Transaction approved successfully", true);
 
@@ -1990,7 +1974,7 @@ export class HeadBranchDashboardComponent
           : t.mode === "bank"
             ? "bank"
             : t.mode === "crypto"
-              ? "crypto" // ✅ NEW
+              ? "crypto"
               : "none";
 
     this.confirmTransaction = { ...t, section: src };
@@ -2021,10 +2005,7 @@ export class HeadBranchDashboardComponent
   }
 
   get rejectionReason(): string {
-    if (!this.reason) return "";
-    return this.reason === "other"
-      ? (this.customReason || "").trim()
-      : this.reason;
+    return this.reason || "";
   }
 
   isAttachmentRequired(): boolean {
@@ -2055,30 +2036,27 @@ export class HeadBranchDashboardComponent
   }
 
   async confirmReject() {
-    if (this.isRejecting) return; // 🔴 ADD THIS
+    if (this.isRejecting) return;
 
-    this.isRejecting = true; // 🔴 ADD THIS
+    this.isRejecting = true;
 
     try {
+      if (!this.confirmTransaction) return;
+
       if (this.isPayoutActionBlocked(this.confirmTransaction)) {
         this.snackbar.show("You can Approve after Processing", false);
         return;
       }
 
-      if (this.confirmTransaction?.type !== "payout" && !this.selectedFile) {
+      if (this.confirmTransaction.type !== "payout" && !this.selectedFile) {
         this.snackbar.show("Please upload attachment before rejecting", false);
         return;
       }
 
-      if (!this.confirmTransaction) return;
-
       const finalReason = this.rejectionReason;
 
       if (!finalReason) {
-        this.snackbar.show(
-          "Please select or enter a reason for rejection",
-          false,
-        );
+        this.snackbar.show("Please select a reason for rejection", false);
         return;
       }
 
@@ -2092,13 +2070,13 @@ export class HeadBranchDashboardComponent
       this.showRejectConfirm = false;
       this.resetForm();
     } finally {
-      this.isRejecting = false; // 🔴 ADD THIS
+      this.isRejecting = false;
     }
   }
 
   resetForm(): void {
     this.reason = "";
-    this.customReason = "";
+
     this.selectedFile = null;
     this.isDragging = false;
     this.showRejectConfirm = false;
@@ -3096,5 +3074,10 @@ export class HeadBranchDashboardComponent
     navigator.clipboard.writeText(address).then(() => {
       this.snackbar.show("Wallet address copied", true);
     });
+  }
+  get currentRejectReasons(): string[] {
+    return this.confirmTransaction?.type === "payout"
+      ? this.payoutRejectReasons
+      : this.payinRejectReasons;
   }
 }
