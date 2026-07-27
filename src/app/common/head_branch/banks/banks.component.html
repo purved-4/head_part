@@ -1706,7 +1706,7 @@
   [style.left.px]="capacityPopupLeft"
 >
   <div class="p-4">
-    <ng-container *ngIf="selectedCapacityAccount.ranges?.length">
+    <ng-container *ngIf="selectedCapacityAccount.ranges?.length; else noRanges">
       <div
         *ngFor="let item of selectedCapacityAccount.ranges"
         class="flex items-center justify-between py-3 border-b border-dashed border-gray-200 last:border-b-0"
@@ -1723,6 +1723,10 @@
         </span>
       </div>
     </ng-container>
+
+    <ng-template #noRanges>
+      <p class="text-xs text-gray-400 py-3 text-center">No ranges configured</p>
+    </ng-template>
 
     <div class="flex justify-end pt-3">
       <button

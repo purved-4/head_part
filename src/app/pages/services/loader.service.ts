@@ -1,5 +1,5 @@
 import { Injectable, signal } from "@angular/core";
-
+export const DEFAULT_LOADER_KEY = "__default__";
 @Injectable({ providedIn: "root" })
 export class LoaderService {
   private activeRequests = 0;
@@ -7,6 +7,8 @@ export class LoaderService {
   private activeButton = signal<string | null>(null);
 
   activeButtonLoader = this.activeButton.asReadonly();
+
+  private pendingKey: string | null = null;
 
   private activeMutations = 0;
   isButtonLoading = signal<boolean>(false);
@@ -33,8 +35,13 @@ export class LoaderService {
     this.isLoading.set(false);
   }
 
-  // showButtonLoader(): void {
+  // Called by directive on button click
+  setPendingKey(key: string): void {
+    console.log('[Loader] setPendingKey:', key);
+    this.pendingKey = key;
+  }
 
+  // showButtonLoader(): void {
 
   //   this.activeMutations++;
   //   if (this.activeMutations === 1) {
@@ -51,11 +58,17 @@ export class LoaderService {
   //   this.activeMutations = 0;
   //   this.isButtonLoading.set(false);
   // }
-  showButtonLoader(key?: any): void {
+  showButtonLoader(key: string = DEFAULT_LOADER_KEY): void {
+  if (this.pendingKey) {
+    this.activeButton.set(this.pendingKey);
+    this.pendingKey = null;
+  } else if (!this.activeButton()) {
     this.activeButton.set(key);
   }
+}
 
   hideButtonLoader(key?: string): void {
+    console.log('[Loader] hideButtonLoader → key:', key, '| activeButton:', this.activeButton());
     if (!key || this.activeButton() === key) {
       this.activeButton.set(null);
     }
@@ -63,5 +76,6 @@ export class LoaderService {
 
   resetButtonLoader(): void {
     this.activeButton.set(null);
+    this.pendingKey = null;
   }
 }

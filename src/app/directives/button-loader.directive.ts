@@ -1,14 +1,6 @@
 import {
-  Directive,
-  ElementRef,
-  Input,
-  OnInit,
-  OnDestroy,
-  Renderer2,
-  inject,
-  Injector,
-  runInInjectionContext,
-  effect,
+  Directive, ElementRef, Input, OnInit, OnDestroy,
+  Renderer2, inject, Injector, runInInjectionContext, effect,
 } from "@angular/core";
 import { LoaderService } from "../pages/services/loader.service";
 
@@ -24,36 +16,64 @@ export class ButtonLoaderDirective implements OnInit, OnDestroy {
   private loaderService = inject(LoaderService);
   private injector = inject(Injector);
 
-  private originalHTML = "";
+  private readonly uniqueKey = `btn-loader-${Math.random().toString(36).slice(2)}`;
+  private wrapperEl: HTMLElement | null = null;
+  private spinnerEl: HTMLElement | null = null;
+  private unlistenClick?: () => void;
 
   ngOnInit(): void {
     this.injectKeyframes();
 
+    this.unlistenClick = this.renderer.listen(
+      this.el.nativeElement,
+      "click",
+      () => this.loaderService.setPendingKey(this.uniqueKey)
+    );
+
     runInInjectionContext(this.injector, () => {
       effect(() => {
-        this.toggleLoader(this.loaderService.isButtonLoading());
+        const active = this.loaderService.activeButtonLoader();
+        const isLoading = !!active && active === this.uniqueKey;
+        this.toggleLoader(!!active && active === this.uniqueKey);
       });
     });
   }
 
-  private toggleLoader(isLoading: boolean): void {
+ private toggleLoader(isLoading: boolean): void {
   const btn = this.el.nativeElement;
 
   if (isLoading) {
-    btn.disabled = true;
+    if (!this.wrapperEl) {
+      const wrapper = this.renderer.createElement("span");
+      this.renderer.setStyle(wrapper, "display", "none");
+      const children = Array.from(btn.childNodes) as ChildNode[];
+      children.forEach((child) => this.renderer.appendChild(wrapper, child));
+      this.renderer.appendChild(btn, wrapper);
+      this.wrapperEl = wrapper;
+    }
 
+    if (!this.spinnerEl) {
+      const spinner = this.renderer.createElement("span");
+      spinner.innerHTML = this.buildSpinnerHTML();
+      this.renderer.appendChild(btn, spinner);
+      this.spinnerEl = spinner;
+    }
+
+    btn.disabled = true;
     this.renderer.setStyle(btn, "opacity", "0.72");
     this.renderer.setStyle(btn, "cursor", "not-allowed");
 
   } else {
-    const spinner = btn.querySelector(".btn-loader-spinner");
-
-    if (spinner) {
-      spinner.remove();
+    if (this.spinnerEl) {
+      this.renderer.removeChild(btn, this.spinnerEl);
+      this.spinnerEl = null;
+    }
+    if (this.wrapperEl) {
+      this.renderer.setStyle(this.wrapperEl, "display", "");
+      this.wrapperEl = null;
     }
 
     btn.disabled = false;
-
     this.renderer.removeStyle(btn, "opacity");
     this.renderer.removeStyle(btn, "cursor");
   }
@@ -62,7 +82,7 @@ export class ButtonLoaderDirective implements OnInit, OnDestroy {
   private buildSpinnerHTML(): string {
     const text = this.loaderText?.trim() || "Loading...";
     return `
-      <span style="display:inline-flex;align-items:center;gap:8px;">
+      <span class="btn-loader-spinner" style="display:inline-flex;align-items:center;gap:8px;">
         <svg width="15" height="15" viewBox="0 0 15 15"
           style="animation:_btn-spin_ 0.7s linear infinite;flex-shrink:0;"
           xmlns="http://www.w3.org/2000/svg">
@@ -83,10 +103,9 @@ export class ButtonLoaderDirective implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.unlistenClick?.();
     const btn = this.el.nativeElement;
-    if (btn.disabled && this.originalHTML) {
-      btn.innerHTML = this.originalHTML;
-      btn.disabled = false;
-    }
+    if (this.wrapperEl) this.renderer.setStyle(this.wrapperEl, "display", "");
+    if (this.spinnerEl) this.renderer.removeChild(btn, this.spinnerEl);
   }
 }
