@@ -3,22 +3,24 @@
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--color-bg)]/80 backdrop-blur-sm"
   >
     <div
-      class="w-full max-w-2xl overflow-hidden rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)]"
+      class="w-full max-w-3xl overflow-hidden rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)]"
     >
       <!-- HEADER -->
       <div
-        class="px-6 py-5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] border-b border-[var(--color-border)]"
+        class="px-6 py-4 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] border-b border-[var(--color-border)]"
       >
         <div class="flex items-center justify-between gap-3">
           <div>
             <h2
-              class="text-xl font-bold text-[var(--color-font)] flex items-center gap-2"
+              class="text-lg font-bold text-[var(--color-font)] flex items-center gap-2"
             >
-              <span class="material-symbols-outlined">currency_exchange</span>
+              <span class="material-symbols-outlined text-xl"
+                >currency_exchange</span
+              >
               Allot Currency
             </h2>
 
-            <p class="mt-1 text-sm text-[var(--color-primary-light)]">
+            <p class="mt-0.5 text-xs text-[var(--color-primary-light)]">
               Manage currency rates and payment modes
             </p>
           </div>
@@ -26,280 +28,179 @@
           <button
             type="button"
             (click)="closeModal()"
-            class="p-2 rounded-lg text-[var(--color-font)] hover:bg-[var(--color-hover)] transition-all"
+            class="p-1.5 rounded-lg text-[var(--color-font)] hover:bg-[var(--color-hover)] transition-all"
           >
-            <span class="material-symbols-outlined">close</span>
+            <span class="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
       </div>
 
       <!-- BODY -->
       <div class="p-6 max-h-[70vh] overflow-y-auto">
-        <!-- Currency Selection -->
-        <div class="mb-8">
-          <label
-            class="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--color-font)]"
-          >
-            <span
-              class="material-symbols-outlined text-base text-[var(--color-accent)]"
-            >
-              radio_button_checked
-            </span>
-            Select Currency
-          </label>
-
-          <div class="relative">
-            <select
-              [(ngModel)]="selectedCurrency"
-              (ngModelChange)="selectCurrency($event)"
-              name="selectedCurrency"
-              class="w-full appearance-none px-4 py-3 pr-10 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] cursor-pointer"
-            >
-              <option [ngValue]="null" disabled selected>
-                Choose a currency…
-              </option>
-              <option
-                *ngFor="let currency of availableCurrencies"
-                [ngValue]="currency.currency"
-              >
-                {{ currency.display }} ({{ currency.currency }})
-              </option>
-            </select>
-
-            <span
-              class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] pointer-events-none"
-            >
-              expand_more
-            </span>
-          </div>
-
-          <!-- Selected currency chip / confirmation -->
-          <div
-            *ngIf="selectedCurrency"
-            class="mt-3 inline-flex items-center gap-2 px-3 py-2 rounded-[var(--radius-md)] border border-[var(--color-accent)] bg-[var(--color-hover)]"
-          >
-            <span
-              class="material-symbols-outlined text-base"
-              [ngClass]="{
-                'text-[var(--color-warning)]': selectedCurrency === 'INR',
-                'text-[var(--color-success)]': selectedCurrency === 'USD',
-                'text-[var(--color-accent)]': selectedCurrency === 'USDT',
-              }"
-            >
-              {{ getCurrencyMeta(selectedCurrency)?.icon }}
-            </span>
-            <span class="text-sm font-medium text-[var(--color-font)]">
-              {{ getCurrencyMeta(selectedCurrency)?.display }}
-            </span>
-          </div>
-        </div>
-
-        <!-- FORM -->
-        <div *ngIf="selectedCurrency" class="space-y-6">
-          <!-- Exchange Rate -->
-          <div *ngIf="!isPortalCurrencyLoaded">
-            <label
-              class="block mb-3 text-sm font-semibold text-[var(--color-font)]"
-            >
-              Exchange Rates
-            </label>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label
-                  class="block mb-1 text-xs font-medium text-[var(--color-muted)]"
-                >
-                  Currency Rate
-                </label>
-
-                <!-- <input
-                  type="number"
-                  [(ngModel)]="rate"
-                  [ngModelOptions]="{ standalone: true }"
-                  [disabled]="isCurrencyLocked(selectedCurrency)"
-                  placeholder="Enter currency rate"
-                  class="w-full px-3 py-2 rounded-[var(--radius-md)] bg-[var(--color-bg)] text-[var(--color-font)] placeholder:text-[var(--color-muted)] border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                /> -->
-                <input
-                  type="number"
-                  [(ngModel)]="rate"
-                  [ngModelOptions]="{ standalone: true }"
-                  [disabled]="selectedCurrency === 'INR'"
-                  placeholder="Enter currency rate"
-                  class="w-full px-3 py-2 rounded-[var(--radius-md)] bg-[var(--color-bg)] text-[var(--color-font)] placeholder:text-[var(--color-muted)] border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                />
-              </div>
-            </div>
-
-            <div
-              *ngIf="currentRole === 'COM_PART'"
-              class="grid grid-cols-1 gap-2 mt-4"
-            >
-              <label class="text-sm font-medium text-[var(--color-font)]">
-                Effective From
-              </label>
-
-              <input
-                type="datetime-local"
-                [(ngModel)]="effectiveFromNew"
-                name="effectiveFromNew"
-                step="1"
-                [disabled]="isCurrencyLocked(selectedCurrency)"
-                class="px-3 py-2 rounded-[var(--radius-md)] bg-[var(--color-bg)] text-[var(--color-font)] border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-              />
-            </div>
-
-            <p class="mt-2 text-xs text-[var(--color-muted)]">
-              Set exchange and transaction rates for {{ selectedCurrency }}
-            </p>
-          </div>
-
-          <!-- PAYMENT MODES (generic, driven by constants) -->
-          <div
-            *ngIf="
-              selectedCurrency &&
-              (entityType === 'CHIEF' || entityType === 'PORTAL')
-            "
-            class="relative"
-          >
-            <label
-              class="block mb-2 text-sm font-medium text-[var(--color-font)]"
-            >
-              {{ currentModesLabel }}
-            </label>
-
-            <p
-              *ngIf="currentModesHint"
-              class="mb-3 text-xs text-[var(--color-muted)]"
-            >
-              {{ currentModesHint }}
-            </p>
-
-            <!-- Trigger -->
-            <button
-              type="button"
-              (click)="isModesOpen = !isModesOpen"
-              class="w-full flex items-center justify-between px-4 py-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-hover)] transition-all"
-            >
-              <span class="flex flex-wrap gap-2">
-                <ng-container *ngIf="selectedModes.length; else noneSelected">
-                  <span
-                    *ngFor="let mode of selectedModes"
-                    class="inline-flex items-center gap-1 px-2 py-1 rounded-[var(--radius-sm)] text-xs font-medium border border-[var(--color-accent)] bg-[var(--color-hover)] text-[var(--color-font)]"
-                  >
-                    <span
-                      class="material-symbols-outlined text-sm text-[var(--color-accent)]"
-                    >
-                      {{ getModeIcon(mode) }}
-                    </span>
-                    {{ getModeLabel(mode) }}
-                  </span>
-                </ng-container>
-                <ng-template #noneSelected>
-                  <span class="text-sm text-[var(--color-muted)]"
-                    >Select payment modes…</span
-                  >
-                </ng-template>
-              </span>
-
-              <span
-                class="material-symbols-outlined text-[var(--color-muted)] transition-transform"
-                [ngClass]="{ 'rotate-180': isModesOpen }"
-              >
-                expand_more
-              </span>
-            </button>
-
-            <!-- Dropdown panel -->
-            <div
-              *ngIf="isModesOpen"
-              class="absolute z-10 mt-2 w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-md)] p-2 space-y-1 max-h-64 overflow-y-auto"
-            >
-              <label
-                *ngFor="let net of currentNetworks"
-                class="flex items-center gap-3 p-3 rounded-[var(--radius-md)] cursor-pointer transition-all"
-                [ngClass]="
-                  selectedModes.includes(net.code)
-                    ? 'bg-[var(--color-hover)]'
-                    : 'hover:bg-[var(--color-hover)]'
-                "
-              >
-                <input
-                  type="checkbox"
-                  (change)="toggleMode(net.code)"
-                  [checked]="selectedModes.includes(net.code)"
-                  [disabled]="false"
-                  class="w-4 h-4 accent-[var(--color-accent)]"
-                />
-                <span
-                  class="material-symbols-outlined text-[var(--color-accent)]"
-                >
-                  {{ net.icon }}
-                </span>
-                <div>
-                  <span class="text-[var(--color-font)] font-medium">{{
-                    net.label
-                  }}</span>
-                  <!-- <p class="text-xs text-[var(--color-muted)]">
-                    {{ net.code }}
-                  </p> -->
-                </div>
-                <span
-                  *ngIf="isModeLocked(net.code)"
-                  class="material-symbols-outlined text-sm text-[var(--color-muted)] ml-auto"
-                  >lock</span
-                >
-              </label>
-            </div>
-          </div>
-
-          <!-- Existing -->
-          <div
-            *ngIf="getExistingDataForCurrency(selectedCurrency)"
-            class="p-3 rounded-[var(--radius-md)] border border-[var(--color-success)] bg-[var(--color-hover)]"
-          >
-            <div
-              class="flex items-center gap-2 text-sm text-[var(--color-success)]"
-            >
-              <span class="material-symbols-outlined text-sm">
-                check_circle
-              </span>
-              Existing configuration loaded. Make changes and update.
-            </div>
-          </div>
-        </div>
-
-        <!-- EMPTY -->
+        <!-- EMPTY STATE -->
         <div
-          *ngIf="!selectedCurrency"
+          *ngIf="!currencyRows.length"
           class="p-6 text-center rounded-[var(--radius-lg)] bg-[var(--color-hover)] border border-[var(--color-border)]"
         >
           <span
-            class="material-symbols-outlined text-4xl text-[var(--color-accent)]"
+            class="material-symbols-outlined text-3xl text-[var(--color-accent)]"
           >
             info
           </span>
 
-          <p class="mt-2 text-[var(--color-font)]">
-            Please select a currency to configure
+          <p class="mt-2 text-sm text-[var(--color-font)]">
+            No currencies available to configure
           </p>
         </div>
+
+        <!-- CURRENCY TABLE: columns auto-size to their content and stay aligned
+             across every currency row. -->
+        <table *ngIf="currencyRows.length" class="border-collapse">
+          <thead>
+            <tr class="text-left">
+              <th
+                class="pb-2 pr-6 text-xs font-medium text-[var(--color-muted)]"
+              >
+                Currency
+              </th>
+              <th
+                *ngIf="!isPortalCurrencyLoaded"
+                class="pb-2 pr-6 text-xs font-medium text-[var(--color-muted)]"
+              >
+                Rate
+              </th>
+              <th
+                *ngIf="currentRole === 'COM_PART' && !isPortalCurrencyLoaded"
+                class="pb-2 pr-6 text-xs font-medium text-[var(--color-muted)]"
+              >
+                Effective From
+              </th>
+              <th
+                *ngIf="entityType === 'CHIEF' || entityType === 'PORTAL'"
+                class="pb-2 text-xs font-medium text-[var(--color-muted)]"
+              >
+                Payment Modes
+              </th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-[var(--color-border)]">
+            <tr *ngFor="let row of currencyRows">
+              <!-- Currency -->
+              <td class="py-3 pr-6 align-middle whitespace-nowrap">
+                <span class="inline-flex items-center gap-1.5">
+                  <span
+                    class="material-symbols-outlined text-base"
+                    [ngClass]="{
+                      'text-[var(--color-warning)]': row.currency === 'INR',
+                      'text-[var(--color-success)]': row.currency === 'USD',
+                      'text-[var(--color-accent)]': row.currency === 'USDT',
+                    }"
+                  >
+                    {{ row.meta?.icon }}
+                  </span>
+                  <span class="text-sm font-medium text-[var(--color-font)]">
+                    {{ row.meta?.display }} ({{ row.currency }})
+                  </span>
+                </span>
+              </td>
+
+              <!-- Currency Rate -->
+              <td
+                *ngIf="!isPortalCurrencyLoaded"
+                class="py-3 pr-6 align-middle"
+              >
+                <input
+                  type="number"
+                  [(ngModel)]="row.rate"
+                  [ngModelOptions]="{ standalone: true }"
+                  [disabled]="row.currency === 'INR'"
+                  placeholder="Rate"
+                  class="w-24 px-2 py-1.5 text-sm rounded-[var(--radius-md)] bg-[var(--color-bg)] text-[var(--color-font)] placeholder:text-[var(--color-muted)] border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-60"
+                />
+              </td>
+
+              <!-- Effective From (COM_PART only) -->
+              <td
+                *ngIf="currentRole === 'COM_PART' && !isPortalCurrencyLoaded"
+                class="py-3 pr-6 align-middle"
+              >
+                <input
+                  type="datetime-local"
+                  [(ngModel)]="row.effectiveFromNew"
+                  [ngModelOptions]="{ standalone: true }"
+                  step="1"
+                  [disabled]="isCurrencyLocked(row.currency)"
+                  class="px-2 py-1.5 text-sm rounded-[var(--radius-md)] bg-[var(--color-bg)] text-[var(--color-font)] border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-60"
+                />
+              </td>
+
+              <!-- Payment Modes (CHIEF / PORTAL only) —
+                   every mode shown inline as a toggle chip. Clicking a chip
+                   flips it selected/unselected; no checkbox input, no dropdown.
+                   A chip starts filled (selected) only when the API returned
+                   `true` for that mode — see convertModes() in the TS. -->
+              <td
+                *ngIf="entityType === 'CHIEF' || entityType === 'PORTAL'"
+                class="py-3 align-middle"
+              >
+                <div class="flex flex-wrap gap-1.5">
+                  <button
+                    *ngFor="let net of getNetworksFor(row.currency)"
+                    type="button"
+                    (click)="toggleMode(row, net.code)"
+                    [disabled]="
+                      isModeLocked(row, net.code) &&
+                      row.selectedModes.includes(net.code)
+                    "
+                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    [ngClass]="
+                      row.selectedModes.includes(net.code)
+                        ? 'bg-[var(--color-accent)] border-[var(--color-accent)] text-white'
+                        : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-muted)] hover:bg-[var(--color-hover)]'
+                    "
+                  >
+                    <span
+                      *ngIf="
+                        row.selectedModes.includes(net.code);
+                        else unselectedIcon
+                      "
+                      class="material-symbols-outlined text-sm"
+                    >
+                      check
+                    </span>
+                    <ng-template #unselectedIcon>
+                      <span class="material-symbols-outlined text-sm">{{
+                        net.icon
+                      }}</span>
+                    </ng-template>
+                    {{ net.label }}
+                    <span
+                      *ngIf="isModeLocked(row, net.code)"
+                      class="material-symbols-outlined text-xs ml-0.5"
+                      >lock</span
+                    >
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- FOOTER -->
       <div
-        class="px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-hover)] flex gap-3"
+        class="px-6 py-3 border-t border-[var(--color-border)] bg-[var(--color-hover)] flex gap-3"
       >
         <button
           appButtonLoader="Adding"
           type="button"
           (click)="submit()"
-          [class.opacity-50]="!selectedCurrency || !hasChanges()"
-          class="flex-1 py-2.5 rounded-[var(--radius-md)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-font)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          [class.opacity-50]="!hasChanges()"
+          class="flex-1 py-2 text-sm rounded-[var(--radius-md)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-font)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span class="material-symbols-outlined"> add </span>
-
-          {{ getExistingDataForCurrency(selectedCurrency) ? "Update" : "Add" }}
+          <span class="material-symbols-outlined text-base">add</span>
+          Update Currencies
         </button>
       </div>
     </div>

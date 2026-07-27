@@ -1,12 +1,12 @@
 <div
-  class="flex bg-gradient-to-br from-white via-slate-50 to-indigo-50/30 font-sans overflow-hidden"
-  style="height: calc(100vh - 56px)"
+  class="fixed left-20 right-0 bottom-0 flex bg-gradient-to-br from-white via-slate-50 to-indigo-50/30 font-sans overflow-hidden"
+  style="top: 74px"
 >
   <!-- ═══════════════════════════════════════
        LEFT SIDEBAR — Thread List
        ═══════════════════════════════════════ -->
   <div
-    class="w-[340px] min-w-[300px] bg-white/90 backdrop-blur-md border-r border-indigo-100/60 flex flex-col shadow-[4px_0_24px_-8px_rgba(99,102,241,0.08)] h-full"
+    class="w-[340px] min-w-[300px] bg-white/90 backdrop-blur-md border-r border-indigo-100/60 flex flex-col shadow-[4px_0_24px_-8px_rgba(99,102,241,0.08)] h-full min-h-0"
   >
     <!-- Search -->
     <div
@@ -117,7 +117,7 @@
 
     <!-- Thread List -->
     <div
-      class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-violet-200/60 scrollbar-track-transparent"
+      class="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-violet-200/60 scrollbar-track-transparent"
       #threadsContainer
       (scroll)="onThreadsScroll($event)"
     >
@@ -279,7 +279,7 @@
        ═══════════════════════════════════════ -->
 
   <div
-    class="flex-1 flex flex-col min-w-0 h-full bg-white"
+    class="flex-1 flex flex-col min-w-0 h-full min-h-0 bg-white"
     *ngIf="selectedNotification"
   >
     <!-- Chat Header -->
@@ -415,7 +415,7 @@
 
     <!-- Messages Area -->
     <div
-      class="relative flex-1 overflow-y-auto px-6 py-5 bg-gradient-to-b from-slate-50/30 via-white to-violet-50/10 scrollbar-thin scrollbar-thumb-violet-200/50 scrollbar-track-transparent"
+      class="relative flex-1 min-h-0 overflow-y-auto px-3 py-3 bg-gradient-to-b from-slate-50/30 via-white to-violet-50/10 scrollbar-thin scrollbar-thumb-violet-200/50 scrollbar-track-transparent"
       #messagesContainer
       (scroll)="onMessagesScroll($event)"
     >
@@ -1229,7 +1229,7 @@
 
   <div
     *ngIf="selectedNotification && showRightPanel"
-    class="w-[320px] min-w-[320px] bg-white/95 backdrop-blur-md border-l border-violet-100/40 flex flex-col h-full overflow-hidden shadow-[-4px_0_24px_-8px_rgba(139,92,246,0.08)]"
+    class="w-[320px] min-w-[320px] bg-white/95 backdrop-blur-md border-l border-violet-100/40 flex flex-col h-full min-h-0 overflow-hidden shadow-[-4px_0_24px_-8px_rgba(139,92,246,0.08)]"
   >
     <!-- Right Sidebar Header -->
     <div class="px-5 py-4 border-b border-violet-50 bg-white flex-shrink-0">
@@ -1283,7 +1283,7 @@
 
     <!-- Right Sidebar Content -->
     <div
-      class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-violet-200/40 scrollbar-track-transparent"
+      class="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-violet-200/40 scrollbar-track-transparent"
     >
       <!-- DETAILS TAB -->
       <div *ngIf="detailTab === 'details'" class="p-5 space-y-5">

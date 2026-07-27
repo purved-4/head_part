@@ -6,7 +6,6 @@ import { PortalService } from "../../pages/services/portal.service";
 import { DateTimeUtil } from "../../utils/date-time.utils";
 import { UserStateService } from "../../store/user-state.service";
 import { LoaderService } from "../../pages/services/loader.service";
-// import { AVAILABLE_CURRENCIES, buildEmptyExistingData, CurrencyConfig, ExistingDataMap, getNetworks, PaymentNetwork } from "../../utils/constants";
 import {
   AVAILABLE_CURRENCIES,
   buildEmptyExistingData,
@@ -16,6 +15,21 @@ import {
   getNetworks,
   PaymentNetwork,
 } from "../../utils/constants";
+
+// One row = one currency, fully self-contained (rate / modes / effective date / open state).
+// Replaces the old single "selectedCurrency" model so several currencies can be
+// edited and submitted together in one go.
+interface CurrencyRow {
+  currency: string;
+  meta: CurrencyConfig | undefined;
+  rate: number | null;
+  selectedModes: string[];
+  lockedModes: string[];
+  isModesOpen: boolean;
+  effectiveFromNew: any;
+  existing: any | null;
+}
+
 @Component({
   selector: "app-allot-currency",
   templateUrl: "./allot-currency.component.html",
@@ -27,60 +41,14 @@ export class AllotCurrencyComponent implements OnInit {
   @Input() currentEntityID: any;
   @Output() close = new EventEmitter<void>();
 
-  effectiveFrom: any = null;
-  selectedCurrency: any;
-
-  selectedModes: string[] = [];
-  lockedModes: string[] = [];
-  rate: number | null = null;
-
   isPortalCurrencyLoaded: boolean = false;
 
-  // Existing data
   existingData: ExistingDataMap = buildEmptyExistingData();
 
-  effectiveFromNew: any;
   currentRole: any;
-  availableCurrencies: any = [];
+  availableCurrencies: any[] = [];
 
-  isModesOpen = false;
-
-  get currentNetworks(): PaymentNetwork[] {
-    return this.getCurrencyMeta(this.selectedCurrency)?.networks ?? [];
-  }
-
-  get currentModesLabel(): string {
-    return (
-      this.getCurrencyMeta(this.selectedCurrency)?.modesLabel ?? "Payment Modes"
-    );
-  }
-
-  get currentModesHint(): string | undefined {
-    return this.getCurrencyMeta(this.selectedCurrency)?.modesHint;
-  }
-
-  getModeIcon(code: string): string {
-    return this.currentNetworks.find((n) => n.code === code)?.icon ?? "token";
-  }
-
-  getModeLabel(code: string): string {
-    return this.currentNetworks.find((n) => n.code === code)?.label ?? code;
-  }
-
-  get usdtNetworks(): PaymentNetwork[] {
-    return getNetworks("USDT");
-  }
-
-  getCurrencyMeta(code: string | null): any | undefined {
-    if (!code) return undefined;
-    return this.availableCurrencies.find((c: any) => c.currency === code);
-  }
-
-  getUsdtIcon(networkCode: string): string {
-    return (
-      this.usdtNetworks.find((n) => n.code === networkCode)?.icon ?? "token"
-    );
-  }
+  currencyRows: CurrencyRow[] = [];
 
   constructor(
     private snackBar: SnackbarService,
@@ -89,24 +57,12 @@ export class AllotCurrencyComponent implements OnInit {
     private portalService: PortalService,
     private userStateService: UserStateService,
     private loaderService: LoaderService,
-  ) {
-    this.effectiveFromNew = new Date();
-  }
+  ) {}
 
-  // ngOnInit(): void {
-  //   this.currentRole = this.userStateService.getRole();
-  //   if (this.entityType === "CHIEF") {
-  //     this.loadCurrencies();
-  //   } else if (this.entityType === "COM_PART") {
-  //     this.loadComPartCurrencies();
-  //   } else if (this.entityType === "PORTAL") {
-  //     this.loadPortalCurrencies();
-  //   }
-  // }
   ngOnInit(): void {
     this.currentRole = this.userStateService.getRole();
 
-    // OWNER -> Hardcoded currencies
+    // OWNER -> Hardcoded currencies (unchanged)
     if (this.currentRole === "OWNER") {
       this.availableCurrencies = AVAILABLE_CURRENCIES;
     } else {
@@ -122,17 +78,6 @@ export class AllotCurrencyComponent implements OnInit {
     }
   }
 
-  // loadAvailableCurrencies() {
-  //   this.comPartService.getCurrencies(this.currentEntityID).subscribe({
-  //     next: (res: any) => {
-  //       const currencies = res?.currencies || [];
-
-  //       this.availableCurrencies = currencies
-  //         .map((item: any) => this.getCurrencyMeta(item.currency))
-  //         .filter((c: CurrencyConfig | undefined): c is CurrencyConfig => !!c);
-  //     },
-  //   });
-  // }
   loadAvailableCurrencies() {
     this.comPartService.getCurrencies(this.currentEntityID).subscribe({
       next: (res: any) => {
@@ -141,72 +86,90 @@ export class AllotCurrencyComponent implements OnInit {
         this.availableCurrencies = currencies
           .map((item: any) => getCurrency(item.currency))
           .filter((c: CurrencyConfig | undefined): c is CurrencyConfig => !!c);
+
+        this.buildRowsFromAvailableCurrencies();
       },
     });
   }
 
-  // ================= LOCK STATE =================
-  hasChanges(): boolean {
-    if (!this.selectedCurrency) return false;
-
-    const existing =
-      this.existingData[
-        this.selectedCurrency as keyof typeof this.existingData
-      ];
-
-    // No existing data yet -> any selection counts as a change worth submitting
-    if (!existing) {
-      return (
-        this.selectedModes.length > 0 ||
-        (this.rate !== null && this.rate !== undefined)
-      );
-    }
-
-    const modesChanged =
-      this.selectedModes.length !== existing.modes.length ||
-      !this.selectedModes.every((m) => existing.modes.includes(m));
-
-    const rateChanged = this.rate !== existing.rate;
-
-    return modesChanged || rateChanged;
+  // ================= META HELPERS =================
+  getCurrencyMeta(code: string | null): CurrencyConfig | undefined {
+    if (!code) return undefined;
+    return this.availableCurrencies.find((c: any) => c.currency === code);
   }
-  // Returns true when this currency's data already exists (fetched from API)
-  // — in that case its rate/modes must be read-only in the UI.
-  // isCurrencyLocked(currency: string | null): boolean {
-  //   if (!currency) return false;
-  //   return !!this.existingData[currency];
-  // }
+
+  getNetworksFor(currency: string): PaymentNetwork[] {
+    return this.getCurrencyMeta(currency)?.networks ?? [];
+  }
+
+  // CurrencyConfig (from constants.ts) has no modesLabel/modesHint field,
+  // so this is a fixed label — adjust here if you ever want it per-currency.
+  getModesLabelFor(currency: string): string {
+    return "Payment Modes";
+  }
+
+  getModeIcon(currency: string, code: string): string {
+    return (
+      this.getNetworksFor(currency).find((n) => n.code === code)?.icon ??
+      "token"
+    );
+  }
+
+  getModeLabel(currency: string, code: string): string {
+    return (
+      this.getNetworksFor(currency).find((n) => n.code === code)?.label ?? code
+    );
+  }
+
+  get usdtNetworks(): PaymentNetwork[] {
+    return getNetworks("USDT");
+  }
+
+  getUsdtIcon(networkCode: string): string {
+    return (
+      this.usdtNetworks.find((n) => n.code === networkCode)?.icon ?? "token"
+    );
+  }
+
+  // Locked state kept exactly as before: INR rate is always fixed at 1 / read-only.
   isCurrencyLocked(currency: string | null): boolean {
     return currency === "INR";
   }
 
-  isModeLocked(mode: string): boolean {
-    return this.lockedModes.includes(mode);
+  isModeLocked(row: CurrencyRow, mode: string): boolean {
+    return row.lockedModes.includes(mode);
   }
 
-  // ================= LOAD DATA =================
+  // ================= ROW BUILDING =================
+  private buildRow(
+    currency: string,
+    meta?: CurrencyConfig,
+    existing?: any,
+  ): CurrencyRow {
+    return {
+      currency,
+      meta: meta ?? this.getCurrencyMeta(currency),
+      rate: currency === "INR" ? 1 : (existing?.rate ?? null),
+      selectedModes: existing ? [...existing.modes] : [],
+      lockedModes: [],
+      isModesOpen: false,
+      effectiveFromNew: existing?.effectiveFrom
+        ? new Date(existing.effectiveFrom)
+        : new Date(),
+      existing: existing ?? null,
+    };
+  }
 
-  // getCurrencyMeta(currency: string | null) {
-  //   return this.availableCurrencies.find((c) => c.currency === currency);
-  // }
+  // Used when no existing data has come back yet (e.g. first load / error branch) —
+  // still lets the user configure every currency they're allowed to see.
+  buildRowsFromAvailableCurrencies() {
+    if (this.currencyRows.length) return;
+    this.currencyRows = this.availableCurrencies.map((meta: any) =>
+      this.buildRow(meta.currency, meta),
+    );
+  }
 
-  // loadCurrencies() {
-  //   this.chiefService.getCurrencies(this.entityId).subscribe({
-  //     next: (res: any) => {
-  //       const data = Array.isArray(res) ? res : res?.data || [];
-  //       this.loadExistingData(data);
-  //       this.snackBar.show(res.message || "Data fetched successfully", true);
-  //       this.setDefaultSelection();
-  //     },
-  //     error: (err) => {
-  //       this.snackBar.show(
-  //         err.error?.message || "No existing data found",
-  //         false,
-  //       );
-  //       this.setDefaultSelection();
-  //     },
-  //   });
-  // }
+  // ================= LOAD DATA (unchanged endpoints / role logic) =================
   loadCurrencies() {
     this.chiefService.getCurrencies(this.entityId).subscribe({
       next: (res: any) => {
@@ -223,25 +186,6 @@ export class AllotCurrencyComponent implements OnInit {
       },
     });
   }
-
-  // loadComPartCurrencies() {
-  //   this.comPartService.getCurrencies(this.entityId).subscribe({
-  //     next: (res: any) => {
-  //       const cs = res.currencies;
-  //       const data = Array.isArray(cs) ? cs : cs?.data || [];
-  //       this.loadExistingData(data);
-  //       this.snackBar.show(res.message || "Data fetched successfully", true);
-  //       this.setDefaultSelection();
-  //     },
-  //     error: (err) => {
-  //       this.snackBar.show(
-  //         err.error?.message || "No existing data found",
-  //         false,
-  //       );
-  //       this.setDefaultSelection();
-  //     },
-  //   });
-  // }
 
   loadComPartCurrencies() {
     this.comPartService.getCurrencies(this.entityId).subscribe({
@@ -260,26 +204,6 @@ export class AllotCurrencyComponent implements OnInit {
       },
     });
   }
-
-  // loadPortalCurrencies() {
-  //   this.portalService.getCurrenciesbyPortal(this.entityId).subscribe({
-  //     next: (res: any) => {
-  //       const data = Array.isArray(res) ? res : res?.data || [];
-  //       this.isPortalCurrencyLoaded = true;
-  //       this.loadExistingData(data);
-  //       this.snackBar.show(res.message || "Portal currencies fetched", true);
-  //       this.setDefaultSelection();
-  //     },
-  //     error: (err) => {
-  //       this.isPortalCurrencyLoaded = true;
-  //       this.snackBar.show(
-  //         err.error?.message || "No portal currency data found",
-  //         false,
-  //       );
-  //       this.setDefaultSelection();
-  //     },
-  //   });
-  // }
 
   loadPortalCurrencies() {
     this.portalService.getCurrenciesbyPortal(this.entityId).subscribe({
@@ -302,31 +226,20 @@ export class AllotCurrencyComponent implements OnInit {
 
   setDefaultSelection() {
     this.existingData = buildEmptyExistingData();
-    this.resetSelectionState();
+    if (!this.currencyRows.length) {
+      this.buildRowsFromAvailableCurrencies();
+    }
   }
 
-  resetSelectionState(): void {
-    this.selectedCurrency = null;
-    this.selectedModes = [];
-    this.lockedModes = [];
-    this.rate = null;
-  }
-
-  // Load existing data into store — USDT handled
-  // loadExistingData(apiData: any[]) {
-  //   this.existingData = buildEmptyExistingData();
-  //   apiData.forEach((item: any) => {
-  //     if (this.existingData.hasOwnProperty(item.currency)) {
-  //       this.existingData[item.currency] = {
-  //         rate: item.rate,
-  //         effectiveFrom: item.effectiveFrom,
-  //         modes: this.convertModes(item.modes),
-  //       };
-  //     }
-  //   });
-  // }
+  // Loads the API's currency array into `existingData` (same as before) AND builds
+  // one row per currency returned, so all of them render — and can be edited/saved —
+  // at once instead of picking a single currency from a dropdown.
+  //
+  // NEW LOGIC: `modes` can arrive as an object map, e.g. { BANK: true, UPI: false }.
+  // convertModes() below only keeps the keys whose value is exactly `true` as selected.
   loadExistingData(apiData: any[]) {
     this.existingData = buildEmptyExistingData();
+
     apiData.forEach((item: any) => {
       if (this.existingData.hasOwnProperty(item.currency)) {
         this.existingData[item.currency] = {
@@ -337,59 +250,35 @@ export class AllotCurrencyComponent implements OnInit {
       }
     });
 
-    const existingCurrency = Object.keys(this.existingData).find(
-      (code) => !!this.existingData[code],
-    );
-    if (existingCurrency) {
-      this.selectCurrency(existingCurrency);
-    } else {
-      this.resetSelectionState();
+    this.currencyRows = apiData.map((item: any) => {
+      const meta =
+        this.getCurrencyMeta(item.currency) ?? getCurrency(item.currency);
+      return this.buildRow(item.currency, meta, {
+        rate: item.rate,
+        modes: this.convertModes(item.modes),
+        effectiveFrom: item.effectiveFrom,
+      });
+    });
+
+    // Any currency the entity is allowed to configure but that has no existing
+    // record yet still gets a (blank) row so it can be set up for the first time.
+    this.availableCurrencies.forEach((meta: any) => {
+      if (!this.currencyRows.find((r) => r.currency === meta.currency)) {
+        this.currencyRows.push(this.buildRow(meta.currency, meta));
+      }
+    });
+
+    if (!this.currencyRows.length) {
+      this.buildRowsFromAvailableCurrencies();
     }
   }
 
+  // NEW LOGIC: only keep mode codes whose value is strictly `true`.
+  // (Array payloads are passed through unchanged, for backwards compatibility.)
   convertModes(modesObj: any): string[] {
     if (!modesObj) return [];
     if (Array.isArray(modesObj)) return modesObj;
-    return Object.keys(modesObj).filter((k) => modesObj[k]);
-  }
-
-  // ================= CURRENCY SELECTION =================
-  // selectCurrency(currency: string) {
-  //   this.selectedCurrency = currency;
-  //   this.isModesOpen = false; // close any open dropdown from the previous currency
-
-  //   const existing = this.existingData[currency];
-  //   if (existing) {
-  //     this.selectedModes = [...existing.modes];
-  //     this.lockedModes = [...existing.modes];
-  //     this.rate = existing.rate;
-  //   } else {
-  //     this.selectedModes = [];
-  //     this.lockedModes = [];
-  //     this.rate = null;
-  //   }
-  // }
-  selectCurrency(currency: string) {
-    this.selectedCurrency = currency;
-    this.isModesOpen = false;
-
-    const existing = this.existingData[currency];
-
-    if (existing) {
-      this.selectedModes = [...existing.modes];
-      this.lockedModes = [];
-      this.rate = currency === "INR" ? 1 : existing.rate;
-    } else {
-      this.selectedModes = [];
-      this.lockedModes = [];
-      this.rate = currency === "INR" ? 1 : null;
-    }
-  }
-
-  clearSelection() {
-    this.selectedCurrency = null;
-    this.selectedModes = [];
-    this.lockedModes = [];
+    return Object.keys(modesObj).filter((k) => modesObj[k] === true);
   }
 
   getExistingDataForCurrency(currency: string | null): any {
@@ -398,92 +287,128 @@ export class AllotCurrencyComponent implements OnInit {
   }
 
   // ================= MODES MANAGEMENT =================
-  toggleMode(mode: string) {
-    if (this.lockedModes.includes(mode) && this.selectedModes.includes(mode)) {
+  toggleMode(row: CurrencyRow, mode: string) {
+    if (row.lockedModes.includes(mode) && row.selectedModes.includes(mode)) {
       return;
     }
 
-    const isMultiSelect =
-      this.getCurrencyMeta(this.selectedCurrency)?.multiSelect !== false;
-
-    if (this.selectedModes.includes(mode)) {
-      this.selectedModes = this.selectedModes.filter((m) => m !== mode);
-    } else if (isMultiSelect) {
-      this.selectedModes.push(mode);
+    // CurrencyConfig has no multiSelect flag in constants.ts — every currency's
+    // payment modes (INR: BANK/UPI, USDT: ERC20/BEP20/TRC20/OMNI/SPL) are
+    // multi-select, so a mode simply toggles on/off.
+    if (row.selectedModes.includes(mode)) {
+      row.selectedModes = row.selectedModes.filter((m) => m !== mode);
     } else {
-      this.selectedModes = [mode];
+      row.selectedModes.push(mode);
     }
   }
 
+  // ================= CHANGE DETECTION (now per-row, same rules as before) =================
+  rowHasChanges(row: CurrencyRow): boolean {
+    if (!row.existing) {
+      return (
+        row.selectedModes.length > 0 ||
+        (row.rate !== null && row.rate !== undefined)
+      );
+    }
+
+    const modesChanged =
+      row.selectedModes.length !== row.existing.modes.length ||
+      !row.selectedModes.every((m: string) => row.existing.modes.includes(m));
+
+    const rateChanged = row.rate !== row.existing.rate;
+
+    return modesChanged || rateChanged;
+  }
+
+  hasChanges(): boolean {
+    return this.currencyRows.some((row) => this.rowHasChanges(row));
+  }
+
   // ================= SUBMIT =================
+  // Only the rows that actually changed are sent, and they're sent together as an
+  // array (index 0 = first changed currency, index 1 = second, ...) instead of a
+  // single currency object like before.
   submit() {
-    if (!this.selectedCurrency) {
-      this.snackBar.show("Please select a currency", false);
+    if (!this.currencyRows.length) {
+      this.snackBar.show("No currencies to update", false);
       return;
     }
 
-    // Validate rate (except INR)
-    if (
-      this.entityType === "OWNER" &&
-      this.selectedCurrency !== "INR" &&
-      (this.rate == null || this.rate <= 0)
-    ) {
-      this.snackBar.show("Currency rate must be greater than 0", false);
-      return;
-    }
-    if (!this.hasChanges()) {
+    const rowsToSubmit = this.currencyRows.filter((row) =>
+      this.rowHasChanges(row),
+    );
+
+    if (!rowsToSubmit.length) {
       this.snackBar.show("No changes to update", false);
       return;
     }
-    // Modes validation only for CHIEF & PORTAL
-    if (
-      (this.entityType === "CHIEF" || this.entityType === "PORTAL") &&
-      this.selectedModes.length === 0
-    ) {
-      this.snackBar.show("Please select at least one payment mode", false);
-      return;
+
+    for (const row of rowsToSubmit) {
+      // Validate rate (except INR) — same rule as before, now per row.
+      if (
+        this.entityType === "OWNER" &&
+        row.currency !== "INR" &&
+        (row.rate == null || row.rate <= 0)
+      ) {
+        this.snackBar.show(
+          `Currency rate for ${row.currency} must be greater than 0`,
+          false,
+        );
+        return;
+      }
+
+      // Modes validation only for CHIEF & PORTAL — same rule as before, now per row.
+      if (
+        (this.entityType === "CHIEF" || this.entityType === "PORTAL") &&
+        row.selectedModes.length === 0
+      ) {
+        this.snackBar.show(
+          `Please select at least one payment mode for ${row.currency}`,
+          false,
+        );
+        return;
+      }
     }
+
     this.loaderService.showButtonLoader();
-    let payload: any;
 
-    // ================= PAYLOAD =================
+    // ================= PAYLOAD (array — one entry per changed currency) =================
+    const payload: any[] = rowsToSubmit.map((row) => {
+      if (this.entityType === "PORTAL") {
+        return {
+          currency: row.currency,
+          modes: row.selectedModes,
+        };
+      }
 
-    // PORTAL
-    if (this.entityType === "PORTAL") {
-      payload = {
-        currency: this.selectedCurrency,
-        modes: this.selectedModes,
-      };
-    }
+      if (this.entityType === "COM_PART" || this.entityType === "OWNER") {
+        return {
+          currency: row.currency,
+          rate: row.rate,
+          effectiveFrom: new Date(row.effectiveFromNew).toISOString(),
+        };
+      }
 
-    // COM_PART & OWNER
-    else if (this.entityType === "COM_PART" || this.entityType === "OWNER") {
-      payload = {
-        currency: this.selectedCurrency,
-        rate: this.rate,
-        effectiveFrom: new Date(this.effectiveFromNew).toISOString(),
-      };
-    }
+      if (this.entityType === "CHIEF") {
+        return {
+          currency: row.currency,
+          rate: row.rate,
+          modes: row.selectedModes,
+        };
+      }
 
-    // CHIEF
-    else if (this.entityType === "CHIEF") {
-      payload = {
-        currency: this.selectedCurrency,
-        rate: this.rate,
-        modes: this.selectedModes,
-      };
-    }
+      return null;
+    });
 
-    // INVALID
-    else {
+    if (payload.some((p) => p === null)) {
+      this.loaderService.hideButtonLoader();
       this.snackBar.show("Invalid entity type", false);
       return;
     }
 
     let submitObservable;
 
-    // ================= API =================
-
+    // ================= API (same endpoints as before, now fed the array payload) =================
     if (this.entityType === "CHIEF") {
       submitObservable = this.chiefService.saveCurrencies(
         this.entityId,
@@ -500,33 +425,25 @@ export class AllotCurrencyComponent implements OnInit {
         payload,
       );
     } else {
+      this.loaderService.hideButtonLoader();
       this.snackBar.show("Invalid entity type", false);
       return;
     }
-
-    // ================= SUBSCRIBE =================
 
     submitObservable.subscribe({
       next: (res: any) => {
         this.loaderService.hideButtonLoader();
         this.snackBar.show(res?.message || "Updated successfully", true);
 
-        const key = this.selectedCurrency;
-
-        if (!this.existingData[key]) {
-          this.existingData[key] = {
-            rate: this.rate,
-            modes: [...this.selectedModes],
-            effectiveFrom: this.effectiveFrom,
+        rowsToSubmit.forEach((row) => {
+          this.existingData[row.currency] = {
+            rate: row.rate,
+            modes: [...row.selectedModes],
+            effectiveFrom: row.effectiveFromNew,
           };
-        } else {
-          this.existingData[key]!.rate = this.rate;
-          this.existingData[key]!.modes = [...this.selectedModes];
-          this.existingData[key]!.effectiveFrom = this.effectiveFrom;
-        }
-        this.lockedModes = [...this.selectedModes];
-
-        this.clearSelection();
+          row.lockedModes = [...row.selectedModes];
+          row.existing = this.existingData[row.currency];
+        });
 
         setTimeout(() => {
           this.closeModal();

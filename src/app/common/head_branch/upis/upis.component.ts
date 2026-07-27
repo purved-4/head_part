@@ -359,7 +359,6 @@ export class UpisComponent implements OnInit {
 
               //Partial Payin
               partialPayinEnabled: r.partialPayinEnabled || false,
-              partialPayinMinRange: r.partialPayinMinRange || 0,
             };
           });
 
@@ -597,7 +596,6 @@ export class UpisComponent implements OnInit {
       minAmount: upi.minAmount || "",
       fttAcceptance: upi.fttAcceptance ?? true,
       partialPayinEnabled: upi.partialPayinEnabled ?? true,
-      partialPayinMinRange: upi.partialPayinMinRange ?? 0,
     };
     this.originalVpa = (upi.vpa || "").trim().toLowerCase();
     this.vpaChanged = false;
@@ -618,7 +616,6 @@ export class UpisComponent implements OnInit {
       status: "active",
       fttAcceptance: true,
       partialPayinEnabled: true,
-      partialPayinMinRange: 0,
     };
     this.originalVpa = "";
     this.updateQrData = null;
@@ -663,13 +660,6 @@ export class UpisComponent implements OnInit {
       return;
     }
 
-    if (this.isUpdatePartialPayinMinRangeInvalid) {
-      this.snack.show(
-        `Partial Payin Min Range must be less than the smallest capacity range (${this.smallestUpdateCapacityRangeLimit}).`,
-        false,
-      );
-      return;
-    }
 
     const qrFile = this.generatedUpdateFile || this.updateManualQrFile;
 
@@ -683,7 +673,6 @@ export class UpisComponent implements OnInit {
       active: this.updateForm.status === "active",
       fttAcceptance: this.updateForm.fttAcceptance,
       partialPayinEnabled: this.updateForm.partialPayinEnabled,
-      partialPayinMinRange: this.updateForm.partialPayinMinRange,
     };
 
     if (this.currentRoleId) {
@@ -1491,13 +1480,4 @@ export class UpisComponent implements OnInit {
     return Math.min(...validRanges.map((r: any) => r.minRange));
   }
 
-  get isUpdatePartialPayinMinRangeInvalid(): boolean {
-    if (!this.updateForm?.partialPayinEnabled) return false;
-
-    const max = this.smallestUpdateCapacityRangeLimit;
-    if (max == null) return false;
-
-    const val = this.updateForm?.partialPayinMinRange;
-    return val != null && Number(val) >= max; // >= per your earlier requirement
-  }
 }

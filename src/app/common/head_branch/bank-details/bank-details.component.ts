@@ -100,7 +100,6 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       accountType: this.bankData?.accountType || "saving",
       fttAcceptance: this.bankData?.fttAcceptance || false,
       partialPayinEnabled: this.bankData?.partialPayinEnabled || false,
-      partialPayinMinRange: this.bankData?.partialPayinMinRange || 0
     };
 
     // Reset IFSC fetch state
@@ -147,14 +146,6 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       return;
     }
 
-      if (this.isPartialPayinMinRangeInvalid) {
-    this.snack.show(
-      `Partial Payin Min Range cannot exceed smallest capacity range (${this.smallestCapacityRangeLimit}).`,
-      false,
-    );
-    return;
-  }
-
     this.isSubmitting = true;
 
     const payload = {
@@ -182,7 +173,6 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
 
       partialPayinEnabled: this.updateForm.partialPayinEnabled,
 
-      partialPayinMinRange:this.updateForm.partialPayinMinRange
     };
 
     const sub = this.bankService.update(payload).subscribe({
@@ -336,13 +326,4 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
   return Math.min(...validRanges.map((r: any) => r.minRange));
 }
 
-get isPartialPayinMinRangeInvalid(): boolean {
-  if (!this.updateForm?.partialPayinEnabled) return false;
-
-  const max = this.smallestCapacityRangeLimit;
-  if (max == null) return false; // no ranges to compare against — don't block
-
-  const val = this.updateForm?.partialPayinMinRange;
-  return val != null && Number(val) >= max;
-}
 }

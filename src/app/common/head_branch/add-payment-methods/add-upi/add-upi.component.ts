@@ -81,12 +81,11 @@ export class AddUpiComponent implements OnInit, OnDestroy {
   // ---------------- FORM ----------------
   private createForm(): FormGroup {
     return this.fb.group({
-      bankId: [null, Validators.required],
+      bankId: [null],
       vpa: ["", [Validators.required]],
       limitAmount: ["", Validators.required],
       fttAcceptance: [true],
       partialPayinEnabled:[true],
-      partialPayinMinRange:[{value:null,disabled:false}]
     });
   }
 
@@ -104,7 +103,6 @@ export class AddUpiComponent implements OnInit, OnDestroy {
     limitAmount: "",
     fttAcceptance: true,
     partialPayinEnabled: true,
-    partialPayinMinRange: null,
   });
     this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
     this.selectedImage = null;
@@ -196,7 +194,6 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       maxRange: null,
       quantity: null,
     });
-    this.revalidatePartialPayinMinRange();
   }
 
   removeRange(index: number) {
@@ -211,20 +208,17 @@ export class AddUpiComponent implements OnInit, OnDestroy {
         },
       ];
     }
-    this.revalidatePartialPayinMinRange();
   }
 
   updateFrom(index: number, event: Event) {
     const value = (event.target as HTMLInputElement).value.trim();
 
     this.capacityRanges[index].minRange = value === "" ? null : Number(value);
-    this.revalidatePartialPayinMinRange();
   }
   updateTo(index: number, event: Event) {
     const value = (event.target as HTMLInputElement).value.trim();
 
     this.capacityRanges[index].maxRange = value === "" ? null : Number(value);
-    this.revalidatePartialPayinMinRange();
   }
 
   updateQuantity(index: number, event: Event) {
@@ -257,11 +251,8 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       qrMode: this.qrMode,
       fttAcceptance: this.addUpiForm.value.fttAcceptance,
       partialPayinEnabled: this.addUpiForm.getRawValue().partialPayinEnabled,
-  partialPayinMinRange: this.addUpiForm.getRawValue().partialPayinEnabled
-    ? this.addUpiForm.getRawValue().partialPayinMinRange
-    : null,
     };
-
+    console.log(payload);
     const validRanges = this.capacityRanges
       .filter(
         (r) =>
@@ -461,39 +452,5 @@ export class AddUpiComponent implements OnInit, OnDestroy {
   return Math.min(...validRanges.map((r) => r.minRange));
 }
 
-private partialPayinMinRangeValidator = (control: AbstractControl): ValidationErrors | null => {
-  if (!this.addUpiForm?.get("partialPayinEnabled")?.value) return null;
 
-  const max = this.smallestCapacityRangeLimit;
-  if (max == null) return { noCapacityRanges: true };
-
-  if (control.value == null || control.value === "") return { required: true };
-  const val = Number(control.value);
-  if (val <= 0) return { min: true };
-  if (val > max) return { exceedsMax: { max } };
-
-  return null;
-};
-
-onPartialPayinToggle(): void {
-  const enabled = this.addUpiForm.get("partialPayinEnabled")?.value;
-  const limitControl = this.addUpiForm.get("partialPayinMinRange");
-
-  if (enabled) {
-    limitControl?.enable();
-    limitControl?.setValidators([this.partialPayinMinRangeValidator]);
-  } else {
-    limitControl?.disable();
-    limitControl?.clearValidators();
-    limitControl?.setValue(null);
-  }
-  limitControl?.updateValueAndValidity();
-}
-
-private revalidatePartialPayinMinRange(): void {
-  const limitControl = this.addUpiForm.get("partialPayinMinRange");
-  if (limitControl?.enabled) {
-    limitControl.updateValueAndValidity();
-  }
-}
 }

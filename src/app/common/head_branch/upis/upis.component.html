@@ -1290,33 +1290,6 @@
               </label>
             </div>
           </div>
-          <!-- Partial Payin Min Range -->
-          <div *ngIf="updateForm.partialPayinEnabled">
-            <label
-              class="block text-sm font-medium text-[var(--color-font)] mb-1"
-            >
-              Partial Payin Min Range
-              <span class="text-[var(--color-danger)]">*</span>
-            </label>
-            <input
-              type="number"
-              [(ngModel)]="updateForm.partialPayinMinRange"
-              name="partialPayinMinRange"
-              [ngModelOptions]="{ standalone: true }"
-              [max]="smallestUpdateCapacityRangeLimit"
-              class="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
-              placeholder="Max: {{ smallestUpdateCapacityRangeLimit ?? 'N/A' }}"
-            />
-            <div
-              *ngIf="isUpdatePartialPayinMinRangeInvalid"
-              class="text-xs text-[var(--color-danger)] mt-1 flex items-center"
-            >
-              <span class="material-icons mr-1 text-sm">error</span>
-              Must be less than smallest capacity range ({{
-                smallestUpdateCapacityRangeLimit
-              }})
-            </div>
-          </div>
           <!-- Buttons -->
           <div class="pt-3 border-t border-[var(--color-border)]">
             <div class="flex gap-3">
@@ -1325,8 +1298,7 @@
                 [disabled]="
                   isSubmitting ||
                   !isValidUpiId(updateForm.vpa) ||
-                  (vpaChanged && !newQrGenerated && !updateManualQrFile) ||
-                  isUpdatePartialPayinMinRangeInvalid
+                  (vpaChanged && !newQrGenerated && !updateManualQrFile)
                 "
                 class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-dark)] disabled:opacity-50"
               >

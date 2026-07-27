@@ -49,7 +49,6 @@ interface BankAccount {
   remainingLimitAmount: any;
   totalLimitAmount: any;
   partialPayinEnabled:boolean;
-  partialPayinMinRange:any;
 }
 
 interface Portal {
@@ -66,6 +65,7 @@ interface Portal {
 export class BanksComponent implements OnInit, OnDestroy {
   @ViewChild("portalDropdown") portalDropdown!: ElementRef;
   @ViewChild("qrcodeElem", { static: false }) qrcodeElem!: ElementRef;
+  @ViewChild("capacityPopupRef") capacityPopupRef!: ElementRef;
   @Input() currency: any = ""; //  ADD THIS
   // ---------- DATA (server‑paginated) ----------
   bankAccounts: BankAccount[] = [];
@@ -103,7 +103,7 @@ export class BanksComponent implements OnInit, OnDestroy {
   selectedLimitAccount: BankAccount | null = null;
   hoveredLimitAccount: BankAccount | null = null;
   tooltipPosition = { x: 0, y: 0 };
-
+  isCapacityPopupOpen = false;
   showAddUpiModal = false;
   isAddingUpi = false;
 
@@ -394,7 +394,6 @@ export class BanksComponent implements OnInit, OnDestroy {
               bankTime: r.bankTime ?? null, // ADD
 
               partialPayinEnabled: r.partialPayinEnabled,
-              partialPayinMinRange:r.partialPayinMinRange,
 
               isBankActive,
             } as BankAccount;
@@ -762,9 +761,25 @@ export class BanksComponent implements OnInit, OnDestroy {
       this.showPaymentDropdown = false;
     }
 
-    if (!target.closest(".capacity-popup") && !target.closest("button")) {
-      this.selectedCapacityAccount = null;
+
+    // Close capacity popup if the click is outside it
+  if (this.selectedCapacityAccount) {
+    const clickedInsidePopup = this.capacityPopupRef?.nativeElement?.contains(
+      target,
+    );
+
+    if (!clickedInsidePopup) {
+      this.closeCapacityPopup();
     }
+  }
+
+  const clickedInside = this.capacityPopupRef?.nativeElement.contains(
+    event.target as Node,
+  );
+
+  if (!clickedInside) {
+    this.closeCapacityPopup();
+  }
   }
 
   changePaymentType(type: string): void {
@@ -779,7 +794,7 @@ export class BanksComponent implements OnInit, OnDestroy {
   openLimitModal(account: any) {
     this.editingAccount = account;
     this.showLimitModal = true;
-
+    this.selectedCapacityAccount = false
     const now = new Date();
     this.viewYear = now.getFullYear();
     this.viewMonth = now.getMonth();
@@ -1577,6 +1592,7 @@ export class BanksComponent implements OnInit, OnDestroy {
 
   openAddBankModal() {
     this.showInventoryModal = true;
+    this.selectedCapacityAccount = false;
   }
 
   closeInventoryModal() {
@@ -1593,9 +1609,16 @@ export class BanksComponent implements OnInit, OnDestroy {
 
   openLimitDetails(account: BankAccount): void {
     this.selectedLimitAccount = account;
+    this.selectedCapacityAccount = false;
   }
 
   closeLimitDetails(): void {
     this.selectedLimitAccount = null;
   }
+
+  openCapacityPopup(account: any): void {
+  this.selectedCapacityAccount = account;
+  this.isCapacityPopupOpen = true;
+}
+
 }

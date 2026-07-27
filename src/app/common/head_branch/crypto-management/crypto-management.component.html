@@ -1300,30 +1300,6 @@
         </div>
       </div>
 
-      <!-- Partial Payin Min Range -->
-      <div *ngIf="editAccountForm.partialPayinEnabled">
-        <label class="block text-xs font-medium text-gray-500 mb-1.5"
-          >Partial Payin Min Range</label
-        >
-        <input
-          type="number"
-          min="0"
-          [(ngModel)]="editAccountForm.partialPayinMinRange"
-          [max]="smallestEditCapacityRangeLimit"
-          class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-green-500 transition"
-          placeholder="Max: {{ smallestEditCapacityRangeLimit ?? 'N/A' }}"
-        />
-        <p
-          *ngIf="isEditPartialPayinMinRangeInvalid"
-          class="text-[11px] text-red-500 mt-1.5 flex items-center gap-1"
-        >
-          <span class="material-symbols-outlined text-[14px]">error</span>
-          Must be less than smallest capacity range ({{
-            smallestEditCapacityRangeLimit
-          }})
-        </p>
-      </div>
-
       <!-- ============= QR SECTION ============= -->
       <div class="border-t border-gray-100 pt-5">
         <div class="flex items-center justify-between mb-3">

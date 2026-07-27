@@ -492,33 +492,6 @@
                   </span>
                 </div>
               </div>
-
-              <!-- CAPACITY RANGE -->
-              <div class="grid grid-cols-2 gap-3">
-                <p class="text-sm text-gray-500">Partial Payin Min Range</p>
-
-                <div *ngIf="!isEditMode">
-                  <p class="text-sm font-semibold text-gray-800">
-                    {{ bankData?.partialPayinMinRange || 0 }}
-                  </p>
-                </div>
-
-                <div *ngIf="isEditMode">
-                  <input
-                    appEnterKeyFocus
-                    [(ngModel)]="updateForm.partialPayinMinRange"
-                    type="number"
-                    [max]="smallestCapacityRangeLimit"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                  <p
-                    *ngIf="isPartialPayinMinRangeInvalid"
-                    class="text-xs text-red-500 mt-1"
-                  >
-                     Must be less than smallest capacity range ({{ smallestCapacityRangeLimit }})
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -562,7 +535,7 @@
       <button
         *ngIf="isEditMode"
         (click)="submitUpdate()"
-        [disabled]="isSubmitting || isPartialPayinMinRangeInvalid"
+        [disabled]="isSubmitting"
         class="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
       >
         {{ isSubmitting ? "Updating..." : "Update Account" }}

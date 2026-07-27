@@ -56,7 +56,6 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
   walletLimit: number | null = null;
   acceptsPpi = true;
   partialPayinEnabled = true;
-  partialPayinMinRange: number | null = null;
   isSubmitting = false;
 
   selectedCurrency: any = null;
@@ -116,6 +115,17 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
   ngOnDestroy(): void {
     this.subs.unsubscribe();
     this.revokePreviewUrl();
+  }
+
+  // ─── Form validation ──────────────────────────────────────────
+  get isFormValid(): boolean {
+    if (!this.walletAddress?.trim()) return false;
+
+    if (!this.generatedFile) return false;
+
+    if (this.walletLimit == null || this.walletLimit <= 0) return false;
+
+    return true;
   }
 
   private applyNetwork(rawMode: string | null | undefined): void {
@@ -199,28 +209,6 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-     if (this.partialPayinEnabled) {
-    const max = this.smallestCapacityRangeLimit;
-
-    if (max == null) {
-      this.snackBar.show("Add at least one valid capacity range first.", false);
-      return;
-    }
-
-    if (this.partialPayinMinRange == null || this.partialPayinMinRange <= 0) {
-      this.snackBar.show("Partial pay min range is required.", false);
-      return;
-    }
-
-    if (this.partialPayinMinRange >= max) {
-  this.snackBar.show(
-    `Partial pay min range must be less than smallest capacity range (${max}).`,
-    false,
-  );
-  return;
-}
-  }
-
     const validRanges = this.capacityRanges
       .filter(
         (r) =>
@@ -250,7 +238,6 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
       fttAcceptance: this.acceptsPpi || true,
       ranges: validRanges.length ? validRanges : null,
        partialPayinEnabled: this.partialPayinEnabled,
-  partialPayinMinRange: this.partialPayinEnabled ? this.partialPayinMinRange : null,
     };
 
     const formData = new FormData();

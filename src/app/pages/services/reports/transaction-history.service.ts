@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { catchError, Observable, throwError } from "rxjs";
 import baseUrl from "../helper";
 import { FundsReport } from "../../../components/reports/funds-report/funds-report.component";
 import { DateTimeUtil } from "../../../utils/date-time.utils";
@@ -199,5 +199,61 @@ getEntityReport(params: {
     return this.http.get<any>(`${baseUrl}/branch/data/report`, {
       params: httpParams,
     });
+  }
+
+  getEntityBalanceSearch(params: {
+    entityId?: string;
+    status?: string | string[]; // <-- string bhi aur array bhi
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    pageSize?: number;
+  }): Observable<any> {
+    let httpParams = new HttpParams();
+
+    if (params.entityId) {
+      httpParams = httpParams.set("entityId", params.entityId);
+    }
+
+    if (params.status) {
+      const statusValue = Array.isArray(params.status)
+        ? params.status.join(",")
+        : params.status;
+
+      httpParams = httpParams.set("status", statusValue);
+    }
+
+    if (params.fromDate) {
+      httpParams = httpParams.set(
+        "fromDate",
+        DateTimeUtil.toUtcISOString(params.fromDate),
+      );
+    }
+
+    if (params.toDate) {
+      httpParams = httpParams.set(
+        "toDate",
+        DateTimeUtil.toUtcISOString(params.toDate),
+      );
+    }
+
+    httpParams = httpParams.set("page", String(params.page ?? 0));
+    httpParams = httpParams.set("pageSize", String(params.pageSize ?? 10));
+
+    console.log("HTTP Params:", httpParams.toString());
+
+    return this.http.get<any>(`${baseUrl}/entityBalance/search`, {
+      params: httpParams,
+    });
+  }
+
+  searchMultiPortalFund(payload: any): Observable<any> {
+    return this.http
+      .post<any>(`${baseUrl}/multi-portal-fund/search`, payload)
+      .pipe(
+        catchError((error) => {
+          return throwError(() => error);
+        }),
+      );
   }
 }

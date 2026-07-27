@@ -34,6 +34,7 @@ export class HeadBranchDashboardComponent
   @ViewChild("trendChart") trendChartRef!: ElementRef;
   @ViewChild("payinMethodChart") payinMethodChartRef!: ElementRef;
   @ViewChild("payoutBankChart") payoutBankChartRef!: ElementRef;
+  private expiryNotifiedIds = new Set<string>();
 
   private trendChart?: Chart;
   private payinMethodChart?: Chart;
@@ -63,27 +64,27 @@ export class HeadBranchDashboardComponent
   showPendingThreads = false;
   autoRefreshBroadcast = false;
   isRejecting = false;
-  // NEW: UI state flags for toggling payin/payout monitoring
+
   payinActive = true;
   payoutActive = true;
   mobilePage = 1;
   mobilePageSize = 1000;
   mobilePageSizes = [1000];
-  // Add these cached arrays
+
   cachedMobileTransactions: any[] = [];
   cachedPendingBank: any[] = [];
   cachedPendingPayouts: any[] = [];
   cachedPendingUpi: any[] = [];
   cachedApprovedPayins: any[] = [];
   cachedApprovedPayouts: any[] = [];
-  // Original mixed lists (kept for compatibility if needed)
+
   pendingTransactions: any[] = [];
   approvedTransactions: any[] = [];
   approvedpayins: any[] = [];
   approvedpayouts: any[] = [];
   private dynamicPayinConfig: any = null;
   private dynamicPayoutConfig: any = null;
-  // NEW: sectioned pending arrays
+
   pendingUpi: any[] = [];
   pendingBank: any[] = [];
   pendingpayouts: any[] = [];
@@ -99,7 +100,6 @@ export class HeadBranchDashboardComponent
   processingNow = Date.now();
   private processingTimerId: any = null;
 
-  // Add these properties
   previewDocument: boolean = false;
   previewUrl: string | null = null;
 
@@ -112,7 +112,7 @@ export class HeadBranchDashboardComponent
 
   selectedFile: File | null = null;
   isDragging = false;
-  //crypto
+
   pendingCrypto: any[] = [];
   cachedPendingCrypto: any[] = [];
   pendingCryptoPage = 1;
@@ -120,7 +120,7 @@ export class HeadBranchDashboardComponent
   cachedPendingPayinAll: any[] = [];
 
   private cryptoTypes = ["SPL", "ERC20", "TRC20", "OMNI", "BEP20"];
-  // filters
+
   pendingFilterType: "all" | "payin" | "payout" = "all";
   pendingFilterMethod: "all" | "upi" | "bank" = "all";
   mobileFilter: "all" | "upi" | "bank" | "crypto" | "payout" = "all";
@@ -151,15 +151,13 @@ export class HeadBranchDashboardComponent
   approvedPage = 1;
   approvedPageSize = 1000;
   approvedPageSizes = [1000];
-  // UPI
+
   pendingUpiPage = 1;
   pendingUpiPageSize = 1000;
 
-  // Bank
   pendingBankPage = 1;
   pendingBankPageSize = 1000;
 
-  // Payout
   pendingPayoutPage = 1;
   pendingPayoutPageSize = 1000;
   pendingPageSizes = [1000];
@@ -172,7 +170,6 @@ export class HeadBranchDashboardComponent
   confirmTransaction: any = null;
   reason: any = "rejects";
 
-  // NAYA — isse replace karo
   payinRejectReasons: string[] = [
     "Amount Not Recieved",
     "Duplicate Transaction (Used Transaction Reciept)",
@@ -231,7 +228,6 @@ export class HeadBranchDashboardComponent
 
     this.getPayinStatus();
 
-    // First time API call
     this.loadBroadcast();
 
     this.resetAllLists();
@@ -350,18 +346,15 @@ export class HeadBranchDashboardComponent
     this.pendingCrypto = [];
     this.recentpayouts = [];
 
-    // new per-section pending arrays
     this.pendingUpi = [];
     this.pendingBank = [];
     this.pendingpayouts = [];
   }
 
-  // New: fetch accepted/settled records from APIs to use as ground truth for charts/stats
   private refreshAllFunds(entityId?: string) {
     if (!entityId) entityId = this.entityId;
     if (!entityId) return;
 
-    // clear previously approved lists (we'll refill)
     this.approvedpayins = [];
     this.approvedpayouts = [];
     this.approvedTransactions = [];
@@ -378,13 +371,11 @@ export class HeadBranchDashboardComponent
 
     forkJoin({ bank: bankObs, upi: upiObs, payout: withdrawObs }).subscribe(
       (res: any) => {
-        // bank and upi are accepted payins
         this.mapFundsArray(res.upi || [], "upi", true);
         this.mapFundsArray(res.bank || [], "bank", true);
-        // payouts
+
         this.mappayoutsArray(res.payout || []);
 
-        // compute accepted sums (amounts) so UI shows totals even if SSE hasn't provided them
         const upiArr = Array.isArray(res.upi) ? res.upi : [];
         const bankArr = Array.isArray(res.bank) ? res.bank : [];
         const withdrawArr = Array.isArray(res.payout) ? res.payout : [];
@@ -404,7 +395,6 @@ export class HeadBranchDashboardComponent
 
         this.acceptedDep = this.acceptedBank + this.acceptedUpi;
 
-        // recompute
         this.computeStatsFromData();
         this.updateChartsFromData();
         this.clampPages();
@@ -449,12 +439,8 @@ export class HeadBranchDashboardComponent
           bankId: fund.bankId || null,
           bankName: fund.bankName || fund.bank || null,
 
-          //  old remove
-          // filePath: ...
-
-          //  NEW
-          filePath: rawPath, // backend path
-          fileUrl: "", // blob URL later
+          filePath: rawPath,
+          fileUrl: "",
 
           remarks: fund.remarks || null,
           settled: !!fund.settled,
@@ -462,23 +448,11 @@ export class HeadBranchDashboardComponent
           upiId: fund.vpa,
         };
 
-        //  LOAD IMAGE (IMPORTANT)
-        // if (tx.filePath) {
-        //   this.multimediaService.getPrivateImage(tx.filePath).subscribe({
-        //     next: (url) => {
-        //       tx.fileUrl = url;
-        //     },
-        //     error: () => {
-        //       tx.fileUrl = '';
-        //     },
-        //   });
-        // }
         if (tx.filePath) {
           this.multimediaService.getPrivateImage(tx.filePath).subscribe({
             next: (url) => {
               tx.fileUrl = url;
 
-              //  ADD THIS (VERY IMPORTANT)
               if (this.selectedTransaction?.id === tx.id) {
                 this.selectedTransaction = { ...tx };
               }
@@ -518,8 +492,8 @@ export class HeadBranchDashboardComponent
           amount: Number(w.amount) || 0,
           date: w.createdAt ? new Date(w.createdAt) : new Date(),
           utrNumber: w.transactionId || w.utr || null,
-          parentCurrency: w.parentCurrency || null, // ✅ FIX
-          currency: w.currency || null, // ✅ FIX
+          parentCurrency: w.parentCurrency || null,
+          currency: w.currency || null,
           currencyWiseAmount: Number(w.currencyWiseAmount) || 0,
           rate: w.rate || 1,
           mode: "bank",
@@ -532,23 +506,18 @@ export class HeadBranchDashboardComponent
           settled: !!w.settled,
           raw: w,
           holderName: w.bankAccountHolderName || null,
-          ifscCode: w.ifsc || null, // ✅ FIX (IFSC bhi same issue tha)
-          fundDisplayId: w.displayId || null, // ✅ FIX (displayId bhi missing tha)
+          ifscCode: w.ifsc || null,
+          fundDisplayId: w.displayId || null,
         };
 
-        //  LOAD IMAGE (IMPORTANT)
         if (tx.filePath) {
           if (tx.filePath.startsWith("http")) {
-            //  public URL
             tx.fileUrl = tx.filePath;
           } else {
-            //  private (token via interceptor)
             this.multimediaService.getPrivateImage(tx.filePath).subscribe({
-              // next: (url) => (tx.fileUrl = url),
               next: (url) => {
                 tx.fileUrl = url;
 
-                //  ADD THIS
                 if (this.selectedTransaction?.id === tx.id) {
                   this.selectedTransaction = { ...tx };
                 }
@@ -593,7 +562,6 @@ export class HeadBranchDashboardComponent
       0,
     );
 
-    // combine pending lists for active accounts calculation (keeps compatibility)
     const allPending = [
       ...this.pendingUpi,
       ...this.pendingBank,
@@ -635,11 +603,11 @@ export class HeadBranchDashboardComponent
   }
   private parseProcessingDeadline(tx: any): Date | null {
     if (!tx) return null;
-    // Check both flat field (set by onProcessingClick) and raw object
+
     const v =
       tx.processingTimeLimit ?? (tx.raw && tx.raw.processingTimeLimit) ?? null;
     if (!v) return null;
-    const d = new Date(v); // works for UTC strings like "2026-06-27T07:30:00Z"
+    const d = new Date(v);
     return isNaN(d.getTime()) ? null : d;
   }
   isPayoutActionBlocked(tx: any): boolean {
@@ -659,7 +627,6 @@ export class HeadBranchDashboardComponent
 
     const diffMs = deadline.getTime() - this.processingNow;
 
-    //  EXPIRED
     if (diffMs <= 0) {
       return "Process";
     }
@@ -696,7 +663,6 @@ export class HeadBranchDashboardComponent
   }
 
   private identifiersMatch(a: any, b: any): boolean {
-    // compare multiple known id-like fields defensively
     const aIds = this.normalizeIdValues(a);
     const bIds = this.normalizeIdValues(b);
     if (aIds.length === 0 || bIds.length === 0) return false;
@@ -705,16 +671,14 @@ export class HeadBranchDashboardComponent
 
   private removeFromPendingListsByTx(tx: any): void {
     if (!tx) return;
-    // Remove matching entries from each pending list using identifiersMatch
+
     const removeFrom = (list: any[]) => {
       for (let i = list.length - 1; i >= 0; i--) {
         try {
           if (this.identifiersMatch(list[i], tx)) {
             list.splice(i, 1);
           }
-        } catch (e) {
-          // ignore and continue
-        }
+        } catch (e) {}
       }
     };
     removeFrom(this.pendingUpi);
@@ -728,13 +692,11 @@ export class HeadBranchDashboardComponent
       const exists = list.some((x) => this.identifiersMatch(x, tx));
       if (!exists) list.unshift(tx);
     } catch (e) {
-      // fallback
       list.unshift(tx);
     }
   }
 
   private resetRejectReason(): void {
-    // restore your default and clear custom input
     this.reason = "rejects";
   }
 
@@ -986,7 +948,6 @@ export class HeadBranchDashboardComponent
   }
 
   private ensureChartsInitialized(): void {
-    // Initialize any charts that haven't been created yet — safe to call multiple times
     try {
       if (!this.trendChart && this.trendChartRef?.nativeElement) {
         this.initTrendChart();
@@ -997,16 +958,12 @@ export class HeadBranchDashboardComponent
       if (!this.payoutBankChart && this.payoutBankChartRef?.nativeElement) {
         this.initpayoutBankChart();
       }
-    } catch (e) {
-      // don't break the app if chart init fails; will attempt again on next update
-    }
+    } catch (e) {}
   }
 
   private updateChartsFromData(): void {
-    // Ensure charts exist (handles cases where data arrives before viewInit or when canvas wasn't ready)
     this.ensureChartsInitialized();
 
-    // Defer actual chart updates to the next frame so the DOM layout settles
     requestAnimationFrame(() => {
       const payinsAll = [...this.pendingUpi, ...this.pendingBank];
       const upiSum = this.acceptedUpi;
@@ -1136,10 +1093,6 @@ export class HeadBranchDashboardComponent
     this.updateChartsFromData();
   }
 
-  // onPendingFilterChange() {
-  //   this.pendingPage = 1;
-  // }
-
   onPendingFilterChange() {
     this.pendingUpiPage = 1;
     this.pendingBankPage = 1;
@@ -1168,12 +1121,11 @@ export class HeadBranchDashboardComponent
     }
 
     if (!transaction) return;
-    // Normalize the incoming object so modal bindings (utrNumber, upiId, accountNo, holderName, filePath, bankName, date etc.) are always present
+
     this.selectedTransaction = this.normalizeTransaction(transaction);
   }
 
   filteredPending(): any[] {
-    // backward-compatible combined pending list
     const all = [
       ...this.pendingUpi,
       ...this.pendingBank,
@@ -1196,7 +1148,6 @@ export class HeadBranchDashboardComponent
     });
   }
 
-  // UPI pending
   filteredPendingUpi(): any[] {
     return this.pendingUpi.filter((t) => {
       if (this.pendingFilterType !== "all" && t.type !== this.pendingFilterType)
@@ -1210,11 +1161,6 @@ export class HeadBranchDashboardComponent
       return true;
     });
   }
-  // pagedPendingUpi(): any[] {
-  //   const list = this.filteredPendingUpi();
-  //   const start = (this.pendingPage - 1) * this.pendingPageSize;
-  //   return list.slice(start, start + this.pendingPageSize);
-  // }
 
   pagedPendingUpi(): any[] {
     const list = this.filteredPendingUpi();
@@ -1222,7 +1168,6 @@ export class HeadBranchDashboardComponent
     return list.slice(start, start + this.pendingUpiPageSize);
   }
 
-  // Bank pending
   filteredPendingBank(): any[] {
     return this.pendingBank.filter((t) => {
       if (this.pendingFilterType !== "all" && t.type !== this.pendingFilterType)
@@ -1265,11 +1210,6 @@ export class HeadBranchDashboardComponent
       this.pendingCryptoTotalPages(),
     );
   }
-  // pagedPendingBank(): any[] {
-  //   const list = this.filteredPendingBank();
-  //   const start = (this.pendingPage - 1) * this.pendingPageSize;
-  //   return list.slice(start, start + this.pendingPageSize);
-  // }
 
   pagedPendingBank(): any[] {
     const list = this.filteredPendingBank();
@@ -1277,7 +1217,6 @@ export class HeadBranchDashboardComponent
     return list.slice(start, start + this.pendingBankPageSize);
   }
 
-  // payouts pending
   filteredPendingpayouts(): any[] {
     return this.pendingpayouts.filter((t) => {
       if (this.pendingFilterType !== "all" && t.type !== this.pendingFilterType)
@@ -1292,11 +1231,6 @@ export class HeadBranchDashboardComponent
     });
   }
 
-  // pagedPendingpayouts(): any[] {
-  //   const list = this.filteredPendingpayouts();
-  //   const start = (this.pendingPage - 1) * this.pendingPageSize;
-  //   return list.slice(start, start + this.pendingPageSize);
-  // }
   pagedPendingpayouts(): any[] {
     const list = this.filteredPendingpayouts();
     const start = (this.pendingPayoutPage - 1) * this.pendingPayoutPageSize;
@@ -1340,13 +1274,6 @@ export class HeadBranchDashboardComponent
     );
   }
 
-  // pendingTotalPages(): number {
-  //   return Math.max(
-  //     1,
-  //     Math.ceil(this.filteredPending().length / this.pendingPageSize),
-  //   );
-  // }
-
   pendingUpiTotalPages(): number {
     return Math.max(
       1,
@@ -1382,9 +1309,6 @@ export class HeadBranchDashboardComponent
   setApprovedPage(p: number) {
     this.approvedPage = Math.min(Math.max(1, p), this.approvedTotalPages());
   }
-  // setPendingPage(p: number) {
-  //   this.pendingPage = Math.min(Math.max(1, p), this.pendingTotalPages());
-  // }
 
   setPendingUpiPage(p: number) {
     this.pendingUpiPage = Math.min(Math.max(1, p), this.pendingUpiTotalPages());
@@ -1414,10 +1338,6 @@ export class HeadBranchDashboardComponent
     this.approvedPageSize = size;
     this.approvedPage = 1;
   }
-  // onChangePendingPageSize(size: number) {
-  //   this.pendingPageSize = size;
-  //   this.pendingPage = 1;
-  // }
 
   onChangePendingUpiPageSize(size: number) {
     this.pendingUpiPageSize = size;
@@ -1439,24 +1359,20 @@ export class HeadBranchDashboardComponent
   }
 
   private clampPages() {
-    // approved (keep same)
     if (this.approvedPage > this.approvedTotalPages())
       this.approvedPage = this.approvedTotalPages();
 
-    // UPI
     if (this.pendingUpiPage > this.pendingUpiTotalPages())
       this.pendingUpiPage = this.pendingUpiTotalPages();
 
-    // Bank
     if (this.pendingBankPage > this.pendingBankTotalPages())
       this.pendingBankPage = this.pendingBankTotalPages();
     if (this.pendingCryptoPage > this.pendingCryptoTotalPages())
       this.pendingCryptoPage = this.pendingCryptoTotalPages();
-    // Payout
+
     if (this.pendingPayoutPage > this.pendingPayoutTotalPages())
       this.pendingPayoutPage = this.pendingPayoutTotalPages();
 
-    // approved payout (keep same)
     if (this.payoutApprovedPage > this.payoutApprovedTotalPages())
       this.payoutApprovedPage = this.payoutApprovedTotalPages();
   }
@@ -1508,10 +1424,8 @@ export class HeadBranchDashboardComponent
 
       this.snackbar.show("Transaction approved successfully", true);
 
-      // Remove from pending
       this.removeFromPendingListsByTx(t);
 
-      // Add to approved
       const approvedTx = {
         ...t,
         status: "completed",
@@ -1529,7 +1443,6 @@ export class HeadBranchDashboardComponent
         this.recentpayins = [...this.approvedpayins];
       }
 
-      // RESET
       this.confirmTransaction = null;
       this.showApproveConfirm = false;
       this.selectedTransaction = null;
@@ -1537,7 +1450,6 @@ export class HeadBranchDashboardComponent
 
       this.resetRejectReason();
 
-      // Refresh stats
       this.computeStatsFromData();
       this.updateChartsFromData();
       this.clampPages();
@@ -1550,7 +1462,6 @@ export class HeadBranchDashboardComponent
 
       this.snackbar.show(message, false);
 
-      // Remove from pending
       this.removeFromPendingListsByTx(t);
 
       const failedTx = {
@@ -1668,25 +1579,20 @@ export class HeadBranchDashboardComponent
         next: (res: any) => {
           transaction._apiPending = false;
 
-          // ✅ API response se seedha limit lo — socket ka wait mat karo
           const rawLimit =
             res?.processingTimeLimit ?? res?.data?.processingTimeLimit ?? null;
 
           if (rawLimit) {
-            // UTC string → local Date object
             const deadline = new Date(rawLimit);
             const now = Date.now();
 
             if (!isNaN(deadline.getTime()) && deadline.getTime() > now) {
-              // ✅ Transaction pe seedha set karo taaki timer immediately chale
               transaction.processing = true;
-              transaction.processingTimeLimit = rawLimit; // string rakhna — parseProcessingDeadline handles it
+              transaction.processingTimeLimit = rawLimit;
               transaction.processingStartedAt = new Date();
 
-              // processingNow refresh karo taaki getRemainingTimeLabel turant correct time dikhaaye
               this.processingNow = now;
 
-              // ✅ Timer already chal raha hai (startSlabTimer se) — sirf ensure karo
               this.ensureProcessingTimerState();
 
               this.snackbar.show(res.message || "Processing started", true);
@@ -1696,8 +1602,6 @@ export class HeadBranchDashboardComponent
               this.snackbar.show("Processing time already expired", false);
             }
           } else {
-            // API ne limit nahi di abhi — socket se aayegi
-            // Sirf processing true karo, deadline socket update mein aayegi
             transaction.processing = true;
             this.ensureProcessingTimerState();
           }
@@ -1719,17 +1623,14 @@ export class HeadBranchDashboardComponent
   }
 
   private startProcessingTimer(): void {
-    //  already running
     if (this.processingTimerId) return;
     this.startSlabTimer();
 
     this.processingNow = Date.now();
 
     this.processingTimerId = window.setInterval(() => {
-      //  moving reference time
       this.processingNow = Date.now();
 
-      //  update slabs realtime
       this.updateAllSlabPercentages();
     }, 1000);
   }
@@ -1742,13 +1643,11 @@ export class HeadBranchDashboardComponent
   }
 
   private ensureProcessingTimerState(): void {
-    // ✅ FIX: Always keep timer alive — payins need it for slab % realtime updates
-    // Old logic was stopping timer when no payout was processing, which killed payin slabs
     if (!this.processingTimerId) {
       this.startSlabTimer();
     }
   }
-  // Reset edit amount data
+
   resetEditAmountData(): void {
     this.editAmountData = {
       newAmount: 0,
@@ -1757,7 +1656,6 @@ export class HeadBranchDashboardComponent
       isDragging: false,
     };
 
-    // Reset file input
     const fileInput = document.getElementById(
       "editFileInput",
     ) as HTMLInputElement;
@@ -1766,7 +1664,6 @@ export class HeadBranchDashboardComponent
     }
   }
 
-  // File handling methods for edit popup
   onEditDragOver(event: DragEvent): void {
     event.preventDefault();
     this.editAmountData.isDragging = true;
@@ -1793,15 +1690,12 @@ export class HeadBranchDashboardComponent
   }
 
   validateAndSetEditFile(file: File): void {
-    // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    const maxSize = 5 * 1024 * 1024;
 
     if (file.size > maxSize) {
-      // You can show a toast notification here
       return;
     }
 
-    // Validate file type
     const allowedTypes = [
       "application/pdf",
       "image/jpeg",
@@ -1812,7 +1706,6 @@ export class HeadBranchDashboardComponent
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      // You can show a toast notification here
       return;
     }
 
@@ -1858,7 +1751,6 @@ export class HeadBranchDashboardComponent
           file,
         );
       } else if (t.mode === "crypto") {
-        // ✅ NEW
         rejectObservable = this.fundService.rejectCryptoFund(
           fundId,
           reason,
@@ -1873,10 +1765,8 @@ export class HeadBranchDashboardComponent
       await lastValueFrom(rejectObservable);
       this.snackbar.show("Transaction rejected successfully", false);
 
-      // Remove from pending
       this.removeFromPendingListsByTx(t);
 
-      // Move to recent failed list
       const failedTx = { ...t, status: "failed" };
       if (t.type === "payout") {
         if (
@@ -1898,13 +1788,11 @@ export class HeadBranchDashboardComponent
         );
       }
 
-      // Clear confirm state
       this.confirmTransaction = null;
       this.showRejectConfirm = false;
       this.selectedTransaction = null;
       this.resetRejectReason();
 
-      // Refresh stats
       this.computeStatsFromData();
       this.updateChartsFromData();
       this.clampPages();
@@ -1946,7 +1834,7 @@ export class HeadBranchDashboardComponent
           : t.mode === "bank"
             ? "bank"
             : t.mode === "crypto"
-              ? "crypto" // ✅ NEW
+              ? "crypto"
               : "none";
 
     this.confirmTransaction = { ...t, section: src };
@@ -1995,7 +1883,6 @@ export class HeadBranchDashboardComponent
 
     if (!this.confirmTransaction) return;
 
-    // PAYOUT APPROVE => ATTACHMENT REQUIRED
     if (this.confirmTransaction.type === "payout" && !this.selectedFile) {
       this.snackbar.show("Attachment is required for payout approval", false);
       return;
@@ -2011,12 +1898,10 @@ export class HeadBranchDashboardComponent
   isAttachmentRequired(): boolean {
     if (!this.confirmTransaction) return false;
 
-    // PAYIN REJECT => REQUIRED
     if (this.showRejectConfirm && this.confirmTransaction.type === "payin") {
       return true;
     }
 
-    // PAYOUT APPROVE => REQUIRED
     if (this.showApproveConfirm && this.confirmTransaction.type === "payout") {
       return true;
     }
@@ -2027,7 +1912,6 @@ export class HeadBranchDashboardComponent
   showAttachmentField(): boolean {
     if (!this.confirmTransaction) return true;
 
-    // HIDE IN PAYOUT REJECT
     if (this.showRejectConfirm && this.confirmTransaction.type === "payout") {
       return false;
     }
@@ -2081,7 +1965,6 @@ export class HeadBranchDashboardComponent
     this.isDragging = false;
     this.showRejectConfirm = false;
 
-    // Reset file input
     const fileInput = document.getElementById("fileInput") as HTMLInputElement;
     if (fileInput) {
       fileInput.value = "";
@@ -2099,19 +1982,14 @@ export class HeadBranchDashboardComponent
     this.resetRejectReason();
   }
 
-  // ---------------------------------------------------------------------------
-  // NEW METHODS: toggles for payin/payout "active" state
-  // ---------------------------------------------------------------------------
   togglepayin(): void {
     this.payinActive = !this.payinActive;
-    // purely UI-only state; no API call
   }
 
   togglepayout(): void {
     this.payoutActive = !this.payoutActive;
   }
 
-  // helper to return css/text for the status small label (not used in template currently but available)
   getActiveSmallLabel(
     active: boolean,
     type: "payin" | "payout",
@@ -2146,7 +2024,6 @@ export class HeadBranchDashboardComponent
   openTransaction(transaction: any) {
     this.selectedTransaction = transaction;
 
-    // Screenshot Load
     if (
       transaction.filePath &&
       !transaction.fileUrl &&
@@ -2166,7 +2043,6 @@ export class HeadBranchDashboardComponent
       });
     }
 
-    // Rejection Screenshot Load
     if (
       transaction.rejectionPath &&
       !transaction.rejectionUrl &&
@@ -2189,7 +2065,6 @@ export class HeadBranchDashboardComponent
     }
   }
 
-  // Process incoming SSE/broadcast event and update local pending lists
   private normalizeIncomingFund(
     fund: any,
     guessedMode?: "bank" | "upi" | "payout" | "crypto",
@@ -2257,7 +2132,6 @@ export class HeadBranchDashboardComponent
 
       bankName: fund.bankName || fund.bank || fund.bank_name || null,
 
-      // only path store
       filePath: filePathRaw,
       fileUrl: null,
       imageLoading: false,
@@ -2289,9 +2163,9 @@ export class HeadBranchDashboardComponent
 
   private normalizeTransaction(tx: any) {
     if (!tx) return tx;
-    // If object already normalized (has mode and a Date), return as-is
+
     if (tx.mode && tx.date instanceof Date) return tx;
-    // If tx.raw exists and looks like original payload, normalize raw
+
     if (tx.raw) return this.normalizeIncomingFund(tx.raw);
     return this.normalizeIncomingFund(tx);
   }
@@ -2313,9 +2187,6 @@ export class HeadBranchDashboardComponent
 
     const now = Date.now();
 
-    // =====================================================
-    // BANK
-    // =====================================================
     if (Array.isArray(data.PENDING_PAYIN)) {
       const upiList: any[] = [];
       const bankList: any[] = [];
@@ -2375,9 +2246,6 @@ export class HeadBranchDashboardComponent
       this.pendingCrypto = cryptoList;
     }
 
-    // =====================================================
-    // PAYOUT
-    // =====================================================
     if (Array.isArray(data.PENDING_PAYOUT)) {
       this.pendingpayouts = data.PENDING_PAYOUT.map((f: any) => {
         const existing = this.pendingpayouts.find(
@@ -2389,9 +2257,7 @@ export class HeadBranchDashboardComponent
           {
             ...existing,
             ...f,
-            // ✅ FIX: agar humne locally processing = true kiya tha (onProcessingClick se),
-            // toh socket ka stale/false value usse overwrite nahi karega.
-            // Sirf tabhi false hoga jab humare paas pehle se true nahi tha.
+
             processing: existing?.processing === true ? true : !!f?.processing,
 
             processingTimeLimit:
@@ -2420,9 +2286,6 @@ export class HeadBranchDashboardComponent
       this.refreshCachedLists();
     }
 
-    // =====================================================
-    // Force new references for Angular UI refresh
-    // =====================================================
     this.pendingUpi = [...this.pendingUpi];
     this.pendingBank = [...this.pendingBank];
     this.pendingCrypto = [...this.pendingCrypto];
@@ -2451,7 +2314,6 @@ export class HeadBranchDashboardComponent
       return;
     }
 
-    // PDF SIZE VALIDATION
     const isPdf = file.type === "application/pdf";
     const maxPdfSize = 1 * 1024 * 1024;
 
@@ -2460,10 +2322,8 @@ export class HeadBranchDashboardComponent
       return;
     }
 
-    // STORE FILE
     this.selectedFile = file;
 
-    // PREVIEW
     if (file.type === "application/pdf") {
       this.previewDocument = true;
       this.previewUrl = URL.createObjectURL(file);
@@ -2494,16 +2354,12 @@ export class HeadBranchDashboardComponent
   }
 
   validateAndSetFile(file: File): void {
-    // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    const maxSize = 5 * 1024 * 1024;
 
     if (file.size > maxSize) {
-      // Show error message (you can implement your own notification system)
-
       return;
     }
 
-    // Validate file type
     const allowedTypes = [
       "application/pdf",
       "image/jpeg",
@@ -2522,15 +2378,13 @@ export class HeadBranchDashboardComponent
 
   removeFile(): void {
     this.selectedFile = null;
-    // Reset file input
+
     const fileInput = document.getElementById("fileInput") as HTMLInputElement;
     if (fileInput) {
       fileInput.value = "";
     }
   }
-  // ---------------------------------------------------------------------------
 
-  // Add these methods
   getAllTransactions() {
     return [
       ...(this.filteredPendingUpi?.() || []),
@@ -2554,7 +2408,6 @@ export class HeadBranchDashboardComponent
     return allTransactions;
   }
 
-  // Add this method for mobile processing click to prevent event propagation
   onProcessingClickMobile(event: Event, transaction: any) {
     event.stopPropagation();
     this.onProcessingClick(transaction);
@@ -2595,7 +2448,6 @@ export class HeadBranchDashboardComponent
     this.previewUrl = null;
   }
 
-  // Add these methods
   openImagePopup(url: string): void {
     this.popupImageUrl = url;
     this.previewImage = url;
@@ -2627,7 +2479,7 @@ export class HeadBranchDashboardComponent
     const now = new Date().getTime();
     const inputTime = new Date(date).getTime();
 
-    let diff = Math.floor((now - inputTime) / 1000); // in seconds
+    let diff = Math.floor((now - inputTime) / 1000);
 
     const days = Math.floor(diff / (24 * 3600));
     diff %= 24 * 3600;
@@ -2685,7 +2537,6 @@ export class HeadBranchDashboardComponent
 
     const diffMinutes = Math.floor((now - createdTime) / 60000);
 
-    // ✅ FIX: Sort karo — isUpto: true wale LAST aayenge (Infinity maxMinutes)
     const ranges = [...(dynamicConfig?.timeRanges || [])].sort(
       (a: any, b: any) => {
         const aMax =
@@ -2715,7 +2566,6 @@ export class HeadBranchDashboardComponent
     let prevMax = 0;
 
     for (const range of ranges) {
-      // ✅ FIX: isUpto: true = catch-all fallback, matlab "iske baad se infinity tak yahi %"
       if (range.isUpto === true) {
         return {
           percentage: Number(range.percentage ?? 100),
@@ -2737,7 +2587,6 @@ export class HeadBranchDashboardComponent
       prevMax = max;
     }
 
-    // Koi range match nahi hua aur koi isUpto bhi nahi tha
     return {
       percentage: 0,
       eligible: false,
@@ -2773,7 +2622,6 @@ export class HeadBranchDashboardComponent
 
     const amountRanges = [...(dynamicConfig?.amountRanges || [])].sort(
       (a: any, b: any) => {
-        // ✅ FIX: isUpto: true wale amount ranges bhi last mein aayenge
         const aMax =
           a.isUpto === true
             ? Infinity
@@ -2801,7 +2649,6 @@ export class HeadBranchDashboardComponent
     let selectedAmountRange = null;
 
     for (const range of amountRanges) {
-      // ✅ FIX: isUpto: true amount range = catch-all, matlab "is amount se upar sab isme"
       if (range.isUpto === true) {
         selectedAmountRange = range;
         break;
@@ -2823,7 +2670,6 @@ export class HeadBranchDashboardComponent
       };
     }
 
-    // ✅ FIX: timeRanges sorting mein bhi isUpto support
     const timeRanges = [...(selectedAmountRange.timeRanges || [])].sort(
       (a: any, b: any) => {
         const aMax =
@@ -2853,7 +2699,6 @@ export class HeadBranchDashboardComponent
     let prevTime = 0;
 
     for (const t of timeRanges) {
-      // ✅ FIX: isUpto: true timeRange = catch-all fallback for this amount range
       if (t.isUpto === true) {
         return {
           percentage: Number(t.percentage ?? 0),
@@ -2884,9 +2729,7 @@ export class HeadBranchDashboardComponent
   private startRealtimeUpdates(): void {
     if (this.realtimeUpdateInterval) return;
 
-    this.realtimeUpdateInterval = setInterval(() => {
-      // this.updateAllSlabPercentages();
-    }, 1000);
+    this.realtimeUpdateInterval = setInterval(() => {}, 1000);
   }
 
   private updateAllSlabPercentages(): void {
@@ -2896,9 +2739,6 @@ export class HeadBranchDashboardComponent
 
     const now = Date.now();
 
-    // =========================
-    // UPI
-    // =========================
     this.pendingUpi = this.pendingUpi.map((tx: any) => {
       if (!tx?.date && !tx?.createdAt && !tx?.dateTime) {
         return tx;
@@ -2918,9 +2758,6 @@ export class HeadBranchDashboardComponent
       };
     });
 
-    // =========================
-    // BANK
-    // =========================
     this.pendingBank = this.pendingBank.map((tx: any) => {
       if (!tx?.date && !tx?.createdAt && !tx?.dateTime) {
         return tx;
@@ -2952,14 +2789,14 @@ export class HeadBranchDashboardComponent
         timePassed: slab.diffMinutes,
       };
     });
-    // =========================
-    // PAYOUT
-    // =========================
+
     this.pendingpayouts = this.pendingpayouts.map((tx: any) => {
-      // Auto reset processing when timer expires
       if (tx?.processing) {
         const deadline = this.parseProcessingDeadline(tx);
         if (!deadline || deadline.getTime() <= now) {
+          // ✅ NEW: existing loadBroadcast API ko hi dobara call karo (ek baar)
+          this.notifyProcessingExpired(tx);
+
           tx = {
             ...tx,
             processing: false,
@@ -2987,7 +2824,6 @@ export class HeadBranchDashboardComponent
       };
     });
 
-    // ✅ FIX: har second cached lists update karo taaki Angular UI refresh ho
     this.refreshCachedLists();
   }
   getMinutesDiff(date: any): number {
@@ -3034,7 +2870,6 @@ export class HeadBranchDashboardComponent
     this.cachedApprovedPayins = this.pagedApprovedpayins();
     this.cachedApprovedPayouts = this.pagedApprovedpayouts();
 
-    // ✅ NEW: combined payin list — jaisa data aaya waisa order (newest first)
     this.cachedPendingPayinAll = [
       ...this.cachedPendingUpi,
       ...this.cachedPendingBank,
@@ -3042,15 +2877,13 @@ export class HeadBranchDashboardComponent
     ].sort((a, b) => {
       const t1 = new Date(a.date).getTime() || 0;
       const t2 = new Date(b.date).getTime() || 0;
-      return t2 - t1; // naya sabse upar
+      return t2 - t1;
     });
   }
   trackById(index: number, item: any): any {
     return item?.id || item?.fundId || index;
   }
   private startSlabTimer(): void {
-    // Always-on 1s interval for slab percentage realtime updates
-    // Separate from processingTimerId which is payout-only
     if (this.processingTimerId) return;
 
     this.processingNow = Date.now();
@@ -3079,5 +2912,20 @@ export class HeadBranchDashboardComponent
     return this.confirmTransaction?.type === "payout"
       ? this.payoutRejectReasons
       : this.payinRejectReasons;
+  }
+
+  private notifyProcessingExpired(tx: any): void {
+    const fundId = tx.id || tx.fundId;
+    if (!fundId) return;
+
+    // ek baar hi trigger ho, baar baar (har second) na ho
+    if (this.expiryNotifiedIds.has(fundId)) return;
+    this.expiryNotifiedIds.add(fundId);
+
+    // ✅ naya API nahi — jo already data load karta hai wahi call karo
+    this.loadBroadcast();
+
+    // thodi der baad id clear kar do taaki future expiries (agar naya transaction hai) bhi handle ho sake
+    setTimeout(() => this.expiryNotifiedIds.delete(fundId), 5000);
   }
 }

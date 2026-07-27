@@ -1,4 +1,3 @@
-
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute, Route, Router } from "@angular/router";
 import { of, Subscription } from "rxjs";
@@ -148,15 +147,15 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       : undefined;
     const isAll = !this.bankcomPartFilter;
     const comPartId = this.bankcomPartFilter || "ALL";
+
     this.fundService
       .getPayinFundWithCpIdAndEntityId(
         this.entityId,
         this.payinPage,
         this.payinPageSize,
-        undefined,
+        this.selectedMode, // category
         fromDate,
         toDate,
-        this.selectedMode,
         this.role,
         this.selectedStatus,
       )

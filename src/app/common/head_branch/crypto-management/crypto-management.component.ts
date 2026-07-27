@@ -39,7 +39,6 @@ interface CryptoAccount {
   ranges?: any[];
   liveAssigned?: boolean;
   partialPayinEnabled:boolean;
-  partialPayinMinRange:any;
 }
 
 @Component({
@@ -76,14 +75,12 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     limitAmount: any;
     fttAcceptance: boolean;
     partialPayinEnabled:boolean;
-    partialPayinMinRange:any
   } = {
     walletAddress: "",
     // holderName: "",
     limitAmount: null,
     fttAcceptance: true,
     partialPayinEnabled:true,
-    partialPayinMinRange:0
   };
   accountBeingEdited: CryptoAccount | null = null;
   isSavingEdit = false;
@@ -112,9 +109,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     if (this.walletAddressChanged && !this.newGeneratedQrFile) {
       return false;
     }
-    if (this.isEditPartialPayinMinRangeInvalid) {
-    return false;
-  }
+
     return true;
   }
 
@@ -314,7 +309,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
           ranges: r.ranges,
           qrImagePath: r.qrImagePath ?? null, // 👈 naya field
           partialPayinEnabled:r.partialPayinEnabled ?? false,
-          partialPayinMinRange:r.partialPayinMinRange ?? 0
         }));
 
         if (this.searchTerm?.trim()) {
@@ -912,7 +906,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       limitAmount: account.limitAmount,
       fttAcceptance: account.fttAcceptance,
       partialPayinEnabled:account.partialPayinEnabled,
-      partialPayinMinRange:account.partialPayinMinRange
     };
     // reset QR regeneration/upload state
     this.newQrData = "";
@@ -950,7 +943,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     limitAmount: null,
     fttAcceptance: true,
     partialPayinEnabled: true,
-    partialPayinMinRange: 0,
   };
     this.newQrData = "";
     this.revokeNewQrPreviewIfBlob();
@@ -1097,14 +1089,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.isEditPartialPayinMinRangeInvalid) {
-  this.snack.show(
-    `Partial Payin Min Range must be less than the smallest capacity range (${this.smallestEditCapacityRangeLimit}).`,
-    false,
-  );
-  return;
-}
-
     this.isSavingEdit = true;
 
     const payload: any = {
@@ -1116,9 +1100,8 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       limitAmount: this.editAccountForm.limitAmount,
       fttAcceptance: this.editAccountForm.fttAcceptance,
       partialPayinEnabled:this.editAccountForm.partialPayinEnabled,
-      partialPayinMinRange:this.editAccountForm.partialPayinMinRange
     };
-
+    console.log(payload);
     const formData = new FormData();
     formData.append(
       "dto",
@@ -1142,6 +1125,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
 
 
     const body: any = formData;
+    console.log(body);
 
     this.cryptoService
       .updateCrypto(this.accountBeingEdited.id, body)
@@ -1171,13 +1155,4 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   return Math.min(...validRanges.map((r: any) => r.minRange));
 }
 
-get isEditPartialPayinMinRangeInvalid(): boolean {
-  if (!this.editAccountForm?.partialPayinEnabled) return false;
-
-  const max = this.smallestEditCapacityRangeLimit;
-  if (max == null) return false;
-
-  const val = this.editAccountForm?.partialPayinMinRange;
-  return val != null && Number(val) >= max;
-}
 }

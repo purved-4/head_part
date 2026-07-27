@@ -553,15 +553,13 @@ getAllPayoutFundWithEntityAndCpId(
         catchError((error) => throwError(error)),
       );
   }
-  getPayinFundWithCpIdAndEntityId(
+ getPayinFundWithCpIdAndEntityId(
     entityId: any,
-
     page: number = 0,
     pageSize: number = 10,
     category?: any,
     fromDate?: any,
     toDate?: any,
-    fundType?: any,
     role?: any,
     status?: string,
   ): Observable<any> {
@@ -583,10 +581,6 @@ getAllPayoutFundWithEntityAndCpId(
 
     if (toDate) {
       params = params.set("toDate", toDate);
-    }
-
-    if (fundType) {
-      params = params.set("fundType", fundType);
     }
 
     return this.http
