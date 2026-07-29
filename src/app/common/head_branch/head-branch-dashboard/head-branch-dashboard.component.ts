@@ -506,6 +506,7 @@ export class HeadBranchDashboardComponent
           settled: !!w.settled,
           raw: w,
           holderName: w.bankAccountHolderName || null,
+          holder: w.holder || null,
           ifscCode: w.ifsc || null,
           fundDisplayId: w.displayId || null,
         };
@@ -610,6 +611,7 @@ export class HeadBranchDashboardComponent
     const d = new Date(v);
     return isNaN(d.getTime()) ? null : d;
   }
+
   isPayoutActionBlocked(tx: any): boolean {
     if (!tx) return true;
     if (tx.type !== "payout") return false;
@@ -618,6 +620,29 @@ export class HeadBranchDashboardComponent
     if (!deadline) return true;
     return Date.now() > deadline.getTime();
   }
+
+  // getRemainingTimeLabel(tx: any): string {
+  //   if (!tx || !tx.processing) return "Process";
+  //   const deadline = this.parseProcessingDeadline(tx);
+
+  //   if (!deadline) return "Process";
+
+  //   const diffMs = deadline.getTime() - this.processingNow;
+
+  //   if (diffMs <= 0) {
+  //     return "Process";
+  //   }
+
+  //   const totalSec = Math.floor(diffMs / 1000);
+
+  //   const h = Math.floor(totalSec / 3600);
+  //   const m = Math.floor((totalSec % 3600) / 60);
+  //   const s = totalSec % 60;
+
+  //   const pad = (n: number) => n.toString().padStart(2, "0");
+
+  //   return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+  // }
 
   getRemainingTimeLabel(tx: any): string {
     if (!tx || !tx.processing) return "Process";
@@ -980,11 +1005,7 @@ export class HeadBranchDashboardComponent
 
       const bankMap = new Map<string, number>();
       for (const f of payoutsAll) {
-        const key =
-          f.bankName ||
-          f.accountNo ||
-          f.bankAccountHolderName ||
-          "Unknown Bank";
+        const key = f.bankName || f.accountNo || f.holder || "Unknown Bank";
         bankMap.set(key, (bankMap.get(key) || 0) + (Number(f.amount) || 0));
       }
       const sortedBanks = Array.from(bankMap.entries()).sort(
@@ -2151,7 +2172,9 @@ export class HeadBranchDashboardComponent
 
       upiId: fund.vpa || fund.upiId || null,
 
-      holderName: fund.bankAccountHolderName || null,
+      // BAAD ME (sahi):
+      holderName: fund.bankAccountHolderName || fund.holder || null,
+      holder: fund.holder || null,
 
       ifscCode: fund.ifsc || fund.raw?.ifsc || null,
 
@@ -2253,15 +2276,35 @@ export class HeadBranchDashboardComponent
             x.id === f.id || x.fundId === f.id || x.fundId === f.fundId,
         );
 
+        // const tx = this.normalizeIncomingFund(
+        //   {
+        //     ...existing,
+        //     ...f,
+
+        //     processing: existing?.processing === true ? true : !!f?.processing,
+
+        //     processingTimeLimit:
+        //       f?.processingTimeLimit ?? existing?.processingTimeLimit ?? null,
+        //   },
+        //   "payout",
+        // );
+
+        const incomingProcessing = f?.processing === true;
+        const localProcessing = existing?.processing === true;
+        const isProcessing = incomingProcessing || localProcessing;
+
         const tx = this.normalizeIncomingFund(
           {
             ...existing,
             ...f,
 
-            processing: existing?.processing === true ? true : !!f?.processing,
+            processing: isProcessing,
 
-            processingTimeLimit:
-              f?.processingTimeLimit ?? existing?.processingTimeLimit ?? null,
+            processingTimeLimit: isProcessing
+              ? (f?.processingTimeLimit ??
+                existing?.processingTimeLimit ??
+                null)
+              : null,
           },
           "payout",
         );
@@ -2299,7 +2342,6 @@ export class HeadBranchDashboardComponent
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
-
     if (!file) return;
 
     const allowedTypes = [
@@ -2309,28 +2351,105 @@ export class HeadBranchDashboardComponent
       "application/pdf",
     ];
 
-    if (!allowedTypes.includes(file.type)) {
+    // Android/iOS ke kuch camera apps blank type bhejte hain — extension se fallback check
+    const nameLower = (file.name || "").toLowerCase();
+    const looksLikeImage = /\.(jpg|jpeg|png)$/.test(nameLower);
+    const looksLikePdf = /\.pdf$/.test(nameLower);
+
+    if (!allowedTypes.includes(file.type) && !looksLikeImage && !looksLikePdf) {
       this.snackbar.show("Only image and PDF files are allowed", false);
       return;
     }
 
-    const isPdf = file.type === "application/pdf";
-    const maxPdfSize = 1 * 1024 * 1024;
+    const isPdf = file.type === "application/pdf" || looksLikePdf;
+    const maxPdfSize = 1 * 1024 * 1024; // 1MB
+    const maxImageSize = 3 * 1024 * 1024; // 3MB — camera photo isse zyada ho toh compress karenge
 
     if (isPdf && file.size > maxPdfSize) {
       this.snackbar.show("PDF size must be less than 1 MB", false);
       return;
     }
 
-    this.selectedFile = file;
-
-    if (file.type === "application/pdf") {
-      this.previewDocument = true;
-      this.previewUrl = URL.createObjectURL(file);
-    } else {
+    if (!isPdf) {
+      if (file.size > maxImageSize) {
+        // compress karke upload karo, seedha reject mat karo
+        this.compressImage(file, maxImageSize)
+          .then((compressed) => {
+            this.selectedFile = compressed;
+            this.previewDocument = false;
+            this.previewUrl = URL.createObjectURL(compressed);
+          })
+          .catch(() => {
+            this.snackbar.show(
+              "Image too large, please retake with lower quality",
+              false,
+            );
+          });
+        return;
+      }
       this.previewDocument = false;
       this.previewUrl = URL.createObjectURL(file);
+      this.selectedFile = file;
+      return;
     }
+
+    this.previewDocument = true;
+    this.previewUrl = URL.createObjectURL(file);
+    this.selectedFile = file;
+  }
+
+  // naya helper — canvas se image compress karta hai
+  private compressImage(file: File, maxSizeBytes: number): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e: any) => {
+        img.src = e.target.result;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let { width, height } = img;
+
+          const maxDim = 1600; // max width/height, quality ke liye kaafi hai
+          if (width > maxDim || height > maxDim) {
+            const scale = maxDim / Math.max(width, height);
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return reject("no canvas context");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          let quality = 0.8;
+          const tryCompress = () => {
+            canvas.toBlob(
+              (blob) => {
+                if (!blob) return reject("compression failed");
+                if (blob.size > maxSizeBytes && quality > 0.3) {
+                  quality -= 0.1;
+                  tryCompress();
+                  return;
+                }
+                const compressedFile = new File([blob], file.name, {
+                  type: "image/jpeg",
+                  lastModified: Date.now(),
+                });
+                resolve(compressedFile);
+              },
+              "image/jpeg",
+              quality,
+            );
+          };
+          tryCompress();
+        };
+        img.onerror = () => reject("image load failed");
+      };
+      reader.onerror = () => reject("file read failed");
+      reader.readAsDataURL(file);
+    });
   }
 
   onDragOver(event: DragEvent): void {
@@ -2794,7 +2913,7 @@ export class HeadBranchDashboardComponent
       if (tx?.processing) {
         const deadline = this.parseProcessingDeadline(tx);
         if (!deadline || deadline.getTime() <= now) {
-          // ✅ NEW: existing loadBroadcast API ko hi dobara call karo (ek baar)
+          //  NEW: existing loadBroadcast API ko hi dobara call karo (ek baar)
           this.notifyProcessingExpired(tx);
 
           tx = {
@@ -2922,10 +3041,20 @@ export class HeadBranchDashboardComponent
     if (this.expiryNotifiedIds.has(fundId)) return;
     this.expiryNotifiedIds.add(fundId);
 
-    // ✅ naya API nahi — jo already data load karta hai wahi call karo
+    //  naya API nahi — jo already data load karta hai wahi call karo
     this.loadBroadcast();
 
     // thodi der baad id clear kar do taaki future expiries (agar naya transaction hai) bhi handle ho sake
     setTimeout(() => this.expiryNotifiedIds.delete(fundId), 5000);
+  }
+
+  copyToClipboard(
+    value: string | null | undefined,
+    label: string = "Value",
+  ): void {
+    if (!value) return;
+    navigator.clipboard.writeText(value).then(() => {
+      this.snackbar.show(`${label} copied`, true);
+    });
   }
 }
