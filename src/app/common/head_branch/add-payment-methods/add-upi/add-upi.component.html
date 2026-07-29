@@ -118,7 +118,7 @@
     <!-- ================= QR DISPLAY ================= -->
     <div
       *ngIf="qrData || selectedImage"
-      class="border p-3 rounded-lg bg-gray-50"
+      class="border p-2 rounded-lg bg-gray-50 inline-block"
     >
       <div class="flex justify-between items-center mb-2">
         <span class="text-sm font-medium">QR Code</span>
@@ -128,7 +128,7 @@
         </button>
       </div>
 
-      <div #qrcodeRef>
+      <div #qrcodeRef class="flex justify-center">
         <qrcode
           *ngIf="qrData && !selectedImage"
           [qrdata]="qrData"

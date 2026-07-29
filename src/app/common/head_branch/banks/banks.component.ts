@@ -1,4 +1,3 @@
-
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
@@ -17,6 +16,7 @@ import { UpiService } from "../../../pages/services/upi.service";
 import { INDIAN_BANKS } from "../../../utils/constants";
 import { BranchService } from "../../../pages/services/branch.service";
 import { CurrencyBehaviourService } from "../payments-methods/currency-behaviour.service";
+import { HttpParams } from "@angular/common/http";
 
 type StatusString = "active" | "inactive" | "frozen" | string;
 
@@ -48,7 +48,7 @@ interface BankAccount {
   liveAssigned?: boolean; // ADD THIS
   remainingLimitAmount: any;
   totalLimitAmount: any;
-  partialPayinEnabled:boolean;
+  partialPayinEnabled: boolean;
 }
 
 interface Portal {
@@ -260,7 +260,7 @@ export class BanksComponent implements OnInit, OnDestroy {
 
         this.selectedCurrencyData = res;
 
-        this.currency = res.currency;
+        this.currency = res.currency === "ALL" ? "" : res.currency;
 
         // API CALL
         this.fetchBankAccounts();
@@ -346,7 +346,7 @@ export class BanksComponent implements OnInit, OnDestroy {
             ? res.data
             : [];
 
-            console.log(res);
+        console.log(res);
 
         this.bankAccounts = rows
           .map((r: any) => {
@@ -672,8 +672,6 @@ export class BanksComponent implements OnInit, OnDestroy {
         this.fetchBankAccounts();
       },
       error: (err) => {
-
-
         this.snack.show(
           err.error?.message || "failed to delete the bank",
           false,
@@ -761,25 +759,23 @@ export class BanksComponent implements OnInit, OnDestroy {
       this.showPaymentDropdown = false;
     }
 
-
     // Close capacity popup if the click is outside it
-  if (this.selectedCapacityAccount) {
-    const clickedInsidePopup = this.capacityPopupRef?.nativeElement?.contains(
-      target,
+    if (this.selectedCapacityAccount) {
+      const clickedInsidePopup =
+        this.capacityPopupRef?.nativeElement?.contains(target);
+
+      if (!clickedInsidePopup) {
+        this.closeCapacityPopup();
+      }
+    }
+
+    const clickedInside = this.capacityPopupRef?.nativeElement.contains(
+      event.target as Node,
     );
 
-    if (!clickedInsidePopup) {
+    if (!clickedInside) {
       this.closeCapacityPopup();
     }
-  }
-
-  const clickedInside = this.capacityPopupRef?.nativeElement.contains(
-    event.target as Node,
-  );
-
-  if (!clickedInside) {
-    this.closeCapacityPopup();
-  }
   }
 
   changePaymentType(type: string): void {
@@ -794,7 +790,7 @@ export class BanksComponent implements OnInit, OnDestroy {
   openLimitModal(account: any) {
     this.editingAccount = account;
     this.showLimitModal = true;
-    this.selectedCapacityAccount = false
+    this.selectedCapacityAccount = false;
     const now = new Date();
     this.viewYear = now.getFullYear();
     this.viewMonth = now.getMonth();
@@ -1482,8 +1478,6 @@ export class BanksComponent implements OnInit, OnDestroy {
   }
 
   openCapacityPreview(account: any, event: MouseEvent) {
-
-
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
 
     this.selectedCapacityAccount = account;
@@ -1617,8 +1611,7 @@ export class BanksComponent implements OnInit, OnDestroy {
   }
 
   openCapacityPopup(account: any): void {
-  this.selectedCapacityAccount = account;
-  this.isCapacityPopupOpen = true;
-}
-
+    this.selectedCapacityAccount = account;
+    this.isCapacityPopupOpen = true;
+  }
 }

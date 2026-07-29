@@ -21,6 +21,7 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
   selectedCurrency: any = null;
   availableModes: string[] = [];
   selectedMode: string = "bank";
+  @Input() showAllOption = false;
 
   constructor(
     private portalService: PortalService,
@@ -33,6 +34,17 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.entityId = this.userStateService.getCurrentEntityId();
     this.role = this.userStateService.getRole();
+
+    // Inventory route se ALL option enable hoga
+    this.showAllOption = this.router.url.includes("/inventory-management");
+
+    // Route change ke baad bhi ALL option maintain rahe
+    this.route.queryParams.subscribe((params) => {
+      if (params["inventory"] === "true") {
+        this.showAllOption = true;
+      }
+    });
+
     this.loadCurrencies();
   }
   ngOnDestroy(): void {
@@ -47,25 +59,53 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
 
           if (!this.currencies.length) return;
 
-          // ===== QUERY PARAMS SE CURRENT STATE NIKAALO =====
           const queryParams = this.route.snapshot.queryParams;
           const urlCurrency = queryParams["currency"];
           const urlMode = (
             queryParams["mode"] || queryParams["paymentMethod"]
           )?.toLowerCase();
 
+          // =============================
+          // INVENTORY INITIAL LOAD
+          // =============================
+          if (this.showAllOption && !urlCurrency) {
+            this.selectedCurrency = {
+              currency: "ALL",
+              modes: {},
+            };
+
+            this.availableModes = ["ALL"];
+            this.selectedMode = "ALL";
+
+            this.currencyBehaviourService.setCurrency(this.selectedCurrency);
+
+            this.currencyBehaviourService.setMode(this.selectedMode);
+
+            return;
+          }
+
+          // =============================
+          // NORMAL CURRENCY FLOW
+          // =============================
+
           const matchedCurrency = urlCurrency
             ? this.currencies.find((c) => c.currency === urlCurrency)
             : null;
 
           if (!matchedCurrency && urlCurrency) {
-            this.selectedCurrency = { currency: urlCurrency, modes: {} };
+            this.selectedCurrency = {
+              currency: urlCurrency,
+              modes: {},
+            };
+
             this.availableModes = urlMode ? [urlMode] : [];
+
             this.selectedMode = urlMode || "";
 
             this.currencyBehaviourService.setCurrency(this.selectedCurrency);
+
             this.currencyBehaviourService.setMode(this.selectedMode);
-            // URL already sahi hai (crypto flow se aaya hai), navigate mat karo
+
             return;
           }
 
@@ -80,7 +120,6 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
             .filter((key) => defaultCurrency.modes[key])
             .map((m) => m.toLowerCase());
 
-          // Pehle URL ka mode try karo, agar available hai
           if (urlMode && this.availableModes.includes(urlMode)) {
             this.selectedMode = urlMode;
           } else if (this.availableModes.includes("bank")) {
@@ -90,6 +129,7 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
           }
 
           this.currencyBehaviourService.setCurrency(this.selectedCurrency);
+
           this.currencyBehaviourService.setMode(this.selectedMode);
 
           if (!this.isUrlAlreadyCorrect(urlCurrency, urlMode)) {
@@ -111,11 +151,30 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
   }
 
   onCurrencyChange(currencyValue: string) {
+    if (currencyValue === "ALL") {
+      this.selectedCurrency = {
+        currency: "ALL",
+        modes: {},
+      };
+
+      this.availableModes = ["ALL"];
+      this.selectedMode = "ALL";
+
+      this.currencyBehaviourService.setCurrency(this.selectedCurrency);
+
+      this.currencyBehaviourService.setMode(this.selectedMode);
+
+      this.navigateToMode();
+
+      return;
+    }
+
     this.selectedCurrency = this.currencies.find(
       (c) => c.currency === currencyValue,
-    ) || { currency: currencyValue, modes: {} };
-
-    if (!this.selectedCurrency) return;
+    ) || {
+      currency: currencyValue,
+      modes: {},
+    };
 
     this.availableModes = Object.keys(this.selectedCurrency.modes)
       .filter((key) => this.selectedCurrency.modes[key])
@@ -130,6 +189,7 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
     }
 
     this.currencyBehaviourService.setCurrency(this.selectedCurrency);
+
     this.currencyBehaviourService.setMode(this.selectedMode);
 
     this.navigateToMode();
@@ -137,19 +197,58 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
 
   onModeChange(event: Event) {
     this.selectedMode = (event.target as HTMLSelectElement).value;
+
     this.currencyBehaviourService.setMode(this.selectedMode);
+
     this.navigateToMode();
   }
-
   private isCryptoMode(): boolean {
     return !FIAT_MODES.includes((this.selectedMode || "").toLowerCase());
   }
 
+  // navigateToMode() {
+  //   if (this.disableRouting) {
+  //     return;
+  //   }
+  //   if (!this.selectedCurrency || !this.selectedMode) return;
+
+  //   const basePath =
+  //     this.role === "BRANCH"
+  //       ? "/branch"
+  //       : this.role === "HEAD"
+  //         ? "/head"
+  //         : null;
+  //   if (!basePath) return;
+
+  //   if (this.isCryptoMode()) {
+  //     this.router.navigate([`${basePath}/crypto`], {
+  //       queryParams: {
+  //         currency: this.selectedCurrency.currency,
+  //         paymentMethod: this.selectedMode.toUpperCase(),
+  //         mode: null,
+  //       },
+  //       queryParamsHandling: "merge",
+  //     });
+  //     return;
+  //   }
+
+  //   this.router.navigate([`${basePath}/${this.selectedMode}`], {
+  //     queryParams: {
+  //       currency: this.selectedCurrency.currency,
+  //       mode: this.selectedMode,
+  //       paymentMethod: null,
+  //     },
+  //     queryParamsHandling: "merge",
+  //   });
+  // }
   navigateToMode() {
     if (this.disableRouting) {
       return;
     }
-    if (!this.selectedCurrency || !this.selectedMode) return;
+
+    if (!this.selectedCurrency || !this.selectedMode) {
+      return;
+    }
 
     const basePath =
       this.role === "BRANCH"
@@ -157,26 +256,69 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
         : this.role === "HEAD"
           ? "/head"
           : null;
-    if (!basePath) return;
+
+    if (!basePath) {
+      return;
+    }
+
+    const queryParams: any = {
+      currency: this.selectedCurrency.currency,
+
+      // inventory se aaya hai to hamesha carry karo
+      inventory: this.showAllOption ? "true" : null,
+    };
+
+    // =============================
+    // ALL MODE
+    // =============================
+
+    if (this.selectedMode === "ALL") {
+      this.router.navigate([`${basePath}/inventory-management`], {
+        queryParams: {
+          ...queryParams,
+          currency: "ALL",
+          mode: "ALL",
+        },
+
+        queryParamsHandling: "merge",
+      });
+
+      return;
+    }
+
+    // =============================
+    // CRYPTO
+    // =============================
 
     if (this.isCryptoMode()) {
       this.router.navigate([`${basePath}/crypto`], {
         queryParams: {
-          currency: this.selectedCurrency.currency,
+          ...queryParams,
+
           paymentMethod: this.selectedMode.toUpperCase(),
+
           mode: null,
         },
+
         queryParamsHandling: "merge",
       });
+
       return;
     }
 
+    // =============================
+    // BANK / UPI / QR
+    // =============================
+
     this.router.navigate([`${basePath}/${this.selectedMode}`], {
       queryParams: {
-        currency: this.selectedCurrency.currency,
+        ...queryParams,
+
         mode: this.selectedMode,
+
         paymentMethod: null,
       },
+
       queryParamsHandling: "merge",
     });
   }

@@ -8,7 +8,13 @@ import {
   ViewChild,
   ElementRef,
 } from "@angular/core";
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from "@angular/forms";
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  Validators,
+} from "@angular/forms";
 import { Subscription } from "rxjs";
 import { SnackbarService } from "../../../snackbar/snackbar.service";
 import { UserStateService } from "../../../../store/user-state.service";
@@ -85,7 +91,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       vpa: ["", [Validators.required]],
       limitAmount: ["", Validators.required],
       fttAcceptance: [true],
-      partialPayinEnabled:[true],
+      partialPayinEnabled: [true],
     });
   }
 
@@ -98,12 +104,12 @@ export class AddUpiComponent implements OnInit, OnDestroy {
   closeAddModal(): void {
     this.showAddModal = false;
     this.addUpiForm.reset({
-    bankId: null,
-    vpa: "",
-    limitAmount: "",
-    fttAcceptance: true,
-    partialPayinEnabled: true,
-  });
+      bankId: null,
+      vpa: "",
+      limitAmount: "",
+      fttAcceptance: true,
+      partialPayinEnabled: true,
+    });
     this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
     this.selectedImage = null;
     this.qrData = "";
@@ -230,7 +236,6 @@ export class AddUpiComponent implements OnInit, OnDestroy {
   // ---------------- SUBMIT ----------------
 
   async submitAddUpi(): Promise<void> {
-
     if (this.addUpiForm.invalid) {
       this.snack.show("Fill required fields", false);
       return;
@@ -368,7 +373,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       ) as HTMLCanvasElement;
 
       if (!canvas) {
-        this.snack.show("QR not rendered yet", false);
+        this.snack.show("Remove Existing Uploaded Image", false);
         return;
       }
 
@@ -445,12 +450,10 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       .substring(0, 100);
   }
   get smallestCapacityRangeLimit(): number | null {
-  const validRanges = this.capacityRanges.filter(
-    (r) => r.minRange != null && r.minRange > 0
-  );
-  if (!validRanges.length) return null;
-  return Math.min(...validRanges.map((r) => r.minRange));
-}
-
-
+    const validRanges = this.capacityRanges.filter(
+      (r) => r.minRange != null && r.minRange > 0,
+    );
+    if (!validRanges.length) return null;
+    return Math.min(...validRanges.map((r) => r.minRange));
+  }
 }

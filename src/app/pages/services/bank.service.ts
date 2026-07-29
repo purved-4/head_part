@@ -174,13 +174,13 @@ export class BankService {
   getPayinCapacity(
     entityType: string,
     entityId: string,
-     mode: "UPI" | "BANK",
+    mode: "UPI" | "BANK",
     payinId: string,
   ): Observable<any> {
     const params = new HttpParams()
       .set("entityType", entityType)
       .set("entityId", entityId)
-       .set("mode", mode)
+      .set("mode", mode)
       .set("payinId", payinId);
 
     return this.http
@@ -192,12 +192,7 @@ export class BankService {
     return this.http.patch<any>(`${baseUrl}/banks/${bankId}/toggle-isbank`, {});
   }
 
-  
-
-
-
-
-toogleBankDeleted(bankId: any): Observable<any[]> {
+  toogleBankDeleted(bankId: any): Observable<any[]> {
     return this.http
       .patch<any[]>(`${baseUrl}/banks/toggleDeleted/${bankId}`, {})
       .pipe(
@@ -210,16 +205,38 @@ toogleBankDeleted(bankId: any): Observable<any[]> {
     let params = new HttpParams();
 
     if (ifsc) {
-     params = params.set("ifsc", ifsc);
+      params = params.set("ifsc", ifsc);
     }
     return this.http
-     .get<any>(`${baseUrl}/banks/ifsc`, {
+      .get<any>(`${baseUrl}/banks/ifsc`, {
         params,
-     })
-     .pipe(
+      })
+      .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(() => error)),
-     );
-}
+      );
+  }
+  getAllPaymentMethods(params: {
+    entityId: string;
+    entityType: string;
 
+    page?: number;
+    size?: number;
+  }): Observable<any> {
+    let httpParams = new HttpParams()
+      .set("entityId", params.entityId)
+      .set("entityType", params.entityType);
+
+    if (params.page !== undefined) {
+      httpParams = httpParams.set("page", params.page);
+    }
+
+    if (params.size !== undefined) {
+      httpParams = httpParams.set("size", params.size);
+    }
+
+    return this.http.get<any>(`${baseUrl}/banks/payment-methods`, {
+      params: httpParams,
+    });
+  }
 }

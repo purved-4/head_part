@@ -216,7 +216,7 @@ export class UpisComponent implements OnInit {
       .getCurrency()
       .subscribe((res) => {
         if (!res) return;
-        this.selectedCurrencyData = res;
+        this.selectedCurrencyData = res.currency === "ALL" ? "" : res.currency;
         this.fetchUpis();
       });
 
@@ -659,7 +659,6 @@ export class UpisComponent implements OnInit {
       this.snack.show("Valid limit required", false);
       return;
     }
-
 
     const qrFile = this.generatedUpdateFile || this.updateManualQrFile;
 
@@ -1479,5 +1478,4 @@ export class UpisComponent implements OnInit {
     if (!validRanges.length) return null;
     return Math.min(...validRanges.map((r: any) => r.minRange));
   }
-
 }

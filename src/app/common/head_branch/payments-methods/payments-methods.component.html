@@ -15,6 +15,9 @@
           [ngModel]="selectedCurrency?.currency"
           (ngModelChange)="onCurrencyChange($event)"
         >
+          <!-- Inventory Management ke liye -->
+          <option *ngIf="showAllOption" value="ALL">ALL</option>
+
           <option
             *ngIf="selectedCurrency && !isCurrencyInList()"
             [value]="selectedCurrency.currency"
@@ -44,6 +47,9 @@
           [(ngModel)]="selectedMode"
           (change)="onModeChange($event)"
         >
+          <!-- Inventory Management ke liye -->
+          <option *ngIf="showAllOption" value="ALL">ALL</option>
+
           <option *ngFor="let mode of availableModes" [value]="mode">
             {{ mode | uppercase }}
           </option>

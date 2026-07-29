@@ -38,7 +38,7 @@ interface CryptoAccount {
   qrImagePath?: string | null; // 👈 naya field
   ranges?: any[];
   liveAssigned?: boolean;
-  partialPayinEnabled:boolean;
+  partialPayinEnabled: boolean;
 }
 
 @Component({
@@ -74,13 +74,13 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     // holderName: string;
     limitAmount: any;
     fttAcceptance: boolean;
-    partialPayinEnabled:boolean;
+    partialPayinEnabled: boolean;
   } = {
     walletAddress: "",
     // holderName: "",
     limitAmount: null,
     fttAcceptance: true,
-    partialPayinEnabled:true,
+    partialPayinEnabled: true,
   };
   accountBeingEdited: CryptoAccount | null = null;
   isSavingEdit = false;
@@ -220,7 +220,9 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       .getCurrency()
       .subscribe((res) => {
         if (!res) return;
-        this.currency = res.currency;
+        this.currency = res.currency === "ALL" ? "" : res.currency;
+
+        this.fetchCryptoAccounts();
       });
 
     this.modeSub = this.currencyBehaviourService.getMode().subscribe((res) => {
@@ -279,7 +281,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       .getCrypto(this.currentRoleId, this.role, paymentMethod)
       .pipe(
         catchError((err) => {
-
           this.loading = false;
           return of([]);
         }),
@@ -308,7 +309,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
           isCryptoActive: !!r.status,
           ranges: r.ranges,
           qrImagePath: r.qrImagePath ?? null, // 👈 naya field
-          partialPayinEnabled:r.partialPayinEnabled ?? false,
+          partialPayinEnabled: r.partialPayinEnabled ?? false,
         }));
 
         if (this.searchTerm?.trim()) {
@@ -905,7 +906,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       // holderName: account.holderName,
       limitAmount: account.limitAmount,
       fttAcceptance: account.fttAcceptance,
-      partialPayinEnabled:account.partialPayinEnabled,
+      partialPayinEnabled: account.partialPayinEnabled,
     };
     // reset QR regeneration/upload state
     this.newQrData = "";
@@ -938,12 +939,12 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   closeEditAccountModal() {
     this.showEditAccountModal = false;
     this.accountBeingEdited = null;
-     this.editAccountForm = {
-    walletAddress: "",
-    limitAmount: null,
-    fttAcceptance: true,
-    partialPayinEnabled: true,
-  };
+    this.editAccountForm = {
+      walletAddress: "",
+      limitAmount: null,
+      fttAcceptance: true,
+      partialPayinEnabled: true,
+    };
     this.newQrData = "";
     this.revokeNewQrPreviewIfBlob();
     this.newQrPreviewUrl = null;
@@ -1099,7 +1100,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       // holderName: this.editAccountForm.holderName.trim(),
       limitAmount: this.editAccountForm.limitAmount,
       fttAcceptance: this.editAccountForm.fttAcceptance,
-      partialPayinEnabled:this.editAccountForm.partialPayinEnabled,
+      partialPayinEnabled: this.editAccountForm.partialPayinEnabled,
     };
     console.log(payload);
     const formData = new FormData();
@@ -1122,7 +1123,6 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
         "",
       );
     }
-
 
     const body: any = formData;
     console.log(body);
@@ -1147,12 +1147,11 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
   }
 
   get smallestEditCapacityRangeLimit(): number | null {
-  const ranges = this.accountBeingEdited?.ranges || [];
-  const validRanges = ranges.filter(
-    (r: any) => r.minRange != null && r.minRange > 0
-  );
-  if (!validRanges.length) return null;
-  return Math.min(...validRanges.map((r: any) => r.minRange));
-}
-
+    const ranges = this.accountBeingEdited?.ranges || [];
+    const validRanges = ranges.filter(
+      (r: any) => r.minRange != null && r.minRange > 0,
+    );
+    if (!validRanges.length) return null;
+    return Math.min(...validRanges.map((r: any) => r.minRange));
+  }
 }
