@@ -450,6 +450,15 @@ export class UpisComponent implements OnInit {
     this.transactionMaxAmount = null;
     this.showPortalDropdown = false;
     this.currentPage = 1;
+
+    const role = this.userStateService.getRole();
+
+    const basePath =
+      role === "HEAD" ? "/head" : role === "BRANCH" ? "/branch" : null;
+
+    if (basePath) {
+      this.router.navigate([`${basePath}/inventory-management`]);
+    }
   }
 
   // ---------- PORTAL FILTER ----------

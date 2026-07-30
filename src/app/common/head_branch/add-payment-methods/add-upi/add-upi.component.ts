@@ -91,7 +91,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       vpa: ["", [Validators.required]],
       limitAmount: ["", Validators.required],
       fttAcceptance: [true],
-      partialPayinEnabled: [true],
+      partialPayinEnabled: [false],
     });
   }
 

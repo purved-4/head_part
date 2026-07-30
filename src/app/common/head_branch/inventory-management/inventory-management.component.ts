@@ -71,13 +71,14 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   pagedItems: InventoryItem[] = [];
 
   loading = false;
+  viewMode: "table" | "grid" = "table";
 
   // ---------- CURRENCY / MODE (no routing, no separate currency API) ----------
   currencies: string[] = [];
   selectedCurrency: any = null; // { currency: 'INR' } shape, kept for template reuse
   availableModes: string[] = []; // sare unique "type" jo API se aaye (BANK/UPI/TRC20...)
   selectedMode: string = "all";
-
+  selectedLimitAccount: any;
   // ---------- FILTERS ----------
   searchTerm = "";
   draftSearchTerm = "";
@@ -156,7 +157,14 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   selectedPortalId!: string;
   selectedPayinId!: string;
   capacityMode: any;
+  hoveredLimitAccount: InventoryItem | null = null;
 
+  tooltipPosition = {
+    x: 0,
+    y: 0,
+  };
+
+  hoverTimeout: any;
   // ---------- DELETE CONFIRM ----------
   isDeleteConfirmVisible = false;
   deleteCandidate: InventoryItem | null = null;
@@ -1354,17 +1362,17 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.selectedImage = null;
   }
 
-  downloadQr(): void {
-    if (!this.generatedFile) return;
-    const url = URL.createObjectURL(this.generatedFile);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = this.generatedFile.name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+  // downloadQr(): void {
+  //   if (!this.generatedFile) return;
+  //   const url = URL.createObjectURL(this.generatedFile);
+  //   const a = document.createElement("a");
+  //   a.href = url;
+  //   a.download = this.generatedFile.name;
+  //   document.body.appendChild(a);
+  //   a.click();
+  //   document.body.removeChild(a);
+  //   URL.revokeObjectURL(url);
+  // }
 
   updateFrom(index: number, event: any) {
     const value = event.target.value;
@@ -1841,5 +1849,54 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
           this.isSavingEdit = false;
         },
       });
+  }
+  downloadQr(): void {
+    if (!this.selectedQrItem) return;
+
+    const imageUrl = this.qrImageUrls[this.selectedQrItem.id];
+    if (!imageUrl) return;
+
+    const link = document.createElement("a");
+    link.href = imageUrl;
+    link.download = `${this.selectedQrItem.type || "QR"}-${this.selectedQrItem.id}.png`;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+  showLimitTooltip(item: InventoryItem, event: MouseEvent): void {
+    clearTimeout(this.hoverTimeout);
+
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const tooltipWidth = 288;
+
+    this.tooltipPosition = {
+      x: rect.left + rect.width / 2 - tooltipWidth / 2,
+      y: rect.bottom + 8,
+    };
+
+    this.hoveredLimitAccount = item;
+  }
+
+  hideLimitTooltip(): void {
+    this.hoverTimeout = setTimeout(() => {
+      this.hoveredLimitAccount = null;
+    }, 150);
+  }
+
+  clearHide(): void {
+    clearTimeout(this.hoverTimeout);
+  }
+
+  openLimitDetails(item: InventoryItem): void {
+    this.selectedLimitAccount = item;
+    this.selectedCapacityAccount = null;
+  }
+
+  closeLimitDetails(): void {
+    this.selectedLimitAccount = null;
+  }
+  toggleView(mode: "table" | "grid"): void {
+    this.viewMode = mode;
   }
 }

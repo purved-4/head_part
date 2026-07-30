@@ -6,7 +6,13 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from "@angular/forms";
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  Validators,
+} from "@angular/forms";
 import { debounceTime, distinctUntilChanged, map, Subscription } from "rxjs";
 import { INDIAN_BANKS } from "../../../../utils/constants";
 import { BankService } from "../../../../pages/services/bank.service";
@@ -105,7 +111,7 @@ export class AddBankComponent implements OnInit, OnDestroy {
         ],
 
         fttAcceptance: [true],
-        partialPayinEnabled: [true],
+        partialPayinEnabled: [false],
       },
       // { validators: this.accountNumberMatchValidator },
     );
@@ -124,7 +130,7 @@ export class AddBankComponent implements OnInit, OnDestroy {
       accountType: "",
       limitAmount: "",
       fttAcceptance: true,
-      partialPayinEnabled:false,
+      partialPayinEnabled: false,
     });
     this.addBankForm.markAsUntouched();
     this.bankSearchTerm = "";
@@ -149,7 +155,7 @@ export class AddBankComponent implements OnInit, OnDestroy {
       accountType: "",
       limitAmount: "",
       fttAcceptance: true,
-      partialPayinEnabled:true,
+      partialPayinEnabled: true,
     });
     this.isAdding = false;
 
@@ -251,7 +257,7 @@ export class AddBankComponent implements OnInit, OnDestroy {
       status: true,
       fttAcceptance: formData.fttAcceptance,
       ranges: validRanges.length ? validRanges : null,
-      partialPayinEnabled:formData.partialPayinEnabled,
+      partialPayinEnabled: formData.partialPayinEnabled,
     };
     const sub = this.bankService.addBank(payload).subscribe({
       next: (res) => {
@@ -290,7 +296,6 @@ export class AddBankComponent implements OnInit, OnDestroy {
 
     this.capacityRanges[index].minRange =
       value === "" || value === null ? null : Number(value);
-
   }
 
   updateTo(index: number, event: any) {
@@ -298,7 +303,6 @@ export class AddBankComponent implements OnInit, OnDestroy {
 
     this.capacityRanges[index].maxRange =
       value === "" || value === null ? null : Number(value);
-
   }
 
   updateQuantity(index: number, event: any) {
@@ -405,12 +409,10 @@ export class AddBankComponent implements OnInit, OnDestroy {
     this.addBankForm.get("bankName")?.setValue("");
   }
   get smallestCapacityRangeLimit(): number | null {
-  const validRanges = this.capacityRanges.filter(
-    (r) => r.minRange != null && r.minRange > 0
-  );
-  if (!validRanges.length) return null;
-  return Math.min(...validRanges.map((r) => r.minRange));
-}
-
-
+    const validRanges = this.capacityRanges.filter(
+      (r) => r.minRange != null && r.minRange > 0,
+    );
+    if (!validRanges.length) return null;
+    return Math.min(...validRanges.map((r) => r.minRange));
+  }
 }

@@ -169,52 +169,6 @@
         />
       </div>
 
-      <!-- CURRENCY -->
-      <!-- <div class="space-y-1">
-        <label class="block text-xs font-medium text-[var(--color-font)]">
-          <span
-            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
-            >currency_exchange</span
-          >
-          Currency
-        </label>
-        <select
-          class="w-full h-9 rounded-lg border border-[var(--color-border)] px-3 text-sm font-medium text-[var(--color-font)] outline-none appearance-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all bg-[var(--color-surface)]"
-          [ngModel]="selectedCurrency?.currency"
-          (ngModelChange)="onCurrencyChange($event)"
-        >
-          <option value="">All</option>
-          <option
-            *ngIf="selectedCurrency && !isCurrencyInList()"
-            [value]="selectedCurrency.currency"
-          >
-            {{ selectedCurrency.currency }}
-          </option>
-          <option *ngFor="let c of currencies" [value]="c">{{ c }}</option>
-        </select>
-      </div> -->
-
-      <!-- TYPE (depends on selected currency) -->
-      <!-- <div class="space-y-1">
-        <label class="block text-xs font-medium text-[var(--color-font)]">
-          <span
-            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
-            >category</span
-          >
-          Type
-        </label>
-        <select
-          class="w-full h-9 rounded-lg border border-[var(--color-border)] px-3 text-sm font-medium text-[var(--color-font)] outline-none appearance-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all bg-[var(--color-surface)]"
-          [(ngModel)]="selectedMode"
-          (change)="onModeChange($event)"
-        >
-          <option value="all">All</option>
-          <option *ngFor="let mode of modesForSelectedCurrency" [value]="mode">
-            {{ mode | uppercase }}
-          </option>
-        </select>
-      </div> -->
-      <app-payments-methods [showAllOption]="true"> </app-payments-methods>
       <!-- MAX LIMIT -->
       <div class="space-y-1">
         <label class="block text-xs font-medium text-[var(--color-font)]">
@@ -231,6 +185,11 @@
           min="0"
           class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
         />
+      </div>
+
+      <!-- PAYMENT METHOD -->
+      <div class="space-y-1">
+        <app-payments-methods [showAllOption]="true"></app-payments-methods>
       </div>
 
       <!-- STATUS -->
@@ -254,6 +213,30 @@
     </div>
 
     <div class="flex justify-end items-center gap-2 mt-4">
+      <div
+        class="flex items-center gap-1 border border-[var(--color-border)] rounded-lg p-1 bg-[var(--color-surface)]"
+      >
+        <button
+          (click)="toggleView('table')"
+          [class.bg-[var(--color-primary)]]="viewMode === 'table'"
+          [class.text-white]="viewMode === 'table'"
+          class="px-3 py-2 rounded flex items-center justify-center transition"
+          title="Table View"
+        >
+          <span class="material-symbols-outlined text-sm">table_rows</span>
+        </button>
+
+        <button
+          (click)="toggleView('grid')"
+          [class.bg-[var(--color-primary)]]="viewMode === 'grid'"
+          [class.text-white]="viewMode === 'grid'"
+          class="px-3 py-2 rounded flex items-center justify-center transition"
+          title="Grid View"
+        >
+          <span class="material-symbols-outlined text-sm">grid_view</span>
+        </button>
+      </div>
+
       <button
         (click)="applyFilters()"
         class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-lg text-sm font-medium"
@@ -292,10 +275,10 @@
     </div>
   </div>
 
-  <!-- ========== COMBINED TABLE ========== -->
+  <!-- ========== COMBINED TABLE (desktop / table mode) ========== -->
   <div
-    *ngIf="!loading && pagedItems.length > 0"
-    class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm mb-4 overflow-hidden"
+    *ngIf="!loading && pagedItems.length > 0 && viewMode === 'table'"
+    class="hidden md:block rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm mb-4 overflow-hidden"
   >
     <div class="overflow-x-auto">
       <table class="min-w-full">
@@ -316,7 +299,7 @@
             <th
               class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
             >
-              Payment Mode
+              Mode
             </th>
             <th
               class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
@@ -326,18 +309,14 @@
             <th
               class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
             >
-              Payin Type
+              Type
             </th>
             <th
               class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
             >
               Limit
             </th>
-            <th
-              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
-            >
-              QR
-            </th>
+
             <th
               class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
             >
@@ -352,6 +331,11 @@
               class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
             >
               Capacity
+            </th>
+            <th
+              class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+            >
+              QR
             </th>
             <th
               class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
@@ -475,40 +459,16 @@
 
             <!-- LIMIT -->
             <td class="px-4 py-3 whitespace-nowrap">
-              <span
-                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200"
+              <button
+                (mouseenter)="showLimitTooltip(item, $event)"
+                (mouseleave)="hideLimitTooltip()"
+                (click)="openLimitDetails(item)"
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 transition"
               >
-                <span class="text-xs font-semibold">{{
-                  item.limitAmount
-                }}</span>
-              </span>
-            </td>
-
-            <!-- QR — bank ke liye "-" -->
-            <td class="px-4 py-3 whitespace-nowrap">
-              <ng-container
-                *ngIf="item.type !== 'BANK' && item.qrImagePath; else noQr"
-              >
-                <button
-                  (click)="openQrPreview(item)"
-                  class="w-10 h-10 rounded-lg border border-gray-200 overflow-hidden hover:ring-2 hover:ring-indigo-300 transition flex items-center justify-center bg-gray-50"
-                >
-                  <span
-                    *ngIf="qrImageLoading[item.id]"
-                    class="material-symbols-outlined animate-spin text-gray-400 text-base"
-                    >refresh</span
-                  >
-                  <img
-                    *ngIf="!qrImageLoading[item.id] && qrImageUrls[item.id]"
-                    [src]="qrImageUrls[item.id]"
-                    alt="QR"
-                    class="w-full h-full object-cover"
-                  />
-                </button>
-              </ng-container>
-              <ng-template #noQr>
-                <span class="text-[11px] text-gray-300">—</span>
-              </ng-template>
+                <span class="text-xs font-semibold">
+                  {{ item.limitAmount }}
+                </span>
+              </button>
             </td>
 
             <!-- DETAILS (bank name+holder / holder / - ) -->
@@ -568,6 +528,31 @@
               >
                 Edit
               </button>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <ng-container
+                *ngIf="item.type !== 'BANK' && item.qrImagePath; else noQr"
+              >
+                <button
+                  (click)="openQrPreview(item)"
+                  class="w-10 h-10 rounded-lg border border-gray-200 overflow-hidden hover:ring-2 hover:ring-indigo-300 transition flex items-center justify-center bg-gray-50"
+                >
+                  <span
+                    *ngIf="qrImageLoading[item.id]"
+                    class="material-symbols-outlined animate-spin text-gray-400 text-base"
+                    >refresh</span
+                  >
+                  <img
+                    *ngIf="!qrImageLoading[item.id] && qrImageUrls[item.id]"
+                    [src]="qrImageUrls[item.id]"
+                    alt="QR"
+                    class="w-full h-full object-cover"
+                  />
+                </button>
+              </ng-container>
+              <ng-template #noQr>
+                <span class="text-[11px] text-gray-300">—</span>
+              </ng-template>
             </td>
 
             <!-- STATUS TOGGLE -->
@@ -669,6 +654,310 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!--  GRID VIEW (card layout) — always used on mobile,          -->
+  <!--  shown on desktop too when viewMode === 'grid'             -->
+  <!-- ========================================================= -->
+  <div
+    *ngIf="!loading && pagedItems.length > 0"
+    [ngClass]="{
+      'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4': true,
+      'md:hidden': viewMode === 'table',
+    }"
+  >
+    <div
+      *ngFor="let item of pagedItems"
+      class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 shadow-sm hover:shadow-md transition relative"
+    >
+      <!-- Card Header: Status + Type + More options -->
+      <div class="flex justify-between items-start mb-3">
+        <div class="flex items-center gap-2 flex-wrap">
+          <ng-container *ngIf="isAccountActive(item); else inactiveGridStatus">
+            <span
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-green-100 text-green-600 border border-green-200"
+            >
+              <span class="w-2 h-2 rounded-full bg-green-500 live-dot"></span>
+              Active
+            </span>
+          </ng-container>
+          <ng-template #inactiveGridStatus>
+            <span
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-red-100 text-red-600 border border-red-200"
+            >
+              <span class="w-2 h-2 rounded-full bg-red-500"></span>
+              Inactive
+            </span>
+          </ng-template>
+          <span class="text-[11px] font-semibold">{{
+            getRemainingTime(item)
+          }}</span>
+
+          <span
+            class="px-2 py-1 text-[10px] font-semibold rounded-full border"
+            [ngClass]="{
+              'bg-indigo-50 text-indigo-600 border-indigo-200':
+                item.type === 'BANK',
+              'bg-purple-50 text-purple-600 border-purple-200':
+                item.type === 'UPI',
+              'bg-amber-50 text-amber-600 border-amber-200':
+                item.type !== 'BANK' && item.type !== 'UPI',
+            }"
+          >
+            {{ item.type }}
+          </span>
+
+          <span
+            class="px-2 py-1 text-[10px] font-semibold rounded-full border"
+            [ngClass]="
+              item.liveAssigned
+                ? 'bg-blue-100 text-blue-700 border-blue-300'
+                : 'bg-gray-100 text-gray-500 border-gray-300'
+            "
+          >
+            {{ item.liveAssigned ? "Assigned" : "Unassigned" }}
+          </span>
+        </div>
+
+        <!-- Three dots dropdown -->
+        <div class="relative action-dropdown-wrapper overflow-visible">
+          <button
+            (click)="toggleActionDropdown(item.id, $event)"
+            class="p-1 rounded-lg hover:bg-[var(--color-hover)] transition-all duration-200 text-[var(--color-muted)] hover:text-[var(--color-primary)]"
+          >
+            <span class="material-symbols-outlined text-xl">more_vert</span>
+          </button>
+
+          <div
+            *ngIf="activeActionDropdown === item.id"
+            class="absolute right-0 top-full mt-1 w-44 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-2xl z-[9999]"
+          >
+            <div class="py-1">
+              <button
+                (click)="openEditModal(item); activeActionDropdown = null"
+                class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
+              >
+                <span class="material-icons text-base mr-2">edit</span>
+                Edit
+              </button>
+
+              <button
+                (click)="openLimitModal(item); activeActionDropdown = null"
+                class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
+              >
+                <span class="material-icons text-base mr-2">edit_calendar</span>
+                Set Limit Time
+              </button>
+
+              <button
+                (click)="
+                  openCapacityPreview(item, $event); activeActionDropdown = null
+                "
+                class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
+              >
+                <span class="material-icons text-base mr-2">insights</span>
+                View Capacity
+              </button>
+
+              <ng-container *ngIf="item.type === 'BANK'">
+                <div class="border-t border-[var(--color-border)] mt-1 pt-1">
+                  <button
+                    (click)="
+                      openAddUpiFromBank(item); activeActionDropdown = null
+                    "
+                    class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
+                  >
+                    <span class="material-icons text-base mr-2">qr_code</span>
+                    Add UPI
+                  </button>
+
+                  <button
+                    (click)="viewUpi(item); activeActionDropdown = null"
+                    class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
+                  >
+                    <span class="material-icons text-base mr-2"
+                      >visibility</span
+                    >
+                    View UPI
+                  </button>
+                </div>
+              </ng-container>
+
+              <div class="border-t border-[var(--color-border)] mt-1 pt-1">
+                <button
+                  (click)="
+                    openDeleteConfirm(item, $event); activeActionDropdown = null
+                  "
+                  class="w-full flex items-center px-3 py-2 text-xs text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 transition"
+                >
+                  <span class="material-icons text-base mr-2">delete</span>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address row -->
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <span
+            class="material-symbols-outlined text-xs text-[var(--color-primary)] shrink-0"
+            >account_balance_wallet</span
+          >
+          <span
+            class="text-xs font-semibold tracking-wider text-[var(--color-font)] truncate"
+          >
+            {{ maskAddress(item.displayAddress, item.type) }}
+          </span>
+        </div>
+        <button
+          (click)="copyText(item.displayAddress, 'Copied')"
+          class="text-gray-400 hover:text-[var(--color-primary)] transition shrink-0"
+        >
+          <span class="material-symbols-outlined text-[16px]"
+            >content_copy</span
+          >
+        </button>
+      </div>
+
+      <!-- Two column detail grid -->
+      <div class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm mb-3">
+        <!-- Left column -->
+        <div class="space-y-2">
+          <div>
+            <span
+              class="text-[10px] uppercase tracking-wider text-[var(--color-muted)] block"
+              >Details</span
+            >
+            <div
+              class="flex flex-col leading-tight mt-0.5"
+              *ngIf="item.type === 'BANK'; else nonBankGridDetails"
+            >
+              <span
+                class="text-xs font-medium text-[var(--color-font)] truncate"
+                >{{ item.bankName || "-" }}</span
+              >
+              <span class="text-[10px] text-gray-400 truncate">{{
+                item.accountHolderName || "-"
+              }}</span>
+            </div>
+            <ng-template #nonBankGridDetails>
+              <span class="text-xs text-[var(--color-font)] truncate">{{
+                item.accountHolder || item.holderName || "-"
+              }}</span>
+            </ng-template>
+          </div>
+
+          <div>
+            <span
+              class="text-[10px] uppercase tracking-wider text-[var(--color-muted)] block"
+              >Payin Type</span
+            >
+            <span
+              class="text-xs font-semibold"
+              [ngClass]="
+                item.fttAcceptance ? 'text-green-600' : 'text-orange-500'
+              "
+            >
+              {{ item.fttAcceptance ? "PPI" : "RPI" }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="space-y-2">
+          <div>
+            <span
+              class="text-[10px] uppercase tracking-wider text-[var(--color-muted)] block"
+              >Limit</span
+            >
+            <button
+              (click)="openLimitDetails(item)"
+              class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 transition mt-0.5"
+            >
+              <span class="text-xs font-semibold">{{ item.limitAmount }}</span>
+            </button>
+          </div>
+
+          <div>
+            <span
+              class="text-[10px] uppercase tracking-wider text-[var(--color-muted)] block"
+              >Limit Time</span
+            >
+            <div class="flex items-center gap-1 mt-0.5">
+              <span
+                class="text-xs font-semibold text-[var(--color-font)] truncate"
+              >
+                {{ item.limitTime ? (item.limitTime | tz) : "Not Set" }}
+              </span>
+              <button
+                (click)="openLimitModal(item)"
+                class="p-0.5 rounded hover:bg-[var(--color-hover)] transition shrink-0"
+              >
+                <span
+                  class="material-symbols-outlined text-[var(--color-primary)] text-[16px]"
+                  >edit_calendar</span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR preview (non-bank only) -->
+      <div
+        *ngIf="item.type !== 'BANK' && item.qrImagePath"
+        class="flex items-center justify-between py-2 border-t border-[var(--color-border)]"
+      >
+        <span
+          class="text-[10px] uppercase tracking-wider text-[var(--color-muted)]"
+          >QR Code</span
+        >
+        <button
+          (click)="openQrPreview(item)"
+          class="w-10 h-10 rounded-lg border border-gray-200 overflow-hidden hover:ring-2 hover:ring-indigo-300 transition flex items-center justify-center bg-gray-50"
+        >
+          <span
+            *ngIf="qrImageLoading[item.id]"
+            class="material-symbols-outlined animate-spin text-gray-400 text-base"
+            >refresh</span
+          >
+          <img
+            *ngIf="!qrImageLoading[item.id] && qrImageUrls[item.id]"
+            [src]="qrImageUrls[item.id]"
+            alt="QR"
+            class="w-full h-full object-cover"
+          />
+        </button>
+      </div>
+
+      <!-- Footer: Status toggle -->
+      <div
+        class="flex items-center justify-between pt-3 border-t border-[var(--color-border)]"
+      >
+        <span
+          class="text-xs font-semibold"
+          [ngClass]="item.status ? 'text-green-600' : 'text-red-500'"
+        >
+          {{ item.status ? "Active" : "Inactive" }}
+        </span>
+
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            class="sr-only peer"
+            [checked]="item.status"
+            (change)="openStatusModal(item, $event)"
+          />
+          <div
+            class="relative w-11 h-6 rounded-full transition-all duration-300 peer-checked:bg-green-500 bg-red-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-200 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"
+          ></div>
+        </label>
+      </div>
     </div>
   </div>
 
@@ -1093,10 +1382,11 @@
       </div>
 
       <button
-        (click)="closeQrPreview()"
-        class="h-10 w-full rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition"
+        (click)="downloadQr()"
+        [disabled]="!selectedQrItem || !qrImageUrls[selectedQrItem.id]"
+        class="h-10 w-full rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
       >
-        Close
+        Download QR
       </button>
     </div>
   </div>
@@ -2103,6 +2393,38 @@
           {{ isSavingEdit ? "Saving..." : "Save Changes" }}
         </button>
       </div>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="hoveredLimitAccount"
+  [ngStyle]="{
+    top: tooltipPosition.y + 'px',
+    left: tooltipPosition.x + 'px',
+  }"
+  class="fixed z-[99999] w-72 p-3 text-xs bg-white border rounded-xl shadow-2xl"
+  (mouseenter)="clearHide()"
+  (mouseleave)="hideLimitTooltip()"
+>
+  <div class="space-y-2 text-xs">
+    <div class="flex justify-between">
+      <span>Bank Limit</span>
+      <span>{{ hoveredLimitAccount.limitAmount }}</span>
+    </div>
+
+    <div class="flex justify-between text-red-600">
+      <span>Used</span>
+      <span>
+        {{
+          (+hoveredLimitAccount.limitAmount || 0) -
+            (+hoveredLimitAccount.remainingLimitAmount || 0)
+        }}
+      </span>
+    </div>
+
+    <div class="flex justify-between text-green-600">
+      <span>Remaining</span>
+      <span>{{ hoveredLimitAccount.remainingLimitAmount }}</span>
     </div>
   </div>
 </div>

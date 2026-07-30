@@ -3,7 +3,6 @@
     <!-- Currency -->
     <div class="flex-1">
       <label
-        *ngIf="selectedMode !== 'upi'"
         class="block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-font)] mb-1"
       >
         Currency
@@ -16,7 +15,7 @@
           (ngModelChange)="onCurrencyChange($event)"
         >
           <!-- Inventory Management ke liye -->
-          <option *ngIf="showAllOption" value="ALL">ALL</option>
+          <option *ngIf="showAllOption" value="ALL">Select</option>
 
           <option
             *ngIf="selectedCurrency && !isCurrencyInList()"
@@ -35,7 +34,6 @@
     <!-- Mode -->
     <div class="flex-1">
       <label
-        *ngIf="selectedMode !== 'upi'"
         class="block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-font)] mb-1"
       >
         Mode
@@ -48,7 +46,7 @@
           (change)="onModeChange($event)"
         >
           <!-- Inventory Management ke liye -->
-          <option *ngIf="showAllOption" value="ALL">ALL</option>
+          <option *ngIf="showAllOption" value="ALL">Select</option>
 
           <option *ngFor="let mode of availableModes" [value]="mode">
             {{ mode | uppercase }}

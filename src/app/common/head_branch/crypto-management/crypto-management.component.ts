@@ -14,7 +14,7 @@ import { CryptoService } from "../../../pages/services/crypto.service";
 import { UserStateService } from "../../../store/user-state.service";
 import { SnackbarService } from "../../snackbar/snackbar.service";
 import { CurrencyBehaviourService } from "../payments-methods/currency-behaviour.service";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { log } from "util";
 
@@ -194,7 +194,8 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     private snack: SnackbarService,
     private currencyBehaviourService: CurrencyBehaviourService,
     private route: ActivatedRoute,
-    private multiMedia: MultimediaService, // 👈 apna actual service inject karo
+    private multiMedia: MultimediaService,
+    private router: Router, // 👈 apna actual service inject karo
   ) {}
 
   ngOnInit(): void {
@@ -279,12 +280,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
 
     const sub = this.cryptoService
       .getCrypto(this.currentRoleId, this.role, paymentMethod)
-      .pipe(
-        catchError((err) => {
-          this.loading = false;
-          return of([]);
-        }),
-      )
+
       .subscribe((res: any) => {
         this.loading = false;
 
@@ -492,7 +488,15 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     this.draftStatusFilter = "all";
 
     this.currentPage = 1;
-    this.fetchCryptoAccounts();
+
+    const role = this.userStateService.getRole();
+
+    const basePath =
+      role === "HEAD" ? "/head" : role === "BRANCH" ? "/branch" : null;
+
+    if (basePath) {
+      this.router.navigate([`${basePath}/inventory-management`]);
+    }
   }
 
   clearLimitFilter(): void {

@@ -55,7 +55,7 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
   accountHolderName = "";
   walletLimit: number | null = null;
   acceptsPpi = true;
-  partialPayinEnabled = true;
+  partialPayinEnabled = false;
   isSubmitting = false;
 
   selectedCurrency: any = null;
@@ -237,7 +237,7 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
       limitAmount: this.walletLimit,
       fttAcceptance: this.acceptsPpi || true,
       ranges: validRanges.length ? validRanges : null,
-       partialPayinEnabled: this.partialPayinEnabled,
+      partialPayinEnabled: this.partialPayinEnabled,
     };
 
     const formData = new FormData();
@@ -439,10 +439,10 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
   get smallestCapacityRangeLimit(): number | null {
-  const validRanges = this.capacityRanges.filter(
-    (r) => r.minRange != null && r.minRange > 0
-  );
-  if (!validRanges.length) return null;
-  return Math.min(...validRanges.map((r) => r.minRange!));
-}
+    const validRanges = this.capacityRanges.filter(
+      (r) => r.minRange != null && r.minRange > 0,
+    );
+    if (!validRanges.length) return null;
+    return Math.min(...validRanges.map((r) => r.minRange!));
+  }
 }

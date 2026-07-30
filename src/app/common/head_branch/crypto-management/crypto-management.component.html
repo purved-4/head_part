@@ -68,11 +68,9 @@
       <h3
         class="text-base font-semibold text-[var(--color-font)] flex items-center"
       >
-        <span
-          class="material-symbols-outlined text-[var(--color-primary)] mr-2"
+        <span class="material-symbols-outlined text-[var(--color-primary)] mr-2"
+          >filter_alt</span
         >
-          filter_alt
-        </span>
         Filter Crypto Accounts
       </h3>
 
@@ -116,8 +114,8 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-      <!-- Search -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+      <!-- SEARCH -->
       <div class="space-y-1">
         <label class="block text-xs font-medium text-[var(--color-font)]">
           <span
@@ -134,7 +132,7 @@
         />
       </div>
 
-      <!-- Max Limit -->
+      <!-- MAX LIMIT -->
       <div class="space-y-1">
         <label class="block text-xs font-medium text-[var(--color-font)]">
           <span
@@ -152,12 +150,12 @@
         />
       </div>
 
-      <!-- Payment Method (5 modes) -->
+      <!-- PAYMENT METHOD -->
       <div class="space-y-1">
         <app-payments-methods></app-payments-methods>
       </div>
 
-      <!-- Status -->
+      <!-- STATUS -->
       <div class="space-y-1">
         <label class="block text-xs font-medium text-[var(--color-font)]">
           <span
@@ -178,23 +176,25 @@
     </div>
 
     <div class="flex justify-end items-center gap-2 mt-4">
-      <!-- VIEW TOGGLE -->
       <div
-        class="hidden md:flex items-center gap-1 border border-[var(--color-border)] rounded-lg p-1 bg-[var(--color-bg)]"
+        class="flex items-center gap-1 border border-[var(--color-border)] rounded-lg p-1 bg-[var(--color-surface)]"
       >
         <button
           (click)="toggleView('table')"
           [class.bg-[var(--color-primary)]]="viewMode === 'table'"
           [class.text-white]="viewMode === 'table'"
-          class="px-3 py-2 rounded flex items-center justify-center"
+          class="px-3 py-2 rounded flex items-center justify-center transition"
+          title="Table View"
         >
           <span class="material-symbols-outlined text-sm">table_rows</span>
         </button>
+
         <button
           (click)="toggleView('grid')"
           [class.bg-[var(--color-primary)]]="viewMode === 'grid'"
           [class.text-white]="viewMode === 'grid'"
-          class="px-3 py-2 rounded flex items-center justify-center"
+          class="px-3 py-2 rounded flex items-center justify-center transition"
+          title="Grid View"
         >
           <span class="material-symbols-outlined text-sm">grid_view</span>
         </button>
@@ -1499,7 +1499,3 @@
     </div>
   </div>
 </div>
-
-
-
-

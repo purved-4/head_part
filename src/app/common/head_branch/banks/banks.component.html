@@ -66,20 +66,16 @@
   <div
     class="bg-[var(--color-bg)] rounded-lg p-4 mb-6 border border-[var(--color-border)] shadow-sm"
   >
-    <!-- Filter header with active filter chips -->
     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
       <h3
         class="text-base font-semibold text-[var(--color-font)] flex items-center"
       >
-        <span
-          class="material-symbols-outlined text-[var(--color-primary)] mr-2"
+        <span class="material-symbols-outlined text-[var(--color-primary)] mr-2"
+          >filter_alt</span
         >
-          filter_alt
-        </span>
         Filter Accounts
       </h3>
 
-      <!-- Active filters chips -->
       <div class="flex flex-wrap items-center gap-2 text-xs">
         <span
           *ngIf="searchTerm"
@@ -102,7 +98,7 @@
           <span class="material-symbols-outlined mr-1 text-sm"
             >currency_rupee</span
           >
-          Max Limit: ≤ {{ maxLimit }} ₹
+          Max Limit: ≤ {{ maxLimit }}
           <button
             (click)="clearLimitFilter()"
             class="ml-1 hover:text-[var(--color-danger)]"
@@ -136,9 +132,8 @@
       </div>
     </div>
 
-    <!-- Main filter inputs -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-      <!-- Unified Search -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+      <!-- SEARCH -->
       <div class="space-y-1">
         <label class="block text-xs font-medium text-[var(--color-font)]">
           <span
@@ -155,7 +150,7 @@
         />
       </div>
 
-      <!-- Max Limit Filter -->
+      <!-- MAX LIMIT -->
       <div class="space-y-1">
         <label class="block text-xs font-medium text-[var(--color-font)]">
           <span
@@ -173,8 +168,13 @@
           class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
         />
       </div>
-      <app-payments-methods></app-payments-methods>
-      <!-- Status Filter -->
+
+      <!-- PAYMENT METHOD -->
+      <div class="space-y-1">
+        <app-payments-methods></app-payments-methods>
+      </div>
+
+      <!-- STATUS -->
       <div class="space-y-1">
         <label class="block text-xs font-medium text-[var(--color-font)]">
           <span
@@ -196,15 +196,14 @@
     </div>
 
     <div class="flex justify-end items-center gap-2 mt-4">
-      <!-- GRID / TABLE TOGGLE -->
       <div
-        class="hidden md:flex items-center gap-1 border border-[var(--color-border)] rounded-lg p-1 bg-[var(--color-bg)]"
+        class="flex items-center gap-1 border border-[var(--color-border)] rounded-lg p-1 bg-[var(--color-surface)]"
       >
         <button
           (click)="toggleView('table')"
           [class.bg-[var(--color-primary)]]="viewMode === 'table'"
           [class.text-white]="viewMode === 'table'"
-          class="px-3 py-2 rounded flex items-center justify-center"
+          class="px-3 py-2 rounded flex items-center justify-center transition"
           title="Table View"
         >
           <span class="material-symbols-outlined text-sm">table_rows</span>
@@ -214,26 +213,24 @@
           (click)="toggleView('grid')"
           [class.bg-[var(--color-primary)]]="viewMode === 'grid'"
           [class.text-white]="viewMode === 'grid'"
-          class="px-3 py-2 rounded flex items-center justify-center"
+          class="px-3 py-2 rounded flex items-center justify-center transition"
           title="Grid View"
         >
           <span class="material-symbols-outlined text-sm">grid_view</span>
         </button>
       </div>
 
-      <!-- APPLY -->
       <button
         (click)="applyFilters()"
-        class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-lg hover:from-[var(--color-primary-dark)] hover:to-[var(--color-primary)] transition-all duration-200 text-sm font-medium"
+        class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-lg text-sm font-medium"
       >
         <span class="material-symbols-outlined mr-1.5 text-sm">filter_alt</span>
         Apply Filters
       </button>
 
-      <!-- RESET -->
       <button
         (click)="resetFilters()"
-        class="inline-flex items-center px-4 py-2 bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] transition-all duration-200 text-sm font-medium border border-[var(--color-border)]"
+        class="inline-flex items-center px-4 py-2 bg-[var(--color-surface)] text-[var(--color-font)] rounded-lg hover:bg-[var(--color-hover)] text-sm font-medium border border-[var(--color-border)]"
       >
         <span class="material-symbols-outlined mr-1.5 text-sm"
           >restart_alt</span
@@ -242,7 +239,6 @@
       </button>
     </div>
   </div>
-
   <!-- Loading Indicator -->
   <div *ngIf="loading" class="text-center py-12">
     <div class="flex flex-1 flex-col items-center justify-center">
@@ -562,7 +558,9 @@
             <!-- CAPACITY -->
             <td class="px-4 py-3 whitespace-nowrap">
               <button
-                (click)="openCapacityPreview(account, $event); $event.stopPropagation()"
+                (click)="
+                  openCapacityPreview(account, $event); $event.stopPropagation()
+                "
                 class="px-3 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100 transition"
               >
                 Edit
@@ -1700,7 +1698,7 @@
 </app-bank-details>
 <div
   *ngIf="selectedCapacityAccount"
-    #capacityPopupRef
+  #capacityPopupRef
   class="fixed z-[60] bg-white rounded-2xl border border-gray-200 shadow-2xl w-[280px] max-h-[70vh] overflow-y-auto"
   [style.top.px]="capacityPopupTop"
   [style.left.px]="capacityPopupLeft"

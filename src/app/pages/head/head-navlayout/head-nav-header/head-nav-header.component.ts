@@ -735,13 +735,13 @@ export class HeadNavHeaderComponent implements OnInit {
   }
 
   toggleMobileSearch() {
-  this.showMobileSearch = !this.showMobileSearch;
+    this.showMobileSearch = !this.showMobileSearch;
 
-  if (!this.showMobileSearch) {
-    this.searchTerm = "";
-    this.searchResults = [];
-    this.showSearchDropdown = false;
-    this.selectedIndex = -1;
+    if (!this.showMobileSearch) {
+      this.searchTerm = "";
+      this.searchResults = [];
+      this.showSearchDropdown = false;
+      this.selectedIndex = -1;
+    }
   }
-}
 }

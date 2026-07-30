@@ -20,7 +20,7 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
   currencies: any[] = [];
   selectedCurrency: any = null;
   availableModes: string[] = [];
-  selectedMode: string = "bank";
+  selectedMode: string = "";
   @Input() showAllOption = false;
 
   constructor(
@@ -74,11 +74,12 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
               modes: {},
             };
 
-            this.availableModes = ["ALL"];
+            // Duplicate ALL se bachne ke liye
+            this.availableModes = [];
+
             this.selectedMode = "ALL";
 
             this.currencyBehaviourService.setCurrency(this.selectedCurrency);
-
             this.currencyBehaviourService.setMode(this.selectedMode);
 
             return;
@@ -91,19 +92,21 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
           const matchedCurrency = urlCurrency
             ? this.currencies.find((c) => c.currency === urlCurrency)
             : null;
-
           if (!matchedCurrency && urlCurrency) {
             this.selectedCurrency = {
               currency: urlCurrency,
               modes: {},
             };
 
-            this.availableModes = urlMode ? [urlMode] : [];
-
-            this.selectedMode = urlMode || "";
+            if (urlCurrency === "ALL") {
+              this.availableModes = [];
+              this.selectedMode = "ALL";
+            } else {
+              this.availableModes = urlMode ? [urlMode] : [];
+              this.selectedMode = urlMode || "";
+            }
 
             this.currencyBehaviourService.setCurrency(this.selectedCurrency);
-
             this.currencyBehaviourService.setMode(this.selectedMode);
 
             return;
@@ -157,11 +160,12 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
         modes: {},
       };
 
-      this.availableModes = ["ALL"];
+      // Duplicate ALL se bachne ke liye
+      this.availableModes = [];
+
       this.selectedMode = "ALL";
 
       this.currencyBehaviourService.setCurrency(this.selectedCurrency);
-
       this.currencyBehaviourService.setMode(this.selectedMode);
 
       this.navigateToMode();
@@ -324,6 +328,13 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
   }
   isCurrencyInList(): boolean {
     if (!this.selectedCurrency) return false;
+
+    // Inventory me ALL option already alag se show ho raha hai,
+    // isliye isko duplicate mat dikhao.
+    if (this.selectedCurrency.currency === "ALL") {
+      return true;
+    }
+
     return this.currencies.some(
       (c) => c.currency === this.selectedCurrency.currency,
     );
