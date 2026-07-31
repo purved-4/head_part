@@ -1,11 +1,13 @@
-import { Component, HostListener } from "@angular/core";
+import { Component, HostListener, OnInit } from "@angular/core";
+import { NavigationEnd, Router } from "@angular/router";
+import { filter } from "rxjs";
 
 @Component({
   selector: "app-head-nav-dashboard-layout",
   templateUrl: "./head-nav-dashboard-layout.component.html",
   styleUrls: ["./head-nav-dashboard-layout.component.css"],
 })
-export class HeadNavDashboardLayoutComponent {
+export class HeadNavDashboardLayoutComponent implements OnInit {
   // ================= BALANCES =================
   headerPayin = 0;
   headerPayout = 0;
@@ -13,6 +15,18 @@ export class HeadNavDashboardLayoutComponent {
   headerLimit = 0;
   headerExploser = 0;
   parentCurrency = "INR";
+  currentUrl:string = "";
+  constructor(private router:Router) {}
+
+  ngOnInit(): void {
+    this.currentUrl = this.router.url;
+    this.router.events
+    .pipe(filter(event => event instanceof NavigationEnd))
+    .subscribe((event: NavigationEnd) => {
+      this.currentUrl = event.urlAfterRedirects;
+    });
+    
+  }
 
   // ================= SIDEBAR =================
   sidebarCollapsed = false;
@@ -143,6 +157,10 @@ export class HeadNavDashboardLayoutComponent {
   closePendingThreads(): void {
     this.showPendingThreads = false;
   }
+
+  get isChatRoute(): boolean {
+  return this.currentUrl.startsWith('/head/chat');
+}
 
   // ================= WINDOW RESIZE =================
   @HostListener("window:resize", ["$event"])
