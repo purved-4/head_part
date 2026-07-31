@@ -1,8 +1,15 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
+import { Component, ElementRef, HostListener, OnDestroy } from "@angular/core";
 import { UserStateService } from "../../store/user-state.service";
 import { ChiefManualService } from "../../pages/services/chief-manual.service";
 import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 import { CurrentUser } from "../../store/current-user-model";
+
+interface DashboardConfig {
+  label: string;
+  route: string;
+  notifications?: number;
+}
 
 @Component({
   selector: "app-welcome",
@@ -11,11 +18,15 @@ import { CurrentUser } from "../../store/current-user-model";
 })
 export class WelcomeComponent implements OnDestroy {
   currentUser$: Observable<CurrentUser | null>;
+  dashboardConfig$: Observable<DashboardConfig | null>;
 
   // Mobile menu
+  // class ke andar naya property add karo
+  isProfileMenuOpen = false;
   isMenuOpen = false;
- 
-currentYear: number = new Date().getFullYear();
+
+  currentYear: number = new Date().getFullYear();
+
   // Carousel
   currentIndex = 0;
   intervalId: any;
@@ -39,23 +50,71 @@ currentYear: number = new Date().getFullYear();
   chiefId: any;
   autoEnabled: boolean = true;
 
+  // 👇 role => dashboard config mapping (yaha naye roles add karte rehna)
+  private roleDashboardMap: { [key: string]: DashboardConfig } = {
+    head: {
+      label: "Dashboard",
+      route: "/head/dashboard",
+    },
+    com_part: {
+      label: " Dashboard",
+      route: "/comPart/commerce-dashboard",
+      notifications: 2,
+    },
+    branch: {
+      label: " Dashboard",
+      route: "/branch/dashboard",
+      notifications: 2,
+    },
+    chief: {
+      label: "Dashboard",
+      route: "/chief/dashboard",
+      notifications: 2,
+    },
+    manager: {
+      label: "Dashboard",
+      route: "/manager/dashboard",
+      notifications: 2,
+    },
+    owner: {
+      label: "Dashboard",
+      route: "/owner/dashboard",
+      notifications: 2,
+    },
+  };
+
   constructor(
     private userStateService: UserStateService,
     private chiefAutoService: ChiefManualService,
+    private elRef: ElementRef,
   ) {
     this.currentUser$ = this.userStateService.currentUser$;
+
+    this.dashboardConfig$ = this.currentUser$.pipe(
+      map((user) => {
+        if (!user) return null;
+
+        // agar userStateService me getRole() method hai use direct use karo:
+        // const roleName = this.userStateService.getRole()?.toLowerCase();
+
+        // fallback: user.role array se nikal lo (jaisa JSON me aa raha hai)
+        const roleName = user?.role?.[0]?.name?.toLowerCase?.();
+
+        if (!roleName) return null;
+
+        return this.roleDashboardMap[roleName] || null;
+      }),
+    );
   }
 
   ngOnDestroy() {
     if (this.intervalId) clearInterval(this.intervalId);
   }
 
-  // Mobile menu toggle
   toggleMobileMenu() {
     this.isMenuOpen = !this.isMenuOpen;
   }
 
-  // Carousel navigation
   nextImage() {
     this.currentIndex = (this.currentIndex + 1) % this.images.length;
   }
@@ -67,5 +126,24 @@ currentYear: number = new Date().getFullYear();
 
   goToImage(index: number) {
     this.currentIndex = index;
+  }
+
+  // naya method add karo
+  toggleProfileMenu() {
+    this.isProfileMenuOpen = !this.isProfileMenuOpen;
+  }
+
+  closeProfileMenu() {
+    this.isProfileMenuOpen = false;
+  }
+
+  @HostListener("document:click", ["$event"])
+  onDocumentClick(event: MouseEvent) {
+    if (
+      this.isProfileMenuOpen &&
+      !this.elRef.nativeElement.contains(event.target)
+    ) {
+      this.isProfileMenuOpen = false;
+    }
   }
 }

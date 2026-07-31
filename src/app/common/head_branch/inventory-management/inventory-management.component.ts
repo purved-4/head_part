@@ -1899,4 +1899,25 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   toggleView(mode: "table" | "grid"): void {
     this.viewMode = mode;
   }
+  onCapacityUpdated(event: {
+    payinId: string;
+    ranges: any[];
+    limitAmount: number | null;
+  }): void {
+    // payinId hi item.id hai (openCapacity() me tune yahi set kiya tha)
+    const item = this.allItems.find((i) => i.id === event.payinId);
+    if (!item) return;
+
+    // direct mutate — same object reference filteredItems/pagedItems me bhi hai
+    item.ranges = event.ranges;
+    if (event.limitAmount != null) {
+      item.limitAmount = String(event.limitAmount);
+    }
+
+    // agar capacity popup abhi khula hai isi item ka, wo bhi auto update ho jaayega
+    // kyunki selectedCapacityAccount same reference hold karta hai
+
+    // force re-render trigger (agar OnPush kahin use ho raha ho to safe rahega)
+    this.pagedItems = [...this.pagedItems];
+  }
 }

@@ -595,7 +595,6 @@
                 class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
               >
                 <span class="material-icons text-base mr-2">edit</span>
-                Edit
               </button>
             </td>
 
@@ -719,6 +718,15 @@
           >
             {{ item.liveAssigned ? "Assigned" : "Unassigned" }}
           </span>
+          <div class="flex justify-end pt-3">
+            <button
+              (click)="openCapacity(item); activeActionDropdown = null"
+              class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
+            >
+              <span class="material-icons text-base mr-2">edit</span>
+              Capacity
+            </button>
+          </div>
         </div>
 
         <!-- Three dots dropdown -->
@@ -749,16 +757,6 @@
               >
                 <span class="material-icons text-base mr-2">edit_calendar</span>
                 Set Limit Time
-              </button>
-
-              <button
-                (click)="
-                  openCapacityPreview(item, $event); activeActionDropdown = null
-                "
-                class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
-              >
-                <span class="material-icons text-base mr-2">insights</span>
-                View Capacity
               </button>
 
               <ng-container *ngIf="item.type === 'BANK'">
@@ -1322,12 +1320,16 @@
       </ng-template>
 
       <div class="flex justify-end pt-3">
-        <button
-          (click)="openCapacity(selectedCapacityAccount)"
-          class="text-slate-500 hover:text-blue-600"
-        >
-          <span class="material-symbols-outlined text-[22px]">edit</span>
-        </button>
+        <div class="flex justify-end pt-3">
+          <div class="flex justify-end pt-3">
+            <button
+              (click)="openCapacity(selectedCapacityAccount)"
+              class="text-slate-500 hover:text-blue-600"
+            >
+              <span class="material-symbols-outlined text-[22px]">edit</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1342,6 +1344,7 @@
     [payinId]="selectedPayinId"
     [bankId]="selectedId"
     (close)="showCapacityModal = false"
+    (capacityUpdated)="onCapacityUpdated($event)"
   ></app-payin-capacity>
 
   <!-- ========== QR PREVIEW MODAL ========== -->
@@ -1779,7 +1782,6 @@
         <form (ngSubmit)="submitUpdate()" appEnterKeyFocus class="space-y-4">
           <!-- Current QR -->
           <div
-            *ngIf="editingUpi?.qrImageUrl"
             class="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--color-bg)]"
           >
             <label
