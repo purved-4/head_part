@@ -19,7 +19,7 @@
           Inventory Management
         </h2>
         <p class="text-[var(--color-muted)] text-sm mt-0.5">
-          Bank, UPI &amp; Crypto — all inventory in one place
+          Bank, UPI &amp; Crypto — select currency &amp; mode, then Apply
         </p>
       </div>
     </div>
@@ -29,8 +29,9 @@
     >
       <div class="flex items-center gap-2 w-full sm:w-auto">
         <button
-          (click)="fetchAllPaymentMethods()"
-          class="p-2 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-hover)] transition"
+          (click)="refreshInventory()"
+          [disabled]="!hasLoadedOnce"
+          class="p-2 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-hover)] transition disabled:opacity-40 disabled:cursor-not-allowed"
           title="Reload"
         >
           <span
@@ -57,9 +58,9 @@
           (click)="$event.stopPropagation()"
         >
           <app-inventory-configuration
-            (refreshBankAccounts)="fetchAllPaymentMethods()"
-            (refreshUpis)="fetchAllPaymentMethods()"
-            (refreshCryptoWallets)="fetchAllPaymentMethods()"
+            (refreshBankAccounts)="refreshInventory()"
+            (refreshUpis)="refreshInventory()"
+            (refreshCryptoWallets)="refreshInventory()"
             (close)="closeInventoryModal()"
           ></app-inventory-configuration>
         </div>
@@ -67,7 +68,7 @@
     </div>
   </div>
 
-  <!-- ========== FILTER SECTION (Search, Currency, Type, Max Limit, Status all together) ========== -->
+  <!-- ========== FILTER SECTION ========== -->
   <div
     class="bg-[var(--color-bg)] rounded-lg p-4 mb-6 border border-[var(--color-border)] shadow-sm"
   >
@@ -83,6 +84,16 @@
 
       <div class="flex flex-wrap items-center gap-2 text-xs">
         <span
+          *ngIf="hasLoadedOnce"
+          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
+        >
+          <span class="material-symbols-outlined mr-1 text-sm"
+            >currency_exchange</span
+          >
+          {{ selectedCurrency }} — {{ selectedMode }}
+        </span>
+
+        <span
           *ngIf="searchTerm"
           class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
         >
@@ -90,36 +101,6 @@
           "{{ searchTerm }}"
           <button
             (click)="clearSearchFilter()"
-            class="ml-1 hover:text-[var(--color-danger)]"
-          >
-            <span class="material-symbols-outlined text-sm">close</span>
-          </button>
-        </span>
-
-        <span
-          *ngIf="selectedCurrency?.currency"
-          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
-        >
-          <span class="material-symbols-outlined mr-1 text-sm"
-            >currency_exchange</span
-          >
-          {{ selectedCurrency.currency }}
-          <button
-            (click)="onCurrencyChange('')"
-            class="ml-1 hover:text-[var(--color-danger)]"
-          >
-            <span class="material-symbols-outlined text-sm">close</span>
-          </button>
-        </span>
-
-        <span
-          *ngIf="selectedMode && selectedMode !== 'all'"
-          class="inline-flex items-center bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full"
-        >
-          <span class="material-symbols-outlined mr-1 text-sm">category</span>
-          {{ selectedMode | uppercase }}
-          <button
-            (click)="selectedMode = 'all'; onModeChange()"
             class="ml-1 hover:text-[var(--color-danger)]"
           >
             <span class="material-symbols-outlined text-sm">close</span>
@@ -152,6 +133,49 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+      <!-- CURRENCY -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-[var(--color-font)]">
+          <span
+            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+            >currency_rupee</span
+          >
+          Currency <span class="text-[var(--color-danger)]">*</span>
+        </label>
+        <select
+          [ngModel]="draftCurrency"
+          (ngModelChange)="onCurrencyChange($event)"
+          class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+        >
+          <option value="">Select currency</option>
+          <option *ngFor="let c of currencies" [value]="c">{{ c }}</option>
+        </select>
+      </div>
+
+      <!-- MODE — disabled until currency is chosen -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-[var(--color-font)]">
+          <span
+            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+            >payments</span
+          >
+          Mode <span class="text-[var(--color-danger)]">*</span>
+        </label>
+        <select
+          [(ngModel)]="draftMode"
+          (change)="onModeChange()"
+          [disabled]="isModeDisabled"
+          class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <option value="">
+            {{ isModeDisabled ? "Select currency first" : "Select mode" }}
+          </option>
+          <option *ngFor="let m of availableModes" [value]="m">
+            {{ m | uppercase }}
+          </option>
+        </select>
+      </div>
+
       <!-- SEARCH -->
       <div class="space-y-1">
         <label class="block text-xs font-medium text-[var(--color-font)]">
@@ -185,11 +209,6 @@
           min="0"
           class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
         />
-      </div>
-
-      <!-- PAYMENT METHOD -->
-      <div class="space-y-1">
-        <app-payments-methods [showAllOption]="true"></app-payments-methods>
       </div>
 
       <!-- STATUS -->
@@ -239,7 +258,9 @@
 
       <button
         (click)="applyFilters()"
-        class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-lg text-sm font-medium"
+        [disabled]="!canApplyFilters"
+        class="inline-flex items-center px-4 py-2 bg-[var(--color-primary)] text-[var(--color-surface)] rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+        title="Currency and Mode required"
       >
         <span class="material-symbols-outlined mr-1.5 text-sm">filter_alt</span>
         Apply Filters
@@ -275,9 +296,32 @@
     </div>
   </div>
 
+  <!-- ========== NOT LOADED YET — prompt to pick currency + mode ========== -->
+  <div *ngIf="!loading && !hasLoadedOnce" class="text-center py-16">
+    <div class="flex flex-col items-center justify-center">
+      <div
+        class="w-16 h-16 bg-[var(--color-primary)]/10 rounded-xl flex items-center justify-center mb-4"
+      >
+        <span
+          class="material-symbols-outlined text-[var(--color-primary)] text-2xl"
+          >tune</span
+        >
+      </div>
+      <h3 class="text-lg font-semibold text-[var(--color-font)] mb-2">
+        Select Currency &amp; Mode
+      </h3>
+      <p class="text-[var(--color-muted)] text-sm max-w-md mb-1">
+        Choose a currency, then a mode (Bank / UPI / Crypto), and click
+        <span class="font-semibold">Apply Filters</span> to load inventory.
+      </p>
+    </div>
+  </div>
+
   <!-- ========== COMBINED TABLE (desktop / table mode) ========== -->
   <div
-    *ngIf="!loading && pagedItems.length > 0 && viewMode === 'table'"
+    *ngIf="
+      !loading && hasLoadedOnce && pagedItems.length > 0 && viewMode === 'table'
+    "
     class="hidden md:block rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm mb-4 overflow-hidden"
   >
     <div class="overflow-x-auto">
@@ -309,14 +353,13 @@
             <th
               class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
             >
-              Type
+              Payin Type
             </th>
             <th
               class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
             >
               Limit
             </th>
-
             <th
               class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500"
             >
@@ -471,11 +514,11 @@
               </button>
             </td>
 
-            <!-- DETAILS (bank name+holder / holder / - ) -->
+            <!-- DETAILS: BANK vs UPI vs CRYPTO — sabki apni field -->
             <td class="px-4 py-3 whitespace-nowrap">
               <div
                 class="flex flex-col leading-tight"
-                *ngIf="item.type === 'BANK'; else nonBankDetails"
+                *ngIf="item.type === 'BANK'; else notBankDetails"
               >
                 <span class="text-xs font-medium text-[var(--color-font)]">{{
                   item.bankName || "-"
@@ -487,9 +530,24 @@
                   item.bankCode || ""
                 }}</span>
               </div>
-              <ng-template #nonBankDetails>
+
+              <ng-template #notBankDetails>
+                <div
+                  class="flex flex-col leading-tight"
+                  *ngIf="item.type === 'UPI'; else cryptoDetails"
+                >
+                  <span class="text-xs font-medium text-[var(--color-font)]">{{
+                    item.bankName || "-"
+                  }}</span>
+                  <span class="text-[10px] text-gray-400">{{
+                    item.accountHolder || "-"
+                  }}</span>
+                </div>
+              </ng-template>
+
+              <ng-template #cryptoDetails>
                 <span class="text-xs text-[var(--color-font)]">{{
-                  item.accountHolder || item.holderName || "-"
+                  item.holderName || "-"
                 }}</span>
               </ng-template>
             </td>
@@ -529,6 +587,8 @@
                 Edit
               </button>
             </td>
+
+            <!-- QR — sirf UPI/Crypto ke paas hota hai, BANK ke paas nahi -->
             <td class="px-4 py-3 whitespace-nowrap">
               <ng-container
                 *ngIf="item.type !== 'BANK' && item.qrImagePath; else noQr"
@@ -589,16 +649,20 @@
                 >
               </button>
             </td>
+
+            <!-- EDIT -->
             <td class="px-4 py-3 whitespace-nowrap">
               <button
                 (click)="openEditModal(item); activeActionDropdown = null"
-                class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
+                class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 flex items-center justify-center transition"
               >
-                <span class="material-icons text-base mr-2">edit</span>
+                <span class="material-icons text-indigo-500 text-[18px]"
+                  >edit</span
+                >
               </button>
             </td>
 
-            <!-- ACTIONS -->
+            <!-- ACTIONS — sirf BANK mode me Add UPI / View UPI -->
             <td
               *ngIf="selectedMode === 'BANK'"
               class="px-4 py-3 whitespace-nowrap relative overflow-visible"
@@ -618,34 +682,25 @@
                   class="absolute right-full mr-2 top-0 w-48 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-2xl z-[9999]"
                 >
                   <div class="py-1">
-                    <ng-container *ngIf="item.type === 'BANK'">
-                      <div
-                        class="border-t border-[var(--color-border)] mt-1 pt-1"
-                      >
-                        <button
-                          (click)="
-                            openAddUpiFromBank(item);
-                            activeActionDropdown = null
-                          "
-                          class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
-                        >
-                          <span class="material-icons text-base mr-2"
-                            >qr_code</span
-                          >
-                          Add UPI
-                        </button>
+                    <button
+                      (click)="
+                        openAddUpiFromBank(item); activeActionDropdown = null
+                      "
+                      class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
+                    >
+                      <span class="material-icons text-base mr-2">qr_code</span>
+                      Add UPI
+                    </button>
 
-                        <button
-                          (click)="viewUpi(item); activeActionDropdown = null"
-                          class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
-                        >
-                          <span class="material-icons text-base mr-2"
-                            >visibility</span
-                          >
-                          View UPI
-                        </button>
-                      </div>
-                    </ng-container>
+                    <button
+                      (click)="viewUpi(item); activeActionDropdown = null"
+                      class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
+                    >
+                      <span class="material-icons text-base mr-2"
+                        >visibility</span
+                      >
+                      View UPI
+                    </button>
                   </div>
                 </div>
               </div>
@@ -657,11 +712,10 @@
   </div>
 
   <!-- ========================================================= -->
-  <!--  GRID VIEW (card layout) — always used on mobile,          -->
-  <!--  shown on desktop too when viewMode === 'grid'             -->
+  <!--  GRID VIEW (card layout)                                   -->
   <!-- ========================================================= -->
   <div
-    *ngIf="!loading && pagedItems.length > 0"
+    *ngIf="!loading && hasLoadedOnce && pagedItems.length > 0"
     [ngClass]="{
       'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4': true,
       'md:hidden': viewMode === 'table',
@@ -671,7 +725,7 @@
       *ngFor="let item of pagedItems"
       class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 shadow-sm hover:shadow-md transition relative"
     >
-      <!-- Card Header: Status + Type + More options -->
+      <!-- Card Header -->
       <div class="flex justify-between items-start mb-3">
         <div class="flex items-center gap-2 flex-wrap">
           <ng-container *ngIf="isAccountActive(item); else inactiveGridStatus">
@@ -718,15 +772,6 @@
           >
             {{ item.liveAssigned ? "Assigned" : "Unassigned" }}
           </span>
-          <div class="flex justify-end pt-3">
-            <button
-              (click)="openCapacity(item); activeActionDropdown = null"
-              class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
-            >
-              <span class="material-icons text-base mr-2">edit</span>
-              Capacity
-            </button>
-          </div>
         </div>
 
         <!-- Three dots dropdown -->
@@ -757,6 +802,14 @@
               >
                 <span class="material-icons text-base mr-2">edit_calendar</span>
                 Set Limit Time
+              </button>
+
+              <button
+                (click)="openCapacity(item); activeActionDropdown = null"
+                class="w-full flex items-center px-3 py-2 text-xs hover:bg-[var(--color-hover)] transition"
+              >
+                <span class="material-icons text-base mr-2">insights</span>
+                View Capacity
               </button>
 
               <ng-container *ngIf="item.type === 'BANK'">
@@ -831,9 +884,10 @@
               class="text-[10px] uppercase tracking-wider text-[var(--color-muted)] block"
               >Details</span
             >
+
             <div
               class="flex flex-col leading-tight mt-0.5"
-              *ngIf="item.type === 'BANK'; else nonBankGridDetails"
+              *ngIf="item.type === 'BANK'; else notBankGridDetails"
             >
               <span
                 class="text-xs font-medium text-[var(--color-font)] truncate"
@@ -843,9 +897,25 @@
                 item.accountHolderName || "-"
               }}</span>
             </div>
-            <ng-template #nonBankGridDetails>
+
+            <ng-template #notBankGridDetails>
+              <div
+                class="flex flex-col leading-tight mt-0.5"
+                *ngIf="item.type === 'UPI'; else cryptoGridDetails"
+              >
+                <span
+                  class="text-xs font-medium text-[var(--color-font)] truncate"
+                  >{{ item.bankName || "-" }}</span
+                >
+                <span class="text-[10px] text-gray-400 truncate">{{
+                  item.accountHolder || "-"
+                }}</span>
+              </div>
+            </ng-template>
+
+            <ng-template #cryptoGridDetails>
               <span class="text-xs text-[var(--color-font)] truncate">{{
-                item.accountHolder || item.holderName || "-"
+                item.holderName || "-"
               }}</span>
             </ng-template>
           </div>
@@ -959,8 +1029,11 @@
     </div>
   </div>
 
-  <!-- ========== EMPTY STATE ========== -->
-  <div *ngIf="!loading && pagedItems.length === 0" class="text-center py-12">
+  <!-- ========== EMPTY STATE (loaded but no results) ========== -->
+  <div
+    *ngIf="!loading && hasLoadedOnce && pagedItems.length === 0"
+    class="text-center py-12"
+  >
     <div class="flex flex-col items-center justify-center">
       <div
         class="w-16 h-16 bg-[var(--color-primary)] rounded-xl flex items-center justify-center mb-4 shadow-md"
@@ -971,13 +1044,16 @@
         >
       </div>
       <h3 class="text-lg font-semibold text-[var(--color-font)] mb-2">
-        No inventory found
+        No {{ selectedMode }} inventory found
       </h3>
       <p class="text-[var(--color-muted)] text-sm max-w-md mb-4">
         {{
           activeFilters > 0
             ? "Try adjusting your search criteria"
-            : "Get started by adding your first inventory item"
+            : "No records available for " +
+              selectedCurrency +
+              " / " +
+              selectedMode
         }}
       </p>
       <button
@@ -995,7 +1071,7 @@
 
   <!-- ========== PAGINATION ========== -->
   <div
-    *ngIf="totalElements > 0"
+    *ngIf="hasLoadedOnce && totalElements > 0"
     class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-[var(--color-border)]"
   >
     <div class="flex items-center gap-3">
@@ -1320,16 +1396,12 @@
       </ng-template>
 
       <div class="flex justify-end pt-3">
-        <div class="flex justify-end pt-3">
-          <div class="flex justify-end pt-3">
-            <button
-              (click)="openCapacity(selectedCapacityAccount)"
-              class="text-slate-500 hover:text-blue-600"
-            >
-              <span class="material-symbols-outlined text-[22px]">edit</span>
-            </button>
-          </div>
-        </div>
+        <button
+          (click)="openCapacity(selectedCapacityAccount)"
+          class="text-slate-500 hover:text-blue-600"
+        >
+          <span class="material-symbols-outlined text-[22px]">edit</span>
+        </button>
       </div>
     </div>
   </div>
@@ -1394,9 +1466,7 @@
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!--  BANK — VIEW / EDIT DETAILS MODAL (restored)              -->
-  <!-- ========================================================= -->
+  <!-- BANK — VIEW / EDIT DETAILS MODAL -->
   <app-bank-details
     *ngIf="showBankDetailsModal"
     [bankData]="selectedBankAccount"
@@ -1405,9 +1475,7 @@
   >
   </app-bank-details>
 
-  <!-- ========================================================= -->
-  <!--  BANK ROW ONLY — ADD UPI MODAL (restored)                 -->
-  <!-- ========================================================= -->
+  <!-- BANK ROW ONLY — ADD UPI MODAL -->
   <div
     *ngIf="showAddUpiModal"
     class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -1748,9 +1816,7 @@
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!--  UPI — EDIT / UPDATE MODAL (restored)                     -->
-  <!-- ========================================================= -->
+  <!-- UPI — EDIT / UPDATE MODAL -->
   <div
     *ngIf="showUpdateModal"
     class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -2002,12 +2068,10 @@
                   [ngModelOptions]="{ standalone: true }"
                 />
 
-                <!-- Track -->
                 <div
                   class="h-7 w-14 rounded-full bg-gray-300 transition-all duration-300 peer-checked:bg-green-500"
                 ></div>
 
-                <!-- Thumb -->
                 <div
                   class="absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow-md transition-all duration-300 ease-in-out peer-checked:translate-x-7"
                 ></div>
@@ -2076,9 +2140,7 @@
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!--  CRYPTO — EDIT ACCOUNT MODAL (restored)                   -->
-  <!-- ========================================================= -->
+  <!-- CRYPTO — EDIT ACCOUNT MODAL -->
   <div
     *ngIf="showEditAccountModal"
     class="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
@@ -2110,7 +2172,6 @@
       </div>
 
       <div class="p-6 space-y-5">
-        <!-- Payment method locked -->
         <div>
           <label class="block text-xs font-medium text-gray-500 mb-1.5"
             >Payment Method</label
@@ -2131,7 +2192,6 @@
           </div>
         </div>
 
-        <!-- Wallet Address -->
         <div>
           <label class="block text-xs font-medium text-gray-500 mb-1.5"
             >Wallet Address</label
@@ -2161,7 +2221,6 @@
           </div>
         </div>
 
-        <!-- Limit Amount -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-gray-500 mb-1.5"
@@ -2177,7 +2236,6 @@
           </div>
         </div>
 
-        <!-- Payin Type toggle -->
         <div>
           <label class="block text-xs font-medium text-gray-500 mb-2"
             >Payin Type</label
@@ -2214,7 +2272,6 @@
           </div>
         </div>
 
-        <!-- Partial Payin Status toggle -->
         <div>
           <label class="block text-xs font-medium text-gray-500 mb-2"
             >Partial Payin Status</label
@@ -2255,7 +2312,6 @@
           </div>
         </div>
 
-        <!-- QR SECTION -->
         <div class="border-t border-gray-100 pt-5">
           <div class="flex items-center justify-between mb-3">
             <label
@@ -2398,6 +2454,7 @@
     </div>
   </div>
 </div>
+
 <div
   *ngIf="hoveredLimitAccount"
   [ngStyle]="{
@@ -2410,7 +2467,7 @@
 >
   <div class="space-y-2 text-xs">
     <div class="flex justify-between">
-      <span>Bank Limit</span>
+      <span>Limit</span>
       <span>{{ hoveredLimitAccount.limitAmount }}</span>
     </div>
 
