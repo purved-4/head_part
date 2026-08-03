@@ -120,6 +120,10 @@ const routes: Routes = [
         path: "inventory-management",
         component: InventoryManagementComponent,
       },
+      {
+        path: "inventory-management",
+        component: InventoryManagementComponent,
+      },
 
       {
         path: "reports",
