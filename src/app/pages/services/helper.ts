@@ -1,4 +1,4 @@
-// let baseUrl = "http://localhost:8083/api";
+// let baseUrl = "http://localhost:8082/api";
 export const uiUrl =
   typeof window !== 'undefined'
     ? window.location.origin
@@ -7,4 +7,6 @@ let baseUrl = '/api';
 export const fileBaseUrl = `${baseUrl}/api/files/private`;
 
 export default baseUrl;
+
+
  

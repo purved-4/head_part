@@ -660,7 +660,7 @@ export class HeadNavHeaderComponent implements OnInit {
 
     this.fundService.getExposure(this.currentRoleId, "ENTITY").subscribe({
       next: (res: any) => {
-        console.log("ecskhdklha", res);
+
 
         const data = res ?? {};
 
@@ -678,7 +678,7 @@ export class HeadNavHeaderComponent implements OnInit {
           heldAmount: data.heldAmount ?? 0,
         };
 
-        console.log(this.exposureData);
+
 
         this.exposureLoading = false;
       },
@@ -705,7 +705,7 @@ export class HeadNavHeaderComponent implements OnInit {
         .subscribe({
           next: (res: any) => {
             this.percentages = res.minPercentage;
-            console.log(res);
+
             this.loadingPercentages = false;
           },
           error: () => {
@@ -735,13 +735,13 @@ export class HeadNavHeaderComponent implements OnInit {
   }
 
   toggleMobileSearch() {
-    this.showMobileSearch = !this.showMobileSearch;
+  this.showMobileSearch = !this.showMobileSearch;
 
-    if (!this.showMobileSearch) {
-      this.searchTerm = "";
-      this.searchResults = [];
-      this.showSearchDropdown = false;
-      this.selectedIndex = -1;
-    }
+  if (!this.showMobileSearch) {
+    this.searchTerm = "";
+    this.searchResults = [];
+    this.showSearchDropdown = false;
+    this.selectedIndex = -1;
   }
+}
 }

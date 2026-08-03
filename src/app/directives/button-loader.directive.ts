@@ -16,68 +16,72 @@ export class ButtonLoaderDirective implements OnInit, OnDestroy {
   private loaderService = inject(LoaderService);
   private injector = inject(Injector);
 
+  // Auto-generated — no @Input() loaderKey needed
   private readonly uniqueKey = `btn-loader-${Math.random().toString(36).slice(2)}`;
   private wrapperEl: HTMLElement | null = null;
   private spinnerEl: HTMLElement | null = null;
   private unlistenClick?: () => void;
 
   ngOnInit(): void {
-    this.injectKeyframes();
+  this.injectKeyframes();
 
-    this.unlistenClick = this.renderer.listen(
-      this.el.nativeElement,
-      "click",
-      () => this.loaderService.setPendingKey(this.uniqueKey)
-    );
-
-    runInInjectionContext(this.injector, () => {
-      effect(() => {
-        const active = this.loaderService.activeButtonLoader();
-        const isLoading = !!active && active === this.uniqueKey;
-        this.toggleLoader(!!active && active === this.uniqueKey);
-      });
-    });
-  }
-
- private toggleLoader(isLoading: boolean): void {
   const btn = this.el.nativeElement;
+  const handler = () => {
+    if (btn.disabled) return;
+    this.loaderService.setPendingKey(this.uniqueKey);
+  };
 
-  if (isLoading) {
-    if (!this.wrapperEl) {
-      const wrapper = this.renderer.createElement("span");
-      this.renderer.setStyle(wrapper, "display", "none");
-      const children = Array.from(btn.childNodes) as ChildNode[];
-      children.forEach((child) => this.renderer.appendChild(wrapper, child));
-      this.renderer.appendChild(btn, wrapper);
-      this.wrapperEl = wrapper;
-    }
+  // capture: true makes this fire BEFORE Angular's (click) handler
+  btn.addEventListener('click', handler, true);
+  this.unlistenClick = () => btn.removeEventListener('click', handler, true);
 
-    if (!this.spinnerEl) {
-      const spinner = this.renderer.createElement("span");
-      spinner.innerHTML = this.buildSpinnerHTML();
-      this.renderer.appendChild(btn, spinner);
-      this.spinnerEl = spinner;
-    }
-
-    btn.disabled = true;
-    this.renderer.setStyle(btn, "opacity", "0.72");
-    this.renderer.setStyle(btn, "cursor", "not-allowed");
-
-  } else {
-    if (this.spinnerEl) {
-      this.renderer.removeChild(btn, this.spinnerEl);
-      this.spinnerEl = null;
-    }
-    if (this.wrapperEl) {
-      this.renderer.setStyle(this.wrapperEl, "display", "");
-      this.wrapperEl = null;
-    }
-
-    btn.disabled = false;
-    this.renderer.removeStyle(btn, "opacity");
-    this.renderer.removeStyle(btn, "cursor");
-  }
+  runInInjectionContext(this.injector, () => {
+    effect(() => {
+      const active = this.loaderService.activeButtonLoader();
+      this.toggleLoader(!!active && active === this.uniqueKey);
+    });
+  });
 }
+
+  private toggleLoader(isLoading: boolean): void {
+    const btn = this.el.nativeElement;
+
+    if (isLoading) {
+      if (!this.wrapperEl) {
+        const wrapper = this.renderer.createElement("span");
+        this.renderer.setStyle(wrapper, "display", "none");
+        const children = Array.from(btn.childNodes) as ChildNode[];
+        children.forEach((child) => this.renderer.appendChild(wrapper, child));
+        this.renderer.appendChild(btn, wrapper);
+        this.wrapperEl = wrapper;
+      }
+
+      if (!this.spinnerEl) {
+        const spinner = this.renderer.createElement("span");
+        spinner.innerHTML = this.buildSpinnerHTML();
+        this.renderer.appendChild(btn, spinner);
+        this.spinnerEl = spinner;
+      }
+
+      btn.disabled = true;
+      this.renderer.setStyle(btn, "opacity", "0.72");
+      this.renderer.setStyle(btn, "cursor", "not-allowed");
+
+    } else {
+      if (this.spinnerEl) {
+        this.renderer.removeChild(btn, this.spinnerEl);
+        this.spinnerEl = null;
+      }
+      if (this.wrapperEl) {
+        this.renderer.setStyle(this.wrapperEl, "display", "");
+        this.wrapperEl = null;
+      }
+
+      btn.disabled = false;
+      this.renderer.removeStyle(btn, "opacity");
+      this.renderer.removeStyle(btn, "cursor");
+    }
+  }
 
   private buildSpinnerHTML(): string {
     const text = this.loaderText?.trim() || "Loading...";

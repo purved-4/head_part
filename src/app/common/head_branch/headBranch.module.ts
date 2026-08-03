@@ -45,7 +45,7 @@ import { InventoryManagementComponent } from "./inventory-management/inventory-m
     RecycleCryptoComponent,
     RecycleManagementComponent,
     AddCryptoComponent,
-    InventoryManagementComponent,
+    InventoryManagementComponent
   ],
   exports: [
     InventoryConfigurationComponent,
@@ -65,7 +65,7 @@ import { InventoryManagementComponent } from "./inventory-management/inventory-m
     RecycleCryptoComponent,
     RecycleManagementComponent,
     AddCryptoComponent,
-    InventoryManagementComponent,
+    InventoryManagementComponent
   ],
   imports: [
     SharedModule,

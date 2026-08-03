@@ -1,3 +1,4 @@
+
 import { Component, OnInit } from "@angular/core";
 import {
   FormBuilder,
@@ -465,7 +466,7 @@ export class TransactionHistoryReportComponent implements OnInit {
 
     this.isPortalReport = !!request.portalId;
 
-    console.log("REPORT REQUEST", request);
+
 
     this.transactionService.getEntityReport(request).subscribe({
       next: (res: any) => {
@@ -479,7 +480,7 @@ export class TransactionHistoryReportComponent implements OnInit {
           };
         });
 
-        console.log("TABLE RECORDS", this.reports);
+
 
         this.fromDate = range.from;
         this.toDate = range.to;
@@ -501,7 +502,7 @@ export class TransactionHistoryReportComponent implements OnInit {
       },
 
       error: (err) => {
-        console.error("REPORT ERROR", err);
+
 
         this.loading = false;
 
@@ -533,7 +534,7 @@ export class TransactionHistoryReportComponent implements OnInit {
 
     this.transactionService.getEntityReports(request).subscribe({
       next: (res: any) => {
-        console.log("REPORT RESPONSE", res);
+
 
         const response = res?.data;
 
@@ -555,7 +556,7 @@ export class TransactionHistoryReportComponent implements OnInit {
           },
         };
 
-        console.log("SHOW RESPONSE", this.showResponse);
+
 
         this.loadingShow = false;
       },

@@ -1105,7 +1105,7 @@
             Cancel
           </button>
           <button
-            appButtonLoader
+            appButtonLoader="Saving..."
             (click)="saveEditedAmount()"
             [disabled]="
               !editAmountData.newAmount || editAmountData.newAmount <= 0
@@ -1365,13 +1365,16 @@
         >
           <button
             (click)="cancelApprove(); removeSelectedFile()"
+            [disabled]="isApproving"
+  [class.opacity-50]="isApproving"
+  [class.cursor-not-allowed]="isApproving"
             class="flex-1 h-11 rounded-lg border border-[var(--color-border)] text-[12px] font-semibold text-[var(--color-muted)] hover:bg-[var(--color-surface)] transition"
           >
             Cancel
           </button>
 
           <button
-            appButtonLoader
+            appButtonLoader="Approving..."
             (click)="confirmApprove()"
             class="flex-1 h-11 rounded-lg bg-[var(--color-success)] text-white text-[12px] font-bold shadow-lg shadow-[var(--color-success)]/20 hover:opacity-90 transition"
           >
@@ -1607,13 +1610,16 @@
         <div class="flex flex-col sm:flex-row gap-2">
           <button
             (click)="cancelApprove(); removeSelectedFile()"
+            [disabled]="isApproving"
+  [class.opacity-50]="isApproving"
+  [class.cursor-not-allowed]="isApproving"
             class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-muted)] rounded-lg hover:bg-[var(--color-bg)] transition font-bold"
           >
             Cancel
           </button>
 
           <button
-            appButtonLoader
+            appButtonLoader="Rejecting..."
             (click)="confirmReject()"
             [disabled]="
               !reason ||
@@ -2372,3 +2378,4 @@
     />
   </div>
 </div>
+

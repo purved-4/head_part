@@ -1,3 +1,4 @@
+
 import {
   Component,
   NgZone,
@@ -117,6 +118,8 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   payoutForm = {
     accountNumber: "",
     ifsc: "",
+    userId: "",
+    holder: "",
     reason: "",
   };
 
@@ -1702,6 +1705,68 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
   //   this.showMediaViewer = true;
   // }
 
+  private resolveFileUrl(mediaUrl: string): string {
+    if (!mediaUrl) return mediaUrl;
+
+    if (mediaUrl.startsWith("http://") || mediaUrl.startsWith("https://")) {
+      return mediaUrl;
+    }
+
+    // Already a fully-qualified backend path — don't prepend fileBaseUrl again
+    if (
+      mediaUrl.startsWith(fileBaseUrl) ||
+      mediaUrl.includes("files/private")
+    ) {
+      return mediaUrl;
+    }
+
+    // Otherwise it's a bare fileId
+    return `${fileBaseUrl}/${mediaUrl}`;
+  }
+  // openMediaViewer(
+  //   mediaUrl: any,
+  //   name: string = "",
+  //   type: string = "file",
+  // ): void {
+  //   if (!mediaUrl) {
+  //     this.snackBar.show("No media to preview", false);
+  //     return;
+  //   }
+
+  //   this.currentMediaName = name || "";
+
+  //   const fileUrl = mediaUrl.startsWith("http")
+  //     ? mediaUrl
+  //     : `${fileBaseUrl}/${mediaUrl}`;
+
+  //   this.multimediaService.getImageByUrlBlob(fileUrl).subscribe({
+  //     next: (blob: Blob) => {
+  //       // CREATE BLOB URL
+  //       const blobUrl = URL.createObjectURL(blob);
+
+  //       this.currentMediaUrl = blobUrl;
+
+  //       // DETECT MEDIA TYPE USING MIME
+  //       if (blob.type.startsWith("image/")) {
+  //         this.currentMediaType = "image";
+  //       } else if (blob.type.startsWith("video/")) {
+  //         this.currentMediaType = "video";
+  //       } else if (blob.type.startsWith("audio/")) {
+  //         this.currentMediaType = "audio";
+  //       } else {
+  //         this.currentMediaType = "file";
+  //       }
+
+  //       this.isZoomed = false;
+  //       this.zoomLevel = 1;
+  //       this.showMediaViewer = true;
+  //     },
+
+  //     error: () => {
+  //       this.snackBar.show("Failed to load media", false);
+  //     },
+  //   });
+  // }
   openMediaViewer(
     mediaUrl: any,
     name: string = "",
@@ -1711,12 +1776,8 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.snackBar.show("No media to preview", false);
       return;
     }
-
     this.currentMediaName = name || "";
-
-    const fileUrl = mediaUrl.startsWith("http")
-      ? mediaUrl
-      : `${fileBaseUrl}/${mediaUrl}`;
+    const fileUrl = this.resolveFileUrl(mediaUrl);
 
     this.multimediaService.getImageByUrlBlob(fileUrl).subscribe({
       next: (blob: Blob) => {
@@ -2236,10 +2297,30 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   }
 
+  // showPayoutModel(thread: any) {
+  //   this.selectedThread = thread;
+
+  //   // For payout threads, open payout edit modal instead of simple resend
+  //   if (this.selectedThread?.threadType === "payout") {
+  //     this.getFundWithId(
+  //       this.selectedThread.id,
+  //       this.selectedThread.fundId,
+  //       this.selectedThread.threadType,
+  //     ).subscribe({
+  //       next: (res: any) => {
+  //         this.payoutForm.accountNumber = res.accountNo ?? "";
+  //         this.payoutForm.ifsc = res.ifsc ?? "";
+  //         this.payoutForm.reason = "";
+  //         this.showPayoutModal = true;
+  //         return;
+  //       },
+  //     });
+  //   }
+  // }
+
   showPayoutModel(thread: any) {
     this.selectedThread = thread;
 
-    // For payout threads, open payout edit modal instead of simple resend
     if (this.selectedThread?.threadType === "payout") {
       this.getFundWithId(
         this.selectedThread.id,
@@ -2249,6 +2330,8 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
         next: (res: any) => {
           this.payoutForm.accountNumber = res.accountNo ?? "";
           this.payoutForm.ifsc = res.ifsc ?? "";
+          this.payoutForm.userId = res.userId ?? "";
+          this.payoutForm.holder = res.holder ?? "";
           this.payoutForm.reason = "";
           this.showPayoutModal = true;
           return;
@@ -2352,10 +2435,47 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
      Payout: Edit & Send modal actions
      -------------------- */
   // User clicks "Send" in payout modal
+  // sendEditedPayout(): void {
+  //   // Basic validation
+  //   if (!this.payoutForm.accountNumber.trim() || !this.payoutForm.ifsc.trim()) {
+  //     alert("Please fill account number and IFSC.");
+  //     return;
+  //   }
+
+  //   const payload = {
+  //     fundId: this.selectedThread?.fundId,
+  //     accountNumber: this.payoutForm.accountNumber.trim(),
+  //     ifsc: this.payoutForm.ifsc.trim(),
+  //     reason: this.payoutForm.reason?.trim() || null,
+  //   };
+
+  //   this.isLoading = true;
+  //   const threadId = this.selectedThread?.id;
+
+  //   this.sentPayoutThreadUpdateToSameUser(threadId, payload).subscribe({
+  //     next: (res: any) => {
+  //       this.isLoading = false;
+  //       if (this.selectedNotification) {
+  //         this.selectedNotification.resolved =
+  //           !this.selectedNotification.resolved;
+  //       }
+  //       this.closeModals();
+  //       this.loadThreads();
+  //     },
+  //     error: (err: any) => {
+  //       this.isLoading = false;
+  //     },
+  //   });
+  // }
+
   sendEditedPayout(): void {
     // Basic validation
-    if (!this.payoutForm.accountNumber.trim() || !this.payoutForm.ifsc.trim()) {
-      alert("Please fill account number and IFSC.");
+    if (
+      !this.payoutForm.accountNumber.trim() ||
+      !this.payoutForm.ifsc.trim() ||
+      !this.payoutForm.userId.trim()
+    ) {
+      alert("Please fill user ID, account number and IFSC.");
       return;
     }
 
@@ -2363,6 +2483,8 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       fundId: this.selectedThread?.fundId,
       accountNumber: this.payoutForm.accountNumber.trim(),
       ifsc: this.payoutForm.ifsc.trim(),
+      userId: this.payoutForm.userId.trim(),
+      holder: this.payoutForm.holder?.trim() || null,
       reason: this.payoutForm.reason?.trim() || null,
     };
 
@@ -2384,7 +2506,6 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
       },
     });
   }
-
   /* --------------------
      Utility / close
      -------------------- */
@@ -2396,8 +2517,18 @@ export class ChatingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.resetPayoutForm();
   }
 
+  // private resetPayoutForm(): void {
+  //   this.payoutForm = { accountNumber: "", ifsc: "", reason: "" };
+  // }
+
   private resetPayoutForm(): void {
-    this.payoutForm = { accountNumber: "", ifsc: "", reason: "" };
+    this.payoutForm = {
+      accountNumber: "",
+      ifsc: "",
+      userId: "",
+      holder: "",
+      reason: "",
+    };
   }
 
   /* --------------------

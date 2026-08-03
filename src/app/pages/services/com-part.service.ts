@@ -398,9 +398,6 @@ export class ComPartService {
       .set("page", page.toString())
       .set("size", pageSize.toString());
 
-    if (status !== null && status !== undefined) {
-      params = params.set("status", status.toString());
-    }
     if (category !== null && category !== undefined) {
       params = params.set("category", category.toString());
     }
@@ -410,8 +407,7 @@ export class ComPartService {
 
     return this.http
       .get<any>(
-        // `${baseUrl}/comPart/funds/getPayinFundsByComPartId/${compartId}/${status}`,
-        `${baseUrl}/comPart/funds/getPayinFundsByComPartId/${compartId}`,
+        `${baseUrl}/comPart/funds/getPayinFundsByComPartId/${compartId}/${status}`,
         {
           params,
         },
@@ -422,7 +418,7 @@ export class ComPartService {
       );
   }
 
-getAllPayOutFundWithCompartId(
+  getAllPayOutFundWithCompartId(
     compartId: any,
     status: any,
     page: number = 0,
@@ -432,9 +428,6 @@ getAllPayOutFundWithCompartId(
     let params = new HttpParams()
       .set("page", page.toString())
       .set("size", pageSize.toString());
-    if (status !== null && status !== undefined) {
-      params = params.set("status", status.toString());
-    }
 
     if (category !== null && category !== undefined) {
       params = params.set("category", category.toString());
@@ -442,8 +435,7 @@ getAllPayOutFundWithCompartId(
 
     return this.http
       .get<any>(
-        // `${baseUrl}/comPart/funds/getPayoutFundsByComPartId/${compartId}/${status}`,
-        `${baseUrl}/comPart/funds/getPayoutFundsByComPartId/${compartId}`,
+        `${baseUrl}/comPart/funds/getPayoutFundsByComPartId/${compartId}/${status}`,
         {
           params,
         },
@@ -1223,7 +1215,7 @@ restoreBankAndUpi(comPartId: any): Observable<any> {
       );;
     }
  
-getAllPayInAndPayoutCombine(
+    getAllPayInAndPayoutCombine(
     compartId: any,
     status: any,
     fundType: any,
@@ -1236,10 +1228,6 @@ getAllPayInAndPayoutCombine(
     let params = new HttpParams()
       .set("page", page.toString())
       .set("size", pageSize.toString());
-
-    if (status !== null && status !== undefined) {
-      params = params.set("status", status.toString());
-    }
 
     if (category !== null && category !== undefined) {
       params = params.set("category", category.toString());
@@ -1256,8 +1244,7 @@ getAllPayInAndPayoutCombine(
     }
     return this.http
       .get<any>(
-        // `${baseUrl}/comPart/funds/getFundsByCompartId/${compartId}/${status}`,
-        `${baseUrl}/comPart/funds/getFundsByCompartId/${compartId}?status=PENDING`,
+        `${baseUrl}/comPart/funds/getFundsByCompartId/${compartId}/${status}`,
         {
           params,
         },
@@ -1283,41 +1270,6 @@ getAllPayInAndPayoutCombine(
         catchError((error) => throwError(() => error)),
       );
   }
+
   
- rejectPayoutReward(
- 
-    fundId: string,
-    reason?: string,
-    id?: any,
-  ): Observable<any> {
-    let params = new HttpParams();
-
-    if (reason?.trim()) {
-      params = params.set("reason", reason.trim());
-    }
-
-    if (id?.trim()) {
-      params = params.set("id", id.trim());
-    }
-
-    return this.http
-      .post<any>(
-        `${baseUrl}/payout-rewards/cp/${fundId}/reject`,
-        {},
-        { params },
-      )
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(() => error)),
-      );
-  }
-
-  acceptPayoutReward(fundId: string): Observable<any> {
-    return this.http
-     .post<any>(`${baseUrl}/payout-rewards/cp/${fundId}/accept-now`, {})
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(() => error)),
-      );
-  }
 }

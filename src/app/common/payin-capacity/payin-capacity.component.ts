@@ -31,6 +31,14 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
 
   @Output() close = new EventEmitter<void>();
 
+  // 🔥 NEW: parent ko batayega ki is payinId ki ranges update ho gayi
+  // (extra API call nahi lagega, parent seedha object mutate karega)
+  @Output() capacityUpdated = new EventEmitter<{
+    payinId: string;
+    ranges: any[];
+    limitAmount: number | null;
+  }>();
+
   capacityRanges: any[] = [];
   limitAmount: number | null = null;
   isLoading: boolean = false;
@@ -59,12 +67,88 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
   }
 
   // ================= FETCH =================
-  fetchCapacity() {
+  // fetchCapacity() {
+  //   if (!this.entityId || !this.payinId) return;
+
+  //   this.isLoading = true;
+
+  //   const isCrypto = this.cryptoModes.includes(this.mode);
+
+  //   if (this.mode === "BANK" || isCrypto) {
+  //     this.bankService
+  //       .getPayinCapacity(
+  //         this.entityType,
+  //         this.entityId,
+  //         this.mode as any,
+  //         this.payinId,
+  //       )
+  //       .subscribe({
+  //         next: (res: any) => {
+  //           this.capacityRanges = res.capacities || [];
+  //           this.limitAmount = res.limitAmount || null;
+  //           this.isLoading = false;
+  //         },
+  //         error: (err) => {
+  //           this.snackBar.show(
+  //             err?.error?.message || "Failed to load capacity",
+  //             false,
+  //           );
+  //           this.isLoading = false;
+  //         },
+  //       });
+  //   } else if (this.mode === "UPI") {
+  //     this.upiService
+  //       .getPayinCapacity(
+  //         this.entityType,
+  //         this.entityId,
+  //         this.portalId,
+  //         this.mode,
+  //         this.payinId,
+  //       )
+  //       .subscribe({
+  //         next: (res: any) => {
+  //           this.capacityRanges = res.capacities || [];
+  //           this.limitAmount = res.limitAmount || null;
+  //           this.isLoading = false;
+  //         },
+  //         error: (err) => {
+  //           this.snackBar.show(
+  //             err?.error?.message || "Failed to load capacity",
+  //             false,
+  //           );
+  //           this.isLoading = false;
+  //         },
+  //       });
+  //   }
+  // }
+  fetchCapacity(emitAfter: boolean = false) {
     if (!this.entityId || !this.payinId) return;
 
     this.isLoading = true;
-
     const isCrypto = this.cryptoModes.includes(this.mode);
+
+    const handleRes = (res: any) => {
+      this.capacityRanges = res.capacities || [];
+      this.limitAmount = res.limitAmount || null;
+      this.isLoading = false;
+
+      // 🔥 save ke baad hi emit karna hai, normal open pe nahi
+      if (emitAfter) {
+        this.capacityUpdated.emit({
+          payinId: this.payinId,
+          ranges: this.capacityRanges,
+          limitAmount: this.limitAmount,
+        });
+      }
+    };
+
+    const handleErr = (err: any) => {
+      this.snackBar.show(
+        err?.error?.message || "Failed to load capacity",
+        false,
+      );
+      this.isLoading = false;
+    };
 
     if (this.mode === "BANK" || isCrypto) {
       this.bankService
@@ -74,20 +158,7 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
           this.mode as any,
           this.payinId,
         )
-        .subscribe({
-          next: (res: any) => {
-            this.capacityRanges = res.capacities || [];
-            this.limitAmount = res.limitAmount || null;
-            this.isLoading = false;
-          },
-          error: (err) => {
-            this.snackBar.show(
-              err?.error?.message || "Failed to load capacity",
-              false,
-            );
-            this.isLoading = false;
-          },
-        });
+        .subscribe({ next: handleRes, error: handleErr });
     } else if (this.mode === "UPI") {
       this.upiService
         .getPayinCapacity(
@@ -97,23 +168,9 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
           this.mode,
           this.payinId,
         )
-        .subscribe({
-          next: (res: any) => {
-            this.capacityRanges = res.capacities || [];
-            this.limitAmount = res.limitAmount || null;
-            this.isLoading = false;
-          },
-          error: (err) => {
-            this.snackBar.show(
-              err?.error?.message || "Failed to load capacity",
-              false,
-            );
-            this.isLoading = false;
-          },
-        });
+        .subscribe({ next: handleRes, error: handleErr });
     }
   }
-
   // ================= EDIT =================
   enableEdit() {
     this.isEditing = true;
@@ -160,6 +217,65 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
   }
 
   // ================= SAVE =================
+  // save() {
+  //   if (!this.isValidRanges()) {
+  //     this.snackBar.show("invalid Ranges", false);
+  //     return;
+  //   }
+
+  //   const isCrypto = this.cryptoModes.includes(this.mode);
+
+  //   const payload = {
+  //     entityType: this.entityType,
+  //     entityId: this.entityId,
+  //     portalId: this.portalId,
+  //     mode: this.mode,
+  //     payinId: this.payinId,
+  //     ranges: this.capacityRanges.map((r) => ({
+  //       minRange: Number(r.minRange),
+  //       maxRange: Number(r.maxRange),
+  //       quantity: Number(r.quantity),
+  //     })),
+  //   };
+
+  //   this.isLoading = true;
+
+  //   // ================= BANK + CRYPTO =================
+  //   if (this.mode === "BANK" || isCrypto) {
+  //     this.bankService.addPayinCapacity(payload).subscribe({
+  //       next: () => {
+  //         this.isLoading = false;
+  //         this.isEditing = false;
+  //         this.fetchCapacity();
+  //       },
+  //       error: (err: any) => {
+  //         this.isLoading = false;
+  //         this.snackBar.show(
+  //           err?.error?.message || "Failed to save capacity",
+  //           false,
+  //         );
+  //       },
+  //     });
+
+  //     // ================= UPI =================
+  //   } else if (this.mode === "UPI") {
+  //     this.upiService.addPayinCapacity(payload).subscribe({
+  //       next: () => {
+  //         this.isLoading = false;
+  //         this.isEditing = false;
+  //         this.fetchCapacity();
+  //       },
+  //       error: (err: any) => {
+  //         this.isLoading = false;
+  //         this.snackBar.show(
+  //           err?.error?.message || "Failed to save capacity",
+  //           false,
+  //         );
+  //       },
+  //     });
+  //   }
+  // }
+
   save() {
     if (!this.isValidRanges()) {
       this.snackBar.show("invalid Ranges", false);
@@ -183,13 +299,11 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
 
     this.isLoading = true;
 
-    // ================= BANK + CRYPTO =================
     if (this.mode === "BANK" || isCrypto) {
       this.bankService.addPayinCapacity(payload).subscribe({
         next: () => {
-          this.isLoading = false;
           this.isEditing = false;
-          this.fetchCapacity();
+          this.fetchCapacity(true); // 👈 true = emit to parent after fetch
         },
         error: (err: any) => {
           this.isLoading = false;
@@ -199,14 +313,11 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
           );
         },
       });
-
-      // ================= UPI =================
     } else if (this.mode === "UPI") {
       this.upiService.addPayinCapacity(payload).subscribe({
         next: () => {
-          this.isLoading = false;
           this.isEditing = false;
-          this.fetchCapacity();
+          this.fetchCapacity(true);
         },
         error: (err: any) => {
           this.isLoading = false;

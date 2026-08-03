@@ -168,35 +168,4 @@ export class OwnerService {
      );
 }
 
-
-getOwnerSetups(): Observable<any> {
-    return this.http.get(`${baseUrl}/owner/getSetups`).pipe(
-      map((res) => res),
-      catchError(this.handleError),
-    );
-  }
-  setUpDynamicTime(minutes: number): Observable<any> {
-    const params = new HttpParams().set("minutes", minutes);
-    return this.http
-      .post(`${baseUrl}/owner/setUpDynamicTime`, null, { params })
-      .pipe(
-        map((res) => res),
-        catchError(this.handleError),
-      );
-  }
-  setUpPartialPayin(partialPayin: number): Observable<any> {
-    const params = new HttpParams().set("partialPayin", partialPayin);
-    return this.http
-      .post(`${baseUrl}/owner/setUpPartialPayin`, null, { params })
-      .pipe(
-        map((res) => res),
-        catchError(this.handleError),
-      );
-  }
-  setUpOwnerSetups(data: any): Observable<any> {
-    return this.http.post(`${baseUrl}/owner/setUpOwnerSetups`, data).pipe(
-      map((res) => res),
-      catchError(this.handleError),
-    );
-  }
 }

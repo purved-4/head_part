@@ -346,7 +346,7 @@ export class BanksComponent implements OnInit, OnDestroy {
             ? res.data
             : [];
 
-        console.log(res);
+
 
         this.bankAccounts = rows
           .map((r: any) => {

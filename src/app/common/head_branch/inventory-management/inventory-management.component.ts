@@ -1,3 +1,4 @@
+
 import {
   Component,
   OnInit,
@@ -14,6 +15,7 @@ import { catchError, debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { BankService } from "../../../pages/services/bank.service";
 import { UpiService } from "../../../pages/services/upi.service";
 import { CryptoService } from "../../../pages/services/crypto.service";
+import { PortalService } from "../../../pages/services/portal.service";
 import { UserStateService } from "../../../store/user-state.service";
 import { SnackbarService } from "../../snackbar/snackbar.service";
 import { MultimediaService } from "../../../pages/services/multimedia.service";
@@ -73,12 +75,21 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   loading = false;
   viewMode: "table" | "grid" = "table";
 
-  // ---------- CURRENCY / MODE (no routing, no separate currency API) ----------
+  // ---------- CURRENCY / MODE (no routing — sirf local state) ----------
   currencies: string[] = [];
-  selectedCurrency: any = null; // { currency: 'INR' } shape, kept for template reuse
-  availableModes: string[] = []; // sare unique "type" jo API se aaye (BANK/UPI/TRC20...)
-  selectedMode: string = "all";
-  selectedLimitAccount: any;
+  private currencyModesMap: { [currency: string]: string[] } = {};
+
+  // "draft" = jo UI me abhi select ho rahe hain (Apply Filters se pehle)
+  draftCurrency: string = "";
+  draftMode: string = "";
+  availableModes: string[] = [];
+
+  // "active" = jo Apply Filters ke baad actually API call ke liye use ho rahe hain
+  selectedCurrency: string = "";
+  selectedMode: string = ""; // hamesha UPPERCASE — 'BANK' | 'UPI' | 'ERC20' | ...
+
+  hasLoadedOnce = false; // pehli baar Apply Filters chalne ke baad true
+
   // ---------- FILTERS ----------
   searchTerm = "";
   draftSearchTerm = "";
@@ -159,27 +170,20 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   capacityMode: any;
   hoveredLimitAccount: InventoryItem | null = null;
 
-  tooltipPosition = {
-    x: 0,
-    y: 0,
-  };
-
+  tooltipPosition = { x: 0, y: 0 };
   hoverTimeout: any;
+
   // ---------- DELETE CONFIRM ----------
   isDeleteConfirmVisible = false;
   deleteCandidate: InventoryItem | null = null;
 
   activeActionDropdown: string | null = null;
 
-  // ===================================================================
-  //  BANK — VIEW/EDIT DETAILS MODAL (app-bank-details)
-  // ===================================================================
+  // ---------- BANK — VIEW/EDIT DETAILS MODAL ----------
   showBankDetailsModal = false;
   selectedBankAccount: InventoryItem | null = null;
 
-  // ===================================================================
-  //  BANK ROW → "Add UPI" / "View UPI" (sirf BANK type ke liye)
-  // ===================================================================
+  // ---------- BANK ROW -> "Add UPI" / "View UPI" ----------
   showAddUpiModal = false;
   isAddingUpi = false;
   addUpiForm!: FormGroup;
@@ -197,9 +201,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
   @ViewChild("qrcodeElem", { static: false }) qrcodeElem!: ElementRef;
 
-  // ===================================================================
-  //  UPI — EDIT / UPDATE MODAL
-  // ===================================================================
+  // ---------- UPI — EDIT / UPDATE MODAL ----------
   showUpdateModal = false;
   editingUpi: any;
   updateForm: any = {
@@ -225,9 +227,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
   private vpaPattern = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
 
-  // ===================================================================
-  //  CRYPTO — EDIT ACCOUNT MODAL
-  // ===================================================================
+  // ---------- CRYPTO — EDIT ACCOUNT MODAL ----------
   showEditAccountModal = false;
   accountBeingEdited: InventoryItem | null = null;
   editAccountForm: {
@@ -270,26 +270,24 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     if (this.searchTerm.trim()) count++;
     if (this.statusFilter && this.statusFilter !== "all") count++;
     if (this.maxLimit !== null && this.maxLimit > 0) count++;
-    if (this.selectedMode && this.selectedMode !== "all") count++;
-    if (this.selectedCurrency?.currency) count++;
     return count;
   }
 
-  // Type dropdown, selected currency ke hisaab se filter hoke aata hai
-  get modesForSelectedCurrency(): string[] {
-    if (!this.selectedCurrency?.currency) return this.availableModes;
-    const set = new Set(
-      this.allItems
-        .filter((i) => i.currency === this.selectedCurrency.currency)
-        .map((i) => i.type),
-    );
-    return Array.from(set);
+  /** Mode dropdown tabhi enable hoga jab currency choose ho chuki ho */
+  get isModeDisabled(): boolean {
+    return !this.draftCurrency;
+  }
+
+  /** Apply Filters tabhi enable hoga jab currency + mode dono select ho */
+  get canApplyFilters(): boolean {
+    return !!this.draftCurrency && !!this.draftMode;
   }
 
   constructor(
     private bankService: BankService,
     private upiService: UpiService,
     private cryptoService: CryptoService,
+    private portalService: PortalService,
     private userStateService: UserStateService,
     private snack: SnackbarService,
     private multiMedia: MultimediaService,
@@ -312,7 +310,8 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         this.applyClientFilters();
       });
 
-    this.fetchAllPaymentMethods();
+    this.loadCurrencies();
+    this.loadAllInventory(); // <-- YE LINE ADD KARNI HAI
 
     this.countdownInterval = setInterval(() => {
       this.pagedItems = [...this.pagedItems];
@@ -330,33 +329,135 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   // =========================================================
-  //  FETCH — single combined API, koi currency/routing API nahi
+  //  CURRENCY LOAD — sirf currency list + unke modes chahiye,
+  //  koi data yahan load nahi hota
   // =========================================================
-  fetchAllPaymentMethods(): void {
+  loadCurrencies(): void {
     if (!this.currentRoleId) return;
+
+    this.portalService
+      .getCurrenciesByEntity(this.currentRoleId, this.role)
+      .pipe(catchError(() => of({ data: [] })))
+      .subscribe((res: any) => {
+        const rows: any[] = res?.data || [];
+        this.currencies = rows.map((c) => c.currency).filter(Boolean);
+
+        this.currencyModesMap = {};
+        rows.forEach((c) => {
+          const modes = Object.keys(c.modes || {})
+            .filter((k) => c.modes[k])
+            .map((m) => m.toLowerCase());
+          this.currencyModesMap[c.currency] = modes;
+        });
+      });
+  }
+
+  // =========================================================
+  //  CURRENCY / MODE SELECTION (draft — Apply Filters se pehle)
+  // =========================================================
+  onCurrencyChange(value: string): void {
+    this.draftCurrency = value;
+    this.availableModes = value ? this.currencyModesMap[value] || [] : [];
+    this.draftMode = ""; // currency badalte hi mode reset — dobara chuno
+  }
+
+  onModeChange(): void {
+    // sirf draft state — actual fetch Apply Filters pe hi hoga
+  }
+
+  // =========================================================
+  //  APPLY FILTERS — yahi se asli mode-based API call trigger hoti hai
+  // =========================================================
+  applyFilters(): void {
+    if (!this.canApplyFilters) {
+      this.snack.show("Please select Currency and Mode first", false);
+      return;
+    }
+
+    this.searchTerm = this.draftSearchTerm;
+    this.maxLimit = this.draftMaxLimit;
+    this.statusFilter = this.draftStatusFilter;
+
+    this.selectedCurrency = this.draftCurrency;
+    this.selectedMode = this.draftMode.toUpperCase();
+
+    this.currentPage = 1;
+    this.hasLoadedOnce = true;
+
+    this.fetchInventory();
+  }
+
+  resetFilters(): void {
+    this.searchTerm = "";
+    this.draftSearchTerm = "";
+    this.maxLimit = null;
+    this.draftMaxLimit = null;
+    this.statusFilter = "all";
+    this.draftStatusFilter = "all";
+
+    this.draftCurrency = "";
+    this.draftMode = "";
+    this.availableModes = [];
+
+    this.selectedCurrency = "";
+    this.selectedMode = "";
+
+    this.currentPage = 1;
+    this.loadAllInventory(); // <-- empty karne ki jagah yeh call — sab data wapas
+  }
+
+  clearLimitFilter(): void {
+    this.maxLimit = null;
+    this.draftMaxLimit = null;
+    this.currentPage = 1;
+    this.applyClientFilters();
+  }
+
+  clearSearchFilter(): void {
+    this.searchTerm = "";
+    this.draftSearchTerm = "";
+    this.currentPage = 1;
+    this.applyClientFilters();
+  }
+
+  onSearchInput(value: string) {
+    this.searchSubject.next(value);
+  }
+
+  // =========================================================
+  //  FETCH DISPATCHER — mode ke hisaab se seedha uska hi service call
+  // =========================================================
+  fetchInventory(): void {
+    if (!this.currentRoleId || !this.selectedMode) return;
+
+    if (this.selectedMode === "BANK") {
+      this.fetchBankInventory();
+    } else if (this.selectedMode === "UPI") {
+      this.fetchUpiInventory();
+    } else {
+      // erc20 / trc20 / spl / bep20 / omni / etc.
+      this.fetchCryptoInventory(this.selectedMode);
+    }
+  }
+
+  /** Refresh — jo bhi filters currently ACTIVE hain (post Apply) unhi se dobara fetch */
+  refreshInventory(): void {
+    if (!this.hasLoadedOnce) return;
+    this.fetchInventory();
+  }
+
+  private fetchBankInventory(): void {
     this.loading = true;
 
     const sub = this.bankService
-      .getAllPaymentMethods({
-        entityId: this.currentRoleId,
-        entityType: this.role,
+      .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, {
         page: 0,
         size: 200,
+        currency: this.selectedCurrency,
       })
-      .pipe(
-        catchError(() => {
-          this.loading = false;
-          return of(null);
-        }),
-      )
+      .pipe(catchError(() => of(null)))
       .subscribe((res: any) => {
         this.loading = false;
-
-        if (!res) {
-          this.allItems = [];
-          this.applyClientFilters();
-          return;
-        }
 
         const rows: any[] = Array.isArray(res?.data?.content)
           ? res.data.content
@@ -364,15 +465,62 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
             ? res.data
             : [];
 
-        this.allItems = rows.map((r: any) => this.mapRow(r));
+        this.allItems = rows.map((r: any) => this.mapBankRow(r));
+        this.loadQrThumbnails();
+        this.applyClientFilters();
+      });
 
-        this.currencies = Array.from(
-          new Set(this.allItems.map((i) => i.currency).filter(Boolean)),
-        );
+    this.subs.add(sub);
+  }
 
-        this.availableModes = Array.from(
-          new Set(this.allItems.map((i) => i.type).filter(Boolean)),
-        );
+  private fetchUpiInventory(): void {
+    this.loading = true;
+
+    const sub = this.upiService
+      .getByEntityIdAndActivePaginated(this.currentRoleId, {
+        page: 0,
+        size: 200,
+        currency: this.selectedCurrency,
+      })
+      .pipe(catchError(() => of(null)))
+      .subscribe((res: any) => {
+        this.loading = false;
+
+        const responseData = res?.data || res;
+        const rows: any[] = Array.isArray(responseData?.content)
+          ? responseData.content
+          : Array.isArray(responseData)
+            ? responseData
+            : [];
+
+        this.allItems = rows.map((r: any) => this.mapUpiRow(r));
+        this.loadQrThumbnails();
+        this.applyClientFilters();
+      });
+
+    this.subs.add(sub);
+  }
+
+  private fetchCryptoInventory(paymentMethod: string): void {
+    this.loading = true;
+
+    const sub = this.cryptoService
+      .getCrypto(this.currentRoleId, this.role, paymentMethod)
+      .pipe(catchError(() => of(null)))
+      .subscribe((res: any) => {
+        this.loading = false;
+
+        const rows: any[] = Array.isArray(res?.content) ? res.content : [];
+
+        this.allItems = rows
+          .filter((r: any) => !r.deleted)
+          .filter((r: any) =>
+            this.selectedCurrency
+              ? (r.currency || "").toUpperCase() ===
+                this.selectedCurrency.toUpperCase()
+              : true,
+          )
+          .map((r: any) => this.mapCryptoRow(r));
 
         this.loadQrThumbnails();
         this.applyClientFilters();
@@ -381,21 +529,76 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.subs.add(sub);
   }
 
-  private mapRow(r: any): InventoryItem {
-    const type: ItemType = (r.type || "").toUpperCase();
-
-    let displayAddress = "-";
-    if (type === "BANK") {
-      displayAddress = r.accountNo || "-";
-    } else if (type === "UPI") {
-      displayAddress = r.vpa || "-";
-    } else {
-      displayAddress = r.walletAddress || "-";
-    }
-
+  // =========================================================
+  //  ROW MAPPERS — har mode ka apna mapper, common InventoryItem shape me
+  // =========================================================
+  private mapBankRow(r: any): InventoryItem {
     return {
       id: r.id,
-      type,
+      type: "BANK",
+      entityType: r.entityType,
+      entityId: r.entityId,
+      currency: r.portalCurrency || r.currency || "",
+      limitAmount: r.limitAmount ?? "",
+      remainingLimitAmount: r.remainingLimitAmount,
+      status:
+        typeof r.status === "boolean"
+          ? r.status
+          : (r.status || "").toLowerCase() === "active",
+      fttAcceptance: r.fttAcceptance ?? true,
+      partialPayinEnabled: r.partialPayinEnabled ?? false,
+      liveAssigned: r.liveAssigned ?? false,
+      limitTime: r.limitTime ?? null,
+      ranges: r.ranges ?? [],
+      qrImagePath: null,
+      qrImageUrl: null,
+
+      accountNo: r.accountNo ?? r.accountNumber ?? "",
+      accountHolderName: r.accountHolderName ?? r.name ?? "",
+      bankCode: r.bankCode ?? "",
+      bankName: r.bankName ?? "",
+      accountType: r.accountType ?? "",
+      bankTime: r.bankTime ?? null,
+      upiCount: r.upiCount ?? null,
+
+      displayAddress: r.accountNo || r.accountNumber || "-",
+    };
+  }
+
+  private mapUpiRow(r: any): InventoryItem {
+    return {
+      id: r.id,
+      type: "UPI",
+      entityType: r.entityType,
+      entityId: r.entityId,
+      currency: r.portalCurrency || r.currency || "",
+      limitAmount: r.limitAmount ?? "",
+      remainingLimitAmount: r.remainingLimitAmount,
+      status:
+        typeof r.status === "boolean"
+          ? r.status
+          : (r.status || "").toLowerCase() === "active",
+      fttAcceptance: r.fttAcceptance ?? true,
+      partialPayinEnabled: r.partialPayinEnabled ?? false,
+      liveAssigned: r.liveAssigned ?? false,
+      limitTime: r.limitTime ?? null,
+      ranges: r.ranges ?? [],
+      qrImagePath: r.qrImagePath || r.qrImageUrl || null,
+      qrImageUrl: null,
+
+      vpa: r.vpa || r.upiId || "",
+      upiTime: r.upiTime ?? null,
+      accountHolder: r.accountHolder ?? "",
+      bankName: r.bankName ?? "",
+
+      displayAddress: r.vpa || r.upiId || "-",
+    };
+  }
+
+  private mapCryptoRow(r: any): InventoryItem {
+    return {
+      id: r.id,
+      type: (r.paymentMethod || "").toUpperCase(),
       entityType: r.entityType,
       entityId: r.entityId,
       currency: r.currency || "",
@@ -410,23 +613,11 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       qrImagePath: r.qrImagePath ?? null,
       qrImageUrl: null,
 
-      accountNo: r.accountNo ?? null,
-      accountHolderName: r.accountHolderName ?? null,
-      bankCode: r.bankCode ?? null,
-      bankName: r.bankName ?? null,
-      accountType: r.accountType ?? null,
-      bankTime: r.bankTime ?? null,
-      upiCount: r.upiCount ?? null,
-
-      vpa: r.vpa ?? null,
-      upiTime: r.upiTime ?? null,
-      accountHolder: r.accountHolder ?? null,
-
-      walletAddress: r.walletAddress ?? null,
+      walletAddress: r.walletAddress ?? "",
       cryptoTime: r.cryptoTime ?? null,
-      holderName: r.holderName ?? null,
+      holderName: r.holderName ?? "",
 
-      displayAddress,
+      displayAddress: r.walletAddress || "-",
     };
   }
 
@@ -465,91 +656,12 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   // =========================================================
-  //  CURRENCY / MODE — pure client side, koi routing nahi
-  //  Currency change hote hi Type list us currency ke items
-  //  se hi (INR -> BANK/UPI, USDT -> TRC20/ERC20/...) niklegi
+  //  CLIENT SIDE FILTERS (search / status / max limit) + PAGINATION
+  //  — currency/mode ab yahan filter nahi hote, kyunki fetch hi
+  //    us mode/currency ke liye hui thi
   // =========================================================
-  onCurrencyChange(value: string) {
-    this.selectedCurrency = value ? { currency: value } : null;
-
-    // agar current selected type naye currency me available nahi hai to reset karo
-    if (
-      this.selectedMode !== "all" &&
-      !this.modesForSelectedCurrency.includes(this.selectedMode)
-    ) {
-      this.selectedMode = "all";
-    }
-
-    this.currentPage = 1;
-    this.applyClientFilters();
-  }
-
-  onModeChange(_event?: Event) {
-    this.currentPage = 1;
-    this.applyClientFilters();
-  }
-
-  isCurrencyInList(): boolean {
-    if (!this.selectedCurrency) return false;
-    return this.currencies.includes(this.selectedCurrency.currency);
-  }
-
-  // =========================================================
-  //  FILTERS — sab kuch client side
-  // =========================================================
-  onSearchInput(value: string) {
-    this.searchSubject.next(value);
-  }
-
-  applyFilters(): void {
-    this.searchTerm = this.draftSearchTerm;
-    this.maxLimit = this.draftMaxLimit;
-    this.statusFilter = this.draftStatusFilter;
-    this.currentPage = 1;
-    this.applyClientFilters();
-  }
-
-  resetFilters(): void {
-    this.searchTerm = "";
-    this.draftSearchTerm = "";
-    this.maxLimit = null;
-    this.draftMaxLimit = null;
-    this.statusFilter = "all";
-    this.draftStatusFilter = "all";
-    this.selectedCurrency = null;
-    this.selectedMode = "all";
-    this.currentPage = 1;
-    this.applyClientFilters();
-  }
-
-  clearLimitFilter(): void {
-    this.maxLimit = null;
-    this.draftMaxLimit = null;
-    this.currentPage = 1;
-    this.applyClientFilters();
-  }
-
-  clearSearchFilter(): void {
-    this.searchTerm = "";
-    this.draftSearchTerm = "";
-    this.currentPage = 1;
-    this.applyClientFilters();
-  }
-
   applyClientFilters(): void {
     let items = [...this.allItems];
-
-    if (this.selectedMode && this.selectedMode !== "all") {
-      items = items.filter(
-        (i) => i.type.toLowerCase() === this.selectedMode.toLowerCase(),
-      );
-    }
-
-    if (this.selectedCurrency?.currency) {
-      items = items.filter(
-        (i) => i.currency === this.selectedCurrency.currency,
-      );
-    }
 
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.trim().toLowerCase();
@@ -560,6 +672,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
           (i.bankName || "").toLowerCase().includes(term) ||
           (i.bankCode || "").toLowerCase().includes(term) ||
           (i.vpa || "").toLowerCase().includes(term) ||
+          (i.accountHolder || "").toLowerCase().includes(term) ||
           (i.walletAddress || "").toLowerCase().includes(term)
         );
       });
@@ -795,7 +908,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         next: (res: any) => {
           this.snack.show(res?.message || "Status updated", true);
           this.showStatusModal = false;
-          this.fetchAllPaymentMethods();
+          this.refreshInventory();
         },
         error: (err) => {
           this.snack.show(
@@ -810,7 +923,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         next: () => {
           this.snack.show("Status updated", true);
           this.showStatusModal = false;
-          this.fetchAllPaymentMethods();
+          this.refreshInventory();
         },
         error: (err: any) => {
           this.snack.show(
@@ -825,7 +938,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         next: (res: any) => {
           this.snack.show(res?.message || "Status updated", true);
           this.showStatusModal = false;
-          this.fetchAllPaymentMethods();
+          this.refreshInventory();
         },
         error: (err: any) => {
           this.snack.show(
@@ -861,7 +974,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         next: (res: any) => {
           this.snack.show(res?.message || "Bank deleted", true);
           this.closeDeleteConfirm();
-          this.fetchAllPaymentMethods();
+          this.refreshInventory();
         },
         error: (err) => {
           this.snack.show(
@@ -876,7 +989,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         next: (res: any) => {
           this.snack.show(res?.message || "UPI deleted", true);
           this.closeDeleteConfirm();
-          this.fetchAllPaymentMethods();
+          this.refreshInventory();
         },
         error: (err) => {
           this.snack.show(err.error?.message || "Failed to delete UPI", false);
@@ -888,7 +1001,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         next: (res: any) => {
           this.snack.show(res?.message || "Crypto account deleted", true);
           this.closeDeleteConfirm();
-          this.fetchAllPaymentMethods();
+          this.refreshInventory();
         },
         error: (err) => {
           this.snack.show(
@@ -1080,7 +1193,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.snack.show("Limit time set successfully", true);
     this.closeLimitModal();
     this.isSubmittingLimit = false;
-    this.fetchAllPaymentMethods();
+    this.refreshInventory();
   }
 
   private onLimitTimeError(err: any) {
@@ -1139,9 +1252,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.showInventoryModal = false;
   }
 
-  // ===================================================================
-  //  BANK — VIEW / EDIT DETAILS MODAL
-  // ===================================================================
+  // ---------- BANK — VIEW / EDIT DETAILS MODAL ----------
   openBankDetails(item: InventoryItem): void {
     this.selectedBankAccount = item;
     this.showBankDetailsModal = true;
@@ -1153,12 +1264,10 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   refreshBankAccounts = () => {
-    this.fetchAllPaymentMethods();
+    this.refreshInventory();
   };
 
-  // ===================================================================
-  //  BANK ROW ONLY — "Add UPI" / "View UPI"
-  // ===================================================================
+  // ---------- BANK ROW ONLY — "Add UPI" / "View UPI" ----------
   viewUpi(item: InventoryItem) {
     const bankId = item?.id;
     if (!bankId) return;
@@ -1278,7 +1387,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         if (res?.success || res?.id || res?._id) {
           this.snack.show(res?.message || "UPI added successfully!", true);
           this.closeAddUpiModal();
-          this.fetchAllPaymentMethods();
+          this.refreshInventory();
         } else {
           this.snack.show(res?.message || "Failed to add UPI.", false);
         }
@@ -1362,18 +1471,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.selectedImage = null;
   }
 
-  // downloadQr(): void {
-  //   if (!this.generatedFile) return;
-  //   const url = URL.createObjectURL(this.generatedFile);
-  //   const a = document.createElement("a");
-  //   a.href = url;
-  //   a.download = this.generatedFile.name;
-  //   document.body.appendChild(a);
-  //   a.click();
-  //   document.body.removeChild(a);
-  //   URL.revokeObjectURL(url);
-  // }
-
   updateFrom(index: number, event: any) {
     const value = event.target.value;
     this.capacityRanges[index].minRange =
@@ -1428,9 +1525,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ===================================================================
-  //  UPI — EDIT / UPDATE MODAL
-  // ===================================================================
+  // ---------- UPI — EDIT / UPDATE MODAL ----------
   openUpdateModal(item: InventoryItem): void {
     this.editingUpi = item;
     this.updateForm = {
@@ -1613,7 +1708,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       next: (res: any) => {
         this.isSubmitting = false;
         this.closeUpdateModal();
-        this.fetchAllPaymentMethods();
+        this.refreshInventory();
         this.snack.show(res?.message || "UPI updated successfully!", true);
       },
       error: (err: any) => {
@@ -1623,9 +1718,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ===================================================================
-  //  CRYPTO — EDIT ACCOUNT MODAL
-  // ===================================================================
+  // ---------- CRYPTO — EDIT ACCOUNT MODAL ----------
   openEditAccountModal(item: InventoryItem): void {
     this.accountBeingEdited = item;
     this.originalWalletAddress = item.walletAddress || "";
@@ -1839,7 +1932,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
           this.snack.show(res?.message || "Account updated successfully", true);
           this.isSavingEdit = false;
           this.closeEditAccountModal();
-          this.fetchAllPaymentMethods();
+          this.refreshInventory();
         },
         error: (err) => {
           this.snack.show(
@@ -1850,6 +1943,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         },
       });
   }
+
   downloadQr(): void {
     if (!this.selectedQrItem) return;
 
@@ -1864,6 +1958,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     link.click();
     document.body.removeChild(link);
   }
+
   showLimitTooltip(item: InventoryItem, event: MouseEvent): void {
     clearTimeout(this.hoverTimeout);
 
@@ -1889,14 +1984,122 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   openLimitDetails(item: InventoryItem): void {
-    this.selectedLimitAccount = item;
+    this.selectedItem = item;
     this.selectedCapacityAccount = null;
   }
 
   closeLimitDetails(): void {
-    this.selectedLimitAccount = null;
+    this.selectedItem = null;
   }
+
   toggleView(mode: "table" | "grid"): void {
     this.viewMode = mode;
+  }
+
+  onCapacityUpdated(event: {
+    payinId: string;
+    ranges: any[];
+    limitAmount: number | null;
+  }): void {
+    const item = this.allItems.find((i) => i.id === event.payinId);
+    if (!item) return;
+
+    item.ranges = event.ranges;
+    if (event.limitAmount != null) {
+      item.limitAmount = String(event.limitAmount);
+    }
+
+    this.pagedItems = [...this.pagedItems];
+  }
+  /** Component load hote hi + Reset All pe — sara data (bank+upi+crypto combined) */
+  private loadAllInventory(): void {
+    if (!this.currentRoleId) return;
+    this.loading = true;
+
+    const sub = this.bankService
+      .getAllPaymentMethods({
+        entityId: this.currentRoleId,
+        entityType: this.role,
+        page: 0,
+        size: 1000,
+      })
+      .pipe(catchError(() => of(null)))
+      .subscribe((res: any) => {
+        this.loading = false;
+
+        const rows: any[] = Array.isArray(res?.data?.content)
+          ? res.data.content
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res)
+              ? res
+              : [];
+
+        this.allItems = rows
+          .filter((r: any) => !r.deleted)
+          .map((r: any) => this.mapAnyRow(r));
+
+        this.hasLoadedOnce = true;
+        this.loadQrThumbnails();
+        this.applyClientFilters();
+      });
+
+    this.subs.add(sub);
+  }
+
+  /** getAllPaymentMethods response ke liye generic mapper (bank/upi/crypto teeno type handle karega) */
+  private mapAnyRow(r: any): InventoryItem {
+    // ⚠️ apna actual response check karke field confirm kar lena (type/paymentMethod/mode)
+    const type = (r.type || r.paymentMethod || r.mode || "")
+      .toString()
+      .toUpperCase();
+
+    let displayAddress = "-";
+    if (type === "BANK") {
+      displayAddress = r.accountNo || "-";
+    } else if (type === "UPI") {
+      displayAddress = r.vpa || "-";
+    } else {
+      displayAddress = r.walletAddress || "-";
+    }
+
+    return {
+      id: r.id,
+      type,
+      entityType: r.entityType,
+      entityId: r.entityId,
+      currency: r.currency || r.portalCurrency || "",
+      limitAmount: r.limitAmount ?? "",
+      remainingLimitAmount: r.remainingLimitAmount,
+      status:
+        typeof r.status === "boolean"
+          ? r.status
+          : (r.status || "").toLowerCase() === "active",
+      fttAcceptance: r.fttAcceptance ?? true,
+      partialPayinEnabled: r.partialPayinEnabled ?? false,
+      liveAssigned: r.liveAssigned ?? false,
+      limitTime: r.limitTime ?? null,
+      ranges: r.ranges ?? [],
+      qrImagePath: r.qrImagePath ?? null,
+      qrImageUrl: null,
+
+      accountNo: r.accountNo ?? null,
+      accountHolderName: r.accountHolderName ?? null,
+      bankCode: r.bankCode ?? null,
+      bankName: r.bankName ?? null,
+      accountType: r.accountType ?? null,
+      bankTime: r.bankTime ?? null,
+      upiCount: r.upiCount ?? null,
+
+      vpa: r.vpa ?? null,
+      upiTime: r.upiTime ?? null,
+      accountHolder: r.accountHolder ?? null,
+
+      walletAddress: r.walletAddress ?? null,
+      cryptoTime: r.cryptoTime ?? null,
+      holderName: r.holderName ?? null,
+
+      displayAddress,
+    };
   }
 }

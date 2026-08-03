@@ -1,3 +1,5 @@
+
+
 import {
   AfterViewInit,
   Component,
@@ -64,7 +66,7 @@ export class HeadBranchDashboardComponent
   showPendingThreads = false;
   autoRefreshBroadcast = false;
   isRejecting = false;
-
+  isApproving = false;
   payinActive = true;
   payoutActive = true;
   mobilePage = 1;
@@ -1897,6 +1899,9 @@ export class HeadBranchDashboardComponent
   }
 
   async confirmApprove() {
+    if (this.isApproving) return;
+    this.isApproving = true;
+     try {
     if (this.isPayoutActionBlocked(this.confirmTransaction)) {
       this.snackbar.show("You Can approve After Processing", false);
       return;
@@ -1910,6 +1915,10 @@ export class HeadBranchDashboardComponent
     }
 
     await this.approveTransaction(this.confirmTransaction);
+  } finally {
+    this.isApproving = false;
+  }
+    
   }
 
   get rejectionReason(): string {
@@ -3058,3 +3067,4 @@ export class HeadBranchDashboardComponent
     });
   }
 }
+

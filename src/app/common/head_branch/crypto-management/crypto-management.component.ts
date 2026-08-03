@@ -1106,7 +1106,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
       fttAcceptance: this.editAccountForm.fttAcceptance,
       partialPayinEnabled: this.editAccountForm.partialPayinEnabled,
     };
-    console.log(payload);
+
     const formData = new FormData();
     formData.append(
       "dto",
@@ -1129,7 +1129,7 @@ export class CryptoManagementComponent implements OnInit, OnDestroy {
     }
 
     const body: any = formData;
-    console.log(body);
+
 
     this.cryptoService
       .updateCrypto(this.accountBeingEdited.id, body)

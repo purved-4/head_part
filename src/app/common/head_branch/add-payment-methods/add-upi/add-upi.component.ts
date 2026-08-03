@@ -257,7 +257,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       fttAcceptance: this.addUpiForm.value.fttAcceptance,
       partialPayinEnabled: this.addUpiForm.getRawValue().partialPayinEnabled,
     };
-    console.log(payload);
+
     const validRanges = this.capacityRanges
       .filter(
         (r) =>

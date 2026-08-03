@@ -240,20 +240,167 @@ getEntityReport(params: {
     httpParams = httpParams.set("page", String(params.page ?? 0));
     httpParams = httpParams.set("pageSize", String(params.pageSize ?? 10));
 
-    console.log("HTTP Params:", httpParams.toString());
+
 
     return this.http.get<any>(`${baseUrl}/entityBalance/search`, {
       params: httpParams,
     });
   }
 
-  searchMultiPortalFund(payload: any): Observable<any> {
+  
+searchMultiPortalFund(payload: any): Observable<any> {
     return this.http
-      .post<any>(`${baseUrl}/multi-portal-fund/search`, payload)
+     .post<any>(`${baseUrl}/multi-portal-fund/search`, payload)
+     .pipe(
+        catchError((error) => {
+         return throwError(() => error);
+        }),
+     );
+}
+
+reportMultiPortalFund(
+    entityId: any,
+    entityType: any,
+    filters: any = {},
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set("entityId", entityId)
+      .set("entityType", entityType);
+
+    if (filters.transactionTypes?.length) {
+      filters.transactionTypes.forEach(
+        (v: any) => (params = params.append("transactionTypes", v)),
+      );
+    }
+    if (filters.amountTypes?.length) {
+      filters.amountTypes.forEach(
+        (v: any) => (params = params.append("amountTypes", v)),
+      );
+    }
+     if (filters.portalIds?.length) {
+ filters.portalIds.forEach(
+        (v: any) => (params = params.append("portalIds", v)),
+      );    }
+    if (filters.currencies?.length) {
+      filters.currencies.forEach(
+        (v: any) => (params = params.append("currencies", v)),
+      );
+    }
+    if (filters.paymentMethods?.length) {
+      filters.paymentMethods.forEach(
+        (v: any) => (params = params.append("paymentMethods", v)),
+      );
+    }
+    if (filters.fromDate) {
+      params = params.set("fromDate", filters.fromDate);
+    }
+    if (filters.toDate) {
+      params = params.set("toDate", filters.toDate);
+    }
+   
+
+    return this.http
+      .get<any>(`${baseUrl}/multi-portal-fund/report`, { params })
       .pipe(
         catchError((error) => {
           return throwError(() => error);
         }),
       );
   }
+
+
+
+  reportComPartFund(entityId: string, filters: any): Observable<any> {
+    const params = this.buildParams(entityId, filters, ["portalIds"]);
+    return this.http.get(`${baseUrl}/multi-portal-fund/report/compart`, { params });
+  }
+
+  reportHeadBranchFund(
+  entityId: string,
+  filters: any
+): Observable<any> {
+  const params = this.buildParams(
+    entityId,
+    filters,
+    ["inventories"]
+  );
+
+  return this.http.get(
+    `${baseUrl}/multi-portal-fund/report/head-branch`,
+    { params }
+  );
+}
+
+reportOtherFund(
+  entityId: string,
+  filters: any
+): Observable<any> {
+  const params = this.buildParams(
+    entityId,
+    filters,
+    ["comPartIds", "inventories"]
+  );
+
+  return this.http.get(
+    `${baseUrl}/multi-portal-fund/report/other`,
+    { params }
+  );
+}
+
+
+  private buildParams(
+  entityId: string,
+  filters: any,
+  extraArrayKeys: string[]
+): HttpParams {
+
+  let params = new HttpParams().set("entityId", entityId);
+
+  const arrayKeys = [
+    "transactionTypes",
+    "amountTypes",
+    "currencies",
+    "paymentMethods",
+    ...extraArrayKeys,
+  ];
+
+  arrayKeys.forEach((key) => {
+    const values: string[] = filters[key];
+
+    if (values?.length) {
+      values.forEach((value) => {
+        params = params.append(key, value);
+      });
+    }
+  });
+
+  if (filters.fromDate) {
+    params = params.set("fromDate", filters.fromDate);
+  }
+
+  if (filters.toDate) {
+    params = params.set("toDate", filters.toDate);
+  }
+
+  return params;
+}
+
+  getInventory(entities:any, payment:any){
+
+    let params = new HttpParams()
+      .set("entityId", entities)
+      .set("paymentMethods", payment);
+
+
+    return this.http
+      .get<any>(`${baseUrl}/multi-portal-fund/getInventory`, { params })
+      .pipe(
+        catchError((error) => {
+          return throwError(() => error);
+        }),
+      );
+
+  }
+
+
 }

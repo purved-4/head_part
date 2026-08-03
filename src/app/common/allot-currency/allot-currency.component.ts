@@ -15,6 +15,7 @@ import {
   getNetworks,
   PaymentNetwork,
 } from "../../utils/constants";
+import { delay } from "rxjs";
 
 // One row = one currency, fully self-contained (rate / modes / effective date / open state).
 // Replaces the old single "selectedCurrency" model so several currencies can be
@@ -370,7 +371,6 @@ export class AllotCurrencyComponent implements OnInit {
       }
     }
 
-    this.loaderService.showButtonLoader();
 
     // ================= PAYLOAD (array — one entry per changed currency) =================
     const payload: any[] = rowsToSubmit.map((row) => {
@@ -401,7 +401,6 @@ export class AllotCurrencyComponent implements OnInit {
     });
 
     if (payload.some((p) => p === null)) {
-      this.loaderService.hideButtonLoader();
       this.snackBar.show("Invalid entity type", false);
       return;
     }
@@ -425,33 +424,30 @@ export class AllotCurrencyComponent implements OnInit {
         payload,
       );
     } else {
-      this.loaderService.hideButtonLoader();
       this.snackBar.show("Invalid entity type", false);
       return;
     }
 
     submitObservable.subscribe({
-      next: (res: any) => {
-        this.loaderService.hideButtonLoader();
-        this.snackBar.show(res?.message || "Updated successfully", true);
+       next: (res: any) => {
+      this.snackBar.show(res?.message || "Updated successfully", true);
 
-        rowsToSubmit.forEach((row) => {
-          this.existingData[row.currency] = {
-            rate: row.rate,
-            modes: [...row.selectedModes],
-            effectiveFrom: row.effectiveFromNew,
-          };
-          row.lockedModes = [...row.selectedModes];
-          row.existing = this.existingData[row.currency];
-        });
+      rowsToSubmit.forEach((row) => {
+        this.existingData[row.currency] = {
+          rate: row.rate,
+          modes: [...row.selectedModes],
+          effectiveFrom: row.effectiveFromNew,
+        };
+        row.lockedModes = [...row.selectedModes];
+        row.existing = this.existingData[row.currency];
+      });
 
-        setTimeout(() => {
-          this.closeModal();
-        }, 1000);
-      },
+      setTimeout(() => {
+        this.closeModal();
+      }, 1000);
+  },
 
       error: (err) => {
-        this.loaderService.hideButtonLoader();
         this.snackBar.show(err.error?.message || "Update failed", false);
       },
     });

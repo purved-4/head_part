@@ -1,58 +1,60 @@
 <div class="w-full">
   <div class="flex items-end gap-3">
     <!-- Currency -->
-    <div class="flex-1">
-      <label
-        class="block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-font)] mb-1"
-      >
+    <div class="flex-1 space-y-1">
+      <label class="block text-xs font-medium text-[var(--color-font)]">
+        <span
+          class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+        >
+          currency_rupee
+        </span>
         Currency
       </label>
 
-      <div class="relative">
-        <select
-          class="w-full h-9 rounded-lg border border-[var(--color-border)] px-3 text-sm font-medium text-[var(--color-font)] outline-none appearance-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all"
-          [ngModel]="selectedCurrency?.currency"
-          (ngModelChange)="onCurrencyChange($event)"
+      <select
+        class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+        [ngModel]="selectedCurrency?.currency"
+        (ngModelChange)="onCurrencyChange($event)"
+      >
+        <!-- Inventory Management ke liye -->
+        <option *ngIf="showAllOption" value="ALL">Select</option>
+
+        <option
+          *ngIf="selectedCurrency && !isCurrencyInList()"
+          [value]="selectedCurrency.currency"
         >
-          <!-- Inventory Management ke liye -->
-          <option *ngIf="showAllOption" value="ALL">Select</option>
+          {{ selectedCurrency.currency }}
+        </option>
 
-          <option
-            *ngIf="selectedCurrency && !isCurrencyInList()"
-            [value]="selectedCurrency.currency"
-          >
-            {{ selectedCurrency.currency }}
-          </option>
-
-          <option *ngFor="let c of currencies" [value]="c.currency">
-            {{ c.currency }}
-          </option>
-        </select>
-      </div>
+        <option *ngFor="let c of currencies" [value]="c.currency">
+          {{ c.currency }}
+        </option>
+      </select>
     </div>
 
     <!-- Mode -->
-    <div class="flex-1">
-      <label
-        class="block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-font)] mb-1"
-      >
+    <div class="flex-1 space-y-1">
+      <label class="block text-xs font-medium text-[var(--color-font)]">
+        <span
+          class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+        >
+          payments
+        </span>
         Mode
       </label>
 
-      <div class="relative">
-        <select
-          class="w-full h-9 rounded-lg border border-[var(--color-border)] px-3 text-sm font-medium text-[var(--color-font)] outline-none appearance-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all"
-          [(ngModel)]="selectedMode"
-          (change)="onModeChange($event)"
-        >
-          <!-- Inventory Management ke liye -->
-          <option *ngIf="showAllOption" value="ALL">Select</option>
+      <select
+        class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+        [(ngModel)]="selectedMode"
+        (change)="onModeChange($event)"
+      >
+        <!-- Inventory Management ke liye -->
+        <option *ngIf="showAllOption" value="ALL">Select</option>
 
-          <option *ngFor="let mode of availableModes" [value]="mode">
-            {{ mode | uppercase }}
-          </option>
-        </select>
-      </div>
+        <option *ngFor="let mode of availableModes" [value]="mode">
+          {{ mode | uppercase }}
+        </option>
+      </select>
     </div>
   </div>
 </div>

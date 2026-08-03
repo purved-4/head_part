@@ -1,3 +1,4 @@
+
 import {
   Component,
   Input,
@@ -20,6 +21,7 @@ import { HeadService } from "../../pages/services/head.service";
 export class HierarchyManagementComponent implements OnChanges, OnInit {
   // ================= INPUT / OUTPUT =================
   @Input() chiefs: any;
+  @Input() initialHead: any;
   @Output() close = new EventEmitter<void>();
 
   // ================= STATE =================
@@ -71,6 +73,12 @@ export class HierarchyManagementComponent implements OnChanges, OnInit {
       this.selectedChief = this.chiefs;
       this.resetAllData();
       this.loadHierarchy();
+    }
+
+     if (changes["initialHead"] && changes["initialHead"].currentValue) {
+      // Jump straight to the branches view for this head.
+      // selectedManager stays null, so goBack() returns to the chief level.
+      this.getBranchesByHead(this.initialHead);
     }
   }
 
