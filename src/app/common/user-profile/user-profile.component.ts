@@ -35,6 +35,11 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   cpInfo: any[] = [];
   expandedCps: Set<string> = new Set();
   expandedRawData: Set<string> = new Set();
+  globalPercentage = {
+  payinPercentage: 0,
+  payoutPercentage: 0,
+  fttPercentage: 0,
+};
 
   rewards: any[] = [];
   payouts: any[] = [];
@@ -153,11 +158,11 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         balance: data?.branchBalance,
       };
 
-    this.cpInfoRaw = Array.isArray(data?.cpInfo)
-      ? data.cpInfo
-      : data?.cps || [];
-    this.cpInfo = this.mapcpInfo(this.cpInfoRaw || []);
+this.cpInfoRaw = Array.isArray(data?.cpInfo)
+  ? data.cpInfo
+  : [];
 
+this.cpInfo = this.mapcpInfo(this.cpInfoRaw);
     this.cpIdToDomain = {};
     for (const w of this.cpInfo) {
       if (w.cpId)

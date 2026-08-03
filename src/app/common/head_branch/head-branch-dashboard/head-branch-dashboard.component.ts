@@ -1,3 +1,4 @@
+import { Fund } from './../../../components/reports/funds-report/funds-report.component';
 
 
 import {
@@ -2152,6 +2153,8 @@ export class HeadBranchDashboardComponent
 
       utrNumber: fund.transactionId || fund.utr || null,
 
+      utrEdited:fund.utrEdited,
+
       parentCurrency: fund.parentCurrency,
 
       mode,
@@ -3007,6 +3010,7 @@ export class HeadBranchDashboardComponent
       const t2 = new Date(b.date).getTime() || 0;
       return t2 - t1;
     });
+
   }
   trackById(index: number, item: any): any {
     return item?.id || item?.fundId || index;
