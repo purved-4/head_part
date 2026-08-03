@@ -1,3 +1,4 @@
+
 import { Component, OnInit } from "@angular/core";
 import { BulkUpdateService } from "../../pages/services/bulk-update.service";
 import { UserStateService } from "../../store/user-state.service";
@@ -138,7 +139,7 @@ export class ResolvedNotificationComponent implements OnInit {
     //   error: (err) => {
     //     this.detailError = "Failed to load request details.";
     //     this.isDetailLoading = false;
-    //     console.error(err);
+
     //   },
     // });
     this.bulkService.getReslovedNotificationById(id).subscribe({
@@ -162,7 +163,7 @@ export class ResolvedNotificationComponent implements OnInit {
       error: (err) => {
         this.detailError = "Failed to load request details.";
         this.isDetailLoading = false;
-        console.error(err);
+
       },
     });
   }
@@ -320,28 +321,28 @@ export class ResolvedNotificationComponent implements OnInit {
 
   // Runs each update call one at a time, only moving to the next
   // after the previous one succeeds.
-  // private runBulkUpdatesSequentially(
-  //   requestFns: (() => Observable<any>)[],
-  //   index: number,
-  // ): void {
-  //   if (index >= requestFns.length) {
-  //     this.isSubmittingBulkUpdate = false;
-  //     this.snackBar.show("Percentage updated successfully", true);
-  //     this.closeModal();
-  //     this.loadResolvedNotifications(true);
-  //     return;
-  //   }
+  private runBulkUpdatesSequentially(
+    requestFns: (() => Observable<any>)[],
+    index: number,
+  ): void {
+    if (index >= requestFns.length) {
+      this.isSubmittingBulkUpdate = false;
+      this.snackBar.show("Percentage updated successfully", true);
+      this.closeModal();
+      this.loadResolvedNotifications(true);
+      return;
+    }
 
-  //   requestFns[index]().subscribe({
-  //     next: () => {
-  //       this.runBulkUpdatesSequentially(requestFns, index + 1);
-  //     },
-  //     error: (err) => {
-  //       this.isSubmittingBulkUpdate = false;
-  //       this.snackBar.show(err?.error?.message || "Update failed", false);
-  //     },
-  //   });
-  // }
+    requestFns[index]().subscribe({
+      next: () => {
+        this.runBulkUpdatesSequentially(requestFns, index + 1);
+      },
+      error: (err) => {
+        this.isSubmittingBulkUpdate = false;
+        this.snackBar.show(err?.error?.message || "Update failed", false);
+      },
+    });
+  }
 
   get showBulkUpdateSection(): boolean {
     return (
@@ -349,40 +350,6 @@ export class ResolvedNotificationComponent implements OnInit {
       this.selectedRequest.status === "PENDING" &&
       this.selectedRequest.requesterType === "CHIEF"
     );
-  }
-
-  get hasUnresolvedManagerBlocker(): boolean {
-    return (this.selectedRequest?.blockers || []).some(
-      (b) =>
-        !b.resolved && (b.blockingEntityType || "").toUpperCase() === "MANAGER",
-    );
-  }
-
-  get hasUnresolvedHeadBlocker(): boolean {
-    return (this.selectedRequest?.blockers || []).some(
-      (b) =>
-        !b.resolved && (b.blockingEntityType || "").toUpperCase() === "HEAD",
-    );
-  }
-
-  toggleResolveTarget(type: "MANAGER" | "HEAD"): void {
-    if (this.activeBlockerType === type) {
-      this.activeBlockerType = null;
-      return;
-    }
-
-    this.activeBlockerType = type;
-
-    this.percentageForm = {
-      payinPercentage: 0,
-      payoutPercentage: 0,
-      fttPercentage: 0,
-    };
-    this.percentageErrors = {
-      payinPercentage: "",
-      payoutPercentage: "",
-      fttPercentage: "",
-    };
   }
 
   // get hasUnresolvedManagerBlocker(): boolean {

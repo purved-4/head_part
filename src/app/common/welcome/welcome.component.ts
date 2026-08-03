@@ -1,3 +1,4 @@
+
 import { Component, ElementRef, HostListener, OnDestroy } from "@angular/core";
 import { UserStateService } from "../../store/user-state.service";
 import { ChiefManualService } from "../../pages/services/chief-manual.service";

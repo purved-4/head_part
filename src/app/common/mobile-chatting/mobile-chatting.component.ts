@@ -1,3 +1,5 @@
+
+
 import {
   Component,
   NgZone,
@@ -113,9 +115,12 @@ export class MobileChattingComponent
   showPayoutModal = false;
 
   // Payout edit form
+  // Payout edit form
   payoutForm = {
     accountNumber: "",
     ifsc: "",
+    userId: "",
+    holder: "",
     reason: "",
   };
 
@@ -1783,37 +1788,6 @@ export class MobileChattingComponent
   /* ════════════════════════════════════════════
      MEDIA VIEWER
      ════════════════════════════════════════════ */
-  // openMediaViewer(
-  //   mediaUrl: any,
-  //   name: string = "",
-  //   type: string = "file",
-  // ): void {
-  //   if (!mediaUrl) {
-  //     this.snackBar.show("No media to preview", false);
-  //     return;
-  //   }
-
-  //   this.currentMediaUrl = mediaUrl;
-  //   this.currentMediaName = name || "";
-  //   this.currentMediaType = "file"; // default
-
-  //   //  TRY TO DETECT IMAGE EVEN WITHOUT EXTENSION
-  //   this.isImageByContent(mediaUrl).then((isImg) => {
-  //     if (isImg) {
-  //       this.currentMediaType = "image";
-  //     } else if (type === "video") {
-  //       this.currentMediaType = "video";
-  //     } else if (type === "audio") {
-  //       this.currentMediaType = "audio";
-  //     } else {
-  //       this.currentMediaType = "file";
-  //     }
-  //   });
-
-  //   this.isZoomed = false;
-  //   this.zoomLevel = 1;
-  //   this.showMediaViewer = true;
-  // }
   openMediaViewer(
     mediaUrl: any,
     name: string = "",
@@ -1823,20 +1797,17 @@ export class MobileChattingComponent
       this.snackBar.show("No media to preview", false);
       return;
     }
-
     this.currentMediaName = name || "";
+    const fileUrl = this.resolveFileUrl(mediaUrl);
 
-    const finalUrl = mediaUrl.startsWith("http")
-      ? mediaUrl
-      : `${fileBaseUrl}/${mediaUrl}`;
-
-    this.multimediaService.getImageByUrlBlob(finalUrl).subscribe({
+    this.multimediaService.getImageByUrlBlob(fileUrl).subscribe({
       next: (blob: Blob) => {
+        // CREATE BLOB URL
         const blobUrl = URL.createObjectURL(blob);
 
         this.currentMediaUrl = blobUrl;
 
-        //  DETECT FROM MIME TYPE
+        // DETECT MEDIA TYPE USING MIME
         if (blob.type.startsWith("image/")) {
           this.currentMediaType = "image";
         } else if (blob.type.startsWith("video/")) {
@@ -1857,6 +1828,69 @@ export class MobileChattingComponent
       },
     });
   }
+
+  private resolveFileUrl(mediaUrl: string): string {
+    if (!mediaUrl) return mediaUrl;
+
+    if (mediaUrl.startsWith("http://") || mediaUrl.startsWith("https://")) {
+      return mediaUrl;
+    }
+
+    // Already a fully-qualified backend path — don't prepend fileBaseUrl again
+    if (
+      mediaUrl.startsWith(fileBaseUrl) ||
+      mediaUrl.includes("files/private")
+    ) {
+      return mediaUrl;
+    }
+
+    // Otherwise it's a bare fileId
+    return `${fileBaseUrl}/${mediaUrl}`;
+  }
+
+  // openMediaViewer(
+  //   mediaUrl: any,
+  //   name: string = "",
+  //   type: string = "file",
+  // ): void {
+  //   if (!mediaUrl) {
+  //     this.snackBar.show("No media to preview", false);
+  //     return;
+  //   }
+
+  //   this.currentMediaName = name || "";
+
+  //   const finalUrl = mediaUrl.startsWith("http")
+  //     ? mediaUrl
+  //     : `${fileBaseUrl}/${mediaUrl}`;
+
+  //   this.multimediaService.getImageByUrlBlob(finalUrl).subscribe({
+  //     next: (blob: Blob) => {
+  //       const blobUrl = URL.createObjectURL(blob);
+
+  //       this.currentMediaUrl = blobUrl;
+
+  //       //  DETECT FROM MIME TYPE
+  //       if (blob.type.startsWith("image/")) {
+  //         this.currentMediaType = "image";
+  //       } else if (blob.type.startsWith("video/")) {
+  //         this.currentMediaType = "video";
+  //       } else if (blob.type.startsWith("audio/")) {
+  //         this.currentMediaType = "audio";
+  //       } else {
+  //         this.currentMediaType = "file";
+  //       }
+
+  //       this.isZoomed = false;
+  //       this.zoomLevel = 1;
+  //       this.showMediaViewer = true;
+  //     },
+
+  //     error: () => {
+  //       this.snackBar.show("Failed to load media", false);
+  //     },
+  //   });
+  // }
 
   // closeMediaViewer(): void {
   //   this.showMediaViewer = false;
@@ -2263,6 +2297,26 @@ export class MobileChattingComponent
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   }
 
+  // showPayoutModel(thread: any) {
+  //   this.selectedThread = thread;
+
+  //   if (this.selectedThread?.threadType === "payout") {
+  //     this.getFundWithId(
+  //       this.selectedThread.id,
+  //       this.selectedThread.fundId,
+  //       this.selectedThread.threadType,
+  //     ).subscribe({
+  //       next: (res: any) => {
+  //         this.payoutForm.accountNumber = res.accountNo ?? "";
+  //         this.payoutForm.ifsc = res.ifsc ?? "";
+  //         this.payoutForm.reason = "";
+  //         this.showPayoutModal = true;
+  //         return;
+  //       },
+  //     });
+  //   }
+  // }
+
   showPayoutModel(thread: any) {
     this.selectedThread = thread;
 
@@ -2275,6 +2329,8 @@ export class MobileChattingComponent
         next: (res: any) => {
           this.payoutForm.accountNumber = res.accountNo ?? "";
           this.payoutForm.ifsc = res.ifsc ?? "";
+          this.payoutForm.userId = res.userId ?? "";
+          this.payoutForm.holder = res.holder ?? "";
           this.payoutForm.reason = "";
           this.showPayoutModal = true;
           return;
@@ -2393,15 +2449,48 @@ export class MobileChattingComponent
     });
   }
 
+  // sendEditedPayout(): void {
+  //   if (!this.payoutForm.accountNumber.trim() || !this.payoutForm.ifsc.trim()) {
+  //     alert("Please fill account number and IFSC.");
+  //     return;
+  //   }
+
+  //   const payload = {
+  //     accountNumber: this.payoutForm.accountNumber.trim(),
+  //     ifsc: this.payoutForm.ifsc.trim(),
+  //     reason: this.payoutForm.reason?.trim() || null,
+  //   };
+
+  //   this.isLoading = true;
+  //   const threadId = this.selectedThread?.id;
+
+  //   this.sentPayoutThreadUpdateToSameUser(threadId, payload).subscribe({
+  //     next: (res: any) => {
+  //       this.isLoading = false;
+  //       this.closeModals();
+  //     },
+  //     error: (err: any) => {
+  //       this.isLoading = false;
+  //     },
+  //   });
+  // }
+
   sendEditedPayout(): void {
-    if (!this.payoutForm.accountNumber.trim() || !this.payoutForm.ifsc.trim()) {
-      alert("Please fill account number and IFSC.");
+    if (
+      !this.payoutForm.accountNumber.trim() ||
+      !this.payoutForm.ifsc.trim() ||
+      !this.payoutForm.userId.trim()
+    ) {
+      alert("Please fill user ID, account number and IFSC.");
       return;
     }
 
     const payload = {
+      fundId: this.selectedThread?.fundId,
       accountNumber: this.payoutForm.accountNumber.trim(),
       ifsc: this.payoutForm.ifsc.trim(),
+      userId: this.payoutForm.userId.trim(),
+      holder: this.payoutForm.holder?.trim() || null,
       reason: this.payoutForm.reason?.trim() || null,
     };
 
@@ -2412,13 +2501,13 @@ export class MobileChattingComponent
       next: (res: any) => {
         this.isLoading = false;
         this.closeModals();
+        this.loadThreads();
       },
       error: (err: any) => {
         this.isLoading = false;
       },
     });
   }
-
   // closeModals(): void {
   //   this.showResendModal = false;
   //   this.showRejectModal = false;
@@ -2435,7 +2524,13 @@ export class MobileChattingComponent
   }
 
   private resetPayoutForm(): void {
-    this.payoutForm = { accountNumber: "", ifsc: "", reason: "" };
+    this.payoutForm = {
+      accountNumber: "",
+      ifsc: "",
+      userId: "",
+      holder: "",
+      reason: "",
+    };
   }
 
   rejectBankThread(threadId: any) {

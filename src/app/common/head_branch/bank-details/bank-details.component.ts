@@ -62,7 +62,7 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.entityId = this.userStateService.getCurrentEntityId();
     this.entityType = this.userStateService.getRole();
-    console.log(this.bankData);
+
     this.patchForm();
 
     // IFSC debounce listener

@@ -16,6 +16,16 @@ export class FundsService {
       catchError((error) => throwError(error)),
     );
   }
+  
+  claimRewards() {
+  return this.http.post(
+    `${baseUrl}/payout-rewards/claim`,
+    {}
+  ).pipe(
+          map((response: any) => response.data),
+          catchError((error) => throwError(() => error)),
+       );
+}
 
   AgentPooling(portalId: any): Observable<any> {
     return this.http.get<any>(`${baseUrl}/branch/getAllData/${portalId}`).pipe(
@@ -235,7 +245,7 @@ return this.http.patch<any>(
     formData.append("file", file);
 
     return this.http
-      .patch<any>(`${baseUrl}/funds/upi/${bankSettleId}/reject`, formData)
+      .patch<any>(`${baseUrl}/funds/payment/${bankSettleId}/reject`, formData)
       .pipe(
         map((response: any) => response.data),
         catchError((error) => throwError(() => error)),
@@ -553,7 +563,8 @@ getAllPayoutFundWithEntityAndCpId(
         catchError((error) => throwError(error)),
       );
   }
- getPayinFundWithCpIdAndEntityId(
+  
+getPayinFundWithCpIdAndEntityId(
     entityId: any,
     page: number = 0,
     pageSize: number = 10,
@@ -640,15 +651,5 @@ rejectCryptoFund(
         catchError((error) => throwError(() => error)),
       );
   }
-
-  claimRewards() {
-  return this.http.post(
-    `${baseUrl}/payout-rewards/claim`,
-    {}
-  ).pipe(
-          map((response: any) => response.data),
-          catchError((error) => throwError(() => error)),
-       );
-}
  
 }

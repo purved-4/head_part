@@ -7,7 +7,13 @@
   <div class="sticky top-0 z-50 bg-white border-b shadow-sm">
     <div class="max-w-7xl mx-auto flex items-center px-3 py-2 gap-2">
       <!-- CLOSE BUTTON AT START -->
-
+      <button
+        (click)="closeMobileProfile()"
+        class="md:hidden flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors"
+        aria-label="Close profile"
+      >
+        <span class="material-icons text-lg">close</span>
+      </button>
       <!-- LEFT TABS -->
       <div
         class="flex items-center bg-gray-100 p-1 rounded-full gap-1 overflow-hidden"

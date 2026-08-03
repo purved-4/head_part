@@ -37,7 +37,7 @@ export class LoaderService {
 
   // Called by directive on button click
   setPendingKey(key: string): void {
-    console.log('[Loader] setPendingKey:', key);
+
     this.pendingKey = key;
   }
 
@@ -59,6 +59,7 @@ export class LoaderService {
   //   this.isButtonLoading.set(false);
   // }
   showButtonLoader(key: string = DEFAULT_LOADER_KEY): void {
+
   if (this.pendingKey) {
     this.activeButton.set(this.pendingKey);
     this.pendingKey = null;
@@ -68,11 +69,15 @@ export class LoaderService {
 }
 
   hideButtonLoader(key?: string): void {
-    console.log('[Loader] hideButtonLoader → key:', key, '| activeButton:', this.activeButton());
+
     if (!key || this.activeButton() === key) {
       this.activeButton.set(null);
     }
   }
+
+  hasPendingKey(): boolean {
+  return !!this.pendingKey;
+}
 
   resetButtonLoader(): void {
     this.activeButton.set(null);

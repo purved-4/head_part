@@ -116,6 +116,10 @@ const routes: Routes = [
         path: "recycle-management",
         component: RecycleManagementComponent,
       },
+      {
+        path: "inventory-management",
+        component: InventoryManagementComponent,
+      },
 
       {
         path: "reports",
@@ -140,6 +144,10 @@ const routes: Routes = [
             path: "funds/payout/:type",
             component: HbPayoutReportComponent,
           },
+          //  {
+          //     path: "balance-report",
+          //     component: PortalReportComponent,
+          //  },
 
           // { path: "funds/accepted", component: ApprovedFundsComponent },
           // { path: "funds/rejected", component: RejectedFundsComponent },
@@ -154,10 +162,6 @@ const routes: Routes = [
       {
         path: "bank",
         component: BanksComponent,
-      },
-      {
-        path: "inventory-management",
-        component: InventoryManagementComponent,
       },
       {
         path: "upi",

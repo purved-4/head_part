@@ -202,15 +202,13 @@
           </div>
         </div> -->
 
-       <!-- Exposure List Section -->
+        <!-- Exposure List Section -->
         <div *ngIf="activeSection === 'exposure'" class="space-y-4">
-
           <div *ngIf="loadingExposure" class="text-xs text-slate-500 text-center py-2">
             Loading...
           </div>
 
           <ng-container *ngIf="!loadingExposure && exposure">
-
             <div class="rounded-xl overflow-hidden border border-[var(--color-border)]">
               <table class="w-full text-sm">
                 <thead>
@@ -224,28 +222,28 @@
                   <tr class="border-t border-[var(--color-border)]">
                     <td class="px-4 py-2.5 text-slate-600">Pending</td>
                     <td class="px-4 py-2.5 text-right text-slate-800">
-                      ₹{{ format(exposure.payinFunds.pending) }}
+                      {{ getCurrencySymbol(parentCurrency) }}{{ format(exposure.pendingPayin) }}
                     </td>
                     <td class="px-4 py-2.5 text-right text-slate-800">
-                      ₹{{ format(exposure.payoutFunds.pending) }}
+                      {{ getCurrencySymbol(parentCurrency) }}{{ format(exposure.pendingPayout) }}
                     </td>
                   </tr>
                   <tr class="border-t border-[var(--color-border)]">
                     <td class="px-4 py-2.5 text-slate-600">Dispute</td>
                     <td class="px-4 py-2.5 text-right text-slate-800">
-                      ₹{{ format(exposure.payinFunds.disputeEscalated) }}
+                      {{ getCurrencySymbol(parentCurrency) }}{{ format(exposure.disputePayin) }}
                     </td>
                     <td class="px-4 py-2.5 text-right text-slate-800">
-                      ₹{{ format(exposure.payoutFunds.disputeEscalated) }}
+                      {{ getCurrencySymbol(parentCurrency) }}{{ format(exposure.disputePayout) }}
                     </td>
                   </tr>
                   <tr class="border-t border-[var(--color-border)] bg-[var(--color-hover)]">
                     <td class="px-4 py-2.5 font-semibold text-[var(--color-primary)]">Total</td>
                     <td class="px-4 py-2.5 text-right font-semibold text-[var(--color-primary)]">
-                      ₹{{ format(exposure.payinFunds.total) }}
+                      {{ getCurrencySymbol(parentCurrency) }}{{ format(exposureTotalPayin) }}
                     </td>
                     <td class="px-4 py-2.5 text-right font-semibold text-[var(--color-primary)]">
-                      ₹{{ format(exposure.payoutFunds.total) }}
+                      {{ getCurrencySymbol(parentCurrency) }}{{ format(exposureTotalPayout) }}
                     </td>
                   </tr>
                 </tbody>
@@ -255,16 +253,14 @@
             <div class="flex justify-between items-center bg-red-50 border border-red-100 rounded-xl px-4 py-3">
               <span class="font-semibold text-red-600 text-sm">Held Amount</span>
               <span class="font-semibold text-red-600 text-sm">
-                ₹{{ format(exposure.heldAmount) }}
+                {{ getCurrencySymbol(parentCurrency) }}{{ format(exposure.heldAmount) }}
               </span>
             </div>
-
           </ng-container>
 
           <div *ngIf="!loadingExposure && !exposure" class="text-xs text-red-500 text-center py-2">
             Failed to load exposure data
           </div>
-
         </div>
 
       </div>

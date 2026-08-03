@@ -1,4 +1,3 @@
-
 import {
   Component,
   Input,
@@ -14,7 +13,7 @@ import {
   AfterViewInit,
   OnDestroy,
   SimpleChanges,
-  OnChanges
+  OnChanges,
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 
@@ -35,7 +34,7 @@ export interface DropdownOption {
   ],
 })
 export class SearchableDropdownComponent
-  implements OnInit, AfterViewInit, OnDestroy, ControlValueAccessor ,OnChanges
+  implements OnInit, AfterViewInit, OnDestroy, ControlValueAccessor, OnChanges
 {
   @Input() options: DropdownOption[] = [];
   @Input() placeholder: string = "Select an option...";
@@ -70,7 +69,7 @@ export class SearchableDropdownComponent
   @Input() matchInputSize: boolean = false;
   @ViewChild("searchInput", { read: ElementRef })
   searchInput!: ElementRef<HTMLInputElement>;
-@Input() externalDisplayValue: string = "";
+  @Input() externalDisplayValue: string = "";
   // Host element for positioning
   @ViewChild("hostEl", { read: ElementRef })
   hostEl!: ElementRef<HTMLElement>;
@@ -79,11 +78,10 @@ export class SearchableDropdownComponent
   @ViewChild("panelTpl", { read: TemplateRef })
   panelTpl!: TemplateRef<any>;
 
-  @ViewChild('innerInput', { read: ElementRef }) 
+  @ViewChild("innerInput", { read: ElementRef })
   innerInput!: ElementRef;
 
-@Output() focusEvent = new EventEmitter<void>();
-  
+  @Output() focusEvent = new EventEmitter<void>();
 
   isOpen = false;
   searchTerm = "";
@@ -102,8 +100,12 @@ export class SearchableDropdownComponent
   // CVA
   private onChange = (value: any) => {};
   private onTouched = () => {};
+  private isUserEditing = false;
 
-  constructor(private vcr: ViewContainerRef, private renderer: Renderer2) {}
+  constructor(
+    private vcr: ViewContainerRef,
+    private renderer: Renderer2,
+  ) {}
 
   ngOnInit() {
     this.filteredOptions = [...this.options];
@@ -112,100 +114,86 @@ export class SearchableDropdownComponent
       this.setDefaultValue();
     }
   }
-// ngOnChanges(changes: SimpleChanges): void {
+  // ngOnChanges(changes: SimpleChanges): void {
 
-//   if (changes["options"]) {
+  //   if (changes["options"]) {
 
-//     const options = changes["options"].currentValue || [];
+  //     const options = changes["options"].currentValue || [];
 
-//     if (
-//       options.length > 0 &&
-//       this.searchTerm?.trim()
-//     ) {
-//       this.isOpen = true;
-//     }
-//   }
+  //     if (
+  //       options.length > 0 &&
+  //       this.searchTerm?.trim()
+  //     ) {
+  //       this.isOpen = true;
+  //     }
+  //   }
 
-// if (changes["externalDisplayValue"]) {
+  // if (changes["externalDisplayValue"]) {
 
-//   const value =
-//     changes["externalDisplayValue"].currentValue || "";
+  //   const value =
+  //     changes["externalDisplayValue"].currentValue || "";
 
-//   this.displayValue = value;
+  //   this.displayValue = value;
 
-//   this.searchTerm = value;
+  //   this.searchTerm = value;
 
-//   this.filterOptions();
-// }
-// }
+  //   this.filterOptions();
+  // }
+  // }
 
-ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(changes: SimpleChanges): void {
+    // OPTIONS UPDATED ASYNC
+    if (changes["options"]) {
+      const options = changes["options"].currentValue || [];
 
-  // OPTIONS UPDATED ASYNC
-  if (changes["options"]) {
+      this.filteredOptions = [...options];
 
-    const options =
-      changes["options"].currentValue || [];
+      const isThisInputFocused =
+        document.activeElement === this.innerInput?.nativeElement;
 
-    this.filteredOptions = [...options];
+      // IMPORTANT FIX
+      if (this.searchTerm?.trim() && options.length > 0 && isThisInputFocused) {
+        // dropdown already open but overlay stale
+        if (this.isOpen) {
+          // refresh overlay
+          this.closeDropdown();
 
-    // IMPORTANT FIX
-    if (
-      this.searchTerm?.trim() &&
-      options.length > 0
-    ) {
-
-      // dropdown already open but overlay stale
-      if (this.isOpen) {
-
-        // refresh overlay
-        this.closeDropdown();
-
-        setTimeout(() => {
+          setTimeout(() => {
+            this.openDropdown();
+          });
+        } else {
           this.openDropdown();
-        });
-
-      } else {
-
-        this.openDropdown();
+        }
       }
     }
-  }
 
-  // EXTERNAL DISPLAY VALUE
-  if (changes["externalDisplayValue"]) {
+    // EXTERNAL DISPLAY VALUE
+    if (changes["externalDisplayValue"]) {
+      const value = changes["externalDisplayValue"].currentValue || "";
 
-    const value =
-      changes["externalDisplayValue"]
-        .currentValue || "";
-
+     if (!this.isUserEditing) {     
     this.displayValue = value;
-
     this.searchTerm = value;
-
     this.filterOptions();
   }
-}
+    }
+  }
   ngAfterViewInit(): void {
     // nothing special, hostEl and panelTpl are available now
   }
 
- focus() {
-  // delay a tick so any DOM updates (form reset, ngIf, navigation flags) settle
-  setTimeout(() => {
-    try {
-      // 1) prefer explicit inner input
-      if (this.innerInput?.nativeElement) {
-        
-        this.innerInput.nativeElement.focus();
-        return;
-      }
-    } catch (err) {
-     }
-  }, 0);
-}
-
-
+  focus() {
+    // delay a tick so any DOM updates (form reset, ngIf, navigation flags) settle
+    setTimeout(() => {
+      try {
+        // 1) prefer explicit inner input
+        if (this.innerInput?.nativeElement) {
+          this.innerInput.nativeElement.focus();
+          return;
+        }
+      } catch (err) {}
+    }, 0);
+  }
 
   // === Helpers ===
   getOptionLabel(option: any): string {
@@ -220,7 +208,7 @@ ngOnChanges(changes: SimpleChanges): void {
 
   private setDefaultValue() {
     const defaultOption = this.options.find(
-      (opt) => String(this.getOptionId(opt)) === String(this.defaultValue)
+      (opt) => String(this.getOptionId(opt)) === String(this.defaultValue),
     );
     if (defaultOption) {
       this.selectedOption = defaultOption;
@@ -237,11 +225,18 @@ ngOnChanges(changes: SimpleChanges): void {
     this.isOpen = true;
     this.filteredOptions = [...this.options];
 
+
+  if (this.searchTerm?.trim()) {
+    this.filterOptions();   
+  } else {
+    this.filteredOptions = [...this.options];
+  }
+
     if (this.selectedOption) {
       const idx = this.filteredOptions.findIndex(
         (opt) =>
           String(this.getOptionId(opt)) ===
-          String(this.getOptionId(this.selectedOption))
+          String(this.getOptionId(this.selectedOption)),
       );
       this.highlightedIndex = idx >= 0 ? idx : 0;
     } else {
@@ -257,7 +252,9 @@ ngOnChanges(changes: SimpleChanges): void {
 
     setTimeout(() => {
       try {
-        this.searchInput.nativeElement.focus();
+        if (document.activeElement === this.innerInput?.nativeElement) {
+          this.searchInput.nativeElement.focus();
+        }
       } catch (e) {}
     }, 0);
   }
@@ -289,6 +286,7 @@ ngOnChanges(changes: SimpleChanges): void {
 
   onSearch(event: any) {
     const value = event.target.value;
+    this.isUserEditing = true; 
     this.searchTerm = value;
     this.displayValue = value;
     this.filterOptions();
@@ -301,6 +299,7 @@ ngOnChanges(changes: SimpleChanges): void {
     setTimeout(() => {
       const pastedText = event.clipboardData?.getData("text") || "";
       if (pastedText) {
+        this.isUserEditing = true;
         this.searchTerm = pastedText;
         this.displayValue = pastedText;
         this.filterOptions();
@@ -361,7 +360,7 @@ ngOnChanges(changes: SimpleChanges): void {
     // uses DOM queries by class names in the template
     const dropdownList = document.querySelector(".dropdown-list");
     const highlightedItem = document.querySelector(
-      ".dropdown-item." + this.highlightedClass.split(" ").join(".")
+      ".dropdown-item." + this.highlightedClass.split(" ").join("."),
     ) as HTMLElement | null;
     if (dropdownList && highlightedItem) {
       highlightedItem.scrollIntoView({ block: "nearest" });
@@ -375,6 +374,7 @@ ngOnChanges(changes: SimpleChanges): void {
   }
 
   selectOption(option: DropdownOption) {
+    this.isUserEditing = false;
     this.selectedOption = option;
     this.displayValue = this.getOptionLabel(option);
     this.searchTerm = "";
@@ -411,7 +411,7 @@ ngOnChanges(changes: SimpleChanges): void {
     const regex = new RegExp(`(${escaped})`, "gi");
     return (text || "").replace(
       regex,
-      '<span class="bg-amber-50 font-semibold">$1</span>'
+      '<span class="bg-amber-50 font-semibold">$1</span>',
     );
   }
 
@@ -430,7 +430,7 @@ ngOnChanges(changes: SimpleChanges): void {
     this.embeddedViewRef = this.vcr.createEmbeddedView(this.panelTpl);
     this.embeddedViewRef.detectChanges();
     this.embeddedViewRef.rootNodes.forEach((node: any) =>
-      this.renderer.appendChild(this.overlayEl, node)
+      this.renderer.appendChild(this.overlayEl, node),
     );
 
     // append to body
@@ -492,7 +492,7 @@ ngOnChanges(changes: SimpleChanges): void {
 
     // --- HEIGHT resolution for the scrolling list (priority: dropdownMaxHeight -> inputHeight -> dropdownMaxHeightMode -> default)
     const listEl = this.overlayEl.querySelector(
-      ".dropdown-list"
+      ".dropdown-list",
     ) as HTMLElement | null;
     if (listEl) {
       if (this.dropdownMaxHeight) {
@@ -508,7 +508,7 @@ ngOnChanges(changes: SimpleChanges): void {
             this.renderer.setStyle(
               listEl,
               "max-height",
-              `${inputRect.height}px`
+              `${inputRect.height}px`,
             );
           }
         } else if (h.match(/^[0-9]+$/)) {
@@ -593,54 +593,48 @@ ngOnChanges(changes: SimpleChanges): void {
   //   }
   //   this.filteredOptions = [...this.options];
   // }
-writeValue(value: any): void {
+  writeValue(value: any): void {
+    if (this.isUserEditing) {
+    // still track selection state internally if it matches, but leave the
+    // text the user is typing alone
+    this.filteredOptions = [...this.options];
+    return;
+  }
+    if (value !== null && value !== undefined) {
+      const option = this.options.find(
+        (opt) => String(this.getOptionId(opt)) === String(value),
+      );
 
-  if (value !== null && value !== undefined) {
+      if (option) {
+        this.selectedOption = option;
 
-    const option = this.options.find(
-      (opt) => String(this.getOptionId(opt)) === String(value)
-    );
+        // DO NOT OVERRIDE OCR/USER TYPED TEXT
+        if (!this.externalDisplayValue?.trim()) {
+          this.displayValue = this.getOptionLabel(option);
+        }
 
-    if (option) {
+        this.searchTerm = "";
+      } else {
+        this.selectedOption = null;
 
-      this.selectedOption = option;
+        if (!this.externalDisplayValue?.trim()) {
+          this.displayValue = "";
+        }
 
-      // DO NOT OVERRIDE OCR/USER TYPED TEXT
-      if (!this.externalDisplayValue?.trim()) {
-
-        this.displayValue = this.getOptionLabel(option);
-
+        this.searchTerm = "";
       }
-
-      this.searchTerm = "";
-
     } else {
-
       this.selectedOption = null;
 
       if (!this.externalDisplayValue?.trim()) {
-
         this.displayValue = "";
       }
 
       this.searchTerm = "";
     }
 
-  } else {
-
-    this.selectedOption = null;
-
-    if (!this.externalDisplayValue?.trim()) {
-
-      this.displayValue = "";
-    }
-
-    this.searchTerm = "";
+    this.filteredOptions = [...this.options];
   }
-
-  this.filteredOptions = [...this.options];
-}
-
 
   registerOnChange(fn: any): void {
     this.onChange = fn;
