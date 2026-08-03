@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { UserService } from "../../pages/services/user.service";
 import { UserStateService } from "../../store/user-state.service";
 import { uiUrl } from "../../pages/services/helper"; // <-- apne actual path se adjust karna
@@ -16,7 +16,8 @@ export class SharedUserProfileComponent implements OnInit {
   userFullDetail: any = null;
   errorMessage: any;
   isLoading: boolean = true;
-
+  showChangePasswordModal = false;
+  successMessage: string = "";
   // --- Promo code state ---
   isGeneratingCode: boolean = false;
   promoCode: string | null = null;
@@ -24,6 +25,15 @@ export class SharedUserProfileComponent implements OnInit {
   promoError: string | null = null;
   copiedCode: boolean = false;
   copiedLink: boolean = false;
+  passwordData: any = {
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  };
+  @Output() passwordChanged = new EventEmitter<{
+      oldPassword: string;
+      newPassword: string;
+    }>();
 
   // --- Head details (business type / existing promo code) ---
   businessType: string | null = null;
@@ -201,6 +211,65 @@ export class SharedUserProfileComponent implements OnInit {
     navigator.clipboard.writeText(this.promoUrl).then(() => {
       this.copiedLink = true;
       setTimeout(() => (this.copiedLink = false), 2000);
+    });
+  }
+
+   changePassword() {
+    this.errorMessage = "";
+    this.successMessage = "";
+
+    if (
+      !this.passwordData.oldPassword ||
+      !this.passwordData.newPassword ||
+      !this.passwordData.confirmPassword
+    ) {
+      this.errorMessage = "All password fields are required";
+      return;
+    }
+    if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
+      this.errorMessage = "New password and confirmation do not match";
+      return;
+    }
+    if (this.passwordData.newPassword.length < 6) {
+      this.errorMessage = "Password must be at least 6 characters long";
+      return;
+    }
+    if (this.passwordData.oldPassword === this.passwordData.newPassword) {
+      this.errorMessage =
+        "New password must be different from current password";
+      return;
+    }
+
+    const payload = {
+      userId: this.currentUserId,
+      oldPassword: this.passwordData.oldPassword,
+      newPassword: this.passwordData.newPassword,
+    };
+
+    this.userService.updateUserPassword(payload).subscribe({
+      next: (res: any) => {
+        this.successMessage = res?.message || "Password updated successfully!";
+        this.passwordData = {
+          oldPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        };
+        setTimeout(() => {
+          this.successMessage = "";
+        }, 3000);
+        this.snackBar.show("Password Updated Succesfully",true,3000);
+        this.showChangePasswordModal = false;
+      },
+      error: (err) => {
+        this.errorMessage =
+          err?.error?.message ||
+          "An error occurred while updating the password.";
+      },
+    });
+
+    this.passwordChanged.emit({
+      oldPassword: payload.oldPassword,
+      newPassword: payload.newPassword,
     });
   }
 }

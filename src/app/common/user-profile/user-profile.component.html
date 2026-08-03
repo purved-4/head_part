@@ -47,13 +47,8 @@
           [class.text-gray-600]="selectedSection !== 'cp'"
           [class.hover:bg-gray-200]="selectedSection !== 'cp'"
         >
-          <span class="material-icons text-sm">language</span>
-          <span class="hidden sm:inline">Cps</span>
-          <span
-            class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 sm:hidden whitespace-nowrap"
-          >
-            Cps
-          </span>
+          <span class="material-icons text-sm">percent</span>
+          <span class="hidden sm:inline">Percentages</span>
         </button>
 
         <!-- SECURITY -->
@@ -194,10 +189,10 @@
               class="text-lg md:text-2xl font-bold mb-0.5 md:mb-1"
               [style.color]="'var(--color-font)'"
             >
-              Cp Configurations
+              Global Percentages
             </h1>
             <p class="text-xs md:text-xs" [style.color]="'var(--color-muted)'">
-              Manage settings for each connected cp
+              View Global Percentages
             </p>
           </div>
           <div class="flex items-center">
@@ -205,16 +200,14 @@
               class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-white font-semibold shadow-sm text-xs md:text-xs"
               [style.background]="'var(--color-primary)'"
             >
-              {{ (cpInfo || []).length }} Cp{{
-                (cpInfo || []).length !== 1 ? "s" : ""
-              }}
+              Global Configuration
             </div>
           </div>
         </div>
 
         <!-- Empty State -->
         <div
-          *ngIf="(cpInfo || []).length === 0"
+          *ngIf="!cpInfo"
           class="bg-white rounded-lg border p-6 md:p-12 text-center shadow-md"
           [style.borderColor]="'var(--color-border)'"
         >
@@ -248,128 +241,93 @@
         <!-- Cp Cards -->
         <div class="space-y-3 md:space-y-4">
           <div
-            *ngFor="let w of cpInfo; let i = index"
+            *ngFor="let w of cpInfo"
             class="bg-white rounded-lg border shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg"
             [style.borderColor]="'var(--color-border)'"
           >
             <!-- Cp Header -->
             <div
-              class="p-2 cursor-pointer transition-all duration-300"
+              class="p-3 cursor-pointer transition-all duration-300"
               [style.background]="'var(--color-bg)'"
-              (click)="toggleCp(w.cpId)"
+              (click)="toggleCp('global')"
             >
-              <div
-                class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-              >
-                <div class="flex items-center gap-2 md:gap-3">
-                  <div class="relative flex-shrink-0">
-                    <div
-                      class="w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center text-white shadow-md"
-                      [style.background]="'var(--color-primary)'"
-                    >
-                      <span class="material-icons text-lg md:text-2xl"
-                        >language</span
-                      >
-                    </div>
-                    <div
-                      class="absolute -top-1.5 -right-1.5 w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-white text-[9px] md:text-[9px] flex items-center justify-center font-semibold shadow-sm text-white"
-                      [style.background]="'var(--color-primary)'"
-                    >
-                      {{ i + 1 }}
-                    </div>
-                  </div>
-                  <div>
-                    <h3
-                      class="text-sm md:text-base font-bold mb-0.5 break-words"
-                      [style.color]="'var(--color-font)'"
-                    >
-                      {{ w.compartUsername || w.compartId || "Unnamed Cp" }}
-                    </h3>
-                    <div class="flex flex-wrap items-center gap-1">
-                      <span
-                        class="px-2 py-1 md:px-2 md:py-0.5 rounded-md text-[9px] md:text-[9px] font-semibold"
-                        [style.background]="'var(--color-bg)'"
-                        [style.color]="'var(--color-primary)'"
-                      >
-                        Active
-                      </span>
-                    </div>
-                  </div>
-                </div>
+              <div class="flex items-center justify-between gap-4">
+  <!-- Left -->
+  <div class="flex-1">
+    <div
+      class="rounded-2xl border overflow-hidden"
+      [style.background]="'var(--color-surface)'"
+      [style.borderColor]="'var(--color-border)'"
+    >
+      <div class="grid grid-cols-3 divide-x" [style.borderColor]="'var(--color-border)'">
+        <!-- Payin -->
+        <div class="py-4 text-center">
+          <div
+            class="text-[11px] uppercase font-medium"
+            [style.color]="'var(--color-font-secondary)'"
+          >
+            Payin
+          </div>
 
-                <div
-                  class="flex items-center justify-between sm:justify-end gap-2 md:gap-3"
-                >
-                  <div
-                    class="text-center px-2 py-1.5 md:px-3 md:py-2 rounded-lg border"
-                    [style.borderColor]="'var(--color-success)'"
-                    [style.background]="'var(--color-success-light)'"
-                  >
-                    <p
-                      class="text-[9px] md:text-[9px] font-semibold mb-0.5"
-                      [style.color]="'var(--color-success)'"
-                    >
-                      Payin
-                    </p>
-                    <p
-                      class="text-xs md:text-sm font-bold"
-                      [style.color]="'var(--color-success)'"
-                    >
-                      {{ w.payinPercentage || 0 }}%
-                    </p>
-                  </div>
-                  <div
-                    class="text-center px-2 py-1.5 md:px-3 md:py-2 rounded-lg border"
-                    [style.borderColor]="'var(--color-info)'"
-                    [style.background]="'var(--color-info-light)'"
-                  >
-                    <p
-                      class="text-[9px] md:text-[9px] font-semibold mb-0.5"
-                      [style.color]="'var(--color-info)'"
-                    >
-                      Payout
-                    </p>
-                    <p
-                      class="text-xs md:text-sm font-bold"
-                      [style.color]="'var(--color-info)'"
-                    >
-                      {{ w.payoutPercentage || 0 }}%
-                    </p>
-                  </div>
-                  <div
-                    class="text-center px-2 py-1.5 md:px-3 md:py-2 rounded-lg border"
-                    [style.borderColor]="'var(--color-success)'"
-                    [style.background]="'var(--color-success-light)'"
-                  >
-                    <p
-                      class="text-[9px] md:text-[9px] font-semibold mb-0.5"
-                      [style.color]="'var(--color-success)'"
-                    >
-                      FTT
-                    </p>
-                    <p
-                      class="text-xs md:text-sm font-bold"
-                      [style.color]="'var(--color-success)'"
-                    >
-                      {{ w.fttPercentage || 0 }}%
-                    </p>
-                  </div>
-                  <div
-                    class="w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center transition-all duration-300 shadow-sm flex-shrink-0"
-                    [class.rotate-180]="isCpExpanded(w.cpId)"
-                    [style.background]="'var(--color-primary)'"
-                  >
-                    <span class="material-icons text-white text-xs md:text-sm"
-                      >expand_more</span
-                    >
-                  </div>
-                </div>
-              </div>
+          <div
+            class="mt-2 text-2xl font-bold"
+            [style.color]="'var(--color-primary)'"
+          >
+            {{ w.payinPercentage ?? 0 }}%
+          </div>
+        </div>
+
+        <!-- Payout -->
+        <div class="py-4 text-center">
+          <div
+            class="text-[11px] uppercase font-medium"
+            [style.color]="'var(--color-font-secondary)'"
+          >
+            Payout
+          </div>
+
+          <div
+            class="mt-2 text-2xl font-bold"
+            [style.color]="'var(--color-primary)'"
+          >
+            {{ w.payoutPercentage ?? 0 }}%
+          </div>
+        </div>
+
+        <!-- FTT -->
+        <div class="py-4 text-center">
+          <div
+            class="text-[11px] uppercase font-medium"
+            [style.color]="'var(--color-font-secondary)'"
+          >
+            FTT
+          </div>
+
+          <div
+            class="mt-2 text-2xl font-bold"
+            [style.color]="'var(--color-primary)'"
+          >
+            {{ w.fttPercentage ?? 0 }}%
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expand -->
+  <button
+    type="button"
+    class="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-105"
+    [class.rotate-180]="isCpExpanded('global')"
+    [style.background]="'var(--color-primary)'"
+  >
+    <span class="material-icons text-white">expand_more</span>
+  </button>
+</div>
             </div>
-
             <!-- Expanded Details -->
             <div
-              *ngIf="isCpExpanded(w.cpId)"
+              *ngIf="isCpExpanded('global')"
               class="border-t"
               [style.borderColor]="'var(--color-border)'"
             >
@@ -669,178 +627,6 @@
                     </div>
                   </div>
                 </div>
-
-                <!-- 3. PAYOUT CONFIGURATION TABLE (FIXED) -->
-                <div
-                  class="rounded-lg border overflow-hidden"
-                  [style.borderColor]="'var(--color-warning)'"
-                >
-                  <div
-                    class="px-3 py-2"
-                    [style.background]="'var(--color-warning)'"
-                    [style.color]="'white'"
-                  >
-                    <h4
-                      class="font-semibold text-xs md:text-sm flex items-center gap-1"
-                    >
-                      <span class="material-icons text-sm md:text-base"
-                        >payments</span
-                      >
-                      Payout Configuration
-                    </h4>
-                  </div>
-                  <div class="p-3">
-                    <ng-container
-                      *ngIf="
-                        w.payoutsTimeStrength?.amountRanges ||
-                        w._raw?.payoutsTimeStrength?.amountRanges ||
-                        w.payoutsTimeStrength ||
-                        [] as amtList
-                      "
-                    >
-                      <div
-                        *ngIf="amtList.length; else noPayoutConfig"
-                        class="overflow-x-auto"
-                      >
-                        <table class="min-w-full text-xs">
-                          <thead>
-                            <tr
-                              class="border-b"
-                              [style.borderColor]="'var(--color-border)'"
-                            >
-                              <th
-                                class="py-1 px-1.5 text-left font-semibold"
-                                [style.color]="'var(--color-font)'"
-                              >
-                                Amount Range (₹)
-                              </th>
-                              <th
-                                class="py-1 px-1.5 text-left font-semibold"
-                                [style.color]="'var(--color-font)'"
-                              >
-                                Minutes Range
-                              </th>
-                              <th
-                                class="py-1 px-1.5 text-left font-semibold"
-                                [style.color]="'var(--color-font)'"
-                              >
-                                Percentage
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <ng-container
-                              *ngFor="let a of amtList; let j = index"
-                            >
-                              <ng-container
-                                *ngIf="a.timeRanges?.length; else noTimeRanges"
-                              >
-                                <tr
-                                  *ngFor="let tr of a.timeRanges; let k = index"
-                                  class="border-b"
-                                  [style.borderColor]="'var(--color-border)'"
-                                >
-                                  <td
-                                    *ngIf="k === 0"
-                                    [attr.rowspan]="a.timeRanges.length"
-                                    class="py-1 px-1.5 font-semibold align-top"
-                                    [style.color]="'var(--color-warning)'"
-                                  >
-                                    ₹{{
-                                      j === 0
-                                        ? (a.minAmount ?? 0)
-                                        : amtList[j - 1].maxAmount
-                                    }}
-                                    -
-                                    {{
-                                      a.maxAmount === 0 && a.isUpto
-                                        ? "UPTO"
-                                        : a.maxAmount
-                                    }}
-                                  </td>
-                                  <td
-                                    class="py-1 px-1.5"
-                                    [style.color]="'var(--color-font)'"
-                                  >
-                                    {{
-                                      k === 0
-                                        ? (tr.minMinutes ?? 0)
-                                        : a.timeRanges[k - 1].maxMinutes
-                                    }}
-                                    -
-                                    {{
-                                      tr.maxMinutes === 0 && tr.isUpto
-                                        ? "UPTO"
-                                        : tr.maxMinutes
-                                    }}
-                                  </td>
-                                  <td
-                                    class="py-1 px-1.5 font-semibold"
-                                    [style.color]="'var(--color-warning)'"
-                                  >
-                                    {{ tr.percentage ?? tr.per }}%
-                                  </td>
-                                </tr>
-                              </ng-container>
-                              <ng-template #noTimeRanges>
-                                <tr
-                                  class="border-b"
-                                  [style.borderColor]="'var(--color-border)'"
-                                >
-                                  <td
-                                    class="py-1 px-1.5 font-semibold"
-                                    [style.color]="'var(--color-warning)'"
-                                  >
-                                    ₹{{
-                                      j === 0
-                                        ? (a.minAmount ?? 0)
-                                        : amtList[j - 1].maxAmount
-                                    }}
-                                    -
-                                    {{
-                                      a.maxAmount === 0 && a.isUpto
-                                        ? "UPTO"
-                                        : a.maxAmount
-                                    }}
-                                  </td>
-                                  <td class="py-1 px-1.5">
-                                    <span
-                                      class="px-2 py-1 text-[9px] font-semibold rounded-full text-white"
-                                      [style.background]="
-                                        'var(--color-warning)'
-                                      "
-                                    >
-                                      {{ a.isUpto ? "Upto" : "Fixed" }}
-                                    </span>
-                                  </td>
-                                  <td
-                                    class="py-1 px-1.5 text-center italic"
-                                    [style.color]="'var(--color-muted)'"
-                                  >
-                                    No time ranges
-                                  </td>
-                                </tr>
-                              </ng-template>
-                            </ng-container>
-                          </tbody>
-                        </table>
-                      </div>
-                      <ng-template #noPayoutConfig>
-                        <div
-                          class="text-center py-4 rounded-lg"
-                          [style.background]="'var(--color-bg)'"
-                        >
-                          <p
-                            class="text-xs"
-                            [style.color]="'var(--color-muted)'"
-                          >
-                            No payout configuration
-                          </p>
-                        </div>
-                      </ng-template>
-                    </ng-container>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -866,6 +652,7 @@
           </div>
 
           <div
+          
             class="bg-white rounded-lg border shadow-md overflow-hidden"
             [style.borderColor]="'var(--color-border)'"
           >

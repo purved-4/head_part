@@ -169,7 +169,12 @@
 
                     <!-- UTR only for UPI/Bank -->
                     <p
-                      class="text-[11px] text-[var(--color-muted)] font-medium whitespace-pre-line"
+                      class="text-[11px]"
+                      [ngClass]="{
+                  'text-red-700': transaction.utrEdited,
+                  'text-black': !transaction.utrEdited,
+                }"
+                      
                     >
                       {{ formatUtrNumber(transaction.utrNumber) }}
                     </p>
@@ -695,11 +700,16 @@
                   </div>
 
                   <!-- TIME -->
-                  <p
-                    class="text-[11px] text-[var(--color-muted)] font-medium whitespace-pre-line"
+                    <p
+                    class="text-[11px]"
+                    [ngClass]="{
+                  'text-red-700': transaction.utrEdited,
+                  'text-black': !transaction.utrEdited,
+                }"
                   >
                     {{ formatUtrNumber(transaction.utrNumber) }}
                   </p>
+
 
                   <p class="text-[11px] text-[var(--color-muted)] mt-2">
                     {{ transaction.date | tz }}
