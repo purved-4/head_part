@@ -248,7 +248,7 @@ export class BankService {
     currencies?: string[];
     modes?: string[];
     query?: string;
-    maxAmount?: number;
+    limitAmount?: number;
     bankId?: string;
     status?: string; // "ACTIVE" | "INACTIVE"
     page?: number;
@@ -270,8 +270,8 @@ export class BankService {
       httpParams = httpParams.set("query", params.query.trim());
     }
 
-    if (params.maxAmount !== undefined && params.maxAmount !== null) {
-      httpParams = httpParams.set("maxAmount", params.maxAmount.toString());
+    if (params.limitAmount !== undefined && params.limitAmount !== null) {
+      httpParams = httpParams.set("limitAmount", params.limitAmount.toString());
     }
 
     if (params.bankId) {
@@ -281,7 +281,6 @@ export class BankService {
     if (params.status) {
       httpParams = httpParams.set("status", params.status);
     }
-    
 
     if (params.page !== undefined) {
       httpParams = httpParams.set("page", params.page);
