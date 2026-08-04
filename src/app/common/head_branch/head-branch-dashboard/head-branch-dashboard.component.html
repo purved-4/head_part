@@ -171,10 +171,9 @@
                     <p
                       class="text-[11px]"
                       [ngClass]="{
-                  'text-red-700': transaction.utrEdited,
-                  'text-black': !transaction.utrEdited,
-                }"
-                      
+                        'text-red-700': transaction.utrEdited,
+                        'text-black': !transaction.utrEdited,
+                      }"
                     >
                       {{ formatUtrNumber(transaction.utrNumber) }}
                     </p>
@@ -379,32 +378,6 @@
 
                 <!-- MIDDLE TAGS -->
                 <div class="flex items-center gap-2 flex-wrap mt-2">
-                  <!-- Process timer button -->
-                  <!-- <button
-                    (click)="
-                      onProcessingClick(transaction); $event.stopPropagation()
-                    "
-                    [ngClass]="{
-                      'bg-orange-100 text-orange-600':
-                        transaction.processing &&
-                        getRemainingTimeLabel(transaction) !== 'Process',
-                      'bg-yellow-100 text-yellow-700':
-                        !transaction.processing ||
-                        getRemainingTimeLabel(transaction) === 'Process',
-                    }"
-                    class="px-2 py-[3px] rounded-lg text-[11px] font-bold transition"
-                  >
-                    <ng-container
-                      *ngIf="
-                        transaction.processing &&
-                          getRemainingTimeLabel(transaction) !== 'Process';
-                        else processBtn
-                      "
-                    >
-                      {{ getRemainingTimeLabel(transaction) }}
-                    </ng-container>
-                    <ng-template #processBtn>Process</ng-template>
-                  </button> -->
                   <button
                     (click)="
                       onProcessingClick(transaction); $event.stopPropagation()
@@ -700,16 +673,15 @@
                   </div>
 
                   <!-- TIME -->
-                    <p
+                  <p
                     class="text-[11px]"
                     [ngClass]="{
-                  'text-red-700': transaction.utrEdited,
-                  'text-black': !transaction.utrEdited,
-                }"
+                      'text-red-700': transaction.utrEdited,
+                      'text-black': !transaction.utrEdited,
+                    }"
                   >
                     {{ formatUtrNumber(transaction.utrNumber) }}
                   </p>
-
 
                   <p class="text-[11px] text-[var(--color-muted)] mt-2">
                     {{ transaction.date | tz }}
@@ -1140,10 +1112,12 @@
       class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-3"
     >
       <div
-        class="w-full max-w-sm bg-[var(--color-surface)] rounded-lg shadow-2xl overflow-hidden animate-slideUp"
+        class="w-full max-w-sm bg-[var(--color-surface)] rounded-lg shadow-2xl overflow-visible animate-slideUp"
       >
         <!-- Header -->
-        <div class="p-4 border-b border-[var(--color-border)]">
+        <div
+          class="p-4 border-b border-[var(--color-border)] rounded-t-lg overflow-hidden"
+        >
           <div class="flex items-start gap-2">
             <div
               class="w-8 h-8 rounded-full bg-[var(--color-success)]/15 flex items-center justify-center shrink-0"
@@ -1168,7 +1142,7 @@
         </div>
 
         <!-- Body -->
-        <div class="p-4 space-y-4">
+        <div class="p-4 space-y-4 relative">
           <!-- Transaction Details -->
           <div
             *ngIf="confirmTransaction"
@@ -1278,6 +1252,190 @@
             </div>
           </div>
 
+          <!-- Payout Inventory Selection (optional, sirf payout ke liye, mode: bank/upi/crypto) -->
+          <div
+            *ngIf="
+              confirmTransaction?.type === 'payout' &&
+              (loadingPayoutInventory || payoutInventoryOptions.length)
+            "
+            class="relative payout-account-dropdown"
+          >
+            <div class="flex items-center justify-between mb-1.5">
+              <label
+                class="text-[10px] uppercase tracking-wide font-semibold text-[var(--color-muted)]"
+              >
+                Payout Account
+              </label>
+              <span class="text-[9px] font-medium text-[var(--color-muted)]/70">
+                Optional
+              </span>
+            </div>
+
+            <!-- Loading -->
+            <div
+              *ngIf="loadingPayoutInventory"
+              class="flex items-center gap-1.5 text-[10px] text-[var(--color-muted)] py-1.5"
+            >
+              <span
+                class="w-2.5 h-2.5 rounded-full border-2 border-[var(--color-muted)]/30 border-t-[var(--color-muted)] animate-spin"
+              ></span>
+              Loading accounts...
+            </div>
+
+            <!-- Select box (trigger) -->
+            <div
+              *ngIf="!loadingPayoutInventory && payoutInventoryOptions.length"
+              class="relative"
+            >
+              <button
+                type="button"
+                (click)="togglePayoutDropdown()"
+                class="w-full flex items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-2.5 py-1.5 text-left transition"
+                [ngClass]="{
+                  'border-[var(--color-success)]/60': payoutDropdownOpen,
+                }"
+              >
+                <!-- Nothing selected -->
+                <div *ngIf="!selectedPayoutInventory" class="flex-1 min-w-0">
+                  <p class="text-[11px] text-[var(--color-muted)]">
+                    Select account
+                  </p>
+                </div>
+
+                <!-- Selected value -->
+                <div
+                  *ngIf="selectedPayoutInventory"
+                  class="flex-1 min-w-0 flex items-center gap-1.5"
+                >
+                  <span
+                    class="text-[8px] uppercase font-bold px-1 py-[1px] rounded shrink-0 leading-tight"
+                    [ngClass]="{
+                      'bg-cyan-100 text-cyan-700':
+                        selectedPayoutInventory.kind === 'bank',
+                      'bg-purple-100 text-purple-700':
+                        selectedPayoutInventory.kind === 'upi',
+                      'bg-amber-100 text-amber-700':
+                        selectedPayoutInventory.kind === 'crypto',
+                    }"
+                  >
+                    {{ selectedPayoutInventory.kind }}
+                  </span>
+
+                  <p
+                    class="flex-1 min-w-0 text-[11px] font-medium text-[var(--color-font)] truncate"
+                  >
+                    {{ selectedPayoutInventory.label }}
+                    <span
+                      *ngIf="selectedPayoutInventory.subLabel"
+                      class="text-[var(--color-muted)] font-normal"
+                    >
+                      · {{ selectedPayoutInventory.subLabel }}
+                    </span>
+                  </p>
+                </div>
+
+                <!-- Clear button -->
+                <span
+                  *ngIf="selectedPayoutInventory"
+                  (click)="clearPayoutInventory($event)"
+                  class="material-symbols-outlined text-[var(--color-muted)] text-[14px] shrink-0 hover:text-red-500 transition"
+                >
+                  close
+                </span>
+
+                <!-- Chevron -->
+                <span
+                  class="material-symbols-outlined text-[var(--color-muted)] text-[16px] shrink-0 transition-transform"
+                  [ngClass]="{ 'rotate-180': payoutDropdownOpen }"
+                >
+                  expand_more
+                </span>
+              </button>
+
+              <!-- Dropdown panel -->
+              <div
+                *ngIf="payoutDropdownOpen"
+                class="absolute left-0 right-0 top-full mt-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg z-50 overflow-hidden"
+              >
+                <!-- Search box -->
+                <div class="p-1.5 border-b border-[var(--color-border)]">
+                  <div class="relative">
+                    <span
+                      class="material-symbols-outlined absolute left-1.5 top-1/2 -translate-y-1/2 text-[13px] text-[var(--color-muted)]"
+                    >
+                      search
+                    </span>
+                    <input
+                      type="text"
+                      [(ngModel)]="payoutSearchQuery"
+                      placeholder="Search account..."
+                      (click)="$event.stopPropagation()"
+                      class="w-full text-[11px] rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] pl-6 pr-2 py-1 text-[var(--color-font)] placeholder:text-[var(--color-muted)] focus:outline-none focus:border-[var(--color-success)]/60"
+                    />
+                  </div>
+                </div>
+
+                <!-- Options list -->
+                <div
+                  class="max-h-[164px] overflow-y-auto divide-y divide-[var(--color-border)]"
+                >
+                  <button
+                    type="button"
+                    *ngFor="let option of filteredPayoutInventoryOptions()"
+                    (click)="selectPayoutInventory(option)"
+                    class="w-full flex items-center gap-1.5 px-2.5 py-1.5 text-left transition hover:bg-[var(--color-bg)]"
+                    [ngClass]="{
+                      'bg-[var(--color-success)]/10':
+                        selectedPayoutInventory?.id === option.id &&
+                        selectedPayoutInventory?.kind === option.kind,
+                    }"
+                  >
+                    <span
+                      class="text-[8px] uppercase font-bold px-1 py-[1px] rounded shrink-0 leading-tight"
+                      [ngClass]="{
+                        'bg-cyan-100 text-cyan-700': option.kind === 'bank',
+                        'bg-purple-100 text-purple-700': option.kind === 'upi',
+                        'bg-amber-100 text-amber-700': option.kind === 'crypto',
+                      }"
+                    >
+                      {{ option.kind }}
+                    </span>
+
+                    <p
+                      class="flex-1 min-w-0 text-[11px] font-medium text-[var(--color-font)] truncate"
+                    >
+                      {{ option.label }}
+                      <span
+                        *ngIf="option.subLabel"
+                        class="text-[var(--color-muted)] font-normal"
+                      >
+                        · {{ option.subLabel }}
+                      </span>
+                    </p>
+
+                    <span
+                      *ngIf="
+                        selectedPayoutInventory?.id === option.id &&
+                        selectedPayoutInventory?.kind === option.kind
+                      "
+                      class="material-symbols-outlined text-[var(--color-success)] text-[14px] shrink-0"
+                    >
+                      check_circle
+                    </span>
+                  </button>
+
+                  <!-- No results -->
+                  <div
+                    *ngIf="!filteredPayoutInventoryOptions().length"
+                    class="px-2.5 py-3 text-center text-[10px] text-[var(--color-muted)]"
+                  >
+                    No matching accounts
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Attachment Upload -->
           <div *ngIf="confirmTransaction?.type === 'payout'">
             <div class="flex items-center justify-between mb-2">
@@ -1371,13 +1529,13 @@
 
         <!-- Footer -->
         <div
-          class="flex gap-2 p-4 border-t border-[var(--color-border)] bg-[var(--color-bg)]"
+          class="flex gap-2 p-4 border-t border-[var(--color-border)] bg-[var(--color-bg)] rounded-b-lg"
         >
           <button
             (click)="cancelApprove(); removeSelectedFile()"
             [disabled]="isApproving"
-  [class.opacity-50]="isApproving"
-  [class.cursor-not-allowed]="isApproving"
+            [class.opacity-50]="isApproving"
+            [class.cursor-not-allowed]="isApproving"
             class="flex-1 h-11 rounded-lg border border-[var(--color-border)] text-[12px] font-semibold text-[var(--color-muted)] hover:bg-[var(--color-surface)] transition"
           >
             Cancel
@@ -1621,8 +1779,8 @@
           <button
             (click)="cancelApprove(); removeSelectedFile()"
             [disabled]="isApproving"
-  [class.opacity-50]="isApproving"
-  [class.cursor-not-allowed]="isApproving"
+            [class.opacity-50]="isApproving"
+            [class.cursor-not-allowed]="isApproving"
             class="flex-1 px-4 py-2.5 border-2 border-[var(--color-border)] text-[var(--color-muted)] rounded-lg hover:bg-[var(--color-bg)] transition font-bold"
           >
             Cancel
@@ -2388,7 +2546,3 @@
     />
   </div>
 </div>
-
-
-
-

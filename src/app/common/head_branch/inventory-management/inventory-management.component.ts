@@ -1,4 +1,3 @@
-
 import {
   Component,
   OnInit,
@@ -108,7 +107,9 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   draftSearchTerm = "";
   private searchSubject = new Subject<string>();
   maxLimit: number | null = null;
+  minLimit: number | null = null;
   draftMaxLimit: number | null = null;
+  draftMinLimit: number | null = null;
   statusFilter: string = "all";
   draftStatusFilter: string = "all";
 
@@ -350,7 +351,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         rows.forEach((c) => {
           const modes = Object.keys(c.modes || {})
             .filter((k) => c.modes[k])
-            .map((m) => m.toLowerCase());
+            .map((m) => m.toUpperCase());
           this.currencyModesMap[c.currency] = modes;
           modes.forEach((m) => modeSet.add(m));
         });
@@ -389,6 +390,8 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   onModeChange(): void {
+    this.selectedMode = this.selectedMode.toUpperCase(); // 👈 add this line
+
     this.currentPage = 1;
 
     // mode badalte hi bank filter reset — sirf UPI mode ke liye relevant hai
@@ -468,24 +471,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     return found ? found.label : this.selectedBankId;
   }
 
-  // resetFilters(): void {
-  //   this.searchTerm = "";
-  //   this.draftSearchTerm = "";
-  //   this.maxLimit = null;
-  //   this.draftMaxLimit = null;
-  //   this.statusFilter = "all";
-  //   this.draftStatusFilter = "all";
-
-  //   this.selectedCurrency = "ALL";
-  //   this.selectedMode = "ALL";
-  //   this.availableModes = this.allModes;
-
-  //   this.selectedBankId = "ALL";
-  //   this.bankOptions = [];
-
-  //   this.currentPage = 1;
-  //   this.fetchInventory();
-  // }
   resetFilters(): void {
     this.searchTerm = "";
     this.draftSearchTerm = "";
@@ -535,15 +520,12 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.currentPage = 1;
     this.fetchInventory();
   }
+  onMinLimitChange(): void {
+    this.minLimit = this.draftMinLimit;
+    this.currentPage = 1;
+    this.fetchInventory();
+  }
 
-  // =========================================================
-  //  SINGLE CONSOLIDATED FETCH — bank + upi + crypto sab isi ek
-  //  API (getAllPaymentMethods) se aate hain. Ye hi refresh /
-  //  status-toggle / limit-time / delete ke baad bhi call hoti hai,
-  //  isliye ab "ALL" mode par bhi state update hamesha sahi hoga.
-  //  Jab mode = UPI aur ek specific bank select ho, to bankId bhi
-  //  query param ke roop me bhej diya jaata hai.
-  // =========================================================
   // fetchInventory(): void {
   //   if (!this.currentRoleId) return;
 
@@ -560,37 +542,36 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   //   const modes =
   //     this.selectedMode === "ALL" ? modesForThisCurrency : [this.selectedMode];
 
-  //   this.currentCurrenciesForApi = currencies;
-  //   this.currentModesForApi = modes;
-
-  //   const bankId =
-  //     this.selectedMode === "UPI" && this.selectedBankId !== "ALL"
-  //       ? this.selectedBankId
-  //       : undefined;
-
   //   this.loading = true;
 
-  //   const sub = this.bankService
+  //   this.bankService
   //     .getAllPaymentMethods({
   //       entityId: this.currentRoleId,
   //       entityType: this.role,
   //       currencies,
   //       modes,
-  //       bankId,
-  //       page: 0,
-  //       size: 10,
+
+  //       query: this.searchTerm || undefined,
+
+  //       // API me minAmount hai, agar backend maxLimit use karta hai
+  //       // to service bhi change karni padegi.
+  //       limitAmount: this.maxLimit ?? undefined,
+
+  //       bankId:
+  //         this.selectedMode === "UPI" && this.selectedBankId !== "ALL"
+  //           ? this.selectedBankId
+  //           : undefined,
+
+  //       status: this.statusFilter === "all" ? undefined : this.statusFilter, // ACTIVE / INACTIVE
+
+  //       page: this.currentPage - 1,
+  //       size: this.pageSize,
   //     })
   //     .pipe(catchError(() => of(null)))
   //     .subscribe((res: any) => {
   //       this.loading = false;
 
-  //       const rows: any[] = Array.isArray(res?.data?.content)
-  //         ? res.data.content
-  //         : Array.isArray(res?.data)
-  //           ? res.data
-  //           : Array.isArray(res)
-  //             ? res
-  //             : [];
+  //       const rows = res?.data?.content || [];
 
   //       this.allItems = rows
   //         .filter((r: any) => !r.deleted)
@@ -598,12 +579,16 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
   //       this.hasLoadedOnce = true;
   //       this.loadQrThumbnails();
-  //       this.applyClientFilters();
+
+  //       this.filteredItems = [...this.allItems];
+  //       this.pagedItems = [...this.allItems];
+
+  //       this.totalElements = res?.data?.totalElements || 0;
+  //       this.totalPagesCount = res?.data?.totalPages || 1;
+
+  //       this.updatePageNumbers();
   //     });
-
-  //   this.subs.add(sub);
   // }
-
   fetchInventory(): void {
     if (!this.currentRoleId) return;
 
@@ -633,7 +618,8 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
         // API me minAmount hai, agar backend maxLimit use karta hai
         // to service bhi change karni padegi.
-        limitAmount: this.maxLimit ?? undefined,
+        maxAmount: this.maxLimit ?? undefined,
+        minAmount: this.minLimit ?? undefined,
 
         bankId:
           this.selectedMode === "UPI" && this.selectedBankId !== "ALL"
@@ -673,11 +659,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.fetchInventory();
   }
 
-  // =========================================================
-  //  ROW MAPPER — getAllPaymentMethods response ke liye generic
-  //  mapper jo bank/upi/crypto teeno type ko common InventoryItem
-  //  shape me convert karta hai
-  // =========================================================
   private mapAnyRow(r: any): InventoryItem {
     const type = (r.type || r.paymentMethod || r.mode || "")
       .toString()
@@ -766,11 +747,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.selectedQrItem = null;
   }
 
-  // =========================================================
-  //  CLIENT SIDE FILTERS (search / status / max limit) + PAGINATION
-  //  — currency/mode/bank ab yahan filter nahi hote, kyunki fetch hi
-  //    us mode/currency/bank ke liye hui thi
-  // =========================================================
   applyClientFilters(): void {
     let items = [...this.allItems];
 

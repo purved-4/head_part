@@ -218,37 +218,65 @@ export class BankService {
   }
 
   // getAllPaymentMethods(params: {
-  //     entityId: string;
-  //     entityType: string;
+  //   entityId: string;
+  //   entityType: string;
+  //   currencies?: string[];
+  //   modes?: string[];
+  //   query?: string;
+  //   limitAmount?: number;
+  //   bankId?: string;
+  //   status?: string; // "ACTIVE" | "INACTIVE"
+  //   page?: number;
+  //   size?: number;
+  // }): Observable<any> {
+  //   let httpParams = new HttpParams()
+  //     .set("entityId", params.entityId)
+  //     .set("entityType", params.entityType);
 
-  //     page?: number;
-  //     size?: number;
-  //   }): Observable<any> {
-  //     let httpParams = new HttpParams()
-  //       .set("entityId", params.entityId)
-  //       .set("entityType", params.entityType);
+  //   (params.currencies || []).forEach((c) => {
+  //     httpParams = httpParams.append("currencies", c);
+  //   });
 
-  //     if (params.page !== undefined) {
-  //       httpParams = httpParams.set("page", params.page);
-  //     }
+  //   (params.modes || []).forEach((m) => {
+  //     httpParams = httpParams.append("modes", m.toUpperCase());
+  //   });
 
-  //     if (params.size !== undefined) {
-  //       httpParams = httpParams.set("size", params.size);
-  //     }
-
-  //     return this.http.get<any>(`${baseUrl}/banks/payment-methods`, {
-  //       params: httpParams,
-  //     });
+  //   if (params.query && params.query.trim()) {
+  //     httpParams = httpParams.set("query", params.query.trim());
   //   }
-  // bank.service.ts — sirf ye ek method update hui hai, baaki service same rehne dena
 
+  //   if (params.limitAmount !== undefined && params.limitAmount !== null) {
+  //     httpParams = httpParams.set("limitAmount", params.limitAmount.toString());
+  //   }
+
+  //   if (params.bankId) {
+  //     httpParams = httpParams.set("bankId", params.bankId);
+  //   }
+
+  //   if (params.status) {
+  //     httpParams = httpParams.set("status", params.status);
+  //   }
+
+  //   if (params.page !== undefined) {
+  //     httpParams = httpParams.set("page", params.page);
+  //   }
+
+  //   if (params.size !== undefined) {
+  //     httpParams = httpParams.set("size", params.size);
+  //   }
+
+  //   return this.http.get<any>(`${baseUrl}/banks/payment-methods`, {
+  //     params: httpParams,
+  //   });
+  // }
   getAllPaymentMethods(params: {
     entityId: string;
     entityType: string;
     currencies?: string[];
     modes?: string[];
     query?: string;
-    limitAmount?: number;
+    maxAmount?: number;
+    minAmount?: number;
     bankId?: string;
     status?: string; // "ACTIVE" | "INACTIVE"
     page?: number;
@@ -270,8 +298,12 @@ export class BankService {
       httpParams = httpParams.set("query", params.query.trim());
     }
 
-    if (params.limitAmount !== undefined && params.limitAmount !== null) {
-      httpParams = httpParams.set("limitAmount", params.limitAmount.toString());
+    if (params.maxAmount !== undefined && params.maxAmount !== null) {
+      httpParams = httpParams.set("maxAmount", params.maxAmount.toString());
+    }
+
+    if (params.minAmount !== undefined && params.minAmount !== null) {
+      httpParams = httpParams.set("minAmount", params.minAmount.toString());
     }
 
     if (params.bankId) {

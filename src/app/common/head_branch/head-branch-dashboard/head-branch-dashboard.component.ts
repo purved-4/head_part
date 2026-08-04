@@ -1,9 +1,8 @@
-
-
 import {
   AfterViewInit,
   Component,
   ElementRef,
+  HostListener,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -21,8 +20,7 @@ import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { ChiefService } from "../../../pages/services/chief.service";
 import { BranchService } from "../../../pages/services/branch.service";
 import { LoaderService } from "../../../pages/services/loader.service";
-import { Fund } from './../../../components/reports/funds-report/funds-report.component';
-
+import { Fund } from "./../../../components/reports/funds-report/funds-report.component";
 
 Chart.register(...registerables);
 
@@ -74,6 +72,8 @@ export class HeadBranchDashboardComponent
   mobilePage = 1;
   mobilePageSize = 1000;
   mobilePageSizes = [1000];
+  payoutDropdownOpen = false;
+  payoutSearchQuery = "";
 
   cachedMobileTransactions: any[] = [];
   cachedPendingBank: any[] = [];
@@ -201,9 +201,20 @@ export class HeadBranchDashboardComponent
   };
   role: any;
   private lastBroadcastData: any = null;
-  selectedPayoutMethod: "upi" | "bank" = "upi";
-  selectedUpi: any = null;
-  selectedBank: any = null;
+  // selectedPayoutMethod: "upi" | "bank" = "upi";
+  // selectedUpi: any = null;
+  // selectedBank: any = null;
+
+  payoutInventoryOptions: Array<{
+    id: string;
+    accountId: string; // yahi backend ko "accountId" ke naam se jaayega
+    kind: "bank" | "upi" | "crypto";
+    label: string;
+    subLabel?: string;
+    raw: any;
+  }> = [];
+  selectedPayoutInventory: any = null;
+  loadingPayoutInventory = false;
 
   payinStatus: any = false;
   private realtimeUpdateInterval: any = null;
@@ -233,7 +244,12 @@ export class HeadBranchDashboardComponent
     this.getPayinStatus();
 
     this.loadBroadcast();
-
+    // this.fundService
+    //   .getInventoryForPayout({
+    //     entityId: this.entityId,
+    //     mode: "BANK",
+    //   })
+    //   .subscribe();
     this.resetAllLists();
 
     this.socketConfigService.subscribeToPendingData(this.entityId);
@@ -1402,6 +1418,121 @@ export class HeadBranchDashboardComponent
       this.payoutApprovedPage = this.payoutApprovedTotalPages();
   }
 
+  // async approveTransaction(transaction: any): Promise<void> {
+  //   if (!transaction) return;
+
+  //   this.loaderService.showButtonLoader();
+
+  //   const t = this.normalizeTransaction(transaction) || transaction;
+
+  //   const fundId =
+  //     t.fundId ||
+  //     t.id ||
+  //     (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
+  //     null;
+
+  //   try {
+  //     if (t.type === "payout") {
+  //       const accountId =
+  //         this.selectedPayoutMethod === "upi"
+  //           ? this.selectedUpi
+  //           : this.selectedPayoutMethod === "bank"
+  //             ? this.selectedBank
+  //             : null;
+
+  //       const formData = new FormData();
+
+  //       if (accountId) {
+  //         formData.append("accountId", String(accountId));
+  //       }
+
+  //       if (this.selectedFile) {
+  //         formData.append("file", this.selectedFile, this.selectedFile.name);
+  //       }
+
+  //       await lastValueFrom(this.fundService.acceptPayout(fundId, formData));
+  //     } else if (t.mode === "upi") {
+  //       await lastValueFrom(this.fundService.settleUpiFund(fundId));
+  //     } else if (t.mode === "bank") {
+  //       await lastValueFrom(this.fundService.settleBankFund(fundId));
+  //     } else if (t.mode === "crypto") {
+  //       await lastValueFrom(this.fundService.settleCryptoFund(fundId));
+  //     } else {
+  //       this.snackbar.show("Unknown transaction type, cannot approve", false);
+  //       this.loaderService.hideButtonLoader();
+  //       return;
+  //     }
+
+  //     this.snackbar.show("Transaction approved successfully", true);
+
+  //     this.removeFromPendingListsByTx(t);
+
+  //     const approvedTx = {
+  //       ...t,
+  //       status: "completed",
+  //       settled: true,
+  //       date: t.date instanceof Date ? t.date : new Date(t.date),
+  //     };
+
+  //     if (approvedTx.type === "payout") {
+  //       this.addApprovedUnique(this.approvedTransactions, approvedTx);
+  //       this.addApprovedUnique(this.approvedpayouts, approvedTx);
+  //       this.recentpayouts = [...this.approvedpayouts];
+  //     } else {
+  //       this.addApprovedUnique(this.approvedTransactions, approvedTx);
+  //       this.addApprovedUnique(this.approvedpayins, approvedTx);
+  //       this.recentpayins = [...this.approvedpayins];
+  //     }
+
+  //     this.confirmTransaction = null;
+  //     this.showApproveConfirm = false;
+  //     this.selectedTransaction = null;
+  //     this.selectedFile = null;
+
+  //     this.resetRejectReason();
+
+  //     this.computeStatsFromData();
+  //     this.updateChartsFromData();
+  //     this.clampPages();
+  //     this.ensureProcessingTimerState();
+
+  //     this.loaderService.hideButtonLoader();
+  //   } catch (err: any) {
+  //     const message =
+  //       err?.error?.message || err?.error?.error || "Approval failed";
+
+  //     this.snackbar.show(message, false);
+
+  //     this.removeFromPendingListsByTx(t);
+
+  //     const failedTx = {
+  //       ...t,
+  //       status: "failed",
+  //     };
+
+  //     if (t.type === "payout") {
+  //       this.recentpayouts.unshift(failedTx);
+  //     } else {
+  //       this.recentpayins.unshift(failedTx);
+  //     }
+
+  //     this.computeStatsFromData();
+  //     this.updateChartsFromData();
+  //     this.clampPages();
+  //     this.ensureProcessingTimerState();
+
+  //     this.confirmTransaction = null;
+  //     this.showApproveConfirm = false;
+  //     this.selectedTransaction = null;
+  //     this.selectedFile = null;
+
+  //     this.resetRejectReason();
+  //     this.refreshCachedLists();
+
+  //     this.loaderService.hideButtonLoader();
+  //   }
+  // }
+
   async approveTransaction(transaction: any): Promise<void> {
     if (!transaction) return;
 
@@ -1417,12 +1548,8 @@ export class HeadBranchDashboardComponent
 
     try {
       if (t.type === "payout") {
-        const accountId =
-          this.selectedPayoutMethod === "upi"
-            ? this.selectedUpi
-            : this.selectedPayoutMethod === "bank"
-              ? this.selectedBank
-              : null;
+        // optional selection — bina select kiye bhi approve chalega
+        const accountId = this.selectedPayoutInventory?.accountId || null;
 
         const formData = new FormData();
 
@@ -1473,6 +1600,12 @@ export class HeadBranchDashboardComponent
       this.selectedTransaction = null;
       this.selectedFile = null;
 
+      // payout inventory state bhi reset karo
+      this.selectedPayoutInventory = null;
+      this.payoutInventoryOptions = [];
+      this.loadingPayoutInventory = false;
+      this.payoutDropdownOpen = false; // yeh line add
+
       this.resetRejectReason();
 
       this.computeStatsFromData();
@@ -1510,13 +1643,17 @@ export class HeadBranchDashboardComponent
       this.selectedTransaction = null;
       this.selectedFile = null;
 
+      // payout inventory state bhi reset karo (error case me bhi)
+      this.selectedPayoutInventory = null;
+      this.payoutInventoryOptions = [];
+      this.loadingPayoutInventory = false;
+
       this.resetRejectReason();
       this.refreshCachedLists();
 
       this.loaderService.hideButtonLoader();
     }
   }
-
   openEditAmountPopup(): void {
     this.editAmountData = {
       newAmount:
@@ -1840,6 +1977,35 @@ export class HeadBranchDashboardComponent
     }
   }
 
+  // openApproveConfirm(transaction: any) {
+  //   if (!transaction) return;
+
+  //   if (transaction.type === "payout" && transaction.processing !== true) {
+  //     this.snackbar.show("Please start processing first", false);
+  //     return;
+  //   }
+
+  //   const portalId = transaction.raw?.portalId;
+
+  //   const t = this.normalizeTransaction(transaction) || transaction;
+  //   const src =
+  //     t.type === "payout"
+  //       ? "payout"
+  //       : t.mode === "upi"
+  //         ? "upi"
+  //         : t.mode === "bank"
+  //           ? "bank"
+  //           : t.mode === "crypto"
+  //             ? "crypto"
+  //             : "none";
+
+  //   this.confirmTransaction = { ...t, section: src };
+  //   this.showApproveConfirm = true;
+  //   this.selectedPayoutMethod = "upi";
+  //   this.selectedUpi = null;
+  //   this.selectedBank = null;
+  //   this.customReason = "";
+  // }
   openApproveConfirm(transaction: any) {
     if (!transaction) return;
 
@@ -1864,12 +2030,21 @@ export class HeadBranchDashboardComponent
 
     this.confirmTransaction = { ...t, section: src };
     this.showApproveConfirm = true;
-    this.selectedPayoutMethod = "upi";
-    this.selectedUpi = null;
-    this.selectedBank = null;
-    this.customReason = "";
-  }
 
+    this.selectedPayoutInventory = null;
+    this.payoutInventoryOptions = [];
+    this.loadingPayoutInventory = false;
+    this.payoutDropdownOpen = false; // yeh line add
+    this.customReason = "";
+
+    // sirf payout ke case me hi inventory dropdown load hoga
+    if (t.type === "payout") {
+      const payoutMode = t.raw?.mode || t.raw?.paymentMethod || null;
+      if (payoutMode) {
+        this.fetchPayoutInventory(payoutMode);
+      }
+    }
+  }
   openRejectConfirm(tx: any) {
     if (!tx) return;
 
@@ -1903,24 +2078,23 @@ export class HeadBranchDashboardComponent
   async confirmApprove() {
     if (this.isApproving) return;
     this.isApproving = true;
-     try {
-    if (this.isPayoutActionBlocked(this.confirmTransaction)) {
-      this.snackbar.show("You Can approve After Processing", false);
-      return;
+    try {
+      if (this.isPayoutActionBlocked(this.confirmTransaction)) {
+        this.snackbar.show("You Can approve After Processing", false);
+        return;
+      }
+
+      if (!this.confirmTransaction) return;
+
+      if (this.confirmTransaction.type === "payout" && !this.selectedFile) {
+        this.snackbar.show("Attachment is required for payout approval", false);
+        return;
+      }
+
+      await this.approveTransaction(this.confirmTransaction);
+    } finally {
+      this.isApproving = false;
     }
-
-    if (!this.confirmTransaction) return;
-
-    if (this.confirmTransaction.type === "payout" && !this.selectedFile) {
-      this.snackbar.show("Attachment is required for payout approval", false);
-      return;
-    }
-
-    await this.approveTransaction(this.confirmTransaction);
-  } finally {
-    this.isApproving = false;
-  }
-    
   }
 
   get rejectionReason(): string {
@@ -2005,15 +2179,19 @@ export class HeadBranchDashboardComponent
 
   cancelApprove() {
     this.showApproveConfirm = false;
-    this.selectedPayoutMethod = "upi";
     this.confirmTransaction = null;
     this.showApproveConfirm = false;
+
+    this.selectedPayoutInventory = null;
+    this.payoutInventoryOptions = [];
+    this.loadingPayoutInventory = false;
+    this.payoutDropdownOpen = false; // yeh line add
+
     if (this.showRejectConfirm === true) {
       this.showRejectConfirm = false;
     }
     this.resetRejectReason();
   }
-
   togglepayin(): void {
     this.payinActive = !this.payinActive;
   }
@@ -2154,7 +2332,7 @@ export class HeadBranchDashboardComponent
 
       utrNumber: fund.transactionId || fund.utr || null,
 
-      utrEdited:fund.utrEdited,
+      utrEdited: fund.utrEdited,
 
       parentCurrency: fund.parentCurrency,
 
@@ -3011,7 +3189,6 @@ export class HeadBranchDashboardComponent
       const t2 = new Date(b.date).getTime() || 0;
       return t2 - t1;
     });
-
   }
   trackById(index: number, item: any): any {
     return item?.id || item?.fundId || index;
@@ -3071,5 +3248,128 @@ export class HeadBranchDashboardComponent
       this.snackbar.show(`${label} copied`, true);
     });
   }
-}
+  private fetchPayoutInventory(mode: string): void {
+    if (!this.entityId || !mode) return;
 
+    this.loadingPayoutInventory = true;
+    this.payoutInventoryOptions = [];
+    this.selectedPayoutInventory = null;
+
+    this.fundService
+      .getInventoryForPayout({
+        entityId: this.entityId,
+        mode: String(mode).toUpperCase(), // bank/upi/trc20/erc20/bep20/omni/spl -> UPPERCASE
+      })
+      .pipe(catchError(() => of(null)))
+      .subscribe((res: any) => {
+        this.loadingPayoutInventory = false;
+
+        const data = res?.data;
+        if (!data) return; // inventory empty -> options khali hi rahenge, dropdown UI hide ho jayega
+
+        const options: any[] = [];
+
+        if (Array.isArray(data.bank)) {
+          for (const b of data.bank) {
+            options.push({
+              id: b.id,
+              accountId: b.id, // bank -> bankId as accountId
+              kind: "bank",
+              label: b.bankName || "Bank Account",
+              subLabel: b.accountHolderName || b.accountNo || "",
+              raw: b,
+            });
+          }
+        }
+
+        if (Array.isArray(data.upi)) {
+          for (const u of data.upi) {
+            options.push({
+              id: u.id,
+              accountId: u.id, // upi -> upiId as accountId
+              kind: "upi",
+              label: u.vpa || "UPI",
+              subLabel: "",
+              raw: u,
+            });
+          }
+        }
+
+        if (Array.isArray(data.crypto)) {
+          for (const c of data.crypto) {
+            options.push({
+              id: c.id,
+              accountId: c.walletAddress, // crypto -> walletAddress as accountId
+              kind: "crypto",
+              label: this.maskWalletAddress(c.walletAddress),
+              subLabel: c.paymentMethod || "",
+              raw: c,
+            });
+          }
+        }
+
+        this.payoutInventoryOptions = options;
+      });
+  }
+
+  selectPayoutInventory(option: any): void {
+    const isSame =
+      this.selectedPayoutInventory?.id === option?.id &&
+      this.selectedPayoutInventory?.kind === option?.kind;
+
+    this.selectedPayoutInventory = isSame ? null : option;
+    this.payoutDropdownOpen = false;
+    this.payoutSearchQuery = ""; // reset search on select
+  }
+
+  togglePayoutDropdown(): void {
+    if (!this.payoutInventoryOptions.length) return;
+    this.payoutDropdownOpen = !this.payoutDropdownOpen;
+    if (this.payoutDropdownOpen) {
+      this.payoutSearchQuery = "";
+    }
+  }
+
+  clearPayoutInventory(event: Event): void {
+    event.stopPropagation();
+    this.selectedPayoutInventory = null;
+    this.payoutDropdownOpen = false;
+    this.payoutSearchQuery = "";
+  }
+
+  // naya getter — search ke hisaab se filter
+  filteredPayoutInventoryOptions(): any[] {
+    const q = this.payoutSearchQuery.trim().toLowerCase();
+    if (!q) return this.payoutInventoryOptions;
+
+    return this.payoutInventoryOptions.filter((option) => {
+      const label = (option.label || "").toLowerCase();
+      const subLabel = (option.subLabel || "").toLowerCase();
+      const walletAddress = (option.raw?.walletAddress || "").toLowerCase();
+      const holderName = (
+        option.raw?.accountHolderName ||
+        option.raw?.holderName ||
+        ""
+      ).toLowerCase();
+      const bankName = (option.raw?.bankName || "").toLowerCase();
+      const vpa = (option.raw?.vpa || "").toLowerCase();
+
+      return (
+        label.includes(q) ||
+        subLabel.includes(q) ||
+        walletAddress.includes(q) ||
+        holderName.includes(q) ||
+        bankName.includes(q) ||
+        vpa.includes(q)
+      );
+    });
+  }
+  @HostListener("document:click", ["$event"])
+  onDocumentClickForPayoutDropdown(event: MouseEvent): void {
+    if (!this.payoutDropdownOpen) return;
+    const target = event.target as HTMLElement;
+    if (!target.closest(".payout-account-dropdown")) {
+      this.payoutDropdownOpen = false;
+    }
+  }
+}

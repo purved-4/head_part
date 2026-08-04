@@ -121,7 +121,7 @@
           <span class="material-symbols-outlined mr-1 text-sm"
             >currency_rupee</span
           >
-        limitAmount - {{ maxLimit }}
+          limitAmount - {{ maxLimit }}
           <button
             (click)="clearLimitFilter()"
             class="ml-1 hover:text-[var(--color-danger)]"
@@ -175,7 +175,7 @@
         >
           <option value="ALL">ALL</option>
           <option *ngFor="let m of availableModes" [value]="m">
-            {{ m | uppercase }}
+            {{ m }}
           </option>
         </select>
       </div>
@@ -212,7 +212,7 @@
             class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
             >search</span
           >
-          Search (Account / UPI / Wallet / Holder)
+          Search (Account / UPI / Wallet )
         </label>
         <input
           type="text"
@@ -224,6 +224,23 @@
       </div>
 
       <!-- MAX LIMIT — turant apply on change -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-[var(--color-font)]">
+          <span
+            class="material-symbols-outlined text-[var(--color-primary)] mr-1 text-xs"
+            >monetization_on</span
+          >
+          Min Limit
+        </label>
+        <input
+          type="number"
+          [(ngModel)]="draftMinLimit"
+          (change)="onMinLimitChange()"
+          placeholder="e.g. 50000"
+          min="0"
+          class="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] bg-[var(--color-surface)]"
+        />
+      </div>
       <div class="space-y-1">
         <label class="block text-xs font-medium text-[var(--color-font)]">
           <span
@@ -259,6 +276,7 @@
           <option value="all">All</option>
           <option value="active">Active</option>
           <option value="archive">Archive</option>
+          <option value="deleted">Deleted</option>
         </select>
       </div>
     </div>
@@ -514,44 +532,6 @@
                 </span>
               </button>
             </td>
-
-            <!-- DETAILS: BANK vs UPI vs CRYPTO — sabki apni field -->
-            <!-- <td class="px-4 py-3 whitespace-nowrap">
-              <div
-                class="flex flex-col leading-tight"
-                *ngIf="item.type === 'BANK'; else notBankDetails"
-              >
-                <span class="text-xs font-medium text-[var(--color-font)]">{{
-                  item.bankName || "-"
-                }}</span>
-                <span class="text-[10px] text-gray-400">{{
-                  item.accountHolderName || "-"
-                }}</span>
-                <span class="text-[10px] text-gray-400 uppercase">{{
-                  item.bankCode || ""
-                }}</span>
-              </div>
-
-              <ng-template #notBankDetails>
-                <div
-                  class="flex flex-col leading-tight"
-                  *ngIf="item.type === 'UPI'; else cryptoDetails"
-                >
-                  <span class="text-xs font-medium text-[var(--color-font)]">{{
-                    item.bankName || "-"
-                  }}</span>
-                  <span class="text-[10px] text-gray-400">{{
-                    item.accountHolder || "-"
-                  }}</span>
-                </div>
-              </ng-template>
-
-              <ng-template #cryptoDetails>
-                <span class="text-xs text-[var(--color-font)]">{{
-                  item.holderName || "-"
-                }}</span>
-              </ng-template>
-            </td> -->
 
             <td class="px-4 py-3 whitespace-nowrap">
               <!-- BANK -->
