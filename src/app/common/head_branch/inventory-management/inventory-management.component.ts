@@ -1,3 +1,4 @@
+
 import {
   Component,
   OnInit,
@@ -60,11 +61,6 @@ interface InventoryItem {
   displayAddress: string;
 }
 
-interface BankFilterOption {
-  id: string;
-  label: string;
-}
-
 @Component({
   selector: "app-inventory-management",
   templateUrl: "./inventory-management.component.html",
@@ -79,30 +75,22 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   loading = false;
   viewMode: "table" | "grid" = "table";
 
-  // ---------- CURRENCY / MODE (single consolidated API — no Apply button) ----------
+  // ---------- CURRENCY / MODE (no routing — sirf local state) ----------
   currencies: string[] = [];
   private currencyModesMap: { [currency: string]: string[] } = {};
-  allModes: string[] = [];
+
+  // "draft" = jo UI me abhi select ho rahe hain (Apply Filters se pehle)
+  draftCurrency: string = "";
+  draftMode: string = "";
   availableModes: string[] = [];
 
-  // "ALL" ya specific value — dono UI me directly select hote hain, badalte hi fetch
-  selectedCurrency: string = "ALL";
-  selectedMode: string = "ALL";
+  // "active" = jo Apply Filters ke baad actually API call ke liye use ho rahe hain
+  selectedCurrency: string = "";
+  selectedMode: string = ""; // hamesha UPPERCASE — 'BANK' | 'UPI' | 'ERC20' | ...
 
-  private currentCurrenciesForApi: string[] = [];
-  private currentModesForApi: string[] = [];
+  hasLoadedOnce = false; // pehli baar Apply Filters chalne ke baad true
 
-  hasLoadedOnce = false;
-
-  // ---------- BANK FILTER (sirf UPI mode select hone par visible) ----------
-  // Jab mode = UPI ho tabhi ye dropdown dikhta hai. Holder name label ke
-  // saath dikhaya jaata hai aur select hote hi getAllPaymentMethods me
-  // bankId query param ke roop me bhej diya jaata hai.
-  bankOptions: BankFilterOption[] = [];
-  selectedBankId: string = "ALL";
-  loadingBanks = false;
-
-  // ---------- FILTERS (client side, apply immediately — no Apply button) ----------
+  // ---------- FILTERS ----------
   searchTerm = "";
   draftSearchTerm = "";
   private searchSubject = new Subject<string>();
@@ -282,8 +270,17 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     if (this.searchTerm.trim()) count++;
     if (this.statusFilter && this.statusFilter !== "all") count++;
     if (this.maxLimit !== null && this.maxLimit > 0) count++;
-    if (this.selectedMode === "UPI" && this.selectedBankId !== "ALL") count++;
     return count;
+  }
+
+  /** Mode dropdown tabhi enable hoga jab currency choose ho chuki ho */
+  get isModeDisabled(): boolean {
+    return !this.draftCurrency;
+  }
+
+  /** Apply Filters tabhi enable hoga jab currency + mode dono select ho */
+  get canApplyFilters(): boolean {
+    return !!this.draftCurrency && !!this.draftMode;
   }
 
   constructor(
@@ -310,10 +307,11 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       .subscribe((value) => {
         this.searchTerm = value;
         this.currentPage = 1;
-        this.fetchInventory();
+        this.applyClientFilters();
       });
 
-    this.loadCurrenciesAndInventory();
+    this.loadCurrencies();
+    this.loadAllInventory(); // <-- YE LINE ADD KARNI HAI
 
     this.countdownInterval = setInterval(() => {
       this.pagedItems = [...this.pagedItems];
@@ -331,13 +329,13 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   // =========================================================
-  //  CURRENCY LOAD — currency list + unke modes chahiye,
-  //  fir turant default ALL/ALL se pehli inventory bhi fetch ho jaati hai
+  //  CURRENCY LOAD — sirf currency list + unke modes chahiye,
+  //  koi data yahan load nahi hota
   // =========================================================
-  private loadCurrenciesAndInventory(): void {
+  loadCurrencies(): void {
     if (!this.currentRoleId) return;
 
-    const sub = this.portalService
+    this.portalService
       .getCurrenciesByEntity(this.currentRoleId, this.role)
       .pipe(catchError(() => of({ data: [] })))
       .subscribe((res: any) => {
@@ -345,358 +343,202 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         this.currencies = rows.map((c) => c.currency).filter(Boolean);
 
         this.currencyModesMap = {};
-        const modeSet = new Set<string>();
         rows.forEach((c) => {
           const modes = Object.keys(c.modes || {})
             .filter((k) => c.modes[k])
             .map((m) => m.toLowerCase());
           this.currencyModesMap[c.currency] = modes;
-          modes.forEach((m) => modeSet.add(m));
         });
-        this.allModes = Array.from(modeSet);
-
-        // Default state — ALL / ALL, dropdown me "ALL" hi pre-selected dikhega
-        this.selectedCurrency = "ALL";
-        this.selectedMode = "ALL";
-        this.availableModes = this.allModes;
-
-        this.fetchInventory();
       });
-
-    this.subs.add(sub);
   }
 
   // =========================================================
-  //  CURRENCY / MODE CHANGE — turant fetch, koi Apply Filters button nahi
+  //  CURRENCY / MODE SELECTION (draft — Apply Filters se pehle)
   // =========================================================
   onCurrencyChange(value: string): void {
-    this.selectedCurrency = value || "ALL";
-    this.availableModes =
-      this.selectedCurrency === "ALL"
-        ? this.allModes
-        : this.currencyModesMap[this.selectedCurrency] || [];
-
-    // currency badalne par mode bhi ALL pe reset — us currency ke sabhi modes fetch honge
-    this.selectedMode = "ALL";
-
-    // bank filter bhi reset — currency change se bank list currency-specific badal sakti hai
-    this.selectedBankId = "ALL";
-    this.bankOptions = [];
-
-    this.currentPage = 1;
-    this.fetchInventory();
+    this.draftCurrency = value;
+    this.availableModes = value ? this.currencyModesMap[value] || [] : [];
+    this.draftMode = ""; // currency badalte hi mode reset — dobara chuno
   }
 
   onModeChange(): void {
-    this.currentPage = 1;
+    // sirf draft state — actual fetch Apply Filters pe hi hoga
+  }
 
-    // mode badalte hi bank filter reset — sirf UPI mode ke liye relevant hai
-    this.selectedBankId = "ALL";
-
-    if (this.selectedMode === "UPI") {
-      this.loadBankOptionsForFilter();
-    } else {
-      this.bankOptions = [];
+  // =========================================================
+  //  APPLY FILTERS — yahi se asli mode-based API call trigger hoti hai
+  // =========================================================
+  applyFilters(): void {
+    if (!this.canApplyFilters) {
+      this.snack.show("Please select Currency and Mode first", false);
+      return;
     }
 
-    this.fetchInventory();
-  }
+    this.searchTerm = this.draftSearchTerm;
+    this.maxLimit = this.draftMaxLimit;
+    this.statusFilter = this.draftStatusFilter;
 
-  // =========================================================
-  //  BANK FILTER (sirf UPI mode me) — bank list load karta hai
-  //  (holder name label ke saath), consolidated getAllPaymentMethods
-  //  API ko hi modes: ["BANK"] ke saath reuse karke.
-  // =========================================================
-  private loadBankOptionsForFilter(): void {
-    if (!this.currentRoleId) return;
+    this.selectedCurrency = this.draftCurrency;
+    this.selectedMode = this.draftMode.toUpperCase();
 
-    const currencies =
-      this.selectedCurrency === "ALL" && this.currencies.length
-        ? this.currencies
-        : this.selectedCurrency !== "ALL"
-          ? [this.selectedCurrency]
-          : [];
-
-    this.loadingBanks = true;
-
-    const sub = this.bankService
-      .getAllPaymentMethods({
-        entityId: this.currentRoleId,
-        entityType: this.role,
-        currencies,
-        modes: ["BANK"],
-        page: 0,
-        size: 100,
-      })
-      .pipe(catchError(() => of(null)))
-      .subscribe((res: any) => {
-        this.loadingBanks = false;
-
-        const rows: any[] = Array.isArray(res?.data?.content)
-          ? res.data.content
-          : Array.isArray(res?.data)
-            ? res.data
-            : Array.isArray(res)
-              ? res
-              : [];
-
-        this.bankOptions = rows
-          .filter((r: any) => !r.deleted)
-          .map((r: any) => ({
-            id: r.id,
-            label: r.accountHolderName || r.bankName || r.accountNo || r.id,
-          }));
-      });
-
-    this.subs.add(sub);
-  }
-
-  onBankFilterChange(): void {
     this.currentPage = 1;
+    this.hasLoadedOnce = true;
+
     this.fetchInventory();
   }
 
-  clearBankFilter(): void {
-    this.selectedBankId = "ALL";
-    this.currentPage = 1;
-    this.fetchInventory();
-  }
-
-  getSelectedBankLabel(): string {
-    const found = this.bankOptions.find((b) => b.id === this.selectedBankId);
-    return found ? found.label : this.selectedBankId;
-  }
-
-  // resetFilters(): void {
-  //   this.searchTerm = "";
-  //   this.draftSearchTerm = "";
-  //   this.maxLimit = null;
-  //   this.draftMaxLimit = null;
-  //   this.statusFilter = "all";
-  //   this.draftStatusFilter = "all";
-
-  //   this.selectedCurrency = "ALL";
-  //   this.selectedMode = "ALL";
-  //   this.availableModes = this.allModes;
-
-  //   this.selectedBankId = "ALL";
-  //   this.bankOptions = [];
-
-  //   this.currentPage = 1;
-  //   this.fetchInventory();
-  // }
   resetFilters(): void {
     this.searchTerm = "";
     this.draftSearchTerm = "";
-
     this.maxLimit = null;
     this.draftMaxLimit = null;
-
     this.statusFilter = "all";
     this.draftStatusFilter = "all";
 
-    this.selectedCurrency = "ALL";
-    this.selectedMode = "ALL";
-    this.availableModes = this.allModes;
+    this.draftCurrency = "";
+    this.draftMode = "";
+    this.availableModes = [];
 
-    this.selectedBankId = "ALL";
-    this.bankOptions = [];
+    this.selectedCurrency = "";
+    this.selectedMode = "";
 
     this.currentPage = 1;
-
-    this.fetchInventory();
+    this.loadAllInventory(); // <-- empty karne ki jagah yeh call — sab data wapas
   }
+
   clearLimitFilter(): void {
     this.maxLimit = null;
     this.draftMaxLimit = null;
     this.currentPage = 1;
-    this.fetchInventory();
+    this.applyClientFilters();
   }
 
   clearSearchFilter(): void {
     this.searchTerm = "";
     this.draftSearchTerm = "";
     this.currentPage = 1;
-    this.fetchInventory();
+    this.applyClientFilters();
   }
 
-  onSearchInput(value: string): void {
+  onSearchInput(value: string) {
     this.searchSubject.next(value);
   }
-  onStatusFilterChange(): void {
-    this.statusFilter = this.draftStatusFilter;
-    this.currentPage = 1;
-    this.fetchInventory();
-  }
-
-  onMaxLimitChange(): void {
-    this.maxLimit = this.draftMaxLimit;
-    this.currentPage = 1;
-    this.fetchInventory();
-  }
 
   // =========================================================
-  //  SINGLE CONSOLIDATED FETCH — bank + upi + crypto sab isi ek
-  //  API (getAllPaymentMethods) se aate hain. Ye hi refresh /
-  //  status-toggle / limit-time / delete ke baad bhi call hoti hai,
-  //  isliye ab "ALL" mode par bhi state update hamesha sahi hoga.
-  //  Jab mode = UPI aur ek specific bank select ho, to bankId bhi
-  //  query param ke roop me bhej diya jaata hai.
+  //  FETCH DISPATCHER — mode ke hisaab se seedha uska hi service call
   // =========================================================
-  // fetchInventory(): void {
-  //   if (!this.currentRoleId) return;
-
-  //   const currencies =
-  //     this.selectedCurrency === "ALL" && this.currencies.length
-  //       ? this.currencies
-  //       : this.selectedCurrency !== "ALL"
-  //         ? [this.selectedCurrency]
-  //         : [];
-
-  //   const modesForThisCurrency =
-  //     this.selectedCurrency === "ALL" ? this.allModes : this.availableModes;
-
-  //   const modes =
-  //     this.selectedMode === "ALL" ? modesForThisCurrency : [this.selectedMode];
-
-  //   this.currentCurrenciesForApi = currencies;
-  //   this.currentModesForApi = modes;
-
-  //   const bankId =
-  //     this.selectedMode === "UPI" && this.selectedBankId !== "ALL"
-  //       ? this.selectedBankId
-  //       : undefined;
-
-  //   this.loading = true;
-
-  //   const sub = this.bankService
-  //     .getAllPaymentMethods({
-  //       entityId: this.currentRoleId,
-  //       entityType: this.role,
-  //       currencies,
-  //       modes,
-  //       bankId,
-  //       page: 0,
-  //       size: 10,
-  //     })
-  //     .pipe(catchError(() => of(null)))
-  //     .subscribe((res: any) => {
-  //       this.loading = false;
-
-  //       const rows: any[] = Array.isArray(res?.data?.content)
-  //         ? res.data.content
-  //         : Array.isArray(res?.data)
-  //           ? res.data
-  //           : Array.isArray(res)
-  //             ? res
-  //             : [];
-
-  //       this.allItems = rows
-  //         .filter((r: any) => !r.deleted)
-  //         .map((r: any) => this.mapAnyRow(r));
-
-  //       this.hasLoadedOnce = true;
-  //       this.loadQrThumbnails();
-  //       this.applyClientFilters();
-  //     });
-
-  //   this.subs.add(sub);
-  // }
-
   fetchInventory(): void {
-    if (!this.currentRoleId) return;
+    if (!this.currentRoleId || !this.selectedMode) return;
 
-    const currencies =
-      this.selectedCurrency === "ALL" && this.currencies.length
-        ? this.currencies
-        : this.selectedCurrency !== "ALL"
-          ? [this.selectedCurrency]
-          : [];
-
-    const modesForThisCurrency =
-      this.selectedCurrency === "ALL" ? this.allModes : this.availableModes;
-
-    const modes =
-      this.selectedMode === "ALL" ? modesForThisCurrency : [this.selectedMode];
-
-    this.loading = true;
-
-    this.bankService
-      .getAllPaymentMethods({
-        entityId: this.currentRoleId,
-        entityType: this.role,
-        currencies,
-        modes,
-
-        query: this.searchTerm || undefined,
-
-        // API me minAmount hai, agar backend maxLimit use karta hai
-        // to service bhi change karni padegi.
-        maxAmount: this.maxLimit ?? undefined,
-
-        bankId:
-          this.selectedMode === "UPI" && this.selectedBankId !== "ALL"
-            ? this.selectedBankId
-            : undefined,
-
-        status: this.statusFilter === "all" ? undefined : this.statusFilter, // ACTIVE / INACTIVE
-
-        page: this.currentPage - 1,
-        size: this.pageSize,
-      })
-      .pipe(catchError(() => of(null)))
-      .subscribe((res: any) => {
-        this.loading = false;
-
-        const rows = res?.data?.content || [];
-
-        this.allItems = rows
-          .filter((r: any) => !r.deleted)
-          .map((r: any) => this.mapAnyRow(r));
-
-        this.hasLoadedOnce = true;
-        this.loadQrThumbnails();
-
-        this.filteredItems = [...this.allItems];
-        this.pagedItems = [...this.allItems];
-
-        this.totalElements = res?.data?.totalElements || 0;
-        this.totalPagesCount = res?.data?.totalPages || 1;
-
-        this.updatePageNumbers();
-      });
+    if (this.selectedMode === "BANK") {
+      this.fetchBankInventory();
+    } else if (this.selectedMode === "UPI") {
+      this.fetchUpiInventory();
+    } else {
+      // erc20 / trc20 / spl / bep20 / omni / etc.
+      this.fetchCryptoInventory(this.selectedMode);
+    }
   }
 
+  /** Refresh — jo bhi filters currently ACTIVE hain (post Apply) unhi se dobara fetch */
   refreshInventory(): void {
     if (!this.hasLoadedOnce) return;
     this.fetchInventory();
   }
 
-  // =========================================================
-  //  ROW MAPPER — getAllPaymentMethods response ke liye generic
-  //  mapper jo bank/upi/crypto teeno type ko common InventoryItem
-  //  shape me convert karta hai
-  // =========================================================
-  private mapAnyRow(r: any): InventoryItem {
-    const type = (r.type || r.paymentMethod || r.mode || "")
-      .toString()
-      .toUpperCase();
+  private fetchBankInventory(): void {
+    this.loading = true;
 
-    let displayAddress = "-";
-    if (type === "BANK") {
-      displayAddress = r.accountNo || "-";
-    } else if (type === "UPI") {
-      displayAddress = r.vpa || "-";
-    } else {
-      displayAddress = r.walletAddress || "-";
-    }
+    const sub = this.bankService
+      .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId, {
+        page: 0,
+        size: 200,
+        currency: this.selectedCurrency,
+      })
+      .pipe(catchError(() => of(null)))
+      .subscribe((res: any) => {
+        this.loading = false;
 
+        const rows: any[] = Array.isArray(res?.data?.content)
+          ? res.data.content
+          : Array.isArray(res?.data)
+            ? res.data
+            : [];
+
+        this.allItems = rows.map((r: any) => this.mapBankRow(r));
+        this.loadQrThumbnails();
+        this.applyClientFilters();
+      });
+
+    this.subs.add(sub);
+  }
+
+  private fetchUpiInventory(): void {
+    this.loading = true;
+
+    const sub = this.upiService
+      .getByEntityIdAndActivePaginated(this.currentRoleId, {
+        page: 0,
+        size: 200,
+        currency: this.selectedCurrency,
+      })
+      .pipe(catchError(() => of(null)))
+      .subscribe((res: any) => {
+        this.loading = false;
+
+        const responseData = res?.data || res;
+        const rows: any[] = Array.isArray(responseData?.content)
+          ? responseData.content
+          : Array.isArray(responseData)
+            ? responseData
+            : [];
+
+        this.allItems = rows.map((r: any) => this.mapUpiRow(r));
+        this.loadQrThumbnails();
+        this.applyClientFilters();
+      });
+
+    this.subs.add(sub);
+  }
+
+  private fetchCryptoInventory(paymentMethod: string): void {
+    this.loading = true;
+
+    const sub = this.cryptoService
+      .getCrypto(this.currentRoleId, this.role, paymentMethod)
+      .pipe(catchError(() => of(null)))
+      .subscribe((res: any) => {
+        this.loading = false;
+
+        const rows: any[] = Array.isArray(res?.content) ? res.content : [];
+
+        this.allItems = rows
+          .filter((r: any) => !r.deleted)
+          .filter((r: any) =>
+            this.selectedCurrency
+              ? (r.currency || "").toUpperCase() ===
+                this.selectedCurrency.toUpperCase()
+              : true,
+          )
+          .map((r: any) => this.mapCryptoRow(r));
+
+        this.loadQrThumbnails();
+        this.applyClientFilters();
+      });
+
+    this.subs.add(sub);
+  }
+
+  // =========================================================
+  //  ROW MAPPERS — har mode ka apna mapper, common InventoryItem shape me
+  // =========================================================
+  private mapBankRow(r: any): InventoryItem {
     return {
       id: r.id,
-      type,
+      type: "BANK",
       entityType: r.entityType,
       entityId: r.entityId,
-      currency: r.currency || r.portalCurrency || "",
+      currency: r.portalCurrency || r.currency || "",
       limitAmount: r.limitAmount ?? "",
       remainingLimitAmount: r.remainingLimitAmount,
       status:
@@ -708,26 +550,74 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       liveAssigned: r.liveAssigned ?? false,
       limitTime: r.limitTime ?? null,
       ranges: r.ranges ?? [],
-      qrImagePath: r.qrImagePath ?? null,
+      qrImagePath: null,
       qrImageUrl: null,
 
-      accountNo: r.accountNo ?? null,
-      accountHolderName: r.accountHolderName ?? null,
-      bankCode: r.bankCode ?? null,
-      bankName: r.bankName ?? null,
-      accountType: r.accountType ?? null,
+      accountNo: r.accountNo ?? r.accountNumber ?? "",
+      accountHolderName: r.accountHolderName ?? r.name ?? "",
+      bankCode: r.bankCode ?? "",
+      bankName: r.bankName ?? "",
+      accountType: r.accountType ?? "",
       bankTime: r.bankTime ?? null,
       upiCount: r.upiCount ?? null,
 
-      vpa: r.vpa ?? null,
+      displayAddress: r.accountNo || r.accountNumber || "-",
+    };
+  }
+
+  private mapUpiRow(r: any): InventoryItem {
+    return {
+      id: r.id,
+      type: "UPI",
+      entityType: r.entityType,
+      entityId: r.entityId,
+      currency: r.portalCurrency || r.currency || "",
+      limitAmount: r.limitAmount ?? "",
+      remainingLimitAmount: r.remainingLimitAmount,
+      status:
+        typeof r.status === "boolean"
+          ? r.status
+          : (r.status || "").toLowerCase() === "active",
+      fttAcceptance: r.fttAcceptance ?? true,
+      partialPayinEnabled: r.partialPayinEnabled ?? false,
+      liveAssigned: r.liveAssigned ?? false,
+      limitTime: r.limitTime ?? null,
+      ranges: r.ranges ?? [],
+      qrImagePath: r.qrImagePath || r.qrImageUrl || null,
+      qrImageUrl: null,
+
+      vpa: r.vpa || r.upiId || "",
       upiTime: r.upiTime ?? null,
-      accountHolder: r.accountHolder ?? null,
+      accountHolder: r.accountHolder ?? "",
+      bankName: r.bankName ?? "",
 
-      walletAddress: r.walletAddress ?? null,
+      displayAddress: r.vpa || r.upiId || "-",
+    };
+  }
+
+  private mapCryptoRow(r: any): InventoryItem {
+    return {
+      id: r.id,
+      type: (r.paymentMethod || "").toUpperCase(),
+      entityType: r.entityType,
+      entityId: r.entityId,
+      currency: r.currency || "",
+      limitAmount: r.limitAmount ?? "",
+      remainingLimitAmount: r.remainingLimitAmount,
+      status: !!r.status,
+      fttAcceptance: r.fttAcceptance ?? true,
+      partialPayinEnabled: r.partialPayinEnabled ?? false,
+      liveAssigned: r.liveAssigned ?? false,
+      limitTime: r.limitTime ?? null,
+      ranges: r.ranges ?? [],
+      qrImagePath: r.qrImagePath ?? null,
+      qrImageUrl: null,
+
+      walletAddress: r.walletAddress ?? "",
       cryptoTime: r.cryptoTime ?? null,
-      holderName: r.holderName ?? null,
+      holderName: r.holderName ?? "",
 
-      displayAddress,
+      displayAddress: r.walletAddress || "-",
     };
   }
 
@@ -767,8 +657,8 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
   // =========================================================
   //  CLIENT SIDE FILTERS (search / status / max limit) + PAGINATION
-  //  — currency/mode/bank ab yahan filter nahi hote, kyunki fetch hi
-  //    us mode/currency/bank ke liye hui thi
+  //  — currency/mode ab yahan filter nahi hote, kyunki fetch hi
+  //    us mode/currency ke liye hui thi
   // =========================================================
   applyClientFilters(): void {
     let items = [...this.allItems];
@@ -790,7 +680,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
     if (this.statusFilter === "active") {
       items = items.filter((i) => i.status);
-    } else if (this.statusFilter === "archive") {
+    } else if (this.statusFilter === "inactive") {
       items = items.filter((i) => !i.status);
     }
 
@@ -980,9 +870,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   // =========================================================
-  //  STATUS TOGGLE / DELETE — item.type ke hisaab se sahi service,
-  //  success par refreshInventory() jo ab consolidated API se
-  //  hamesha sahi state layegi (timer bhi turant chalne lagega)
+  //  STATUS TOGGLE / DELETE — item.type ke hisaab se sahi service
   // =========================================================
   openStatusModal(item: InventoryItem, event: any): void {
     event.preventDefault();
@@ -2123,22 +2011,95 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
     this.pagedItems = [...this.pagedItems];
   }
-  copyDetails(item: any): void {
-    let text = "";
+  /** Component load hote hi + Reset All pe — sara data (bank+upi+crypto combined) */
+  private loadAllInventory(): void {
+    if (!this.currentRoleId) return;
+    this.loading = true;
 
-    if (item.type === "BANK") {
-      text = `Bank Name: ${item.bankName || "-"}
-Account Holder: ${item.accountHolderName || "-"}
-Bank Code: ${item.bankCode || "-"}`;
-    } else if (item.type === "UPI") {
-      text = `UPI Name: ${item.bankName || "-"}
-Account Holder: ${item.accountHolder || "-"}`;
+    const sub = this.bankService
+      .getAllPaymentMethods({
+        entityId: this.currentRoleId,
+        entityType: this.role,
+        page: 0,
+        size: 1000,
+      })
+      .pipe(catchError(() => of(null)))
+      .subscribe((res: any) => {
+        this.loading = false;
+
+        const rows: any[] = Array.isArray(res?.data?.content)
+          ? res.data.content
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res)
+              ? res
+              : [];
+
+        this.allItems = rows
+          .filter((r: any) => !r.deleted)
+          .map((r: any) => this.mapAnyRow(r));
+
+        this.hasLoadedOnce = true;
+        this.loadQrThumbnails();
+        this.applyClientFilters();
+      });
+
+    this.subs.add(sub);
+  }
+
+  /** getAllPaymentMethods response ke liye generic mapper (bank/upi/crypto teeno type handle karega) */
+  private mapAnyRow(r: any): InventoryItem {
+    // ⚠️ apna actual response check karke field confirm kar lena (type/paymentMethod/mode)
+    const type = (r.type || r.paymentMethod || r.mode || "")
+      .toString()
+      .toUpperCase();
+
+    let displayAddress = "-";
+    if (type === "BANK") {
+      displayAddress = r.accountNo || "-";
+    } else if (type === "UPI") {
+      displayAddress = r.vpa || "-";
     } else {
-      text = `Holder Name: ${item.holderName || "-"}`;
+      displayAddress = r.walletAddress || "-";
     }
 
-    navigator.clipboard.writeText(text).then(() => {
-      this.snack.show("Copied successfully", true);
-    });
+    return {
+      id: r.id,
+      type,
+      entityType: r.entityType,
+      entityId: r.entityId,
+      currency: r.currency || r.portalCurrency || "",
+      limitAmount: r.limitAmount ?? "",
+      remainingLimitAmount: r.remainingLimitAmount,
+      status:
+        typeof r.status === "boolean"
+          ? r.status
+          : (r.status || "").toLowerCase() === "active",
+      fttAcceptance: r.fttAcceptance ?? true,
+      partialPayinEnabled: r.partialPayinEnabled ?? false,
+      liveAssigned: r.liveAssigned ?? false,
+      limitTime: r.limitTime ?? null,
+      ranges: r.ranges ?? [],
+      qrImagePath: r.qrImagePath ?? null,
+      qrImageUrl: null,
+
+      accountNo: r.accountNo ?? null,
+      accountHolderName: r.accountHolderName ?? null,
+      bankCode: r.bankCode ?? null,
+      bankName: r.bankName ?? null,
+      accountType: r.accountType ?? null,
+      bankTime: r.bankTime ?? null,
+      upiCount: r.upiCount ?? null,
+
+      vpa: r.vpa ?? null,
+      upiTime: r.upiTime ?? null,
+      accountHolder: r.accountHolder ?? null,
+
+      walletAddress: r.walletAddress ?? null,
+      cryptoTime: r.cryptoTime ?? null,
+      holderName: r.holderName ?? null,
+
+      displayAddress,
+    };
   }
 }

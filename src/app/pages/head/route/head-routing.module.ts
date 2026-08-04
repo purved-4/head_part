@@ -120,10 +120,6 @@ const routes: Routes = [
         path: "inventory-management",
         component: InventoryManagementComponent,
       },
-      {
-        path: "inventory-management",
-        component: InventoryManagementComponent,
-      },
 
       {
         path: "reports",
@@ -148,10 +144,6 @@ const routes: Routes = [
             path: "funds/payout/:type",
             component: HbPayoutReportComponent,
           },
-          //  {
-          //     path: "balance-report",
-          //     component: PortalReportComponent,
-          //  },
 
           // { path: "funds/accepted", component: ApprovedFundsComponent },
           // { path: "funds/rejected", component: RejectedFundsComponent },

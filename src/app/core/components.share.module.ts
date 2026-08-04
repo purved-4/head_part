@@ -48,6 +48,7 @@ import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods
 import { SharedUserProfileComponent } from "../common/shared-user-profile/shared-user-profile.component";
 import { GlobalCompartPercentageComponent } from "../common/global-compart-percentage/global-compart-percentage.component";
 import { ResolvedNotificationComponent } from "../common/resolved-notification/resolved-notification.component";
+import { MaintenanceNoticeComponent } from "../common/maintenance-notice/maintenance-notice.component";
 
 @NgModule({
   declarations: [
@@ -96,6 +97,7 @@ import { ResolvedNotificationComponent } from "../common/resolved-notification/r
     PaymentsMethodsComponent,
     SharedUserProfileComponent,
     GlobalCompartPercentageComponent,
+    MaintenanceNoticeComponent,
   ],
   exports: [
     WebhookDataComponent,
@@ -143,6 +145,7 @@ import { ResolvedNotificationComponent } from "../common/resolved-notification/r
     PaymentsMethodsComponent,
     SharedUserProfileComponent,
     GlobalCompartPercentageComponent,
+    MaintenanceNoticeComponent,
   ],
   imports: [
     SharedModule,

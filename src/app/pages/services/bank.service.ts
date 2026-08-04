@@ -258,17 +258,14 @@ export class BankService {
       .set("entityId", params.entityId)
       .set("entityType", params.entityType);
 
-    // Set<Currency> currencies -> repeated query params
     (params.currencies || []).forEach((c) => {
       httpParams = httpParams.append("currencies", c);
     });
 
-    // Set<TransactionMode> modes -> repeated query params
     (params.modes || []).forEach((m) => {
       httpParams = httpParams.append("modes", m.toUpperCase());
     });
 
-    // ---------- SearchCriteria fields ----------
     if (params.query && params.query.trim()) {
       httpParams = httpParams.set("query", params.query.trim());
     }
@@ -284,7 +281,7 @@ export class BankService {
     if (params.status) {
       httpParams = httpParams.set("status", params.status);
     }
-    // --------------------------------------------
+    
 
     if (params.page !== undefined) {
       httpParams = httpParams.set("page", params.page);

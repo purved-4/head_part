@@ -1,4 +1,3 @@
-import { Fund } from './../../../components/reports/funds-report/funds-report.component';
 
 
 import {
@@ -22,6 +21,8 @@ import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { ChiefService } from "../../../pages/services/chief.service";
 import { BranchService } from "../../../pages/services/branch.service";
 import { LoaderService } from "../../../pages/services/loader.service";
+import { Fund } from './../../../components/reports/funds-report/funds-report.component';
+
 
 Chart.register(...registerables);
 
