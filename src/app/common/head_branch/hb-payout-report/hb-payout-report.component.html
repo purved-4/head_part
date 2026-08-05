@@ -537,26 +537,39 @@
           </div>
 
           <!-- IMAGE LIST -->
-          <div class="flex flex-wrap gap-3">
-            <div
-              *ngFor="let img of selectedRecord.proofImages"
-              class="relative group"
-            >
-              <img
-                [src]="img"
-                alt="proof"
-                class="h-32 sm:h-36 w-auto rounded-xl border border-[var(--color-border)] object-contain cursor-pointer bg-white p-1 shadow-sm hover:shadow-md transition"
-                (click)="openLightbox(img)"
-                (error)="onImageError($event)"
-              />
+          <!-- IMAGE LIST -->
+<div
+  class="grid gap-4"
+  [ngClass]="{
+    'grid-cols-1': selectedRecord.proofImages.length === 1,
+    'grid-cols-2': selectedRecord.proofImages.length === 2,
+    'grid-cols-2 lg:grid-cols-3': selectedRecord.proofImages.length > 2
+  }"
+>
+  <div
+    *ngFor="let img of selectedRecord.proofImages"
+    class="relative group"
+  >
+    <img
+      [src]="img"
+      alt="proof"
+      (click)="openLightbox(img)"
+      (error)="onImageError($event)"
+      class="w-full rounded-2xl border border-[var(--color-border)] bg-white p-2 shadow-sm hover:shadow-lg transition cursor-pointer object-contain"
+      [ngClass]="{
+        'max-h-[520px] min-h-[420px]': selectedRecord.proofImages.length === 1,
+        'h-80': selectedRecord.proofImages.length === 2,
+        'h-44': selectedRecord.proofImages.length > 2
+      }"
+    />
 
-              <div
-                class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[10px] py-1 text-center rounded-b-xl opacity-0 group-hover:opacity-100 transition"
-              >
-                Click to preview
-              </div>
-            </div>
-          </div>
+    <div
+      class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 text-center rounded-b-2xl opacity-0 group-hover:opacity-100 transition"
+    >
+      Click to preview
+    </div>
+  </div>
+</div>
 
           <!-- PDF LIST -->
           <div class="flex flex-col gap-3 mt-3">
@@ -594,150 +607,71 @@
 
         <!-- ================= ACCEPTED PROOF ================= -->
         <div
-          *ngIf="
-            selectedRecord?.acceptedImages?.length ||
-            selectedRecord?.acceptedPdfs?.length
-          "
-          class="mb-5"
-        >
-          <!-- TITLE -->
-          <div
-            class="flex items-center gap-2 mb-3 text-sm font-bold text-green-600"
-          >
-            <span class="material-symbols-outlined text-[20px]">
-              verified
-            </span>
+  class="grid gap-4"
+  [ngClass]="{
+    'grid-cols-1': selectedRecord.acceptedImages.length === 1,
+    'grid-cols-2': selectedRecord.acceptedImages.length === 2,
+    'grid-cols-2 lg:grid-cols-3': selectedRecord.acceptedImages.length > 2
+  }"
+>
+  <div
+    *ngFor="let img of selectedRecord.acceptedImages"
+    class="relative group"
+  >
+    <img
+      [src]="img"
+      alt="accepted-proof"
+      (click)="openLightbox(img)"
+      (error)="onImageError($event)"
+      class="w-full rounded-2xl border border-green-200 bg-white p-2 shadow-sm hover:shadow-lg transition cursor-pointer object-contain"
+      [ngClass]="{
+        'max-h-[520px] min-h-[420px]': selectedRecord.acceptedImages.length === 1,
+        'h-80': selectedRecord.acceptedImages.length === 2,
+        'h-44': selectedRecord.acceptedImages.length > 2
+      }"
+    />
 
-            Accepted File Proof
-          </div>
-
-          <!-- IMAGE LIST -->
-          <div class="flex flex-wrap gap-3">
-            <div
-              *ngFor="let img of selectedRecord.acceptedImages"
-              class="relative group"
-            >
-              <img
-                [src]="img"
-                alt="accepted-proof"
-                class="h-32 sm:h-36 w-auto rounded-xl border border-green-200 object-contain cursor-pointer bg-white p-1 shadow-sm hover:shadow-md transition"
-                (click)="openLightbox(img)"
-                (error)="onImageError($event)"
-              />
-
-              <div
-                class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[10px] py-1 text-center rounded-b-xl opacity-0 group-hover:opacity-100 transition"
-              >
-                Click to preview
-              </div>
-            </div>
-          </div>
-
-          <!-- PDF LIST -->
-          <div class="flex flex-col gap-3 mt-3">
-            <div
-              *ngFor="let pdf of selectedRecord.acceptedPdfs"
-              class="border border-green-200 rounded-2xl p-4 bg-green-50 flex items-center justify-between"
-            >
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-green-600 text-5xl">
-                  picture_as_pdf
-                </span>
-
-                <div>
-                  <div class="font-semibold text-sm text-green-700">
-                    Accepted PDF Proof
-                  </div>
-
-                  <div class="text-xs text-gray-500">
-                    Preview unavailable. Download PDF file.
-                  </div>
-                </div>
-              </div>
-
-              <a
-                [href]="pdf.url"
-                target="_blank"
-                download
-                class="px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-semibold hover:opacity-90 transition"
-              >
-                Download
-              </a>
-            </div>
-          </div>
-        </div>
+    <div
+      class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 text-center rounded-b-2xl opacity-0 group-hover:opacity-100 transition"
+    >
+      Click to preview
+    </div>
+  </div>
+</div>
 
         <!-- ================= REJECTED PROOF ================= -->
         <div
-          *ngIf="
-            selectedRecord?.rejectedImages?.length ||
-            selectedRecord?.rejectedPdfs?.length
-          "
-        >
-          <!-- TITLE -->
-          <div
-            class="flex items-center gap-2 mb-3 text-sm font-bold text-red-600"
-          >
-            <span class="material-symbols-outlined text-[20px]"> cancel </span>
+  class="grid gap-4"
+  [ngClass]="{
+    'grid-cols-1': selectedRecord.rejectedImages.length === 1,
+    'grid-cols-2': selectedRecord.rejectedImages.length === 2,
+    'grid-cols-2 lg:grid-cols-3': selectedRecord.rejectedImages.length > 2
+  }"
+>
+  <div
+    *ngFor="let img of selectedRecord.rejectedImages"
+    class="relative group"
+  >
+    <img
+      [src]="img"
+      alt="rejected-proof"
+      (click)="openLightbox(img)"
+      (error)="onImageError($event)"
+      class="w-full rounded-2xl border border-red-200 bg-white p-2 shadow-sm hover:shadow-lg transition cursor-pointer object-contain"
+      [ngClass]="{
+        'max-h-[520px] min-h-[420px]': selectedRecord.rejectedImages.length === 1,
+        'h-80': selectedRecord.rejectedImages.length === 2,
+        'h-44': selectedRecord.rejectedImages.length > 2
+      }"
+    />
 
-            Rejected File Proof
-          </div>
-
-          <!-- IMAGE LIST -->
-          <div class="flex flex-wrap gap-3">
-            <div
-              *ngFor="let img of selectedRecord.rejectedImages"
-              class="relative group"
-            >
-              <img
-                [src]="img"
-                alt="rejected-proof"
-                class="h-32 sm:h-36 w-auto rounded-xl border border-red-200 object-contain cursor-pointer bg-white p-1 shadow-sm hover:shadow-md transition"
-                (click)="openLightbox(img)"
-                (error)="onImageError($event)"
-              />
-
-              <div
-                class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[10px] py-1 text-center rounded-b-xl opacity-0 group-hover:opacity-100 transition"
-              >
-                Click to preview
-              </div>
-            </div>
-          </div>
-
-          <!-- PDF LIST -->
-          <div class="flex flex-col gap-3 mt-3">
-            <div
-              *ngFor="let pdf of selectedRecord.rejectedPdfs"
-              class="border border-red-200 rounded-2xl p-4 bg-red-50 flex items-center justify-between"
-            >
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-red-600 text-5xl">
-                  picture_as_pdf
-                </span>
-
-                <div>
-                  <div class="font-semibold text-sm text-red-700">
-                    Rejected PDF Proof
-                  </div>
-
-                  <div class="text-xs text-gray-500">
-                    Preview unavailable. Download PDF file.
-                  </div>
-                </div>
-              </div>
-
-              <a
-                [href]="pdf.url"
-                target="_blank"
-                download
-                class="px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:opacity-90 transition"
-              >
-                Download
-              </a>
-            </div>
-          </div>
-        </div>
+    <div
+      class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 text-center rounded-b-2xl opacity-0 group-hover:opacity-100 transition"
+    >
+      Click to preview
+    </div>
+  </div>
+</div>
 
         <!-- ================= EMPTY STATE ================= -->
         <div

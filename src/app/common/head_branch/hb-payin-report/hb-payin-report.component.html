@@ -490,7 +490,7 @@
   </div>
 </div>
 
-<!-- ENHANCED RECORD MODAL (small image with click-to-popup) -->
+<!-- ENHANCED RECORD MODAL (larger image, no click-to-popup) -->
 <div
   *ngIf="showRecordModal"
   class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
@@ -562,12 +562,12 @@
             </div>
 
             <!-- Images -->
-            <div class="flex flex-wrap gap-3">
+            <div class="flex flex-col gap-3">
               <img
                 *ngFor="let img of selectedRecord.proofImages"
                 [src]="img"
                 alt="proof"
-                class="h-32 w-auto rounded-lg border object-contain cursor-pointer"
+                class="w-full max-h-[380px] rounded-lg border border-[var(--color-border)] object-contain cursor-pointer"
                 (click)="openLightbox(img)"
                 (error)="onImageError($event)"
               />
@@ -576,7 +576,7 @@
             <!-- PDFs -->
             <div
               *ngFor="let pdf of selectedRecord.proofPdfs"
-              class="border rounded-xl p-4 bg-white flex items-center justify-between"
+              class="border rounded-xl p-4 bg-white flex items-center justify-between mt-3"
             >
               <div class="flex items-center gap-3">
                 <span class="material-symbols-outlined text-red-600 text-4xl">
@@ -613,12 +613,12 @@
             </div>
 
             <!-- Images -->
-            <div class="flex flex-wrap gap-3">
+            <div class="flex flex-col gap-3">
               <img
                 *ngFor="let img of selectedRecord.rejectedImages"
                 [src]="img"
                 alt="rejected-proof"
-                class="h-32 w-auto rounded-lg border object-contain cursor-pointer"
+                class="w-full max-h-[380px] rounded-lg border border-[var(--color-border)] object-contain cursor-pointer"
                 (click)="openLightbox(img)"
                 (error)="onImageError($event)"
               />
@@ -627,7 +627,7 @@
             <!-- PDFs -->
             <div
               *ngFor="let pdf of selectedRecord.rejectedPdfs"
-              class="border rounded-xl p-4 bg-red-50 flex items-center justify-between"
+              class="border rounded-xl p-4 bg-red-50 flex items-center justify-between mt-3"
             >
               <div class="flex items-center gap-3">
                 <span class="material-symbols-outlined text-red-600 text-4xl">

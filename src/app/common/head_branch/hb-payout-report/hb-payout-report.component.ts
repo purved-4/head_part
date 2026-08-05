@@ -438,6 +438,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   // ============ MODAL & LIGHTBOX ============
   openRecordModal(record: any) {
     this.selectedRecord = record;
+    console.log(this.selectedRecord);
 
     this.displayFields = this.getDisplayFields(record);
 
