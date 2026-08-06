@@ -29,7 +29,7 @@
                 </span>
               </div>
               <div class="text-[var(--color-bg)]">
-                <h3 class="font-bold text-xl">Rejected payouts</h3>
+                <h3 class="font-bold text-xl">Payout Reports</h3>
                 <p class="mt-1 opacity-80">
                   {{ filteredApprovedpayouts().length }} records • Processed
                   payments
@@ -39,15 +39,14 @@
 
             <!-- Filters Row (comPart, filter dropdown, search, buttons) -->
             <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
-              <!-- Payout comPart custom dropdown -->
-
+              <!-- Payout status dropdown -->
               <div class="relative min-w-[160px] flex-1 xl:flex-none">
                 <select
                   [(ngModel)]="selectedStatus"
                   (change)="onStatusChange(selectedStatus)"
                   class="w-full px-4 py-3 rounded-2xl text-xs sm:text-sm border border-[var(--color-border)] bg-white/20 text-[var(--color-font)] shadow-lg focus:ring-2 transition-all duration-300"
                 >
-                  <option value="  DISPUTE_ESCALATED">Dispute pending</option>
+                  <option value="DISPUTE_ESCALATED">Dispute pending</option>
                   <option value="ACCEPTED">Accepted</option>
                   <option value="CP_REJECTED">Rejected</option>
                 </select>
@@ -156,13 +155,19 @@
                   <th
                     class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
                   >
-                    Account Details
+                    Display ID
                   </th>
                   <th
                     class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
                   >
-                    Bank Info
+                    Account / VPA / Wallet
                   </th>
+                  <th
+                    class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
+                  >
+                    Holder / IFSC
+                  </th>
+
                   <th
                     class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
                   >
@@ -171,7 +176,7 @@
                   <th
                     class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
                   >
-                    Date
+                    Created At
                   </th>
                   <th
                     class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
@@ -179,9 +184,10 @@
                     Actions
                   </th>
                   <th
+                    *ngIf="isThreadAllowed()"
                     class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
                   >
-                    Thread Image
+                    Thread
                   </th>
                 </tr>
               </thead>
@@ -191,26 +197,13 @@
                   class="hover:bg-[var(--color-hover)] transition-all duration-300 group"
                 >
                   <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div
-                        class="w-9 h-9 rounded-lg flex items-center justify-center shadow-sm border border-[var(--color-border)] bg-[var(--color-surface)]"
-                      >
-                        <span
-                          class="material-symbols-outlined text-sm text-[var(--color-font)]"
-                          >badge</span
-                        >
-                      </div>
-                      <div>
-                        <span
-                          class="text-sm font-medium block text-[var(--color-font)]"
-                          >{{ w.accountNo || "-" }}</span
-                        >
-                        <span class="text-xs text-[var(--color-muted)]"
-                          >Account Number</span
-                        >
-                      </div>
-                    </div>
+                    <span
+                      class="text-sm font-semibold text-[var(--color-font)]"
+                    >
+                      {{ w.displayId }}
+                    </span>
                   </td>
+
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                       <div
@@ -218,40 +211,52 @@
                       >
                         <span
                           class="material-symbols-outlined text-sm text-[var(--color-font)]"
-                          >account_balance</span
                         >
+                          {{
+                            w.category === "bank"
+                              ? "account_balance"
+                              : w.category === "upi"
+                                ? "qr_code"
+                                : "currency_bitcoin"
+                          }}
+                        </span>
                       </div>
                       <div>
                         <span
-                          class="text-sm font-medium block text-[var(--color-font)]"
-                          >{{ w.ifscCode || "-" }}</span
+                          class="text-sm font-medium block text-[var(--color-font)] break-all"
+                          >{{ w.identifier }}</span
                         >
                         <span class="text-xs text-[var(--color-muted)]">{{
-                          w.holder || "Account Holder"
+                          w.payoutType
                         }}</span>
                       </div>
                     </div>
                   </td>
+
+                  <td class="px-6 py-4">
+                    <span
+                      class="text-sm font-medium block text-[var(--color-font)]"
+                    >
+                      {{ w.holder || "-" }}
+                    </span>
+                    <span
+                      *ngIf="w.category === 'bank'"
+                      class="text-xs text-[var(--color-muted)]"
+                    >
+                      {{ w.ifscCode || "-" }}
+                    </span>
+                  </td>
+
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-2">
-                      <div
-                        class="w-8 h-8 rounded-full flex items-center justify-center border border-[var(--color-border)] bg-[var(--color-surface)]"
-                      >
-                        <span
-                          class="material-symbols-outlined text-sm text-[var(--color-font)]"
-                          >arrow_downward</span
-                        >
-                      </div>
-                      <span class="text-base font-bold text-[var(--color-font)]"
-                        >-{{ formatCurrency(w.amount) }}</span
+                      <span
+                        class="text-base font-bold text-[var(--color-font)]"
+                        >{{ formatCurrency(w.amount) }}</span
                       >
                     </div>
                   </td>
                   <td class="px-6 py-4">
                     <div class="text-sm font-medium text-[var(--color-font)]">
-                      {{ w.date | tz }}
-                    </div>
-                    <div class="text-xs text-[var(--color-muted)]">
                       {{ w.date | tz }}
                     </div>
                   </td>
@@ -267,11 +272,15 @@
                       <span>Details</span>
                     </button>
                   </td>
-                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                  <!-- ✅ Thread column sirf PENDING / ACCEPTED (dispute pending) filter par -->
+                  <td
+                    *ngIf="isThreadAllowed()"
+                    class="px-4 sm:px-6 py-3 sm:py-4"
+                  >
                     <button
                       (click)="openChatModal(w); $event.stopPropagation()"
                       class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 border border-[var(--color-border)] text-[var(--color-font)] bg-[var(--color-surface)] shadow-sm"
-                      title="View proof & details"
+                      title="View thread"
                     >
                       <span
                         class="material-symbols-outlined text-base sm:text-lg"
@@ -282,7 +291,7 @@
                   </td>
                 </tr>
                 <tr *ngIf="filteredApprovedpayouts().length === 0">
-                  <td colspan="7" class="px-4 py-12 text-center">
+                  <td colspan="8" class="px-4 py-12 text-center">
                     <div class="flex flex-col items-center">
                       <div
                         class="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 shadow-inner border border-[var(--color-border)] bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-primary-light)]"
@@ -295,7 +304,7 @@
                       <p
                         class="text-base font-semibold text-[var(--color-font)]"
                       >
-                        No rejected payouts found
+                        No payouts found
                       </p>
                       <p class="text-sm mt-2 text-[var(--color-muted)]">
                         Try adjusting your search criteria
@@ -315,76 +324,84 @@
               *ngFor="let w of pagedApprovedPayoutsData"
               class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-4 shadow-sm"
             >
-              <!-- Account Number -->
+              <!-- Top row: Display ID + Type badge -->
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-[var(--color-muted)]">
+                  #{{ w.displayId }}
+                </span>
+                <span
+                  class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border border-[var(--color-border)] bg-[var(--color-bg)]"
+                >
+                  {{ w.payoutType }}
+                </span>
+              </div>
+
+              <!-- Identifier (Account / VPA / Wallet) -->
               <div class="flex items-center gap-3 mb-3">
                 <div
                   class="w-9 h-9 rounded-lg flex items-center justify-center bg-[var(--color-surface)] border border-[var(--color-border)]"
                 >
-                  <span class="material-symbols-outlined text-sm">badge</span>
+                  <span class="material-symbols-outlined text-sm">
+                    {{
+                      w.category === "bank"
+                        ? "account_balance"
+                        : w.category === "upi"
+                          ? "qr_code"
+                          : "currency_bitcoin"
+                    }}
+                  </span>
                 </div>
                 <div class="flex-1">
                   <div class="text-sm font-medium break-all">
-                    {{ w.accountNo || "-" }}
+                    {{ w.identifier }}
                   </div>
                   <div class="text-xs text-[var(--color-muted)]">
-                    Account Number
+                    {{ w.holder || "Account Holder" }}
+                    <span *ngIf="w.category === 'bank' && w.ifscCode">
+                      • {{ w.ifscCode }}</span
+                    >
                   </div>
                 </div>
               </div>
 
-              <!-- Bank Info (IFSC + holder) -->
-              <div class="flex items-center gap-3 mb-3">
-                <div
-                  class="w-9 h-9 rounded-lg flex items-center justify-center bg-[var(--color-surface)] border border-[var(--color-border)]"
-                >
-                  <span class="material-symbols-outlined text-sm"
-                    >account_balance</span
-                  >
-                </div>
-                <div class="flex-1">
-                  <div class="text-sm font-medium break-all">
-                    {{ w.ifscCode || "-" }}
-                  </div>
-                  <div class="text-xs text-[var(--color-muted)]">
-                    {{ w.holder || "Account Holder" }}
-                  </div>
-                </div>
-              </div>
+              <!-- Transaction ID -->
 
               <!-- Amount and Date row -->
               <div class="flex justify-between items-center mb-4">
                 <div class="flex items-center gap-2">
-                  <div
-                    class="w-8 h-8 rounded-full flex items-center justify-center border border-[var(--color-border)]"
-                  >
-                    <span class="material-symbols-outlined text-sm"
-                      >arrow_downward</span
-                    >
-                  </div>
-                  <span class="text-base font-bold"
-                    >-{{ formatCurrency(w.amount) }}</span
-                  >
+                  <span class="text-base font-bold">{{
+                    formatCurrency(w.amount)
+                  }}</span>
                 </div>
                 <div class="text-right">
                   <div class="text-sm font-medium">
                     {{ w.date | tz }}
                   </div>
-                  <div class="text-xs text-[var(--color-muted)]">
-                    {{ w.date | tz }}
-                  </div>
                 </div>
               </div>
 
-              <!-- Details button -->
-              <button
-                (click)="openRecordModal(w)"
-                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm"
-              >
-                <span class="material-symbols-outlined text-lg"
-                  >visibility</span
+              <!-- Action buttons -->
+              <div class="flex gap-2">
+                <button
+                  (click)="openRecordModal(w)"
+                  class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm"
                 >
-                Details
-              </button>
+                  <span class="material-symbols-outlined text-lg"
+                    >visibility</span
+                  >
+                  Details
+                </button>
+
+                <!-- ✅ Thread button sirf PENDING / ACCEPTED (dispute pending) filter par -->
+                <button
+                  *ngIf="isThreadAllowed()"
+                  (click)="openChatModal(w)"
+                  class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm"
+                >
+                  <span class="material-symbols-outlined text-lg">chat</span>
+                  Thread
+                </button>
+              </div>
             </div>
 
             <!-- Empty state -->
@@ -397,7 +414,7 @@
               >
                 <span class="material-symbols-outlined text-2xl">savings</span>
               </div>
-              <p class="text-base font-semibold">No rejected payouts found</p>
+              <p class="text-base font-semibold">No payouts found</p>
               <p class="text-sm text-[var(--color-muted)] mt-1">
                 Try adjusting your search
               </p>
@@ -415,7 +432,7 @@
             >
             <select
               [(ngModel)]="payoutApprovedPageSize"
-              (change)="setPayoutPage(0)"
+              (change)="onChangepayoutApprovedPageSize(payoutApprovedPageSize)"
               class="text-sm rounded-xl px-3 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)]"
             >
               <option *ngFor="let s of payoutApprovedPageSizes" [value]="s">
@@ -458,7 +475,7 @@
   </div>
 </div>
 
-<!-- ENHANCED RECORD MODAL (unchanged) -->
+<!-- ENHANCED RECORD MODAL -->
 <div
   *ngIf="showRecordModal"
   class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
@@ -493,7 +510,8 @@
             Transaction Details
           </h3>
           <p class="text-xs sm:text-sm text-[var(--color-muted)]">
-            {{ selectedRecord?.mode || "—" }} • Complete information
+            {{ selectedRecord?.payoutType || selectedRecord?.mode || "—" }} •
+            Complete information
           </p>
         </div>
       </div>
@@ -512,8 +530,7 @@
     <div
       class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 p-3 sm:p-6 overflow-y-auto max-h-[calc(90vh-80px)]"
     >
-      <!-- LEFT: Image + Quick Summary -->
-
+      <!-- LEFT: Proof Section -->
       <div
         class="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 sm:p-4 max-h-[420px] overflow-y-auto"
       >
@@ -537,39 +554,40 @@
           </div>
 
           <!-- IMAGE LIST -->
-          <!-- IMAGE LIST -->
-<div
-  class="grid gap-4"
-  [ngClass]="{
-    'grid-cols-1': selectedRecord.proofImages.length === 1,
-    'grid-cols-2': selectedRecord.proofImages.length === 2,
-    'grid-cols-2 lg:grid-cols-3': selectedRecord.proofImages.length > 2
-  }"
->
-  <div
-    *ngFor="let img of selectedRecord.proofImages"
-    class="relative group"
-  >
-    <img
-      [src]="img"
-      alt="proof"
-      (click)="openLightbox(img)"
-      (error)="onImageError($event)"
-      class="w-full rounded-2xl border border-[var(--color-border)] bg-white p-2 shadow-sm hover:shadow-lg transition cursor-pointer object-contain"
-      [ngClass]="{
-        'max-h-[520px] min-h-[420px]': selectedRecord.proofImages.length === 1,
-        'h-80': selectedRecord.proofImages.length === 2,
-        'h-44': selectedRecord.proofImages.length > 2
-      }"
-    />
+          <div
+            class="grid gap-4"
+            [ngClass]="{
+              'grid-cols-1': selectedRecord.proofImages.length === 1,
+              'grid-cols-2': selectedRecord.proofImages.length === 2,
+              'grid-cols-2 lg:grid-cols-3':
+                selectedRecord.proofImages.length > 2,
+            }"
+          >
+            <div
+              *ngFor="let img of selectedRecord.proofImages"
+              class="relative group"
+            >
+              <img
+                [src]="img"
+                alt="proof"
+                (click)="openLightbox(img)"
+                (error)="onImageError($event)"
+                class="w-full rounded-2xl border border-[var(--color-border)] bg-white p-2 shadow-sm hover:shadow-lg transition cursor-pointer object-contain"
+                [ngClass]="{
+                  'max-h-[520px] min-h-[420px]':
+                    selectedRecord.proofImages.length === 1,
+                  'h-80': selectedRecord.proofImages.length === 2,
+                  'h-44': selectedRecord.proofImages.length > 2,
+                }"
+              />
 
-    <div
-      class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 text-center rounded-b-2xl opacity-0 group-hover:opacity-100 transition"
-    >
-      Click to preview
-    </div>
-  </div>
-</div>
+              <div
+                class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 text-center rounded-b-2xl opacity-0 group-hover:opacity-100 transition"
+              >
+                Click to preview
+              </div>
+            </div>
+          </div>
 
           <!-- PDF LIST -->
           <div class="flex flex-col gap-3 mt-3">
@@ -607,71 +625,168 @@
 
         <!-- ================= ACCEPTED PROOF ================= -->
         <div
-  class="grid gap-4"
-  [ngClass]="{
-    'grid-cols-1': selectedRecord.acceptedImages.length === 1,
-    'grid-cols-2': selectedRecord.acceptedImages.length === 2,
-    'grid-cols-2 lg:grid-cols-3': selectedRecord.acceptedImages.length > 2
-  }"
->
-  <div
-    *ngFor="let img of selectedRecord.acceptedImages"
-    class="relative group"
-  >
-    <img
-      [src]="img"
-      alt="accepted-proof"
-      (click)="openLightbox(img)"
-      (error)="onImageError($event)"
-      class="w-full rounded-2xl border border-green-200 bg-white p-2 shadow-sm hover:shadow-lg transition cursor-pointer object-contain"
-      [ngClass]="{
-        'max-h-[520px] min-h-[420px]': selectedRecord.acceptedImages.length === 1,
-        'h-80': selectedRecord.acceptedImages.length === 2,
-        'h-44': selectedRecord.acceptedImages.length > 2
-      }"
-    />
+          *ngIf="
+            selectedRecord?.acceptedImages?.length ||
+            selectedRecord?.acceptedPdfs?.length
+          "
+          class="mb-5"
+        >
+          <div
+            class="flex items-center gap-2 mb-3 text-sm font-bold text-green-700"
+          >
+            <span class="material-symbols-outlined text-green-600 text-[20px]">
+              verified
+            </span>
+            Accepted Proof
+          </div>
 
-    <div
-      class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 text-center rounded-b-2xl opacity-0 group-hover:opacity-100 transition"
-    >
-      Click to preview
-    </div>
-  </div>
-</div>
+          <div
+            class="grid gap-4"
+            [ngClass]="{
+              'grid-cols-1': selectedRecord.acceptedImages.length === 1,
+              'grid-cols-2': selectedRecord.acceptedImages.length === 2,
+              'grid-cols-2 lg:grid-cols-3':
+                selectedRecord.acceptedImages.length > 2,
+            }"
+          >
+            <div
+              *ngFor="let img of selectedRecord.acceptedImages"
+              class="relative group"
+            >
+              <img
+                [src]="img"
+                alt="accepted-proof"
+                (click)="openLightbox(img)"
+                (error)="onImageError($event)"
+                class="w-full rounded-2xl border border-green-200 bg-white p-2 shadow-sm hover:shadow-lg transition cursor-pointer object-contain"
+                [ngClass]="{
+                  'max-h-[520px] min-h-[420px]':
+                    selectedRecord.acceptedImages.length === 1,
+                  'h-80': selectedRecord.acceptedImages.length === 2,
+                  'h-44': selectedRecord.acceptedImages.length > 2,
+                }"
+              />
+
+              <div
+                class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 text-center rounded-b-2xl opacity-0 group-hover:opacity-100 transition"
+              >
+                Click to preview
+              </div>
+            </div>
+          </div>
+
+          <!-- ACCEPTED PDF LIST -->
+          <div class="flex flex-col gap-3 mt-3">
+            <div
+              *ngFor="let pdf of selectedRecord.acceptedPdfs"
+              class="border border-green-200 rounded-2xl p-4 bg-green-50 flex items-center justify-between"
+            >
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-green-600 text-5xl">
+                  picture_as_pdf
+                </span>
+                <div>
+                  <div class="font-semibold text-sm text-green-700">
+                    Accepted PDF Proof
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    Preview unavailable. Download PDF file.
+                  </div>
+                </div>
+              </div>
+              <a
+                [href]="pdf.url"
+                target="_blank"
+                download
+                class="px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-semibold hover:opacity-90 transition"
+              >
+                Download
+              </a>
+            </div>
+          </div>
+        </div>
 
         <!-- ================= REJECTED PROOF ================= -->
         <div
-  class="grid gap-4"
-  [ngClass]="{
-    'grid-cols-1': selectedRecord.rejectedImages.length === 1,
-    'grid-cols-2': selectedRecord.rejectedImages.length === 2,
-    'grid-cols-2 lg:grid-cols-3': selectedRecord.rejectedImages.length > 2
-  }"
->
-  <div
-    *ngFor="let img of selectedRecord.rejectedImages"
-    class="relative group"
-  >
-    <img
-      [src]="img"
-      alt="rejected-proof"
-      (click)="openLightbox(img)"
-      (error)="onImageError($event)"
-      class="w-full rounded-2xl border border-red-200 bg-white p-2 shadow-sm hover:shadow-lg transition cursor-pointer object-contain"
-      [ngClass]="{
-        'max-h-[520px] min-h-[420px]': selectedRecord.rejectedImages.length === 1,
-        'h-80': selectedRecord.rejectedImages.length === 2,
-        'h-44': selectedRecord.rejectedImages.length > 2
-      }"
-    />
+          *ngIf="
+            selectedRecord?.rejectedImages?.length ||
+            selectedRecord?.rejectedPdfs?.length
+          "
+        >
+          <div
+            class="flex items-center gap-2 mb-3 text-sm font-bold text-red-600"
+          >
+            <span class="material-symbols-outlined text-red-600 text-[20px]">
+              cancel
+            </span>
+            Rejected Proof
+          </div>
 
-    <div
-      class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 text-center rounded-b-2xl opacity-0 group-hover:opacity-100 transition"
-    >
-      Click to preview
-    </div>
-  </div>
-</div>
+          <div
+            class="grid gap-4"
+            [ngClass]="{
+              'grid-cols-1': selectedRecord.rejectedImages.length === 1,
+              'grid-cols-2': selectedRecord.rejectedImages.length === 2,
+              'grid-cols-2 lg:grid-cols-3':
+                selectedRecord.rejectedImages.length > 2,
+            }"
+          >
+            <div
+              *ngFor="let img of selectedRecord.rejectedImages"
+              class="relative group"
+            >
+              <img
+                [src]="img"
+                alt="rejected-proof"
+                (click)="openLightbox(img)"
+                (error)="onImageError($event)"
+                class="w-full rounded-2xl border border-red-200 bg-white p-2 shadow-sm hover:shadow-lg transition cursor-pointer object-contain"
+                [ngClass]="{
+                  'max-h-[520px] min-h-[420px]':
+                    selectedRecord.rejectedImages.length === 1,
+                  'h-80': selectedRecord.rejectedImages.length === 2,
+                  'h-44': selectedRecord.rejectedImages.length > 2,
+                }"
+              />
+
+              <div
+                class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 text-center rounded-b-2xl opacity-0 group-hover:opacity-100 transition"
+              >
+                Click to preview
+              </div>
+            </div>
+          </div>
+
+          <!-- REJECTED PDF LIST -->
+          <div class="flex flex-col gap-3 mt-3">
+            <div
+              *ngFor="let pdf of selectedRecord.rejectedPdfs"
+              class="border border-red-200 rounded-2xl p-4 bg-red-50 flex items-center justify-between"
+            >
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-red-600 text-5xl">
+                  picture_as_pdf
+                </span>
+                <div>
+                  <div class="font-semibold text-sm text-red-700">
+                    Rejected PDF Proof
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    Preview unavailable. Download PDF file.
+                  </div>
+                </div>
+              </div>
+              <a
+                [href]="pdf.url"
+                target="_blank"
+                download
+                class="px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:opacity-90 transition"
+              >
+                Download
+              </a>
+            </div>
+          </div>
+        </div>
 
         <!-- ================= EMPTY STATE ================= -->
         <div
@@ -693,7 +808,7 @@
         </div>
       </div>
 
-      <!-- RIGHT: Transaction Details – compact grid -->
+      <!-- RIGHT: Transaction Details – category-wise (bank / upi / crypto) -->
       <div class="overflow-y-auto h-full max-h-[calc(90vh-160px)] pr-2">
         <h4
           class="text-sm sm:text-base font-semibold mb-2 sm:mb-4 flex items-center gap-1 sm:gap-2 text-[var(--color-font)]"

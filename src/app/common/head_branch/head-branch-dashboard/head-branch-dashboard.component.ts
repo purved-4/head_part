@@ -3301,7 +3301,7 @@ export class HeadBranchDashboardComponent
               id: c.id,
               accountId: c.walletAddress, // crypto -> walletAddress as accountId
               kind: "crypto",
-              label: this.maskWalletAddress(c.walletAddress),
+              label: c.walletAddress || "—",
               subLabel: c.paymentMethod || "",
               raw: c,
             });
@@ -3371,5 +3371,9 @@ export class HeadBranchDashboardComponent
     if (!target.closest(".payout-account-dropdown")) {
       this.payoutDropdownOpen = false;
     }
+  }
+  isCryptoMode(mode: string | null | undefined): boolean {
+    if (!mode) return false;
+    return this.cryptoTypes.includes(String(mode).toUpperCase());
   }
 }

@@ -149,7 +149,7 @@
                     <!-- Dispute -->
                     <tr class="transition hover:bg-gray-50">
                       <td class="px-3 py-2 font-medium text-gray-700">
-                        Dispute
+                        Thread
                       </td>
 
                       <td class="px-3 py-2 text-right">
@@ -183,7 +183,7 @@
                   class="mt-4 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-3 py-2"
                 >
                   <span class="text-sm font-semibold text-red-600">
-                    Held Amount
+                    Lock Amount
                   </span>
 
                   <span class="text-sm font-bold text-red-600">
@@ -215,10 +215,29 @@
           </div>
 
           <div
-            class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs z-45"
+            class="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-72 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-lg p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition text-[var(--color-font)]"
           >
-            Remaining:{{ getCurrencySymbol(parentCurrency) }}
-            {{ limitRemainingAmount | crformat }}
+            <div class="flex justify-between text-sm py-1">
+              <span>Balance</span>
+              <span>
+                {{ getCurrencySymbol(parentCurrency) }}
+                {{ entityBalance | crformat }}</span
+              >
+            </div>
+            <div class="flex justify-between text-sm py-1">
+              <span>Available Balance</span>
+              <span>
+                {{ getCurrencySymbol(parentCurrency) }}
+                {{ availableBalance | crformat }}</span
+              >
+            </div>
+            <div class="flex justify-between text-sm py-1">
+              <span>Exposure Balance</span>
+              <span>
+                {{ getCurrencySymbol(parentCurrency) }}
+                {{ exploserBalance | crformat }}</span
+              >
+            </div>
           </div>
         </div>
       </div>

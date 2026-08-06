@@ -70,6 +70,11 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   // Colors based on role (already in template via data-role)
   colors: any = null;
   comPartOptions: { id: string; domain: string }[] = [];
+
+  // ========== STATUS VALUES THAT ALLOW THE THREAD BUTTON ==========
+  // Thread button dikhna chahiye sirf PENDING aur ACCEPTED (dispute pending bhi allowed)
+  private readonly THREAD_ALLOWED_STATUSES = ["PENDING", "ACCEPTED"];
+
   constructor(
     private route: ActivatedRoute,
     private fundService: FundsService,
@@ -167,7 +172,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
         this.payinPage = pageNum;
         this.payinPageSize = pageSize;
 
-        this.mapFundsArray(list, "bank");
+        this.mapFundsArray(list, this.selectedMode);
       });
   }
 
@@ -203,34 +208,78 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
 
     return { list, total, pageNum, pageSize };
   }
+
+  // ============ CATEGORY HELPERS ============
+  // payinType / mode values: BANK, UPI, BEP20, TRC20, ERC20, SPL, OMNI
+  // Isse teen buckets mein daal dete hain: 'bank' | 'upi' | 'crypto'
+  private getCategory(typeVal: string): "bank" | "upi" | "crypto" {
+    const t = (typeVal || "").toUpperCase();
+    if (t === "BANK") return "bank";
+    if (t === "UPI") return "upi";
+    return "crypto"; // BEP20, TRC20, ERC20, SPL, OMNI
+  }
+
+  // Category ke hisaab se sahi identifier (account no / vpa / wallet) nikalna
+  private getIdentifier(category: string, it: any): string {
+    if (category === "bank")
+      return it.accountNo || it.accNo || it.account || "-";
+    if (category === "upi") return it.vpa || it.vpaId || it.upiId || "-";
+    return it.walletAddress || it.wallet || "-"; // crypto
+  }
+
   // ============ MAPPERS ============
 
-  private mapFundsArray(items: any[], mode: "bank" | "upi") {
-    this.approvedpayins = items.map((it: any) => ({
-      mode: mode,
+  private mapFundsArray(items: any[], mode: string) {
+    this.approvedpayins = items.map((it: any) => {
+      const payinType =
+        it.payinType || it.mode || mode?.toUpperCase() || "BANK";
+      const category = this.getCategory(payinType);
 
-      comPart: it.comPartDomain || it.comPartId || "—",
-      comPartId: it.comPartId || it.raw?.comPartId || null,
+      return {
+        mode: mode,
+        category: category, // 'bank' | 'upi' | 'crypto'
+        payinType: payinType, // BANK / UPI / BEP20 / TRC20 / ERC20 / SPL / OMNI
 
-      vpa: it.vpa || it.vpaId || it.upiId,
-      upiId: it.upiId,
+        displayId: it.displayId || "-",
+        userId: it.userId || "-",
 
-      accountNo: it.accountNo || it.accNo || it.account,
+        // ✅ unified identifier for table (account no / vpa / wallet address)
+        identifier: this.getIdentifier(category, it),
 
-      transactionId: it.transactionId || it.txnId,
+        comPart: it.comPartDomain || it.comPartId || "—",
+        comPartId: it.comPartId || it.raw?.comPartId || null,
 
-      amount: Number(it.amount ?? it.value ?? 0),
+        vpa: it.vpa || it.vpaId || it.upiId,
+        upiId: it.upiId,
 
-      settled: it.settled,
+        accountNo: it.accountNo || it.accNo || it.account,
+        ifsc: it.ifsc || it.ifscCode || null,
+        walletAddress: it.walletAddress || it.wallet || null,
+        holder: it.bankAccountHolderName || it.holder || null,
 
-      reviewStatus: it.reviewStatus || it.review,
+        transactionId: it.transactionId || it.txnId || "-",
 
-      status: it.status || it.state,
+        amount: Number(it.amount ?? it.currencyWiseAmount ?? it.value ?? 0),
+        currency: it.currency || "INR",
 
-      date: it.createdAt ? new Date(it.createdAt) : new Date(),
+        settled: it.settled,
 
-      raw: it,
-    }));
+        reviewStatus: it.reviewStatus || it.review,
+
+        status: it.status || it.state,
+
+        remarks: it.remarks,
+        queryText: it.queryText,
+
+        date: it.dateTime
+          ? new Date(it.dateTime)
+          : it.createdAt
+            ? new Date(it.createdAt)
+            : new Date(),
+
+        raw: it,
+      };
+    });
 
     this.approvedpayins.sort(
       (a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0),
@@ -249,17 +298,18 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       1,
       Math.ceil(this.payinTotalRecords / this.payinApprovedPageSize),
     );
-    Math.ceil(this.filteredBankpayins().length / this.payinPageSize);
   }
 
   setpayinPage(p: number) {
     const totalPages = this.bankTotalPages();
     this.payinPage = Math.max(0, Math.min(p, totalPages - 1));
+    this.fetchBankPayins();
   }
 
   onChangepayinPageSize(size: number) {
     this.payinPageSize = Number(size);
     this.payinPage = 0;
+    this.fetchBankPayins();
   }
 
   // ============ FILTER DROPDOWN CONTROLS ============
@@ -309,7 +359,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     this.bankDateTo = "";
 
     this.payinPage = 0;
-    // this.fetchBankPayins(); // ✅ REQUIRED
+    this.fetchBankPayins(); // ✅ REQUIRED
   }
 
   // ============ REFRESH BUTTON ============
@@ -338,11 +388,6 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   }
 
   // ============ MODAL & LIGHTBOX ============
-  // openRecordModal(record: any) {
-  //   this.selectedRecord = record;
-  //   this.showRecordModal = true;
-  // }
-
   openRecordModal(record: any) {
     this.selectedRecord = record;
 
@@ -377,6 +422,11 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   formatCurrency(v: number) {
     if (v == null || isNaN(v)) return "0.00";
     return Number(v).toFixed(2);
+  }
+
+  // ✅ Thread button sirf PENDING / ACCEPTED status filter par dikhana hai
+  isThreadAllowed(): boolean {
+    return this.THREAD_ALLOWED_STATUSES.includes(this.selectedStatus);
   }
 
   loadImage(rec: any) {
@@ -461,124 +511,67 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     }
   }
 
-  // private processFile(
-  //   filePath: string,
-  //   imageArray: any[],
-  //   pdfArray: any[],
-  //   pdfName: string,
-  // ) {
-  //   if (
-  //     !filePath ||
-  //     filePath === "null" ||
-  //     filePath === "undefined" ||
-  //     String(filePath).trim() === ""
-  //   ) {
-  //     return;
-  //   }
-
-  //   const lowerPath = String(filePath).toLowerCase();
-
-  //   // ✅ detect pdf from original path
-  //   const isPdf =
-  //     lowerPath.includes(".pdf") ||
-  //     lowerPath.includes("/pdf/") ||
-  //     lowerPath.includes("pdf") ||
-  //     lowerPath.includes("application/pdf");
-
-  //   // ✅ DIRECTLY HANDLE PDF
-  //   if (isPdf) {
-  //     this.multimediaService.getPrivateImage(filePath).subscribe({
-  //       next: (url) => {
-  //         pdfArray.push({
-  //           url,
-  //           name: pdfName,
-  //         });
-  //       },
-  //       error: () => {
-  //         this.imageError = true;
-  //       },
-  //     });
-
-  //     return;
-  //   }
-
-  //   // ✅ IMAGE
-  //   this.multimediaService.getPrivateImage(filePath).subscribe({
-  //     next: (url) => {
-  //       imageArray.push(url);
-  //     },
-
-  //     error: () => {
-  //       this.imageError = true;
-  //     },
-  //   });
-  // }
   onImageError(ev: any) {
     if (ev && ev.target) {
       ev.target.src = "";
     }
   }
 
+  // ============ DETAILS MODAL FIELDS (category-wise) ============
   getDisplayFields(record: any): any[] {
     if (!record) return [];
 
-    const mode =
-      record.mode ||
-      (record.vpa ? "upi" : record.accountNo ? "bank" : "payout");
+    const category: "bank" | "upi" | "crypto" =
+      record.category || this.getCategory(record.payinType || record.mode);
 
-    switch (mode) {
-      case "upi":
-        return [
-          { label: "VPA / UPI ID", value: record.vpa || record.upiId || "—" },
-          { label: "Transaction ID", value: record.transactionId || "—" },
-          { label: "Amount", value: `₹ ${this.formatCurrency(record.amount)}` },
-          {
-            label: "Settlement Status",
-            value:
-              record.settled === true
-                ? "Settled"
-                : record.settled === false
-                  ? "Pending"
-                  : "—",
-          },
-          {
-            label: "Review Status",
-            value: record.reviewStatus || record.status || "—",
-          },
-          {
-            label: "Date",
-            value: record.date ? new Date(record.date).toLocaleString() : "—",
-          },
-        ];
+    const common = [
+      { label: "Display ID", value: record.displayId || "—" },
+      { label: "User ID", value: record.userId || "—" },
+      { label: "Transaction ID / UTR", value: record.transactionId || "—" },
+      { label: "Amount", value: `₹ ${this.formatCurrency(record.amount)}` },
+      { label: "Currency", value: record.currency || "—" },
+      {
+        label: "Settlement Status",
+        value:
+          record.settled === true
+            ? "Settled"
+            : record.settled === false
+              ? "Pending"
+              : "—",
+      },
+      {
+        label: "Review Status",
+        value: record.reviewStatus || record.status || "—",
+      },
+      { label: "Remarks", value: record.remarks || "—" },
+      {
+        label: "Date",
+        value: record.date ? new Date(record.date).toLocaleString() : "—",
+      },
+    ];
 
-      case "bank":
-        return [
-          { label: "Account Number", value: record.accountNo || "—" },
-          { label: "Transaction ID", value: record.transactionId || "—" },
-          { label: "Amount", value: `₹ ${this.formatCurrency(record.amount)}` },
-          { label: "Account Holder", value: record.holder || "—" },
-          {
-            label: "Settlement Status",
-            value:
-              record.settled === true
-                ? "Settled"
-                : record.settled === false
-                  ? "Pending"
-                  : "—",
-          },
-          {
-            label: "Review Status",
-            value: record.reviewStatus || record.status || "—",
-          },
-          {
-            label: "Date",
-            value: record.date ? new Date(record.date).toLocaleString() : "—",
-          },
-        ];
-
-      default:
-        return [];
+    if (category === "bank") {
+      return [
+        { label: "Account Number", value: record.accountNo || "—" },
+        { label: "IFSC Code", value: record.ifsc || "—" },
+        { label: "Account Holder", value: record.holder || "—" },
+        ...common,
+      ];
     }
+
+    if (category === "upi") {
+      return [
+        { label: "VPA / UPI ID", value: record.vpa || record.upiId || "—" },
+        ...common,
+      ];
+    }
+
+    // crypto (BEP20 / TRC20 / ERC20 / SPL / OMNI)
+    return [
+      { label: "Wallet Address", value: record.walletAddress || "—" },
+      { label: "Network / Type", value: record.payinType || "—" },
+      ...common,
+    ];
   }
 
   getStatusClass(status: string): string {

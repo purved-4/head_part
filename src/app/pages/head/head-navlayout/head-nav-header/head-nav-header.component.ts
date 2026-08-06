@@ -76,6 +76,9 @@ export class HeadNavHeaderComponent implements OnInit {
   exposureData: any = null;
   exposureLoading = false;
   isExposureOpen = false;
+  entityBalance: any;
+  availableBalance: any;
+  exploserBalance: any;
 
   searchResults: any[] = [];
   showMobileSearch = false;
@@ -252,6 +255,9 @@ export class HeadNavHeaderComponent implements OnInit {
         this.payoutBalance = res?.totalPayout ?? 0;
         this.rewards = res?.reward ?? 0;
         this.exploser = res?.exploser ?? 0;
+        this.availableBalance = res?.availableBalance ?? 0;
+        this.entityBalance = res?.entityBalance ?? 0;
+        this.exploserBalance = res?.exploserBalance ?? 0;
 
         this.emitBalances();
       });
@@ -267,6 +273,9 @@ export class HeadNavHeaderComponent implements OnInit {
           this.payoutBalance = res?.totalPayout ?? 0;
           this.rewards = res?.reward ?? 0;
           this.exploser = res?.exploser ?? 0;
+          this.availableBalance = res?.availableBalance ?? 0;
+          this.entityBalance = res?.entityBalance ?? 0;
+          this.exploserBalance = res?.exploserBalance ?? 0;
           this.emitBalances();
         });
       });
@@ -660,8 +669,6 @@ export class HeadNavHeaderComponent implements OnInit {
 
     this.fundService.getExposure(this.currentRoleId, "ENTITY").subscribe({
       next: (res: any) => {
-
-
         const data = res ?? {};
 
         this.exposureData = {
@@ -677,8 +684,6 @@ export class HeadNavHeaderComponent implements OnInit {
 
           heldAmount: data.heldAmount ?? 0,
         };
-
-
 
         this.exposureLoading = false;
       },
@@ -735,13 +740,13 @@ export class HeadNavHeaderComponent implements OnInit {
   }
 
   toggleMobileSearch() {
-  this.showMobileSearch = !this.showMobileSearch;
+    this.showMobileSearch = !this.showMobileSearch;
 
-  if (!this.showMobileSearch) {
-    this.searchTerm = "";
-    this.searchResults = [];
-    this.showSearchDropdown = false;
-    this.selectedIndex = -1;
+    if (!this.showMobileSearch) {
+      this.searchTerm = "";
+      this.searchResults = [];
+      this.showSearchDropdown = false;
+      this.selectedIndex = -1;
+    }
   }
-}
 }

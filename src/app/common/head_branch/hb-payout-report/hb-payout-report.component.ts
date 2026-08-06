@@ -1,8 +1,6 @@
- 
-
 import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
- import { FundsService } from "../../../pages/services/funds.service";
+import { FundsService } from "../../../pages/services/funds.service";
 import { UserStateService } from "../../../store/user-state.service";
 import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { catchError, of, Subscription } from "rxjs";
@@ -66,6 +64,11 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   // Colors based on role (already in template via data-role)
   colors: any = null;
   headcomParts: any[] = [];
+
+  // ========== STATUS VALUES THAT ALLOW THE THREAD BUTTON ==========
+  // Thread button sirf PENDING / ACCEPTED (dispute pending) filter par dikhana hai
+  private readonly THREAD_ALLOWED_STATUSES = ["DISPUTE_ESCALATED", "ACCEPTED"];
+
   constructor(
     private route: ActivatedRoute,
     private fundService: FundsService,
@@ -283,29 +286,69 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     return { list, total, pageNum, pageSize };
   }
 
+  // ============ CATEGORY HELPERS ============
+  // mode values: BANK, UPI, BEP20, TRC20, ERC20, SPL, OMNI
+  // Isse teen buckets mein daal dete hain: 'bank' | 'upi' | 'crypto'
+  private getCategory(typeVal: string): "bank" | "upi" | "crypto" {
+    const t = (typeVal || "").toUpperCase();
+    if (t === "BANK") return "bank";
+    if (t === "UPI") return "upi";
+    return "crypto"; // BEP20, TRC20, ERC20, SPL, OMNI
+  }
+
+  // Category ke hisaab se sahi identifier (account no / vpa / wallet) nikalna
+  private getIdentifier(category: string, it: any): string {
+    if (category === "bank")
+      return it.accountNo || it.accNo || it.account || "-";
+    if (category === "upi") return it.vpa || it.vpaId || it.upiId || "-";
+    return it.walletAddress || it.wallet || "-"; // crypto
+  }
+
   // ============ MAPPERS ============
 
   private mapPayoutArray(items: any[]) {
-    this.approvedpayouts = items.map((it: any) => ({
-      mode: "payout",
-      userId: it.userId,
-      accountNo: it.accountNo || it.raw?.accountNo || it.accNo || "-",
-      ifscCode: it.ifsc,
-      holder: it.holder,
-      amount: Number(it.currencyWiseAmount ?? it.amount ?? it.value ?? 0),
-      status: it.status || it.state || "CP_REJECTED",
-      reviewStatus: it.reviewStatus,
-      remarks: it.remarks,
-      portalDomain: it.portalDomain,
-      queryText: it.queryText,
-      rejectionFilePath: it.rejectionFilePath,
-      date: it.dateTime
-        ? new Date(it.dateTime)
-        : it.createdAt
-          ? new Date(it.createdAt)
-          : new Date(),
-      raw: it.raw || it,
-    }));
+    this.approvedpayouts = items.map((it: any) => {
+      const modeVal = it.mode || it.payoutType || "BANK";
+      const category = this.getCategory(modeVal);
+
+      return {
+        mode: "payout",
+        category: category, // 'bank' | 'upi' | 'crypto'
+        payoutType: modeVal, // BANK / UPI / BEP20 / TRC20 / ERC20 / SPL / OMNI
+
+        displayId: it.displayId || "-",
+        userId: it.userId || "-",
+
+        // ✅ unified identifier for table (account no / vpa / wallet address)
+        identifier: this.getIdentifier(category, it),
+
+        accountNo: it.accountNo || it.raw?.accountNo || it.accNo || "-",
+        ifscCode: it.ifsc || it.ifscCode || null,
+        walletAddress: it.walletAddress || it.wallet || null,
+        vpa: it.vpa || it.upiId || null,
+        holder: it.holder,
+
+        transactionId: it.transactionId || it.txnId || "-",
+
+        amount: Number(it.currencyWiseAmount ?? it.amount ?? it.value ?? 0),
+        currency: it.currency || "INR",
+
+        status: it.status || it.state || "CP_REJECTED",
+        reviewStatus: it.reviewStatus,
+        remarks: it.remarks,
+        portalDomain: it.portalDomain,
+        queryText: it.queryText,
+        rejectionFilePath: it.rejectionFilePath,
+
+        date: it.dateTime
+          ? new Date(it.dateTime)
+          : it.createdAt
+            ? new Date(it.createdAt)
+            : new Date(),
+
+        raw: it.raw || it,
+      };
+    });
 
     this.approvedpayouts.sort(
       (a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0),
@@ -403,7 +446,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     this.applyPayoutFilters();
   }
 
-  // }
   clearPayoutFilters() {
     this.payoutSearchQuery = "";
     this.payoutcomPartFilter = "";
@@ -438,7 +480,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   // ============ MODAL & LIGHTBOX ============
   openRecordModal(record: any) {
     this.selectedRecord = record;
-    console.log(this.selectedRecord);
 
     this.displayFields = this.getDisplayFields(record);
 
@@ -481,6 +522,11 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     return Number(v).toFixed(2);
   }
 
+  // ✅ Thread button sirf PENDING / ACCEPTED (dispute pending) status filter par dikhana hai
+  isThreadAllowed(): boolean {
+    return this.THREAD_ALLOWED_STATUSES.includes(this.selectedStatus);
+  }
+
   getStatusClass(status: string): string {
     const st = (status || "").toLowerCase();
     if (st.includes("accept") || st.includes("completed") || st === "success") {
@@ -498,22 +544,6 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     }
     return "status-default";
   }
-
-  // getImageUrl(rec: any): string | null {
-  //   if (!rec) return null;
-  //   const raw = rec.raw || {};
-  //   const fp = `${fileBaseUrl}/${raw.rejectionFilePath}`;
-  //   if (!fp) return null;
-  //   const trimmed = ("" + fp).trim();
-  //   if (!trimmed || trimmed.toLowerCase().includes("null")) return null;
-  //   if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  //   try {
-  //     // return `${window.location.origin}${trimmed.startsWith("/") ? trimmed : "/" + trimmed}`;
-  //     return `${location.origin}${trimmed.startsWith("/") ? trimmed : "/" + trimmed}`;
-  //   } catch (e) {
-  //     return trimmed;
-  //   }
-  // }
 
   loadImages(rec: any) {
     if (!rec) return;
@@ -602,46 +632,60 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ============ DETAILS MODAL FIELDS (category-wise) ============
   getDisplayFields(record: any): any[] {
     if (!record) return [];
 
-    return [
+    const category: "bank" | "upi" | "crypto" =
+      record.category || this.getCategory(record.payoutType || record.mode);
+
+    const common = [
+      { label: "Display ID", value: record.displayId || "—" },
       { label: "User ID", value: record.userId || "—" },
-
-      {
-        label: "Account Number",
-        value: record.accountNo || record.accountNumber || "—",
-      },
-
-      {
-        label: "IFSC Code",
-        value: record.ifsc || record.ifscCode || record.bankCode || "—",
-      },
-
-      {
-        label: "Account Holder",
-        value:
-          record.holder ||
-          record.accountHolder ||
-          record.accountHolderName ||
-          "—",
-      },
-
-      {
-        label: "Amount",
-        value: `₹ ${this.formatCurrency(record.amount)}`,
-      },
-
+      { label: "Transaction ID / UTR", value: record.transactionId || "—" },
+      { label: "Amount", value: `₹ ${this.formatCurrency(record.amount)}` },
+      { label: "Currency", value: record.currency || "—" },
       { label: "Status", value: record.status || "—" },
-
+      { label: "Review Status", value: record.reviewStatus || "—" },
       { label: "Remarks", value: record.remarks || "—" },
-
       { label: "Query Text", value: record.queryText || "—" },
-
       {
         label: "Date",
         value: record.date ? new Date(record.date).toLocaleString() : "—",
       },
+    ];
+
+    if (category === "bank") {
+      return [
+        { label: "Account Number", value: record.accountNo || "—" },
+        {
+          label: "IFSC Code",
+          value: record.ifscCode || record.ifsc || record.bankCode || "—",
+        },
+        {
+          label: "Account Holder",
+          value: record.holder || record.accountHolder || "—",
+        },
+        ...common,
+      ];
+    }
+
+    if (category === "upi") {
+      return [
+        { label: "VPA / UPI ID", value: record.vpa || "—" },
+        {
+          label: "Account Holder",
+          value: record.holder || record.accountHolder || "—",
+        },
+        ...common,
+      ];
+    }
+
+    // crypto (BEP20 / TRC20 / ERC20 / SPL / OMNI)
+    return [
+      { label: "Wallet Address", value: record.walletAddress || "—" },
+      { label: "Network / Type", value: record.payoutType || "—" },
+      ...common,
     ];
   }
 
@@ -730,18 +774,11 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     const fundId = record?.raw?.id || record?.id;
 
     const fundType =
-      record?.mode === "upi"
+      record?.category === "upi"
         ? "UPI"
-        : record?.mode === "bank"
+        : record?.category === "bank"
           ? "BANK"
           : "PAYOUT";
-
-    // console.log({
-    //   entityId,
-    //   entityType,
-    //   fundId,
-    //   fundType,
-    // });
 
     if (!entityId || !entityType || !fundId || !fundType) {
       return;

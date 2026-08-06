@@ -110,8 +110,8 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   minLimit: number | null = null;
   draftMaxLimit: number | null = null;
   draftMinLimit: number | null = null;
-  statusFilter: string = "all";
-  draftStatusFilter: string = "all";
+  statusFilter: string = "Active";
+  draftStatusFilter: string = "active";
 
   // ---------- PAGINATION (client side) ----------
   currentPage = 1;
@@ -553,16 +553,19 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
   //       query: this.searchTerm || undefined,
 
-  //       // API me minAmount hai, agar backend maxLimit use karta hai
-  //       // to service bhi change karni padegi.
-  //       limitAmount: this.maxLimit ?? undefined,
+  //       maxAmount: this.maxLimit ?? undefined,
+  //       minAmount: this.minLimit ?? undefined,
 
   //       bankId:
   //         this.selectedMode === "UPI" && this.selectedBankId !== "ALL"
   //           ? this.selectedBankId
   //           : undefined,
 
-  //       status: this.statusFilter === "all" ? undefined : this.statusFilter, // ACTIVE / INACTIVE
+  //       // Deleted frontend pe handle hoga
+  //       status:
+  //         this.statusFilter === "all" || this.statusFilter === "deleted"
+  //           ? undefined
+  //           : this.statusFilter,
 
   //       page: this.currentPage - 1,
   //       size: this.pageSize,
@@ -574,7 +577,15 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   //       const rows = res?.data?.content || [];
 
   //       this.allItems = rows
-  //         .filter((r: any) => !r.deleted)
+  //         .filter((r: any) => {
+  //           // Deleted filter select hua to sirf deleted records
+  //           if (this.statusFilter === "deleted") {
+  //             return r.deleted === true;
+  //           }
+
+  //           // All / Active / Archive me deleted records hide
+  //           return !r.deleted;
+  //         })
   //         .map((r: any) => this.mapAnyRow(r));
 
   //       this.hasLoadedOnce = true;
@@ -583,8 +594,11 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   //       this.filteredItems = [...this.allItems];
   //       this.pagedItems = [...this.allItems];
 
-  //       this.totalElements = res?.data?.totalElements || 0;
-  //       this.totalPagesCount = res?.data?.totalPages || 1;
+  //       this.totalElements = this.allItems.length;
+  //       this.totalPagesCount = Math.max(
+  //         1,
+  //         Math.ceil(this.totalElements / this.pageSize),
+  //       );
 
   //       this.updatePageNumbers();
   //     });
@@ -616,8 +630,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
         query: this.searchTerm || undefined,
 
-        // API me minAmount hai, agar backend maxLimit use karta hai
-        // to service bhi change karni padegi.
         maxAmount: this.maxLimit ?? undefined,
         minAmount: this.minLimit ?? undefined,
 
@@ -626,7 +638,10 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
             ? this.selectedBankId
             : undefined,
 
-        status: this.statusFilter === "all" ? undefined : this.statusFilter, // ACTIVE / INACTIVE
+        status:
+          this.statusFilter === "all" || this.statusFilter === "deleted"
+            ? undefined
+            : this.statusFilter,
 
         page: this.currentPage - 1,
         size: this.pageSize,
@@ -638,7 +653,13 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         const rows = res?.data?.content || [];
 
         this.allItems = rows
-          .filter((r: any) => !r.deleted)
+          .filter((r: any) => {
+            if (this.statusFilter === "deleted") {
+              return r.deleted === true;
+            }
+
+            return !r.deleted;
+          })
           .map((r: any) => this.mapAnyRow(r));
 
         this.hasLoadedOnce = true;
@@ -647,13 +668,18 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         this.filteredItems = [...this.allItems];
         this.pagedItems = [...this.allItems];
 
-        this.totalElements = res?.data?.totalElements || 0;
-        this.totalPagesCount = res?.data?.totalPages || 1;
+        // ✅ Backend pagination use karo
+        this.totalElements = res?.data?.totalElements ?? 0;
+        this.totalPagesCount = res?.data?.totalPages ?? 1;
+
+        // Agar current page last page se bada ho gaya ho
+        if (this.currentPage > this.totalPagesCount) {
+          this.currentPage = this.totalPagesCount;
+        }
 
         this.updatePageNumbers();
       });
   }
-
   refreshInventory(): void {
     if (!this.hasLoadedOnce) return;
     this.fetchInventory();
@@ -815,38 +841,61 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.pageNumbers = pages;
   }
 
+  // prevPage(): void {
+  //   if (this.currentPage > 1) {
+  //     this.currentPage--;
+  //     this.updatePageNumbers();
+  //     this.paginate();
+  //   }
+  // }
   prevPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.updatePageNumbers();
-      this.paginate();
+      this.fetchInventory();
     }
   }
-
+  // nextPage(): void {
+  //   if (this.currentPage < this.totalPages()) {
+  //     this.currentPage++;
+  //     this.updatePageNumbers();
+  //     this.paginate();
+  //   }
+  // }
   nextPage(): void {
-    if (this.currentPage < this.totalPages()) {
+    if (this.currentPage < this.totalPagesCount) {
       this.currentPage++;
-      this.updatePageNumbers();
-      this.paginate();
+      this.fetchInventory();
     }
   }
-
+  // goToPage(page: number): void {
+  //   if (page >= 1 && page <= this.totalPages() && page !== this.currentPage) {
+  //     this.currentPage = page;
+  //     this.updatePageNumbers();
+  //     this.paginate();
+  //   }
+  // }
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages() && page !== this.currentPage) {
+    if (
+      page >= 1 &&
+      page <= this.totalPagesCount &&
+      page !== this.currentPage
+    ) {
       this.currentPage = page;
-      this.updatePageNumbers();
-      this.paginate();
+      this.fetchInventory();
     }
   }
-
+  // onPageSizeChange(): void {
+  //   this.currentPage = 1;
+  //   this.totalPagesCount = Math.max(
+  //     1,
+  //     Math.ceil(this.filteredItems.length / this.pageSize),
+  //   );
+  //   this.updatePageNumbers();
+  //   this.paginate();
+  // }
   onPageSizeChange(): void {
     this.currentPage = 1;
-    this.totalPagesCount = Math.max(
-      1,
-      Math.ceil(this.filteredItems.length / this.pageSize),
-    );
-    this.updatePageNumbers();
-    this.paginate();
+    this.fetchInventory();
   }
 
   // =========================================================
