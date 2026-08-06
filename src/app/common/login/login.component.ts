@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit {
     { title: "Expenses", value: 0, target: 48200 },
     { title: "Investments", value: 0, target: 375000 },
   ];
-   private publicRoutes = ["/register"];
+  private publicRoutes = ["/register"];
   isCheckingAuth = true;
   showPassword = false;
   selfRegisterEnabled = false;
@@ -43,28 +43,26 @@ export class LoginComponent implements OnInit {
     private memoryService: AuthMemoryService,
     private subjectService: SubjectRegistryService,
     private chiefService: ChiefService,
-        @Inject(PLATFORM_ID) private platformId: Object,
-    
+    @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
   ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.initializeApp();
 
-      if (isPlatformBrowser(this.platformId)) {
-          this.initializeApp();
-    
-          this.userStateService.currentUser$.subscribe((user) => {
-            const role = user?.role?.[0]?.name || null;
-    
-            if (role) {
-              const normalizedRole = role.toLowerCase();
-              document.documentElement.setAttribute("data-role", normalizedRole);
-              this.socketConfigService.connect();
-            } else {
-              document.documentElement.removeAttribute("data-role");
-              this.socketConfigService.destroyAll();
-            }
-          });
+      this.userStateService.currentUser$.subscribe((user) => {
+        const role = user?.role?.[0]?.name || null;
+
+        if (role) {
+          const normalizedRole = role.toLowerCase();
+          document.documentElement.setAttribute("data-role", normalizedRole);
+          this.socketConfigService.connect();
+        } else {
+          document.documentElement.removeAttribute("data-role");
+          this.socketConfigService.destroyAll();
         }
+      });
+    }
     this.socketConfigService.destroyAll();
     this.memoryService.setAccessToken(null);
     this.userStateService.setCurrentUser(null);
@@ -154,13 +152,12 @@ export class LoginComponent implements OnInit {
         this.snackbarService.show("Login Successful", true, 4000);
       },
       error: (err) => {
-        const msg =
-          err?.error?.message ||
-          err?.error?.error ||
-          err?.message ||
-          "Server error";
-
-        this.snackbarService.show(msg, false, 5000);
+        // const msg =
+        //   err?.error?.message ||
+        //   err?.error?.error ||
+        //   err?.message ||
+        //   "Server error";
+        // this.snackbarService.show(msg, false, 5000);
       },
     });
   }

@@ -647,4 +647,44 @@ export class FundsService {
       params: httpParams,
     });
   }
+  getPayinCountForHeadBranch(params: {
+    entityId: string;
+    userId?: string;
+    fundId?: string;
+    fundType?: string;
+  }): Observable<any> {
+    let httpParams = new HttpParams();
+    httpParams = httpParams.set("entityId", params.entityId);
+
+    if (params.userId && params.userId.length > 0) {
+      httpParams = httpParams.set("userId", params.userId);
+    }
+    if (params.fundId && params.fundId.length > 0) {
+      httpParams = httpParams.set("fundId", params.fundId);
+    }
+    if (params.fundType && params.fundType.length > 0) {
+      httpParams = httpParams.set("fundType", params.fundType);
+    }
+    return this.http.get<any>(`${baseUrl}/funds/getPayinsCountsByUserId`, {
+      params: httpParams,
+    });
+  }
+  getPayoutsCountForHeadBranch(params: {
+    entityId: string;
+    userId?: string;
+    fundId?: string;
+  }): Observable<any> {
+    let httpParams = new HttpParams();
+    httpParams = httpParams.set("entityId", params.entityId);
+
+    if (params.userId && params.userId.length > 0) {
+      httpParams = httpParams.set("userId", params.userId);
+    }
+    if (params.fundId && params.fundId.length > 0) {
+      httpParams = httpParams.set("fundId", params.fundId);
+    }
+    return this.http.get<any>(`${baseUrl}/funds/getPayoutsCountsByUserId`, {
+      params: httpParams,
+    });
+  }
 }

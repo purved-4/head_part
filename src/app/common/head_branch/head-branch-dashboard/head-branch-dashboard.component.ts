@@ -89,6 +89,28 @@ export class HeadBranchDashboardComponent
   private dynamicPayinConfig: any = null;
   private dynamicPayoutConfig: any = null;
 
+  // Pay-in linked user info (payout cards ke liye)
+  showPayoutColModal = false;
+  showPayinColModal = false;
+  payinData: any[] = [];
+  payinColData: any[] = [];
+  loadingPayinDetails = false;
+  payinColLoading = false;
+  showAllPayoutAccounts = false;
+  showAllPayinAccounts = false;
+
+  // Payin history modal (payin card + payout card dono se open hota hai)
+  showPayinHistoryModal = false;
+  payinHistoryData: any[] = [];
+  loadingPayinHistory = false;
+  showAllPayinHistoryAccounts = false;
+
+  // Payout history modal (sirf payout card se — repeated payout user)
+  showPayoutHistoryModal = false;
+  payoutHistoryData: any[] = [];
+  loadingPayoutHistory = false;
+  showAllPayoutHistoryAccounts = false;
+
   pendingUpi: any[] = [];
   pendingBank: any[] = [];
   pendingpayouts: any[] = [];
@@ -244,12 +266,7 @@ export class HeadBranchDashboardComponent
     this.getPayinStatus();
 
     this.loadBroadcast();
-    // this.fundService
-    //   .getInventoryForPayout({
-    //     entityId: this.entityId,
-    //     mode: "BANK",
-    //   })
-    //   .subscribe();
+
     this.resetAllLists();
 
     this.socketConfigService.subscribeToPendingData(this.entityId);
@@ -415,6 +432,8 @@ export class HeadBranchDashboardComponent
 
         this.acceptedDep = this.acceptedBank + this.acceptedUpi;
 
+        this.attachExistsInPayoutFunds();
+
         this.computeStatsFromData();
         this.updateChartsFromData();
         this.clampPages();
@@ -529,6 +548,8 @@ export class HeadBranchDashboardComponent
           holder: w.holder || null,
           ifscCode: w.ifsc || null,
           fundDisplayId: w.displayId || null,
+          existsInPayinFunds: w.existsInPayinFunds ?? 0,
+          userId: w.userId || null,
         };
 
         if (tx.filePath) {
@@ -557,6 +578,8 @@ export class HeadBranchDashboardComponent
         }
       } catch (err) {}
     }
+
+    this.attachExistsInPayoutFunds();
   }
 
   private extractPortalsFromFetched(allFunds: any[]): void {
@@ -2363,7 +2386,6 @@ export class HeadBranchDashboardComponent
 
       upiId: fund.vpa || fund.upiId || null,
 
-      // BAAD ME (sahi):
       holderName: fund.bankAccountHolderName || fund.holder || null,
       holder: fund.holder || null,
 
@@ -2372,6 +2394,8 @@ export class HeadBranchDashboardComponent
       fundDisplayId: fund.displayId,
 
       ftt: !!fund.firstPayin,
+      existsInPayinFunds: fund.existsInPayinFunds ?? 0,
+      userId: fund.userId || null,
     };
   }
 
@@ -2384,6 +2408,152 @@ export class HeadBranchDashboardComponent
     return this.normalizeIncomingFund(tx);
   }
 
+  // private processIncomingEvent(data: any) {
+  //   if (!data) return;
+
+  //   if (!this.dynamicPayinConfig && data?.DYNAMIC_PAYIN_TIME) {
+  //     this.dynamicPayinConfig = structuredClone(data.DYNAMIC_PAYIN_TIME);
+  //     this.latestDynamicPayin = this.dynamicPayinConfig;
+  //   }
+  //   if (!this.dynamicPayoutConfig && data?.DYNAMIC_PAYOUT_TIME) {
+  //     this.dynamicPayoutConfig = structuredClone(data.DYNAMIC_PAYOUT_TIME);
+  //     this.latestDynamicPayout = this.dynamicPayoutConfig;
+  //   }
+
+  //   const dynamicPayin = this.dynamicPayinConfig;
+  //   const dynamicPayout = this.dynamicPayoutConfig;
+
+  //   const now = Date.now();
+
+  //   if (Array.isArray(data.PENDING_PAYIN)) {
+  //     const upiList: any[] = [];
+  //     const bankList: any[] = [];
+  //     const cryptoList: any[] = [];
+
+  //     for (const f of data.PENDING_PAYIN) {
+  //       const rawType = (f.type || "").toUpperCase();
+
+  //       const existing =
+  //         this.pendingUpi.find(
+  //           (x: any) => x.id === f.id || x.fundId === f.id,
+  //         ) ||
+  //         this.pendingBank.find(
+  //           (x: any) => x.id === f.id || x.fundId === f.id,
+  //         ) ||
+  //         this.pendingCrypto.find(
+  //           (x: any) => x.id === f.id || x.fundId === f.id,
+  //         );
+
+  //       let mode: "upi" | "bank" | "crypto";
+  //       if (this.isCryptoType(rawType)) mode = "crypto";
+  //       else if (rawType === "UPI") mode = "upi";
+  //       else mode = "bank";
+
+  //       const tx = this.normalizeIncomingFund(
+  //         {
+  //           ...existing,
+  //           ...f,
+  //           processing: existing?.processing ?? f?.processing ?? false,
+  //         },
+  //         mode,
+  //       );
+  //       if (!tx) continue;
+
+  //       const slab = dynamicPayin?.timeRanges?.length
+  //         ? this.getPayinSlabInfo(tx, dynamicPayin, now)
+  //         : null;
+
+  //       const finalTx = {
+  //         ...tx,
+  //         slabPercentage:
+  //           slab !== null ? slab.percentage : (existing?.slabPercentage ?? 100),
+  //         slabEligible:
+  //           slab !== null ? slab.eligible : (existing?.slabEligible ?? true),
+  //         timePassed:
+  //           slab !== null ? slab.diffMinutes : (existing?.timePassed ?? 0),
+  //         cryptoType: this.isCryptoType(rawType) ? rawType : null,
+  //       };
+
+  //       if (mode === "crypto") cryptoList.push(finalTx);
+  //       else if (mode === "upi") upiList.push(finalTx);
+  //       else bankList.push(finalTx);
+  //     }
+
+  //     this.pendingUpi = upiList;
+  //     this.pendingBank = bankList;
+  //     this.pendingCrypto = cryptoList;
+  //   }
+
+  //   if (Array.isArray(data.PENDING_PAYOUT)) {
+  //     this.pendingpayouts = data.PENDING_PAYOUT.map((f: any) => {
+  //       const existing = this.pendingpayouts.find(
+  //         (x: any) =>
+  //           x.id === f.id || x.fundId === f.id || x.fundId === f.fundId,
+  //       );
+
+  //       // const tx = this.normalizeIncomingFund(
+  //       //   {
+  //       //     ...existing,
+  //       //     ...f,
+
+  //       //     processing: existing?.processing === true ? true : !!f?.processing,
+
+  //       //     processingTimeLimit:
+  //       //       f?.processingTimeLimit ?? existing?.processingTimeLimit ?? null,
+  //       //   },
+  //       //   "payout",
+  //       // );
+
+  //       const incomingProcessing = f?.processing === true;
+  //       const localProcessing = existing?.processing === true;
+  //       const isProcessing = incomingProcessing || localProcessing;
+
+  //       const tx = this.normalizeIncomingFund(
+  //         {
+  //           ...existing,
+  //           ...f,
+
+  //           processing: isProcessing,
+
+  //           processingTimeLimit: isProcessing
+  //             ? (f?.processingTimeLimit ??
+  //               existing?.processingTimeLimit ??
+  //               null)
+  //             : null,
+  //         },
+  //         "payout",
+  //       );
+
+  //       if (!tx) return null;
+
+  //       const slab = dynamicPayout?.amountRanges?.length
+  //         ? this.getPayoutSlabInfo(tx, dynamicPayout, now)
+  //         : null;
+
+  //       return {
+  //         ...tx,
+  //         slabPercentage:
+  //           slab !== null ? slab.percentage : (existing?.slabPercentage ?? 100),
+  //         slabEligible:
+  //           slab !== null ? slab.eligible : (existing?.slabEligible ?? true),
+  //         timePassed:
+  //           slab !== null ? slab.diffMinutes : (existing?.timePassed ?? 0),
+  //       };
+  //     }).filter(Boolean);
+
+  //     this.refreshCachedLists();
+  //   }
+
+  //   this.pendingUpi = [...this.pendingUpi];
+  //   this.pendingBank = [...this.pendingBank];
+  //   this.pendingCrypto = [...this.pendingCrypto];
+  //   this.pendingpayouts = [...this.pendingpayouts];
+
+  //   this.computeStatsFromData();
+  //   this.updateChartsFromData();
+  //   this.clampPages();
+  //   this.ensureProcessingTimerState();
+  // }
   private processIncomingEvent(data: any) {
     if (!data) return;
 
@@ -2467,19 +2637,6 @@ export class HeadBranchDashboardComponent
             x.id === f.id || x.fundId === f.id || x.fundId === f.fundId,
         );
 
-        // const tx = this.normalizeIncomingFund(
-        //   {
-        //     ...existing,
-        //     ...f,
-
-        //     processing: existing?.processing === true ? true : !!f?.processing,
-
-        //     processingTimeLimit:
-        //       f?.processingTimeLimit ?? existing?.processingTimeLimit ?? null,
-        //   },
-        //   "payout",
-        // );
-
         const incomingProcessing = f?.processing === true;
         const localProcessing = existing?.processing === true;
         const isProcessing = incomingProcessing || localProcessing;
@@ -2516,6 +2673,8 @@ export class HeadBranchDashboardComponent
             slab !== null ? slab.diffMinutes : (existing?.timePassed ?? 0),
         };
       }).filter(Boolean);
+
+      this.attachExistsInPayoutFunds();
 
       this.refreshCachedLists();
     }
@@ -3375,5 +3534,185 @@ export class HeadBranchDashboardComponent
   isCryptoMode(mode: string | null | undefined): boolean {
     if (!mode) return false;
     return this.cryptoTypes.includes(String(mode).toUpperCase());
+  }
+
+  closePayoutColModal(): void {
+    this.showPayoutColModal = false;
+    this.payinData = [];
+    this.showAllPayoutAccounts = false;
+  }
+
+  closePayinColModal(): void {
+    this.showPayinColModal = false;
+    this.payinColData = [];
+    this.showAllPayinAccounts = false;
+  }
+
+  // ── existsInPayoutFunds (repeated payout user) — frontend pe compute ──
+  private computePayoutUserCounts(): Map<string, number> {
+    const map = new Map<string, number>();
+    const all = [...this.pendingpayouts]; // sirf pending payouts se count
+
+    for (const tx of all) {
+      const uid = tx.userId || tx.raw?.userId || null;
+      if (!uid) continue;
+      map.set(uid, (map.get(uid) || 0) + 1);
+    }
+
+    return map;
+  }
+
+  private attachExistsInPayoutFunds(): void {
+    const counts = this.computePayoutUserCounts();
+
+    this.pendingpayouts = this.pendingpayouts.map((tx: any) => {
+      const uid = tx.userId || tx.raw?.userId || null;
+      const count = uid ? counts.get(uid) || 0 : 0;
+
+      return { ...tx, existsInPayoutFunds: count };
+    });
+  }
+
+  // ── Currency-wise sum helpers (header ke liye) ──
+  private currencySymbol(code: string): string {
+    const map: Record<string, string> = {
+      INR: "₹",
+      USDT: "$",
+      EUR: "€",
+      GBP: "£",
+    };
+    const key = (code || "").toUpperCase();
+    return map[key] || "";
+  }
+
+  private sumByCurrency(
+    list: any[],
+    currencyFn: (t: any) => string,
+    amountFn: (t: any) => number,
+  ): { currency: string; symbol: string; total: number }[] {
+    const map = new Map<string, number>();
+
+    for (const t of list) {
+      const cur = (currencyFn(t) || "N/A").toUpperCase();
+      const amt = Number(amountFn(t)) || 0;
+      map.set(cur, (map.get(cur) || 0) + amt);
+    }
+
+    return Array.from(map.entries()).map(([currency, total]) => ({
+      currency,
+      symbol: this.currencySymbol(currency),
+      total,
+    }));
+  }
+
+  getPayinCurrencySums(): {
+    currency: string;
+    symbol: string;
+    total: number;
+  }[] {
+    const all = [
+      ...this.filteredPendingUpi(),
+      ...this.filteredPendingBank(),
+      ...this.filteredPendingCrypto(),
+    ];
+    return this.sumByCurrency(
+      all,
+      (t) => (t.mode === "crypto" ? t.currency : t.parentCurrency),
+      (t) => t.amount,
+    );
+  }
+
+  getPayoutCurrencySums(): {
+    currency: string;
+    symbol: string;
+    total: number;
+  }[] {
+    return this.sumByCurrency(
+      this.filteredPendingpayouts(),
+      (t) => t.parentCurrency,
+      (t) => t.amount,
+    );
+  }
+
+  formatCurrencySum(item: {
+    currency: string;
+    symbol: string;
+    total: number;
+  }): string {
+    const num = item.total.toLocaleString("en-IN");
+    return item.symbol ? `${item.symbol}${num}` : `${num} ${item.currency}`;
+  }
+
+  // ── Payin history modal (payin card + payout card dono use karenge) ──
+  openPayinHistoryModal(
+    p: any,
+    event?: Event,
+    fundType: "payin" | "payout" = "payin",
+  ): void {
+    event?.stopPropagation();
+
+    this.userId = p.userId || p.raw?.userId || null;
+    this.showPayinHistoryModal = true;
+    this.showAllPayinHistoryAccounts = false;
+    this.loadingPayinHistory = true;
+    this.payinHistoryData = [];
+
+    this.fundService
+      .getPayinCountForHeadBranch({
+        entityId: this.entityId,
+        userId: this.userId,
+        fundId: p.fundId || p.id,
+        fundType: fundType,
+      })
+      .subscribe({
+        next: (res: any) => {
+          this.payinHistoryData = Array.isArray(res) ? res : res?.data || [];
+          this.loadingPayinHistory = false;
+        },
+        error: () => {
+          this.payinHistoryData = [];
+          this.loadingPayinHistory = false;
+        },
+      });
+  }
+
+  closePayinHistoryModal(): void {
+    this.showPayinHistoryModal = false;
+    this.payinHistoryData = [];
+    this.showAllPayinHistoryAccounts = false;
+  }
+
+  // ── Payout history modal (sirf payout card — repeated payout user) ──
+  openPayoutHistoryModal(p: any, event?: Event): void {
+    event?.stopPropagation();
+
+    this.userId = p.userId || p.raw?.userId || null;
+    this.showPayoutHistoryModal = true;
+    this.showAllPayoutHistoryAccounts = false;
+    this.loadingPayoutHistory = true;
+    this.payoutHistoryData = [];
+
+    this.fundService
+      .getPayoutsCountForHeadBranch({
+        entityId: this.entityId,
+        userId: this.userId,
+        fundId: p.id || p.id,
+      })
+      .subscribe({
+        next: (res: any) => {
+          this.payoutHistoryData = Array.isArray(res) ? res : res?.data || [];
+          this.loadingPayoutHistory = false;
+        },
+        error: () => {
+          this.payoutHistoryData = [];
+          this.loadingPayoutHistory = false;
+        },
+      });
+  }
+
+  closePayoutHistoryModal(): void {
+    this.showPayoutHistoryModal = false;
+    this.payoutHistoryData = [];
+    this.showAllPayoutHistoryAccounts = false;
   }
 }

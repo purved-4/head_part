@@ -63,6 +63,16 @@
             <p class="text-[11px] text-[var(--color-muted)] mt-1">
               Awaiting approval for payins
             </p>
+
+            <!-- CURRENCY-WISE TOTAL -->
+            <div class="flex flex-wrap gap-1.5 mt-1.5">
+              <span
+                *ngFor="let s of getPayinCurrencySums()"
+                class="text-[10px] font-bold px-2 py-[2px] rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-info)]/30"
+              >
+                {{ formatCurrencySum(s) }}
+              </span>
+            </div>
           </div>
 
           <!-- SINGLE SCROLL AREA — real-time order, no type sorting -->
@@ -193,6 +203,7 @@
                 </div>
 
                 <!-- MIDDLE TAGS -->
+                <!-- MIDDLE TAGS -->
                 <div class="flex items-center gap-2 flex-wrap mt-2">
                   <span
                     class="px-2 py-[2px] rounded-lg text-[11px] font-semibold"
@@ -208,6 +219,19 @@
                         : transaction.slabPercentage
                     }}%
                   </span>
+
+                  <!-- REPEATED USER BADGE (payin history) -->
+                  <div
+                    class="h-[22px] px-2 rounded-full flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-[#FFF1CF] text-[#B45309] hover:bg-[#FFE9A0] transition-colors"
+                    (click)="
+                      openPayinHistoryModal(transaction, $event, 'payin')
+                    "
+                  >
+                    <span class="material-symbols-outlined text-[13px]"
+                      >group</span
+                    >
+                    Repeated User
+                  </div>
                 </div>
 
                 <!-- BOTTOM ROW -->
@@ -305,6 +329,16 @@
                 <p class="text-[11px] text-[var(--color-muted)] mt-1">
                   Awaiting approval for payout requests
                 </p>
+
+                <!-- CURRENCY-WISE TOTAL -->
+                <div class="flex flex-wrap gap-1.5 mt-1.5">
+                  <span
+                    *ngFor="let s of getPayoutCurrencySums()"
+                    class="text-[10px] font-bold px-2 py-[2px] rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-danger)]/30"
+                  >
+                    {{ formatCurrencySum(s) }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -377,6 +411,7 @@
                 </div>
 
                 <!-- MIDDLE TAGS -->
+                <!-- MIDDLE TAGS -->
                 <div class="flex items-center gap-2 flex-wrap mt-2">
                   <button
                     (click)="
@@ -413,6 +448,31 @@
                   >
                     Reward Eligibility {{ transaction.slabPercentage || 100 }}%
                   </span>
+
+                  <!-- PAY-IN USER BADGE (payin history) -->
+                  <ng-container>
+                    <div
+                      class="h-[22px] px-2 rounded-full flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-[#E8F0FF] text-[#2563EB] hover:bg-[#DCE9FF] transition-colors"
+                      (click)="
+                        openPayinHistoryModal(transaction, $event, 'payout')
+                      "
+                    >
+                      <span class="material-symbols-outlined text-[13px]"
+                        >person</span
+                      >
+                      Pay-in User
+                    </div>
+
+                    <div
+                      class="h-[22px] px-2 rounded-full flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-[#FFF1CF] text-[#B45309] hover:bg-[#FFE9A0] transition-colors"
+                      (click)="openPayoutHistoryModal(transaction, $event)"
+                    >
+                      <span class="material-symbols-outlined text-[13px]"
+                        >group</span
+                      >
+                      Repeated User
+                    </div>
+                  </ng-container>
                 </div>
 
                 <!-- BOTTOM ROW -->
@@ -697,6 +757,8 @@
               </div>
 
               <!-- CENTER TAGS -->
+
+              <!-- CENTER TAGS -->
               <div class="flex items-center gap-2 flex-wrap mt-2">
                 <!-- PROCESS BUTTON -->
                 <button
@@ -739,6 +801,43 @@
                       : transaction.slabPercentage
                   }}%
                 </span>
+
+                <!-- PAYIN CARD: sirf Repeated User (payin history) -->
+                <div
+                  *ngIf="transaction.type !== 'payout'"
+                  class="h-[22px] px-2 rounded-full flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-[#FFF1CF] text-[#B45309] hover:bg-[#FFE9A0] transition-colors"
+                  (click)="openPayinHistoryModal(transaction, $event, 'payin')"
+                >
+                  <span class="material-symbols-outlined text-[13px]"
+                    >group</span
+                  >
+                  Repeated User
+                </div>
+
+                <!-- PAYOUT CARD: Pay-in User + Repeated Payin + Repeated Payout -->
+                <ng-container *ngIf="transaction.type === 'payout'">
+                  <div
+                    class="h-[22px] px-2 rounded-full flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-[#E8F0FF] text-[#2563EB] hover:bg-[#DCE9FF] transition-colors"
+                    (click)="
+                      openPayinHistoryModal(transaction, $event, 'payout')
+                    "
+                  >
+                    <span class="material-symbols-outlined text-[13px]"
+                      >person</span
+                    >
+                    Pay-in User
+                  </div>
+
+                  <div
+                    class="h-[22px] px-2 rounded-full flex items-center gap-1 text-[11px] font-semibold cursor-pointer bg-[#FFF1CF] text-[#B45309] hover:bg-[#FFE9A0] transition-colors"
+                    (click)="openPayoutHistoryModal(transaction, $event)"
+                  >
+                    <span class="material-symbols-outlined text-[13px]"
+                      >group</span
+                    >
+                    Repeated User
+                  </div>
+                </ng-container>
               </div>
 
               <!-- BOTTOM -->
@@ -1797,6 +1896,326 @@
           >
             {{ isRejecting ? "Rejecting..." : "Reject" }}
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- PAYIN HISTORY MODAL -->
+  <div
+    *ngIf="showPayinHistoryModal"
+    class="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999] p-4"
+    (click)="closePayinHistoryModal()"
+  >
+    <div
+      class="bg-white w-[340px] max-w-full max-h-[80vh] overflow-hidden rounded-[20px] shadow-[0_12px_40px_rgba(0,0,0,0.15)] flex flex-col border border-[#E2E8F0]"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- HEADER -->
+      <div
+        class="flex items-center justify-between px-4 py-3 border-b border-[#F1F5F9]"
+      >
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-9 h-9 rounded-full bg-[#EDF3FF] border border-[#DBEAFE] flex items-center justify-center shrink-0"
+          >
+            <span class="material-symbols-outlined text-[#2563EB] text-[18px]"
+              >person</span
+            >
+          </div>
+          <div>
+            <div class="text-[14px] font-semibold text-[#0F172A]">
+              Pay-in User Details
+            </div>
+
+            <div class="text-[11px] text-[#94A3B8]">
+              Transaction linked info
+            </div>
+
+            <div
+              class="mt-1 inline-flex items-center gap-1.5 rounded-md bg-[#EFF6FF] px-2 py-0.5 border border-[#DBEAFE]"
+            >
+              <span
+                class="material-symbols-outlined text-[12px] text-[#2563EB]"
+              >
+                badge
+              </span>
+              <span class="text-[11px] font-semibold text-[#1E40AF]">
+                User ID: {{ userId }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <button
+          (click)="closePayinHistoryModal()"
+          class="w-7 h-7 rounded-full bg-[#F1F5F9] border-none flex items-center justify-center cursor-pointer hover:bg-[#E2E8F0] transition-all shrink-0"
+        >
+          <span class="material-symbols-outlined text-[15px] text-[#64748B]"
+            >close</span
+          >
+        </button>
+      </div>
+
+      <!-- BODY -->
+      <div class="p-4 overflow-y-auto">
+        <div
+          *ngIf="loadingPayinHistory"
+          class="flex items-center justify-center py-8 gap-2 text-[13px] text-[#94A3B8]"
+        >
+          <span class="material-symbols-outlined text-[18px] animate-spin"
+            >progress_activity</span
+          >
+          Loading...
+        </div>
+
+        <ng-container *ngIf="!loadingPayinHistory && payinHistoryData.length">
+          <!-- TOP ACCOUNT CARD -->
+          <div
+            class="bg-[#F8FAFC] border border-[#E8EFF8] rounded-[12px] p-3.5"
+          >
+            <div class="flex items-center gap-2 mb-2.5">
+              <div
+                class="w-7 h-7 rounded-[8px] bg-[#EDF3FF] flex items-center justify-center shrink-0"
+              >
+                <span
+                  class="material-symbols-outlined text-[#2563EB] text-[14px]"
+                  >account_balance</span
+                >
+              </div>
+              <span class="text-[13px] font-semibold text-[#0F172A] truncate">
+                {{ payinHistoryData[0].bankName || "Bank" }}
+              </span>
+            </div>
+            <div class="text-[12px] text-[#64748B] mb-3 font-mono">
+              {{ payinHistoryData[0].accountHolderName }} ·
+              {{ payinHistoryData[0].accountNo }}
+            </div>
+            <div class="h-px bg-[#E8EFF8] mb-3"></div>
+            <div class="flex items-center justify-between">
+              <div class="flex flex-col gap-0.5">
+                <span
+                  class="text-[10px] text-[#94A3B8] font-semibold uppercase tracking-wide"
+                  >Total Pay-in Count</span
+                >
+                <span class="text-[14px] font-bold text-[#0F172A]"
+                  >{{ payinHistoryData[0].count }} Transactions</span
+                >
+              </div>
+              <div class="flex flex-col gap-0.5 text-right">
+                <span
+                  class="text-[10px] text-[#94A3B8] font-semibold uppercase tracking-wide"
+                  >Total Amount</span
+                >
+                <span class="text-[14px] font-bold text-[#0F172A]"
+                  >₹{{ payinHistoryData[0].totalAmount }}</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- +N MORE BUTTON -->
+          <button
+            *ngIf="payinHistoryData.length > 1 && !showAllPayinHistoryAccounts"
+            (click)="showAllPayinHistoryAccounts = true"
+            class="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] bg-[#EDF3FF] text-[#2563EB] text-[12px] font-semibold border-none cursor-pointer hover:bg-[#D9E8FF] transition-all"
+          >
+            <span class="material-symbols-outlined text-[14px]"
+              >open_in_new</span
+            >
+            +{{ payinHistoryData.length - 1 }} More Accounts
+          </button>
+
+          <!-- EXPANDED LIST -->
+          <div
+            *ngIf="showAllPayinHistoryAccounts"
+            class="mt-3 flex flex-col gap-2 max-h-[260px] overflow-y-auto"
+          >
+            <div
+              *ngFor="let item of payinHistoryData.slice(1)"
+              class="bg-[#F8FAFC] border border-[#E8EFF8] rounded-[10px] p-3"
+            >
+              <div class="text-[12px] font-semibold text-[#0F172A]">
+                {{ item.bankName || "Bank" }}
+              </div>
+              <div class="text-[11px] text-[#64748B] mt-0.5 font-mono">
+                {{ item.accountHolderName }} · {{ item.accountNo }}
+              </div>
+              <div class="flex justify-between items-center mt-2">
+                <span class="text-[11px] text-[#64748B]"
+                  >{{ item.count }} txns</span
+                >
+                <span class="text-[12px] font-bold text-[#0F172A]"
+                  >₹{{ item.totalAmount }}</span
+                >
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <div
+          *ngIf="!loadingPayinHistory && !payinHistoryData.length"
+          class="text-[12px] text-[#94A3B8] py-6 text-center"
+        >
+          No data found
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- PAYOUT HISTORY MODAL -->
+  <div
+    *ngIf="showPayoutHistoryModal"
+    class="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999] p-4"
+    (click)="closePayoutHistoryModal()"
+  >
+    <div
+      class="bg-white w-[340px] max-w-full max-h-[80vh] overflow-hidden rounded-[20px] shadow-[0_12px_40px_rgba(0,0,0,0.15)] flex flex-col border border-[#E2E8F0]"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- HEADER -->
+      <div
+        class="flex items-center justify-between px-4 py-3 border-b border-[#F1F5F9]"
+      >
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-9 h-9 rounded-full bg-[#FDE8E8] border border-[#F5B8B8] flex items-center justify-center shrink-0"
+          >
+            <span class="material-symbols-outlined text-[#B42318] text-[18px]"
+              >history</span
+            >
+          </div>
+          <div>
+            <div class="text-[14px] font-semibold text-[#0F172A]">
+              Payout User Details
+            </div>
+            <div class="text-[11px] text-[#94A3B8]">
+              Transaction linked info
+            </div>
+            <div
+              class="mt-1 inline-flex items-center gap-1.5 rounded-md bg-[#FEF2F2] px-2 py-0.5 border border-[#FCA5A5]"
+            >
+              <span
+                class="material-symbols-outlined text-[12px] text-[#B42318]"
+              >
+                badge
+              </span>
+              <span class="text-[11px] font-semibold text-[#B42318]">
+                User ID: {{ userId }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <button
+          (click)="closePayoutHistoryModal()"
+          class="w-7 h-7 rounded-full bg-[#F1F5F9] border-none flex items-center justify-center cursor-pointer hover:bg-[#E2E8F0] transition-all shrink-0"
+        >
+          <span class="material-symbols-outlined text-[15px] text-[#64748B]"
+            >close</span
+          >
+        </button>
+      </div>
+
+      <!-- BODY -->
+      <div class="p-4 overflow-y-auto">
+        <div
+          *ngIf="loadingPayoutHistory"
+          class="flex items-center justify-center py-8 gap-2 text-[13px] text-[#94A3B8]"
+        >
+          <span class="material-symbols-outlined text-[18px] animate-spin"
+            >progress_activity</span
+          >
+          Loading...
+        </div>
+
+        <ng-container *ngIf="!loadingPayoutHistory && payoutHistoryData.length">
+          <!-- TOP ACCOUNT CARD -->
+          <div
+            class="bg-[#FFF8F8] border border-[#F5B8B8] rounded-[12px] p-3.5"
+          >
+            <div class="flex items-center gap-2 mb-2.5">
+              <div
+                class="w-7 h-7 rounded-[8px] bg-[#FDE8E8] flex items-center justify-center shrink-0"
+              >
+                <span
+                  class="material-symbols-outlined text-[#B42318] text-[14px]"
+                  >account_balance</span
+                >
+              </div>
+              <span class="text-[13px] font-semibold text-[#0F172A] truncate">
+                {{ payoutHistoryData[0].bankName || "Bank" }}
+              </span>
+            </div>
+            <div class="text-[12px] text-[#64748B] mb-3 font-mono">
+              {{ payoutHistoryData[0].accountHolderName }} ·
+              {{ payoutHistoryData[0].accountNo }}
+            </div>
+            <div class="h-px bg-[#F5B8B8] mb-3"></div>
+            <div class="flex items-center justify-between">
+              <div class="flex flex-col gap-0.5">
+                <span
+                  class="text-[10px] text-[#94A3B8] font-semibold uppercase tracking-wide"
+                  >Total Payout Count</span
+                >
+                <span class="text-[14px] font-bold text-[#0F172A]"
+                  >{{ payoutHistoryData[0].count }} Transactions</span
+                >
+              </div>
+              <div class="flex flex-col gap-0.5 text-right">
+                <span
+                  class="text-[10px] text-[#94A3B8] font-semibold uppercase tracking-wide"
+                  >Total Amount</span
+                >
+                <span class="text-[14px] font-bold text-[#0F172A]"
+                  >₹{{ payoutHistoryData[0].totalAmount }}</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- +N MORE BUTTON -->
+          <button
+            *ngIf="
+              payoutHistoryData.length > 1 && !showAllPayoutHistoryAccounts
+            "
+            (click)="showAllPayoutHistoryAccounts = true"
+            class="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] bg-[#FDE8E8] text-[#B42318] text-[12px] font-semibold border-none cursor-pointer hover:bg-[#FBD5D5] transition-all"
+          >
+            <span class="material-symbols-outlined text-[14px]"
+              >open_in_new</span
+            >
+            +{{ payoutHistoryData.length - 1 }} More Accounts
+          </button>
+
+          <!-- EXPANDED LIST -->
+          <div
+            *ngIf="showAllPayoutHistoryAccounts"
+            class="mt-3 flex flex-col gap-2 max-h-[260px] overflow-y-auto"
+          >
+            <div
+              *ngFor="let item of payoutHistoryData.slice(1)"
+              class="bg-[#FFF8F8] border border-[#F5B8B8] rounded-[10px] p-3"
+            >
+              <div class="text-[12px] font-semibold text-[#0F172A]">
+                {{ item.bankName || "Bank" }}
+              </div>
+              <div class="text-[11px] text-[#64748B] mt-0.5 font-mono">
+                {{ item.accountHolderName }} · {{ item.accountNo }}
+              </div>
+              <div class="flex justify-between items-center mt-2">
+                <span class="text-[11px] text-[#64748B]"
+                  >{{ item.count }} txns</span
+                >
+                <span class="text-[12px] font-bold text-[#0F172A]"
+                  >₹{{ item.totalAmount }}</span
+                >
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <div
+          *ngIf="!loadingPayoutHistory && !payoutHistoryData.length"
+          class="text-[12px] text-[#94A3B8] py-6 text-center"
+        >
+          No data found
         </div>
       </div>
     </div>
