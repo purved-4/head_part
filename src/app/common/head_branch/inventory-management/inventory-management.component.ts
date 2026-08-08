@@ -30,6 +30,7 @@ interface InventoryItem {
   limitAmount: string;
   remainingLimitAmount: any;
   status: boolean;
+  deleted: boolean; // 👈 NEW — true when the item is soft-deleted
   fttAcceptance: boolean;
   partialPayinEnabled: boolean;
   liveAssigned: boolean;
@@ -187,7 +188,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   tooltipPosition = { x: 0, y: 0 };
   hoverTimeout: any;
 
-  // ---------- DELETE CONFIRM ----------
+  // ---------- DELETE / RESTORE CONFIRM ----------
   isDeleteConfirmVisible = false;
   deleteCandidate: InventoryItem | null = null;
 
@@ -332,35 +333,35 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     });
   }
 
-  // =========================================================
-  //  CURRENCY LOAD — currency list + unke modes chahiye,
-  //  fir turant default ALL/ALL se pehli inventory bhi fetch ho jaati hai
-  // =========================================================
   private loadCurrenciesAndInventory(): void {
     if (!this.currentRoleId) return;
 
     const sub = this.portalService
       .getCurrenciesByEntity(this.currentRoleId, this.role)
-      .pipe(catchError(() => of({ data: [] })))
+      .pipe(catchError(() => of({ data: { currencies: [] } })))
       .subscribe((res: any) => {
-        const rows: any[] = res?.data || [];
+        const rows: any[] = res?.data?.currencies ?? [];
+
         this.currencies = rows.map((c) => c.currency).filter(Boolean);
 
         this.currencyModesMap = {};
         const modeSet = new Set<string>();
-        rows.forEach((c) => {
+
+        rows.forEach((c: any) => {
           const modes = Object.keys(c.modes || {})
-            .filter((k) => c.modes[k])
-            .map((m) => m.toUpperCase());
+            .filter((key) => c.modes[key])
+            .map((mode) => mode.toUpperCase());
+
           this.currencyModesMap[c.currency] = modes;
-          modes.forEach((m) => modeSet.add(m));
+
+          modes.forEach((mode) => modeSet.add(mode));
         });
+
         this.allModes = Array.from(modeSet);
 
-        // Default state — ALL / ALL, dropdown me "ALL" hi pre-selected dikhega
         this.selectedCurrency = "ALL";
         this.selectedMode = "ALL";
-        this.availableModes = this.allModes;
+        this.availableModes = [...this.allModes];
 
         this.fetchInventory();
       });
@@ -368,9 +369,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.subs.add(sub);
   }
 
-  // =========================================================
-  //  CURRENCY / MODE CHANGE — turant fetch, koi Apply Filters button nahi
-  // =========================================================
   onCurrencyChange(value: string): void {
     this.selectedCurrency = value || "ALL";
     this.availableModes =
@@ -394,7 +392,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
     this.currentPage = 1;
 
-    // mode badalte hi bank filter reset — sirf UPI mode ke liye relevant hai
     this.selectedBankId = "ALL";
 
     if (this.selectedMode === "UPI") {
@@ -478,8 +475,8 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.maxLimit = null;
     this.draftMaxLimit = null;
 
-    this.statusFilter = "all";
-    this.draftStatusFilter = "all";
+    this.statusFilter = "active";
+    this.draftStatusFilter = "active";
 
     this.selectedCurrency = "ALL";
     this.selectedMode = "ALL";
@@ -526,83 +523,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.fetchInventory();
   }
 
-  // fetchInventory(): void {
-  //   if (!this.currentRoleId) return;
-
-  //   const currencies =
-  //     this.selectedCurrency === "ALL" && this.currencies.length
-  //       ? this.currencies
-  //       : this.selectedCurrency !== "ALL"
-  //         ? [this.selectedCurrency]
-  //         : [];
-
-  //   const modesForThisCurrency =
-  //     this.selectedCurrency === "ALL" ? this.allModes : this.availableModes;
-
-  //   const modes =
-  //     this.selectedMode === "ALL" ? modesForThisCurrency : [this.selectedMode];
-
-  //   this.loading = true;
-
-  //   this.bankService
-  //     .getAllPaymentMethods({
-  //       entityId: this.currentRoleId,
-  //       entityType: this.role,
-  //       currencies,
-  //       modes,
-
-  //       query: this.searchTerm || undefined,
-
-  //       maxAmount: this.maxLimit ?? undefined,
-  //       minAmount: this.minLimit ?? undefined,
-
-  //       bankId:
-  //         this.selectedMode === "UPI" && this.selectedBankId !== "ALL"
-  //           ? this.selectedBankId
-  //           : undefined,
-
-  //       // Deleted frontend pe handle hoga
-  //       status:
-  //         this.statusFilter === "all" || this.statusFilter === "deleted"
-  //           ? undefined
-  //           : this.statusFilter,
-
-  //       page: this.currentPage - 1,
-  //       size: this.pageSize,
-  //     })
-  //     .pipe(catchError(() => of(null)))
-  //     .subscribe((res: any) => {
-  //       this.loading = false;
-
-  //       const rows = res?.data?.content || [];
-
-  //       this.allItems = rows
-  //         .filter((r: any) => {
-  //           // Deleted filter select hua to sirf deleted records
-  //           if (this.statusFilter === "deleted") {
-  //             return r.deleted === true;
-  //           }
-
-  //           // All / Active / Archive me deleted records hide
-  //           return !r.deleted;
-  //         })
-  //         .map((r: any) => this.mapAnyRow(r));
-
-  //       this.hasLoadedOnce = true;
-  //       this.loadQrThumbnails();
-
-  //       this.filteredItems = [...this.allItems];
-  //       this.pagedItems = [...this.allItems];
-
-  //       this.totalElements = this.allItems.length;
-  //       this.totalPagesCount = Math.max(
-  //         1,
-  //         Math.ceil(this.totalElements / this.pageSize),
-  //       );
-
-  //       this.updatePageNumbers();
-  //     });
-  // }
   fetchInventory(): void {
     if (!this.currentRoleId) return;
 
@@ -638,10 +558,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
             ? this.selectedBankId
             : undefined,
 
-        status:
-          this.statusFilter === "all" || this.statusFilter === "deleted"
-            ? undefined
-            : this.statusFilter,
+        status: this.statusFilter === "all" ? "all" : this.statusFilter,
 
         page: this.currentPage - 1,
         size: this.pageSize,
@@ -711,6 +628,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         typeof r.status === "boolean"
           ? r.status
           : (r.status || "").toLowerCase() === "active",
+      deleted: r.deleted === true, // 👈 NEW
       fttAcceptance: r.fttAcceptance ?? true,
       partialPayinEnabled: r.partialPayinEnabled ?? false,
       liveAssigned: r.liveAssigned ?? false,
@@ -841,39 +759,18 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.pageNumbers = pages;
   }
 
-  // prevPage(): void {
-  //   if (this.currentPage > 1) {
-  //     this.currentPage--;
-  //     this.updatePageNumbers();
-  //     this.paginate();
-  //   }
-  // }
   prevPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
       this.fetchInventory();
     }
   }
-  // nextPage(): void {
-  //   if (this.currentPage < this.totalPages()) {
-  //     this.currentPage++;
-  //     this.updatePageNumbers();
-  //     this.paginate();
-  //   }
-  // }
   nextPage(): void {
     if (this.currentPage < this.totalPagesCount) {
       this.currentPage++;
       this.fetchInventory();
     }
   }
-  // goToPage(page: number): void {
-  //   if (page >= 1 && page <= this.totalPages() && page !== this.currentPage) {
-  //     this.currentPage = page;
-  //     this.updatePageNumbers();
-  //     this.paginate();
-  //   }
-  // }
   goToPage(page: number): void {
     if (
       page >= 1 &&
@@ -884,15 +781,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       this.fetchInventory();
     }
   }
-  // onPageSizeChange(): void {
-  //   this.currentPage = 1;
-  //   this.totalPagesCount = Math.max(
-  //     1,
-  //     Math.ceil(this.filteredItems.length / this.pageSize),
-  //   );
-  //   this.updatePageNumbers();
-  //   this.paginate();
-  // }
   onPageSizeChange(): void {
     this.currentPage = 1;
     this.fetchInventory();
@@ -993,9 +881,29 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   // =========================================================
+  //  DELETED GUARD — deleted items pe koi bhi edit/limit/capacity/
+  //  status action open nahi hoga, sirf snackbar dikhega
+  // =========================================================
+  isItemDeleted(item: InventoryItem): boolean {
+    return !!item?.deleted;
+  }
+
+  private blockIfDeleted(item: InventoryItem): boolean {
+    if (this.isItemDeleted(item)) {
+      this.snack.show(
+        "This inventory is deleted. Please restore it first.",
+        false,
+      );
+      return true;
+    }
+    return false;
+  }
+
+  // =========================================================
   //  EDIT DISPATCHER — item.type ke hisaab se sahi modal khulega
   // =========================================================
   openEditModal(item: InventoryItem): void {
+    if (this.blockIfDeleted(item)) return; // 👈 NEW
     if (item.type === "BANK") {
       this.openBankDetails(item);
     } else if (item.type === "UPI") {
@@ -1012,6 +920,17 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   // =========================================================
   openStatusModal(item: InventoryItem, event: any): void {
     event.preventDefault();
+
+    if (this.isItemDeleted(item)) {
+      // deleted item — checkbox ko wapas original state pe le aao, block karo
+      event.target.checked = item.status;
+      this.snack.show(
+        "This inventory is deleted. Please restore it first.",
+        false,
+      );
+      return;
+    }
+
     this.selectedItem = item;
     this.pendingToggleValue = event.target.checked;
     this.toggleEvent = event;
@@ -1103,57 +1022,67 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.isDeleteConfirmVisible = false;
   }
 
+  // =========================================================
+  //  DELETE / RESTORE — same toggle API dobara call karne se
+  //  hi item wapas restore ho jaata hai (delete flag toggle hota hai)
+  // =========================================================
   executeDelete(): void {
     if (!this.deleteCandidate) return;
     const item = this.deleteCandidate;
+    const isRestore = !!item.deleted;
+
+    const onSuccess = (res: any, deleteMsg: string, restoreMsg: string) => {
+      this.snack.show(
+        res?.message || (isRestore ? restoreMsg : deleteMsg),
+        true,
+      );
+      this.closeDeleteConfirm();
+      this.refreshInventory();
+    };
+
+    const onError = (err: any, deleteMsg: string, restoreMsg: string) => {
+      this.snack.show(
+        err?.error?.message || (isRestore ? restoreMsg : deleteMsg),
+        false,
+      );
+      this.closeDeleteConfirm();
+    };
 
     if (item.type === "BANK") {
       this.bankService.toogleBankDeleted(item.id).subscribe({
-        next: (res: any) => {
-          this.snack.show(res?.message || "Bank deleted", true);
-          this.closeDeleteConfirm();
-          this.refreshInventory();
-        },
-        error: (err) => {
-          this.snack.show(
-            err.error?.message || "Failed to delete the bank",
-            false,
-          );
-          this.closeDeleteConfirm();
-        },
+        next: (res: any) => onSuccess(res, "Bank deleted", "Bank restored"),
+        error: (err) =>
+          onError(
+            err,
+            "Failed to delete the bank",
+            "Failed to restore the bank",
+          ),
       });
     } else if (item.type === "UPI") {
       this.upiService.toogleUpiDeleted(item.id).subscribe({
-        next: (res: any) => {
-          this.snack.show(res?.message || "UPI deleted", true);
-          this.closeDeleteConfirm();
-          this.refreshInventory();
-        },
-        error: (err) => {
-          this.snack.show(err.error?.message || "Failed to delete UPI", false);
-          this.closeDeleteConfirm();
-        },
+        next: (res: any) => onSuccess(res, "UPI deleted", "UPI restored"),
+        error: (err) =>
+          onError(err, "Failed to delete UPI", "Failed to restore UPI"),
       });
     } else {
+      // ⚠️ Agar backend me crypto ke liye alag restore endpoint hai,
+      // yahan isRestore check karke sahi method call karo.
       this.cryptoService.deleteCrypto(item.id, {}).subscribe({
-        next: (res: any) => {
-          this.snack.show(res?.message || "Crypto account deleted", true);
-          this.closeDeleteConfirm();
-          this.refreshInventory();
-        },
-        error: (err) => {
-          this.snack.show(
-            err?.error?.message || "Failed to delete the account",
-            false,
-          );
-          this.closeDeleteConfirm();
-        },
+        next: (res: any) =>
+          onSuccess(res, "Crypto account deleted", "Crypto account restored"),
+        error: (err) =>
+          onError(
+            err,
+            "Failed to delete the account",
+            "Failed to restore the account",
+          ),
       });
     }
   }
 
   // ---------- LIMIT TIME MODAL ----------
   openLimitModal(item: InventoryItem) {
+    if (this.blockIfDeleted(item)) return; // 👈 NEW
     this.editingItem = item;
     this.showLimitModal = true;
 
@@ -1347,6 +1276,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
   // ---------- CAPACITY POPUP / MODAL ----------
   openCapacityPreview(item: InventoryItem, event: MouseEvent) {
+    if (this.blockIfDeleted(item)) return; // 👈 NEW
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     this.selectedCapacityAccount = item;
 
@@ -1373,6 +1303,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   openCapacity(item: InventoryItem) {
+    if (this.blockIfDeleted(item)) return; // 👈 NEW
     this.selectedId = item.id;
     this.selectedPortalId = item.id;
     this.selectedPayinId = item.id;
@@ -1438,6 +1369,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   openAddUpiFromBank(item: InventoryItem) {
+    if (this.blockIfDeleted(item)) return; // 👈 NEW
     this.selectedBank = item;
     this.showAddUpiModal = true;
     document.body.style.overflow = "hidden";
@@ -1665,6 +1597,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
   // ---------- UPI — EDIT / UPDATE MODAL ----------
   openUpdateModal(item: InventoryItem): void {
+    if (this.blockIfDeleted(item)) return; // 👈 NEW (double guard, safe even if called directly)
     this.editingUpi = item;
     this.updateForm = {
       vpa: item.vpa || "",
@@ -1858,6 +1791,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
   // ---------- CRYPTO — EDIT ACCOUNT MODAL ----------
   openEditAccountModal(item: InventoryItem): void {
+    if (this.blockIfDeleted(item)) return; // 👈 NEW (double guard, safe even if called directly)
     this.accountBeingEdited = item;
     this.originalWalletAddress = item.walletAddress || "";
     this.editAccountForm = {

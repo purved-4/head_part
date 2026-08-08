@@ -217,58 +217,6 @@ export class BankService {
       );
   }
 
-  // getAllPaymentMethods(params: {
-  //   entityId: string;
-  //   entityType: string;
-  //   currencies?: string[];
-  //   modes?: string[];
-  //   query?: string;
-  //   limitAmount?: number;
-  //   bankId?: string;
-  //   status?: string; // "ACTIVE" | "INACTIVE"
-  //   page?: number;
-  //   size?: number;
-  // }): Observable<any> {
-  //   let httpParams = new HttpParams()
-  //     .set("entityId", params.entityId)
-  //     .set("entityType", params.entityType);
-
-  //   (params.currencies || []).forEach((c) => {
-  //     httpParams = httpParams.append("currencies", c);
-  //   });
-
-  //   (params.modes || []).forEach((m) => {
-  //     httpParams = httpParams.append("modes", m.toUpperCase());
-  //   });
-
-  //   if (params.query && params.query.trim()) {
-  //     httpParams = httpParams.set("query", params.query.trim());
-  //   }
-
-  //   if (params.limitAmount !== undefined && params.limitAmount !== null) {
-  //     httpParams = httpParams.set("limitAmount", params.limitAmount.toString());
-  //   }
-
-  //   if (params.bankId) {
-  //     httpParams = httpParams.set("bankId", params.bankId);
-  //   }
-
-  //   if (params.status) {
-  //     httpParams = httpParams.set("status", params.status);
-  //   }
-
-  //   if (params.page !== undefined) {
-  //     httpParams = httpParams.set("page", params.page);
-  //   }
-
-  //   if (params.size !== undefined) {
-  //     httpParams = httpParams.set("size", params.size);
-  //   }
-
-  //   return this.http.get<any>(`${baseUrl}/banks/payment-methods`, {
-  //     params: httpParams,
-  //   });
-  // }
   getAllPaymentMethods(params: {
     entityId: string;
     entityType: string;

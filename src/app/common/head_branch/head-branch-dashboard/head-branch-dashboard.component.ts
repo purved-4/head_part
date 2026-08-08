@@ -195,6 +195,19 @@ export class HeadBranchDashboardComponent
   showRejectConfirm = false;
   confirmTransaction: any = null;
   reason: any = "rejects";
+  customReason: string = "";
+
+  payinCurrencySums: {
+    currency: string;
+    symbol: string;
+    total: number;
+  }[] = [];
+
+  payoutCurrencySums: {
+    currency: string;
+    symbol: string;
+    total: number;
+  }[] = [];
 
   payinRejectReasons: string[] = [
     "Amount Not Recieved",
@@ -209,7 +222,6 @@ export class HeadBranchDashboardComponent
     "Inactive Beneficiary (Amount refunded)",
   ];
 
-  customReason: string = "";
   sse: any;
   banks: any;
   upis: any;
@@ -223,9 +235,6 @@ export class HeadBranchDashboardComponent
   };
   role: any;
   private lastBroadcastData: any = null;
-  // selectedPayoutMethod: "upi" | "bank" = "upi";
-  // selectedUpi: any = null;
-  // selectedBank: any = null;
 
   payoutInventoryOptions: Array<{
     id: string;
@@ -621,6 +630,7 @@ export class HeadBranchDashboardComponent
       else if (p.portal) uniqueAccounts.add(p.portal);
     }
     this.activeAccounts = uniqueAccounts.size;
+    this.updateCurrencySums();
   }
 
   ngAfterViewInit(): void {
@@ -1948,7 +1958,7 @@ export class HeadBranchDashboardComponent
       }
 
       await lastValueFrom(rejectObservable);
-      this.snackbar.show("Transaction rejected successfully", false);
+      this.snackbar.show("Transaction rejected successfully", true);
 
       this.removeFromPendingListsByTx(t);
 
@@ -2166,10 +2176,15 @@ export class HeadBranchDashboardComponent
         return;
       }
 
-      const finalReason = this.rejectionReason;
+      const finalReason =
+        this.reason === "OTHER" ? this.customReason.trim() : this.reason;
 
       if (!finalReason) {
         this.snackbar.show("Please select a reason for rejection", false);
+        return;
+      }
+      if (this.reason === "OTHER" && !this.customReason.trim()) {
+        this.snackbar.show("Please enter rejection reason", false);
         return;
       }
 
@@ -3614,11 +3629,12 @@ export class HeadBranchDashboardComponent
       ...this.filteredPendingUpi(),
       ...this.filteredPendingBank(),
       ...this.filteredPendingCrypto(),
+      console.log("===== PAYIN DEBUG ====="),
     ];
     return this.sumByCurrency(
       all,
-      (t) => (t.mode === "crypto" ? t.currency : t.parentCurrency),
-      (t) => t.amount,
+      (t) => t.parentCurrency, // 👈 ab hamesha parentCurrency (INR/USDT)
+      (t) => t.currencyWiseAmount, // 👈 amount ki jagah currencyWiseAmount
     );
   }
 
@@ -3630,17 +3646,64 @@ export class HeadBranchDashboardComponent
     return this.sumByCurrency(
       this.filteredPendingpayouts(),
       (t) => t.parentCurrency,
-      (t) => t.amount,
+      (t) => t.currencyWiseAmount,
+      // 👈 yaha bhi amount → currencyWiseAmount
     );
   }
 
-  formatCurrencySum(item: {
-    currency: string;
-    symbol: string;
-    total: number;
-  }): string {
-    const num = item.total.toLocaleString("en-IN");
-    return item.symbol ? `${item.symbol}${num}` : `${num} ${item.currency}`;
+  private updateCurrencySums(): void {
+    const payinMap = new Map<string, any>();
+
+    [...this.pendingUpi, ...this.pendingBank, ...this.pendingCrypto].forEach(
+      (tx: any) => {
+        const currency = tx.parentCurrency || tx.currency || "INR";
+        const symbol = currency;
+
+        if (!payinMap.has(currency)) {
+          payinMap.set(currency, {
+            currency,
+            symbol,
+            total: 0,
+          });
+        }
+
+        payinMap.get(currency).total += Number(
+          tx.currencyWiseAmount || tx.amount || 0,
+        );
+      },
+    );
+
+    this.payinCurrencySums = Array.from(payinMap.values());
+
+    const payoutMap = new Map<string, any>();
+
+    this.pendingpayouts.forEach((tx: any) => {
+      const currency = tx.parentCurrency || tx.currency || "INR";
+      const symbol = currency;
+
+      if (!payoutMap.has(currency)) {
+        payoutMap.set(currency, {
+          currency,
+          symbol,
+          total: 0,
+        });
+      }
+
+      payoutMap.get(currency).total += Number(
+        tx.currencyWiseAmount || tx.amount || 0,
+      );
+    });
+
+    this.payoutCurrencySums = Array.from(payoutMap.values());
+
+    console.log("Payin:", this.payinCurrencySums);
+    console.log("Payout:", this.payoutCurrencySums);
+  }
+
+  formatCurrencySum(s: any): string {
+    const symbol = s.currency === "INR" ? "₹" : s.symbol || s.currency;
+
+    return `${symbol} ${Number(s.total || 0).toLocaleString("en-IN")}`;
   }
 
   // ── Payin history modal (payin card + payout card dono use karenge) ──

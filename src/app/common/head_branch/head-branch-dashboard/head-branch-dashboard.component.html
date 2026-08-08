@@ -59,20 +59,16 @@
                     filteredPendingCrypto().length
                 }}
               </span>
+              <span
+                *ngFor="let s of payinCurrencySums"
+                class="text-[10px] font-bold px-2 py-[2px] rounded-full ml-3 bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-info)]/30"
+              >
+                {{ formatCurrencySum(s) }}
+              </span>
             </h3>
             <p class="text-[11px] text-[var(--color-muted)] mt-1">
               Awaiting approval for payins
             </p>
-
-            <!-- CURRENCY-WISE TOTAL -->
-            <div class="flex flex-wrap gap-1.5 mt-1.5">
-              <span
-                *ngFor="let s of getPayinCurrencySums()"
-                class="text-[10px] font-bold px-2 py-[2px] rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-info)]/30"
-              >
-                {{ formatCurrencySum(s) }}
-              </span>
-            </div>
           </div>
 
           <!-- SINGLE SCROLL AREA — real-time order, no type sorting -->
@@ -325,26 +321,24 @@
                   >
                     {{ filteredPendingpayouts().length }}
                   </span>
+                  <span
+                    *ngFor="let s of payoutCurrencySums"
+                    class="text-[10px] font-bold px-2 py-[2px] ml-3 rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-danger)]/30"
+                  >
+                    {{ formatCurrencySum(s) }}
+                  </span>
                 </h3>
                 <p class="text-[11px] text-[var(--color-muted)] mt-1">
                   Awaiting approval for payout requests
                 </p>
-
-                <!-- CURRENCY-WISE TOTAL -->
-                <div class="flex flex-wrap gap-1.5 mt-1.5">
-                  <span
-                    *ngFor="let s of getPayoutCurrencySums()"
-                    class="text-[10px] font-bold px-2 py-[2px] rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-danger)]/30"
-                  >
-                    {{ formatCurrencySum(s) }}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
 
           <!-- Scrollable list -->
-          <div class="overflow-y-auto h-[600px] scrollbar-hide px-2">
+          <div
+            class="overflow-y-auto overflow-x-hidden h-[600px] scrollbar-hide px-2"
+          >
             <div class="grid gap-2 py-1.5">
               <!-- CARD -->
               <div
@@ -353,10 +347,12 @@
                   trackBy: trackById
                 "
                 (click)="viewTransactionDetails(transaction)"
-                class="bg-white dark:bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+                class="bg-white dark:bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-3 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] w-full overflow-hidden"
               >
-                <!-- TOP ROW -->
-                <div class="flex items-start justify-between gap-2">
+                <!-- TOP ROW: grid = left (shrinkable) | right (fixed, always visible) -->
+                <div
+                  class="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-start w-full"
+                >
                   <!-- LEFT -->
                   <div class="flex items-start gap-2 min-w-0">
                     <!-- Icon -->
@@ -370,47 +366,63 @@
                     </div>
 
                     <!-- Info -->
-                    <div class="min-w-0">
+                    <div class="min-w-0 flex-1">
                       <p
-                        class="text-[16px] font-bold text-[var(--color-font)] truncate leading-tight"
+                        class="text-[14px] font-bold text-[var(--color-font)] truncate leading-tight"
                       >
                         {{ transaction.fundDisplayId }}
+                      </p>
+                      <p
+                        class="text-[11px] text-[var(--color-font)]/80 mt-1 font-medium truncate"
+                      >
+                        {{ transaction.holderName || transaction.holder || "" }}
+                      </p>
+                      <p
+                        class="text-[11px] text-[var(--color-muted)] mt-0.5 truncate uppercase"
+                      >
+                        {{ transaction.raw?.mode || transaction.mode
+                        }}{{
+                          transaction.accountNo
+                            ? "-" + transaction.accountNo
+                            : transaction.raw?.walletAddress
+                              ? "-" + transaction.raw.walletAddress
+                              : ""
+                        }}
                       </p>
                     </div>
                   </div>
 
-                  <!-- RIGHT -->
-                  <div class="text-right flex-shrink-0">
+                  <!-- RIGHT: fixed column, always fully visible, no truncation -->
+                  <div class="text-right whitespace-nowrap">
                     <!-- Amount -->
                     <div
-                      class="flex items-center justify-end gap-1 text-[18px] font-bold text-[var(--color-font)] leading-none"
+                      class="flex items-baseline justify-end gap-1 text-[15px] font-bold text-[var(--color-font)] leading-none"
                     >
-                      <span class="text-[11px] opacity-70 uppercase">
+                      <span class="text-[10px] opacity-70 uppercase">
                         {{ transaction.parentCurrency }}
                       </span>
                       <span>{{ transaction.amount }}</span>
                     </div>
 
                     <!-- Time -->
-                    <p class="text-[11px] text-[var(--color-muted)] mt-1.5">
+                    <p class="text-[10px] text-[var(--color-muted)] mt-1.5">
                       {{ transaction.date | tz }}
                     </p>
 
-                    <!-- Currency conversion (if different) -->
-                    <span
-                      *ngIf="
-                        transaction.amount !== transaction.currencyWiseAmount
-                      "
-                      class="text-[11px] text-[var(--color-muted)]"
-                    >
-                      {{ transaction.currency }}-{{
+                    <!-- Rate -->
+                    <p class="text-[10px] text-[var(--color-muted)] mt-0.5">
+                      Rate-{{ transaction.rate }}
+                    </p>
+
+                    <!-- Currency conversion -->
+                    <span class="text-[10px] text-[var(--color-muted)]">
+                      {{ transaction.parentCurrency }}-{{
                         transaction.currencyWiseAmount
                       }}
                     </span>
                   </div>
                 </div>
 
-                <!-- MIDDLE TAGS -->
                 <!-- MIDDLE TAGS -->
                 <div class="flex items-center gap-2 flex-wrap mt-2">
                   <button
@@ -583,6 +595,9 @@
 
       <!-- ───────────── BLANK RIGHT AREA ───────────── -->
       <div class="flex-1"></div>
+
+      <!-- ───────────── BLANK RIGHT AREA ───────────── -->
+      <div class="flex-1"></div>
     </div>
 
     <div class="block lg:hidden mb-6">
@@ -606,10 +621,23 @@
           <p class="text-[11px] text-[var(--color-muted)] mt-1">
             UPI, Bank, Crypto & Payout transactions
           </p>
+          <span
+            *ngFor="let s of payinCurrencySums"
+            class="text-[10px] font-bold px-2 py-[2px] rounded-full ml-3 bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-info)]/30"
+          >
+            payin - {{ formatCurrencySum(s) }}
+          </span>
+
+          <span
+            *ngFor="let s of payoutCurrencySums"
+            class="text-[10px] font-bold px-2 py-[2px] ml-3 rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-danger)]/30"
+          >
+            payout - {{ formatCurrencySum(s) }}
+          </span>
         </div>
 
         <!-- Scroll Area -->
-        <div class="overflow-y-auto h-[70vh] px-2">
+        <div class="overflow-y-auto overflow-x-hidden h-[70vh] px-2">
           <div class="grid gap-2 py-1.5">
             <!-- CARD -->
             <div
@@ -618,10 +646,12 @@
                 trackBy: trackById
               "
               (click)="viewTransactionDetails(transaction)"
-              class="bg-white dark:bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-2 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+              class="bg-white dark:bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-2 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] w-full overflow-hidden"
             >
-              <!-- TOP -->
-              <div class="flex items-start justify-between gap-2">
+              <!-- TOP: grid = left (shrinkable) | right (fixed, always visible) -->
+              <div
+                class="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-start w-full"
+              >
                 <!-- LEFT -->
                 <div class="flex items-start gap-2 min-w-0">
                   <!-- ICON: mode ke hisaab se, crypto ke lieye purple -->
@@ -668,7 +698,7 @@
                   </div>
 
                   <!-- DETAILS -->
-                  <div class="min-w-0">
+                  <div class="min-w-0 flex-1">
                     <!-- ID -->
                     <p
                       class="text-[13px] font-bold text-[var(--color-font)] truncate"
@@ -680,12 +710,35 @@
                     <p
                       class="text-[11px] text-[var(--color-font)]/80 mt-1 truncate font-medium"
                     >
-                      {{ transaction.holderName || getTxKind(transaction) }}
+                      {{
+                        transaction.type === "payout"
+                          ? transaction.holderName ||
+                            transaction.holder ||
+                            getTxKind(transaction)
+                          : transaction.holderName || getTxKind(transaction)
+                      }}
                     </p>
 
-                    <!-- UPI / ACCOUNT sub-line - crypto ke lieye nahi -->
+                    <!-- UPI / ACCOUNT / mode sub-line -->
                     <p
-                      *ngIf="transaction.mode !== 'crypto'"
+                      *ngIf="transaction.type === 'payout'"
+                      class="text-[11px] text-[var(--color-muted)] mt-0.5 truncate uppercase"
+                    >
+                      {{ transaction.raw?.mode || transaction.mode
+                      }}{{
+                        transaction.accountNo
+                          ? "-" + transaction.accountNo
+                          : transaction.raw?.walletAddress
+                            ? "-" + transaction.raw.walletAddress
+                            : ""
+                      }}
+                    </p>
+
+                    <p
+                      *ngIf="
+                        transaction.type !== 'payout' &&
+                        transaction.mode !== 'crypto'
+                      "
                       class="text-[11px] text-[var(--color-muted)] mt-0.5 truncate"
                     >
                       {{ transaction.upiId || transaction.accountNo || "—" }}
@@ -701,11 +754,11 @@
                   </div>
                 </div>
 
-                <!-- RIGHT -->
-                <div class="text-right flex-shrink-0">
+                <!-- RIGHT: fixed column, always fully visible -->
+                <div class="text-right whitespace-nowrap">
                   <!-- AMOUNT -->
                   <div
-                    class="flex items-center justify-end gap-1 text-[16px] font-bold leading-none"
+                    class="flex items-baseline justify-end gap-1 text-[14px] font-bold leading-none"
                     [ngClass]="{
                       'text-[var(--color-font)]':
                         transaction.mode === 'upi' ||
@@ -716,13 +769,15 @@
                       'text-red-black': transaction.type === 'payout',
                     }"
                   >
-                    <span class="text-[13px] text-[var(--color-font)]">
+                    <span
+                      class="text-[11px] text-[var(--color-font)] opacity-70 uppercase"
+                    >
                       {{
                         transaction.mode === "crypto"
                           ? transaction.currency
                           : transaction.parentCurrency
-                      }}-</span
-                    >
+                      }}
+                    </span>
                     <span>
                       {{
                         transaction.mode === "crypto"
@@ -732,9 +787,10 @@
                     </span>
                   </div>
 
-                  <!-- TIME -->
+                  <!-- UTR (payin only) -->
                   <p
-                    class="text-[11px]"
+                    *ngIf="transaction.type !== 'payout'"
+                    class="text-[10px] leading-tight"
                     [ngClass]="{
                       'text-red-700': transaction.utrEdited,
                       'text-black': !transaction.utrEdited,
@@ -743,20 +799,24 @@
                     {{ formatUtrNumber(transaction.utrNumber) }}
                   </p>
 
-                  <p class="text-[11px] text-[var(--color-muted)] mt-2">
+                  <!-- TIME -->
+                  <p class="text-[10px] text-[var(--color-muted)] mt-1.5">
                     {{ transaction.date | tz }}
                   </p>
 
-                  <p>Rate-{{ transaction.rate }}</p>
-                  <span>
+                  <!-- RATE -->
+                  <p class="text-[10px] text-[var(--color-muted)] mt-0.5">
+                    Rate-{{ transaction.rate }}
+                  </p>
+
+                  <!-- Parent currency wise amount -->
+                  <span class="text-[10px] text-[var(--color-muted)]">
                     {{ transaction.parentCurrency }}-{{
                       transaction.currencyWiseAmount
                     }}
                   </span>
                 </div>
               </div>
-
-              <!-- CENTER TAGS -->
 
               <!-- CENTER TAGS -->
               <div class="flex items-center gap-2 flex-wrap mt-2">
@@ -873,14 +933,6 @@
                   (click)="$event.stopPropagation()"
                 >
                   <!-- APPROVE -->
-                  <!-- <button
-                    (click)="openApproveConfirm(transaction)"
-                    [disabled]="
-                      transaction.type === 'payout' && !transaction.processing
-                    "
-                    class="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center hover:bg-green-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                  > -->
-                  <!-- APPROVE -->
                   <button
                     (click)="openApproveConfirm(transaction)"
                     [disabled]="
@@ -896,14 +948,6 @@
                     </span>
                   </button>
 
-                  <!-- REJECT -->
-                  <!-- <button
-                    (click)="openRejectConfirm(transaction)"
-                    [disabled]="
-                      transaction.type === 'payout' && !transaction.processing
-                    "
-                    class="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center hover:bg-red-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                  > -->
                   <!-- REJECT -->
                   <button
                     (click)="openRejectConfirm(transaction)"
@@ -1208,10 +1252,10 @@
     <!-- Approve Confirmation Modal -->
     <div
       *ngIf="showApproveConfirm"
-      class="fixed inset-0 z-[60] flex items-start justify-center bg-black/60 backdrop-blur-sm p-3 overflow-y-auto"
+      class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 overflow-y-auto"
     >
       <div
-        class="w-full max-w-sm max-h-[90vh] bg-[var(--color-surface)] rounded-lg shadow-2xl overflow-hidden animate-slideUp my-8 flex flex-col"
+        class="w-full max-w-sm max-h-[90vh] bg-[var(--color-surface)] rounded-lg shadow-2xl overflow-hidden animate-slideUp flex flex-col -translate-y-10"
       >
         <!-- Header -->
         <div
@@ -1609,7 +1653,7 @@
                 <img
                   *ngIf="!previewDocument"
                   [src]="previewUrl"
-                  class="w-full h-52 object-contain rounded-lg border border-[var(--color-border)]"
+                  class="w-full h-36 object-contain rounded-lg border border-[var(--color-border)]"
                 />
               </div>
             </div>
@@ -1730,7 +1774,16 @@
             <option *ngFor="let r of currentRejectReasons" [value]="r">
               {{ r }}
             </option>
+            <option value="OTHER">Other</option>
           </select>
+          <div *ngIf="reason === 'OTHER'" class="mt-3">
+            <textarea
+              [(ngModel)]="customReason"
+              rows="3"
+              placeholder="Enter rejection reason..."
+              class="w-full p-3 rounded-lg border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-danger)] resize-none"
+            ></textarea>
+          </div>
 
           <p class="text-[11px] mt-2 text-[var(--color-danger)]/90">
             Please select a reason. This will be saved as the rejection reason.
@@ -1884,13 +1937,18 @@
             (click)="confirmReject()"
             [disabled]="
               !reason ||
+              (reason === 'OTHER' && !customReason.trim()) ||
+              (confirmTransaction?.type !== 'payout' && !selectedFile)
+            "
+            [class.cursor-not-allowed]="
+              !reason ||
+              (reason === 'OTHER' && !customReason.trim()) ||
               (confirmTransaction?.type !== 'payout' && !selectedFile)
             "
             [class.opacity-50]="
-              !reason || (confirmTransaction?.type === 'payin' && !selectedFile)
-            "
-            [class.cursor-not-allowed]="
-              !reason || (confirmTransaction?.type === 'payin' && !selectedFile)
+              !reason ||
+              (reason === 'OTHER' && !customReason.trim()) ||
+              (confirmTransaction?.type !== 'payout' && !selectedFile)
             "
             class="flex-1 px-4 py-2.5 bg-[var(--color-danger)] text-white rounded-lg transition font-bold shadow-lg shadow-[var(--color-danger)]/30 disabled:shadow-none"
           >
@@ -1929,19 +1987,6 @@
 
             <div class="text-[11px] text-[#94A3B8]">
               Transaction linked info
-            </div>
-
-            <div
-              class="mt-1 inline-flex items-center gap-1.5 rounded-md bg-[#EFF6FF] px-2 py-0.5 border border-[#DBEAFE]"
-            >
-              <span
-                class="material-symbols-outlined text-[12px] text-[#2563EB]"
-              >
-                badge
-              </span>
-              <span class="text-[11px] font-semibold text-[#1E40AF]">
-                User ID: {{ userId }}
-              </span>
             </div>
           </div>
         </div>
@@ -2088,18 +2133,6 @@
             </div>
             <div class="text-[11px] text-[#94A3B8]">
               Transaction linked info
-            </div>
-            <div
-              class="mt-1 inline-flex items-center gap-1.5 rounded-md bg-[#FEF2F2] px-2 py-0.5 border border-[#FCA5A5]"
-            >
-              <span
-                class="material-symbols-outlined text-[12px] text-[#B42318]"
-              >
-                badge
-              </span>
-              <span class="text-[11px] font-semibold text-[#B42318]">
-                User ID: {{ userId }}
-              </span>
             </div>
           </div>
         </div>
