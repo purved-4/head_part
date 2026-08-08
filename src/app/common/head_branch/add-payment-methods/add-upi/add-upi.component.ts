@@ -249,6 +249,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
     const payload: any = {
       entityId: this.currentRoleId,
       entityType: this.role,
+      status: true,
       currency: this.currency?.currency,
       bankId: this.addUpiForm.value.bankId,
       vpa: this.addUpiForm.value.vpa,

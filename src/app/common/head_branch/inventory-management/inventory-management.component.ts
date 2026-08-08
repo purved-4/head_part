@@ -1365,6 +1365,8 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       ],
       bankId: [""],
       limitAmount: ["", [Validators.required, Validators.min(1)]],
+      fttAcceptance: [true],
+      partialPayinEnabled: [false],
     });
   }
 
@@ -1372,11 +1374,14 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     if (this.blockIfDeleted(item)) return; // 👈 NEW
     this.selectedBank = item;
     this.showAddUpiModal = true;
+    this.generatedFile = null;
+    this.manualQrFile = null;
     document.body.style.overflow = "hidden";
   }
 
   closeAddUpiModal() {
     this.showAddUpiModal = false;
+    this.addUpiForm.reset({ fttAcceptance: true, partialPayinEnabled: false });
     this.addUpiForm.reset();
     this.generatedFile = null;
     this.manualQrFile = null;
@@ -1426,12 +1431,16 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       limitAmount: this.addUpiForm.value.limitAmount,
       entityId: this.currentRoleId,
       entityType: this.role,
+      status: true,
+
       userId: this.currentUserId,
-      active: true,
       bankId: this.selectedBank?.id,
       ranges: validRanges.length ? validRanges : null,
       createdAt: new Date().toISOString(),
+      fttAcceptance: this.addUpiForm.value.fttAcceptance ?? true,
+      partialPayinEnabled: this.addUpiForm.value.partialPayinEnabled ?? false,
     };
+    console.log(payload);
 
     const formData = new FormData();
     formData.append(
