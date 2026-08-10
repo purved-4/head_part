@@ -301,6 +301,28 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     private router: Router,
   ) {}
 
+  // ngOnInit(): void {
+  //   this.currentRoleId = this.userStateService.getCurrentEntityId();
+  //   this.currentUserId = this.userStateService.getUserId();
+  //   this.role = this.userStateService.getRole();
+
+  //   this.initAddUpiForm();
+
+  //   this.searchSubject
+  //     .pipe(debounceTime(500), distinctUntilChanged())
+  //     .subscribe((value) => {
+  //       this.searchTerm = value;
+  //       this.currentPage = 1;
+  //       this.fetchInventory();
+  //     });
+
+  //   this.loadCurrenciesAndInventory();
+
+  //   this.countdownInterval = setInterval(() => {
+  //     this.pagedItems = [...this.pagedItems];
+  //   }, 1000);
+  // }
+
   ngOnInit(): void {
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.currentUserId = this.userStateService.getUserId();
@@ -319,7 +341,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.loadCurrenciesAndInventory();
 
     this.countdownInterval = setInterval(() => {
-      this.pagedItems = [...this.pagedItems];
+      this.pagedItems = this.sortByLimitTime(this.pagedItems);
     }, 1000);
   }
 
@@ -523,6 +545,81 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.fetchInventory();
   }
 
+  // fetchInventory(): void {
+  //   if (!this.currentRoleId) return;
+
+  //   const currencies =
+  //     this.selectedCurrency === "ALL" && this.currencies.length
+  //       ? this.currencies
+  //       : this.selectedCurrency !== "ALL"
+  //         ? [this.selectedCurrency]
+  //         : [];
+
+  //   const modesForThisCurrency =
+  //     this.selectedCurrency === "ALL" ? this.allModes : this.availableModes;
+
+  //   const modes =
+  //     this.selectedMode === "ALL" ? modesForThisCurrency : [this.selectedMode];
+
+  //   this.loading = true;
+
+  //   this.bankService
+  //     .getAllPaymentMethods({
+  //       entityId: this.currentRoleId,
+  //       entityType: this.role,
+  //       currencies,
+  //       modes,
+
+  //       query: this.searchTerm || undefined,
+
+  //       maxAmount: this.maxLimit ?? undefined,
+  //       minAmount: this.minLimit ?? undefined,
+
+  //       bankId:
+  //         this.selectedMode === "UPI" && this.selectedBankId !== "ALL"
+  //           ? this.selectedBankId
+  //           : undefined,
+
+  //       status: this.statusFilter === "all" ? "all" : this.statusFilter,
+
+  //       page: this.currentPage - 1,
+  //       size: this.pageSize,
+  //     })
+  //     .pipe(catchError(() => of(null)))
+  //     .subscribe((res: any) => {
+  //       this.loading = false;
+
+  //       const rows = res?.data?.content || [];
+
+  //       this.allItems = rows
+  //         .filter((r: any) => {
+  //           if (this.statusFilter === "deleted") {
+  //             return r.deleted === true;
+  //           }
+
+  //           return !r.deleted;
+  //         })
+  //         .map((r: any) => this.mapAnyRow(r));
+
+  //       this.hasLoadedOnce = true;
+  //       this.loadQrThumbnails();
+
+  //       this.filteredItems = [...this.allItems];
+  //       this.pagedItems = [...this.allItems];
+
+  //       // ✅ Backend pagination use karo
+  //       this.totalElements = res?.data?.totalElements ?? 0;
+  //       this.totalPagesCount = res?.data?.totalPages ?? 1;
+
+  //       // Agar current page last page se bada ho gaya ho
+  //       if (this.currentPage > this.totalPagesCount) {
+  //         this.currentPage = this.totalPagesCount;
+  //       }
+
+  //       this.updatePageNumbers();
+  //     });
+  // }
+
   fetchInventory(): void {
     if (!this.currentRoleId) return;
 
@@ -560,8 +657,12 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
         status: this.statusFilter === "all" ? "all" : this.statusFilter,
 
-        page: this.currentPage - 1,
-        size: this.pageSize,
+        // 👇 Sorting is correct only if ALL matching rows are fetched together,
+        // then sorted, then sliced for the page — server-side chunking (page/size)
+        // can't be sorted correctly on the client because each page only sees
+        // its own slice. So we fetch everything matching the filters in one go.
+        page: 0,
+        size: 100000,
       })
       .pipe(catchError(() => of(null)))
       .subscribe((res: any) => {
@@ -569,34 +670,43 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
         const rows = res?.data?.content || [];
 
-        this.allItems = rows
-          .filter((r: any) => {
-            if (this.statusFilter === "deleted") {
-              return r.deleted === true;
-            }
+        const allSorted = this.sortByLimitTime(
+          rows
+            .filter((r: any) => {
+              if (this.statusFilter === "deleted") {
+                return r.deleted === true;
+              }
 
-            return !r.deleted;
-          })
-          .map((r: any) => this.mapAnyRow(r));
+              return !r.deleted;
+            })
+            .map((r: any) => this.mapAnyRow(r)),
+        );
+
+        this.allItems = allSorted;
 
         this.hasLoadedOnce = true;
         this.loadQrThumbnails();
 
         this.filteredItems = [...this.allItems];
-        this.pagedItems = [...this.allItems];
 
-        // ✅ Backend pagination use karo
-        this.totalElements = res?.data?.totalElements ?? 0;
-        this.totalPagesCount = res?.data?.totalPages ?? 1;
+        // ✅ Ab pagination client-side, sorted list ke upar
+        this.totalElements = this.allItems.length;
+        this.totalPagesCount = Math.max(
+          1,
+          Math.ceil(this.totalElements / this.pageSize),
+        );
 
-        // Agar current page last page se bada ho gaya ho
         if (this.currentPage > this.totalPagesCount) {
           this.currentPage = this.totalPagesCount;
         }
 
+        const start = (this.currentPage - 1) * this.pageSize;
+        this.pagedItems = this.allItems.slice(start, start + this.pageSize);
+
         this.updatePageNumbers();
       });
   }
+
   refreshInventory(): void {
     if (!this.hasLoadedOnce) return;
     this.fetchInventory();
@@ -719,11 +829,8 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       items = items.filter((i) => Number(i.limitAmount || 0) <= this.maxLimit!);
     }
 
-    items.sort((a, b) => {
-      const aTime = a.limitTime ? new Date(a.limitTime).getTime() : 0;
-      const bTime = b.limitTime ? new Date(b.limitTime).getTime() : 0;
-      return bTime - aTime;
-    });
+    // ✅ purana descending-only sort hata ke wahi FUTURE→PAST→INVALID sort lagaya
+    items = this.sortByLimitTime(items);
 
     this.filteredItems = items;
     this.totalElements = items.length;
@@ -2108,6 +2215,52 @@ Account Holder: ${item.accountHolder || "-"}`;
 
     navigator.clipboard.writeText(text).then(() => {
       this.snack.show("Copied successfully", true);
+    });
+  }
+
+  private sortByLimitTime(items: InventoryItem[]): InventoryItem[] {
+    const now = Date.now();
+
+    const getTimestamp = (item: InventoryItem): number => {
+      if (!item.limitTime) return NaN;
+
+      let raw = item.limitTime;
+
+      // Backend timezone-less datetime ko UTC treat karo
+      if (typeof raw === "string" && !/[zZ]|[+-]\d{2}:\d{2}$/.test(raw)) {
+        raw = raw + "Z";
+      }
+
+      const t = new Date(raw).getTime();
+
+      return isNaN(t) ? NaN : t;
+    };
+
+    const getCategory = (time: number): 0 | 1 | 2 => {
+      if (isNaN(time)) return 2;
+      return time > now ? 0 : 1;
+    };
+
+    return [...items].sort((a, b) => {
+      const timeA = getTimestamp(a);
+      const timeB = getTimestamp(b);
+
+      const catA = getCategory(timeA);
+      const catB = getCategory(timeB);
+
+      if (catA !== catB) {
+        return catA - catB;
+      }
+
+      if (catA === 2) {
+        return 0;
+      }
+
+      if (catA === 0) {
+        return timeB - timeA;
+      }
+
+      return timeB - timeA;
     });
   }
 }

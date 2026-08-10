@@ -6,6 +6,7 @@ import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { catchError, of, Subscription } from "rxjs";
 import { DateTimeUtil } from "../../../utils/date-time.utils";
 import { SnackbarService } from "../../snackbar/snackbar.service";
+import { AnyCnameRecord } from "node:dns";
 
 @Component({
   selector: "app-hb-payout-report",
@@ -28,7 +29,8 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
   loadingThreads = false;
   selectedMode: "all" | "upi" | "bank" = "all";
 
-  selectedStatus: string = "APPROVED";
+  selectedStatus: "ACCEPTED" | "REJECTED" | "DISPUTE_ESCALATED" =
+    "DISPUTE_ESCALATED";
 
   private routeSub: Subscription | null = null;
 
@@ -67,7 +69,11 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
   // ========== STATUS VALUES THAT ALLOW THE THREAD BUTTON ==========
   // Thread button sirf PENDING / ACCEPTED (dispute pending) filter par dikhana hai
-  private readonly THREAD_ALLOWED_STATUSES = ["DISPUTE_ESCALATED", "ACCEPTED"];
+  private readonly THREAD_ALLOWED_STATUSES = [
+    "DISPUTE_ESCALATED",
+    "ACCEPTED",
+    "REJECTED",
+  ];
 
   constructor(
     private route: ActivatedRoute,
@@ -524,7 +530,14 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
   // ✅ Thread button sirf PENDING / ACCEPTED (dispute pending) status filter par dikhana hai
   isThreadAllowed(): boolean {
-    return this.THREAD_ALLOWED_STATUSES.includes(this.selectedStatus);
+    const status = String(this.selectedStatus || "").toUpperCase();
+
+    return [
+      "ACCEPTED",
+      "REJECTED",
+      "CP_REJECTED",
+      "DISPUTE_ESCALATED",
+    ].includes(status);
   }
 
   getStatusClass(status: string): string {
@@ -725,7 +738,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
 
     return found ? found.domain : "All Comparts";
   }
-  onStatusChange(status: string) {
+  onStatusChange(status: any) {
     this.selectedStatus = status;
 
     // ✅ reset page

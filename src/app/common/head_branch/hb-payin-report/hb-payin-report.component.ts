@@ -28,7 +28,8 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     "bank";
 
   // Status filter
-  selectedStatus: "ACCEPTED" | "REJECTED" | "PENDING" = "PENDING";
+  selectedStatus: "ACCEPTED" | "CP_REJECTED" | "DISPUTE_ESCALATED" | "PENDING" =
+    "PENDING";
 
   // route + user ids
   entityId: any;
@@ -73,7 +74,11 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
 
   // ========== STATUS VALUES THAT ALLOW THE THREAD BUTTON ==========
   // Thread button dikhna chahiye sirf PENDING aur ACCEPTED (dispute pending bhi allowed)
-  private readonly THREAD_ALLOWED_STATUSES = ["PENDING", "ACCEPTED"];
+  private readonly THREAD_ALLOWED_STATUSES = [
+    "PENDING",
+    "DISPUTE_ESCALATED",
+    "ACCEPTED",
+  ];
 
   constructor(
     private route: ActivatedRoute,
@@ -517,7 +522,6 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ============ DETAILS MODAL FIELDS (category-wise) ============
   getDisplayFields(record: any): any[] {
     if (!record) return [];
 
@@ -628,7 +632,9 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
 
     this.refreshCurrentView();
   }
-  onStatusChange(status: "ACCEPTED" | "REJECTED" | "PENDING") {
+  onStatusChange(
+    status: "ACCEPTED" | "CP_REJECTED" | "DISPUTE_ESCALATED" | "PENDING",
+  ) {
     this.selectedStatus = status;
 
     this.payinPage = 0;

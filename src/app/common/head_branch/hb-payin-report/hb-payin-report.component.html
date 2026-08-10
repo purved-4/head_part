@@ -19,7 +19,7 @@
             {{
               selectedStatus === "ACCEPTED"
                 ? "Approved Payins"
-                : selectedStatus === "REJECTED"
+                : selectedStatus === "CP_REJECTED"
                   ? "Rejected Payins"
                   : "Pending Payins"
             }}
@@ -310,6 +310,11 @@
                     Account / VPA / Wallet
                   </th>
                   <th
+                    *ngIf="
+                      !['BEP20', 'TRC20', 'SPL', 'OMNI', 'ERC20'].includes(
+                        selectedMode
+                      )
+                    "
                     class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
                   >
                     Holder
@@ -335,7 +340,7 @@
                     Actions
                   </th>
                   <th
-                    *ngIf="isThreadAllowed()"
+                    *ngIf="selectedStatus !== 'PENDING'"
                     class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-font)]"
                   >
                     Thread
@@ -385,7 +390,14 @@
                     </div>
                   </td>
 
-                  <td class="px-4 sm:px-6 py-3 sm:py-4">
+                  <td
+                    *ngIf="
+                      !['BEP20', 'TRC20', 'SPL', 'OMNI', 'ERC20'].includes(
+                        selectedMode
+                      )
+                    "
+                    Sclass="px-4 sm:px-6 py-3 sm:py-4"
+                  >
                     <span class="text-xs sm:text-sm text-[var(--color-font)]">
                       {{ a.holder || "-" }}
                     </span>
@@ -429,7 +441,7 @@
                   </td>
                   <!-- ✅ Thread column sirf PENDING / ACCEPTED filter par -->
                   <td
-                    *ngIf="isThreadAllowed()"
+                    *ngIf="selectedStatus !== 'PENDING' && isThreadAllowed()"
                     class="px-4 sm:px-6 py-3 sm:py-4"
                   >
                     <button
