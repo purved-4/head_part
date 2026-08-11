@@ -34,6 +34,7 @@ import { RecycleManagementComponent } from "../../../common/head_branch/recycle-
 import { CryptoManagementComponent } from "../../../common/head_branch/crypto-management/crypto-management.component";
 import { ResolvedNotificationComponent } from "../../../common/resolved-notification/resolved-notification.component";
 import { InventoryManagementComponent } from "../../../common/head_branch/inventory-management/inventory-management.component";
+import { PortalReportComponent } from "../../../components/reports/portal-report/portal-report.component";
 
 const routes: Routes = [
   {
@@ -144,10 +145,10 @@ const routes: Routes = [
             path: "funds/payout/:type",
             component: HbPayoutReportComponent,
           },
-          //  {
-          //     path: "balance-report",
-          //     component: PortalReportComponent,
-          //  },
+          {
+            path: "balance-report",
+            component: PortalReportComponent,
+          },
 
           // { path: "funds/accepted", component: ApprovedFundsComponent },
           // { path: "funds/rejected", component: RejectedFundsComponent },
