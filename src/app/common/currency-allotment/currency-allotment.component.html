@@ -17,104 +17,168 @@
 
     <!-- BODY -->
     <div class="p-6 bg-[var(--color-bg)] text-[var(--color-font)]">
-      <!-- MAIN FORM SECTION - IMPROVED LAYOUT -->
-      <div *ngIf="isEdited">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
-          <!-- LEFT COLUMN -->
-          <div class="space-y-6">
-            <!-- CURRENCY SELECTION -->
-            <div>
-              <label
-                class="mb-2 flex items-center gap-2 text-sm font-semibold text-[var(--color-font)]"
-              >
-                <span
-                  class="material-symbols-outlined text-base text-[var(--color-accent)]"
-                >
-                  currency_exchange
-                </span>
-                Currency
-              </label>
-              <select
-                [(ngModel)]="selectedCurrency"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="selectCurrency(selectedCurrency!)"
-                class="w-full px-4 py-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] outline-none focus:ring-2 focus:ring-[var(--color-primary-light)] transition-all"
-              >
-                <option value="">Select Currency</option>
-                <option *ngFor="let currency of currencies" [value]="currency">
-                  {{ currency }}
-                </option>
-              </select>
-            </div>
-
-            <!-- CURRENCY RATE - CONDITIONAL -->
-            <div *ngIf="entityType !== 'PORTAL' && selectedCurrency">
-              <label
-                class="block mb-2 text-sm font-semibold text-[var(--color-font)]"
-              >
-                Currency Rate
-              </label>
-              <input
-                type="number"
-                [(ngModel)]="rate"
-                [ngModelOptions]="{ standalone: true }"
-                placeholder="Enter currency rate"
-                class="w-full px-4 py-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] placeholder:text-[var(--color-muted)] outline-none focus:ring-2 focus:ring-[var(--color-primary-light)] transition-all"
-              />
-            </div>
-          </div>
-
-          <!-- RIGHT COLUMN -->
-          <div class="space-y-6" *ngIf="selectedCurrency">
-            <!-- EFFECTIVE FROM - CONDITIONAL -->
-            <div *ngIf="entityType !== 'PORTAL'">
-              <label
-                class="block mb-2 text-sm font-semibold text-[var(--color-font)]"
-              >
-                Effective From
-              </label>
-              <input
-                type="datetime-local"
-                name="effectiveFrom"
-                [(ngModel)]="effectiveFromNew"
-                [min]="minDateTime"
-                (focus)="updateMinDateTime()"
-                class="w-full px-4 py-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] outline-none focus:ring-2 focus:ring-[var(--color-primary-light)] transition-all"
-              />
-            </div>
-          </div>
+      <!-- ACCESS LOCKED BANNER -->
+      <div
+        *ngIf="isLocked"
+        class="mb-6 flex items-center gap-3 px-5 py-4 rounded-[var(--radius-lg)] border-2 border-red-400 bg-red-500/10"
+      >
+        <span class="material-symbols-outlined text-red-500 text-3xl"
+          >lock</span
+        >
+        <div>
+          <p class="font-semibold text-red-500">You don't have access</p>
+          <p class="text-sm text-red-500/80">
+            Editing is disabled for this account. You can still view existing
+            currency rate history below.
+          </p>
         </div>
       </div>
-      <!-- ACTION BUTTONS - IMPROVED FLEX LAYOUT -->
-      <div
-        *ngIf="isEdited"
-        class="mt-8 p-5 border border-[var(--color-border)] rounded-[var(--radius-lg)] bg-[var(--color-hover)] flex flex-col sm:flex-row gap-4"
-      >
-        <button
-          *ngIf="selectedCurrency"
-          type="button"
-          (click)="clearSelection()"
-          class="flex-1 py-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] hover:bg-[var(--color-hover)] transition-all font-medium"
-        >
-          Clear
-        </button>
-        <button
-          type="button"
-          (click)="submit()"
-          class="flex-1 py-3 rounded-[var(--radius-md)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white transition-all font-medium shadow-sm"
-        >
-          Save Currency
-        </button>
+
+      <div *ngIf="!isLocked">
+        <fieldset [disabled]="isLocked" [class.opacity-60]="isLocked">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+            <!-- LEFT COLUMN -->
+            <div class="space-y-6">
+              <!-- CURRENCY SELECTION -->
+              <div>
+                <label
+                  class="mb-2 flex items-center gap-2 text-sm font-semibold text-[var(--color-font)]"
+                >
+                  <span
+                    class="material-symbols-outlined text-base text-[var(--color-accent)]"
+                  >
+                    currency_exchange
+                  </span>
+                  Currency
+                </label>
+                <select
+                  [(ngModel)]="selectedCurrency"
+                  [ngModelOptions]="{ standalone: true }"
+                  (change)="selectCurrency(selectedCurrency!)"
+                  [disabled]="isLocked"
+                  class="w-full px-4 py-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] outline-none focus:ring-2 focus:ring-[var(--color-primary-light)] transition-all disabled:cursor-not-allowed"
+                >
+                  <option value="">Select Currency</option>
+                  <option
+                    *ngFor="let currency of currencies"
+                    [value]="currency"
+                  >
+                    {{ currency }}
+                    <ng-container *ngIf="existingData[currency]">
+                      &nbsp;— current: {{ existingData[currency]?.rate }}
+                    </ng-container>
+                  </option>
+                </select>
+                <p
+                  *ngIf="selectedCurrency && existingData[selectedCurrency]"
+                  class="mt-2 text-xs text-[var(--color-muted)] flex items-center gap-1"
+                >
+                  <span class="material-symbols-outlined text-sm">info</span>
+                  Currently active rate for {{ selectedCurrency }}:
+                  <span class="font-semibold text-[var(--color-font)]">
+                    {{ existingData[selectedCurrency]?.rate }}
+                  </span>
+                </p>
+              </div>
+
+              <!-- CURRENCY RATE - CONDITIONAL -->
+              <div *ngIf="entityType !== 'PORTAL' && selectedCurrency">
+                <label
+                  class="block mb-2 text-sm font-semibold text-[var(--color-font)]"
+                >
+                  Currency Rate
+                </label>
+                <input
+                  type="number"
+                  [(ngModel)]="rate"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="Enter currency rate"
+                  [disabled]="isLocked"
+                  class="w-full px-4 py-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] placeholder:text-[var(--color-muted)] outline-none focus:ring-2 focus:ring-[var(--color-primary-light)] transition-all disabled:cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="space-y-6" *ngIf="selectedCurrency">
+              <!-- EFFECTIVE FROM - WITH BUILT-IN LIVE TIMER -->
+              <div *ngIf="entityType !== 'PORTAL'">
+                <label
+                  class="block mb-2 text-sm font-semibold text-[var(--color-font)]"
+                >
+                  Effective From
+                </label>
+
+                <div
+                  class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden focus-within:ring-2 focus-within:ring-[var(--color-primary-light)] transition-all"
+                >
+                  <input
+                    type="datetime-local"
+                    name="effectiveFrom"
+                    [(ngModel)]="effectiveFromNew"
+                    [min]="minDateTime"
+                    [disabled]="isLocked"
+                    (focus)="updateMinDateTime()"
+                    (change)="onEffectiveFromChange()"
+                    (ngModelChange)="onEffectiveFromChange()"
+                    class="w-full px-4 py-3 bg-transparent text-[var(--color-font)] outline-none border-none disabled:cursor-not-allowed"
+                  />
+
+                  <!-- LIVE TICKING TIMER, anchored to whatever is selected above -->
+                  <div
+                    class="px-4 py-2 bg-[var(--color-hover)] border-t border-[var(--color-border)] flex items-center gap-2"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[var(--color-accent)] text-base animate-pulse"
+                      >schedule</span
+                    >
+                    <span class="text-xs text-[var(--color-muted)]">
+                      Live:
+                    </span>
+                    <span
+                      class="text-sm font-semibold text-[var(--color-font)] tabular-nums"
+                    >
+                      {{ effectivePreviewLabel }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACTION BUTTONS -->
+          <div
+            class="mt-8 p-5 border border-[var(--color-border)] rounded-[var(--radius-lg)] bg-[var(--color-hover)] flex flex-col sm:flex-row gap-4"
+          >
+            <button
+              *ngIf="selectedCurrency"
+              type="button"
+              (click)="clearSelection()"
+              [disabled]="isLocked"
+              class="flex-1 py-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)] hover:bg-[var(--color-hover)] transition-all font-medium disabled:cursor-not-allowed"
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              (click)="submit()"
+              [disabled]="isLocked || !selectedCurrency"
+              class="flex-1 py-3 rounded-[var(--radius-md)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white transition-all font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Save Currency
+            </button>
+          </div>
+        </fieldset>
       </div>
 
-      <!-- HISTORY TABLE SECTION - IMPROVED SPACING -->
+      <!-- HISTORY TABLE SECTION -->
       <div class="mt-8">
         <div
           class="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)]"
         >
           <!-- TABLE HEADER -->
           <div
-            class="px-6 py-4 bg-[var(--color-hover)] border-b border-[var(--color-border)]"
+            class="px-6 py-4 bg-[var(--color-hover)] border-b border-[var(--color-border)] flex items-center justify-between flex-wrap gap-3"
           >
             <h3
               class="font-semibold text-[var(--color-font)] flex items-center gap-2"
@@ -122,15 +186,56 @@
               <span class="material-symbols-outlined text-base">history</span>
               Currency Rate History
             </h3>
+
+            <div class="flex items-center gap-4 flex-wrap">
+              <!-- LEGEND -->
+              <div class="flex items-center gap-3 text-xs">
+                <span class="flex items-center gap-1">
+                  <span class="w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+                  Expired
+                </span>
+                <span class="flex items-center gap-1">
+                  <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                  Active
+                </span>
+                <span class="flex items-center gap-1">
+                  <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                  Upcoming
+                </span>
+              </div>
+
+              <!-- CURRENCY FILTER DROPDOWN (client-side) -->
+              <select
+                [(ngModel)]="tableFilterCurrency"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="onTableFilterChange(tableFilterCurrency)"
+                class="px-3 py-1.5 text-sm rounded-[var(--radius-md)] bg-[var(--color-surface)] text-[var(--color-font)] border border-[var(--color-border)] outline-none focus:ring-2 focus:ring-[var(--color-primary-light)]"
+              >
+                <option value="ALL">All Currencies</option>
+                <option *ngFor="let currency of currencies" [value]="currency">
+                  {{ currency }}
+                </option>
+              </select>
+            </div>
           </div>
 
           <!-- TABLE RESPONSIVE WRAPPER -->
           <div class="overflow-x-auto">
-            <table class="w-full min-w-[500px]">
+            <table class="w-full min-w-[620px]">
               <thead
                 class="bg-[var(--color-hover)] border-b border-[var(--color-border)]"
               >
                 <tr>
+                  <th
+                    class="px-6 py-4 text-left text-sm font-semibold text-[var(--color-font)]"
+                  >
+                    Currency
+                  </th>
+                  <th
+                    class="px-6 py-4 text-left text-sm font-semibold text-[var(--color-font)]"
+                  >
+                    Status
+                  </th>
                   <th
                     class="px-6 py-4 text-left text-sm font-semibold text-[var(--color-font)]"
                   >
@@ -149,79 +254,98 @@
                 </tr>
               </thead>
               <tbody class="bg-[var(--color-surface)]">
-                <ng-container
-                  *ngIf="existingData[selectedCurrency || 'INR'] as data"
+                <tr
+                  *ngFor="let item of tableRows"
+                  class="border-b border-[var(--color-border)] hover:bg-[var(--color-hover)] transition-all"
                 >
-                  <tr
-                    *ngFor="let item of data?.currencyRates || []"
-                    class="border-b border-[var(--color-border)] hover:bg-[var(--color-hover)] transition-all"
-                  >
-                    <!-- RATE -->
-                    <td class="px-6 py-4 text-[var(--color-font)] font-medium">
-                      {{ item.rate }}
-                    </td>
-                    <!-- DATE -->
-                    <td class="px-6 py-4 text-[var(--color-font)]">
-                      {{
-                        item.effectiveFrom
-                          ? (item.effectiveFrom | tz: "full")
-                          : "-"
-                      }}
-                    </td>
-                    <!-- ACTION -->
-                    <td class="px-6 py-4">
-                      <div class="flex justify-center gap-3">
-                        <!-- EDIT BUTTON -->
-                        <button
-                          type="button"
-                          class="p-2 rounded-lg text-blue-500 hover:bg-blue-500/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                          [disabled]="isPastDate(item.effectiveFrom)"
-                          (click)="
-                            editRate(data.currencyId, item.id, item.rate)
-                          "
-                        >
-                          <span class="material-symbols-outlined text-base"
-                            >edit</span
-                          >
-                        </button>
-                        <!-- DELETE BUTTON -->
-                        <button
-                          type="button"
-                          class="p-2 rounded-lg text-red-500 hover:bg-red-500/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                          [disabled]="isPastDate(item.effectiveFrom)"
-                          (click)="deleteRate(data.currencyId, item.id)"
-                        >
-                          <span class="material-symbols-outlined text-base"
-                            >delete</span
-                          >
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  <!-- EMPTY STATE -->
-                  <tr *ngIf="!data?.currencyRates?.length">
-                    <td
-                      colspan="3"
-                      class="px-6 py-12 text-center text-[var(--color-muted)]"
+                  <!-- CURRENCY -->
+                  <td class="px-6 py-4">
+                    <span
+                      class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
+                    >
+                      {{ item.currency }}
+                    </span>
+                  </td>
+                  <!-- STATUS BADGE -->
+                  <td class="px-6 py-4">
+                    <span
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                      [ngClass]="{
+                        'bg-gray-400/15 text-gray-500':
+                          item.status === 'expired',
+                        'bg-green-500/15 text-green-600':
+                          item.status === 'active',
+                        'bg-blue-500/15 text-blue-600':
+                          item.status === 'upcoming',
+                      }"
                     >
                       <span
-                        class="material-symbols-outlined text-3xl mb-2 block"
-                        >inbox</span
+                        class="w-2 h-2 rounded-full"
+                        [ngClass]="{
+                          'bg-gray-400': item.status === 'expired',
+                          'bg-green-500': item.status === 'active',
+                          'bg-blue-500': item.status === 'upcoming',
+                        }"
+                      ></span>
+                      {{
+                        item.status === "expired"
+                          ? "Expired"
+                          : item.status === "active"
+                            ? "Active"
+                            : "Upcoming"
+                      }}
+                    </span>
+                  </td>
+                  <!-- RATE -->
+                  <td class="px-6 py-4 text-[var(--color-font)] font-medium">
+                    {{ item.rate }}
+                  </td>
+                  <!-- DATE -->
+                  <td class="px-6 py-4 text-[var(--color-font)]">
+                    {{
+                      item.effectiveFrom
+                        ? (item.effectiveFrom | tz: "full")
+                        : "-"
+                    }}
+                  </td>
+                  <!-- ACTION -->
+                  <td class="px-6 py-4">
+                    <div class="flex justify-center gap-3">
+                      <!-- EDIT BUTTON -->
+                      <button
+                        type="button"
+                        class="p-2 rounded-lg text-blue-500 hover:bg-blue-500/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                        [disabled]="isLocked || isPastDate(item.effectiveFrom)"
+                        (click)="editRate(item.currencyId, item.id, item.rate)"
                       >
-                      No currency rates available
-                    </td>
-                  </tr>
-                </ng-container>
-                <!-- NO DATA STATE -->
-                <tr *ngIf="!existingData[selectedCurrency || 'INR']">
+                        <span class="material-symbols-outlined text-base"
+                          >edit</span
+                        >
+                      </button>
+                      <!-- DELETE BUTTON -->
+                      <button
+                        type="button"
+                        class="p-2 rounded-lg text-red-500 hover:bg-red-500/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                        [disabled]="isLocked || isPastDate(item.effectiveFrom)"
+                        (click)="deleteRate(item.currencyId, item.id)"
+                      >
+                        <span class="material-symbols-outlined text-base"
+                          >delete</span
+                        >
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <!-- EMPTY STATE -->
+                <tr *ngIf="!tableRows.length">
                   <td
-                    colspan="3"
+                    colspan="5"
                     class="px-6 py-12 text-center text-[var(--color-muted)]"
                   >
                     <span class="material-symbols-outlined text-3xl mb-2 block"
-                      >currency_exchange</span
+                      >inbox</span
                     >
-                    Select a currency to view history
+                    No currency rates available
                   </td>
                 </tr>
               </tbody>
@@ -233,7 +357,7 @@
   </div>
 </form>
 
-<!-- EDIT MODAL - IMPROVED DESIGN -->
+<!-- EDIT MODAL -->
 <div
   *ngIf="showEditModal"
   class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all"

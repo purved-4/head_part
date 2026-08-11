@@ -235,7 +235,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
 
   // ---------------- SUBMIT ----------------
 
-  async submitAddUpi(): Promise<void> {
+async submitAddUpi(): Promise<void> {
     if (this.addUpiForm.invalid) {
       this.snack.show("Fill required fields", false);
       return;
@@ -316,6 +316,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
 
     this.subs.add(sub);
   }
+  
   loadBanks(): void {
     this.bankService
       .getBankDataWithSubAdminIdAndActivePaginated(this.currentRoleId)

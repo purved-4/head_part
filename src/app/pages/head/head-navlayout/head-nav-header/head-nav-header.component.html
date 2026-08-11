@@ -1,3 +1,5 @@
+
+
 <header
   class="main-header fixed top-0 right-0 z-20 overflow-visible h-[77px] bg-[var(--color-hover)] text-[var(--color-muted)] border-b border-[var(--color-border)] py-2.5 left-0 sm:left-auto"
   [style.left.px]="marginLeft"
@@ -224,18 +226,20 @@
                 {{ entityBalance | crformat }}</span
               >
             </div>
-            <div class="flex justify-between text-sm py-1">
-              <span>Available Balance</span>
-              <span>
-                {{ getCurrencySymbol(parentCurrency) }}
-                {{ availableBalance | crformat }}</span
-              >
-            </div>
+           
             <div class="flex justify-between text-sm py-1">
               <span>Exposure Balance</span>
               <span>
                 {{ getCurrencySymbol(parentCurrency) }}
                 {{ exploserBalance | crformat }}</span
+              >
+            </div>
+
+             <div class="flex justify-between text-sm py-1">
+              <span>Available Balance</span>
+              <span>
+                {{ getCurrencySymbol(parentCurrency) }}
+                {{ availableBalance | crformat }}</span
               >
             </div>
           </div>

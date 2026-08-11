@@ -16,13 +16,16 @@ export class FundsService {
       catchError((error) => throwError(error)),
     );
   }
-
+  
   claimRewards() {
-    return this.http.post(`${baseUrl}/payout-rewards/claim`, {}).pipe(
-      map((response: any) => response.data),
-      catchError((error) => throwError(() => error)),
-    );
-  }
+  return this.http.post(
+    `${baseUrl}/payout-rewards/claim`,
+    {}
+  ).pipe(
+          map((response: any) => response.data),
+          catchError((error) => throwError(() => error)),
+       );
+}
 
   AgentPooling(portalId: any): Observable<any> {
     return this.http.get<any>(`${baseUrl}/branch/getAllData/${portalId}`).pipe(
@@ -53,6 +56,7 @@ export class FundsService {
       catchError((error) => throwError(error)),
     );
   }
+ 
 
   settleUpiFund(upiSettleId: any): Observable<any> {
     return this.http
@@ -78,6 +82,8 @@ export class FundsService {
       catchError((error) => throwError(error)),
     );
   }
+
+ 
 
   getAllUpiFund(): Observable<any> {
     return this.http.get<any>(`${baseUrl}/funds/getAllUpiFunds`).pipe(
@@ -197,16 +203,20 @@ export class FundsService {
       );
   }
 
-  acceptPayout(bankSettleId: any, payload?: FormData): Observable<any> {
-    // console.log(payload)
+  acceptPayout(
+bankSettleId: any,
+payload?: FormData
+): Observable<any> {
+// console.log(payload)
 
-    return this.http
-      .patch<any>(`${baseUrl}/funds/payout/${bankSettleId}/accept`, payload)
-      .pipe(
-        map((response: any) => response.data),
-        catchError((error) => throwError(() => error)),
-      );
-  }
+return this.http.patch<any>(
+    `${baseUrl}/funds/payout/${bankSettleId}/accept`,
+    payload
+).pipe(
+    map((response: any) => response.data),
+    catchError((error) => throwError(() => error)),
+);
+}
 
   rejectpayout(
     bankSettleId: string,
@@ -261,7 +271,7 @@ export class FundsService {
 
   // websocket
 
-  broadcast(subAgenId: any, role: any): Observable<any> {
+broadcast(subAgenId: any, role: any): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/funds/webhook/broadcast/${subAgenId}/${role}`)
       .pipe(
@@ -292,7 +302,8 @@ export class FundsService {
     );
   }
 
-  updateProcessingStatus(fundId: any, branchId: any, entityType?: any) {
+   
+updateProcessingStatus(fundId: any, branchId: any, entityType?: any) {
     return this.http.patch(
       `${baseUrl}/funds/payoutProcessing/${fundId}/${branchId}/${entityType}`,
       {},
@@ -300,6 +311,8 @@ export class FundsService {
   }
 
   /// Accept and reject for the tp role
+
+ 
 
   getByThreadIdFundIdAndType(
     threadId: any,
@@ -317,6 +330,8 @@ export class FundsService {
   }
 
   // payout rejectin
+
+  
 
   getAllUpiFundWithPortalId(
     portalId: any,
@@ -346,7 +361,8 @@ export class FundsService {
       );
   }
 
-  getFundDataWithHeadAndBranchWithIdForOwner(ids: any): Observable<any> {
+
+getFundDataWithHeadAndBranchWithIdForOwner(ids: any): Observable<any> {
     let params = new HttpParams();
 
     // ids.forEach((id) => {
@@ -357,6 +373,8 @@ export class FundsService {
       params,
     });
   }
+
+
 
   getTotalFundDetails(portalId: any): Observable<any> {
     let params = new HttpParams()
@@ -422,7 +440,7 @@ export class FundsService {
       );
   }
 
-  getPayinFundWithPortalIdAndEntityId(
+ getPayinFundWithPortalIdAndEntityId(
     entityId: any,
     portalId: any,
     status: any,
@@ -506,8 +524,8 @@ export class FundsService {
         catchError((error) => throwError(error)),
       );
   }
-
-  getAllPayoutFundWithEntityAndCpId(
+ 
+getAllPayoutFundWithEntityAndCpId(
     entityId: any,
 
     status: any,
@@ -545,8 +563,8 @@ export class FundsService {
         catchError((error) => throwError(error)),
       );
   }
-
-  getPayinFundWithCpIdAndEntityId(
+  
+getPayinFundWithCpIdAndEntityId(
     entityId: any,
     page: number = 0,
     pageSize: number = 10,
@@ -587,7 +605,7 @@ export class FundsService {
       );
   }
 
-  getThreadByEntityIdTypeAndFund(
+ getThreadByEntityIdTypeAndFund(
     entityId: string,
     entityType: string,
     fundId: string,
@@ -600,15 +618,15 @@ export class FundsService {
 
   getExposure(entityId: string, entityType: string): Observable<any> {
     let params = new HttpParams()
-      .set("entityId", entityId)
-      .set("entityType", entityType);
+     .set("entityId", entityId)
+     .set("entityType", entityType);
     return this.http.get<any>(`${baseUrl}/exposure/summary`, { params }).pipe(
-      map((response: any) => response.data),
-      catchError((error) => throwError(error)),
+     map((response: any) => response.data),
+     catchError((error) => throwError(error)),
     );
-  }
+}
 
-  settleCryptoFund(cryptoSettleId: any): Observable<any> {
+settleCryptoFund(cryptoSettleId: any): Observable<any> {
     return this.http
       .patch<any>(`${baseUrl}/funds/payment/${cryptoSettleId}/accept`, {})
       .pipe(
@@ -617,7 +635,7 @@ export class FundsService {
       );
   }
 
-  rejectCryptoFund(
+rejectCryptoFund(
     bankSettleId: string,
     reason: string,
     file: any,
@@ -633,21 +651,23 @@ export class FundsService {
         catchError((error) => throwError(() => error)),
       );
   }
+ 
   getInventoryForPayout(params: {
     entityId: string;
     mode?: any;
-  }): Observable<any> {
+}): Observable<any> {
     let httpParams = new HttpParams();
     httpParams = httpParams.set("entityId", params.entityId);
 
     if (params.mode && params.mode.length > 0) {
-      httpParams = httpParams.set("mode", params.mode);
+     httpParams = httpParams.set("mode", params.mode);
     }
     return this.http.get<any>(`${baseUrl}/funds/getPayinDetailForPayout`, {
-      params: httpParams,
+     params: httpParams,
     });
-  }
-  getPayinCountForHeadBranch(params: {
+}
+
+getPayinCountForHeadBranch(params: {
     entityId: string;
     userId?: string;
     fundId?: string;
@@ -687,4 +707,5 @@ export class FundsService {
       params: httpParams,
     });
   }
+
 }

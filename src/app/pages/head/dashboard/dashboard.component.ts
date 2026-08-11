@@ -211,11 +211,7 @@ private latestDynamicPayout: any = null;
   ngOnInit(): void {
     this.headId = this.userStateService.getCurrentEntityId();
     this.role = this.userStateService.getRole();
-    this.chiefService
-      .getCurrenciesByEntity(this.headId, this.role)
-      .subscribe((res) => {
-
-      });
+   
     this.getPayinStatus();
 
     this.fundService

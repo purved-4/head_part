@@ -167,15 +167,25 @@ export class SearchableDropdownComponent
       }
     }
 
-    // EXTERNAL DISPLAY VALUE
     if (changes["externalDisplayValue"]) {
-      const value = changes["externalDisplayValue"].currentValue || "";
+      const value = changes["externalDisplayValue"].currentValue ?? "";
 
-     if (!this.isUserEditing) {     
-    this.displayValue = value;
-    this.searchTerm = value;
-    this.filterOptions();
-  }
+      // Parent cleared the dropdown
+      if (value === "") {
+        this.isUserEditing = false;
+        this.selectedOption = null;
+        this.displayValue = "";
+        this.searchTerm = "";
+        this.highlightedIndex = -1;
+        this.filteredOptions = [...this.options];
+        return;
+      }
+
+      if (!this.isUserEditing) {
+        this.displayValue = value;
+        this.searchTerm = value;
+        this.filterOptions();
+      }
     }
   }
   ngAfterViewInit(): void {
@@ -225,12 +235,11 @@ export class SearchableDropdownComponent
     this.isOpen = true;
     this.filteredOptions = [...this.options];
 
-
-  if (this.searchTerm?.trim()) {
-    this.filterOptions();   
-  } else {
-    this.filteredOptions = [...this.options];
-  }
+    if (this.searchTerm?.trim()) {
+      this.filterOptions();
+    } else {
+      this.filteredOptions = [...this.options];
+    }
 
     if (this.selectedOption) {
       const idx = this.filteredOptions.findIndex(
@@ -286,7 +295,7 @@ export class SearchableDropdownComponent
 
   onSearch(event: any) {
     const value = event.target.value;
-    this.isUserEditing = true; 
+    this.isUserEditing = true;
     this.searchTerm = value;
     this.displayValue = value;
     this.filterOptions();
@@ -595,12 +604,12 @@ export class SearchableDropdownComponent
   // }
   writeValue(value: any): void {
     if (this.isUserEditing) {
-    // still track selection state internally if it matches, but leave the
-    // text the user is typing alone
-    this.filteredOptions = [...this.options];
-    return;
-  }
-    if (value !== null && value !== undefined) {
+      // still track selection state internally if it matches, but leave the
+      // text the user is typing alone
+      this.filteredOptions = [...this.options];
+      return;
+    }
+    if (value !== null && value !== undefined && value !== "") {
       const option = this.options.find(
         (opt) => String(this.getOptionId(opt)) === String(value),
       );

@@ -1487,4 +1487,7 @@ export class UpisComponent implements OnInit {
     if (!validRanges.length) return null;
     return Math.min(...validRanges.map((r: any) => r.minRange));
   }
+
+
+  
 }

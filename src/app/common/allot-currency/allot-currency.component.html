@@ -9,18 +9,26 @@
       <div
         class="px-6 py-4 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] border-b border-[var(--color-border)]"
       >
-        <div class="flex items-center justify-between gap-3">
-          <div>
-            <h2
-              class="text-lg font-bold text-[var(--color-font)] flex items-center gap-2"
-            >
-              <span class="material-symbols-outlined text-xl"
-                >currency_exchange</span
-              >
-              Allot Currency
-            </h2>
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-3">
+              <h2 class="flex items-center gap-2 text-xl font-bold text-white">
+                <span class="material-symbols-outlined text-white text-2xl">
+                  currency_exchange
+                </span>
+                Allot Currency
+              </h2>
 
-            <p class="mt-0.5 text-xs text-[var(--color-primary-light)]">
+              <span
+                *ngIf="parentCurrency"
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-font)]/10 border border-[var(--color-font)]/20 text-[16px] font-semibold text-white"
+              >
+                <span class="material-symbols-outlined text-sm">payments</span>
+                Parent: {{ parentCurrency }}
+              </span>
+            </div>
+
+            <p class="mt-2 text-sm text-white">
               Manage currency rates and payment modes
             </p>
           </div>
@@ -28,7 +36,7 @@
           <button
             type="button"
             (click)="closeModal()"
-            class="p-1.5 rounded-lg text-[var(--color-font)] hover:bg-[var(--color-hover)] transition-all"
+            class="flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-font)] hover:bg-[var(--color-hover)] hover:rotate-90 transition-all duration-300"
           >
             <span class="material-symbols-outlined text-xl">close</span>
           </button>
@@ -87,6 +95,7 @@
           <tbody class="divide-y divide-[var(--color-border)]">
             <tr *ngFor="let row of currencyRows">
               <!-- Currency -->
+              <!-- Currency -->
               <td class="py-3 pr-6 align-middle whitespace-nowrap">
                 <span class="inline-flex items-center gap-1.5">
                   <span
@@ -99,8 +108,16 @@
                   >
                     {{ row.meta?.icon }}
                   </span>
-                  <span class="text-sm font-medium text-[var(--color-font)]">
-                    {{ row.meta?.display }} ({{ row.currency }})
+                  <span class="flex flex-col leading-tight">
+                    <span class="text-sm font-medium text-[var(--color-font)]">
+                      {{ row.meta?.display }} ({{ row.currency }})
+                    </span>
+                    <span
+                      *ngIf="currentRole === 'OWNER'"
+                      class="text-[14px] text-[var(--color-font)]"
+                    >
+                      {{ row.currency }} to {{ parentCurrency }}
+                    </span>
                   </span>
                 </span>
               </td>

@@ -55,7 +55,7 @@ export class PaymentsMethodsComponent implements OnInit, OnDestroy {
       .getCurrenciesByEntity(this.entityId, this.role)
       .subscribe({
         next: (res: any) => {
-          this.currencies = res?.data.currencies ?? [];
+          this.currencies = res?.data?.currencies || res?.data || [];
 
           if (!this.currencies.length) return;
 
