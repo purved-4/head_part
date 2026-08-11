@@ -1,4 +1,3 @@
-
 import {
   AfterViewInit,
   Component,
@@ -446,7 +445,7 @@ export class HeadBranchDashboardComponent
 
         this.computeStatsFromData();
         this.updateChartsFromData();
-        this.clampPages();
+
         this.ensureProcessingTimerState();
       },
       (err) => {},
@@ -481,7 +480,7 @@ export class HeadBranchDashboardComponent
               : new Date(),
           utrNumber: fund.transactionId || fund.utr || null,
           parentCurrency: fund.parentCurrency,
-          currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,
+          currencyCcWiseAmount: Number(fund.currencyCcWiseAmount) || 0,
           rate: fund.rate || 1,
           mode: mode,
           accountNo: fund.accountNo || null,
@@ -543,7 +542,7 @@ export class HeadBranchDashboardComponent
           utrNumber: w.transactionId || w.utr || null,
           parentCurrency: w.parentCurrency || null,
           currency: w.currency || null,
-          currencyWiseAmount: Number(w.currencyWiseAmount) || 0,
+          currencyCcWiseAmount: Number(w.currencyCcWiseAmount) || 0,
           rate: w.rate || 1,
           mode: "bank",
           accountNo: w.accountNo || w.accountNumber || null,
@@ -1433,140 +1432,6 @@ export class HeadBranchDashboardComponent
     this.payoutApprovedPage = 1;
   }
 
-  private clampPages() {
-    if (this.approvedPage > this.approvedTotalPages())
-      this.approvedPage = this.approvedTotalPages();
-
-    if (this.pendingUpiPage > this.pendingUpiTotalPages())
-      this.pendingUpiPage = this.pendingUpiTotalPages();
-
-    if (this.pendingBankPage > this.pendingBankTotalPages())
-      this.pendingBankPage = this.pendingBankTotalPages();
-    if (this.pendingCryptoPage > this.pendingCryptoTotalPages())
-      this.pendingCryptoPage = this.pendingCryptoTotalPages();
-
-    if (this.pendingPayoutPage > this.pendingPayoutTotalPages())
-      this.pendingPayoutPage = this.pendingPayoutTotalPages();
-
-    if (this.payoutApprovedPage > this.payoutApprovedTotalPages())
-      this.payoutApprovedPage = this.payoutApprovedTotalPages();
-  }
-
-  // async approveTransaction(transaction: any): Promise<void> {
-  //   if (!transaction) return;
-
-  //   this.loaderService.showButtonLoader();
-
-  //   const t = this.normalizeTransaction(transaction) || transaction;
-
-  //   const fundId =
-  //     t.fundId ||
-  //     t.id ||
-  //     (t.raw && (t.raw.id || t.raw._id || t.raw.fundId)) ||
-  //     null;
-
-  //   try {
-  //     if (t.type === "payout") {
-  //       const accountId =
-  //         this.selectedPayoutMethod === "upi"
-  //           ? this.selectedUpi
-  //           : this.selectedPayoutMethod === "bank"
-  //             ? this.selectedBank
-  //             : null;
-
-  //       const formData = new FormData();
-
-  //       if (accountId) {
-  //         formData.append("accountId", String(accountId));
-  //       }
-
-  //       if (this.selectedFile) {
-  //         formData.append("file", this.selectedFile, this.selectedFile.name);
-  //       }
-
-  //       await lastValueFrom(this.fundService.acceptPayout(fundId, formData));
-  //     } else if (t.mode === "upi") {
-  //       await lastValueFrom(this.fundService.settleUpiFund(fundId));
-  //     } else if (t.mode === "bank") {
-  //       await lastValueFrom(this.fundService.settleBankFund(fundId));
-  //     } else if (t.mode === "crypto") {
-  //       await lastValueFrom(this.fundService.settleCryptoFund(fundId));
-  //     } else {
-  //       this.snackbar.show("Unknown transaction type, cannot approve", false);
-  //       this.loaderService.hideButtonLoader();
-  //       return;
-  //     }
-
-  //     this.snackbar.show("Transaction approved successfully", true);
-
-  //     this.removeFromPendingListsByTx(t);
-
-  //     const approvedTx = {
-  //       ...t,
-  //       status: "completed",
-  //       settled: true,
-  //       date: t.date instanceof Date ? t.date : new Date(t.date),
-  //     };
-
-  //     if (approvedTx.type === "payout") {
-  //       this.addApprovedUnique(this.approvedTransactions, approvedTx);
-  //       this.addApprovedUnique(this.approvedpayouts, approvedTx);
-  //       this.recentpayouts = [...this.approvedpayouts];
-  //     } else {
-  //       this.addApprovedUnique(this.approvedTransactions, approvedTx);
-  //       this.addApprovedUnique(this.approvedpayins, approvedTx);
-  //       this.recentpayins = [...this.approvedpayins];
-  //     }
-
-  //     this.confirmTransaction = null;
-  //     this.showApproveConfirm = false;
-  //     this.selectedTransaction = null;
-  //     this.selectedFile = null;
-
-  //     this.resetRejectReason();
-
-  //     this.computeStatsFromData();
-  //     this.updateChartsFromData();
-  //     this.clampPages();
-  //     this.ensureProcessingTimerState();
-
-  //     this.loaderService.hideButtonLoader();
-  //   } catch (err: any) {
-  //     const message =
-  //       err?.error?.message || err?.error?.error || "Approval failed";
-
-  //     this.snackbar.show(message, false);
-
-  //     this.removeFromPendingListsByTx(t);
-
-  //     const failedTx = {
-  //       ...t,
-  //       status: "failed",
-  //     };
-
-  //     if (t.type === "payout") {
-  //       this.recentpayouts.unshift(failedTx);
-  //     } else {
-  //       this.recentpayins.unshift(failedTx);
-  //     }
-
-  //     this.computeStatsFromData();
-  //     this.updateChartsFromData();
-  //     this.clampPages();
-  //     this.ensureProcessingTimerState();
-
-  //     this.confirmTransaction = null;
-  //     this.showApproveConfirm = false;
-  //     this.selectedTransaction = null;
-  //     this.selectedFile = null;
-
-  //     this.resetRejectReason();
-  //     this.refreshCachedLists();
-
-  //     this.loaderService.hideButtonLoader();
-  //   }
-  // }
-
   async approveTransaction(transaction: any): Promise<void> {
     if (!transaction) return;
 
@@ -1644,7 +1509,7 @@ export class HeadBranchDashboardComponent
 
       this.computeStatsFromData();
       this.updateChartsFromData();
-      this.clampPages();
+
       this.ensureProcessingTimerState();
 
       this.loaderService.hideButtonLoader();
@@ -1669,7 +1534,7 @@ export class HeadBranchDashboardComponent
 
       this.computeStatsFromData();
       this.updateChartsFromData();
-      this.clampPages();
+
       this.ensureProcessingTimerState();
 
       this.confirmTransaction = null;
@@ -1692,7 +1557,7 @@ export class HeadBranchDashboardComponent
     this.editAmountData = {
       newAmount:
         this.selectedTransaction.mode === "crypto"
-          ? this.selectedTransaction.currencyWiseAmount
+          ? this.selectedTransaction.currencyCcWiseAmount
           : this.selectedTransaction.amount,
       message: "",
       file: null,
@@ -1726,7 +1591,7 @@ export class HeadBranchDashboardComponent
       fundId: this.selectedTransaction.id,
       oldAmount:
         this.selectedTransaction.mode === "crypto"
-          ? this.selectedTransaction.currencyWiseAmount
+          ? this.selectedTransaction.currencyCcWiseAmount
           : this.selectedTransaction.amount,
       amount: this.editAmountData.newAmount,
       reason: this.editAmountData.message,
@@ -1750,7 +1615,7 @@ export class HeadBranchDashboardComponent
       });
 
     if (this.selectedTransaction.mode === "crypto") {
-      this.selectedTransaction.currencyWiseAmount =
+      this.selectedTransaction.currencyCcWiseAmount =
         this.editAmountData.newAmount;
     } else {
       this.selectedTransaction.amount = this.editAmountData.newAmount;
@@ -1991,7 +1856,7 @@ export class HeadBranchDashboardComponent
 
       this.computeStatsFromData();
       this.updateChartsFromData();
-      this.clampPages();
+
       this.ensureProcessingTimerState();
     } catch (err: any) {
       const message =
@@ -2011,35 +1876,6 @@ export class HeadBranchDashboardComponent
     }
   }
 
-  // openApproveConfirm(transaction: any) {
-  //   if (!transaction) return;
-
-  //   if (transaction.type === "payout" && transaction.processing !== true) {
-  //     this.snackbar.show("Please start processing first", false);
-  //     return;
-  //   }
-
-  //   const portalId = transaction.raw?.portalId;
-
-  //   const t = this.normalizeTransaction(transaction) || transaction;
-  //   const src =
-  //     t.type === "payout"
-  //       ? "payout"
-  //       : t.mode === "upi"
-  //         ? "upi"
-  //         : t.mode === "bank"
-  //           ? "bank"
-  //           : t.mode === "crypto"
-  //             ? "crypto"
-  //             : "none";
-
-  //   this.confirmTransaction = { ...t, section: src };
-  //   this.showApproveConfirm = true;
-  //   this.selectedPayoutMethod = "upi";
-  //   this.selectedUpi = null;
-  //   this.selectedBank = null;
-  //   this.customReason = "";
-  // }
   openApproveConfirm(transaction: any) {
     if (!transaction) return;
 
@@ -2365,7 +2201,7 @@ export class HeadBranchDashboardComponent
       rate: fund.rate || 1,
 
       amount: Number(fund.amount) || 0,
-      currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,
+      currencyCcWiseAmount: Number(fund.currencyCcWiseAmount) || 0,
 
       date: parsedDate,
 
@@ -2424,152 +2260,6 @@ export class HeadBranchDashboardComponent
     return this.normalizeIncomingFund(tx);
   }
 
-  // private processIncomingEvent(data: any) {
-  //   if (!data) return;
-
-  //   if (!this.dynamicPayinConfig && data?.DYNAMIC_PAYIN_TIME) {
-  //     this.dynamicPayinConfig = structuredClone(data.DYNAMIC_PAYIN_TIME);
-  //     this.latestDynamicPayin = this.dynamicPayinConfig;
-  //   }
-  //   if (!this.dynamicPayoutConfig && data?.DYNAMIC_PAYOUT_TIME) {
-  //     this.dynamicPayoutConfig = structuredClone(data.DYNAMIC_PAYOUT_TIME);
-  //     this.latestDynamicPayout = this.dynamicPayoutConfig;
-  //   }
-
-  //   const dynamicPayin = this.dynamicPayinConfig;
-  //   const dynamicPayout = this.dynamicPayoutConfig;
-
-  //   const now = Date.now();
-
-  //   if (Array.isArray(data.PENDING_PAYIN)) {
-  //     const upiList: any[] = [];
-  //     const bankList: any[] = [];
-  //     const cryptoList: any[] = [];
-
-  //     for (const f of data.PENDING_PAYIN) {
-  //       const rawType = (f.type || "").toUpperCase();
-
-  //       const existing =
-  //         this.pendingUpi.find(
-  //           (x: any) => x.id === f.id || x.fundId === f.id,
-  //         ) ||
-  //         this.pendingBank.find(
-  //           (x: any) => x.id === f.id || x.fundId === f.id,
-  //         ) ||
-  //         this.pendingCrypto.find(
-  //           (x: any) => x.id === f.id || x.fundId === f.id,
-  //         );
-
-  //       let mode: "upi" | "bank" | "crypto";
-  //       if (this.isCryptoType(rawType)) mode = "crypto";
-  //       else if (rawType === "UPI") mode = "upi";
-  //       else mode = "bank";
-
-  //       const tx = this.normalizeIncomingFund(
-  //         {
-  //           ...existing,
-  //           ...f,
-  //           processing: existing?.processing ?? f?.processing ?? false,
-  //         },
-  //         mode,
-  //       );
-  //       if (!tx) continue;
-
-  //       const slab = dynamicPayin?.timeRanges?.length
-  //         ? this.getPayinSlabInfo(tx, dynamicPayin, now)
-  //         : null;
-
-  //       const finalTx = {
-  //         ...tx,
-  //         slabPercentage:
-  //           slab !== null ? slab.percentage : (existing?.slabPercentage ?? 100),
-  //         slabEligible:
-  //           slab !== null ? slab.eligible : (existing?.slabEligible ?? true),
-  //         timePassed:
-  //           slab !== null ? slab.diffMinutes : (existing?.timePassed ?? 0),
-  //         cryptoType: this.isCryptoType(rawType) ? rawType : null,
-  //       };
-
-  //       if (mode === "crypto") cryptoList.push(finalTx);
-  //       else if (mode === "upi") upiList.push(finalTx);
-  //       else bankList.push(finalTx);
-  //     }
-
-  //     this.pendingUpi = upiList;
-  //     this.pendingBank = bankList;
-  //     this.pendingCrypto = cryptoList;
-  //   }
-
-  //   if (Array.isArray(data.PENDING_PAYOUT)) {
-  //     this.pendingpayouts = data.PENDING_PAYOUT.map((f: any) => {
-  //       const existing = this.pendingpayouts.find(
-  //         (x: any) =>
-  //           x.id === f.id || x.fundId === f.id || x.fundId === f.fundId,
-  //       );
-
-  //       // const tx = this.normalizeIncomingFund(
-  //       //   {
-  //       //     ...existing,
-  //       //     ...f,
-
-  //       //     processing: existing?.processing === true ? true : !!f?.processing,
-
-  //       //     processingTimeLimit:
-  //       //       f?.processingTimeLimit ?? existing?.processingTimeLimit ?? null,
-  //       //   },
-  //       //   "payout",
-  //       // );
-
-  //       const incomingProcessing = f?.processing === true;
-  //       const localProcessing = existing?.processing === true;
-  //       const isProcessing = incomingProcessing || localProcessing;
-
-  //       const tx = this.normalizeIncomingFund(
-  //         {
-  //           ...existing,
-  //           ...f,
-
-  //           processing: isProcessing,
-
-  //           processingTimeLimit: isProcessing
-  //             ? (f?.processingTimeLimit ??
-  //               existing?.processingTimeLimit ??
-  //               null)
-  //             : null,
-  //         },
-  //         "payout",
-  //       );
-
-  //       if (!tx) return null;
-
-  //       const slab = dynamicPayout?.amountRanges?.length
-  //         ? this.getPayoutSlabInfo(tx, dynamicPayout, now)
-  //         : null;
-
-  //       return {
-  //         ...tx,
-  //         slabPercentage:
-  //           slab !== null ? slab.percentage : (existing?.slabPercentage ?? 100),
-  //         slabEligible:
-  //           slab !== null ? slab.eligible : (existing?.slabEligible ?? true),
-  //         timePassed:
-  //           slab !== null ? slab.diffMinutes : (existing?.timePassed ?? 0),
-  //       };
-  //     }).filter(Boolean);
-
-  //     this.refreshCachedLists();
-  //   }
-
-  //   this.pendingUpi = [...this.pendingUpi];
-  //   this.pendingBank = [...this.pendingBank];
-  //   this.pendingCrypto = [...this.pendingCrypto];
-  //   this.pendingpayouts = [...this.pendingpayouts];
-
-  //   this.computeStatsFromData();
-  //   this.updateChartsFromData();
-  //   this.clampPages();
-  //   this.ensureProcessingTimerState();
-  // }
   private processIncomingEvent(data: any) {
     if (!data) return;
 
@@ -2702,7 +2392,7 @@ export class HeadBranchDashboardComponent
 
     this.computeStatsFromData();
     this.updateChartsFromData();
-    this.clampPages();
+
     this.ensureProcessingTimerState();
   }
 
@@ -2951,7 +2641,6 @@ export class HeadBranchDashboardComponent
 
     this.computeStatsFromData();
     this.updateChartsFromData();
-    this.clampPages();
 
     this.snackbar.show("Dashboard refreshed", true, 800);
   }
@@ -2989,9 +2678,27 @@ export class HeadBranchDashboardComponent
     return "Bank";
   }
 
-  getTxKind(tx: any): "UPI" | "Bank" | "Payout" {
-    if (tx.type === "payout") return "Payout";
-    return (tx.fundtype || "").toUpperCase() === "UPI" ? "UPI" : "Bank";
+  getTxKind(tx: any): "UPI" | "Bank" | "Crypto" | "Payout" {
+    if (tx.type?.toLowerCase() === "payout") {
+      return "Payout";
+    }
+
+    const type = (tx.payinType || tx.type || tx.mode || "").toUpperCase();
+
+    // Crypto modes
+    if (
+      ["TRC20", "BEP20", "ERC20", "SPL", "OMNI", "POLYGON", "SOLANA"].includes(
+        type,
+      )
+    ) {
+      return "Crypto";
+    }
+
+    if (type === "UPI") {
+      return "UPI";
+    }
+
+    return "Bank";
   }
 
   getTxAccountLabel(tx: any): string {
@@ -3634,8 +3341,8 @@ export class HeadBranchDashboardComponent
     ];
     return this.sumByCurrency(
       all,
-      (t) => t.parentCurrency, // 👈 ab hamesha parentCurrency (INR/USDT)
-      (t) => t.currencyWiseAmount, // 👈 amount ki jagah currencyWiseAmount
+      (t) => t.parentCurrency,
+      (t) => t.currencyCcWiseAmount,
     );
   }
 
@@ -3647,10 +3354,58 @@ export class HeadBranchDashboardComponent
     return this.sumByCurrency(
       this.filteredPendingpayouts(),
       (t) => t.parentCurrency,
-      (t) => t.currencyWiseAmount,
-      // 👈 yaha bhi amount → currencyWiseAmount
+      (t) => t.currencyCcWiseAmount,
     );
   }
+
+  // private updateCurrencySums(): void {
+  //   const payinMap = new Map<string, any>();
+
+  //   [...this.pendingUpi, ...this.pendingBank, ...this.pendingCrypto].forEach(
+  //     (tx: any) => {
+  //       const currency = tx.parentCurrency || tx.currency || "INR";
+  //       const symbol = currency;
+
+  //       if (!payinMap.has(currency)) {
+  //         payinMap.set(currency, {
+  //           currency,
+  //           symbol,
+  //           total: 0,
+  //         });
+  //       }
+
+  //       payinMap.get(currency).total += Number(
+  //         tx.currencyCcWiseAmount  || 0,
+  //       );
+  //     },
+  //   );
+
+  //   this.payinCurrencySums = Array.from(payinMap.values());
+
+  //   const payoutMap = new Map<string, any>();
+
+  //   this.pendingpayouts.forEach((tx: any) => {
+  //     const currency = tx.parentCurrency || tx.currency || "INR";
+  //     const symbol = currency;
+
+  //     if (!payoutMap.has(currency)) {
+  //       payoutMap.set(currency, {
+  //         currency,
+  //         symbol,
+  //         total: 0,
+  //       });
+  //     }
+
+  //     payoutMap.get(currency).total += Number(
+  //       tx.currencyCcWiseAmount || 0,
+  //     );
+  //   });
+
+  //   this.payoutCurrencySums = Array.from(payoutMap.values());
+
+  //   console.log("Payin:", this.payinCurrencySums);
+  //   console.log("Payout:", this.payoutCurrencySums);
+  // }
 
   private updateCurrencySums(): void {
     const payinMap = new Map<string, any>();
@@ -3658,19 +3413,17 @@ export class HeadBranchDashboardComponent
     [...this.pendingUpi, ...this.pendingBank, ...this.pendingCrypto].forEach(
       (tx: any) => {
         const currency = tx.parentCurrency || tx.currency || "INR";
-        const symbol = currency;
 
         if (!payinMap.has(currency)) {
           payinMap.set(currency, {
             currency,
-            symbol,
+            symbol: currency,
             total: 0,
           });
         }
 
-        payinMap.get(currency).total += Number(
-          tx.currencyWiseAmount || tx.amount || 0,
-        );
+        // ONLY currencyCcWiseAmount
+        payinMap.get(currency).total += Number(tx.currencyCcWiseAmount || 0);
       },
     );
 
@@ -3680,27 +3433,24 @@ export class HeadBranchDashboardComponent
 
     this.pendingpayouts.forEach((tx: any) => {
       const currency = tx.parentCurrency || tx.currency || "INR";
-      const symbol = currency;
 
       if (!payoutMap.has(currency)) {
         payoutMap.set(currency, {
           currency,
-          symbol,
+          symbol: currency,
           total: 0,
         });
       }
 
-      payoutMap.get(currency).total += Number(
-        tx.currencyWiseAmount || tx.amount || 0,
-      );
+      // ONLY currencyCcWiseAmount
+      payoutMap.get(currency).total += Number(tx.currencyCcWiseAmount || 0);
     });
 
     this.payoutCurrencySums = Array.from(payoutMap.values());
 
-    console.log("Payin:", this.payinCurrencySums);
-    console.log("Payout:", this.payoutCurrencySums);
+    console.log("PAYIN currencyCcWiseAmount SUM:", this.payinCurrencySums);
+    console.log("PAYOUT currencyCcWiseAmount SUM:", this.payoutCurrencySums);
   }
-
   formatCurrencySum(s: any): string {
     const symbol = s.currency === "INR" ? "₹" : s.symbol || s.currency;
 

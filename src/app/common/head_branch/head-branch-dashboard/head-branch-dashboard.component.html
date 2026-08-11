@@ -127,29 +127,70 @@
                         {{ transaction.holderName || "" }}
                       </p>
 
-                      <!-- UPI sub-line -->
-                      <p
+                      <!-- UPI -->
+                      <!-- UPI badge -->
+                      <!-- UPI -->
+                      <div
                         *ngIf="transaction.mode === 'upi'"
-                        class="text-[11px] text-[var(--color-muted)] mt-0.5 truncate"
+                        class="flex items-center gap-1.5 mt-0.5"
                       >
-                        UPI-{{ transaction.upiId || transaction.vpa || "—" }}
-                      </p>
+                        <span
+                          class="inline-block text-[10px] font-bold px-1.5 py-[1px] rounded bg-purple-50 text-purple-600 border border-purple-200"
+                        >
+                          UPI
+                        </span>
 
-                      <!-- Bank sub-line -->
-                      <p
+                        <span
+                          class="text-[11px] text-[var(--color-muted)] truncate"
+                        >
+                          {{ transaction.upiId || transaction.vpa || "—" }}
+                        </span>
+                      </div>
+
+                      <!-- Bank -->
+                      <div
                         *ngIf="transaction.mode === 'bank'"
-                        class="text-[11px] text-[var(--color-muted)] mt-0.5 truncate"
+                        class="flex items-center gap-1.5 mt-0.5"
                       >
-                        Bank-{{ transaction.accountNo || "—" }}
-                      </p>
+                        <span
+                          class="inline-block text-[10px] font-bold px-1.5 py-[1px] rounded bg-blue-50 text-blue-600 border border-blue-200"
+                        >
+                          Bank
+                        </span>
 
-                      <!-- Crypto sub-line (badge) -->
-                      <span
+                        <span
+                          class="text-[11px] text-[var(--color-muted)] truncate"
+                        >
+                          {{ transaction.accountNo || "—" }}
+                        </span>
+                      </div>
+
+                      <!-- Crypto -->
+                      <div
                         *ngIf="transaction.mode === 'crypto'"
-                        class="inline-block mt-0.5 text-[10px] font-bold px-1.5 py-[1px] rounded bg-purple-50 text-purple-600 border border-purple-200"
+                        class="flex items-center gap-1.5 mt-0.5"
                       >
-                        {{ transaction.cryptoType || transaction.raw?.type }}
-                      </span>
+                        <span
+                          class="inline-block text-[10px] font-bold px-1.5 py-[1px] rounded bg-purple-50 text-purple-600 border border-purple-200"
+                        >
+                          {{
+                            transaction.cryptoType ||
+                              transaction.raw?.type ||
+                              "Crypto"
+                          }}
+                        </span>
+
+                        <span
+                          class="text-[11px] text-[var(--color-muted)] truncate"
+                        >
+                          {{
+                            transaction.walletAddress ||
+                              transaction.wallet ||
+                              transaction.address ||
+                              "—"
+                          }}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -158,11 +199,7 @@
                       class="flex items-baseline justify-end gap-1 text-[16px] font-bold text-[var(--color-font)] leading-none"
                     >
                       <span class="text-[11px] opacity-70 uppercase">
-                        {{
-                          transaction.mode === "crypto"
-                            ? transaction.currency
-                            : transaction.parentCurrency
-                        }}
+                        {{ transaction.currency }}
                       </span>
                       <span class="tabular-nums">
                         {{
@@ -192,7 +229,7 @@
 
                     <span class="text-[11px] text-[var(--color-muted)]">
                       {{ transaction.parentCurrency }}-{{
-                        transaction.currencyWiseAmount
+                        transaction.currencyCcWiseAmount
                       }}
                     </span>
                   </div>
@@ -243,7 +280,6 @@
                       }}
                     </span>
                     <span
-                      *ngIf="transaction.mode !== 'crypto'"
                       class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700"
                     >
                       {{ transaction.ftt ? "RPI" : "PPI" }}
@@ -399,7 +435,7 @@
                       class="flex items-baseline justify-end gap-1 text-[15px] font-bold text-[var(--color-font)] leading-none"
                     >
                       <span class="text-[10px] opacity-70 uppercase">
-                        {{ transaction.parentCurrency }}
+                        {{ transaction.currency }}
                       </span>
                       <span>{{ transaction.amount }}</span>
                     </div>
@@ -417,7 +453,7 @@
                     <!-- Currency conversion -->
                     <span class="text-[10px] text-[var(--color-muted)]">
                       {{ transaction.parentCurrency }}-{{
-                        transaction.currencyWiseAmount
+                        transaction.currencyCcWiseAmount
                       }}
                     </span>
                   </div>
@@ -711,11 +747,13 @@
                       class="text-[11px] text-[var(--color-font)]/80 mt-1 truncate font-medium"
                     >
                       {{
-                        transaction.type === "payout"
+                        transaction.type?.toLowerCase() === "payout"
                           ? transaction.holderName ||
                             transaction.holder ||
                             getTxKind(transaction)
-                          : transaction.holderName || getTxKind(transaction)
+                          : transaction.bankAccountHolderName ||
+                            transaction.holderName ||
+                            getTxKind(transaction)
                       }}
                     </p>
 
@@ -733,7 +771,6 @@
                             : ""
                       }}
                     </p>
-
                     <p
                       *ngIf="
                         transaction.type !== 'payout' &&
@@ -772,18 +809,10 @@
                     <span
                       class="text-[11px] text-[var(--color-font)] opacity-70 uppercase"
                     >
-                      {{
-                        transaction.mode === "crypto"
-                          ? transaction.currency
-                          : transaction.parentCurrency
-                      }}
+                      {{ transaction.currency }}
                     </span>
                     <span>
-                      {{
-                        transaction.mode === "crypto"
-                          ? transaction.currencyWiseAmount
-                          : transaction.amount
-                      }}
+                      {{ transaction.amount }}
                     </span>
                   </div>
 
@@ -812,7 +841,7 @@
                   <!-- Parent currency wise amount -->
                   <span class="text-[10px] text-[var(--color-muted)]">
                     {{ transaction.parentCurrency }}-{{
-                      transaction.currencyWiseAmount
+                      transaction.currencyCcWiseAmount
                     }}
                   </span>
                 </div>
@@ -917,13 +946,10 @@
 
                   <!-- PPI / RPI - crypto ke lieye nahi dikhta -->
                   <span
-                    *ngIf="
-                      transaction.type !== 'payout' &&
-                      transaction.mode !== 'crypto'
-                    "
+                    *ngIf="transaction.type !== 'payout'"
                     class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700"
                   >
-                    {{ transaction.ftt ? "RPI" : "PPI" }}
+                    Payin - {{ transaction.ftt ? "RPI" : "PPI" }}
                   </span>
                 </div>
 
@@ -2423,7 +2449,7 @@
                 Exchange amount
               </p>
               <p class="font-bold text-gray-800">
-                {{ selectedTransaction.currencyWiseAmount | number }}
+                {{ selectedTransaction.currencyCcWiseAmount | number }}
                 {{ selectedTransaction.parentCurrency }}
               </p>
             </div>
@@ -2957,17 +2983,6 @@
         >
           Reject
         </button>
-
-        <!-- <button
-          (click)="openRejectConfirm(selectedTransaction)"
-          [disabled]="
-            selectedTransaction.type === 'payout' &&
-            !selectedTransaction.raw?.processing
-          "
-          class="px-6 py-2.5 bg-red-500 rounded-lg font-medium text-white transition hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-500"
-        >
-          Reject
-        </button> -->
       </div>
     </div>
   </div>

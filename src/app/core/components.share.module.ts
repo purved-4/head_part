@@ -49,6 +49,7 @@ import { SharedUserProfileComponent } from "../common/shared-user-profile/shared
 import { GlobalCompartPercentageComponent } from "../common/global-compart-percentage/global-compart-percentage.component";
 import { ResolvedNotificationComponent } from "../common/resolved-notification/resolved-notification.component";
 import { MaintenanceNoticeComponent } from "../common/maintenance-notice/maintenance-notice.component";
+import { PortalReportComponent } from "../components/reports/portal-report/portal-report.component";
 
 @NgModule({
   declarations: [
@@ -98,6 +99,7 @@ import { MaintenanceNoticeComponent } from "../common/maintenance-notice/mainten
     SharedUserProfileComponent,
     GlobalCompartPercentageComponent,
     MaintenanceNoticeComponent,
+    PortalReportComponent,
   ],
   exports: [
     WebhookDataComponent,
@@ -146,6 +148,7 @@ import { MaintenanceNoticeComponent } from "../common/maintenance-notice/mainten
     SharedUserProfileComponent,
     GlobalCompartPercentageComponent,
     MaintenanceNoticeComponent,
+    PortalReportComponent,
   ],
   imports: [
     SharedModule,

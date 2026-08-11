@@ -29,7 +29,8 @@ const routes: Routes = [
       ),
   },
 
-  { path: "**", redirectTo: "/login" },
+  // pehle "/login" tha — ab home pe bhejo, login pe bar-bar force nahi karna
+  { path: "**", redirectTo: "" },
 ];
 
 @NgModule({

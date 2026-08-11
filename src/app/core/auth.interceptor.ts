@@ -10,14 +10,14 @@ import { Observable, throwError, BehaviorSubject, from } from "rxjs";
 import { catchError, switchMap, filter, take, finalize } from "rxjs/operators";
 import { AuthMemoryService } from "../pages/services/auth-memory.service";
 import { AuthService } from "../pages/services/auth.service";
-import { FingerprintService } from "../pages/services/fingerprint.service"; 
+import { FingerprintService } from "../pages/services/fingerprint.service";
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
-private readonly OPEN_LINK_PATHS = [
+  private readonly OPEN_LINK_PATHS = [
     "/api/anonymous/getBankDetailsByAmount",
     "/api/anonymous/getUpiDetailsByAmount",
     "/api/anonymous/webhook/post",
@@ -25,32 +25,38 @@ private readonly OPEN_LINK_PATHS = [
     "/api/anonymous/remove-assignment",
     "/api/ocr/anonymous",
     "/api/anonymous/favourites/add",
-      "/api/anonymous/favourites/user",
-            "/api/anonymous/favourites/delete",
-"/api/anonymous/selectFavBank",
+    "/api/anonymous/favourites/user",
+    "/api/anonymous/favourites/delete",
+    "/api/anonymous/selectFavBank",
   ];
 
   constructor(
     private memoryService: AuthMemoryService,
     private authService: AuthService,
-    private fingerprintService: FingerprintService
+    private fingerprintService: FingerprintService,
   ) {}
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(
+    req: HttpRequest<any>,
+    next: HttpHandler,
+  ): Observable<HttpEvent<any>> {
     if (this.isAuthEndpoint(req.url)) {
       return next.handle(req);
     }
 
-    const isOpenLinkRequest = this.OPEN_LINK_PATHS.some(path => req.url.includes(path));
+    const isOpenLinkRequest = this.OPEN_LINK_PATHS.some((path) =>
+      req.url.includes(path),
+    );
 
     if (isOpenLinkRequest) {
       return from(this.fingerprintService.getFingerprint()).pipe(
-        switchMap(fp => {
-          const withFp = req.clone({
-            setHeaders: { 'X-Device-FP': fp }
-          });
+        catchError(() => from(Promise.resolve(null))), // fingerprint fail ho toh bhi request jaane do
+        switchMap((fp) => {
+          const withFp = fp
+            ? req.clone({ setHeaders: { "X-Device-FP": fp } })
+            : req;
           return next.handle(withFp);
-        })
+        }),
       );
     }
 
@@ -63,7 +69,7 @@ private readonly OPEN_LINK_PATHS = [
           return throwError(() => error);
         }
         return this.handle401Error(req, next);
-      })
+      }),
     );
   }
 
@@ -72,7 +78,7 @@ private readonly OPEN_LINK_PATHS = [
       return this.refreshTokenSubject.pipe(
         filter((token): token is string => token !== null),
         take(1),
-        switchMap((token) => next.handle(this.addToken(req, token)))
+        switchMap((token) => next.handle(this.addToken(req, token))),
       );
     }
 
@@ -87,6 +93,8 @@ private readonly OPEN_LINK_PATHS = [
           this.memoryService.resetAccessToken();
           return throwError(() => new Error("Refresh failed"));
         }
+
+        this.memoryService.setAccessToken(newToken); // 👈 ye missing tha, ab fix
         this.refreshTokenSubject.next(newToken);
 
         return next.handle(this.addToken(req, newToken));
@@ -97,7 +105,7 @@ private readonly OPEN_LINK_PATHS = [
       }),
       finalize(() => {
         this.isRefreshing = false;
-      })
+      }),
     );
   }
 

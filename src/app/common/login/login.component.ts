@@ -231,12 +231,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.snackbarService.show("Login Successful", true, 4000);
       },
       error: (err) => {
-        // const msg =
-        //   err?.error?.message ||
-        //   err?.error?.error ||
-        //   err?.message ||
-        //   "Server error";
-        // this.snackbarService.show(msg, false, 5000);
+        this.snackbarService.show(err.error?.message, false, 4000);
       },
     });
   }

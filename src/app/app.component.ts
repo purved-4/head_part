@@ -22,16 +22,14 @@ export class AppComponent implements OnInit {
     private userStateService: UserStateService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router,
-    private socketConfigService: SocketConfigService
-  ) { }
+    private socketConfigService: SocketConfigService,
+  ) {}
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.initializeApp();
 
       this.userStateService.currentUser$.subscribe((user) => {
-        console.log(user);
-        
         const role = user?.role?.[0]?.name || null;
 
         if (role) {
@@ -52,7 +50,7 @@ export class AppComponent implements OnInit {
     const currentUrl = window.location.pathname;
 
     const isPublicRoute = this.publicRoutes.some((route) =>
-      currentUrl.startsWith(route)
+      currentUrl.startsWith(route),
     );
 
     if (isPublicRoute) return;
@@ -64,16 +62,19 @@ export class AppComponent implements OnInit {
         if (this.userStateService.getIsLoggedIn()) {
           const role = this.userStateService.getRole();
 
-          if (currentUrl === "/" || currentUrl === "/login") {
+          // sirf /login pe hai tabhi role-home pe bhejo, / pe hi rehne do
+          if (currentUrl === "/login") {
             this.navigateToRoleHome(role);
           }
-
         }
       },
       error: () => {
         this.userStateService.setCurrentUser(null);
 
-        this.router.navigate(["/"]);
+        // already "/" pe hai toh dobara navigate mat karo (yehi loop ka reason tha)
+        if (currentUrl !== "/") {
+          this.router.navigate(["/"]);
+        }
       },
     });
   }
