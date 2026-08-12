@@ -35,6 +35,14 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
   isEditMode = false;
   isSubmitting = false;
 
+  // NEW: drives the left sidebar nav / which content panel is shown
+  activeSection: string = "account";
+  sections = [
+    { id: "account", label: "Account Details", icon: "account_circle" },
+    { id: "inventory", label: "Inventory Configuration", icon: "inventory_2" },
+    { id: "limits", label: "Limits & Capacity", icon: "speed" },
+  ];
+
   entityId: any;
   entityType: any;
   updateBankSearchTerm = "";
@@ -51,6 +59,11 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
     limitAmount: 0,
     accountType: "",
     fttAcceptance: false,
+    partialPayinEnabled: false,
+    // NEW: second payin-related toggle, lives in the "Advanced Configuration" section.
+    // Controls whether the system auto-flips between PPI/RPI on payin failure,
+    // independent of the manual PPI/RPI selection above (fttAcceptance).
+    autoPayinSwitchEnabled: false,
   };
 
   constructor(
@@ -82,6 +95,10 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
     this.subs.add(ifscSub);
   }
 
+  setActiveSection(sectionId: string): void {
+    this.activeSection = sectionId;
+  }
+
   toggleEditMode(): void {
     this.isEditMode = !this.isEditMode;
 
@@ -100,6 +117,8 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
       accountType: this.bankData?.accountType || "saving",
       fttAcceptance: this.bankData?.fttAcceptance || false,
       partialPayinEnabled: this.bankData?.partialPayinEnabled || false,
+      // NEW: keep the auto payin-switch toggle in sync with the loaded record
+      autoPayinSwitchEnabled: this.bankData?.autoPayinSwitchEnabled || false,
     };
 
     // Reset IFSC fetch state
@@ -173,6 +192,8 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
 
       partialPayinEnabled: this.updateForm.partialPayinEnabled,
 
+      // NEW: send the auto payin-switch flag to the backend along with the rest
+      autoPayinSwitchEnabled: this.updateForm.autoPayinSwitchEnabled,
     };
 
     const sub = this.bankService.update(payload).subscribe({
@@ -318,12 +339,11 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
   }
 
   get smallestCapacityRangeLimit(): number | null {
-  const ranges = this.bankData?.ranges || [];
-  const validRanges = ranges.filter(
-    (r: any) => r.minRange != null && r.minRange > 0
-  );
-  if (!validRanges.length) return null;
-  return Math.min(...validRanges.map((r: any) => r.minRange));
-}
-
+    const ranges = this.bankData?.ranges || [];
+    const validRanges = ranges.filter(
+      (r: any) => r.minRange != null && r.minRange > 0,
+    );
+    if (!validRanges.length) return null;
+    return Math.min(...validRanges.map((r: any) => r.minRange));
+  }
 }

@@ -209,13 +209,13 @@
                   <div
                     class="flex-shrink-0 h-10 w-10 bg-[var(--color-primary)] rounded-full flex items-center justify-center text-[var(--color-bg)] font-medium"
                   >
-                    {{ element.userName?.charAt(0) || "U" }}
+                    {{ element.userUsername?.charAt(0) || "U" }}
                   </div>
                   <div class="ml-4">
                     <div
                       class="text-sm font-medium text-[var(--color-font)] group-hover:text-[var(--color-primary)] transition-colors duration-150"
                     >
-                      {{ element.userName }}
+                      {{ element.userUsername }}
                     </div>
                   </div>
                 </div>
@@ -462,13 +462,13 @@
               <div
                 class="w-14 h-14 bg-[var(--color-primary)] rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ring-2 ring-[var(--color-primary)]/20"
               >
-                {{ user.userName?.[0] || "U" | uppercase }}
+                {{ user.userUsername?.[0] || "U" | uppercase }}
               </div>
               <div>
                 <h3
                   class="font-semibold text-[var(--color-font)] text-lg group-hover:text-[var(--color-primary)] group-hover:scale-105 transition-all duration-200"
                 >
-                  {{ user.userName }}
+                  {{ user.userUsername }}
                 </h3>
                 <span
                   class="inline-flex items-center gap-1 text-xs font-medium mt-1"
@@ -1002,11 +1002,11 @@
           <div
             class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-sm flex-shrink-0"
           >
-            {{ selectedUserDetails?.userName?.charAt(0) || "U" }}
+            {{ selectedUserDetails?.userUsername?.charAt(0) || "U" }}
           </div>
           <div class="flex-1 min-w-0">
             <h3 class="font-medium text-gray-900 text-sm truncate">
-              {{ selectedUserDetails?.userName }}
+              {{ selectedUserDetails?.userUsername }}
             </h3>
             <p class="text-xs text-gray-600 truncate">
               {{ selectedUserDetails?.userEmail }}

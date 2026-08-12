@@ -2226,7 +2226,7 @@ Account Holder: ${item.accountHolder || "-"}`;
 
       let raw = item.limitTime;
 
-      // Backend timezone-less datetime ko UTC treat karo
+      // Backend timezone-less datetime ko UdTC treat karo
       if (typeof raw === "string" && !/[zZ]|[+-]\d{2}:\d{2}$/.test(raw)) {
         raw = raw + "Z";
       }

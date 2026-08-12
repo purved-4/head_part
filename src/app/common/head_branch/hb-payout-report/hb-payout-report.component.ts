@@ -339,7 +339,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
         amount: Number(it.currencyWiseAmount ?? it.amount ?? it.value ?? 0),
         currency: it.currency || "INR",
 
-        status: it.status || it.state || "CP_REJECTED",
+        status: it.status || it.state || "-",
         reviewStatus: it.reviewStatus,
         remarks: it.remarks,
         portalDomain: it.portalDomain,

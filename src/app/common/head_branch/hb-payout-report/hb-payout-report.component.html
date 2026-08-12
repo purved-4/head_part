@@ -475,362 +475,656 @@
 </div>
 
 <!-- ENHANCED RECORD MODAL -->
+
+<!-- ENHANCED RECORD MODAL -->
 <div
   *ngIf="showRecordModal"
   class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
-  (keydown.escape)="closeLightbox()"
+  (keydown.escape)="closeRecordModal()"
   tabindex="0"
 >
   <!-- Backdrop -->
   <div
-    class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+    class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
     (click)="closeRecordModal()"
   ></div>
 
   <!-- Modal Content -->
   <div
-    class="relative rounded-2xl sm:rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fadeIn z-10 transform transition-all duration-300 scale-95 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-2xl"
+    class="relative rounded-2xl max-w-6xl w-full max-h-[92vh] overflow-hidden animate-fadeIn z-10 transform transition-all duration-300 bg-white border border-gray-200 shadow-xl flex flex-col"
   >
-    <!-- Header – compact on mobile -->
+    <!-- Header -->
     <div
-      class="flex items-center justify-between p-3 sm:p-6 border-b border-[var(--color-border)] bg-[var(--color-bg)]"
+      class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-200 shrink-0"
     >
-      <div class="flex items-center gap-2 sm:gap-4">
+      <div class="flex items-center gap-3">
         <div
-          class="w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)]"
+          class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center bg-blue-600"
         >
-          <span
-            class="material-symbols-outlined text-base sm:text-xl text-[var(--color-font)]"
-            >receipt_long</span
-          >
+          <span class="material-symbols-outlined text-lg sm:text-xl text-white">
+            receipt_long
+          </span>
         </div>
         <div>
-          <h3 class="font-bold text-base sm:text-xl text-[var(--color-font)]">
+          <h3
+            class="font-bold text-base sm:text-xl text-gray-900 leading-tight"
+          >
             Transaction Details
           </h3>
-          <p class="text-xs sm:text-sm text-[var(--color-muted)]">
-            {{ selectedRecord?.payoutType || selectedRecord?.mode || "—" }} •
-            Complete information
+          <p
+            class="text-[11px] sm:text-sm text-gray-500 uppercase tracking-wide"
+          >
+            {{
+              selectedRecord?.payoutType || selectedRecord?.mode || "PAYOUT"
+            }}
+            • Complete information
           </p>
         </div>
       </div>
       <button
         (click)="closeRecordModal()"
-        class="px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-font)]"
+        class="w-9 h-9 rounded-lg flex items-center justify-center border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+        title="Close"
       >
-        <span class="material-symbols-outlined text-base sm:text-lg"
-          >close</span
-        >
-        <span class="hidden sm:inline">Close</span>
+        <span class="material-symbols-outlined text-lg">close</span>
       </button>
     </div>
 
-    <!-- Body – responsive grid -->
+    <!-- Summary strip: Amount / Transaction ID / Status -->
     <div
-      class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 p-3 sm:p-6 overflow-y-auto max-h-[calc(90vh-80px)]"
+      class="flex flex-wrap items-center gap-6 sm:gap-10 px-4 sm:px-6 py-4 border-b border-gray-200 shrink-0"
     >
-      <!-- LEFT: Proof Section -->
-      <div
-        class="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 sm:p-4 max-h-[420px] overflow-y-auto"
-      >
-        <!-- ================= FILE PROOF ================= -->
+      <div>
         <div
-          *ngIf="
-            selectedRecord?.proofImages?.length ||
-            selectedRecord?.proofPdfs?.length
-          "
-          class="mb-5"
+          class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1"
         >
-          <!-- TITLE -->
-          <div
-            class="flex items-center gap-2 mb-3 text-sm font-bold text-[var(--color-font)]"
-          >
-            <span class="material-symbols-outlined text-blue-600 text-[20px]">
-              folder
-            </span>
-
-            File Proof
-          </div>
-
-          <!-- IMAGE LIST -->
-          <div
-            class="grid gap-4"
-            [ngClass]="{
-              'grid-cols-1': selectedRecord.proofImages.length === 1,
-              'grid-cols-2': selectedRecord.proofImages.length === 2,
-              'grid-cols-2 lg:grid-cols-3':
-                selectedRecord.proofImages.length > 2,
-            }"
-          >
-            <div
-              *ngFor="let img of selectedRecord.proofImages"
-              class="relative group"
-            >
-              <img
-                [src]="img"
-                alt="proof"
-                (click)="openLightbox(img)"
-                (error)="onImageError($event)"
-                class="w-full rounded-2xl border border-[var(--color-border)] bg-white p-2 shadow-sm hover:shadow-lg transition cursor-pointer object-contain"
-                [ngClass]="{
-                  'max-h-[520px] min-h-[420px]':
-                    selectedRecord.proofImages.length === 1,
-                  'h-80': selectedRecord.proofImages.length === 2,
-                  'h-44': selectedRecord.proofImages.length > 2,
-                }"
-              />
-
-              <div
-                class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 text-center rounded-b-2xl opacity-0 group-hover:opacity-100 transition"
-              >
-                Click to preview
-              </div>
-            </div>
-          </div>
-
-          <!-- PDF LIST -->
-          <div class="flex flex-col gap-3 mt-3">
-            <div
-              *ngFor="let pdf of selectedRecord.proofPdfs"
-              class="border border-blue-200 rounded-2xl p-4 bg-blue-50 flex items-center justify-between"
-            >
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-blue-600 text-5xl">
-                  picture_as_pdf
-                </span>
-
-                <div>
-                  <div class="font-semibold text-sm text-blue-700">
-                    File PDF Proof
-                  </div>
-
-                  <div class="text-xs text-gray-500">
-                    Preview unavailable. Download PDF file.
-                  </div>
-                </div>
-              </div>
-
-              <a
-                [href]="pdf.url"
-                target="_blank"
-                download
-                class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:opacity-90 transition"
-              >
-                Download
-              </a>
-            </div>
-          </div>
+          Amount
         </div>
-
-        <!-- ================= ACCEPTED PROOF ================= -->
         <div
-          *ngIf="
-            selectedRecord?.acceptedImages?.length ||
-            selectedRecord?.acceptedPdfs?.length
-          "
-          class="mb-5"
+          class="text-xl sm:text-2xl font-bold text-gray-900 flex items-baseline gap-1"
         >
-          <div
-            class="flex items-center gap-2 mb-3 text-sm font-bold text-green-700"
-          >
-            <span class="material-symbols-outlined text-green-600 text-[20px]">
-              verified
-            </span>
-            Accepted Proof
-          </div>
-
-          <div
-            class="grid gap-4"
-            [ngClass]="{
-              'grid-cols-1': selectedRecord.acceptedImages.length === 1,
-              'grid-cols-2': selectedRecord.acceptedImages.length === 2,
-              'grid-cols-2 lg:grid-cols-3':
-                selectedRecord.acceptedImages.length > 2,
-            }"
-          >
-            <div
-              *ngFor="let img of selectedRecord.acceptedImages"
-              class="relative group"
-            >
-              <img
-                [src]="img"
-                alt="accepted-proof"
-                (click)="openLightbox(img)"
-                (error)="onImageError($event)"
-                class="w-full rounded-2xl border border-green-200 bg-white p-2 shadow-sm hover:shadow-lg transition cursor-pointer object-contain"
-                [ngClass]="{
-                  'max-h-[520px] min-h-[420px]':
-                    selectedRecord.acceptedImages.length === 1,
-                  'h-80': selectedRecord.acceptedImages.length === 2,
-                  'h-44': selectedRecord.acceptedImages.length > 2,
-                }"
-              />
-
-              <div
-                class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 text-center rounded-b-2xl opacity-0 group-hover:opacity-100 transition"
-              >
-                Click to preview
-              </div>
-            </div>
-          </div>
-
-          <!-- ACCEPTED PDF LIST -->
-          <div class="flex flex-col gap-3 mt-3">
-            <div
-              *ngFor="let pdf of selectedRecord.acceptedPdfs"
-              class="border border-green-200 rounded-2xl p-4 bg-green-50 flex items-center justify-between"
-            >
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-green-600 text-5xl">
-                  picture_as_pdf
-                </span>
-                <div>
-                  <div class="font-semibold text-sm text-green-700">
-                    Accepted PDF Proof
-                  </div>
-                  <div class="text-xs text-gray-500">
-                    Preview unavailable. Download PDF file.
-                  </div>
-                </div>
-              </div>
-              <a
-                [href]="pdf.url"
-                target="_blank"
-                download
-                class="px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-semibold hover:opacity-90 transition"
-              >
-                Download
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- ================= REJECTED PROOF ================= -->
-        <div
-          *ngIf="
-            selectedRecord?.rejectedImages?.length ||
-            selectedRecord?.rejectedPdfs?.length
-          "
-        >
-          <div
-            class="flex items-center gap-2 mb-3 text-sm font-bold text-red-600"
-          >
-            <span class="material-symbols-outlined text-red-600 text-[20px]">
-              cancel
-            </span>
-            Rejected Proof
-          </div>
-
-          <div
-            class="grid gap-4"
-            [ngClass]="{
-              'grid-cols-1': selectedRecord.rejectedImages.length === 1,
-              'grid-cols-2': selectedRecord.rejectedImages.length === 2,
-              'grid-cols-2 lg:grid-cols-3':
-                selectedRecord.rejectedImages.length > 2,
-            }"
-          >
-            <div
-              *ngFor="let img of selectedRecord.rejectedImages"
-              class="relative group"
-            >
-              <img
-                [src]="img"
-                alt="rejected-proof"
-                (click)="openLightbox(img)"
-                (error)="onImageError($event)"
-                class="w-full rounded-2xl border border-red-200 bg-white p-2 shadow-sm hover:shadow-lg transition cursor-pointer object-contain"
-                [ngClass]="{
-                  'max-h-[520px] min-h-[420px]':
-                    selectedRecord.rejectedImages.length === 1,
-                  'h-80': selectedRecord.rejectedImages.length === 2,
-                  'h-44': selectedRecord.rejectedImages.length > 2,
-                }"
-              />
-
-              <div
-                class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs py-2 text-center rounded-b-2xl opacity-0 group-hover:opacity-100 transition"
-              >
-                Click to preview
-              </div>
-            </div>
-          </div>
-
-          <!-- REJECTED PDF LIST -->
-          <div class="flex flex-col gap-3 mt-3">
-            <div
-              *ngFor="let pdf of selectedRecord.rejectedPdfs"
-              class="border border-red-200 rounded-2xl p-4 bg-red-50 flex items-center justify-between"
-            >
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-red-600 text-5xl">
-                  picture_as_pdf
-                </span>
-                <div>
-                  <div class="font-semibold text-sm text-red-700">
-                    Rejected PDF Proof
-                  </div>
-                  <div class="text-xs text-gray-500">
-                    Preview unavailable. Download PDF file.
-                  </div>
-                </div>
-              </div>
-              <a
-                [href]="pdf.url"
-                target="_blank"
-                download
-                class="px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:opacity-90 transition"
-              >
-                Download
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- ================= EMPTY STATE ================= -->
-        <div
-          *ngIf="
-            !selectedRecord?.proofImages?.length &&
-            !selectedRecord?.proofPdfs?.length &&
-            !selectedRecord?.acceptedImages?.length &&
-            !selectedRecord?.acceptedPdfs?.length &&
-            !selectedRecord?.rejectedImages?.length &&
-            !selectedRecord?.rejectedPdfs?.length
-          "
-          class="flex flex-col items-center justify-center py-10 text-[var(--color-muted)]"
-        >
-          <span class="material-symbols-outlined text-6xl mb-2">
-            image_not_supported
+          <span *ngIf="(selectedRecord?.currency || 'INR') === 'INR'">₹</span>
+          {{ formatCurrency(selectedRecord?.amount) }}
+          <span class="text-xs sm:text-sm font-medium text-gray-400">
+            {{ selectedRecord?.currency || "INR" }}
           </span>
-
-          <div class="text-sm font-medium">No proof files available</div>
         </div>
       </div>
 
-      <!-- RIGHT: Transaction Details – category-wise (bank / upi / crypto) -->
-      <div class="overflow-y-auto h-full max-h-[calc(90vh-160px)] pr-2">
-        <h4
-          class="text-sm sm:text-base font-semibold mb-2 sm:mb-4 flex items-center gap-1 sm:gap-2 text-[var(--color-font)]"
+      <div class="h-9 w-px bg-gray-200 hidden sm:block"></div>
+
+      <div>
+        <div
+          class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1"
         >
-          <span class="material-symbols-outlined text-base sm:text-lg"
-            >info</span
-          >
-          Transaction Details
-        </h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+          Transaction ID
+        </div>
+        <div class="text-base sm:text-lg font-bold text-gray-900">
+          {{ selectedRecord?.transactionId || "—" }}
+        </div>
+      </div>
+
+      <div class="ml-auto flex items-center gap-6 sm:gap-8">
+        <div>
           <div
-            *ngFor="let field of displayFields"
-            class="rounded-lg sm:rounded-xl p-2 sm:p-4 bg-[var(--color-bg)] border border-[var(--color-border)]"
+            class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1"
           >
-            <div
-              class="text-[9px] sm:text-xs font-medium mb-0.5 uppercase tracking-wide text-[var(--color-muted)]"
+            Status
+          </div>
+          <span
+            class="px-2.5 py-1 rounded-md text-[11px] font-bold uppercase"
+            [ngClass]="getStatusClass(selectedRecord?.status)"
+          >
+            {{ selectedRecord?.status || "—" }}
+          </span>
+        </div>
+        <div *ngIf="selectedRecord?.reviewStatus">
+          <div
+            class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1"
+          >
+            Review Status
+          </div>
+          <span
+            class="px-2.5 py-1 rounded-md text-[11px] font-bold uppercase"
+            [ngClass]="getStatusClass(selectedRecord?.reviewStatus)"
+          >
+            {{ selectedRecord?.reviewStatus || "—" }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div
+      class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 p-4 sm:p-6 overflow-y-auto"
+    >
+      <!-- LEFT: Details -->
+      <div class="flex flex-col gap-7 order-2 lg:order-1">
+        <!-- BANK: Account Information -->
+        <div
+          class="flex flex-col gap-3"
+          *ngIf="selectedRecord?.category === 'bank'"
+        >
+          <h4
+            class="text-xs sm:text-sm font-bold flex items-center gap-2 text-gray-800 uppercase tracking-wide"
+          >
+            <span
+              class="material-symbols-outlined text-base sm:text-lg text-gray-500"
+              >account_balance</span
             >
-              {{ field.label }}
+            Account Information
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="rounded-lg p-3.5 bg-white border border-gray-200">
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                Account Number
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.accountNo || "—" }}
+              </div>
+            </div>
+            <div class="rounded-lg p-3.5 bg-white border border-gray-200">
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                IFSC Code
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.ifscCode || "—" }}
+              </div>
             </div>
             <div
-              class="text-[11px] sm:text-sm font-semibold text-[var(--color-font)] break-words"
+              class="rounded-lg p-3.5 bg-white border border-gray-200 sm:col-span-2"
             >
-              {{ field.value }}
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                Account Holder
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.holder || "—" }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPI: UPI Information -->
+        <div
+          class="flex flex-col gap-3"
+          *ngIf="selectedRecord?.category === 'upi'"
+        >
+          <h4
+            class="text-xs sm:text-sm font-bold flex items-center gap-2 text-gray-800 uppercase tracking-wide"
+          >
+            <span
+              class="material-symbols-outlined text-base sm:text-lg text-gray-500"
+              >qr_code_2</span
+            >
+            UPI Information
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="rounded-lg p-3.5 bg-white border border-gray-200">
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                VPA / UPI ID
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.vpa || "—" }}
+              </div>
+            </div>
+            <div class="rounded-lg p-3.5 bg-white border border-gray-200">
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                Account Holder
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.holder || "—" }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CRYPTO: Wallet Information -->
+        <div
+          class="flex flex-col gap-3"
+          *ngIf="selectedRecord?.category === 'crypto'"
+        >
+          <h4
+            class="text-xs sm:text-sm font-bold flex items-center gap-2 text-gray-800 uppercase tracking-wide"
+          >
+            <span
+              class="material-symbols-outlined text-base sm:text-lg text-gray-500"
+              >currency_bitcoin</span
+            >
+            Wallet Information
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
+              class="rounded-lg p-3.5 bg-white border border-gray-200 sm:col-span-2"
+            >
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                Wallet Address
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.walletAddress || "—" }}
+              </div>
+            </div>
+            <div class="rounded-lg p-3.5 bg-white border border-gray-200">
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                Network / Type
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.payoutType || "—" }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Information -->
+        <div class="flex flex-col gap-3">
+          <h4
+            class="text-xs sm:text-sm font-bold flex items-center gap-2 text-gray-800 uppercase tracking-wide"
+          >
+            <span
+              class="material-symbols-outlined text-base sm:text-lg text-gray-500"
+              >person</span
+            >
+            User Information
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="rounded-lg p-3.5 bg-white border border-gray-200">
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                User ID
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.userId || "—" }}
+              </div>
+            </div>
+            <div class="rounded-lg p-3.5 bg-white border border-gray-200">
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                Display ID
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.displayId || "—" }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transaction Meta -->
+        <div class="flex flex-col gap-3">
+          <h4
+            class="text-xs sm:text-sm font-bold flex items-center gap-2 text-gray-800 uppercase tracking-wide"
+          >
+            <span
+              class="material-symbols-outlined text-base sm:text-lg text-gray-500"
+              >info</span
+            >
+            Transaction Meta
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
+              class="rounded-lg p-3.5 bg-white border border-gray-200 sm:col-span-2"
+            >
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                Transaction ID / UTR
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.transactionId || "—" }}
+              </div>
+            </div>
+            <div class="rounded-lg p-3.5 bg-white border border-gray-200">
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                Amount
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                <span *ngIf="(selectedRecord?.currency || 'INR') === 'INR'"
+                  >₹</span
+                >{{ formatCurrency(selectedRecord?.amount) }}
+              </div>
+            </div>
+            <div class="rounded-lg p-3.5 bg-white border border-gray-200">
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                Currency
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.currency || "INR" }}
+              </div>
+            </div>
+            <div
+              class="rounded-lg p-3.5 bg-white border border-gray-200"
+              *ngIf="selectedRecord?.remarks"
+            >
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                Remarks
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.remarks }}
+              </div>
+            </div>
+            <div
+              class="rounded-lg p-3.5 bg-white border border-gray-200"
+              *ngIf="selectedRecord?.queryText"
+            >
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                Query Text
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{ selectedRecord?.queryText }}
+              </div>
+            </div>
+            <div
+              class="rounded-lg p-3.5 bg-white border border-gray-200 sm:col-span-2"
+            >
+              <div
+                class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
+              >
+                Date
+              </div>
+              <div class="text-sm font-semibold text-gray-900 break-words">
+                {{
+                  selectedRecord?.date
+                    ? (selectedRecord.date | date: "medium")
+                    : "—"
+                }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Proof Section -->
+      <div class="flex flex-col gap-3 order-1 lg:order-2">
+        <h4
+          class="text-sm sm:text-base font-bold text-gray-900 flex items-center gap-2"
+        >
+          <span
+            class="material-symbols-outlined text-base sm:text-lg text-gray-500"
+            >folder</span
+          >
+          File Proof
+        </h4>
+
+        <div
+          class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 flex flex-col gap-5 max-h-[640px] overflow-y-auto"
+        >
+          <!-- ================= FILE PROOF ================= -->
+          <div
+            *ngIf="
+              selectedRecord?.proofImages?.length ||
+              selectedRecord?.proofPdfs?.length
+            "
+          >
+            <div
+              class="text-[10px] font-bold uppercase tracking-wide text-blue-600 mb-2 flex items-center gap-1"
+            >
+              <span class="material-symbols-outlined text-xs">description</span>
+              File Proof
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <div
+                *ngFor="let img of selectedRecord.proofImages; let i = index"
+                class="relative group rounded-lg overflow-hidden border border-gray-200 bg-white cursor-pointer"
+                (click)="openLightbox(img)"
+              >
+                <img
+                  [src]="img"
+                  alt="proof"
+                  class="w-full max-h-[380px] object-contain bg-white transition-transform duration-300 group-hover:scale-[1.02]"
+                  (error)="onImageError($event)"
+                />
+                <div
+                  class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center"
+                >
+                  <span
+                    class="material-symbols-outlined text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  >
+                    zoom_in
+                  </span>
+                </div>
+                <span
+                  *ngIf="selectedRecord.proofImages.length > 1"
+                  class="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white"
+                >
+                  {{ i + 1 }} / {{ selectedRecord.proofImages.length }}
+                </span>
+              </div>
+            </div>
+
+            <div
+              *ngFor="let pdf of selectedRecord.proofPdfs"
+              class="border border-gray-200 rounded-xl p-3 sm:p-4 bg-white flex items-center justify-between mt-3"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0"
+                >
+                  <span class="material-symbols-outlined text-blue-600 text-2xl"
+                    >picture_as_pdf</span
+                  >
+                </div>
+                <div>
+                  <div class="font-semibold text-xs sm:text-sm text-gray-900">
+                    {{ pdf.name || "File Proof" }}
+                  </div>
+                  <div class="text-[10px] text-gray-400">
+                    Preview unavailable. Click to download
+                  </div>
+                </div>
+              </div>
+              <a
+                [href]="pdf.url"
+                target="_blank"
+                download
+                class="px-3 sm:px-4 py-1.5 rounded-lg bg-blue-600 text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+              >
+                <span class="material-symbols-outlined text-sm">download</span>
+                Download
+              </a>
+            </div>
+          </div>
+
+          <!-- ================= ACCEPTED PROOF ================= -->
+          <div
+            *ngIf="
+              selectedRecord?.acceptedImages?.length ||
+              selectedRecord?.acceptedPdfs?.length
+            "
+          >
+            <div
+              class="text-[10px] font-bold uppercase tracking-wide text-green-600 mb-2 flex items-center gap-1"
+            >
+              <span class="material-symbols-outlined text-xs">verified</span>
+              Accepted Proof
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <div
+                *ngFor="let img of selectedRecord.acceptedImages; let i = index"
+                class="relative group rounded-lg overflow-hidden border border-green-200 bg-white cursor-pointer"
+                (click)="openLightbox(img)"
+              >
+                <img
+                  [src]="img"
+                  alt="accepted-proof"
+                  class="w-full max-h-[380px] object-contain bg-white transition-transform duration-300 group-hover:scale-[1.02]"
+                  (error)="onImageError($event)"
+                />
+                <div
+                  class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center"
+                >
+                  <span
+                    class="material-symbols-outlined text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  >
+                    zoom_in
+                  </span>
+                </div>
+                <span
+                  *ngIf="selectedRecord.acceptedImages.length > 1"
+                  class="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white"
+                >
+                  {{ i + 1 }} / {{ selectedRecord.acceptedImages.length }}
+                </span>
+              </div>
+            </div>
+
+            <div
+              *ngFor="let pdf of selectedRecord.acceptedPdfs"
+              class="border border-green-200 rounded-xl p-3 sm:p-4 bg-green-50 flex items-center justify-between mt-3"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center shrink-0"
+                >
+                  <span
+                    class="material-symbols-outlined text-green-600 text-2xl"
+                    >picture_as_pdf</span
+                  >
+                </div>
+                <div>
+                  <div class="font-semibold text-xs sm:text-sm text-green-700">
+                    {{ pdf.name || "Accepted Proof" }}
+                  </div>
+                  <div class="text-[10px] text-gray-400">
+                    Preview unavailable. Click to download
+                  </div>
+                </div>
+              </div>
+              <a
+                [href]="pdf.url"
+                target="_blank"
+                download
+                class="px-3 sm:px-4 py-1.5 rounded-lg bg-green-600 text-white text-xs sm:text-sm font-semibold hover:bg-green-700 transition-colors flex items-center gap-1.5"
+              >
+                <span class="material-symbols-outlined text-sm">download</span>
+                Download
+              </a>
+            </div>
+          </div>
+
+          <!-- ================= REJECTED PROOF ================= -->
+          <div
+            *ngIf="
+              selectedRecord?.rejectedImages?.length ||
+              selectedRecord?.rejectedPdfs?.length
+            "
+          >
+            <div
+              class="text-[10px] font-bold uppercase tracking-wide text-red-600 mb-2 flex items-center gap-1"
+            >
+              <span class="material-symbols-outlined text-xs">error</span>
+              Rejected Proof
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <div
+                *ngFor="let img of selectedRecord.rejectedImages; let i = index"
+                class="relative group rounded-lg overflow-hidden border-2 border-red-200 bg-white cursor-pointer"
+                (click)="openLightbox(img)"
+              >
+                <img
+                  [src]="img"
+                  alt="rejected-proof"
+                  class="w-full max-h-[380px] object-contain bg-white transition-transform duration-300 group-hover:scale-[1.02]"
+                  (error)="onImageError($event)"
+                />
+                <div
+                  class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center"
+                >
+                  <span
+                    class="material-symbols-outlined text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  >
+                    zoom_in
+                  </span>
+                </div>
+                <span
+                  class="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-600 text-white"
+                >
+                  Rejected
+                </span>
+              </div>
+            </div>
+
+            <div
+              *ngFor="let pdf of selectedRecord.rejectedPdfs"
+              class="border border-red-200 rounded-xl p-3 sm:p-4 bg-red-50 flex items-center justify-between mt-3"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center shrink-0"
+                >
+                  <span class="material-symbols-outlined text-red-600 text-2xl"
+                    >picture_as_pdf</span
+                  >
+                </div>
+                <div>
+                  <div class="font-semibold text-xs sm:text-sm text-red-600">
+                    {{ pdf.name || "Rejected Proof" }}
+                  </div>
+                  <div class="text-[10px] text-gray-400">
+                    Preview unavailable. Click to download
+                  </div>
+                </div>
+              </div>
+              <a
+                [href]="pdf.url"
+                target="_blank"
+                download
+                class="px-3 sm:px-4 py-1.5 rounded-lg bg-red-600 text-white text-xs sm:text-sm font-semibold hover:bg-red-700 transition-colors flex items-center gap-1.5"
+              >
+                <span class="material-symbols-outlined text-sm">download</span>
+                Download
+              </a>
+            </div>
+          </div>
+
+          <!-- ================= EMPTY STATE ================= -->
+          <div
+            *ngIf="
+              !selectedRecord?.proofImages?.length &&
+              !selectedRecord?.proofPdfs?.length &&
+              !selectedRecord?.acceptedImages?.length &&
+              !selectedRecord?.acceptedPdfs?.length &&
+              !selectedRecord?.rejectedImages?.length &&
+              !selectedRecord?.rejectedPdfs?.length
+            "
+            class="flex flex-col items-center justify-center text-center text-gray-400 py-14"
+          >
+            <div
+              class="w-16 h-16 rounded-full bg-white border border-gray-200 flex items-center justify-center mb-3"
+            >
+              <span class="material-symbols-outlined text-3xl"
+                >image_not_supported</span
+              >
+            </div>
+            <div class="text-sm font-semibold text-gray-600">
+              No proof files available
+            </div>
+            <div class="text-xs mt-1 opacity-70">
+              No file has been uploaded for this transaction
             </div>
           </div>
         </div>

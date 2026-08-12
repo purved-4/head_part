@@ -1,5 +1,3 @@
-
-import { SharedModule } from "./../../../../core/shared.module";
 import {
   Component,
   OnDestroy,
@@ -7,12 +5,10 @@ import {
   ViewChild,
   ViewContainerRef,
 } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute } from "@angular/router";
 import { UserService } from "../../../services/user.service";
-import { HeadService } from "../../../services/head.service";
 import { BranchService } from "../../../services/branch.service";
 import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
-import { HostListener } from "@angular/core";
 @Component({
   selector: "app-manage-branch-user",
   templateUrl: "./manage-branch-user.component.html",
@@ -53,47 +49,13 @@ export class ManageBranchUserComponent implements OnInit, OnDestroy {
   constructor(
     private userService: UserService,
     private activatedRoute: ActivatedRoute,
-    private router: Router,
-    private headService: HeadService,
+
     private BranchService: BranchService,
     private snack: SnackbarService,
   ) {}
   ngOnDestroy(): void {
     sessionStorage.removeItem("branchViewMode");
   }
-
-  // ngOnInit(): void {
-
-  // this.checkScreen();
-
-  //   this.activatedRoute.params.subscribe((params) => {
-  //     this.branchId = params["branchId"];
-  //     this.headId = params["headId"];
-  //     this.loadUsers();
-
-  //   });
-  // }
-
-  // View toggle method
-
-  // Update ngOnInit
-  // ngOnInit(): void {
-  //   this.checkScreen();
-
-  //   // Get the previous view mode from sessionStorage
-  //   const savedViewMode = sessionStorage.getItem("branchViewMode");
-  //   if (savedViewMode && !this.isMobile) {
-  //     // Only restore on desktop
-  //     this.viewMode = savedViewMode as "table" | "grid";
-  //     this.itemsPerPage = savedViewMode === "table" ? this.itemsPerPageTable : this.itemsPerPageGrid;
-  //   }
-
-  //   this.activatedRoute.params.subscribe((params) => {
-  //     this.branchId = params["branchId"];
-  //     this.headId = params["headId"];
-  //     this.loadUsers();
-  //   });
-  // }
 
   ngOnInit(): void {
     const savedViewMode = sessionStorage.getItem("branchViewMode");
@@ -111,33 +73,6 @@ export class ManageBranchUserComponent implements OnInit, OnDestroy {
       this.loadUsers();
     });
   }
-
-  // toggleView(mode: "table" | "grid"): void {
-  //   this.viewMode = mode;
-  //   this.itemsPerPage =
-  //     mode === "table" ? this.itemsPerPageTable : this.itemsPerPageGrid;
-  //   this.currentPage = 1; // reset to first page
-  //   this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
-  //   this.updatePagedData();
-  // }
-
-  //   toggleView(mode: "table" | "grid"): void {
-  //   // Don't allow table view on mobile
-  //   if (this.isMobile && mode === "table") {
-  //     return;
-  //   }
-
-  //   this.viewMode = mode;
-  //   this.itemsPerPage = mode === "table" ? this.itemsPerPageTable : this.itemsPerPageGrid;
-  //   this.currentPage = 1;
-  //   this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
-  //   this.updatePagedData();
-
-  //   // Save preference to sessionStorage only on desktop
-  //   if (!this.isMobile) {
-  //     sessionStorage.setItem("branchViewMode", mode);
-  //   }
-  // }
 
   toggleView(mode: "table" | "grid"): void {
     this.viewMode = mode;
@@ -247,7 +182,7 @@ export class ManageBranchUserComponent implements OnInit, OnDestroy {
   onEdit(user: any): void {
     this.selectedUser = {
       id: user.userId,
-      name: user.userName,
+      name: user.userUsername,
       email: user.userEmail,
       active: user.active,
       phone: user.userPhone,
@@ -269,7 +204,7 @@ export class ManageBranchUserComponent implements OnInit, OnDestroy {
 
     const userToUpdate: any = {
       id: this.selectedUser.id,
-      username: this.selectedUser.name,
+      userUsername: this.selectedUser.name,
       email: this.selectedUser.email,
       active: this.selectedUser.active,
       phone: this.selectedUser.phone,
@@ -292,12 +227,14 @@ export class ManageBranchUserComponent implements OnInit, OnDestroy {
   toggleStatus(user: any): void {
     this.BranchService.toggleChiefUserStatus(
       this.branchId,
-      this.userId,
+      user.userId,
     ).subscribe({
       next: () => {
         user.active = !user.active;
       },
-      error: (err) => {},
+      error: (err) => {
+        console.error("Failed to toggle user status:", err);
+      },
     });
   }
 
@@ -310,22 +247,6 @@ export class ManageBranchUserComponent implements OnInit, OnDestroy {
     this.searchTerm = "";
     this.applyFilter();
   }
-
-  // checkScreen(): void {
-  //   this.isMobile = window.innerWidth < 768;
-
-  //   if (this.isMobile) {
-  //     this.viewMode = "grid";
-  //     this.itemsPerPage = this.itemsPerPageGrid;
-  //   } else {
-  //     // On desktop, restore saved preference
-  //     const savedViewMode = sessionStorage.getItem("branchViewMode") as "table" | "grid";
-  //     if (savedViewMode) {
-  //       this.viewMode = savedViewMode;
-  //       this.itemsPerPage = savedViewMode === "table" ? this.itemsPerPageTable : this.itemsPerPageGrid;
-  //     }
-  //   }
-  // }
 
   openAddUserModal(): void {
     this.showAddUserModal = true;
@@ -340,19 +261,4 @@ export class ManageBranchUserComponent implements OnInit, OnDestroy {
     this.loadUsers(); // reload list after adding
     this.snack.show("User created successfully", true);
   }
-
-  // openUserDetails(user: any) {
-  //   this.selectedUserDetails = user;
-  //   this.showUserDetailsModal = true;
-  // }
-
-  // closeUserDetails() {
-  //   this.showUserDetailsModal = false;
-  //   this.selectedUserDetails = null;
-  // }
-
-  // @HostListener("window:resize")
-  // onResize() {
-  //   this.checkScreen();
-  // }
 }
