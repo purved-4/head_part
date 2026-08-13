@@ -797,4 +797,48 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       });
     }
   }
+
+  get totalAmount(): number {
+    return (this.pagedBankPayinsData || []).reduce(
+      (sum, r) => sum + (Number(r?.amount) || 0),
+      0,
+    );
+  }
+
+  get pendingCount(): number {
+    return (this.pagedBankPayinsData || []).filter((r) =>
+      String(r?.reviewStatus || r?.status || "")
+        .toUpperCase()
+        .includes("PENDING"),
+    ).length;
+  }
+
+  get completedCount(): number {
+    return (this.pagedBankPayinsData || []).filter((r) =>
+      String(r?.reviewStatus || r?.status || "")
+        .toUpperCase()
+        .includes("ACCEPT"),
+    ).length;
+  }
+
+  statusPillClass(status: string): string {
+    const st = (status || "").toLowerCase();
+    if (st.includes("accept") || st.includes("completed") || st === "success") {
+      return "bg-emerald-50 text-emerald-700";
+    }
+    if (st.includes("dispute")) {
+      return "bg-blue-50 text-blue-700";
+    }
+    if (st.includes("pending")) {
+      return "bg-amber-50 text-amber-700";
+    }
+    if (
+      st.includes("reject") ||
+      st.includes("failed") ||
+      st.includes("decline")
+    ) {
+      return "bg-red-50 text-red-700";
+    }
+    return "bg-slate-100 text-slate-600";
+  }
 }

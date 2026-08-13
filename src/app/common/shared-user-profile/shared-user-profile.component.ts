@@ -15,6 +15,7 @@ export class SharedUserProfileComponent implements OnInit {
   currentEntityId: any;
   userFullDetail: any = null;
   errorMessage: any;
+  entityInfos: any = null;
   isLoading: boolean = true;
   showChangePasswordModal = false;
   successMessage: string = "";
@@ -31,9 +32,9 @@ export class SharedUserProfileComponent implements OnInit {
     confirmPassword: "",
   };
   @Output() passwordChanged = new EventEmitter<{
-      oldPassword: string;
-      newPassword: string;
-    }>();
+    oldPassword: string;
+    newPassword: string;
+  }>();
 
   // --- Head details (business type / existing promo code) ---
   businessType: string | null = null;
@@ -57,6 +58,7 @@ export class SharedUserProfileComponent implements OnInit {
     this.userService.getUserFullDetail(this.currentUserId).subscribe({
       next: (data: any) => {
         this.userFullDetail = data?.data || data;
+        this.entityInfos = data?.entityInfo || data;
         this.isLoading = false;
       },
       error: (err) => {
@@ -180,7 +182,7 @@ export class SharedUserProfileComponent implements OnInit {
     this.copiedCode = false;
     this.copiedLink = false;
 
-    this.headService.generatePromoCode(this.currentEntityId,null).subscribe({
+    this.headService.generatePromoCode(this.currentEntityId, null).subscribe({
       next: (res: any) => {
         const code = res?.code || res?.promoCode || res;
         this.promoCode = code;
@@ -214,7 +216,7 @@ export class SharedUserProfileComponent implements OnInit {
     });
   }
 
-   changePassword() {
+  changePassword() {
     this.errorMessage = "";
     this.successMessage = "";
 
@@ -257,7 +259,7 @@ export class SharedUserProfileComponent implements OnInit {
         setTimeout(() => {
           this.successMessage = "";
         }, 3000);
-        this.snackBar.show("Password Updated Succesfully",true,3000);
+        this.snackBar.show("Password Updated Succesfully", true, 3000);
         this.showChangePasswordModal = false;
       },
       error: (err) => {

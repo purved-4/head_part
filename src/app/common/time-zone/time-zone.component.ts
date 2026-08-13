@@ -7,8 +7,11 @@ import {
   ViewChild,
 } from "@angular/core";
 import { Subscription, interval } from "rxjs";
-import { TimeZoneOption, TimeZoneServiceService, TimeZoneState } from "./time-zone-service.service";
- 
+import {
+  TimeZoneOption,
+  TimeZoneServiceService,
+  TimeZoneState,
+} from "./time-zone-service.service";
 
 @Component({
   selector: "app-time-zone",
@@ -71,7 +74,7 @@ export class TimeZoneComponent implements OnInit, OnDestroy {
   getSelectedLocalTime(): string {
     return this.formatNoSeconds(
       this.now,
-      this.currentState?.iana || this.timeZoneService.getActiveTimeZone()
+      this.currentState?.iana || this.timeZoneService.getActiveTimeZone(),
     );
   }
 
@@ -102,6 +105,33 @@ export class TimeZoneComponent implements OnInit, OnDestroy {
       minute: "2-digit",
       hour12: true,
     }).format(value);
+  }
+
+  /**
+   * Live clock (no date, includes seconds) for whichever timezone
+   * is currently selected. Shown on the trigger button/pill.
+   */
+  getSelectedTimeOnly(): string {
+    const tz =
+      this.currentState?.iana || this.timeZoneService.getActiveTimeZone();
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    }).format(this.now);
+  }
+
+  /**
+   * Human readable label for whichever timezone is currently selected.
+   * Useful if you want to show the zone name next to the clock.
+   */
+  getSelectedZoneLabel(): string {
+    if (this.currentState?.mode === "SYSTEM") {
+      return "System";
+    }
+    return this.currentState?.label || this.currentState?.code || "";
   }
 
   @HostListener("document:click", ["$event"])

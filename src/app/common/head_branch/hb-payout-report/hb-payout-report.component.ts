@@ -900,4 +900,56 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
       });
     }
   }
+
+  /** Total amount of currently loaded page (for the "Total Amount" stat pill) */
+  get payoutTotalAmount(): number {
+    return (this.pagedApprovedPayoutsData || []).reduce(
+      (sum, r) => sum + (Number(r?.amount) || 0),
+      0,
+    );
+  }
+
+  /** Count of pending/dispute records on current page (for the "Pending / Dispute" stat pill) */
+  get payoutPendingCount(): number {
+    return (this.pagedApprovedPayoutsData || []).filter(
+      (r) =>
+        String(r?.reviewStatus || "")
+          .toUpperCase()
+          .includes("DISPUTE") ||
+        String(r?.reviewStatus || "")
+          .toUpperCase()
+          .includes("PENDING"),
+    ).length;
+  }
+
+  /** Count of accepted records on current page (for the "Accepted" stat pill) */
+  get payoutCompletedCount(): number {
+    return (this.pagedApprovedPayoutsData || []).filter((r) =>
+      String(r?.reviewStatus || "")
+        .toUpperCase()
+        .includes("ACCEPT"),
+    ).length;
+  }
+
+  /** Tailwind color classes for the status badge in the new table/card design */
+  payoutStatusPillClass(status: string): string {
+    const st = (status || "").toLowerCase();
+    if (st.includes("accept") || st.includes("completed") || st === "success") {
+      return "bg-emerald-50 text-emerald-700";
+    }
+    if (st.includes("dispute")) {
+      return "bg-blue-50 text-blue-700";
+    }
+    if (st.includes("pending")) {
+      return "bg-amber-50 text-amber-700";
+    }
+    if (
+      st.includes("reject") ||
+      st.includes("failed") ||
+      st.includes("decline")
+    ) {
+      return "bg-red-50 text-red-700";
+    }
+    return "bg-slate-100 text-slate-600";
+  }
 }

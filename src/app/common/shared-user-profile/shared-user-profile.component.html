@@ -183,6 +183,21 @@
             </p>
           </div>
         </div>
+        <div class="flex items-center gap-3">
+          <div
+            class="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0"
+          >
+            <span class="material-symbols-outlined text-red-500 text-[18px]"
+              >account_balance_wallet</span
+            >
+          </div>
+          <div>
+            <p class="text-[11px] text-slate-400">Converstion Rate</p>
+            <p class="text-sm font-bold text-red-600">
+              {{ entityInfos.ownerRate | number: "1.2-2" }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -519,7 +534,3 @@
     </div>
   </div>
 </div>
-
-
-
-
