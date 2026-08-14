@@ -198,6 +198,16 @@
                     <div
                       class="flex items-baseline justify-end gap-1 text-[16px] font-bold text-[var(--color-font)] leading-none"
                     >
+                      <span
+                        *ngIf="(transaction.raw?.noOfThread || 0) > 0"
+                        class="inline-flex items-center gap-1 px-2 py-[2px] rounded-lg text-[11px] font-semiboldbg-orange-100 text-orange-600"
+                      >
+                        <span class="material-symbols-outlined text-[13px]"
+                          >local_fire_department</span
+                        >
+                        {{ transaction.raw?.noOfThread }}
+                      </span>
+
                       <span class="text-[11px] opacity-70 uppercase">
                         {{ transaction.currency }}
                       </span>
@@ -434,6 +444,15 @@
                     <div
                       class="flex items-baseline justify-end gap-1 text-[15px] font-bold text-[var(--color-font)] leading-none"
                     >
+                      <span
+                        *ngIf="(transaction.raw?.noOfThread || 0) > 0"
+                        class="inline-flex items-center gap-1 px-2 py-[2px] rounded-lg text-[11px] font-semiboldbg-orange-100 text-orange-600"
+                      >
+                        <span class="material-symbols-outlined text-[13px]"
+                          >local_fire_department</span
+                        >
+                        {{ transaction.raw?.noOfThread }}
+                      </span>
                       <span class="text-[10px] opacity-70 uppercase">
                         {{ transaction.currency }}
                       </span>
@@ -807,6 +826,15 @@
                     }"
                   >
                     <span
+                      *ngIf="(transaction.raw?.noOfThread || 0) > 0"
+                      class="inline-flex items-center gap-1 px-2 py-[2px] rounded-lg text-[11px] font-semiboldbg-orange-100 text-orange-600"
+                    >
+                      <span class="material-symbols-outlined text-[13px]"
+                        >local_fire_department</span
+                      >
+                      {{ transaction.raw?.noOfThread }}
+                    </span>
+                    <span
                       class="text-[11px] text-[var(--color-font)] opacity-70 uppercase"
                     >
                       {{ transaction.currency }}
@@ -1055,9 +1083,9 @@
               class="text-[11px] text-[var(--color-muted)] font-semibold uppercase"
               >Type</span
             >
-            <span class="font-bold text-[var(--color-font)]">
-              {{ selectedTransaction.mode }}
-            </span>
+            <span class="font-bold text-[var(--color-font)]">{{
+              selectedTransaction.mode
+            }}</span>
           </div>
           <div class="flex justify-between items-center">
             <span
@@ -1066,7 +1094,11 @@
             >
             <span class="font-bold text-[var(--color-font)]">
               {{ selectedTransaction.parentCurrency }}-
-              {{ selectedTransaction.amount }}
+              {{
+                selectedTransaction.mode === "crypto"
+                  ? selectedTransaction.currencyWiseAmount
+                  : selectedTransaction.amount
+              }}
             </span>
           </div>
           <div class="flex justify-between items-center">
@@ -1108,17 +1140,18 @@
           </p>
         </div>
 
-        <!-- Optional Message -->
+        <!-- Message -->
         <div class="mb-6">
           <label
             class="block text-[11px] text-[var(--color-muted)] font-semibold uppercase mb-2"
           >
-            Message (Optional)
+            Message (Required)
           </label>
           <textarea
             [(ngModel)]="editAmountData.message"
             class="w-full p-3 rounded-lg border border-[var(--color-border)] focus:ring-2 focus:ring-[var(--color-primary-light)] focus:border-[var(--color-primary)] outline-none transition"
             rows="3"
+            required
             placeholder="Add a note about why the amount is being updated..."
           ></textarea>
           <p class="text-[11px] mt-2 text-[var(--color-muted)]">
@@ -1126,33 +1159,29 @@
           </p>
         </div>
 
-        <!-- Optional File Attachment -->
-        <!-- Conditional File Attachment -->
-        <!-- Optional File Attachment -->
-        <!-- Conditional File Attachment -->
-        <div class="mb-6" *ngIf="confirmTransaction?.type === 'payin'">
+        <!-- Attachment -->
+        <div class="mb-6">
           <div class="flex items-center justify-between mb-2">
             <label
               class="block text-[11px] text-[var(--color-muted)] font-semibold uppercase"
             >
-              Attachment (Required)
+              Attachment (Optional)
             </label>
             <span class="text-[11px] text-[var(--color-muted)]">Max 5MB</span>
           </div>
 
-          <!-- File upload area -->
           <div
             class="relative border-2 border-dashed border-[var(--color-border)] rounded-lg p-4 text-center hover:border-[var(--color-danger)] transition-colors duration-200"
-            [class.border-[var(--color-danger)]]="isDragging"
-            (dragover)="onDragOver($event)"
-            (dragleave)="onDragLeave($event)"
-            (drop)="onFileDrop($event)"
+            [class.border-[var(--color-danger)]]="editAmountData.isDragging"
+            (dragover)="onEditDragOver($event)"
+            (dragleave)="onEditDragLeave($event)"
+            (drop)="onEditFileDrop($event)"
           >
             <input
               type="file"
-              id="fileInput"
-              #fileInput
-              (change)="onFileSelected($event)"
+              id="editFileInput"
+              #editFileInput
+              (change)="onEditFileSelected($event)"
               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               accept=".pdf,.jpg,.jpeg,.png,application/pdf"
               aria-label="Upload attachment"
@@ -1164,12 +1193,11 @@
               >
                 <span
                   class="material-symbols-outlined text-[var(--color-muted)]"
+                  >attach_file</span
                 >
-                  attach_file
-                </span>
               </div>
 
-              <div *ngIf="!selectedFile" class="space-y-2">
+              <div *ngIf="!editAmountData.file" class="space-y-2">
                 <p class="text-[12px] font-medium text-[var(--color-font)]">
                   Drop file here or click to upload
                 </p>
@@ -1178,37 +1206,36 @@
                 </p>
               </div>
 
-              <!-- File preview when selected -->
-              <div *ngIf="selectedFile" class="space-y-3">
+              <div *ngIf="editAmountData.file" class="space-y-3">
                 <div class="flex items-center justify-center gap-2">
                   <div
                     class="w-10 h-10 rounded-lg bg-[var(--color-danger)]/10 flex items-center justify-center"
                   >
                     <span
                       class="material-symbols-outlined text-[var(--color-danger)]"
+                      >description</span
                     >
-                      description
-                    </span>
                   </div>
                   <div class="text-left flex-1">
                     <p
                       class="text-[12px] font-medium text-[var(--color-font)] truncate"
                     >
-                      {{ selectedFile.name }}
+                      {{ editAmountData.file.name }}
                     </p>
                     <p class="text-[11px] text-[var(--color-muted)]">
-                      {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
+                      {{
+                        (editAmountData.file.size / 1024 / 1024).toFixed(2)
+                      }}
+                      MB
                     </p>
                   </div>
                   <button
                     type="button"
-                    (click)="removeFile(); $event.stopPropagation()"
+                    (click)="removeEditFile(); $event.stopPropagation()"
                     class="text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors"
                     aria-label="Remove file"
                   >
-                    <span class="material-symbols-outlined text-sm">
-                      close
-                    </span>
+                    <span class="material-symbols-outlined text-sm">close</span>
                   </button>
                 </div>
 
@@ -1227,15 +1254,19 @@
 
                 <!-- PDF Preview -->
                 <iframe
-                  *ngIf="previewDocument"
-                  [src]="previewUrl"
-                  class="w-full h-[300px] object-contain rounded-lg mt-1 border"
+                  *ngIf="
+                    editAmountData.previewDocument && editAmountData.previewUrl
+                  "
+                  [src]="editAmountData.previewUrl"
+                  class="w-full h-[300px] object-contain rounded-lg mt-1 border pointer-events-auto"
                 ></iframe>
 
                 <!-- Image Preview -->
                 <img
-                  *ngIf="!previewDocument"
-                  [src]="previewUrl"
+                  *ngIf="
+                    !editAmountData.previewDocument && editAmountData.previewUrl
+                  "
+                  [src]="editAmountData.previewUrl"
                   class="w-full h-[300px] object-contain rounded-lg mt-1 border"
                 />
               </div>
@@ -1243,7 +1274,7 @@
           </div>
 
           <p class="text-[11px] mt-2 text-[var(--color-muted)]">
-            Attachment is mandatory for payin rejection.
+            Attachment is optional but recommended for record keeping.
           </p>
         </div>
 

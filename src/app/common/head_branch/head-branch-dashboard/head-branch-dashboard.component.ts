@@ -1,4 +1,3 @@
-
 import {
   AfterViewInit,
   Component,
@@ -649,6 +648,9 @@ export class HeadBranchDashboardComponent
     if (this.sse) {
       this.sse.unsubscribe();
       this.sse = undefined;
+    }
+    if (this.editAmountData?.previewUrl) {
+      URL.revokeObjectURL(this.editAmountData.previewUrl);
     }
 
     this.socketConfigService.unsubscribePendingData();
@@ -1554,23 +1556,7 @@ export class HeadBranchDashboardComponent
       this.loaderService.hideButtonLoader();
     }
   }
-  openEditAmountPopup(): void {
-    this.editAmountData = {
-      newAmount:
-        this.selectedTransaction.mode === "crypto"
-          ? this.selectedTransaction.currencyWiseAmount
-          : this.selectedTransaction.amount,
-      message: "",
-      file: null,
-      isDragging: false,
-    };
-    this.showEditAmountPopup = true;
-  }
 
-  closeEditAmountPopup(): void {
-    this.showEditAmountPopup = false;
-    this.resetEditAmountData();
-  }
   maskWalletAddress(address: string | null | undefined): string {
     if (!address) return "—";
     if (address.length <= 8) return address;
@@ -1579,50 +1565,6 @@ export class HeadBranchDashboardComponent
     const last = address.slice(-4);
 
     return `${first}....${last}`;
-  }
-
-  saveEditedAmount(): void {
-    if (!this.editAmountData.newAmount || this.editAmountData.newAmount <= 0) {
-      return;
-    }
-
-    this.loaderService.showButtonLoader();
-
-    const updateData = {
-      fundId: this.selectedTransaction.id,
-      oldAmount:
-        this.selectedTransaction.mode === "crypto"
-          ? this.selectedTransaction.currencyWiseAmount
-          : this.selectedTransaction.amount,
-      amount: this.editAmountData.newAmount,
-      reason: this.editAmountData.message,
-      timestamp: new Date().toISOString(),
-      updatedBy: this.entityId,
-    };
-
-    this.fundService
-      .updateAmount(updateData, this.editAmountData.file)
-      .subscribe({
-        next: (res) => {
-          this.loaderService.hideButtonLoader();
-        },
-        error: (err) => {
-          this.loaderService.hideButtonLoader();
-          this.snackbar.show(
-            err?.error?.message || "Failed to update amount",
-            false,
-          );
-        },
-      });
-
-    if (this.selectedTransaction.mode === "crypto") {
-      this.selectedTransaction.currencyWiseAmount =
-        this.editAmountData.newAmount;
-    } else {
-      this.selectedTransaction.amount = this.editAmountData.newAmount;
-    }
-
-    this.closeEditAmountPopup();
   }
 
   onProcessingClick(transaction: any) {
@@ -1710,79 +1652,6 @@ export class HeadBranchDashboardComponent
     }
   }
 
-  resetEditAmountData(): void {
-    this.editAmountData = {
-      newAmount: 0,
-      message: "",
-      file: null,
-      isDragging: false,
-    };
-
-    const fileInput = document.getElementById(
-      "editFileInput",
-    ) as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = "";
-    }
-  }
-
-  onEditDragOver(event: DragEvent): void {
-    event.preventDefault();
-    this.editAmountData.isDragging = true;
-  }
-
-  onEditDragLeave(event: DragEvent): void {
-    event.preventDefault();
-    this.editAmountData.isDragging = false;
-  }
-
-  onEditFileDrop(event: DragEvent): void {
-    event.preventDefault();
-    this.editAmountData.isDragging = false;
-
-    if (event.dataTransfer?.files.length) {
-      const file = event.dataTransfer.files[0];
-      this.validateAndSetEditFile(file);
-    }
-  }
-
-  onEditFileSelected(event: any): void {
-    const file = event.target.files[0];
-    this.validateAndSetEditFile(file);
-  }
-
-  validateAndSetEditFile(file: File): void {
-    const maxSize = 5 * 1024 * 1024;
-
-    if (file.size > maxSize) {
-      return;
-    }
-
-    const allowedTypes = [
-      "application/pdf",
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-
-    if (!allowedTypes.includes(file.type)) {
-      return;
-    }
-
-    this.editAmountData.file = file;
-  }
-
-  removeEditFile(): void {
-    this.editAmountData.file = null;
-    const fileInput = document.getElementById(
-      "editFileInput",
-    ) as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = "";
-    }
-  }
   async rejectTransaction(
     transaction: any,
     reason: any,
@@ -3359,55 +3228,6 @@ export class HeadBranchDashboardComponent
     );
   }
 
-  // private updateCurrencySums(): void {
-  //   const payinMap = new Map<string, any>();
-
-  //   [...this.pendingUpi, ...this.pendingBank, ...this.pendingCrypto].forEach(
-  //     (tx: any) => {
-  //       const currency = tx.parentCurrency || tx.currency || "INR";
-  //       const symbol = currency;
-
-  //       if (!payinMap.has(currency)) {
-  //         payinMap.set(currency, {
-  //           currency,
-  //           symbol,
-  //           total: 0,
-  //         });
-  //       }
-
-  //       payinMap.get(currency).total += Number(
-  //         tx.currencyWiseAmount  || 0,
-  //       );
-  //     },
-  //   );
-
-  //   this.payinCurrencySums = Array.from(payinMap.values());
-
-  //   const payoutMap = new Map<string, any>();
-
-  //   this.pendingpayouts.forEach((tx: any) => {
-  //     const currency = tx.parentCurrency || tx.currency || "INR";
-  //     const symbol = currency;
-
-  //     if (!payoutMap.has(currency)) {
-  //       payoutMap.set(currency, {
-  //         currency,
-  //         symbol,
-  //         total: 0,
-  //       });
-  //     }
-
-  //     payoutMap.get(currency).total += Number(
-  //       tx.currencyWiseAmount || 0,
-  //     );
-  //   });
-
-  //   this.payoutCurrencySums = Array.from(payoutMap.values());
-
-
-
-  // }
-
   private updateCurrencySums(): void {
     const payinMap = new Map<string, any>();
 
@@ -3448,9 +3268,6 @@ export class HeadBranchDashboardComponent
     });
 
     this.payoutCurrencySums = Array.from(payoutMap.values());
-
-
-
   }
   formatCurrencySum(s: any): string {
     const symbol = s.currency === "INR" ? "₹" : s.symbol || s.currency;
@@ -3529,5 +3346,367 @@ export class HeadBranchDashboardComponent
     this.showPayoutHistoryModal = false;
     this.payoutHistoryData = [];
     this.showAllPayoutHistoryAccounts = false;
+  }
+  //changes
+
+  openEditAmountPopup(): void {
+    // pehle purana state fully reset karo (agar last time close nahi hua tha properly)
+    this.resetEditAmountData();
+
+    this.editAmountData = {
+      newAmount:
+        this.selectedTransaction.mode === "crypto"
+          ? this.selectedTransaction.currencyWiseAmount
+          : this.selectedTransaction.amount,
+      message: "",
+      file: null,
+      isDragging: false,
+      previewUrl: null,
+      previewDocument: false,
+    };
+    this.showEditAmountPopup = true;
+  }
+
+  closeEditAmountPopup(): void {
+    this.showEditAmountPopup = false;
+    this.resetEditAmountData();
+  }
+
+  resetEditAmountData(): void {
+    // agar purana blob URL bana hua tha, usko revoke karo — warna memory leak + stale preview
+    if (this.editAmountData?.previewUrl) {
+      URL.revokeObjectURL(this.editAmountData.previewUrl);
+    }
+
+    this.editAmountData = {
+      newAmount: 0,
+      message: "",
+      file: null,
+      isDragging: false,
+      previewUrl: null,
+      previewDocument: false,
+    };
+
+    const fileInput = document.getElementById(
+      "editFileInput",
+    ) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  }
+
+  onEditDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.editAmountData.isDragging = true;
+  }
+
+  onEditDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    this.editAmountData.isDragging = false;
+  }
+
+  onEditFileDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.editAmountData.isDragging = false;
+
+    if (event.dataTransfer?.files.length) {
+      const file = event.dataTransfer.files[0];
+      this.validateAndSetEditFile(file);
+    }
+  }
+
+  onEditFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.validateAndSetEditFile(file);
+    }
+  }
+
+  validateAndSetEditFile(file: File): void {
+    const maxSize = 5 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      this.snackbar.show("File size must be less than 5MB", false);
+      return;
+    }
+
+    const allowedTypes = [
+      "application/pdf",
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      this.snackbar.show("Only PDF, JPG, PNG, DOC files are allowed", false);
+      return;
+    }
+
+    // purana preview URL revoke karo naya set karne se pehle
+    if (this.editAmountData.previewUrl) {
+      URL.revokeObjectURL(this.editAmountData.previewUrl);
+    }
+
+    this.editAmountData.file = file;
+    this.editAmountData.previewDocument = file.type === "application/pdf";
+    this.editAmountData.previewUrl = URL.createObjectURL(file);
+  }
+
+  removeEditFile(): void {
+    if (this.editAmountData.previewUrl) {
+      URL.revokeObjectURL(this.editAmountData.previewUrl);
+    }
+
+    this.editAmountData.file = null;
+    this.editAmountData.previewUrl = null;
+    this.editAmountData.previewDocument = false;
+
+    const fileInput = document.getElementById(
+      "editFileInput",
+    ) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  }
+
+  saveEditedAmount(): void {
+    if (
+      this.editAmountData.newAmount === null ||
+      this.editAmountData.newAmount === undefined ||
+      Number(this.editAmountData.newAmount) <= 0
+    ) {
+      return;
+    }
+
+    const mode = this.selectedTransaction?.mode;
+    const isCrypto = this.isCryptoModes(mode);
+
+    const oldAmount = isCrypto
+      ? Number(this.selectedTransaction?.currencyWiseAmount ?? 0)
+      : Number(this.selectedTransaction?.amount ?? 0);
+
+    const newAmount = Number(this.editAmountData.newAmount);
+
+    if (newAmount === oldAmount) {
+      this.snackbar.show("Amount is unchanged, nothing to update", false);
+      return;
+    }
+
+    if (!this.editAmountData.message?.trim()) {
+      this.snackbar.show(
+        "Please enter a reason for updating the amount",
+        false,
+      );
+      return;
+    }
+
+    this.loaderService.showButtonLoader();
+
+    const txId = this.selectedTransaction.id;
+    const txType = this.selectedTransaction.type;
+
+    const updateData = {
+      entityId: this.entityId,
+      fundId: txId,
+      oldAmount: oldAmount,
+      amount: newAmount,
+      reason: this.editAmountData.message.trim(),
+      timestamp: new Date().toISOString(),
+      updatedBy: this.entityId,
+    };
+
+    this.fundService
+      .updateAmount(updateData, this.editAmountData.file)
+      .subscribe({
+        next: () => {
+          this.loaderService.hideButtonLoader();
+
+          // ==========================================
+          // 1. UPDATE SELECTED TRANSACTION IMMEDIATELY
+          // ==========================================
+
+          if (isCrypto) {
+            this.selectedTransaction = {
+              ...this.selectedTransaction,
+              currencyWiseAmount: newAmount,
+              raw: {
+                ...this.selectedTransaction?.raw,
+                currencyWiseAmount: newAmount,
+              },
+            };
+          } else {
+            this.selectedTransaction = {
+              ...this.selectedTransaction,
+              amount: newAmount,
+              raw: {
+                ...this.selectedTransaction?.raw,
+                amount: newAmount,
+              },
+            };
+          }
+
+          // ==========================================
+          // 2. UPDATE ALL SOURCE LISTS
+          // ==========================================
+
+          this.applyAmountUpdateToLists(txId, mode, txType, newAmount);
+
+          // ==========================================
+          // 3. UPDATE CACHED CRYPTO LISTS
+          // ==========================================
+
+          if (isCrypto) {
+            this.cachedPendingCrypto = this.patchAmountInList(
+              this.cachedPendingCrypto,
+              txId,
+              newAmount,
+              true,
+            );
+
+            this.cachedPendingPayinAll = this.patchAmountInList(
+              this.cachedPendingPayinAll,
+              txId,
+              newAmount,
+              true,
+            );
+          }
+
+          // ==========================================
+          // 4. REFRESH DERIVED STATE
+          // ==========================================
+
+          this.updateCurrencySums();
+          this.computeStatsFromData();
+          this.updateChartsFromData();
+          this.refreshCachedLists();
+
+          // ==========================================
+          // 5. FORCE ANGULAR STATE UPDATE
+          // ==========================================
+
+          this.selectedTransaction = {
+            ...this.selectedTransaction,
+          };
+
+          this.snackbar.show("Amount updated successfully", true);
+
+          this.closeEditAmountPopup();
+        },
+
+        error: (err) => {
+          this.loaderService.hideButtonLoader();
+
+          this.snackbar.show(
+            err?.error?.message || "Failed to update amount",
+            false,
+          );
+        },
+      });
+  }
+
+  private applyAmountUpdateToLists(
+    txId: any,
+    mode: string,
+    txType: string,
+    newAmount: number,
+  ): void {
+    const isCrypto = this.isCryptoMode(mode);
+
+    const patch = (list: any[]): any[] => {
+      if (!Array.isArray(list)) {
+        return [];
+      }
+
+      return list.map((t) => {
+        if (t.id !== txId && t.fundId !== txId) {
+          return t;
+        }
+
+        if (isCrypto) {
+          return {
+            ...t,
+            currencyWiseAmount: Number(newAmount),
+            raw: {
+              ...t.raw,
+              currencyWiseAmount: Number(newAmount),
+            },
+          };
+        }
+
+        return {
+          ...t,
+          amount: Number(newAmount),
+          raw: {
+            ...t.raw,
+            amount: Number(newAmount),
+          },
+        };
+      });
+    };
+
+    if (txType === "payout") {
+      this.pendingpayouts = patch(this.pendingpayouts);
+      this.approvedpayouts = patch(this.approvedpayouts);
+    } else {
+      this.pendingUpi = patch(this.pendingUpi);
+      this.pendingBank = patch(this.pendingBank);
+      this.pendingCrypto = patch(this.pendingCrypto);
+      this.approvedpayins = patch(this.approvedpayins);
+    }
+
+    // Crypto cache state
+    if (isCrypto) {
+      this.cachedPendingCrypto = patch(this.cachedPendingCrypto);
+      this.cachedPendingPayinAll = patch(this.cachedPendingPayinAll);
+    }
+  }
+
+  private isCryptoModes(mode: any): boolean {
+    const normalizedMode = String(mode || "")
+      .trim()
+      .toUpperCase();
+
+    return ["CRYPTO", "TRC20", "ERC20", "BEP20", "SPL", "OMNI"].includes(
+      normalizedMode,
+    );
+  }
+
+  private patchAmountInList(
+    list: any[],
+    txId: any,
+    newAmount: number,
+    isCrypto: boolean,
+  ): any[] {
+    if (!Array.isArray(list)) {
+      return [];
+    }
+
+    return list.map((t) => {
+      if (t.id !== txId && t.fundId !== txId) {
+        return t;
+      }
+
+      if (isCrypto) {
+        return {
+          ...t,
+          currencyWiseAmount: Number(newAmount),
+          raw: {
+            ...t.raw,
+            currencyWiseAmount: Number(newAmount),
+          },
+        };
+      }
+
+      return {
+        ...t,
+        amount: Number(newAmount),
+        raw: {
+          ...t.raw,
+          amount: Number(newAmount),
+        },
+      };
+    });
   }
 }
