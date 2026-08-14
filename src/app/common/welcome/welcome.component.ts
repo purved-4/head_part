@@ -1,3 +1,4 @@
+
 import { Component, ElementRef, HostListener, OnDestroy } from "@angular/core";
 import { UserStateService } from "../../store/user-state.service";
 import { ChiefManualService } from "../../pages/services/chief-manual.service";
@@ -20,11 +21,14 @@ export class WelcomeComponent implements OnDestroy {
   currentUser$: Observable<CurrentUser | null>;
   dashboardConfig$: Observable<DashboardConfig | null>;
 
+  // Mobile menu
+  // class ke andar naya property add karo
   isProfileMenuOpen = false;
   isMenuOpen = false;
 
   currentYear: number = new Date().getFullYear();
 
+  // Carousel
   currentIndex = 0;
   intervalId: any;
   images: string[] = [
@@ -34,8 +38,10 @@ export class WelcomeComponent implements OnDestroy {
     "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1000&q=80",
   ];
 
+  // Modal state
   isFormModalOpen = false;
 
+  // Form fields
   branchName = "";
   email = "";
   mobile = "";
@@ -45,8 +51,12 @@ export class WelcomeComponent implements OnDestroy {
   chiefId: any;
   autoEnabled: boolean = true;
 
+  // 👇 role => dashboard config mapping (yaha naye roles add karte rehna)
   private roleDashboardMap: { [key: string]: DashboardConfig } = {
-    head: { label: "Dashboard", route: "/head/dashboard" },
+    head: {
+      label: "Dashboard",
+      route: "/head/dashboard",
+    },
     com_part: {
       label: " Dashboard",
       route: "/comPart/commerce-dashboard",
@@ -57,13 +67,21 @@ export class WelcomeComponent implements OnDestroy {
       route: "/branch/dashboard",
       notifications: 2,
     },
-    chief: { label: "Dashboard", route: "/chief/dashboard", notifications: 2 },
+    chief: {
+      label: "Dashboard",
+      route: "/chief/dashboard",
+      notifications: 2,
+    },
     manager: {
       label: "Dashboard",
       route: "/manager/dashboard",
       notifications: 2,
     },
-    owner: { label: "Dashboard", route: "/owner/dashboard", notifications: 2 },
+    owner: {
+      label: "Dashboard",
+      route: "/owner/dashboard",
+      notifications: 2,
+    },
   };
 
   constructor(
@@ -76,8 +94,15 @@ export class WelcomeComponent implements OnDestroy {
     this.dashboardConfig$ = this.currentUser$.pipe(
       map((user) => {
         if (!user) return null;
+
+        // agar userStateService me getRole() method hai use direct use karo:
+        // const roleName = this.userStateService.getRole()?.toLowerCase();
+
+        // fallback: user.role array se nikal lo (jaisa JSON me aa raha hai)
         const roleName = user?.role?.[0]?.name?.toLowerCase?.();
+
         if (!roleName) return null;
+
         return this.roleDashboardMap[roleName] || null;
       }),
     );
@@ -104,22 +129,13 @@ export class WelcomeComponent implements OnDestroy {
     this.currentIndex = index;
   }
 
+  // naya method add karo
   toggleProfileMenu() {
     this.isProfileMenuOpen = !this.isProfileMenuOpen;
   }
 
   closeProfileMenu() {
     this.isProfileMenuOpen = false;
-  }
-
-  // href hi nahi hai <a> pe, isliye event ki zaroorat nahi — koi bhi
-  // navigation/reload trigger ho hi nahi sakta, sirf smooth scroll hota hai
-  scrollToSection(sectionId: string): void {
-    const el = document.getElementById(sectionId);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-    this.isMenuOpen = false;
   }
 
   @HostListener("document:click", ["$event"])

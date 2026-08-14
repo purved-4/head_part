@@ -168,4 +168,15 @@ export class OwnerService {
      );
 }
 
+
+getSecretKey(id: any): Observable<any[]> {
+    return this.http
+     .get<any>(`${baseUrl}/owner/getSecretKey/${id}`)
+     .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+     );
+}
+
+
 }

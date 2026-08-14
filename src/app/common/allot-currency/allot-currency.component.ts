@@ -1,3 +1,4 @@
+
 import { Component, Input, Output, EventEmitter, OnInit } from "@angular/core";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { ChiefService } from "../../pages/services/chief.service";
@@ -40,7 +41,7 @@ export class AllotCurrencyComponent implements OnInit {
   @Output() close = new EventEmitter<void>();
 
   isPortalCurrencyLoaded: boolean = false;
-  parentCurrency: string = "INR"; // default fallback
+  parentCurrency: any; // default fallback
 
   existingData: ExistingDataMap = buildEmptyExistingData();
 
@@ -148,7 +149,9 @@ export class AllotCurrencyComponent implements OnInit {
     return {
       currency,
       meta: meta ?? this.getCurrencyMeta(currency),
-      rate: currency === "INR" ? 1 : (existing?.rate ?? null),
+      // rate: currency === "INR" ? 1 : (existing?.rate ?? null),
+            rate: existing?.rate,
+
       selectedModes: existing ? [...existing.modes] : [],
       lockedModes: [],
       isModesOpen: false,
@@ -176,7 +179,7 @@ export class AllotCurrencyComponent implements OnInit {
           ? res
           : res?.data?.currencies || res?.data || res?.currencies || [];
         this.parentCurrency =
-          res?.data?.parentCurrency || res?.parentCurrency || "INR"; // 👈 add this
+          res?.data?.parentCurrency || res?.parentCurrency || ""; 
 
         this.loadExistingData(data);
         this.snackBar.show(res.message || "Data fetched successfully", true);
@@ -194,6 +197,7 @@ export class AllotCurrencyComponent implements OnInit {
   loadComPartCurrencies() {
     this.comPartService.getCurrencies(this.entityId).subscribe({
       next: (res: any) => {
+        this.parentCurrency = res.parentCurrency;
         const cs = res.currencies;
         const data = Array.isArray(cs) ? cs : cs?.data || [];
         this.loadExistingData(data);

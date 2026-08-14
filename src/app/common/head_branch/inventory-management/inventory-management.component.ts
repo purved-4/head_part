@@ -657,6 +657,10 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
         status: this.statusFilter === "all" ? "all" : this.statusFilter,
 
+        // 👇 Sorting is correct only if ALL matching rows are fetched together,
+        // then sorted, then sliced for the page — server-side chunking (page/size)
+        // can't be sorted correctly on the client because each page only sees
+        // its own slice. So we fetch everything matching the filters in one go.
         page: 0,
         size: 100000,
       })
@@ -1543,7 +1547,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       fttAcceptance: this.addUpiForm.value.fttAcceptance ?? true,
       partialPayinEnabled: this.addUpiForm.value.partialPayinEnabled ?? false,
     };
-    console.log(payload);
+
 
     const formData = new FormData();
     formData.append(

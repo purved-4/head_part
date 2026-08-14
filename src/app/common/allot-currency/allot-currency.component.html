@@ -95,7 +95,6 @@
           <tbody class="divide-y divide-[var(--color-border)]">
             <tr *ngFor="let row of currencyRows">
               <!-- Currency -->
-              <!-- Currency -->
               <td class="py-3 pr-6 align-middle whitespace-nowrap">
                 <span class="inline-flex items-center gap-1.5">
                   <span
@@ -112,10 +111,7 @@
                     <span class="text-sm font-medium text-[var(--color-font)]">
                       {{ row.meta?.display }} ({{ row.currency }})
                     </span>
-                    <span
-                      *ngIf="currentRole === 'OWNER'"
-                      class="text-[14px] text-[var(--color-font)]"
-                    >
+                    <span class="text-[14px] text-[var(--color-font)]">
                       {{ row.currency }} to {{ parentCurrency }}
                     </span>
                   </span>
@@ -131,7 +127,6 @@
                   type="number"
                   [(ngModel)]="row.rate"
                   [ngModelOptions]="{ standalone: true }"
-                  [disabled]="row.currency === 'INR'"
                   placeholder="Rate"
                   class="w-24 px-2 py-1.5 text-sm rounded-[var(--radius-md)] bg-[var(--color-bg)] text-[var(--color-font)] placeholder:text-[var(--color-muted)] border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-60"
                 />
@@ -223,3 +218,6 @@
     </div>
   </div>
 </form>
+
+
+

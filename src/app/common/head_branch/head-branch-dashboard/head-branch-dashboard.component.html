@@ -229,7 +229,7 @@
 
                     <span class="text-[11px] text-[var(--color-muted)]">
                       {{ transaction.parentCurrency }}-{{
-                        transaction.currencyCcWiseAmount
+                        transaction.currencyWiseAmount
                       }}
                     </span>
                   </div>
@@ -453,7 +453,7 @@
                     <!-- Currency conversion -->
                     <span class="text-[10px] text-[var(--color-muted)]">
                       {{ transaction.parentCurrency }}-{{
-                        transaction.currencyCcWiseAmount
+                        transaction.currencyWiseAmount
                       }}
                     </span>
                   </div>
@@ -841,7 +841,7 @@
                   <!-- Parent currency wise amount -->
                   <span class="text-[10px] text-[var(--color-muted)]">
                     {{ transaction.parentCurrency }}-{{
-                      transaction.currencyCcWiseAmount
+                      transaction.currencyWiseAmount
                     }}
                   </span>
                 </div>
@@ -2449,7 +2449,7 @@
                 Exchange amount
               </p>
               <p class="font-bold text-gray-800">
-                {{ selectedTransaction.currencyCcWiseAmount | number }}
+                {{ selectedTransaction.currencyWiseAmount | number }}
                 {{ selectedTransaction.parentCurrency }}
               </p>
             </div>

@@ -1,3 +1,5 @@
+
+
 import {
   Component,
   Output,
@@ -146,6 +148,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     const ent = data?.entityInfo || data?.entity || {};
     this.entityInfo = {
+      ownerRate:ent?.ownerRate,
       id: ent?.id,
       name: ent?.name || ent?.entityName,
       limit: ent?.balance ?? ent?.limit ?? null,

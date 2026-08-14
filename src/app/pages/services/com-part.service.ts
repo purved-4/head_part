@@ -1270,6 +1270,23 @@ restoreBankAndUpi(comPartId: any): Observable<any> {
         catchError((error) => throwError(() => error)),
       );
   }
+  
+getSecretKeybyPortalId(portalId: string): Observable<any> {
+    return this.http
+     .get<any>(`${baseUrl}/comPart/getSecretKey/${portalId}`)
+     .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+     );
+}
 
+rotateKeyForAuto(portalId: string): Observable<any> {
+    return this.http
+     .patch<any>(`${baseUrl}/comPart/rotateKeyForAuto/${portalId}`, {})
+     .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+     );
+}
   
 }

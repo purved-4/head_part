@@ -233,7 +233,7 @@ export class ManageBranchUserComponent implements OnInit, OnDestroy {
         user.active = !user.active;
       },
       error: (err) => {
-        console.error("Failed to toggle user status:", err);
+
       },
     });
   }

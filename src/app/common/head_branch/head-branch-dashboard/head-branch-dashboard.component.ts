@@ -1,3 +1,4 @@
+
 import {
   AfterViewInit,
   Component,
@@ -480,7 +481,7 @@ export class HeadBranchDashboardComponent
               : new Date(),
           utrNumber: fund.transactionId || fund.utr || null,
           parentCurrency: fund.parentCurrency,
-          currencyCcWiseAmount: Number(fund.currencyCcWiseAmount) || 0,
+          currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,
           rate: fund.rate || 1,
           mode: mode,
           accountNo: fund.accountNo || null,
@@ -542,7 +543,7 @@ export class HeadBranchDashboardComponent
           utrNumber: w.transactionId || w.utr || null,
           parentCurrency: w.parentCurrency || null,
           currency: w.currency || null,
-          currencyCcWiseAmount: Number(w.currencyCcWiseAmount) || 0,
+          currencyWiseAmount: Number(w.currencyWiseAmount) || 0,
           rate: w.rate || 1,
           mode: "bank",
           accountNo: w.accountNo || w.accountNumber || null,
@@ -1557,7 +1558,7 @@ export class HeadBranchDashboardComponent
     this.editAmountData = {
       newAmount:
         this.selectedTransaction.mode === "crypto"
-          ? this.selectedTransaction.currencyCcWiseAmount
+          ? this.selectedTransaction.currencyWiseAmount
           : this.selectedTransaction.amount,
       message: "",
       file: null,
@@ -1591,7 +1592,7 @@ export class HeadBranchDashboardComponent
       fundId: this.selectedTransaction.id,
       oldAmount:
         this.selectedTransaction.mode === "crypto"
-          ? this.selectedTransaction.currencyCcWiseAmount
+          ? this.selectedTransaction.currencyWiseAmount
           : this.selectedTransaction.amount,
       amount: this.editAmountData.newAmount,
       reason: this.editAmountData.message,
@@ -1615,7 +1616,7 @@ export class HeadBranchDashboardComponent
       });
 
     if (this.selectedTransaction.mode === "crypto") {
-      this.selectedTransaction.currencyCcWiseAmount =
+      this.selectedTransaction.currencyWiseAmount =
         this.editAmountData.newAmount;
     } else {
       this.selectedTransaction.amount = this.editAmountData.newAmount;
@@ -2201,7 +2202,7 @@ export class HeadBranchDashboardComponent
       rate: fund.rate || 1,
 
       amount: Number(fund.amount) || 0,
-      currencyCcWiseAmount: Number(fund.currencyCcWiseAmount) || 0,
+      currencyWiseAmount: Number(fund.currencyWiseAmount) || 0,
 
       date: parsedDate,
 
@@ -3342,7 +3343,7 @@ export class HeadBranchDashboardComponent
     return this.sumByCurrency(
       all,
       (t) => t.parentCurrency,
-      (t) => t.currencyCcWiseAmount,
+      (t) => t.currencyWiseAmount,
     );
   }
 
@@ -3354,7 +3355,7 @@ export class HeadBranchDashboardComponent
     return this.sumByCurrency(
       this.filteredPendingpayouts(),
       (t) => t.parentCurrency,
-      (t) => t.currencyCcWiseAmount,
+      (t) => t.currencyWiseAmount,
     );
   }
 
@@ -3375,7 +3376,7 @@ export class HeadBranchDashboardComponent
   //       }
 
   //       payinMap.get(currency).total += Number(
-  //         tx.currencyCcWiseAmount  || 0,
+  //         tx.currencyWiseAmount  || 0,
   //       );
   //     },
   //   );
@@ -3397,14 +3398,14 @@ export class HeadBranchDashboardComponent
   //     }
 
   //     payoutMap.get(currency).total += Number(
-  //       tx.currencyCcWiseAmount || 0,
+  //       tx.currencyWiseAmount || 0,
   //     );
   //   });
 
   //   this.payoutCurrencySums = Array.from(payoutMap.values());
 
-  //   console.log("Payin:", this.payinCurrencySums);
-  //   console.log("Payout:", this.payoutCurrencySums);
+
+
   // }
 
   private updateCurrencySums(): void {
@@ -3422,8 +3423,8 @@ export class HeadBranchDashboardComponent
           });
         }
 
-        // ONLY currencyCcWiseAmount
-        payinMap.get(currency).total += Number(tx.currencyCcWiseAmount || 0);
+        // ONLY currencyWiseAmount
+        payinMap.get(currency).total += Number(tx.currencyWiseAmount || 0);
       },
     );
 
@@ -3442,14 +3443,14 @@ export class HeadBranchDashboardComponent
         });
       }
 
-      // ONLY currencyCcWiseAmount
-      payoutMap.get(currency).total += Number(tx.currencyCcWiseAmount || 0);
+      // ONLY currencyWiseAmount
+      payoutMap.get(currency).total += Number(tx.currencyWiseAmount || 0);
     });
 
     this.payoutCurrencySums = Array.from(payoutMap.values());
 
-    console.log("PAYIN currencyCcWiseAmount SUM:", this.payinCurrencySums);
-    console.log("PAYOUT currencyCcWiseAmount SUM:", this.payoutCurrencySums);
+
+
   }
   formatCurrencySum(s: any): string {
     const symbol = s.currency === "INR" ? "₹" : s.symbol || s.currency;

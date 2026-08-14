@@ -102,17 +102,20 @@
     <div class="max-w-7xl mx-auto">
       <div *ngIf="selectedSection === 'user'" class="animate-fade-in">
         <!-- 🔹 HEADER -->
-        <div class="mb-2">
-          <h1
-            class="text-lg md:text-2xl font-bold mb-0.5 md:mb-1"
-            [style.color]="'var(--color-font)'"
-          >
-            Profile & Entity
-          </h1>
-          <p class="text-xs" [style.color]="'var(--color-muted)'">
-            User details and entity configuration
-          </p>
-        </div>
+        <div class="mb-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+  <div>
+    <h1
+      class="text-lg md:text-2xl font-bold mb-0.5 md:mb-1"
+      [style.color]="'var(--color-font)'"
+    >
+      Rewards
+    </h1>
+    <p class="text-xs" [style.color]="'var(--color-muted)'">
+      Rewards configuration
+    </p>
+  </div>
+</div>
 
         <div
           class="bg-white rounded-lg border shadow-md overflow-hidden"
@@ -121,35 +124,47 @@
           <div class="p-2 md:p-3">
             <!-- 🔹 STATUS + BALANCE -->
             <div
-              class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 pb-2 border-b gap-2"
-              [style.borderColor]="'var(--color-border)'"
-            >
-              <div class="flex items-center gap-2">
-                <!-- ROLE -->
-                <div
-                  class="px-2 py-1 rounded-lg font-semibold text-white text-xs"
-                  [style.background]="'var(--color-primary)'"
-                >
-                  {{ user?.role || "User" }}
-                </div>
+  class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 pb-2 border-b gap-2"
+  [style.borderColor]="'var(--color-border)'"
+>
+  <!-- ROLE + STATUS -->
+  <div class="flex items-center gap-2">
+    <!-- ROLE -->
+    <div
+      class="px-2 py-1 rounded-lg font-semibold text-white text-xs"
+      [style.background]="'var(--color-primary)'"
+    >
+      {{ user?.role || "User" }}
+    </div>
 
-                <!-- STATUS -->
-                <div
-                  class="px-2 py-1 rounded-lg border text-xs"
-                  [style.background]="user?.active ? '#dcfce7' : '#fee2e2'"
-                >
-                  {{ user?.active ? "Active" : "Inactive" }}
-                </div>
-              </div>
+    <!-- STATUS -->
+    <div
+      class="px-2 py-1 rounded-lg border text-xs"
+      [style.background]="user?.active ? '#dcfce7' : '#fee2e2'"
+    >
+      {{ user?.active ? "Active" : "Inactive" }}
+    </div>
+  </div>
 
-              <!-- BALANCE -->
-              <div class="text-right">
-                <p class="text-[10px] text-gray-400">Rewards</p>
-                <p class="font-bold text-sm text-green-600">
-                  ₹ {{ entityInfo?.limit || 0 }}
-                </p>
-              </div>
-            </div>
+  <!-- OWNER RATE + REWARDS -->
+  <div class="flex items-center gap-6">
+    <!-- OWNER RATE -->
+    <div class="text-right">
+      <p class="text-[10px] text-gray-400">Conversion Rate</p>
+      <p class="font-bold text-sm text-green-600">
+        ₹ {{ entityInfo?.ownerRate || 0 }}
+      </p>
+    </div>
+
+    <!-- REWARDS -->
+    <div class="text-right">
+      <p class="text-[10px] text-gray-400">Rewards</p>
+      <p class="font-bold text-sm text-green-600">
+        ₹ {{ entityInfo?.limit || 0 }}
+      </p>
+    </div>
+  </div>
+</div>
 
             <!-- 🔹 GRID -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -824,6 +839,4 @@
     </div>
   </main>
 </div>
-
-
 

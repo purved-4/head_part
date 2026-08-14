@@ -50,6 +50,7 @@ import { GlobalCompartPercentageComponent } from "../common/global-compart-perce
 import { ResolvedNotificationComponent } from "../common/resolved-notification/resolved-notification.component";
 import { MaintenanceNoticeComponent } from "../common/maintenance-notice/maintenance-notice.component";
 import { PortalReportComponent } from "../components/reports/portal-report/portal-report.component";
+import { BalanceReportComponent } from "../components/reports/balance-report/balance-report.component";
 
 @NgModule({
   declarations: [
@@ -100,6 +101,7 @@ import { PortalReportComponent } from "../components/reports/portal-report/porta
     GlobalCompartPercentageComponent,
     MaintenanceNoticeComponent,
     PortalReportComponent,
+    BalanceReportComponent,
   ],
   exports: [
     WebhookDataComponent,
@@ -149,6 +151,7 @@ import { PortalReportComponent } from "../components/reports/portal-report/porta
     GlobalCompartPercentageComponent,
     MaintenanceNoticeComponent,
     PortalReportComponent,
+    BalanceReportComponent,
   ],
   imports: [
     SharedModule,

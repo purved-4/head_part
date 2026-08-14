@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { catchError, map, Observable, throwError } from "rxjs";
+import { catchError, forkJoin, map, Observable, throwError } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import baseUrl from "../pages/services/helper";
 import { ManagerService } from "../pages/services/manager.service";
@@ -31,20 +31,14 @@ export class UtilsServiceService {
           catchError((err) => throwError(() => err)),
         );
 
-      case "chief":
-        if (cheifToogle === "B2B") {
-          return this.whoService.getManagersByChiefId(id).pipe(
-            map((res) => res),
-            catchError((err) => throwError(() => err)),
-          );
-        } else if (cheifToogle === "B2C") {
-          return this.headService.getHeadByManagerId(id).pipe(
-            map((res) => res),
-            catchError((err) => throwError(() => err)),
-          );
-        } else {
-          return null;
-        }
+    case "chief":
+        return forkJoin({
+          managers: this.whoService.getManagersByChiefId(id),
+          heads: this.headService.getHeadByManagerId(id),
+        }).pipe(
+          map((res) => res),
+          catchError((err) => throwError(() => err)),
+        );
       case "manager":
         return this.headService.getHeadByManagerId(id).pipe(
           map((res) => res),
@@ -95,7 +89,7 @@ export class UtilsServiceService {
       case "owner":
         return [
           { id: "owner", name: "Owner", value: "owner" },
-          { id: "chief", name: "Chief Controller", value: "chief" },
+          { id: "chief", name: "Chief", value: "chief" },
           { id: "manager", name: "Manager", value: "manager" },
           { id: "head", name: "Head", value: "head" },
           { id: "branch", name: "Branch", value: "branch" },
@@ -103,7 +97,7 @@ export class UtilsServiceService {
 
       case "chief":
         return [
-          { id: "chief", name: "Chief Controller", value: "chief" },
+          { id: "chief", name: "Chief", value: "chief" },
           { id: "manager", name: "Manager", value: "manager" },
           { id: "head", name: "Head", value: "head" },
           { id: "branch", name: "Branch", value: "branch" },
