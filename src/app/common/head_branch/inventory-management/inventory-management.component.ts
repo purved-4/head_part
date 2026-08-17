@@ -187,6 +187,13 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
   tooltipPosition = { x: 0, y: 0 };
   hoverTimeout: any;
+  selectedAccountDetails: {
+    accountHolderName?: string | null;
+    accountNo?: string | null;
+    vpa?: string | null;
+    walletAddress?: string | null;
+    bankName?: string | null;
+  } | null = null;
 
   // ---------- DELETE / RESTORE CONFIRM ----------
   isDeleteConfirmVisible = false;
@@ -1410,12 +1417,23 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   openCapacity(item: InventoryItem) {
-    if (this.blockIfDeleted(item)) return; // 👈 NEW
+    if (this.blockIfDeleted(item)) return;
+
     this.selectedId = item.id;
     this.selectedPortalId = item.id;
     this.selectedPayinId = item.id;
     this.capacityMode =
       item.type === "BANK" ? "BANK" : item.type === "UPI" ? "UPI" : item.type;
+
+    // 🔥 NEW — item se hi details nikal ke pass karo, extra call nahi
+    this.selectedAccountDetails = {
+      accountHolderName: item.accountHolderName,
+      accountNo: item.accountNo,
+      vpa: item.vpa,
+      walletAddress: item.walletAddress,
+      bankName: item.bankName,
+    };
+
     this.showCapacityModal = true;
     this.closeCapacityPopup();
   }
@@ -1547,7 +1565,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       fttAcceptance: this.addUpiForm.value.fttAcceptance ?? true,
       partialPayinEnabled: this.addUpiForm.value.partialPayinEnabled ?? false,
     };
-
 
     const formData = new FormData();
     formData.append(

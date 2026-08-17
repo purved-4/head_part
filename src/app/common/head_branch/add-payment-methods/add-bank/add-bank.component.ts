@@ -13,7 +13,13 @@ import {
   ValidationErrors,
   Validators,
 } from "@angular/forms";
-import { debounceTime, distinctUntilChanged, map, Subscription } from "rxjs";
+import {
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  Subject,
+  Subscription,
+} from "rxjs";
 import { INDIAN_BANKS } from "../../../../utils/constants";
 import { BankService } from "../../../../pages/services/bank.service";
 import { SnackbarService } from "../../../snackbar/snackbar.service";
@@ -49,7 +55,10 @@ export class AddBankComponent implements OnInit, OnDestroy {
   }[] = [{ minRange: null, maxRange: null, quantity: null }];
   isBankNameFetching: boolean = false;
   isBankNameEditable: boolean = false;
-  ifscSubject: any;
+  ifscSubject: Subject<string> = new Subject<string>();
+
+  private subs = new Subscription();
+
   constructor(
     private bankService: BankService,
     private snack: SnackbarService,
@@ -59,11 +68,20 @@ export class AddBankComponent implements OnInit, OnDestroy {
     this.addBankForm = this.createAddBankForm();
   }
 
+  // currency Input object hai ({ currency: 'INR' | 'AED' ... }) — isliye ek helper getter
+  get isInrMode(): boolean {
+    return this.currency?.currency === "INR";
+  }
+
   ngOnInit(): void {
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.role = this.userStateService.getRole();
 
-    // IFSC valueChanges pe debounce — most reliable way
+    // Agar embeddedMode hai to modal ke openAddBankModal() se pehle hi form dikh sakta hai,
+    // isliye ngOnInit mein bhi currency rules apply kar do
+    this.applyCurrencyModeRules();
+
+    // IFSC valueChanges pe debounce — sirf INR currency ke liye chalega
     const ifscSub = this.addBankForm
       .get("bankCode")!
       .valueChanges.pipe(
@@ -72,6 +90,11 @@ export class AddBankComponent implements OnInit, OnDestroy {
         map((val: string) => (val || "").toUpperCase().replace(/\s/g, "")),
       )
       .subscribe((bankCode) => {
+        // AED / other currencies ke liye IFSC logic bilkul skip
+        if (!this.isInrMode) {
+          return;
+        }
+
         console.log("IFSC value changed:", bankCode); // debug ke liye
 
         const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
@@ -89,26 +112,23 @@ export class AddBankComponent implements OnInit, OnDestroy {
     this.subs.add(ifscSub);
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
+
   private createAddBankForm(): FormGroup {
     return this.fb.group(
       {
         // portal: ["", Validators.required],
-        bankName: ["", Validators.required], // Add this line
+        bankName: ["", Validators.required],
+        bankCode: [""], // validators dynamically currency ke hisaab se lagenge (applyCurrencyModeRules)
         accountNumber: [
           "",
           [Validators.required, Validators.pattern(/^\d{10,20}$/)],
         ],
         accountHolderName: ["", [Validators.required, Validators.minLength(3)]],
-        bankCode: [
-          "",
-          [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)],
-        ],
+
         accountType: ["", Validators.required],
-        limitAmount: [
-          "",
-          [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)],
-        ],
 
         fttAcceptance: [true],
         partialPayinEnabled: [false],
@@ -139,7 +159,9 @@ export class AddBankComponent implements OnInit, OnDestroy {
     this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
     this.isBankNameFetching = false;
     this.isBankNameEditable = false;
-    this.addBankForm.get("bankName")?.disable();
+
+    this.applyCurrencyModeRules();
+
     document.body.style.overflow = "hidden";
   }
 
@@ -165,10 +187,35 @@ export class AddBankComponent implements OnInit, OnDestroy {
     this.isCustomBank = false;
     this.isBankNameFetching = false;
     this.isBankNameEditable = false;
-    this.addBankForm.get("bankName")?.disable();
+
+    this.applyCurrencyModeRules();
 
     document.body.style.overflow = "auto";
   }
+
+  /**
+   * Currency ke hisaab se bankName / bankCode ka behaviour set karta hai.
+   * INR  -> bankName locked (auto-fill se), bankCode required + IFSC pattern validation
+   * Others (AED, etc.) -> bankName normal editable, bankCode ignore/no validation
+   */
+  private applyCurrencyModeRules(): void {
+    const bankCodeCtrl = this.addBankForm.get("bankCode");
+    const bankNameCtrl = this.addBankForm.get("bankName");
+
+    if (this.isInrMode) {
+      bankNameCtrl?.disable();
+      bankCodeCtrl?.setValidators([
+        Validators.required,
+        Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/),
+      ]);
+    } else {
+      bankNameCtrl?.enable();
+      bankCodeCtrl?.clearValidators();
+      bankCodeCtrl?.setValue("", { emitEvent: false });
+    }
+    bankCodeCtrl?.updateValueAndValidity({ emitEvent: false });
+  }
+
   onBankInputChange(): void {
     const value = this.addBankForm.get("bankName")?.value || "";
     this.bankSearchTerm = value;
@@ -284,7 +331,6 @@ export class AddBankComponent implements OnInit, OnDestroy {
     this.subs.add(sub);
   }
 
-  private subs = new Subscription();
   selectBank(bank: string): void {
     this.addBankForm.patchValue({ bankName: bank });
     this.showBankDropdown = false;
@@ -353,7 +399,10 @@ export class AddBankComponent implements OnInit, OnDestroy {
       ];
     }
   }
+
   onIfscInput(event: Event): void {
+    if (!this.isInrMode) return; // AED etc. me ye field render hi nahi hota, safety guard
+
     const input = event.target as HTMLInputElement;
     const formattedValue = input.value.replace(/\s/g, "").toUpperCase();
 
@@ -378,7 +427,10 @@ export class AddBankComponent implements OnInit, OnDestroy {
     // Subject mein push karo, debounce handle karega
     this.ifscSubject.next(formattedValue);
   }
+
   fetchBankFromIfsc(bankCode: string): void {
+    if (!this.isInrMode) return; // safety guard
+
     this.isBankNameFetching = true;
     this.isBankNameEditable = false;
     this.addBankForm.get("bankName")?.disable();
@@ -404,10 +456,12 @@ export class AddBankComponent implements OnInit, OnDestroy {
   }
 
   enableBankNameEdit(): void {
+    if (!this.isInrMode) return; // non-INR mein already editable hai
     this.isBankNameEditable = true;
     this.addBankForm.get("bankName")?.enable();
     this.addBankForm.get("bankName")?.setValue("");
   }
+
   get smallestCapacityRangeLimit(): number | null {
     const validRanges = this.capacityRanges.filter(
       (r) => r.minRange != null && r.minRange > 0,

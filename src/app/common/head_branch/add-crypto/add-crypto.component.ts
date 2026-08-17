@@ -13,7 +13,6 @@ import { CryptoService } from "../../../pages/services/crypto.service";
 import { CurrencyBehaviourService } from "../payments-methods/currency-behaviour.service";
 import { Subscription } from "rxjs";
 import { UserStateService } from "../../../store/user-state.service";
-import { tr } from "intl-tel-input/i18n";
 
 type CryptoNetwork = "OMNI" | "SPL" | "ERC20" | "TRC20" | "BEP20";
 
@@ -123,8 +122,6 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
 
     if (!this.generatedFile) return false;
 
-    if (this.walletLimit == null || this.walletLimit <= 0) return false;
-
     return true;
   }
 
@@ -229,7 +226,7 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
     const payload: any = {
       entityId: this.entityId,
       entityType: this.entityType,
-      paymentMethod: this.mode || this.selectedMode,
+      transactionMode: this.mode || this.selectedMode,
       currency: this.selectedCurrency?.currency ?? this.currency?.currency,
       network: this.mode || this.selectedMode,
       walletAddress: this.walletAddress,
@@ -239,6 +236,7 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
       ranges: validRanges.length ? validRanges : null,
       partialPayinEnabled: this.partialPayinEnabled,
     };
+    console.log(payload);
 
     const formData = new FormData();
     formData.append(
@@ -268,6 +266,7 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   // ─── Wallet address generation (per network) ─────────────────
+
   generateWalletAddress(): void {
     switch (this.networkKey) {
       case "ERC20":

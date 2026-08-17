@@ -18,17 +18,45 @@
               >insights</span
             >
           </div>
+
           <div>
             <h2
               class="text-lg sm:text-xl font-bold text-[var(--color-text-main)]"
             >
               Capacity Ranges
             </h2>
+
+            <!-- 🔥 Account info jo parent se @Input aaya, koi API call nahi -->
             <p
-              class="text-xs sm:text-sm text-[var(--color-text-muted)] mt-0.5 hidden sm:block"
+              *ngIf="accountDetails; else defaultSubtitle"
+              class="text-xs sm:text-sm text-[var(--color-text-muted)] mt-0.5 truncate max-w-[220px] sm:max-w-none"
             >
-              Manage your capacity tiers and quantities
+              <ng-container [ngSwitch]="mode">
+                <span *ngSwitchCase="'UPI'">
+                  {{ accountDetails.vpa || "-" }}
+                  <span *ngIf="accountDetails.bankName">
+                    • {{ accountDetails.bankName }}</span
+                  >
+                </span>
+                <span *ngSwitchCase="'BANK'">
+                  {{ accountDetails.accountNo || "-" }}
+                  <span *ngIf="accountDetails.accountHolderName">
+                    • {{ accountDetails.accountHolderName }}</span
+                  >
+                </span>
+                <span *ngSwitchDefault>
+                  {{ accountDetails.walletAddress || "-" }}
+                </span>
+              </ng-container>
             </p>
+
+            <ng-template #defaultSubtitle>
+              <p
+                class="text-xs sm:text-sm text-[var(--color-text-muted)] mt-0.5 hidden sm:block"
+              >
+                Manage your capacity tiers and quantities
+              </p>
+            </ng-template>
           </div>
         </div>
         <div class="text-lg font-bold text-[var(--color-text-main)]">
@@ -368,8 +396,3 @@
     </div>
   </div>
 </div>
-
-
-
-
-

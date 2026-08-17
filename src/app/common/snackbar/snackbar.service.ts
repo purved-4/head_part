@@ -15,8 +15,7 @@ export interface SnackbarPayload {
 export class SnackbarService {
   private queue: SnackbarPayload[] = [];
 
-  private currentSubject =
-    new BehaviorSubject<SnackbarPayload | null>(null);
+  private currentSubject = new BehaviorSubject<SnackbarPayload | null>(null);
 
   current$ = this.currentSubject.asObservable();
 
@@ -24,11 +23,11 @@ export class SnackbarService {
 
   constructor(private ngZone: NgZone) {}
 
-  show(
-    message: string,
-    type: any,
-    duration = 4000
-  ) {
+  show(message: string | null | undefined, type: any, duration = 4000) {
+    // null/undefined/empty message -> snackbar trigger hi mat karo
+    if (!message || !message.trim()) {
+      return;
+    }
 
     if (type === true) {
       type = "success";
@@ -46,7 +45,6 @@ export class SnackbarService {
   }
 
   private processQueue() {
-
     // already showing snackbar
     if (this.currentSubject.value) {
       return;
@@ -69,7 +67,6 @@ export class SnackbarService {
   }
 
   hide() {
-
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
       this.timeoutId = null;
