@@ -25,6 +25,7 @@ import { RecycleCryptoComponent } from "./recycle-crypto/recycle-crypto.componen
 import { RecycleManagementComponent } from "./recycle-management/recycle-management.component";
 import { AddCryptoComponent } from "./add-crypto/add-crypto.component";
 import { InventoryManagementComponent } from "./inventory-management/inventory-management.component";
+import { AddAaniComponent } from "./add-payment-methods/add-aani/add-aani.component";
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import { InventoryManagementComponent } from "./inventory-management/inventory-m
     RecycleCryptoComponent,
     RecycleManagementComponent,
     AddCryptoComponent,
-    InventoryManagementComponent
+    InventoryManagementComponent,
+    AddAaniComponent,
   ],
   exports: [
     InventoryConfigurationComponent,
@@ -65,7 +67,8 @@ import { InventoryManagementComponent } from "./inventory-management/inventory-m
     RecycleCryptoComponent,
     RecycleManagementComponent,
     AddCryptoComponent,
-    InventoryManagementComponent
+    InventoryManagementComponent,
+    AddAaniComponent,
   ],
   imports: [
     SharedModule,

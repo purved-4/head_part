@@ -24,13 +24,14 @@ type ItemType = "BANK" | "UPI" | string; // TRC20 / ERC20 / SPL / BEP20 / OMNI /
 interface InventoryItem {
   id: string;
   type: ItemType;
+  paymentMode?: string | null; // 👈 NEW — AANI / PayNow / DuitNow etc (UPI ke variants)
   entityType: string;
   entityId: string;
   currency: string;
   limitAmount: string;
   remainingLimitAmount: any;
   status: boolean;
-  deleted: boolean; // 👈 NEW — true when the item is soft-deleted
+  deleted: boolean;
   fttAcceptance: boolean;
   partialPayinEnabled: boolean;
   liveAssigned: boolean;
@@ -80,6 +81,8 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   loading = false;
   viewMode: "table" | "grid" = "table";
 
+  // ---------- UPI/AANI — CURRENT QR PREVIEW (fresh-fetched, fixes broken image) ----------
+  updateCurrentQrUrl: string | null = null;
   // ---------- CURRENCY / MODE (single consolidated API — no Apply button) ----------
   currencies: string[] = [];
   private currencyModesMap: { [currency: string]: string[] } = {};
@@ -95,14 +98,16 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
   hasLoadedOnce = false;
 
-  // ---------- BANK FILTER (sirf UPI mode select hone par visible) ----------
-  // Jab mode = UPI ho tabhi ye dropdown dikhta hai. Holder name label ke
-  // saath dikhaya jaata hai aur select hote hi getAllPaymentMethods me
-  // bankId query param ke roop me bhej diya jaata hai.
   bankOptions: BankFilterOption[] = [];
   selectedBankId: string = "ALL";
   loadingBanks = false;
 
+  // ---------- UPI/AANI — MODAL FLAG & PATTERN ----------
+  private aaniPattern = /^[A-Za-z0-9._+@:-]{3,128}$/; // same as add-aani.component.ts backend regex
+
+  get isAaniUpi(): boolean {
+    return (this.editingUpi?.paymentMode || "").toUpperCase() === "AANI";
+  }
   // ---------- FILTERS (client side, apply immediately — no Apply button) ----------
   searchTerm = "";
   draftSearchTerm = "";
@@ -307,28 +312,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private router: Router,
   ) {}
-
-  // ngOnInit(): void {
-  //   this.currentRoleId = this.userStateService.getCurrentEntityId();
-  //   this.currentUserId = this.userStateService.getUserId();
-  //   this.role = this.userStateService.getRole();
-
-  //   this.initAddUpiForm();
-
-  //   this.searchSubject
-  //     .pipe(debounceTime(500), distinctUntilChanged())
-  //     .subscribe((value) => {
-  //       this.searchTerm = value;
-  //       this.currentPage = 1;
-  //       this.fetchInventory();
-  //     });
-
-  //   this.loadCurrenciesAndInventory();
-
-  //   this.countdownInterval = setInterval(() => {
-  //     this.pagedItems = [...this.pagedItems];
-  //   }, 1000);
-  // }
 
   ngOnInit(): void {
     this.currentRoleId = this.userStateService.getCurrentEntityId();
@@ -552,81 +535,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.fetchInventory();
   }
 
-  // fetchInventory(): void {
-  //   if (!this.currentRoleId) return;
-
-  //   const currencies =
-  //     this.selectedCurrency === "ALL" && this.currencies.length
-  //       ? this.currencies
-  //       : this.selectedCurrency !== "ALL"
-  //         ? [this.selectedCurrency]
-  //         : [];
-
-  //   const modesForThisCurrency =
-  //     this.selectedCurrency === "ALL" ? this.allModes : this.availableModes;
-
-  //   const modes =
-  //     this.selectedMode === "ALL" ? modesForThisCurrency : [this.selectedMode];
-
-  //   this.loading = true;
-
-  //   this.bankService
-  //     .getAllPaymentMethods({
-  //       entityId: this.currentRoleId,
-  //       entityType: this.role,
-  //       currencies,
-  //       modes,
-
-  //       query: this.searchTerm || undefined,
-
-  //       maxAmount: this.maxLimit ?? undefined,
-  //       minAmount: this.minLimit ?? undefined,
-
-  //       bankId:
-  //         this.selectedMode === "UPI" && this.selectedBankId !== "ALL"
-  //           ? this.selectedBankId
-  //           : undefined,
-
-  //       status: this.statusFilter === "all" ? "all" : this.statusFilter,
-
-  //       page: this.currentPage - 1,
-  //       size: this.pageSize,
-  //     })
-  //     .pipe(catchError(() => of(null)))
-  //     .subscribe((res: any) => {
-  //       this.loading = false;
-
-  //       const rows = res?.data?.content || [];
-
-  //       this.allItems = rows
-  //         .filter((r: any) => {
-  //           if (this.statusFilter === "deleted") {
-  //             return r.deleted === true;
-  //           }
-
-  //           return !r.deleted;
-  //         })
-  //         .map((r: any) => this.mapAnyRow(r));
-
-  //       this.hasLoadedOnce = true;
-  //       this.loadQrThumbnails();
-
-  //       this.filteredItems = [...this.allItems];
-  //       this.pagedItems = [...this.allItems];
-
-  //       // ✅ Backend pagination use karo
-  //       this.totalElements = res?.data?.totalElements ?? 0;
-  //       this.totalPagesCount = res?.data?.totalPages ?? 1;
-
-  //       // Agar current page last page se bada ho gaya ho
-  //       if (this.currentPage > this.totalPagesCount) {
-  //         this.currentPage = this.totalPagesCount;
-  //       }
-
-  //       this.updatePageNumbers();
-  //     });
-  // }
-
   fetchInventory(): void {
     if (!this.currentRoleId) return;
 
@@ -664,10 +572,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
         status: this.statusFilter === "all" ? "all" : this.statusFilter,
 
-        // 👇 Sorting is correct only if ALL matching rows are fetched together,
-        // then sorted, then sliced for the page — server-side chunking (page/size)
-        // can't be sorted correctly on the client because each page only sees
-        // its own slice. So we fetch everything matching the filters in one go.
         page: 0,
         size: 100000,
       })
@@ -720,9 +624,16 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   private mapAnyRow(r: any): InventoryItem {
-    const type = (r.type || r.paymentMethod || r.mode || "")
+    const rawType = (r.type || r.paymentMethod || r.mode || "")
       .toString()
       .toUpperCase();
+
+    const type: ItemType =
+      rawType === "BANK"
+        ? "BANK"
+        : rawType === "UPI" || (r.vpa && !r.walletAddress)
+          ? "UPI"
+          : rawType || "CRYPTO";
 
     let displayAddress = "-";
     if (type === "BANK") {
@@ -736,6 +647,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     return {
       id: r.id,
       type,
+      paymentMode: r.paymentMode ?? null, // 👈 NEW — sirf UI badge ke liye, dispatch logic isse affect nahi hota
       entityType: r.entityType,
       entityId: r.entityId,
       currency: r.currency || r.portalCurrency || "",
@@ -745,7 +657,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         typeof r.status === "boolean"
           ? r.status
           : (r.status || "").toLowerCase() === "active",
-      deleted: r.deleted === true, // 👈 NEW
+      deleted: r.deleted === true,
       fttAcceptance: r.fttAcceptance ?? true,
       partialPayinEnabled: r.partialPayinEnabled ?? false,
       liveAssigned: r.liveAssigned ?? false,
@@ -1730,7 +1642,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
   // ---------- UPI — EDIT / UPDATE MODAL ----------
   openUpdateModal(item: InventoryItem): void {
-    if (this.blockIfDeleted(item)) return; // 👈 NEW (double guard, safe even if called directly)
+    if (this.blockIfDeleted(item)) return;
     this.editingUpi = item;
     this.updateForm = {
       vpa: item.vpa || "",
@@ -1744,6 +1656,30 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.updateQrData = null;
     this.generatedUpdateFile = null;
     this.updateQrError = "";
+    this.updateManualQrFile = null;
+    this.updateSelectedImage = null;
+    this.updateQrMode = this.isAaniUpi ? "upload" : "generate";
+
+    // 👇 NEW — current QR ko fresh fetch karo, taaki broken image na dikhe
+    this.updateCurrentQrUrl = item.qrImageUrl || null;
+    if (item.qrImagePath) {
+      if (this.qrImageUrls[item.id]) {
+        this.updateCurrentQrUrl = this.qrImageUrls[item.id];
+      } else {
+        const sub = this.multiMedia
+          .getPrivateImage(item.qrImagePath)
+          .pipe(catchError(() => of(null)))
+          .subscribe((url: any) => {
+            this.updateCurrentQrUrl = url;
+            if (url) {
+              this.qrImageUrls[item.id] = url;
+              item.qrImageUrl = url;
+            }
+          });
+        this.subs.add(sub);
+      }
+    }
+
     this.showUpdateModal = true;
     document.body.style.overflow = "hidden";
   }
@@ -1768,9 +1704,9 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.updateManualQrFile = null;
     this.updateSelectedImage = null;
     this.updateQrMode = "generate";
+    this.updateCurrentQrUrl = null; // 👈 NEW
     document.body.style.overflow = "auto";
   }
-
   onUpdateVpaChange(): void {
     const currentVpa = (this.updateForm.vpa || "").trim().toLowerCase();
     this.vpaChanged = currentVpa !== this.originalVpa;
@@ -1779,16 +1715,20 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       this.updateQrData = null;
       this.generatedUpdateFile = null;
     }
-    if (this.isValidUpiId(currentVpa)) {
+    if (this.isValidUpiId(this.updateForm.vpa || "")) {
       this.updateQrError = "";
     }
   }
 
   isValidUpiId(vpa: string): boolean {
-    return this.vpaPattern.test(vpa);
+    if (!vpa) return false;
+    return this.isAaniUpi
+      ? this.aaniPattern.test(vpa)
+      : this.vpaPattern.test(vpa);
   }
 
   generateQrForUpdate(): void {
+    if (this.isAaniUpi) return; // 👈 NEW — AANI me generate allowed nahi, sirf upload
     const vpa = String(this.updateForm.vpa).trim();
     if (!this.isValidUpiId(vpa)) {
       this.updateQrError = "Please enter a valid UPI ID first";
@@ -1800,7 +1740,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.isGeneratingUpdateQr = true;
     setTimeout(() => this.captureUpdateQrImage(), 600);
   }
-
   private captureUpdateQrImage(): void {
     try {
       const qrcodeElement = this.updateQrcodeElem;
@@ -1875,7 +1814,10 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     const limit = parseFloat(this.updateForm.limitAmount) || 0;
 
     if (!vpa || !this.isValidUpiId(vpa)) {
-      this.snack.show("Valid UPI ID required", false);
+      this.snack.show(
+        this.isAaniUpi ? "Valid Aani ID required" : "Valid UPI ID required",
+        false,
+      );
       return;
     }
     if (limit <= 0) {
@@ -1894,6 +1836,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       active: true,
       fttAcceptance: this.updateForm.fttAcceptance,
       partialPayinEnabled: this.updateForm.partialPayinEnabled,
+      paymentMode: this.editingUpi.paymentMode || null, // 👈 NEW — backend ko AANI/UPI differentiate karne ke liye
     };
 
     const formData = new FormData();
@@ -1913,15 +1856,24 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
         this.isSubmitting = false;
         this.closeUpdateModal();
         this.refreshInventory();
-        this.snack.show(res?.message || "UPI updated successfully!", true);
+        this.snack.show(
+          res?.message ||
+            (this.isAaniUpi
+              ? "Aani updated successfully!"
+              : "UPI updated successfully!"),
+          true,
+        );
       },
       error: (err: any) => {
         this.isSubmitting = false;
-        this.snack.show(err?.error?.message || "Error updating UPI", false);
+        this.snack.show(
+          err?.error?.message ||
+            (this.isAaniUpi ? "Error updating Aani" : "Error updating UPI"),
+          false,
+        );
       },
     });
   }
-
   // ---------- CRYPTO — EDIT ACCOUNT MODAL ----------
   openEditAccountModal(item: InventoryItem): void {
     if (this.blockIfDeleted(item)) return; // 👈 NEW (double guard, safe even if called directly)

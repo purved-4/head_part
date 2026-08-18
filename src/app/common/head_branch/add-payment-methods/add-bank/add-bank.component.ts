@@ -129,7 +129,7 @@ export class AddBankComponent implements OnInit, OnDestroy {
         accountHolderName: ["", [Validators.required, Validators.minLength(3)]],
 
         accountType: ["", Validators.required],
-
+        limitAmount: [null, [Validators.pattern(/^\d+$/)]],
         fttAcceptance: [true],
         partialPayinEnabled: [false],
       },
@@ -300,7 +300,12 @@ export class AddBankComponent implements OnInit, OnDestroy {
       accountHolderName: formData.accountHolderName,
       bankCode: formData.bankCode,
       accountType: formData.accountType,
-      limitAmount: formData.limitAmount,
+      limitAmount:
+        formData.limitAmount === null ||
+        formData.limitAmount === "" ||
+        formData.limitAmount === undefined
+          ? null
+          : Number(formData.limitAmount),
       status: true,
       fttAcceptance: formData.fttAcceptance,
       ranges: validRanges.length ? validRanges : null,

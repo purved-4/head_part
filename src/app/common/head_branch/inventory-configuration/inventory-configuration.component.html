@@ -119,6 +119,24 @@
         ></app-add-upi>
       </div>
     </ng-container>
+    <!-- AANI -->
+    <ng-container *ngIf="showForm && isAaniMode(selectedMode)">
+      <div class="border-t border-gray-100 pt-5">
+        <div class="flex items-center gap-2 mb-4">
+          <span
+            class="w-6 h-6 rounded-full border-2 border-green-500 text-green-600 bg-green-50 flex items-center justify-center text-xs font-bold"
+            >2</span
+          >
+          <span class="text-sm font-semibold text-gray-800">Aani Details</span>
+        </div>
+        <app-add-aani
+          [embeddedMode]="true"
+          [currency]="selectedCurrency"
+          (formSubmitted)="onAaniSubmitted($event)"
+          (formCancelled)="onAaniCancelled()"
+        ></app-add-aani>
+      </div>
+    </ng-container>
 
     <!-- CRYPTO: OMNI / SPL / ERC20 / TRC20 / BEP20 — single combined component -->
     <ng-container *ngIf="showForm && isCryptoMode(selectedMode)">

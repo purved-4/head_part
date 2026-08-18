@@ -8,13 +8,7 @@ import {
   ViewChild,
   ElementRef,
 } from "@angular/core";
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  ValidationErrors,
-  Validators,
-} from "@angular/forms";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Subscription } from "rxjs";
 import { SnackbarService } from "../../../snackbar/snackbar.service";
 import { UserStateService } from "../../../../store/user-state.service";
@@ -22,11 +16,11 @@ import { UpiService } from "../../../../pages/services/upi.service";
 import { BankService } from "../../../../pages/services/bank.service";
 
 @Component({
-  selector: "app-add-upi",
-  templateUrl: "./add-upi.component.html",
-  styleUrl: "./add-upi.component.css",
+  selector: "app-add-aani",
+  templateUrl: "./add-aani.component.html",
+  styleUrl: "./add-aani.component.css",
 })
-export class AddUpiComponent implements OnInit, OnDestroy {
+export class AddAaniComponent implements OnInit, OnDestroy {
   @Input() currency: any;
   @Input() embeddedMode: boolean = false;
   @Input() preselectedBankId: any = null;
@@ -36,9 +30,9 @@ export class AddUpiComponent implements OnInit, OnDestroy {
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formCancelled = new EventEmitter<void>();
 
-  addUpiForm: FormGroup;
+  addAaniForm: FormGroup;
 
-  isAddingUpi = false;
+  isAddingAani = false;
   currentRoleId: any;
   role: any;
   generatingQr = false;
@@ -48,10 +42,10 @@ export class AddUpiComponent implements OnInit, OnDestroy {
   showAddModal = false;
 
   // bank dropdown (same like bank component)
-  upiPortalSearch = "";
+  aaniPortalSearch = "";
   filteredBanks: any[] = [];
-  showUpiPortalDropdown = false;
-  selectedUpiPortal: any = null;
+  showAaniPortalDropdown = false;
+  selectedAaniPortal: any = null;
 
   // QR
   qrMode: "generate" | "upload" = "generate";
@@ -63,6 +57,9 @@ export class AddUpiComponent implements OnInit, OnDestroy {
 
   capacityRanges: any[] = [{ minRange: null, maxRange: null, quantity: null }];
 
+  // backend: private String validateAani(String value) -> ^[A-Za-z0-9._+@:-]{3,128}$
+  private readonly AANI_ID_PATTERN = /^[A-Za-z0-9._+@:-]{3,128}$/;
+
   private subs = new Subscription();
   constructor(
     private fb: FormBuilder,
@@ -71,7 +68,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
     private upiService: UpiService,
     private bankService: BankService,
   ) {
-    this.addUpiForm = this.createForm();
+    this.addAaniForm = this.createForm();
   }
 
   ngOnInit(): void {
@@ -88,7 +85,10 @@ export class AddUpiComponent implements OnInit, OnDestroy {
   private createForm(): FormGroup {
     return this.fb.group({
       bankId: [null],
-      vpa: ["", [Validators.required]],
+      aaniId: [
+        "",
+        [Validators.required, Validators.pattern(this.AANI_ID_PATTERN)],
+      ],
       limitAmount: ["", Validators.required],
       fttAcceptance: [true],
       partialPayinEnabled: [false],
@@ -103,9 +103,9 @@ export class AddUpiComponent implements OnInit, OnDestroy {
 
   closeAddModal(): void {
     this.showAddModal = false;
-    this.addUpiForm.reset({
+    this.addAaniForm.reset({
       bankId: null,
-      vpa: "",
+      aaniId: "",
       limitAmount: "",
       fttAcceptance: true,
       partialPayinEnabled: true,
@@ -117,8 +117,8 @@ export class AddUpiComponent implements OnInit, OnDestroy {
   }
 
   // ---------------- BANK SEARCH ----------------
-  onUpiPortalSearch(): void {
-    const term = this.upiPortalSearch?.toLowerCase() || "";
+  onAaniPortalSearch(): void {
+    const term = this.aaniPortalSearch?.toLowerCase() || "";
 
     this.filteredBanks = this.banks.filter(
       (b: any) =>
@@ -126,35 +126,35 @@ export class AddUpiComponent implements OnInit, OnDestroy {
         (b.accountNo || "").toLowerCase().includes(term),
     );
 
-    this.showUpiPortalDropdown = true;
+    this.showAaniPortalDropdown = true;
   }
 
-  openUpiPortalDropdown(): void {
+  openAaniPortalDropdown(): void {
     this.filteredBanks = [...this.banks];
-    this.showUpiPortalDropdown = true;
+    this.showAaniPortalDropdown = true;
   }
 
-  onUpiPortalFocus(): void {
+  onAaniPortalFocus(): void {
     this.filteredBanks = [...this.banks];
-    this.showUpiPortalDropdown = true;
+    this.showAaniPortalDropdown = true;
   }
 
-  selectUpiPortal(bank: any): void {
-    this.selectedUpiPortal = bank;
+  selectAaniPortal(bank: any): void {
+    this.selectedAaniPortal = bank;
 
-    this.addUpiForm.patchValue({
+    this.addAaniForm.patchValue({
       bankId: bank.id,
     });
 
-    this.upiPortalSearch = bank.accountHolderName || bank.accountNo;
+    this.aaniPortalSearch = bank.accountHolderName || bank.accountNo;
 
-    this.showUpiPortalDropdown = false;
+    this.showAaniPortalDropdown = false;
   }
 
-  clearUpiPortalSelection(): void {
-    this.selectedUpiPortal = null;
-    this.upiPortalSearch = "";
-    this.addUpiForm.patchValue({ bankId: null });
+  clearAaniPortalSelection(): void {
+    this.selectedAaniPortal = null;
+    this.aaniPortalSearch = "";
+    this.addAaniForm.patchValue({ bankId: null });
   }
 
   // ---------------- QR ----------------
@@ -218,25 +218,21 @@ export class AddUpiComponent implements OnInit, OnDestroy {
 
   updateFrom(index: number, event: Event) {
     const value = (event.target as HTMLInputElement).value.trim();
-
     this.capacityRanges[index].minRange = value === "" ? null : Number(value);
   }
   updateTo(index: number, event: Event) {
     const value = (event.target as HTMLInputElement).value.trim();
-
     this.capacityRanges[index].maxRange = value === "" ? null : Number(value);
   }
 
   updateQuantity(index: number, event: Event) {
     const value = (event.target as HTMLInputElement).value.trim();
-
     this.capacityRanges[index].quantity = value === "" ? null : Number(value);
   }
 
   // ---------------- SUBMIT ----------------
-
-  async submitAddUpi(): Promise<void> {
-    if (this.addUpiForm.invalid) {
+  async submitAddAani(): Promise<void> {
+    if (this.addAaniForm.invalid) {
       this.snack.show("Fill required fields", false);
       return;
     }
@@ -250,15 +246,16 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       entityId: this.currentRoleId,
       entityType: this.role,
       status: true,
-      paymentMode: "UPI",
+      paymentMode: "AANI",
       currency: this.currency?.currency,
-      bankId: this.addUpiForm.value.bankId,
-      vpa: this.addUpiForm.value.vpa,
-      limitAmount: this.addUpiForm.value.limitAmount,
+      bankId: this.addAaniForm.value.bankId,
+      vpa: this.addAaniForm.value.aaniId,
+      limitAmount: this.addAaniForm.value.limitAmount,
       qrMode: this.qrMode,
-      fttAcceptance: this.addUpiForm.value.fttAcceptance,
-      partialPayinEnabled: this.addUpiForm.getRawValue().partialPayinEnabled,
+      fttAcceptance: this.addAaniForm.value.fttAcceptance,
+      partialPayinEnabled: this.addAaniForm.getRawValue().partialPayinEnabled,
     };
+    console.log(payload);
 
     const validRanges = this.capacityRanges
       .filter(
@@ -296,29 +293,34 @@ export class AddUpiComponent implements OnInit, OnDestroy {
 
     formData.append("file", this.generatedFile, this.generatedFile.name);
 
-    this.isAddingUpi = true;
+    this.isAddingAani = true;
 
+    // NOTE: reusing upiService.add() since backend endpoint is same for UPI/AANI
+    // dto.paymentMode differentiates it server-side. Agar Aani ke liye alag
+    // endpoint/service hai toh yaha upiService.add -> aaniService.add karna hoga.
     const sub = this.upiService.add(formData).subscribe({
       next: (res) => {
-        this.isAddingUpi = false;
+        this.isAddingAani = false;
 
         this.closeAddModal();
 
-        this.snack.show(res.message || "UPI added successfully", true);
+        this.snack.show(res.message || "Aani added successfully", true);
 
         this.formSubmitted.emit();
       },
       error: (err) => {
-        this.isAddingUpi = false;
+        this.isAddingAani = false;
 
-        this.snack.show(err?.error?.message || "Error adding UPI", false);
+        this.snack.show(err?.error?.message || "Error adding Aani", false);
       },
     });
 
     this.subs.add(sub);
   }
+
   loadBanks(): void {
-    this.bankService.getBankForQr(this.currentRoleId, "INR").subscribe({
+    // FIX: pehle "INR" hardcoded tha, Aani AED ke liye hai
+    this.bankService.getBankForQr(this.currentRoleId, "AED").subscribe({
       next: (res: any) => {
         const banks = res?.data ?? [];
 
@@ -331,13 +333,13 @@ export class AddUpiComponent implements OnInit, OnDestroy {
           );
 
           if (matchedBank) {
-            this.selectedUpiPortal = matchedBank;
+            this.selectedAaniPortal = matchedBank;
 
-            this.addUpiForm.patchValue({
+            this.addAaniForm.patchValue({
               bankId: matchedBank.id,
             });
 
-            this.upiPortalSearch =
+            this.aaniPortalSearch =
               matchedBank.accountHolderName || matchedBank.accountNo || "";
           }
         }
@@ -348,25 +350,31 @@ export class AddUpiComponent implements OnInit, OnDestroy {
 
         this.banks = [];
         this.filteredBanks = [];
-        this.selectedUpiPortal = null;
+        this.selectedAaniPortal = null;
       },
     });
   }
-  generateQrFromVpa(): void {
-    const vpa = String(this.addUpiForm.get("vpa")?.value || "").trim();
 
-    if (!vpa) {
-      this.snack.show("Enter VPA first", false);
+  generateQrFromAaniId(): void {
+    const aaniId = String(this.addAaniForm.get("aaniId")?.value || "").trim();
+
+    if (!aaniId) {
+      this.snack.show("Enter Aani ID first", false);
+      return;
+    }
+
+    if (!this.AANI_ID_PATTERN.test(aaniId)) {
+      this.snack.show("Invalid Aani payment identifier", false);
       return;
     }
 
     this.qrMode = "generate";
 
-    const upiIntent = `upi://pay?pa=${encodeURIComponent(vpa)}&cu=INR`;
+    const aaniIntent = `aani://pay?id=${encodeURIComponent(aaniId)}&cu=AED`;
 
-    this.qrData = upiIntent;
+    this.qrData = aaniIntent;
 
-    const filename = `upi_qr_${this.sanitizeFilename(vpa)}_${Date.now()}.png`;
+    const filename = `aani_qr_${this.sanitizeFilename(aaniId)}_${Date.now()}.png`;
 
     // delay to allow QR render
     setTimeout(() => {
@@ -405,7 +413,8 @@ export class AddUpiComponent implements OnInit, OnDestroy {
 
     reader.readAsDataURL(file);
   }
-  private captureQrImage(vpa: string): void {
+
+  private captureQrImage(aaniId: string): void {
     try {
       if (!this.qrcodeElem?.nativeElement) {
         this.finishQrGeneration();
@@ -423,7 +432,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
         canvas.toBlob(
           (blob: Blob | null) => {
             if (blob) {
-              const filename = `upi_qr_${this.sanitizeFilename(vpa)}_${Date.now()}.png`;
+              const filename = `aani_qr_${this.sanitizeFilename(aaniId)}_${Date.now()}.png`;
 
               this.generatedFile = new File([blob], filename, {
                 type: "image/png",
@@ -451,6 +460,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       .replace(/_{2,}/g, "_")
       .substring(0, 100);
   }
+
   get smallestCapacityRangeLimit(): number | null {
     const validRanges = this.capacityRanges.filter(
       (r) => r.minRange != null && r.minRange > 0,

@@ -1,4 +1,3 @@
-
 import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { CurrencyService } from "../../../pages/services/currency.service";
 import { UserStateService } from "../../../store/user-state.service";
@@ -16,6 +15,7 @@ export class InventoryConfigurationComponent implements OnInit {
   @Output() refreshBankAccounts = new EventEmitter<void>();
   @Output() refreshUpis = new EventEmitter<void>();
   @Output() refreshCryptoWallets = new EventEmitter<void>();
+  @Output() refreshAaniWallets = new EventEmitter<void>();
 
   currentStep = 1;
 
@@ -61,7 +61,6 @@ export class InventoryConfigurationComponent implements OnInit {
           this.currencies = res?.data?.currencies || res?.data || [];
         },
         error: (err) => {
-
           this.snackBar.show(
             err.error.message || "Failed to load currencies. Please try again.",
             false,
@@ -86,8 +85,6 @@ export class InventoryConfigurationComponent implements OnInit {
   selectMode(mode: any): void {
     this.selectedMode = mode?.toUpperCase();
 
-
-
     this.currencyBehaviour.setMode(this.selectedMode);
 
     this.showForm = !!mode;
@@ -106,7 +103,6 @@ export class InventoryConfigurationComponent implements OnInit {
 
   // ─── UPI handlers ────────────────────────────────────────────
   onUpiSubmitted(event: any): void {
-
     this.refreshUpis.emit();
     this.showForm = false;
     this.close.emit();
@@ -125,5 +121,20 @@ export class InventoryConfigurationComponent implements OnInit {
 
     this.refreshCryptoWallets.emit();
     this.close.emit();
+  }
+
+  isAaniMode(mode: any): boolean {
+    return (mode || "").toUpperCase() === "AANI";
+  }
+
+  // ─── AANI handlers ───────────────────────────────────────────
+  onAaniSubmitted(event: any): void {
+    this.refreshAaniWallets.emit();
+    this.showForm = false;
+    this.close.emit();
+  }
+
+  onAaniCancelled(): void {
+    this.showForm = false;
   }
 }

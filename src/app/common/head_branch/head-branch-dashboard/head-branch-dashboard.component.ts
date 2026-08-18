@@ -3354,10 +3354,7 @@ export class HeadBranchDashboardComponent
     this.resetEditAmountData();
 
     this.editAmountData = {
-      newAmount:
-        this.selectedTransaction.mode === "crypto"
-          ? this.selectedTransaction.currencyWiseAmount
-          : this.selectedTransaction.amount,
+      newAmount: this.selectedTransaction.amount,
       message: "",
       file: null,
       isDragging: false,
@@ -3480,13 +3477,7 @@ export class HeadBranchDashboardComponent
       return;
     }
 
-    const mode = this.selectedTransaction?.mode;
-    const isCrypto = this.isCryptoModes(mode);
-
-    const oldAmount = isCrypto
-      ? Number(this.selectedTransaction?.currencyWiseAmount ?? 0)
-      : Number(this.selectedTransaction?.amount ?? 0);
-
+    const oldAmount = Number(this.selectedTransaction?.amount ?? 0);
     const newAmount = Number(this.editAmountData.newAmount);
 
     if (newAmount === oldAmount) {
@@ -3505,7 +3496,6 @@ export class HeadBranchDashboardComponent
     this.loaderService.showButtonLoader();
 
     const txId = this.selectedTransaction.id;
-    const txType = this.selectedTransaction.type;
 
     const updateData = {
       entityId: this.entityId,
@@ -3523,76 +3513,10 @@ export class HeadBranchDashboardComponent
         next: () => {
           this.loaderService.hideButtonLoader();
 
-          // ==========================================
-          // 1. UPDATE SELECTED TRANSACTION IMMEDIATELY
-          // ==========================================
-
-          if (isCrypto) {
-            this.selectedTransaction = {
-              ...this.selectedTransaction,
-              currencyWiseAmount: newAmount,
-              raw: {
-                ...this.selectedTransaction?.raw,
-                currencyWiseAmount: newAmount,
-              },
-            };
-          } else {
-            this.selectedTransaction = {
-              ...this.selectedTransaction,
-              amount: newAmount,
-              raw: {
-                ...this.selectedTransaction?.raw,
-                amount: newAmount,
-              },
-            };
-          }
-
-          // ==========================================
-          // 2. UPDATE ALL SOURCE LISTS
-          // ==========================================
-
-          this.applyAmountUpdateToLists(txId, mode, txType, newAmount);
-
-          // ==========================================
-          // 3. UPDATE CACHED CRYPTO LISTS
-          // ==========================================
-
-          if (isCrypto) {
-            this.cachedPendingCrypto = this.patchAmountInList(
-              this.cachedPendingCrypto,
-              txId,
-              newAmount,
-              true,
-            );
-
-            this.cachedPendingPayinAll = this.patchAmountInList(
-              this.cachedPendingPayinAll,
-              txId,
-              newAmount,
-              true,
-            );
-          }
-
-          // ==========================================
-          // 4. REFRESH DERIVED STATE
-          // ==========================================
-
-          this.updateCurrencySums();
-          this.computeStatsFromData();
-          this.updateChartsFromData();
-          this.refreshCachedLists();
-
-          // ==========================================
-          // 5. FORCE ANGULAR STATE UPDATE
-          // ==========================================
-
-          this.selectedTransaction = {
-            ...this.selectedTransaction,
-          };
-
           this.snackbar.show("Amount updated successfully", true);
 
           this.closeEditAmountPopup();
+          this.selectedTransaction = null;
         },
 
         error: (err) => {
@@ -3606,63 +3530,6 @@ export class HeadBranchDashboardComponent
       });
   }
 
-  private applyAmountUpdateToLists(
-    txId: any,
-    mode: string,
-    txType: string,
-    newAmount: number,
-  ): void {
-    const isCrypto = this.isCryptoMode(mode);
-
-    const patch = (list: any[]): any[] => {
-      if (!Array.isArray(list)) {
-        return [];
-      }
-
-      return list.map((t) => {
-        if (t.id !== txId && t.fundId !== txId) {
-          return t;
-        }
-
-        if (isCrypto) {
-          return {
-            ...t,
-            currencyWiseAmount: Number(newAmount),
-            raw: {
-              ...t.raw,
-              currencyWiseAmount: Number(newAmount),
-            },
-          };
-        }
-
-        return {
-          ...t,
-          amount: Number(newAmount),
-          raw: {
-            ...t.raw,
-            amount: Number(newAmount),
-          },
-        };
-      });
-    };
-
-    if (txType === "payout") {
-      this.pendingpayouts = patch(this.pendingpayouts);
-      this.approvedpayouts = patch(this.approvedpayouts);
-    } else {
-      this.pendingUpi = patch(this.pendingUpi);
-      this.pendingBank = patch(this.pendingBank);
-      this.pendingCrypto = patch(this.pendingCrypto);
-      this.approvedpayins = patch(this.approvedpayins);
-    }
-
-    // Crypto cache state
-    if (isCrypto) {
-      this.cachedPendingCrypto = patch(this.cachedPendingCrypto);
-      this.cachedPendingPayinAll = patch(this.cachedPendingPayinAll);
-    }
-  }
-
   private isCryptoModes(mode: any): boolean {
     const normalizedMode = String(mode || "")
       .trim()
@@ -3671,42 +3538,5 @@ export class HeadBranchDashboardComponent
     return ["CRYPTO", "TRC20", "ERC20", "BEP20", "SPL", "OMNI"].includes(
       normalizedMode,
     );
-  }
-
-  private patchAmountInList(
-    list: any[],
-    txId: any,
-    newAmount: number,
-    isCrypto: boolean,
-  ): any[] {
-    if (!Array.isArray(list)) {
-      return [];
-    }
-
-    return list.map((t) => {
-      if (t.id !== txId && t.fundId !== txId) {
-        return t;
-      }
-
-      if (isCrypto) {
-        return {
-          ...t,
-          currencyWiseAmount: Number(newAmount),
-          raw: {
-            ...t.raw,
-            currencyWiseAmount: Number(newAmount),
-          },
-        };
-      }
-
-      return {
-        ...t,
-        amount: Number(newAmount),
-        raw: {
-          ...t.raw,
-          amount: Number(newAmount),
-        },
-      };
-    });
   }
 }
