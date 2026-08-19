@@ -94,7 +94,7 @@ export class UpiService {
       params = params.set("status", options.status);
     }
 
-     if (options.bankId) {
+    if (options.bankId) {
       params = params.set("bankId", options.bankId);
     }
 
@@ -174,15 +174,15 @@ export class UpiService {
   getPayinCapacity(
     entityType: string,
     entityId: string,
-    portalId: string,
-    mode: "UPI" | "BANK",
+
+    mode: "UPI" | "AANI" | "BANK",
     payinId: string,
   ): Observable<any> {
     const params = new HttpParams({
       fromObject: {
         entityType,
         entityId,
-        portalId,
+
         mode,
         payinId: payinId,
       },

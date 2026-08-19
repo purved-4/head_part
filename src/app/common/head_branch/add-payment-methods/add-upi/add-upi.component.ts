@@ -30,6 +30,8 @@ export class AddUpiComponent implements OnInit, OnDestroy {
   @Input() currency: any;
   @Input() embeddedMode: boolean = false;
   @Input() preselectedBankId: any = null;
+  @ViewChild("upiBankDropdown", { static: false })
+  upiBankDropdown!: ElementRef;
   @ViewChild("qrcodeRef", { static: false })
   qrcodeElem!: ElementRef;
 
@@ -46,8 +48,9 @@ export class AddUpiComponent implements OnInit, OnDestroy {
 
   // modal
   showAddModal = false;
+  isUserUploaded: boolean = false;
 
-  // bank dropdown (same like bank component)
+  // bank dropdown
   upiPortalSearch = "";
   filteredBanks: any[] = [];
   showUpiPortalDropdown = false;
@@ -64,12 +67,14 @@ export class AddUpiComponent implements OnInit, OnDestroy {
   capacityRanges: any[] = [{ minRange: null, maxRange: null, quantity: null }];
 
   private subs = new Subscription();
+
   constructor(
     private fb: FormBuilder,
     private snack: SnackbarService,
     private userStateService: UserStateService,
     private upiService: UpiService,
     private bankService: BankService,
+    private elRef: ElementRef,
   ) {
     this.addUpiForm = this.createForm();
   }
@@ -78,18 +83,38 @@ export class AddUpiComponent implements OnInit, OnDestroy {
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.role = this.userStateService.getRole();
     this.loadBanks();
+
+    // Capture phase so this fires BEFORE any (click)="$event.stopPropagation()"
+    // inside the modal (e.g. the modal panel) can swallow the event during bubbling.
+    document.addEventListener("click", this.handleOutsideClick, true);
   }
 
   ngOnDestroy(): void {
+    document.removeEventListener("click", this.handleOutsideClick, true);
     this.subs.unsubscribe();
   }
+
+  private handleOutsideClick = (event: MouseEvent): void => {
+    if (!this.showUpiPortalDropdown) {
+      return;
+    }
+
+    const target = event.target as Node;
+
+    const clickedInsideBankDropdown =
+      this.upiBankDropdown?.nativeElement?.contains(target);
+
+    if (!clickedInsideBankDropdown) {
+      this.showUpiPortalDropdown = false;
+    }
+  };
 
   // ---------------- FORM ----------------
   private createForm(): FormGroup {
     return this.fb.group({
       bankId: [null],
       vpa: ["", [Validators.required]],
-      limitAmount: ["", Validators.required],
+      limitAmount: [null],
       fttAcceptance: [true],
       partialPayinEnabled: [false],
     });
@@ -103,16 +128,20 @@ export class AddUpiComponent implements OnInit, OnDestroy {
 
   closeAddModal(): void {
     this.showAddModal = false;
+
     this.addUpiForm.reset({
       bankId: null,
       vpa: "",
-      limitAmount: "",
+      limitAmount: null,
       fttAcceptance: true,
       partialPayinEnabled: true,
     });
+
     this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
     this.selectedImage = null;
     this.qrData = "";
+    this.isUserUploaded = false;
+
     document.body.style.overflow = "auto";
   }
 
@@ -158,7 +187,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
   }
 
   // ---------------- QR ----------------
-  setQrMode(mode: "generate" | "upload") {
+  setQrMode(mode: "generate" | "upload"): void {
     this.qrMode = mode;
   }
 
@@ -166,192 +195,13 @@ export class AddUpiComponent implements OnInit, OnDestroy {
     this.selectedImage = null;
     this.manualQrFile = null;
     this.qrData = "";
+    this.isUserUploaded = false;
   }
 
   downloadQr(): void {
     // optional implementation
   }
 
-  // ---------------- CAPACITY ----------------
-  addRange() {
-    const last = this.capacityRanges[this.capacityRanges.length - 1];
-
-    if (
-      last.minRange == null ||
-      last.maxRange == null ||
-      last.quantity == null
-    ) {
-      this.snack.show("Please fill previous range first.", false);
-      return;
-    }
-
-    if (last.minRange <= 0 || last.maxRange <= 0 || last.quantity <= 0) {
-      this.snack.show("Range values must be greater than 0.", false);
-      return;
-    }
-
-    if (last.maxRange <= last.minRange) {
-      this.snack.show("'To' must be greater than 'From'.", false);
-      return;
-    }
-
-    this.capacityRanges.push({
-      minRange: null,
-      maxRange: null,
-      quantity: null,
-    });
-  }
-
-  removeRange(index: number) {
-    this.capacityRanges.splice(index, 1);
-
-    if (this.capacityRanges.length === 0) {
-      this.capacityRanges = [
-        {
-          minRange: null,
-          maxRange: null,
-          quantity: null,
-        },
-      ];
-    }
-  }
-
-  updateFrom(index: number, event: Event) {
-    const value = (event.target as HTMLInputElement).value.trim();
-
-    this.capacityRanges[index].minRange = value === "" ? null : Number(value);
-  }
-  updateTo(index: number, event: Event) {
-    const value = (event.target as HTMLInputElement).value.trim();
-
-    this.capacityRanges[index].maxRange = value === "" ? null : Number(value);
-  }
-
-  updateQuantity(index: number, event: Event) {
-    const value = (event.target as HTMLInputElement).value.trim();
-
-    this.capacityRanges[index].quantity = value === "" ? null : Number(value);
-  }
-
-  // ---------------- SUBMIT ----------------
-
-  async submitAddUpi(): Promise<void> {
-    if (this.addUpiForm.invalid) {
-      this.snack.show("Fill required fields", false);
-      return;
-    }
-
-    if (!this.generatedFile) {
-      this.snack.show("Please upload or generate QR first", false);
-      return;
-    }
-
-    const payload: any = {
-      entityId: this.currentRoleId,
-      entityType: this.role,
-      status: true,
-      paymentMode: "UPI",
-      currency: this.currency?.currency,
-      bankId: this.addUpiForm.value.bankId,
-      vpa: this.addUpiForm.value.vpa,
-      limitAmount: this.addUpiForm.value.limitAmount,
-      qrMode: this.qrMode,
-      fttAcceptance: this.addUpiForm.value.fttAcceptance,
-      partialPayinEnabled: this.addUpiForm.getRawValue().partialPayinEnabled,
-    };
-
-    const validRanges = this.capacityRanges
-      .filter(
-        (r) =>
-          r.minRange != null &&
-          r.maxRange != null &&
-          r.quantity != null &&
-          r.minRange > 0 &&
-          r.maxRange > 0 &&
-          r.quantity > 0,
-      )
-      .map((r) => ({
-        minRange: r.minRange!,
-        maxRange: r.maxRange!,
-        quantity: r.quantity!,
-      }));
-    payload.ranges = validRanges.length ? validRanges : null;
-
-    if (validRanges.length > 0) {
-      payload.ranges = validRanges.map((r) => ({
-        minRange: Number(r.minRange),
-        maxRange: Number(r.maxRange),
-        quantity: Number(r.quantity),
-      }));
-    }
-
-    const formData = new FormData();
-
-    formData.append(
-      "dto",
-      new Blob([JSON.stringify(payload)], {
-        type: "application/json",
-      }),
-    );
-
-    formData.append("file", this.generatedFile, this.generatedFile.name);
-
-    this.isAddingUpi = true;
-
-    const sub = this.upiService.add(formData).subscribe({
-      next: (res) => {
-        this.isAddingUpi = false;
-
-        this.closeAddModal();
-
-        this.snack.show(res.message || "UPI added successfully", true);
-
-        this.formSubmitted.emit();
-      },
-      error: (err) => {
-        this.isAddingUpi = false;
-
-        this.snack.show(err?.error?.message || "Error adding UPI", false);
-      },
-    });
-
-    this.subs.add(sub);
-  }
-  loadBanks(): void {
-    this.bankService.getBankForQr(this.currentRoleId, "INR").subscribe({
-      next: (res: any) => {
-        const banks = res?.data ?? [];
-
-        this.banks = banks;
-        this.filteredBanks = [...banks];
-
-        if (this.preselectedBankId) {
-          const matchedBank = this.banks.find(
-            (bank: any) => String(bank.id) === String(this.preselectedBankId),
-          );
-
-          if (matchedBank) {
-            this.selectedUpiPortal = matchedBank;
-
-            this.addUpiForm.patchValue({
-              bankId: matchedBank.id,
-            });
-
-            this.upiPortalSearch =
-              matchedBank.accountHolderName || matchedBank.accountNo || "";
-          }
-        }
-      },
-
-      error: (error) => {
-        this.snack.show(error?.error?.message || "Error fetching banks", false);
-
-        this.banks = [];
-        this.filteredBanks = [];
-        this.selectedUpiPortal = null;
-      },
-    });
-  }
   generateQrFromVpa(): void {
     const vpa = String(this.addUpiForm.get("vpa")?.value || "").trim();
 
@@ -361,17 +211,16 @@ export class AddUpiComponent implements OnInit, OnDestroy {
     }
 
     this.qrMode = "generate";
+    this.isUserUploaded = false;
 
     const upiIntent = `upi://pay?pa=${encodeURIComponent(vpa)}&cu=INR`;
-
     this.qrData = upiIntent;
 
     const filename = `upi_qr_${this.sanitizeFilename(vpa)}_${Date.now()}.png`;
 
-    // delay to allow QR render
     setTimeout(() => {
-      const canvas = document.querySelector(
-        "qrcode canvas",
+      const canvas = this.qrcodeElem?.nativeElement?.querySelector(
+        "canvas",
       ) as HTMLCanvasElement;
 
       if (!canvas) {
@@ -396,6 +245,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
 
     this.manualQrFile = file;
     this.generatedFile = file;
+    this.isUserUploaded = true;
 
     const reader = new FileReader();
 
@@ -405,6 +255,7 @@ export class AddUpiComponent implements OnInit, OnDestroy {
 
     reader.readAsDataURL(file);
   }
+
   private captureQrImage(vpa: string): void {
     try {
       if (!this.qrcodeElem?.nativeElement) {
@@ -451,11 +302,188 @@ export class AddUpiComponent implements OnInit, OnDestroy {
       .replace(/_{2,}/g, "_")
       .substring(0, 100);
   }
+
+  // ---------------- CAPACITY ----------------
+  addRange(): void {
+    const last = this.capacityRanges[this.capacityRanges.length - 1];
+
+    if (
+      last.minRange == null ||
+      last.maxRange == null ||
+      last.quantity == null
+    ) {
+      this.snack.show("Please fill previous range first.", false);
+      return;
+    }
+
+    if (last.minRange <= 0 || last.maxRange <= 0 || last.quantity <= 0) {
+      this.snack.show("Range values must be greater than 0.", false);
+      return;
+    }
+
+    if (last.maxRange <= last.minRange) {
+      this.snack.show("'To' must be greater than 'From'.", false);
+      return;
+    }
+
+    this.capacityRanges.push({
+      minRange: null,
+      maxRange: null,
+      quantity: null,
+    });
+  }
+
+  removeRange(index: number): void {
+    this.capacityRanges.splice(index, 1);
+
+    if (this.capacityRanges.length === 0) {
+      this.capacityRanges = [
+        {
+          minRange: null,
+          maxRange: null,
+          quantity: null,
+        },
+      ];
+    }
+  }
+
+  updateFrom(index: number, event: Event): void {
+    const value = (event.target as HTMLInputElement).value.trim();
+    this.capacityRanges[index].minRange = value === "" ? null : Number(value);
+  }
+
+  updateTo(index: number, event: Event): void {
+    const value = (event.target as HTMLInputElement).value.trim();
+    this.capacityRanges[index].maxRange = value === "" ? null : Number(value);
+  }
+
+  updateQuantity(index: number, event: Event): void {
+    const value = (event.target as HTMLInputElement).value.trim();
+    this.capacityRanges[index].quantity = value === "" ? null : Number(value);
+  }
+
   get smallestCapacityRangeLimit(): number | null {
     const validRanges = this.capacityRanges.filter(
       (r) => r.minRange != null && r.minRange > 0,
     );
+
     if (!validRanges.length) return null;
+
     return Math.min(...validRanges.map((r) => r.minRange));
+  }
+
+  // ---------------- BANKS ----------------
+  loadBanks(): void {
+    this.bankService.getBankForQr(this.currentRoleId, "INR").subscribe({
+      next: (res: any) => {
+        const banks = res?.data ?? [];
+
+        this.banks = banks;
+        this.filteredBanks = [...banks];
+
+        if (this.preselectedBankId) {
+          const matchedBank = this.banks.find(
+            (bank: any) => String(bank.id) === String(this.preselectedBankId),
+          );
+
+          if (matchedBank) {
+            this.selectedUpiPortal = matchedBank;
+
+            this.addUpiForm.patchValue({
+              bankId: matchedBank.id,
+            });
+
+            this.upiPortalSearch =
+              matchedBank.accountHolderName || matchedBank.accountNo || "";
+          }
+        }
+      },
+
+      error: (error) => {
+        this.snack.show(error?.error?.message || "Error fetching banks", false);
+
+        this.banks = [];
+        this.filteredBanks = [];
+        this.selectedUpiPortal = null;
+      },
+    });
+  }
+
+  // ---------------- SUBMIT ----------------
+  async submitAddUpi(): Promise<void> {
+    if (this.addUpiForm.invalid) {
+      this.snack.show("Fill required fields", false);
+      return;
+    }
+
+    if (!this.generatedFile) {
+      this.snack.show("Please upload or generate QR first", false);
+      return;
+    }
+
+    const payload: any = {
+      entityId: this.currentRoleId,
+      entityType: this.role,
+      status: true,
+      paymentMode: "UPI",
+      currency: this.currency?.currency,
+      bankId: this.addUpiForm.value.bankId,
+      vpa: this.addUpiForm.value.vpa,
+      limitAmount: this.addUpiForm.value.limitAmount,
+      qrMode: this.qrMode,
+      fttAcceptance: this.addUpiForm.value.fttAcceptance,
+      partialPayinEnabled: this.addUpiForm.getRawValue().partialPayinEnabled,
+    };
+
+    const validRanges = this.capacityRanges
+      .filter(
+        (r) =>
+          r.minRange != null &&
+          r.maxRange != null &&
+          r.quantity != null &&
+          r.minRange > 0 &&
+          r.maxRange > 0 &&
+          r.quantity > 0,
+      )
+      .map((r) => ({
+        minRange: Number(r.minRange),
+        maxRange: Number(r.maxRange),
+        quantity: Number(r.quantity),
+      }));
+
+    payload.ranges = validRanges.length ? validRanges : null;
+
+    const formData = new FormData();
+
+    formData.append(
+      "dto",
+      new Blob([JSON.stringify(payload)], {
+        type: "application/json",
+      }),
+    );
+
+    formData.append("file", this.generatedFile, this.generatedFile.name);
+    formData.append("isUserUploaded", String(this.isUserUploaded));
+
+    this.isAddingUpi = true;
+
+    const sub = this.upiService.add(formData).subscribe({
+      next: (res) => {
+        this.isAddingUpi = false;
+
+        this.closeAddModal();
+
+        this.snack.show(res.message || "UPI added successfully", true);
+
+        this.formSubmitted.emit();
+      },
+      error: (err) => {
+        this.isAddingUpi = false;
+
+        this.snack.show(err?.error?.message || "Error adding UPI", false);
+      },
+    });
+
+    this.subs.add(sub);
   }
 }

@@ -47,6 +47,8 @@ export class AddAaniComponent implements OnInit, OnDestroy {
   showAaniPortalDropdown = false;
   selectedAaniPortal: any = null;
 
+  isUserUploaded: boolean = false; // 👈 NEW
+
   // QR
   qrMode: "generate" | "upload" = "generate";
   qrData: string = "";
@@ -113,6 +115,7 @@ export class AddAaniComponent implements OnInit, OnDestroy {
     this.capacityRanges = [{ minRange: null, maxRange: null, quantity: null }];
     this.selectedImage = null;
     this.qrData = "";
+    this.isUserUploaded = false; // 👈 NEW
     document.body.style.overflow = "auto";
   }
 
@@ -166,6 +169,7 @@ export class AddAaniComponent implements OnInit, OnDestroy {
     this.selectedImage = null;
     this.manualQrFile = null;
     this.qrData = "";
+    this.isUserUploaded = false; // 👈 NEW
   }
 
   downloadQr(): void {
@@ -293,24 +297,19 @@ export class AddAaniComponent implements OnInit, OnDestroy {
 
     formData.append("file", this.generatedFile, this.generatedFile.name);
 
+    formData.append("IsUserUploaded", String(this.isUserUploaded)); // 👈 NEW
+
     this.isAddingAani = true;
 
-    // NOTE: reusing upiService.add() since backend endpoint is same for UPI/AANI
-    // dto.paymentMode differentiates it server-side. Agar Aani ke liye alag
-    // endpoint/service hai toh yaha upiService.add -> aaniService.add karna hoga.
     const sub = this.upiService.add(formData).subscribe({
       next: (res) => {
         this.isAddingAani = false;
-
         this.closeAddModal();
-
         this.snack.show(res.message || "Aani added successfully", true);
-
         this.formSubmitted.emit();
       },
       error: (err) => {
         this.isAddingAani = false;
-
         this.snack.show(err?.error?.message || "Error adding Aani", false);
       },
     });
@@ -369,14 +368,13 @@ export class AddAaniComponent implements OnInit, OnDestroy {
     }
 
     this.qrMode = "generate";
+    this.isUserUploaded = false; // 👈 NEW
 
     const aaniIntent = `aani://pay?id=${encodeURIComponent(aaniId)}&cu=AED`;
-
     this.qrData = aaniIntent;
 
     const filename = `aani_qr_${this.sanitizeFilename(aaniId)}_${Date.now()}.png`;
 
-    // delay to allow QR render
     setTimeout(() => {
       const canvas = document.querySelector(
         "qrcode canvas",
@@ -404,6 +402,7 @@ export class AddAaniComponent implements OnInit, OnDestroy {
 
     this.manualQrFile = file;
     this.generatedFile = file;
+    this.isUserUploaded = true; // 👈 NEW
 
     const reader = new FileReader();
 
@@ -413,7 +412,6 @@ export class AddAaniComponent implements OnInit, OnDestroy {
 
     reader.readAsDataURL(file);
   }
-
   private captureQrImage(aaniId: string): void {
     try {
       if (!this.qrcodeElem?.nativeElement) {

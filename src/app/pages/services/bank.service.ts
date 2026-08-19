@@ -282,7 +282,7 @@ export class BankService {
         {},
       )
       .pipe(
-        map((response: any) => response.data),
+        map((response: any) => response),
         catchError((error) => throwError(() => error)),
       );
   }

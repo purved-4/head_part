@@ -26,7 +26,15 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
   @Input() portalId!: string;
   @Input() bankId!: any;
 
-  @Input() mode!: "UPI" | "BANK" | "ERC20" | "TRC20" | "SPL" | "BEP20" | "OMNI";
+  @Input() mode!:
+    | "UPI"
+    | "AANI"
+    | "BANK"
+    | "ERC20"
+    | "TRC20"
+    | "SPL"
+    | "BEP20"
+    | "OMNI";
   @Input() payinId!: string;
   @Input() accountDetails: {
     accountHolderName?: string | null;
@@ -111,16 +119,19 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
           this.payinId,
         )
         .subscribe({ next: handleRes, error: handleErr });
-    } else if (this.mode === "UPI") {
+    } else if (this.mode === "UPI" || this.mode === "AANI") {
       this.upiService
         .getPayinCapacity(
           this.entityType,
           this.entityId,
-          this.portalId,
+
           this.mode,
           this.payinId,
         )
         .subscribe({ next: handleRes, error: handleErr });
+    } else {
+      this.isLoading = false;
+      this.snackBar.show(`Unsupported mode: ${this.mode}`, false);
     }
   }
   // ================= EDIT =================
@@ -167,7 +178,6 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
 
     return true;
   }
-
   save() {
     if (!this.isValidRanges()) {
       this.snackBar.show("invalid Ranges", false);
@@ -179,7 +189,6 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
     const payload = {
       entityType: this.entityType,
       entityId: this.entityId,
-      portalId: this.portalId,
       mode: this.mode,
       payinId: this.payinId,
       ranges: this.capacityRanges.map((r) => ({
@@ -205,7 +214,7 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
           );
         },
       });
-    } else if (this.mode === "UPI") {
+    } else if (this.mode === "UPI" || this.mode === "AANI") {
       this.upiService.addPayinCapacity(payload).subscribe({
         next: () => {
           this.isEditing = false;

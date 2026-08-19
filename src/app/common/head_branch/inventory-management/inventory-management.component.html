@@ -876,20 +876,31 @@
           <span class="text-[11px] font-semibold">{{
             getRemainingTime(item)
           }}</span>
+          <span
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold rounded-md border bg-indigo-50 text-indigo-700 border-indigo-200 tracking-wide"
+          >
+            <span class="text-[10px] opacity-70">●</span>
+            {{ item.currency }}
+          </span>
 
           <span
-            class="px-2 py-1 text-[10px] font-semibold rounded-full border"
-            [ngClass]="{
-              'bg-indigo-50 text-indigo-600 border-indigo-200':
-                item.type === 'BANK',
-              'bg-purple-50 text-purple-600 border-purple-200':
-                item.type === 'UPI',
-              'bg-amber-50 text-amber-600 border-amber-200':
-                item.type !== 'BANK' && item.type !== 'UPI',
-            }"
+            *ngIf="item.type === 'BANK'; else modeBadge"
+            class="text-xs font-bold text-blue-600 tracking-wide"
           >
             {{ item.type }}
           </span>
+          <ng-template #modeBadge>
+            <span
+              class="px-2.5 py-1 text-[11px] font-bold rounded-md border tracking-wide"
+              [ngClass]="
+                item.type === 'UPI'
+                  ? 'bg-purple-50 text-purple-600 border-purple-200'
+                  : 'bg-amber-50 text-amber-600 border-amber-200'
+              "
+            >
+              {{ item.paymentMode || item.type }}
+            </span>
+          </ng-template>
 
           <span
             class="px-2 py-1 text-[10px] font-semibold rounded-full border"

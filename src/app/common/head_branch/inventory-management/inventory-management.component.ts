@@ -83,12 +83,16 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
   // ---------- UPI/AANI — CURRENT QR PREVIEW (fresh-fetched, fixes broken image) ----------
   updateCurrentQrUrl: string | null = null;
+  newQrGenerated = false;
+  updateIsUserUploaded: boolean = false; // 👈 NEW
+  updateQrMode: "generate" | "upload" = "generate";
   // ---------- CURRENCY / MODE (single consolidated API — no Apply button) ----------
   currencies: string[] = [];
   private currencyModesMap: { [currency: string]: string[] } = {};
   allModes: string[] = [];
   availableModes: string[] = [];
-
+  qrImageUrls: { [id: string]: string } = {};
+  qrImagePathCache: { [id: string]: string } = {};
   // "ALL" ya specific value — dono UI me directly select hote hain, badalte hi fetch
   selectedCurrency: string = "ALL";
   selectedMode: string = "ALL";
@@ -136,7 +140,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
   private countdownInterval: any;
 
-  qrImageUrls: { [id: string]: string } = {};
   qrImageLoading: { [id: string]: boolean } = {};
 
   showQrPreviewModal = false;
@@ -239,8 +242,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   };
   originalVpa = "";
   vpaChanged = false;
-  newQrGenerated = false;
-  updateQrMode: "generate" | "upload" = "generate";
+
   updateQrData: string | null = null;
   generatedUpdateFile: File | null = null;
   updateManualQrFile: File | null = null;
@@ -572,8 +574,9 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
         status: this.statusFilter === "all" ? "all" : this.statusFilter,
 
-        page: 0,
-        size: 100000,
+        // ✅ ab actual current page + pageSize backend ko jaayega
+        page: this.currentPage - 1,
+        size: this.pageSize,
       })
       .pipe(catchError(() => of(null)))
       .subscribe((res: any) => {
@@ -581,38 +584,40 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
 
         const rows = res?.data?.content || [];
 
-        const allSorted = this.sortByLimitTime(
+        // NOTE: ab yeh sirf CURRENT PAGE ke rows sort kar raha hai,
+        // poore dataset ko nahi (kyunki poora dataset fetch hi nahi ho raha)
+        const pageSorted = this.sortByLimitTime(
           rows
             .filter((r: any) => {
               if (this.statusFilter === "deleted") {
                 return r.deleted === true;
               }
-
               return !r.deleted;
             })
             .map((r: any) => this.mapAnyRow(r)),
         );
 
-        this.allItems = allSorted;
+        this.pagedItems = pageSorted;
+        this.allItems = pageSorted; // ab "allItems" = current page items hi hain
+        this.filteredItems = pageSorted;
 
         this.hasLoadedOnce = true;
         this.loadQrThumbnails();
 
-        this.filteredItems = [...this.allItems];
-
-        // ✅ Ab pagination client-side, sorted list ke upar
-        this.totalElements = this.allItems.length;
+        // ✅ totalElements/totalPages ab BACKEND se aane chahiye (Spring Page response format maan kar likha hai)
+        this.totalElements = res?.data?.totalElements ?? rows.length;
         this.totalPagesCount = Math.max(
           1,
-          Math.ceil(this.totalElements / this.pageSize),
+          res?.data?.totalPages ??
+            Math.ceil(this.totalElements / this.pageSize),
         );
 
         if (this.currentPage > this.totalPagesCount) {
           this.currentPage = this.totalPagesCount;
+          // page out-of-range hone par ek retry fetch chahiye
+          this.fetchInventory();
+          return;
         }
-
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.allItems.slice(start, start + this.pageSize);
 
         this.updatePageNumbers();
       });
@@ -689,7 +694,21 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   private loadQrThumbnails(): void {
     this.allItems.forEach((item) => {
       if (!item.qrImagePath) return;
-      if (this.qrImageUrls[item.id]) return;
+
+      const cachedPath = this.qrImagePathCache[item.id];
+
+      // path same hai aur url bhi cached hai — fresh hai, refetch mat karo
+      if (cachedPath === item.qrImagePath && this.qrImageUrls[item.id]) {
+        item.qrImageUrl = this.qrImageUrls[item.id];
+        return;
+      }
+
+      // path badal gaya (naya QR upload/generate hua) — purana blob revoke karo
+      if (this.qrImageUrls[item.id]) {
+        try {
+          URL.revokeObjectURL(this.qrImageUrls[item.id]);
+        } catch {}
+      }
 
       this.qrImageLoading[item.id] = true;
       const sub = this.multiMedia
@@ -699,6 +718,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
           this.qrImageLoading[item.id] = false;
           if (url) {
             this.qrImageUrls[item.id] = url;
+            this.qrImagePathCache[item.id] = item.qrImagePath!;
             item.qrImageUrl = url;
           }
         });
@@ -760,12 +780,6 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     }
 
     this.updatePageNumbers();
-    this.paginate();
-  }
-
-  private paginate(): void {
-    const start = (this.currentPage - 1) * this.pageSize;
-    this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
   }
 
   // =========================================================
@@ -784,19 +798,20 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     for (let i = start; i <= end; i++) pages.push(i);
     this.pageNumbers = pages;
   }
-
   prevPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
       this.fetchInventory();
     }
   }
+
   nextPage(): void {
     if (this.currentPage < this.totalPagesCount) {
       this.currentPage++;
       this.fetchInventory();
     }
   }
+
   goToPage(page: number): void {
     if (
       page >= 1 &&
@@ -807,6 +822,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       this.fetchInventory();
     }
   }
+
   onPageSizeChange(): void {
     this.currentPage = 1;
     this.fetchInventory();
@@ -1335,7 +1351,13 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.selectedPortalId = item.id;
     this.selectedPayinId = item.id;
     this.capacityMode =
-      item.type === "BANK" ? "BANK" : item.type === "UPI" ? "UPI" : item.type;
+      item.type === "BANK"
+        ? "BANK"
+        : item.type === "UPI"
+          ? item.paymentMode?.toUpperCase() === "AANI"
+            ? "AANI"
+            : "UPI"
+          : item.type;
 
     // 🔥 NEW — item se hi details nikal ke pass karo, extra call nahi
     this.selectedAccountDetails = {
@@ -1653,6 +1675,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.originalVpa = (item.vpa || "").trim().toLowerCase();
     this.vpaChanged = false;
     this.newQrGenerated = false;
+    this.updateIsUserUploaded = false;
     this.updateQrData = null;
     this.generatedUpdateFile = null;
     this.updateQrError = "";
@@ -1660,12 +1683,16 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.updateSelectedImage = null;
     this.updateQrMode = this.isAaniUpi ? "upload" : "generate";
 
-    // 👇 NEW — current QR ko fresh fetch karo, taaki broken image na dikhe
-    this.updateCurrentQrUrl = item.qrImageUrl || null;
+    this.updateCurrentQrUrl = null; // 👈 pehle reset karo, stale value se bachne ke liye
+
     if (item.qrImagePath) {
-      if (this.qrImageUrls[item.id]) {
+      const cachedPath = this.qrImagePathCache[item.id];
+
+      if (cachedPath === item.qrImagePath && this.qrImageUrls[item.id]) {
+        // path same hai — cached url safe hai
         this.updateCurrentQrUrl = this.qrImageUrls[item.id];
       } else {
+        // path naya hai ya cache nahi — fresh fetch karo
         const sub = this.multiMedia
           .getPrivateImage(item.qrImagePath)
           .pipe(catchError(() => of(null)))
@@ -1673,6 +1700,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
             this.updateCurrentQrUrl = url;
             if (url) {
               this.qrImageUrls[item.id] = url;
+              this.qrImagePathCache[item.id] = item.qrImagePath!;
               item.qrImageUrl = url;
             }
           });
@@ -1701,10 +1729,11 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.updateQrError = "";
     this.vpaChanged = false;
     this.newQrGenerated = false;
+    this.updateIsUserUploaded = false; // 👈 NEW
     this.updateManualQrFile = null;
     this.updateSelectedImage = null;
     this.updateQrMode = "generate";
-    this.updateCurrentQrUrl = null; // 👈 NEW
+    this.updateCurrentQrUrl = null;
     document.body.style.overflow = "auto";
   }
   onUpdateVpaChange(): void {
@@ -1728,13 +1757,14 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
   }
 
   generateQrForUpdate(): void {
-    if (this.isAaniUpi) return; // 👈 NEW — AANI me generate allowed nahi, sirf upload
+    if (this.isAaniUpi) return;
     const vpa = String(this.updateForm.vpa).trim();
     if (!this.isValidUpiId(vpa)) {
       this.updateQrError = "Please enter a valid UPI ID first";
       return;
     }
     this.updateQrError = "";
+    this.updateIsUserUploaded = false; // 👈 NEW
     const upiIntent = `upi://pay?pa=${encodeURIComponent(vpa)}&cu=INR`;
     this.updateQrData = upiIntent;
     this.isGeneratingUpdateQr = true;
@@ -1789,6 +1819,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     reader.readAsDataURL(file);
     this.generatedUpdateFile = file;
     this.newQrGenerated = true;
+    this.updateIsUserUploaded = true; // 👈 NEW
   }
 
   setUpdateQrMode(mode: "generate" | "upload") {
@@ -1798,13 +1829,15 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     this.updateManualQrFile = null;
     this.updateSelectedImage = null;
     this.newQrGenerated = false;
+    this.updateIsUserUploaded = false; // 👈 NEW
   }
-
   removeUpdateQr() {
     this.updateQrData = null;
     this.updateSelectedImage = null;
     this.updateManualQrFile = null;
     this.generatedUpdateFile = null;
+    this.newQrGenerated = false; // 👈 NEW (proper reset)
+    this.updateIsUserUploaded = false; // 👈 NEW
   }
 
   submitUpdate(): void {
@@ -1836,7 +1869,7 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       active: true,
       fttAcceptance: this.updateForm.fttAcceptance,
       partialPayinEnabled: this.updateForm.partialPayinEnabled,
-      paymentMode: this.editingUpi.paymentMode || null, // 👈 NEW — backend ko AANI/UPI differentiate karne ke liye
+      paymentMode: this.editingUpi.paymentMode || null,
     };
 
     const formData = new FormData();
@@ -1849,10 +1882,19 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
       formData.append("file", qrFile, qrFile.name);
     }
 
+    // 👇 NEW — sirf tab bhejo jab naya QR generate/upload hua ho
+    if (this.newQrGenerated) {
+      formData.append("IsUserUploaded", String(this.updateIsUserUploaded));
+    }
+
     this.isSubmitting = true;
 
     this.upiService.updateUpi(formData).subscribe({
       next: (res: any) => {
+        // 👇 NEW — is item ki QR cache clear karo taaki refresh ke baad zaroor fresh fetch ho
+        delete this.qrImageUrls[this.editingUpi.id];
+        delete this.qrImagePathCache[this.editingUpi.id];
+
         this.isSubmitting = false;
         this.closeUpdateModal();
         this.refreshInventory();
