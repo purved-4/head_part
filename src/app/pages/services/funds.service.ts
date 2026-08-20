@@ -550,6 +550,7 @@ export class FundsService {
     entityId: any,
     page: number = 0,
     pageSize: number = 10,
+    currnecy?: any,
     category?: any,
     fromDate?: any,
     toDate?: any,
@@ -566,6 +567,9 @@ export class FundsService {
 
     if (category != null) {
       params = params.set("category", category.toString());
+    }
+    if (currnecy != null) {
+      params = params.set("currency", currnecy.toString());
     }
 
     if (fromDate) {

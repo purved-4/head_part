@@ -1,4 +1,3 @@
-
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { ActivatedRoute, Route, Router } from "@angular/router";
 import { of, Subscription } from "rxjs";
@@ -10,6 +9,7 @@ import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { DateTimeUtil } from "../../../utils/date-time.utils";
 import { BranchService } from "../../../pages/services/branch.service";
 import { SnackbarService } from "../../snackbar/snackbar.service";
+import { ChiefService } from "../../../pages/services/chief.service";
 
 @Component({
   selector: "app-hb-payin-report",
@@ -50,6 +50,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   bankcomPartFilter = "";
   bankDateFrom = "";
   bankDateTo = "";
+  private readonly CRYPTO_MODES = ["BEP20", "TRC20", "ERC20", "SPL", "OMNI"];
 
   payinPage = 0;
   payinPageSize = 10;
@@ -73,6 +74,11 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   colors: any = null;
   comPartOptions: { id: string; domain: string }[] = [];
 
+  currencies: any[] = []; // API se currencies list
+  selectedCurrency: string = ""; // currently selected currency (e.g. "AED")
+  availableModes: string[] = []; // selected currency ke andar jo modes true hain
+  loadingCurrencies = false;
+
   // ========== STATUS VALUES THAT ALLOW THE THREAD BUTTON ==========
   // Thread button dikhna chahiye sirf PENDING aur ACCEPTED (dispute pending bhi allowed)
   private readonly THREAD_ALLOWED_STATUSES = [
@@ -87,6 +93,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     private userStateService: UserStateService,
     private multimediaService: MultimediaService,
     private snackbar: SnackbarService,
+    private chiefService: ChiefService,
 
     private router: Router,
   ) {}
@@ -102,6 +109,7 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       this.activeView = type === "payout" ? "payout" : "bank";
 
       if (!this.entityId) return;
+      this.loadCurrencies();
 
       this.fetchBankPayins(); // ✅ yahan hai already - check karo entityId console mein
     });
@@ -164,6 +172,8 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
         this.entityId,
         this.payinPage,
         this.payinPageSize,
+        this.selectedCurrency, // ✅ yahan hardcoded "AED" tha, ab dynamic
+
         this.selectedMode, // category
         fromDate,
         toDate,
@@ -218,19 +228,25 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
   // ============ CATEGORY HELPERS ============
   // payinType / mode values: BANK, UPI, BEP20, TRC20, ERC20, SPL, OMNI
   // Isse teen buckets mein daal dete hain: 'bank' | 'upi' | 'crypto'
+  // ============ CATEGORY HELPERS ============
+
   private getCategory(typeVal: string): "bank" | "upi" | "crypto" {
     const t = (typeVal || "").toUpperCase();
     if (t === "BANK") return "bank";
-    if (t === "UPI") return "upi";
-    return "crypto"; // BEP20, TRC20, ERC20, SPL, OMNI
+    if (t === "UPI" || t === "AANI") return "upi"; // ✅ AANI bhi upi-type instant payment hai
+    if (this.CRYPTO_MODES.includes(t)) return "crypto";
+    return "upi"; // safe fallback instead of dumping into crypto
   }
 
   // Category ke hisaab se sahi identifier (account no / vpa / wallet) nikalna
   private getIdentifier(category: string, it: any): string {
     if (category === "bank")
       return it.accountNo || it.accNo || it.account || "-";
-    if (category === "upi") return it.vpa || it.vpaId || it.upiId || "-";
-    return it.walletAddress || it.wallet || "-"; // crypto
+    if (category === "upi")
+      return (
+        it.vpa || it.vpaId || it.upiId || it.aaniId || it.identifier || "-"
+      );
+    return it.walletAddress || it.wallet || "-"; // crypto only
   }
 
   // ============ MAPPERS ============
@@ -841,5 +857,50 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
       return "bg-red-50 text-red-700";
     }
     return "bg-slate-100 text-slate-600";
+  }
+  loadCurrencies(): void {
+    if (!this.entityId) return;
+    this.loadingCurrencies = true;
+
+    this.chiefService
+      .getCurrenciesByEntity(this.entityId, this.role)
+      .pipe(catchError(() => of({ data: { currencies: [] } })))
+      .subscribe((res: any) => {
+        this.loadingCurrencies = false;
+        this.currencies = res?.data?.currencies || [];
+
+        if (this.currencies.length) {
+          // default: pehli currency select karo
+          this.selectedCurrency = this.currencies[0].currency;
+          this.updateAvailableModes();
+        }
+
+        // ab currency ready hai, tabhi payins fetch karo
+        this.fetchBankPayins();
+      });
+  }
+
+  updateAvailableModes(): void {
+    const curr = this.currencies.find(
+      (c) => c.currency === this.selectedCurrency,
+    );
+    this.availableModes = curr
+      ? Object.keys(curr.modes || {}).filter((k) => curr.modes[k])
+      : [];
+
+    // agar current selectedMode naye currency me valid nahi hai to reset karo
+    if (
+      this.availableModes.length &&
+      !this.availableModes.includes(this.selectedMode)
+    ) {
+      this.selectedMode = this.availableModes[0] as any;
+    }
+  }
+
+  onCurrencyChange(curr: string): void {
+    this.selectedCurrency = curr;
+    this.updateAvailableModes();
+    this.payinPage = 0;
+    this.fetchBankPayins();
   }
 }

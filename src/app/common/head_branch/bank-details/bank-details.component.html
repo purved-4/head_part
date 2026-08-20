@@ -363,6 +363,7 @@
             <div class="grid grid-cols-[200px_1fr] gap-6 items-center">
               <p class="text-sm text-gray-500">Payin Type</p>
 
+              <!-- View Mode -->
               <div *ngIf="!isEditMode">
                 <span
                   class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
@@ -376,26 +377,35 @@
                 </span>
               </div>
 
-              <label
-                *ngIf="isEditMode"
-                class="relative inline-flex items-center cursor-pointer w-fit"
-              >
-                <input
-                  type="checkbox"
-                  appEnterKeyFocus
-                  class="sr-only peer"
-                  [(ngModel)]="updateForm.fttAcceptance"
-                />
-                <div
-                  class="w-10 h-[22px] bg-gray-200 rounded-full peer peer-checked:bg-emerald-500 transition-colors duration-200"
-                ></div>
-                <div
-                  class="absolute left-[3px] top-[3px] bg-white w-4 h-4 rounded-full shadow-sm transition-transform duration-200"
-                  [ngClass]="
-                    updateForm.fttAcceptance ? 'translate-x-[18px]' : ''
-                  "
-                ></div>
-              </label>
+              <!-- Edit Mode -->
+              <div *ngIf="isEditMode" class="flex items-center gap-6">
+                <!-- PPI -->
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="payinType"
+                    [value]="true"
+                    [(ngModel)]="updateForm.fttAcceptance"
+                    appEnterKeyFocus
+                    class="w-4 h-4 accent-emerald-500"
+                  />
+
+                  <span class="text-sm font-medium text-gray-700"> PPI </span>
+                </label>
+
+                <!-- RPI -->
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="payinType"
+                    [value]="false"
+                    [(ngModel)]="updateForm.fttAcceptance"
+                    class="w-4 h-4 accent-amber-500"
+                  />
+
+                  <span class="text-sm font-medium text-gray-700"> RPI </span>
+                </label>
+              </div>
             </div>
 
             <!-- ONE SHOT (moved from its own sidebar tab) -->

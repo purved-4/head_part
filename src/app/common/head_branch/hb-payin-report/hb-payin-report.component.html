@@ -98,18 +98,26 @@
 
             <!-- Filters -->
             <div class="flex flex-wrap items-center gap-2">
+              <!-- NEW: Currency dropdown -->
+              <select
+                [(ngModel)]="selectedCurrency"
+                (change)="onCurrencyChange(selectedCurrency)"
+                class="px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <option *ngFor="let c of currencies" [value]="c.currency">
+                  {{ c.currency }}
+                </option>
+              </select>
+
+              <!-- Mode dropdown -- ab dynamic, currency ke hisaab se -->
               <select
                 [(ngModel)]="selectedMode"
                 (change)="onModeChange(selectedMode)"
                 class="px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
               >
-                <option value="bank">Bank</option>
-                <option value="upi">UPI</option>
-                <option value="BEP20">BEP20</option>
-                <option value="TRC20">TRC20</option>
-                <option value="ERC20">ERC20</option>
-                <option value="SPL">SPL</option>
-                <option value="OMNI">OMNI</option>
+                <option *ngFor="let m of availableModes" [value]="m">
+                  {{ m }}
+                </option>
               </select>
 
               <select
@@ -762,10 +770,19 @@
               <div
                 class="text-[10px] font-semibold mb-1 uppercase tracking-wide text-gray-400"
               >
-                VPA / UPI ID
+                {{
+                  selectedRecord?.payinType === "AANI"
+                    ? "AANI ID"
+                    : "VPA / UPI ID"
+                }}
               </div>
               <div class="text-sm font-semibold text-gray-900 break-words">
-                {{ selectedRecord?.vpa || selectedRecord?.upiId || "—" }}
+                {{
+                  selectedRecord?.vpa ||
+                    selectedRecord?.upiId ||
+                    selectedRecord?.aaniId ||
+                    "—"
+                }}
               </div>
             </div>
           </div>

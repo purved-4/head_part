@@ -2168,7 +2168,8 @@ export class HeadBranchDashboardComponent
 
         let mode: "upi" | "bank" | "crypto";
         if (this.isCryptoType(rawType)) mode = "crypto";
-        else if (rawType === "UPI") mode = "upi";
+        else if (rawType === "UPI" || rawType === "AANI")
+          mode = "upi"; // 👈 FIX: AANI ko UPI ki tarah treat karo (vpa field use karta hai)
         else mode = "bank";
 
         const tx = this.normalizeIncomingFund(
@@ -2194,6 +2195,7 @@ export class HeadBranchDashboardComponent
           timePassed:
             slab !== null ? slab.diffMinutes : (existing?.timePassed ?? 0),
           cryptoType: this.isCryptoType(rawType) ? rawType : null,
+          paymentMode: rawType, // 👈 NEW — asli type (UPI/AANI/BANK) UI badge ke liye
         };
 
         if (mode === "crypto") cryptoList.push(finalTx);
@@ -2247,6 +2249,7 @@ export class HeadBranchDashboardComponent
             slab !== null ? slab.eligible : (existing?.slabEligible ?? true),
           timePassed:
             slab !== null ? slab.diffMinutes : (existing?.timePassed ?? 0),
+          paymentMode: (f.mode || "").toString().toUpperCase(), // 👈 NEW — payout ke liye bhi (BANK/TRC20/AANI etc)
         };
       }).filter(Boolean);
 
