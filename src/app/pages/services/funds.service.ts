@@ -640,10 +640,14 @@ export class FundsService {
 
   getInventoryForPayout(params: {
     entityId: string;
+    currency?: string;
     mode?: any;
   }): Observable<any> {
     let httpParams = new HttpParams();
     httpParams = httpParams.set("entityId", params.entityId);
+    if (params.currency && params.currency.length > 0) {
+      httpParams = httpParams.set("currency", params.currency);
+    }
 
     if (params.mode && params.mode.length > 0) {
       httpParams = httpParams.set("mode", params.mode);

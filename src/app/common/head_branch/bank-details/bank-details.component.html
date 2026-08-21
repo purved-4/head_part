@@ -130,9 +130,11 @@
               />
             </div>
 
-            <!-- IFSC -->
+            <!-- BANK CODE (IFSC for INR / SWIFT for AED) -->
             <div class="grid grid-cols-[200px_1fr] gap-6 items-center">
-              <p class="text-sm text-gray-500">IFSC Code</p>
+              <p class="text-sm text-gray-500">
+                {{ isAedCurrency ? "IFSC Code" : "IFSC Code" }}
+              </p>
 
               <p
                 *ngIf="!isEditMode"
@@ -141,7 +143,8 @@
                 {{ bankData?.bankCode || "-" }}
               </p>
 
-              <div *ngIf="isEditMode" class="relative">
+              <!-- INR: existing auto-fetch IFSC flow -->
+              <div *ngIf="isEditMode && !isAedCurrency" class="relative">
                 <span
                   class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[18px] pointer-events-none"
                 >
@@ -172,13 +175,36 @@
                   >check_circle</span
                 >
               </div>
+
+              <!-- AED: replica, plain manual bank code entry -->
+              <div *ngIf="isEditMode && isAedCurrency" class="relative">
+                <span
+                  class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[18px] pointer-events-none"
+                >
+                  account_balance
+                </span>
+
+                <input
+                  type="text"
+                  [value]="updateForm.bankCode"
+                  (input)="onBankCodeManualInput($event)"
+                  placeholder="e.g. EBILAEAD"
+                  class="w-full h-12 uppercase border border-gray-200 rounded-xl pl-11 pr-4 text-base font-mono font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none transition-shadow"
+                />
+              </div>
             </div>
             <p
-              *ngIf="isEditMode"
+              *ngIf="isEditMode && !isAedCurrency"
               class="text-xs text-gray-400 -mt-4 ml-[224px]"
             >
               {{ updateForm.bankCode?.length || 0 }}/11 — bank name auto-fills
               on valid IFSC
+            </p>
+            <p
+              *ngIf="isEditMode && isAedCurrency"
+              class="text-xs text-gray-400 -mt-4 ml-[224px]"
+            >
+              Enter the bank's SWIFT/BIC code manually
             </p>
 
             <!-- BANK NAME -->
@@ -192,7 +218,8 @@
                 {{ bankData?.bankName || "-" }}
               </p>
 
-              <div *ngIf="isEditMode" class="space-y-1.5">
+              <!-- INR: existing auto-filled / lockable bank name -->
+              <div *ngIf="isEditMode && !isAedCurrency" class="space-y-1.5">
                 <div class="relative">
                   <span
                     class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]"
@@ -262,6 +289,23 @@
                   >
                   Editing manually
                 </p>
+              </div>
+
+              <!-- AED: replica, plain manual bank name entry -->
+              <div *ngIf="isEditMode && isAedCurrency" class="relative pt-0">
+                <span
+                  class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]"
+                >
+                  account_balance
+                </span>
+
+                <input
+                  type="text"
+                  [(ngModel)]="updateForm.bankName"
+                  name="bankNameAed"
+                  placeholder="Enter bank name"
+                  class="w-full h-12 pl-11 pr-4 border border-gray-200 rounded-xl text-base font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none transition-shadow"
+                />
               </div>
             </div>
 
@@ -351,7 +395,7 @@
             <div class="grid grid-cols-[200px_1fr] gap-6 items-center">
               <p class="text-sm text-gray-500">Currency</p>
               <p class="text-base font-medium text-gray-900 uppercase">
-                {{ bankData?.currency || "INR" }}
+                {{ bankData?.currency || "-" }}
               </p>
             </div>
 

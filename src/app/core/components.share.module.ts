@@ -51,6 +51,7 @@ import { ResolvedNotificationComponent } from "../common/resolved-notification/r
 import { MaintenanceNoticeComponent } from "../common/maintenance-notice/maintenance-notice.component";
 import { PortalReportComponent } from "../components/reports/portal-report/portal-report.component";
 import { BalanceReportComponent } from "../components/reports/balance-report/balance-report.component";
+import { LoaderComponent } from "../common/loader/loader.component";
 
 @NgModule({
   declarations: [
@@ -102,6 +103,7 @@ import { BalanceReportComponent } from "../components/reports/balance-report/bal
     MaintenanceNoticeComponent,
     PortalReportComponent,
     BalanceReportComponent,
+    LoaderComponent,
   ],
   exports: [
     WebhookDataComponent,
@@ -152,6 +154,7 @@ import { BalanceReportComponent } from "../components/reports/balance-report/bal
     MaintenanceNoticeComponent,
     PortalReportComponent,
     BalanceReportComponent,
+    LoaderComponent,
   ],
   imports: [
     SharedModule,

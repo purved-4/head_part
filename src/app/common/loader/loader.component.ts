@@ -1,5 +1,4 @@
 import { Component, inject } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { LoaderService } from "../../pages/services/loader.service";
 
 @Component({

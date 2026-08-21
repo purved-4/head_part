@@ -347,40 +347,90 @@ export class InventoryManagementComponent implements OnInit, OnDestroy {
     });
   }
 
+  // private loadCurrenciesAndInventory(): void {
+  //   if (!this.currentRoleId) return;
+
+  //   const sub = this.portalService
+  //     .getCurrenciesByEntity(this.currentRoleId, this.role)
+  //     .pipe(catchError(() => of({ data: { currencies: [] } })))
+  //     .subscribe((res: any) => {
+  //       const rows: any[] = res?.data?.currencies ?? [];
+
+  //       this.currencies = rows.map((c) => c.currency).filter(Boolean);
+
+  //       this.currencyModesMap = {};
+  //       const modeSet = new Set<string>();
+
+  //       rows.forEach((c: any) => {
+  //         const modes = Object.keys(c.modes || {})
+  //           .filter((key) => c.modes[key])
+  //           .map((mode) => mode.toUpperCase());
+
+  //         this.currencyModesMap[c.currency] = modes;
+
+  //         modes.forEach((mode) => modeSet.add(mode));
+  //       });
+
+  //       this.allModes = Array.from(modeSet);
+
+  //       this.selectedCurrency = "ALL";
+  //       this.selectedMode = "ALL";
+  //       this.availableModes = [...this.allModes];
+
+  //       this.fetchInventory();
+  //     });
+
+  //   this.subs.add(sub);
+  // }
+
   private loadCurrenciesAndInventory(): void {
     if (!this.currentRoleId) return;
 
+    const roleUpper = (this.role || "").toUpperCase();
+
+    // HEAD / BRANCH → pehle localStorage cache try karo
+    if (roleUpper === "HEAD" || roleUpper === "BRANCH") {
+      const cached = this.userStateService.getStoredCurrencies();
+      if (cached) {
+        this.applyCurrencyResponse(cached);
+        this.fetchInventory();
+        return; // 👈 API call skip
+      }
+    }
+
+    // cache nahi mila (pehli baar) ya doosra role → fallback API
     const sub = this.portalService
       .getCurrenciesByEntity(this.currentRoleId, this.role)
       .pipe(catchError(() => of({ data: { currencies: [] } })))
       .subscribe((res: any) => {
-        const rows: any[] = res?.data?.currencies ?? [];
-
-        this.currencies = rows.map((c) => c.currency).filter(Boolean);
-
-        this.currencyModesMap = {};
-        const modeSet = new Set<string>();
-
-        rows.forEach((c: any) => {
-          const modes = Object.keys(c.modes || {})
-            .filter((key) => c.modes[key])
-            .map((mode) => mode.toUpperCase());
-
-          this.currencyModesMap[c.currency] = modes;
-
-          modes.forEach((mode) => modeSet.add(mode));
-        });
-
-        this.allModes = Array.from(modeSet);
-
-        this.selectedCurrency = "ALL";
-        this.selectedMode = "ALL";
-        this.availableModes = [...this.allModes];
-
+        this.applyCurrencyResponse(res);
         this.fetchInventory();
       });
 
     this.subs.add(sub);
+  }
+
+  private applyCurrencyResponse(res: any): void {
+    const rows: any[] = res?.data?.currencies ?? [];
+
+    this.currencies = rows.map((c) => c.currency).filter(Boolean);
+
+    this.currencyModesMap = {};
+    const modeSet = new Set<string>();
+
+    rows.forEach((c: any) => {
+      const modes = Object.keys(c.modes || {})
+        .filter((key) => c.modes[key])
+        .map((mode) => mode.toUpperCase());
+
+      this.currencyModesMap[c.currency] = modes;
+      modes.forEach((mode) => modeSet.add(mode));
+    });
+
+    this.allModes = Array.from(modeSet);
+    this.selectedCurrency = "ALL";
+    this.selectedMode = "ALL";
+    this.availableModes = [...this.allModes];
   }
 
   onCurrencyChange(value: string): void {

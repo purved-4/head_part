@@ -26,7 +26,7 @@ export class AuthService {
     private userStateService: UserStateService,
     private router: Router,
     handler: HttpBackend,
-    private snack:SnackbarService
+    private snack: SnackbarService,
   ) {
     this.refreshHttp = new HttpClient(handler);
   }
@@ -50,37 +50,35 @@ export class AuthService {
       );
   }
 
- public getCurrentUser(): Observable<any> {
-  return this.http.get(`${baseUrl}/current-user`, { withCredentials: true }).pipe(
+  public getCurrentUser(): Observable<any> {
+    return this.http
+      .get(`${baseUrl}/current-user`, { withCredentials: true })
+      .pipe(
+        tap((res: any) => {
+          const message = res?.message || res || "User fetched successfully";
 
-    tap((res: any) => {
-      const message =
-        res?.message ||res || "User fetched successfully";
+          this.snack.show(message, true);
+        }),
 
-      this.snack.show(message, true); 
-    }),
+        map((user: any) => user?.data || null),
 
-    map((user: any) => user?.data || null),
+        catchError((error) => {
+          let message = "Failed to fetch user details";
 
-    catchError((error) => {
+          if (typeof error?.error === "string") {
+            message = error.error;
+          } else if (error?.error?.message) {
+            message = error.error.message;
+          } else if (error?.message) {
+            message = error.message;
+          }
 
+          this.snack.show(message, false);
 
-      let message = "Failed to fetch user details";
-
-      if (typeof error?.error === "string") {
-        message = error.error;
-      } else if (error?.error?.message) {
-        message = error.error.message;
-      } else if (error?.message) {
-        message = error.message;
-      }
-
-      this.snack.show(message, false);
-
-      return of(null);
-    })
-  );
-}
+          return of(null);
+        }),
+      );
+  }
 
   loginAndLoadUser(loginData: any): Observable<any> {
     return this.login(loginData).pipe(
@@ -103,8 +101,8 @@ export class AuthService {
       .post<any>(`${baseUrl}/logout`, {}, { headers, withCredentials: true })
       .pipe(
         tap(() => {
-        
           // this.subjectRegistryService.destroyAll();
+          this.userStateService.setCurrentUser(null); // 👈 ye currency cache + user state dono clear karega
 
           token = null;
         }),

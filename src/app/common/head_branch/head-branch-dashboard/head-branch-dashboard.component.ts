@@ -1746,6 +1746,46 @@ export class HeadBranchDashboardComponent
     }
   }
 
+  // openApproveConfirm(transaction: any) {
+  //   if (!transaction) return;
+
+  //   if (transaction.type === "payout" && transaction.processing !== true) {
+  //     this.snackbar.show("Please start processing first", false);
+  //     return;
+  //   }
+
+  //   const portalId = transaction.raw?.portalId;
+
+  //   const t = this.normalizeTransaction(transaction) || transaction;
+  //   const src =
+  //     t.type === "payout"
+  //       ? "payout"
+  //       : t.mode === "upi"
+  //         ? "upi"
+  //         : t.mode === "bank"
+  //           ? "bank"
+  //           : t.mode === "crypto"
+  //             ? "crypto"
+  //             : "none";
+
+  //   this.confirmTransaction = { ...t, section: src };
+  //   this.showApproveConfirm = true;
+
+  //   this.selectedPayoutInventory = null;
+  //   this.payoutInventoryOptions = [];
+  //   this.loadingPayoutInventory = false;
+  //   this.payoutDropdownOpen = false; // yeh line add
+  //   this.customReason = "";
+
+  //   // sirf payout ke case me hi inventory dropdown load hoga
+  //   if (t.type === "payout") {
+  //     const payoutMode = t.raw?.mode || t.raw?.paymentMethod || null;
+  //     if (payoutMode) {
+  //       this.fetchPayoutInventory(payoutMode);
+  //     }
+  //   }
+  // }
+
   openApproveConfirm(transaction: any) {
     if (!transaction) return;
 
@@ -1753,8 +1793,6 @@ export class HeadBranchDashboardComponent
       this.snackbar.show("Please start processing first", false);
       return;
     }
-
-    const portalId = transaction.raw?.portalId;
 
     const t = this.normalizeTransaction(transaction) || transaction;
     const src =
@@ -1780,8 +1818,9 @@ export class HeadBranchDashboardComponent
     // sirf payout ke case me hi inventory dropdown load hoga
     if (t.type === "payout") {
       const payoutMode = t.raw?.mode || t.raw?.paymentMethod || null;
+      const payoutCurrency = t.currency || t.raw?.parentCurrency || null;
       if (payoutMode) {
-        this.fetchPayoutInventory(payoutMode);
+        this.fetchPayoutInventory(payoutMode, payoutCurrency);
       }
     }
   }
@@ -2899,6 +2938,30 @@ export class HeadBranchDashboardComponent
 
     return Math.floor((now - createdTime) / 60000);
   }
+  getLiveTimeAgo(date: Date | string): string {
+    if (!date) return "0m 00s";
+
+    const inputTime = new Date(date).getTime();
+    let diff = Math.floor((this.processingNow - inputTime) / 1000);
+    if (diff < 0) diff = 0;
+
+    const days = Math.floor(diff / (24 * 3600));
+    diff %= 24 * 3600;
+
+    const hours = Math.floor(diff / 3600);
+    diff %= 3600;
+
+    const minutes = Math.floor(diff / 60);
+    const seconds = diff % 60;
+
+    const pad = (n: number) => n.toString().padStart(2, "0");
+
+    if (days > 0) return `${days}d ${hours}h ${pad(minutes)}m`;
+    if (hours > 0) return `${hours}h ${pad(minutes)}m ${pad(seconds)}s`;
+
+    // 👇 ab minute hamesha dikhega, chahe 0 hi ho
+    return `${minutes}m ${pad(seconds)}s`;
+  }
   removeSelectedFile(event?: Event): void {
     if (event) {
       event.stopPropagation();
@@ -3003,7 +3066,72 @@ export class HeadBranchDashboardComponent
       this.snackbar.show(`${label} copied`, true);
     });
   }
-  private fetchPayoutInventory(mode: string): void {
+  // private fetchPayoutInventory(mode: string): void {
+  //   if (!this.entityId || !mode) return;
+
+  //   this.loadingPayoutInventory = true;
+  //   this.payoutInventoryOptions = [];
+  //   this.selectedPayoutInventory = null;
+
+  //   this.fundService
+  //     .getInventoryForPayout({
+  //       entityId: this.entityId,
+  //       currency :currency,
+  //       mode: String(mode).toUpperCase(), // bank/upi/trc20/erc20/bep20/omni/spl -> UPPERCASE
+  //     })
+  //     .pipe(catchError(() => of(null)))
+  //     .subscribe((res: any) => {
+  //       this.loadingPayoutInventory = false;
+
+  //       const data = res?.data;
+  //       if (!data) return; // inventory empty -> options khali hi rahenge, dropdown UI hide ho jayega
+
+  //       const options: any[] = [];
+
+  //       if (Array.isArray(data.bank)) {
+  //         for (const b of data.bank) {
+  //           options.push({
+  //             id: b.id,
+  //             accountId: b.id, // bank -> bankId as accountId
+  //             kind: "bank",
+  //             label: b.bankName || "Bank Account",
+  //             subLabel: b.accountHolderName || b.accountNo || "",
+  //             raw: b,
+  //           });
+  //         }
+  //       }
+
+  //       if (Array.isArray(data.upi)) {
+  //         for (const u of data.upi) {
+  //           options.push({
+  //             id: u.id,
+  //             accountId: u.id, // upi -> upiId as accountId
+  //             kind: "upi",
+  //             label: u.vpa || "UPI",
+  //             subLabel: "",
+  //             raw: u,
+  //           });
+  //         }
+  //       }
+
+  //       if (Array.isArray(data.crypto)) {
+  //         for (const c of data.crypto) {
+  //           options.push({
+  //             id: c.id,
+  //             accountId: c.walletAddress, // crypto -> walletAddress as accountId
+  //             kind: "crypto",
+  //             label: c.walletAddress || "—",
+  //             subLabel: c.paymentMethod || "",
+  //             raw: c,
+  //           });
+  //         }
+  //       }
+
+  //       this.payoutInventoryOptions = options;
+  //     });
+  // }
+
+  private fetchPayoutInventory(mode: string, currency?: string | null): void {
     if (!this.entityId || !mode) return;
 
     this.loadingPayoutInventory = true;
@@ -3013,6 +3141,7 @@ export class HeadBranchDashboardComponent
     this.fundService
       .getInventoryForPayout({
         entityId: this.entityId,
+        currency: currency || undefined,
         mode: String(mode).toUpperCase(), // bank/upi/trc20/erc20/bep20/omni/spl -> UPPERCASE
       })
       .pipe(catchError(() => of(null)))

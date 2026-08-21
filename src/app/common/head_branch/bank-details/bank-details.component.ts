@@ -346,4 +346,16 @@ export class BankDetailsComponent implements OnInit, OnDestroy {
     if (!validRanges.length) return null;
     return Math.min(...validRanges.map((r: any) => r.minRange));
   }
+  // Add near other getters (e.g. right after smallestCapacityRangeLimit)
+  get isAedCurrency(): boolean {
+    return (this.bankData?.currency || "").toString().toUpperCase() === "AED";
+  }
+
+  // Add near onIfscEditInput() — plain manual bank code entry for AED, no debounce/fetch
+  onBankCodeManualInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const formatted = input.value.replace(/\s/g, "").toUpperCase();
+    this.updateForm.bankCode = formatted;
+    input.value = formatted;
+  }
 }

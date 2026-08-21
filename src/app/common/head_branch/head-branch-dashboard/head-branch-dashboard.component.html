@@ -280,11 +280,7 @@
                     <span
                       class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-blue-100 text-blue-700"
                     >
-                      {{
-                        getMinutesDiff(transaction.date) < 1
-                          ? "just now"
-                          : getTimeAgo(transaction.date) + " ago"
-                      }}
+                      {{ getLiveTimeAgo(transaction.date) }} ago
                     </span>
                     <span
                       class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700"
@@ -547,11 +543,7 @@
                     <span
                       class="px-2 py-[2px] rounded-lg text-[11px] font-semibold bg-blue-100 text-blue-700"
                     >
-                      {{
-                        getMinutesDiff(transaction.date) < 1
-                          ? "just now"
-                          : getTimeAgo(transaction.date) + " ago"
-                      }}
+                      {{ getLiveTimeAgo(transaction.date) }} ago
                     </span>
                   </div>
 

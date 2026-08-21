@@ -6,11 +6,11 @@ import {
   HttpEvent,
 } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { delay, finalize } from "rxjs/operators";
+import { finalize } from "rxjs/operators";
 import { LoaderService } from "../pages/services/loader.service";
 
 const SKIP_LOADER_URLS = ["/api/auth/refresh", "/api/health-check"];
-const MUTATION_METHODS = ["POST", "PUT", "PATCH", "DELETE","GET"]; // ✅ NEW
+const MUTATION_METHODS = ["POST", "PUT", "PATCH", "DELETE"];
 
 @Injectable()
 export class LoaderInterceptor implements HttpInterceptor {
@@ -24,21 +24,23 @@ export class LoaderInterceptor implements HttpInterceptor {
       SKIP_LOADER_URLS.some((url) => req.url.includes(url)) ||
       req.headers.has("X-Skip-Loader");
 
-    // ─── Existing GET loader — BILKUL NAHI CHEDA ─────────────────────────
+    if (shouldSkip) {
+      return next.handle(req);
+    }
+
     if (req.method === "GET") {
-      if (shouldSkip) return next.handle(req);
-       if (this.loaderService.hasPendingKey()) {
-    this.loaderService.showButtonLoader();
-    return next.handle(req).pipe(
-      finalize(() => this.loaderService.hideButtonLoader())
-    );
-  }
+      if (this.loaderService.hasPendingKey()) {
+        this.loaderService.showButtonLoader();
+        return next
+          .handle(req)
+          .pipe(finalize(() => this.loaderService.hideButtonLoader()));
+      }
+
       this.loaderService.show();
       return next.handle(req).pipe(finalize(() => this.loaderService.hide()));
     }
 
-    // ─── NEW: Button loader — POST/PUT/PATCH/DELETE ───────────────────────
-    if (MUTATION_METHODS.includes(req.method) && !shouldSkip) {
+    if (MUTATION_METHODS.includes(req.method)) {
       this.loaderService.showButtonLoader();
       return next
         .handle(req)

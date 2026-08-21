@@ -1,4 +1,3 @@
-
 import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { FundsService } from "../../../pages/services/funds.service";
@@ -7,7 +6,6 @@ import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { catchError, of, Subscription } from "rxjs";
 import { DateTimeUtil } from "../../../utils/date-time.utils";
 import { SnackbarService } from "../../snackbar/snackbar.service";
-import { AnyCnameRecord } from "node:dns";
 
 @Component({
   selector: "app-hb-payout-report",
@@ -146,7 +144,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
         this.selectedStatus,
         this.payoutApprovedPage, // ✅ current page
         this.payoutApprovedPageSize, // ✅ dynamic page size
-        undefined,
+        "PAYOUT",
         fromDate,
         toDate,
         this.role,
@@ -801,7 +799,7 @@ export class HbPayoutReportComponent implements OnInit, OnDestroy {
     this.loadingThreads = true;
 
     this.fundService
-      .getThreadByEntityIdTypeAndFund(entityId, entityType, fundId, fundType)
+      .getThreadByEntityIdTypeAndFund(entityId, entityType, fundId, "PAYOUT")
       .subscribe({
         next: (res: any) => {
           this.loadingThreads = false;
