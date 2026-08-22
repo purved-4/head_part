@@ -62,6 +62,15 @@
       </div>
       <!-- RIGHT -->
       <div class="flex items-center justify-end gap-1">
+        <button
+          (click)="toggleVoice()"
+          class="p-1 rounded hover:bg-white/20"
+          [title]="isVoiceEnabled ? 'Turn voice off' : 'Turn voice on'"
+        >
+          <span class="material-icons text-sm">
+            {{ isVoiceEnabled ? "volume_up" : "volume_off" }}
+          </span>
+        </button>
         <button (click)="markAllAsRead()" class="p-1 rounded hover:bg-white/20">
           <span class="material-icons text-xs">done_all</span>
         </button>
@@ -726,4 +735,3 @@
     </div>
   </div>
 </div>
-

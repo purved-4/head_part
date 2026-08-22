@@ -1,4 +1,3 @@
-
 import {
   Component,
   NgZone,
@@ -26,6 +25,7 @@ import {
   BulkHeadUpdatePayload,
   BulkBranchUpdatePayload,
 } from "../../pages/services/bulk-update.service";
+import { VoiceNotificationService } from "../../pages/services/voice-notification.service";
 interface BackendThread {
   bankFunds?: any;
   upiFunds?: any;
@@ -80,6 +80,8 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
   currentRoleId: any;
   isLoading = false;
 
+  isVoiceEnabled = true;
+
   // Selected notification for details view
   selectedNotification: any | null = null;
   showDetailsPanel = false;
@@ -132,25 +134,55 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     private bulkUpdateService: BulkUpdateService,
     private cdr: ChangeDetectorRef,
     private tzService: TimeZoneServiceService,
+    private voiceNotificationService: VoiceNotificationService,
   ) {}
+
+  // ngOnInit(): void {
+  //   this.currentUserId = this.userStateService.getUserId();
+  //   this.currentRoleName = this.userStateService.getRole();
+  //   this.currentRoleId = this.userStateService.getCurrentEntityId();
+
+  //   // this.getAllNotifications();
+
+  //   this.socketConfigService.subscribeNotifications(this.currentRoleId);
+
+  //   this.ws = this.socketConfigService.getNotifications().subscribe((data) => {
+  //     if (!data) return;
+  //     if (Array.isArray(data.threads)) {
+  //       this.processIncomingData(data.threads);
+  //     } else if (data.threads) {
+  //       this.processIncomingData([data.threads]);
+  //     } else {
+  //       this.handleSseUpdate(data);
+  //     }
+  //   });
+  // }
 
   ngOnInit(): void {
     this.currentUserId = this.userStateService.getUserId();
     this.currentRoleName = this.userStateService.getRole();
     this.currentRoleId = this.userStateService.getCurrentEntityId();
-
-    // this.getAllNotifications();
+    this.isVoiceEnabled = this.voiceNotificationService.isEnabled();
 
     this.socketConfigService.subscribeNotifications(this.currentRoleId);
 
     this.ws = this.socketConfigService.getNotifications().subscribe((data) => {
       if (!data) return;
+
       if (Array.isArray(data.threads)) {
         this.processIncomingData(data.threads);
+
+        data.threads.forEach((notification: any) => {
+          this.voiceNotificationService.announceNotification(notification);
+        });
       } else if (data.threads) {
         this.processIncomingData([data.threads]);
+
+        this.voiceNotificationService.announceNotification(data.threads);
       } else {
         this.handleSseUpdate(data);
+
+        this.voiceNotificationService.announceNotification(data);
       }
     });
   }
@@ -418,230 +450,6 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     this.selectedPercentageNotification = null;
   }
 
-  // submitPercentageUpdate() {
-  //   const max = this.percentageData.maxAllowed;
-
-  //   if (
-  //     this.percentageForm.payinPercentage > max ||
-  //     this.percentageForm.payoutPercentage > max ||
-  //     this.percentageForm.fttPercentage > max
-  //   ) {
-  //     this.snackBar.show(`Maximum allowed percentage is ${max}`, false);
-  //     return;
-  //   }
-  //   // if (
-  //   //   this.selectedPercentageNotification.generateForType === "MANAGER" &&
-  //   //   !this.selectedPercentageNotification.parentType
-  //   // ) {
-  //   //   this.snackBar.show("Parent type not found.", false);
-  //   //   return;
-  //   // }
-  //   // switch (this.selectedPercentageNotification.generateForType) {
-  //   //   case "CHIEF":
-  //   //     this.bulkUpdateService
-  //   //       .updateBulkManager({
-  //   //           parentId: this.currentRoleId,
-  //   //         percentage: this.percentageForm,
-  //   //       })
-  //   //       // .subscribe(() => {
-  //   //       //   this.closePercentageModal();
-
-  //   //       //   this.refreshNotifications();
-  //   //       // });
-  //   //       .subscribe({
-  //   //         next: () => {
-  //   //           this.markAsRead(this.selectedPercentageNotification.id);
-
-  //   //           this.closePercentageModal();
-
-  //   //           this.refreshNotifications();
-
-  //   //           this.snackBar.show("Percentage updated successfully", true);
-  //   //         },
-  //   //         error: (err) => {
-  //   //           this.snackBar.show(err?.error?.message || "Update failed", false);
-  //   //         },
-  //   //       });
-
-  //   //     break;
-
-  //   //   case "MANAGER":
-  //   //     this.bulkUpdateService
-  //   //       .updateBulkHead({
-  //   //         parentId: this.currentRoleId,
-
-  //   //         parentType: this.selectedPercentageNotification.parentType,
-
-  //   //         percentage: this.percentageForm,
-  //   //       })
-  //   //       // .subscribe(() => {
-  //   //       //   this.closePercentageModal();
-
-  //   //       //   this.refreshNotifications();
-  //   //       // });
-  //   //       .subscribe({
-  //   //         next: () => {
-  //   //           this.markAsRead(this.selectedPercentageNotification.id);
-
-  //   //           this.closePercentageModal();
-
-  //   //           this.refreshNotifications();
-
-  //   //           this.snackBar.show("Percentage updated successfully", true);
-  //   //         },
-  //   //         error: (err) => {
-  //   //           this.snackBar.show(err?.error?.message || "Update failed", false);
-  //   //         },
-  //   //       });
-
-  //   //     break;
-
-  //   //   case "HEAD":
-  //   //     this.bulkUpdateService
-  //   //       .updateBulkBranch({
-  //   //         parentId: this.currentRoleId,
-
-  //   //         parentType: this.selectedPercentageNotification.parentType,
-
-  //   //         percentage: this.percentageForm,
-  //   //       })
-  //   //       // .subscribe(() => {
-  //   //       //   this.closePercentageModal();
-
-  //   //       //   this.refreshNotifications();
-  //   //       // });
-  //   //       .subscribe({
-  //   //         next: () => {
-  //   //           this.markAsRead(this.selectedPercentageNotification.id);
-
-  //   //           this.closePercentageModal();
-
-  //   //           this.refreshNotifications();
-
-  //   //           this.snackBar.show("Percentage updated successfully", true);
-  //   //         },
-  //   //         error: (err) => {
-  //   //           this.snackBar.show(err?.error?.message || "Update failed", false);
-  //   //         },
-  //   //       });
-
-  //   //     break;
-  //   // }
-
-  //   switch (this.selectedPercentageNotification.generateForType) {
-  //     case "CHIEF":
-  //       this.bulkUpdateService
-  //         .updateBulkManager({
-  //           chiefId: this.currentRoleId, // was parentId
-  //           percentage: this.percentageForm,
-  //         })
-  //         .subscribe({
-  //           /* unchanged */
-  //         });
-  //       break;
-
-  //     case "MANAGER":
-  //       this.bulkUpdateService
-  //         .updateBulkManager({
-  //           parentId: this.currentRoleId,
-  //           parentType: "MANAGER",
-  //           percentage: this.percentageForm,
-  //         })
-  //         .subscribe({
-  //           /* unchanged */
-  //         });
-  //       break;
-
-  //     case "HEAD":
-  //       this.bulkUpdateService
-  //         .updateBulkHead({
-  //           parentId: this.currentRoleId, // was parentId
-  //           parentType: "CHIEF",
-  //           percentage: this.percentageForm, // drop parentType entirely, DTO has no such field
-  //         })
-  //         .subscribe({
-  //           /* unchanged */
-  //         });
-  //       break;
-  //   }
-  // }
-
-  // private markAsRead(notificationId: string) {
-  //   this.notificationChatService.SendNotificationAsRead(notificationId).subscribe({
-  //     next: () => {},
-  //     error: (err) => console.error("Failed to mark notification read", err),
-  //   });
-  // }
-
-  // submitPercentageUpdate() {
-  //   if (!this.isPercentageFormValid()) {
-  //     this.snackBar.show(
-  //       `Please fix the highlighted fields before submitting.`,
-  //       false,
-  //     );
-  //     return;
-  //   }
-  //   const actingRole = this.currentRoleName?.toUpperCase(); // who is logged in
-  //   const targetLevel =
-  //     this.selectedPercentageNotification?.generateForType?.toUpperCase(); // which level to bulk-update
-
-  //   let request$: Observable<any> | null = null;
-
-  //   // CHIEF -> can update MANAGER level or HEAD level
-  //   if (actingRole === "CHIEF" && targetLevel === "MANAGER") {
-  //     request$ = this.bulkUpdateService.updateBulkManager({
-  //       chiefId: this.currentRoleId,
-  //       percentage: this.percentageForm,
-  //     });
-  //   } else if (actingRole === "CHIEF" && targetLevel === "HEAD") {
-  //     request$ = this.bulkUpdateService.updateBulkHead({
-  //       parentId: this.currentRoleId,
-  //       parentType: "CHIEF",
-  //       percentage: this.percentageForm,
-  //     });
-  //   }
-
-  //   // MANAGER -> can update HEAD level
-  //   else if (actingRole === "MANAGER" && targetLevel === "HEAD") {
-  //     request$ = this.bulkUpdateService.updateBulkHead({
-  //       parentId: this.currentRoleId,
-  //       parentType: "MANAGER",
-  //       percentage: this.percentageForm,
-  //     });
-  //   }
-
-  //   // HEAD -> can update BRANCH level
-  //   else if (actingRole === "HEAD" && targetLevel === "BRANCH") {
-  //     request$ = this.bulkUpdateService.updateBulkBranch({
-  //       headId: this.currentRoleId,
-  //       percentage: this.percentageForm,
-  //     });
-  //   }
-
-  //   if (!request$) {
-  //     this.snackBar.show(
-  //       `Your role (${actingRole}) cannot perform a bulk update for ${targetLevel}.`,
-  //       false,
-  //     );
-  //     console.error(
-  //       `Unhandled bulk update combination: actingRole="${actingRole}", targetLevel="${targetLevel}"`,
-  //     );
-  //     return;
-  //   }
-
-  //   request$.subscribe({
-  //     next: () => {
-  //       this.markAsRead(this.selectedPercentageNotification.id);
-  //       this.closePercentageModal();
-  //       this.refreshNotifications();
-  //       this.snackBar.show("Percentage updated successfully", true);
-  //     },
-  //     error: (err) => {
-  //       this.snackBar.show(err?.error?.message || "Update failed", false);
-  //     },
-  //   });
-  // }
-
   submitPercentageUpdate() {
     if (!this.isPercentageFormValid()) {
       this.snackBar.show(
@@ -726,24 +534,6 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
       });
   }
 
-  // openChat(notification: BackendThread, event: Event) {
-  //   event.stopPropagation();
-
-  //   if (!this.canRedirectToChat(notification)) {
-  //     this.onNotificationSelect(notification as SidebarNotification);
-  //     return;
-  //   }
-
-  //   const threadId = notification.relatedEntityId || "";
-  //   const entity = (notification.createdByEntityType || "BRANCH").toLowerCase();
-  //   const role = (this.currentRoleName || "branch").toLowerCase();
-
-  //   this.router.navigate([`/${role}/chat`], {
-  //     queryParams: { threadId: threadId, chatType: entity },
-  //   });
-
-  //   this.closeSidebar();
-  // }
   openChat(notification: BackendThread, event?: Event) {
     if (event) {
       event.stopPropagation();
@@ -1133,5 +923,9 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
 
   refreshNotifications() {
     this.getAllNotifications();
+  }
+  toggleVoice(): void {
+    this.isVoiceEnabled = !this.isVoiceEnabled;
+    this.voiceNotificationService.setEnabled(this.isVoiceEnabled);
   }
 }

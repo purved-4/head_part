@@ -16,31 +16,21 @@
             "outputPath": "dist/onlineB",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": [
-             "zone.js",
-              "src/polyfills.ts"
-            ],
+            "polyfills": ["zone.js", "src/polyfills.ts"],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
                 "glob": "**/*",
                 "input": "public"
-              },
-              {
-                "glob": "**/*",
-                "input": "src/assets",
-                "output": "/assets"
               }
             ],
-           "styles": [
-             "@angular/material/prebuilt-themes/indigo-pink.css",
-             "src/styles.css",
-             "src/global_styles.css",
-             "node_modules/intl-tel-input/build/css/intlTelInput.css"
+            "styles": [
+              "@angular/material/prebuilt-themes/indigo-pink.css",
+              "src/styles.css",
+              "src/global_styles.css",
+              "node_modules/intl-tel-input/build/css/intlTelInput.css"
             ],
-            "scripts": [
-              "node_modules/jquery/dist/jquery.min.js"
-            ],
+            "scripts": ["node_modules/jquery/dist/jquery.min.js"],
             "server": "src/main.server.ts",
             "prerender": true,
             "ssr": {
@@ -95,11 +85,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-           "polyfills": [
-              "zone.js",
-              "zone.js/testing",
-              "src/polyfills.ts"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing", "src/polyfills.ts"],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               {
@@ -112,9 +98,7 @@
               "src/styles.css",
               "src/global_styles.css"
             ],
-            "scripts": [
-              "node_modules/jquery/dist/jquery.min.js"
-            ]
+            "scripts": ["node_modules/jquery/dist/jquery.min.js"]
           }
         }
       }

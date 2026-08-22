@@ -51,7 +51,7 @@
             >
               Pay In
               <span
-                class="ml-2 text-[11px] font-bold px-2.5 py-1 rounded-full bg-[var(--color-info)]/20 text-[var(--color-secondary)] border border-[var(--color-info)]/50"
+                class="ml-2 text-[11px] font-bold px-2.5 py-1 rounded-full bg-[var(--color-info)]/20 text-[var(--color-danger)] border border-[var(--color-info)]/50"
               >
                 {{
                   filteredPendingUpi().length +
@@ -61,7 +61,7 @@
               </span>
               <span
                 *ngFor="let s of payinCurrencySums"
-                class="text-[10px] font-bold px-2 py-[2px] rounded-full ml-3 bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-info)]/30"
+                class="text-[10px] font-bold px-2 py-[2px] rounded-full ml-3 bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-danger)]/30"
               >
                 {{ formatCurrencySum(s) }}
               </span>
