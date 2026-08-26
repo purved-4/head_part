@@ -1,28 +1,45 @@
 import { Injectable } from "@angular/core";
 
+type VoiceLang = "en" | "hi";
+
 @Injectable({
   providedIn: "root",
 })
 export class VoiceNotificationService {
   private readonly enabledKey = "notification_voice_enabled";
   private readonly spokenIdsKey = "spoken_notification_ids";
+  private readonly languageKey = "notification_voice_language";
 
   private enabled = true;
+  private language: VoiceLang = "en"; // default English
 
   private spokenNotificationIds = new Set<string>();
 
-  private readonly voiceMessages: Record<string, string> = {
-    BANK_FUND_REJECT: ". A bank fund has been rejected. .",
+  private currentAudio: HTMLAudioElement | null = null;
 
-    UPI_FUND_REJECT: ". A U P I fund has been rejected. .",
+  // Type -> audio "group" mapping (payin / payout)
+  private readonly typeToAudioGroup: Record<string, "payin" | "payout"> = {
+    BANK_FUND_REJECT: "payin",
+    UPI_FUND_REJECT: "payin",
+    CRYPTO_FUND_REJECT: "payin",
+    PAYOUT_FUND_REJECT: "payout",
+  };
 
-    PAYOUT_FUND_REJECT: ". A payout fund has been rejected. .",
-
-    CRYPTO_FUND_REJECT: ". A crypto fund has been rejected..",
+  // group + language -> filename (files rakhe hain public folder me)
+  private readonly audioFileMap: Record<string, Record<VoiceLang, string>> = {
+    payin: {
+      en: "/payineng.mp3",
+      hi: "/payinhindi.mp3",
+    },
+    payout: {
+      en: "/payouteng.mp3",
+      hi: "/payouthindi.mp3",
+    },
   };
 
   constructor() {
     this.loadSettings();
+    this.loadLanguage();
     this.loadSpokenIds();
   }
 
@@ -32,7 +49,6 @@ export class VoiceNotificationService {
    */
   announceNotification(notification: any): void {
     if (!this.enabled) return;
-
     if (!notification) return;
 
     const id = String(
@@ -48,15 +64,14 @@ export class VoiceNotificationService {
 
     if (!id || !type) return;
 
-    // Already spoken -> dobara nahi bolega
     if (this.spokenNotificationIds.has(id)) {
       return;
     }
 
-    const message = this.voiceMessages[type];
+    const group = this.typeToAudioGroup[type];
 
-    // Sirf configured notification types ke liye voice
-    if (!message) {
+    // Sirf configured notification types ke liye audio
+    if (!group) {
       return;
     }
 
@@ -64,53 +79,30 @@ export class VoiceNotificationService {
     this.spokenNotificationIds.add(id);
     this.saveSpokenIds();
 
-    this.speak(message);
+    this.playAudio(group);
   }
 
   /**
-   * Actual browser speaker call
+   * Actual audio file play call
    */
-  private speak(message: string): void {
-    if (!("speechSynthesis" in window)) {
+  private playAudio(group: "payin" | "payout"): void {
+    const filePath = this.audioFileMap[group]?.[this.language];
 
-      return;
+    if (!filePath) return;
+
+    // Agar pehle se koi audio baj raha hai to rok do
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio.currentTime = 0;
     }
 
-    const synth = window.speechSynthesis;
+    const audio = new Audio(filePath);
+    audio.volume = 1;
+    this.currentAudio = audio;
 
-    const speakWithFemaleVoice = () => {
-      const voices = synth.getVoices();
-
-      // Female / Indian-English voice ko prefer karo
-      const femaleVoice =
-        voices.find((v) => /female/i.test(v.name) && /en-IN/i.test(v.lang)) ||
-        voices.find((v) => /female/i.test(v.name)) ||
-        voices.find((v) => /en-IN/i.test(v.lang)) ||
-        voices.find((v) => /en-US/i.test(v.lang));
-
-      const utterance = new SpeechSynthesisUtterance(message);
-
-      utterance.lang = femaleVoice?.lang || "en-IN";
-      utterance.voice = femaleVoice || null;
-      utterance.rate = 0.9;
-      utterance.pitch = 1.05;
-      utterance.volume = 1;
-
-      synth.cancel();
-      synth.speak(utterance);
-    };
-
-    // Chrome me voices kabhi async load hoti hain
-    const voices = synth.getVoices();
-
-    if (voices.length > 0) {
-      speakWithFemaleVoice();
-    } else {
-      synth.onvoiceschanged = () => {
-        synth.onvoiceschanged = null;
-        speakWithFemaleVoice();
-      };
-    }
+    audio.play().catch((err) => {
+      console.error("Voice notification audio play failed:", err);
+    });
   }
 
   /**
@@ -118,11 +110,10 @@ export class VoiceNotificationService {
    */
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
-
     localStorage.setItem(this.enabledKey, String(enabled));
 
-    if (!enabled && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
+    if (!enabled) {
+      this.stop();
     }
   }
 
@@ -131,11 +122,25 @@ export class VoiceNotificationService {
   }
 
   /**
-   * Currently speaking voice stop
+   * Language toggle (en default, hi optional)
+   */
+  setLanguage(lang: VoiceLang): void {
+    this.language = lang;
+    localStorage.setItem(this.languageKey, lang);
+  }
+
+  getLanguage(): VoiceLang {
+    return this.language;
+  }
+
+  /**
+   * Currently playing audio stop
    */
   stop(): void {
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio.currentTime = 0;
+      this.currentAudio = null;
     }
   }
 
@@ -143,29 +148,29 @@ export class VoiceNotificationService {
    * Testing ke liye
    */
   testVoice(): void {
-    this.speak("Voice notification system is active.");
+    this.playAudio("payin");
   }
 
   private loadSettings(): void {
     const saved = localStorage.getItem(this.enabledKey);
-
     this.enabled = saved !== "false";
+  }
+
+  private loadLanguage(): void {
+    const saved = localStorage.getItem(this.languageKey);
+    this.language = saved === "hi" ? "hi" : "en"; // default english
   }
 
   private loadSpokenIds(): void {
     try {
       const saved = localStorage.getItem(this.spokenIdsKey);
-
       if (!saved) return;
 
       const ids = JSON.parse(saved);
-
       if (Array.isArray(ids)) {
         this.spokenNotificationIds = new Set(ids.map((id) => String(id)));
       }
-    } catch (error) {
-
-    }
+    } catch (error) {}
   }
 
   private saveSpokenIds(): void {
@@ -174,8 +179,6 @@ export class VoiceNotificationService {
         this.spokenIdsKey,
         JSON.stringify(Array.from(this.spokenNotificationIds)),
       );
-    } catch (error) {
-
-    }
+    } catch (error) {}
   }
 }

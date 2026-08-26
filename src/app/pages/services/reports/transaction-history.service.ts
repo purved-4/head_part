@@ -42,7 +42,7 @@ export interface PortalWiseReport {
 @Injectable({ providedIn: "root" })
 export class TransactionHistoryService {
   constructor(private http: HttpClient) {}
-getEntityReport(params: {
+  getEntityReport(params: {
     entityId?: string;
     entityType: string;
     portalId?: string;
@@ -240,25 +240,22 @@ getEntityReport(params: {
     httpParams = httpParams.set("page", String(params.page ?? 0));
     httpParams = httpParams.set("pageSize", String(params.pageSize ?? 10));
 
-
-
     return this.http.get<any>(`${baseUrl}/entityBalance/search`, {
       params: httpParams,
     });
   }
 
-  
-searchMultiPortalFund(payload: any): Observable<any> {
+  searchMultiPortalFund(payload: any): Observable<any> {
     return this.http
-     .post<any>(`${baseUrl}/multi-portal-fund/search`, payload)
-     .pipe(
+      .post<any>(`${baseUrl}/multi-portal-fund/search`, payload)
+      .pipe(
         catchError((error) => {
-         return throwError(() => error);
+          return throwError(() => error);
         }),
-     );
-}
+      );
+  }
 
-reportMultiPortalFund(
+  reportMultiPortalFund(
     entityId: any,
     entityType: any,
     filters: any = {},
@@ -277,10 +274,11 @@ reportMultiPortalFund(
         (v: any) => (params = params.append("amountTypes", v)),
       );
     }
-     if (filters.portalIds?.length) {
- filters.portalIds.forEach(
+    if (filters.portalIds?.length) {
+      filters.portalIds.forEach(
         (v: any) => (params = params.append("portalIds", v)),
-      );    }
+      );
+    }
     if (filters.currencies?.length) {
       filters.currencies.forEach(
         (v: any) => (params = params.append("currencies", v)),
@@ -297,7 +295,6 @@ reportMultiPortalFund(
     if (filters.toDate) {
       params = params.set("toDate", filters.toDate);
     }
-   
 
     return this.http
       .get<any>(`${baseUrl}/multi-portal-fund/report`, { params })
@@ -308,89 +305,72 @@ reportMultiPortalFund(
       );
   }
 
-
-
   reportComPartFund(entityId: string, filters: any): Observable<any> {
     const params = this.buildParams(entityId, filters, ["portalIds"]);
-    return this.http.get(`${baseUrl}/multi-portal-fund/report/compart`, { params });
+    return this.http.get(`${baseUrl}/multi-portal-fund/report/compart`, {
+      params,
+    });
   }
 
-  reportHeadBranchFund(
-  entityId: string,
-  filters: any
-): Observable<any> {
-  const params = this.buildParams(
-    entityId,
-    filters,
-    ["inventories"]
-  );
+  reportHeadBranchFund(entityId: string, filters: any): Observable<any> {
+    const params = this.buildParams(entityId, filters, ["inventories"]);
 
-  return this.http.get(
-    `${baseUrl}/multi-portal-fund/report/head-branch`,
-    { params }
-  );
-}
+    return this.http.get(`${baseUrl}/multi-portal-fund/report/head-branch`, {
+      params,
+    });
+  }
 
-reportOtherFund(
-  entityId: string,
-  filters: any
-): Observable<any> {
-  const params = this.buildParams(
-    entityId,
-    filters,
-    ["comPartIds", "inventories"]
-  );
+  reportOtherFund(entityId: string, filters: any): Observable<any> {
+    const params = this.buildParams(entityId, filters, [
+      "comPartIds",
+      "inventories",
+    ]);
 
-  return this.http.get(
-    `${baseUrl}/multi-portal-fund/report/other`,
-    { params }
-  );
-}
-
+    return this.http.get(`${baseUrl}/multi-portal-fund/report/other`, {
+      params,
+    });
+  }
 
   private buildParams(
-  entityId: string,
-  filters: any,
-  extraArrayKeys: string[]
-): HttpParams {
+    entityId: string,
+    filters: any,
+    extraArrayKeys: string[],
+  ): HttpParams {
+    let params = new HttpParams().set("entityId", entityId);
 
-  let params = new HttpParams().set("entityId", entityId);
+    const arrayKeys = [
+      "transactionTypes",
+      "amountTypes",
+      "currencies",
+      "paymentMethods",
+      ...extraArrayKeys,
+    ];
 
-  const arrayKeys = [
-    "transactionTypes",
-    "amountTypes",
-    "currencies",
-    "paymentMethods",
-    ...extraArrayKeys,
-  ];
+    arrayKeys.forEach((key) => {
+      const values: string[] = filters[key];
 
-  arrayKeys.forEach((key) => {
-    const values: string[] = filters[key];
+      if (values?.length) {
+        values.forEach((value) => {
+          params = params.append(key, value);
+        });
+      }
+    });
 
-    if (values?.length) {
-      values.forEach((value) => {
-        params = params.append(key, value);
-      });
+    if (filters.fromDate) {
+      params = params.set("fromDate", filters.fromDate);
     }
-  });
 
-  if (filters.fromDate) {
-    params = params.set("fromDate", filters.fromDate);
+    if (filters.toDate) {
+      params = params.set("toDate", filters.toDate);
+    }
+
+    return params;
   }
 
-  if (filters.toDate) {
-    params = params.set("toDate", filters.toDate);
-  }
-
-  return params;
-}
-
-  getInventory(entities:any, payment:any){
-
+  getInventory(entities: any, payment: any) {
     let params = new HttpParams()
       .set("entityId", entities)
       .set("paymentMethods", payment);
-
 
     return this.http
       .get<any>(`${baseUrl}/multi-portal-fund/getInventory`, { params })
@@ -399,8 +379,72 @@ reportOtherFund(
           return throwError(() => error);
         }),
       );
-
   }
+  getFundsForAllLevels(params: {
+    entityId: string;
+    entityType: string;
+    reviewStatus: string[];
+    fundType: string[];
+    fundMode: string[];
+    fromDate: string | Date;
+    toDate: string | Date;
+    currency?: string[];
+    page?: number;
+    size?: number;
+    sort?: string;
+  }): Observable<any> {
+    let httpParams = new HttpParams();
+    httpParams = httpParams.set("entityId", params.entityId);
+    httpParams = httpParams.set("entityType", params.entityType);
 
+    if (params.reviewStatus && params.reviewStatus.length > 0) {
+      params.reviewStatus.forEach((status) => {
+        httpParams = httpParams.append("reviewStatus", status);
+      });
+    }
 
+    if (params.fundType && params.fundType.length > 0) {
+      params.fundType.forEach((type) => {
+        httpParams = httpParams.append("fundType", type);
+      });
+    }
+
+    if (params.fundMode && params.fundMode.length > 0) {
+      params.fundMode.forEach((mode) => {
+        httpParams = httpParams.append("fundMode", mode);
+      });
+    }
+
+    const fromDateStr =
+      params.fromDate instanceof Date
+        ? params.fromDate.toISOString()
+        : params.fromDate;
+    const toDateStr =
+      params.toDate instanceof Date
+        ? params.toDate.toISOString()
+        : params.toDate;
+
+    httpParams = httpParams.set("fromDate", fromDateStr);
+    httpParams = httpParams.set("toDate", toDateStr);
+
+    if (params.currency && params.currency.length > 0) {
+      params.currency.forEach((mode) => {
+        httpParams = httpParams.append("currencies", mode);
+      });
+    }
+
+    if (params.page !== undefined) {
+      httpParams = httpParams.set("page", params.page.toString());
+    }
+    if (params.size !== undefined) {
+      httpParams = httpParams.set("size", params.size.toString());
+    }
+    if (params.sort && params.sort.length > 0) {
+      httpParams = httpParams.set("sort", params.sort);
+    }
+
+    return this.http.get<any>(`${baseUrl}/funds/getFundData`, {
+      params: httpParams,
+    });
+  }
 }

@@ -71,6 +71,17 @@
             {{ isVoiceEnabled ? "volume_up" : "volume_off" }}
           </span>
         </button>
+
+        <button
+          (click)="toggleLanguage()"
+          class="px-2 py-1 rounded hover:bg-white/20 text-xs font-semibold"
+          [title]="
+            currentLanguage === 'hi' ? 'Switch to English' : 'हिंदी में सुनें'
+          "
+        >
+          {{ currentLanguage === "hi" ? "हिं" : "EN" }}
+        </button>
+
         <button (click)="markAllAsRead()" class="p-1 rounded hover:bg-white/20">
           <span class="material-icons text-xs">done_all</span>
         </button>

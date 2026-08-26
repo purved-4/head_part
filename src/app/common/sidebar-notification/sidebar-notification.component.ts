@@ -1,4 +1,3 @@
-
 import {
   Component,
   NgZone,
@@ -16,7 +15,7 @@ import { Router } from "@angular/router";
 import { NotificationChatService } from "../../pages/services/notification-chat.service";
 import { AuthService } from "../../pages/services/auth.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
- import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
+import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
 import { TimeZoneServiceService } from "../time-zone/time-zone-service.service";
 import { BulkUpdateService } from "../../pages/services/bulk-update.service";
 import { Observable } from "rxjs";
@@ -25,7 +24,7 @@ import {
   BulkHeadUpdatePayload,
   BulkBranchUpdatePayload,
 } from "../../pages/services/bulk-update.service";
- import { UserStateService } from "../../pages/services/store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { VoiceNotificationService } from "../../pages/services/voice-notification.service";
 
 interface BackendThread {
@@ -91,6 +90,8 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
 
   selectedPercentageNotification: any = null;
 
+  currentLanguage: "en" | "hi" = "en"; // add this
+
   percentageForm: {
     payinPercentage: number | null;
     payoutPercentage: number | null;
@@ -134,7 +135,7 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     private socketConfigService: SocketConfigService,
     private ngZone: NgZone,
     private bulkUpdateService: BulkUpdateService,
-        private voiceNotificationService : VoiceNotificationService,
+    private voiceNotificationService: VoiceNotificationService,
 
     private cdr: ChangeDetectorRef,
     private tzService: TimeZoneServiceService,
@@ -166,6 +167,7 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     this.currentRoleName = this.userStateService.getRole();
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.isVoiceEnabled = this.voiceNotificationService.isEnabled();
+    this.currentLanguage = this.voiceNotificationService.getLanguage(); // add this
 
     this.socketConfigService.subscribeNotifications(this.currentRoleId);
 
@@ -927,8 +929,14 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
   refreshNotifications() {
     this.getAllNotifications();
   }
+
   toggleVoice(): void {
     this.isVoiceEnabled = !this.isVoiceEnabled;
     this.voiceNotificationService.setEnabled(this.isVoiceEnabled);
+  }
+
+  toggleLanguage(): void {
+    this.currentLanguage = this.currentLanguage === "en" ? "hi" : "en";
+    this.voiceNotificationService.setLanguage(this.currentLanguage);
   }
 }

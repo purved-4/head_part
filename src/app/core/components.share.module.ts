@@ -52,6 +52,7 @@ import { BalanceReportComponent } from "../components/reports/balance-report/bal
 import { MaintenanceNoticeComponent } from "../common/maintenance-notice/maintenance-notice.component";
 import { PortalReportComponent } from "../components/reports/portal-report/portal-report.component";
 import { LoaderComponent } from "../common/loader/loader.component";
+import { PayinPayoutReportComponent } from "../components/reports/payin-payout-report/payin-payout-report.component";
 
 @NgModule({
   declarations: [
@@ -94,17 +95,16 @@ import { LoaderComponent } from "../common/loader/loader.component";
     BankDetailsComponent,
     PendingThreadsComponent,
     ChatpopupComponent,
-ResolvedNotificationComponent,
+    ResolvedNotificationComponent,
     OverrideCurrencyRateComponent,
     PaymentsMethodsComponent,
     SharedUserProfileComponent,
     GlobalCompartPercentageComponent,
     BalanceReportComponent,
     MaintenanceNoticeComponent,
-            PortalReportComponent,
-                LoaderComponent
-
-
+    PortalReportComponent,
+    LoaderComponent,
+    PayinPayoutReportComponent,
   ],
   exports: [
     WebhookDataComponent,
@@ -151,10 +151,10 @@ ResolvedNotificationComponent,
     SharedUserProfileComponent,
     GlobalCompartPercentageComponent,
     ResolvedNotificationComponent,
-    MaintenanceNoticeComponent,     
-      PortalReportComponent,
-      LoaderComponent
-
+    MaintenanceNoticeComponent,
+    PortalReportComponent,
+    LoaderComponent,
+    PayinPayoutReportComponent,
   ],
   imports: [
     SharedModule,
@@ -162,7 +162,7 @@ ResolvedNotificationComponent,
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-    QRCodeComponent
+    QRCodeComponent,
   ],
 })
 export class ComponentSharedModule {}

@@ -1,0 +1,813 @@
+<div
+  class="min-h-screen bg-[#F7F8FA] px-6 py-6 space-y-5"
+  style="
+    font-family:
+      &quot;Inter&quot;,
+      &quot;Segoe UI&quot;,
+      system-ui,
+      -apple-system,
+      sans-serif;
+  "
+>
+  <!-- ================= HEADER ================= -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-[22px] font-bold tracking-tight text-gray-900">
+        Payin / Payout Report
+      </h1>
+      <p class="text-[12.5px] text-gray-500 mt-0.5">
+        Filter, review and export payin & payout transaction activity.
+      </p>
+    </div>
+  </div>
+
+  <!-- ================= FILTER CARD ================= -->
+  <div
+    class="bg-white border border-gray-200/80 rounded-[22px] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_28px_-16px_rgba(16,24,40,0.14)] p-6 space-y-6"
+  >
+    <!-- Filters header + active-filter badge -->
+    <div class="flex items-center gap-2 pb-1">
+      <span
+        class="h-7 w-7 flex items-center justify-center rounded-lg bg-emerald-50 border border-emerald-100"
+      >
+        <span class="material-symbols-outlined text-[16px] text-emerald-700"
+          >filter_alt</span
+        >
+      </span>
+      <span class="text-[13.5px] font-semibold tracking-wide text-gray-900"
+        >Filters</span
+      >
+      <span
+        *ngIf="activeFilterCount > 0"
+        class="h-5 min-w-[20px] px-1.5 flex items-center justify-center rounded-full bg-emerald-600 text-white text-[10px] font-semibold shadow-sm shadow-emerald-900/20"
+      >
+        {{ activeFilterCount }}
+      </span>
+    </div>
+
+    <!-- ============ ROW 1: Transaction Type / Review Status / Currency / Mode ============ -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- TRANSACTION TYPE (PAYIN / PAYOUT) -->
+      <div class="relative" data-dropdown>
+        <label class="block text-[11px] font-medium text-gray-500 mb-2"
+          >Transaction Type</label
+        >
+        <button
+          type="button"
+          (click)="toggleDropdown('transactionType')"
+          class="w-full h-10 px-3.5 flex items-center gap-2 rounded-xl border border-gray-200 bg-white text-[12.5px] text-gray-700 hover:border-emerald-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+        >
+          <span class="truncate flex-1 text-left">
+            {{
+              getGroupLabel(transactionTypeOptions, "Select Transaction Type")
+            }}
+          </span>
+          <span class="material-symbols-outlined text-[16px] text-gray-400"
+            >expand_more</span
+          >
+        </button>
+
+        <div
+          *ngIf="isDropdownOpen('transactionType')"
+          class="absolute z-30 mt-1.5 w-full max-h-56 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg shadow-gray-900/10 py-1.5"
+        >
+          <div
+            class="flex justify-between px-3.5 py-2 text-[10.5px] font-semibold text-emerald-700"
+          >
+            <button
+              type="button"
+              (click)="toggleSelectAll(transactionTypeOptions, true)"
+            >
+              Select all
+            </button>
+            <button
+              type="button"
+              (click)="toggleSelectAll(transactionTypeOptions, false)"
+            >
+              Clear
+            </button>
+          </div>
+          <label
+            *ngFor="let opt of transactionTypeOptions"
+            class="flex items-center gap-2.5 px-3.5 py-2.5 text-[12.5px] text-gray-700 cursor-pointer hover:bg-emerald-50/60"
+          >
+            <input
+              type="checkbox"
+              [checked]="opt.checked"
+              (change)="toggleOption(transactionTypeOptions, opt.value)"
+              class="accent-emerald-600"
+            />
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-semibold"
+              [ngClass]="transactionTypeClass(opt.value)"
+            >
+              {{ opt.label }}
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- REVIEW STATUS -->
+      <div class="relative" data-dropdown>
+        <label class="block text-[11px] font-medium text-gray-500 mb-2"
+          >Review Status</label
+        >
+        <button
+          type="button"
+          (click)="toggleDropdown('reviewStatus')"
+          class="w-full h-10 px-3.5 flex items-center gap-2 rounded-xl border border-gray-200 bg-white text-[12.5px] text-gray-700 hover:border-emerald-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+        >
+          <span class="truncate flex-1 text-left">
+            {{ getGroupLabel(reviewStatusOptions, "Select Review Status") }}
+          </span>
+          <span class="material-symbols-outlined text-[16px] text-gray-400"
+            >expand_more</span
+          >
+        </button>
+
+        <div
+          *ngIf="isDropdownOpen('reviewStatus')"
+          class="absolute z-30 mt-1.5 w-full max-h-56 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg shadow-gray-900/10 py-1.5"
+        >
+          <div
+            class="flex justify-between px-3.5 py-2 text-[10.5px] font-semibold text-emerald-700"
+          >
+            <button
+              type="button"
+              (click)="toggleSelectAll(reviewStatusOptions, true)"
+            >
+              Select all
+            </button>
+            <button
+              type="button"
+              (click)="toggleSelectAll(reviewStatusOptions, false)"
+            >
+              Clear
+            </button>
+          </div>
+          <label
+            *ngFor="let opt of reviewStatusOptions"
+            class="flex items-center gap-2.5 px-3.5 py-2.5 text-[12.5px] text-gray-700 cursor-pointer hover:bg-emerald-50/60"
+          >
+            <input
+              type="checkbox"
+              [checked]="opt.checked"
+              (change)="toggleOption(reviewStatusOptions, opt.value)"
+              class="accent-emerald-600"
+            />
+            {{ opt.label }}
+          </label>
+        </div>
+      </div>
+
+      <!-- CURRENCY (multiselect) -->
+      <div class="relative" data-dropdown>
+        <label class="block text-[11px] font-medium text-gray-500 mb-2"
+          >Currency</label
+        >
+        <button
+          type="button"
+          (click)="toggleDropdown('currency')"
+          class="w-full h-10 px-3.5 flex items-center gap-2 rounded-xl border border-gray-200 bg-white text-[12.5px] text-gray-700 hover:border-emerald-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+        >
+          <span class="truncate flex-1 text-left">
+            {{ getGroupLabel(currencyOptions, "Select Currency") }}
+          </span>
+          <span class="material-symbols-outlined text-[16px] text-gray-400"
+            >expand_more</span
+          >
+        </button>
+
+        <div
+          *ngIf="isDropdownOpen('currency')"
+          class="absolute z-30 mt-1.5 w-full max-h-56 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg shadow-gray-900/10 py-1.5"
+        >
+          <div
+            class="flex justify-between px-3.5 py-2 text-[10.5px] font-semibold text-emerald-700"
+          >
+            <button
+              type="button"
+              (click)="toggleSelectAll(currencyOptions, true)"
+            >
+              Select all
+            </button>
+            <button
+              type="button"
+              (click)="toggleSelectAll(currencyOptions, false)"
+            >
+              Clear
+            </button>
+          </div>
+          <label
+            *ngFor="let opt of currencyOptions"
+            class="flex items-center gap-2.5 px-3.5 py-2.5 text-[12.5px] text-gray-700 cursor-pointer hover:bg-emerald-50/60"
+          >
+            <input
+              type="checkbox"
+              [checked]="opt.checked"
+              (change)="toggleOption(currencyOptions, opt.value)"
+              class="accent-emerald-600"
+            />
+            <span
+              *ngIf="opt.icon"
+              class="material-symbols-outlined text-[15px] text-gray-400"
+              >{{ opt.icon }}</span
+            >
+            {{ opt.label }}
+          </label>
+        </div>
+      </div>
+
+      <!-- TRANSACTION MODE (depends on selected Currency) -->
+      <div class="relative" data-dropdown>
+        <label class="block text-[11px] font-medium text-gray-500 mb-2"
+          >Transaction Mode</label
+        >
+        <button
+          type="button"
+          (click)="toggleDropdown('mode')"
+          class="w-full h-10 px-3.5 flex items-center gap-2 rounded-xl border border-gray-200 bg-white text-[12.5px] text-gray-700 hover:border-emerald-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+        >
+          <span class="truncate flex-1 text-left">
+            {{ getGroupLabel(modeOptions, "Select Transaction Mode") }}
+          </span>
+          <span class="material-symbols-outlined text-[16px] text-gray-400"
+            >expand_more</span
+          >
+        </button>
+
+        <div
+          *ngIf="isDropdownOpen('mode')"
+          class="absolute z-30 mt-1.5 w-full max-h-56 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg shadow-gray-900/10 py-1.5"
+        >
+          <div
+            *ngIf="modeOptions.length"
+            class="flex justify-between px-3.5 py-2 text-[10.5px] font-semibold text-emerald-700"
+          >
+            <button type="button" (click)="toggleSelectAll(modeOptions, true)">
+              Select all
+            </button>
+            <button type="button" (click)="toggleSelectAll(modeOptions, false)">
+              Clear
+            </button>
+          </div>
+          <label
+            *ngFor="let opt of modeOptions"
+            class="flex items-center gap-2.5 px-3.5 py-2.5 text-[12.5px] text-gray-700 cursor-pointer hover:bg-emerald-50/60"
+          >
+            <input
+              type="checkbox"
+              [checked]="opt.checked"
+              (change)="toggleOption(modeOptions, opt.value)"
+              class="accent-emerald-600"
+            />
+            {{ opt.label }}
+          </label>
+          <div
+            *ngIf="!modeOptions.length"
+            class="px-3.5 py-4 text-[12.5px] text-gray-500"
+          >
+            Select a currency first
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ROW 2: DATE RANGE (Custom / Month / Year) ============ -->
+    <div class="pt-5 border-t border-gray-100 space-y-3.5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <label class="text-[11px] font-medium text-gray-500">Date Range</label>
+
+        <!-- Mode tabs -->
+        <div class="inline-flex items-center bg-gray-100/80 rounded-lg p-1">
+          <button
+            type="button"
+            (click)="setRangeMode('custom')"
+            class="px-4 py-1.5 rounded-md text-[12px] font-medium transition-all"
+            [class.bg-white]="rangeMode === 'custom'"
+            [class.shadow-sm]="rangeMode === 'custom'"
+            [class.font-semibold]="rangeMode === 'custom'"
+            [class.text-emerald-700]="rangeMode === 'custom'"
+            [class.text-gray-500]="rangeMode !== 'custom'"
+          >
+            Custom
+          </button>
+          <button
+            type="button"
+            (click)="setRangeMode('month')"
+            class="px-4 py-1.5 rounded-md text-[12px] font-medium transition-all"
+            [class.bg-white]="rangeMode === 'month'"
+            [class.shadow-sm]="rangeMode === 'month'"
+            [class.font-semibold]="rangeMode === 'month'"
+            [class.text-emerald-700]="rangeMode === 'month'"
+            [class.text-gray-500]="rangeMode !== 'month'"
+          >
+            Month
+          </button>
+          <button
+            type="button"
+            (click)="setRangeMode('year')"
+            class="px-4 py-1.5 rounded-md text-[12px] font-medium transition-all"
+            [class.bg-white]="rangeMode === 'year'"
+            [class.shadow-sm]="rangeMode === 'year'"
+            [class.font-semibold]="rangeMode === 'year'"
+            [class.text-gray-500]="rangeMode !== 'year'"
+          >
+            Year
+          </button>
+        </div>
+      </div>
+
+      <!-- CUSTOM -->
+      <div
+        *ngIf="rangeMode === 'custom'"
+        class="flex flex-wrap items-end gap-3"
+      >
+        <div class="w-44">
+          <label class="block text-[10.5px] text-gray-500 mb-1.5">From</label>
+          <div class="relative">
+            <span
+              class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[15px] text-gray-400"
+              >calendar_today</span
+            >
+            <input
+              type="date"
+              [(ngModel)]="fromDate"
+              [max]="getTodayDate()"
+              (ngModelChange)="onCustomDateChange()"
+              class="w-full h-10 pl-8 pr-2 text-[12.5px] text-gray-700 border border-gray-200 rounded-xl bg-white outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+            />
+          </div>
+        </div>
+        <div class="w-44">
+          <label class="block text-[10.5px] text-gray-500 mb-1.5">To</label>
+          <div class="relative">
+            <span
+              class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[15px] text-gray-400"
+              >calendar_today</span
+            >
+            <input
+              type="date"
+              [(ngModel)]="toDate"
+              [max]="getTodayDate()"
+              (ngModelChange)="onCustomDateChange()"
+              class="w-full h-10 pl-8 pr-2 text-[12.5px] text-gray-700 border border-gray-200 rounded-xl bg-white outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- MONTH -->
+      <div *ngIf="rangeMode === 'month'" class="flex flex-wrap items-end gap-3">
+        <div class="w-44">
+          <label class="block text-[10.5px] text-gray-500 mb-1.5"
+            >From Month</label
+          >
+          <input
+            type="month"
+            [(ngModel)]="fromMonth"
+            (ngModelChange)="onMonthRangeChange()"
+            class="w-full h-10 px-3 text-[12.5px] text-gray-700 border border-gray-200 rounded-xl bg-white outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+          />
+        </div>
+        <div class="w-44">
+          <label class="block text-[10.5px] text-gray-500 mb-1.5"
+            >To Month</label
+          >
+          <input
+            type="month"
+            [(ngModel)]="toMonth"
+            (ngModelChange)="onMonthRangeChange()"
+            class="w-full h-10 px-3 text-[12.5px] text-gray-700 border border-gray-200 rounded-xl bg-white outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+          />
+        </div>
+      </div>
+
+      <!-- YEAR -->
+      <div *ngIf="rangeMode === 'year'" class="flex flex-wrap items-end gap-3">
+        <div class="w-36">
+          <label class="block text-[10.5px] text-gray-500 mb-1.5"
+            >From Year</label
+          >
+          <select
+            [(ngModel)]="fromYear"
+            (ngModelChange)="onYearRangeChange()"
+            class="w-full h-10 px-3 text-[12.5px] text-gray-700 border border-gray-200 rounded-xl bg-white outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+          >
+            <option *ngFor="let y of yearOptions" [ngValue]="y">{{ y }}</option>
+          </select>
+        </div>
+        <div class="w-36">
+          <label class="block text-[10.5px] text-gray-500 mb-1.5"
+            >To Year</label
+          >
+          <select
+            [(ngModel)]="toYear"
+            (ngModelChange)="onYearRangeChange()"
+            class="w-full h-10 px-3 text-[12.5px] text-gray-700 border border-gray-200 rounded-xl bg-white outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+          >
+            <option *ngFor="let y of yearOptions" [ngValue]="y">{{ y }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ROW 3: ACTIONS ============ -->
+    <div
+      class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-gray-100"
+    >
+      <div class="grid sm:grid-cols-2 gap-2">
+        <!-- DOWNLOAD REPORT (CSV / PDF dropdown) -->
+        <div class="relative" data-dropdown>
+          <button
+            type="button"
+            (click)="toggleDropdown('download')"
+            [disabled]="!results.length"
+            class="h-10 px-4 flex items-center gap-1.5 rounded-xl border border-gray-200 text-[12.5px] font-medium text-gray-600 hover:text-gray-900 hover:border-emerald-400 hover:bg-emerald-50/40 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <span class="material-symbols-outlined text-[16px]">download</span>
+            Download Report
+          </button>
+
+          <div
+            *ngIf="isDropdownOpen('download')"
+            class="absolute left-0 z-30 mt-1.5 w-48 bg-white border border-gray-200 rounded-xl shadow-lg shadow-gray-900/10 py-1.5"
+          >
+            <button
+              type="button"
+              (click)="exportCsv(); toggleDropdown('download')"
+              class="w-full text-left px-3.5 py-2.5 text-[12.5px] text-gray-700 hover:bg-emerald-50/60 flex items-center gap-2"
+            >
+              <span
+                class="material-symbols-outlined text-[15px] text-emerald-600"
+                >description</span
+              >
+              Export as CSV
+            </button>
+            <button
+              type="button"
+              (click)="exportPdf(); toggleDropdown('download')"
+              class="w-full text-left px-3.5 py-2.5 text-[12.5px] text-gray-700 hover:bg-red-50/60 flex items-center gap-2"
+            >
+              <span class="material-symbols-outlined text-[15px] text-red-500"
+                >picture_as_pdf</span
+              >
+              Export as PDF
+            </button>
+          </div>
+          <p class="text-[10px] text-gray-400 mt-1 pl-1" *ngIf="results.length">
+            Exports the currently loaded page ({{ pageStart }}-{{ pageEnd }})
+          </p>
+        </div>
+
+        <button
+          type="button"
+          (click)="resetFilters()"
+          class="h-10 px-5 flex items-center gap-1.5 rounded-xl border border-gray-200 text-[12.5px] font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all"
+        >
+          Reset
+        </button>
+      </div>
+
+      <button
+        type="button"
+        (click)="loadReport(0)"
+        [disabled]="loading || !canSearch()"
+        class="h-10 px-6 flex items-center gap-1.5 rounded-xl bg-emerald-700 text-white text-[12.5px] font-semibold shadow-sm shadow-emerald-900/20 hover:bg-emerald-800 hover:shadow-md hover:shadow-emerald-900/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <span
+          *ngIf="loading"
+          class="material-symbols-outlined animate-spin text-[16px]"
+          >progress_activity</span
+        >
+        {{ loading ? "Searching..." : "Generate Report" }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= TRANSACTION TABLE ================= -->
+  <div
+    class="bg-white border border-gray-200/80 rounded-[22px] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_10px_28px_-16px_rgba(16,24,40,0.14)] overflow-hidden"
+  >
+    <div
+      class="h-16 px-6 flex items-center justify-between border-b border-gray-100 gap-3"
+    >
+      <div class="flex items-center gap-2.5 shrink-0">
+        <span class="text-[15px] font-semibold text-gray-900"
+          >Transactions</span
+        >
+        <span
+          class="h-5 px-2 flex items-center justify-center rounded-full bg-emerald-50 border border-emerald-100 text-[11px] font-semibold text-emerald-700"
+        >
+          {{ totalRecords }}
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- PAGE SIZE -->
+        <div class="relative" data-dropdown>
+          <button
+            type="button"
+            (click)="toggleDropdown('pageSize')"
+            class="h-10 px-3 flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white text-[12px] text-gray-600 hover:border-emerald-400 transition-all"
+          >
+            {{ pageSize }} / page
+            <span class="material-symbols-outlined text-[15px] text-gray-400"
+              >expand_more</span
+            >
+          </button>
+          <div
+            *ngIf="isDropdownOpen('pageSize')"
+            class="absolute right-0 z-30 mt-1.5 w-28 bg-white border border-gray-200 rounded-xl shadow-lg shadow-gray-900/10 py-1.5"
+          >
+            <button
+              *ngFor="let size of pageSizeOptions"
+              type="button"
+              (click)="onPageSizeChange(size)"
+              class="w-full text-left px-3.5 py-2 text-[12.5px] hover:bg-emerald-50/60"
+              [class.text-emerald-700]="pageSize === size"
+              [class.font-semibold]="pageSize === size"
+              [class.text-gray-700]="pageSize !== size"
+            >
+              {{ size }} / page
+            </button>
+          </div>
+        </div>
+
+        <div class="relative w-[260px]">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[16px] text-gray-400"
+            >search</span
+          >
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange()"
+            placeholder="Search this page..."
+            class="w-full h-10 pl-9 pr-3 text-[12.5px] text-gray-700 border border-gray-200 rounded-xl bg-gray-50/70 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 focus:bg-white transition-all"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-[12.5px] border-collapse">
+        <thead>
+          <tr class="border-b border-gray-100 bg-gray-50/60">
+            <th
+              class="text-left px-5 py-3.5 text-[10.5px] font-semibold tracking-wider uppercase text-gray-400"
+            >
+              Sr No
+            </th>
+            <th
+              *ngFor="let col of columns; trackBy: trackByColKey"
+              class="text-left px-5 py-3.5 text-[10.5px] font-semibold tracking-wider uppercase text-gray-400 whitespace-nowrap select-none"
+              [class.cursor-pointer]="col.sortable"
+              [class.hover:text-gray-600]="col.sortable"
+              (click)="col.sortable && sortBy(col.key)"
+            >
+              <span class="inline-flex items-center gap-1">
+                {{ col.label }}
+                <span
+                  *ngIf="col.sortable"
+                  class="material-symbols-outlined text-[14px]"
+                  [class.text-emerald-700]="sortColumn === col.key"
+                  [class.text-gray-300]="sortColumn !== col.key"
+                >
+                  {{
+                    sortColumn === col.key
+                      ? sortDirection === "asc"
+                        ? "arrow_upward"
+                        : "arrow_downward"
+                      : "unfold_more"
+                  }}
+                </span>
+              </span>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngIf="loading">
+            <td [attr.colspan]="columns.length + 1" class="py-16 text-center">
+              <span
+                class="material-symbols-outlined animate-spin text-[32px] text-emerald-600"
+              >
+                progress_activity
+              </span>
+              <p class="mt-3 text-[13px] font-medium text-gray-700">
+                Loading transactions...
+              </p>
+            </td>
+          </tr>
+
+          <tr
+            *ngFor="let row of results; let i = index"
+            class="border-b border-gray-50 last:border-b-0 hover:bg-emerald-50/25 transition-colors"
+          >
+            <td class="px-5 py-3.5 text-gray-400 tabular-nums">
+              {{ pageStart + i }}
+            </td>
+
+            <td
+              *ngFor="let col of columns; trackBy: trackByColKey"
+              class="px-5 py-3.5 whitespace-nowrap text-gray-800"
+            >
+              <!-- TRANSACTION ID -->
+              <span
+                *ngIf="col.key === 'displayId'"
+                class="font-semibold text-gray-900"
+              >
+                {{ displayValue(row.displayId) }}
+              </span>
+
+              <!-- DATE & TIME -->
+              <span
+                *ngIf="col.key === 'transactionDate'"
+                class="flex flex-col leading-tight"
+              >
+                <span class="font-semibold text-gray-900">
+                  {{ row.createdAt | date: "dd MMM yyyy" }}
+                </span>
+                <span class="text-[10.5px] text-gray-400">
+                  {{ row.createdAt | date: "hh:mm a" }}
+                </span>
+              </span>
+
+              <!-- TRANSACTION TYPE -->
+              <span
+                *ngIf="col.key === 'transactionType'"
+                class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold"
+                [ngClass]="transactionTypeClass(row.transactionType)"
+              >
+                {{ row.transactionType }}
+              </span>
+
+              <!-- ENTITY -->
+              <span
+                *ngIf="col.key === 'entity'"
+                class="flex flex-col leading-tight"
+              >
+                <span class="text-gray-800">{{
+                  displayValue(row.entityType)
+                }}</span>
+              </span>
+
+              <!-- UTR / REF NO -->
+              <span
+                *ngIf="col.key === 'utr'"
+                class="text-gray-700 font-mono text-[11.5px]"
+              >
+                {{ displayValue(row.transactionId) }}
+              </span>
+
+              <!-- MODE -->
+              <span
+                *ngIf="col.key === 'mode'"
+                class="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 text-[11px] font-semibold text-gray-700"
+              >
+                {{ displayValue(row.mode) }}
+              </span>
+
+              <!-- CURRENCY -->
+              <span
+                *ngIf="col.key === 'currency'"
+                class="font-medium text-gray-700"
+              >
+                {{ displayValue(row.currency) }}
+              </span>
+
+              <!-- AMOUNT -->
+              <span
+                *ngIf="col.key === 'amount'"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-bold tabular-nums"
+                [ngClass]="
+                  row.transactionType === 'PAYIN'
+                    ? 'bg-emerald-50 border border-emerald-100 text-emerald-700'
+                    : 'bg-rose-50 border border-rose-100 text-rose-600'
+                "
+              >
+                <span class="material-symbols-outlined text-[13px]">
+                  {{
+                    row.transactionType === "PAYIN"
+                      ? "arrow_upward"
+                      : "arrow_downward"
+                  }}
+                </span>
+                {{ displayValue(row.amount) }}
+              </span>
+
+              <!-- REVIEW STATUS -->
+              <span
+                *ngIf="col.key === 'reviewStatus'"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-semibold"
+                [ngClass]="statusClass(row.reviewStatus)"
+              >
+                <span
+                  class="h-1.5 w-1.5 rounded-full bg-current opacity-70"
+                ></span>
+                {{ displayValue(row.reviewStatus) }}
+              </span>
+
+              <!-- REMARKS / DISPUTE REASON -->
+              <span
+                *ngIf="col.key === 'remarks'"
+                class="text-gray-500 max-w-[220px] truncate inline-block align-bottom"
+                [title]="displayValue(row.remarks)"
+              >
+                {{ displayValue(row.remarks) }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div
+        *ngIf="!loading && errorMessage"
+        class="py-14 flex flex-col items-center justify-center gap-2.5"
+      >
+        <span
+          class="h-10 w-10 flex items-center justify-center rounded-full bg-red-50"
+        >
+          <span class="material-symbols-outlined text-red-400 text-[20px]"
+            >error</span
+          >
+        </span>
+        <p class="text-[12.5px] text-red-500">{{ errorMessage }}</p>
+      </div>
+
+      <div
+        *ngIf="!loading && !errorMessage && searched && !results.length"
+        class="py-16 flex flex-col items-center justify-center gap-2.5"
+      >
+        <span
+          class="h-10 w-10 flex items-center justify-center rounded-full bg-gray-50"
+        >
+          <span class="material-symbols-outlined text-[20px] text-gray-300"
+            >inbox</span
+          >
+        </span>
+        <p class="text-[12.5px] text-gray-500">
+          No transactions found for the selected filters.
+        </p>
+      </div>
+
+      <div
+        *ngIf="!loading && !searched"
+        class="py-16 flex flex-col items-center justify-center gap-2.5"
+      >
+        <span
+          class="h-10 w-10 flex items-center justify-center rounded-full bg-gray-50"
+        >
+          <span class="material-symbols-outlined text-[20px] text-gray-300"
+            >filter_alt</span
+          >
+        </span>
+        <p class="text-[12.5px] text-gray-500">
+          Apply your filters and click Generate Report.
+        </p>
+      </div>
+    </div>
+
+    <div
+      *ngIf="!loading && results.length"
+      class="h-14 px-6 flex items-center justify-between border-t border-gray-100"
+    >
+      <span class="text-[11.5px] text-gray-500">
+        Showing {{ pageStart }}-{{ pageEnd }} of {{ totalRecords }} transactions
+      </span>
+      <div class="flex items-center gap-1.5">
+        <button
+          type="button"
+          (click)="goToPage(currentPage - 1)"
+          [disabled]="currentPage === 1 || loading"
+          class="h-8 px-3.5 rounded-lg border border-gray-200 text-[10.5px] font-medium text-gray-500 disabled:opacity-40 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+        >
+          ‹ Prev
+        </button>
+        <button
+          *ngFor="let p of pageNumbers"
+          type="button"
+          (click)="goToPage(p)"
+          [disabled]="loading"
+          class="h-8 w-8 rounded-lg text-[10.5px] font-semibold transition-all"
+          [ngClass]="
+            p === currentPage
+              ? 'bg-emerald-700 text-white shadow-sm shadow-emerald-900/20'
+              : 'text-gray-500 border border-gray-200 hover:bg-gray-50'
+          "
+        >
+          {{ p }}
+        </button>
+        <button
+          type="button"
+          (click)="goToPage(currentPage + 1)"
+          [disabled]="currentPage === totalPages || loading"
+          class="h-8 px-3.5 rounded-lg border border-gray-200 text-[10.5px] font-medium text-gray-500 disabled:opacity-40 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+        >
+          Next ›
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

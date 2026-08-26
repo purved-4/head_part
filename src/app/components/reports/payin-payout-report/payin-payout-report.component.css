@@ -1,0 +1,65 @@
+.report-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-item label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+
+.filter-item input,
+.filter-item select {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.action-buttons {
+  margin-bottom: 15px;
+}
+
+.action-buttons button {
+  padding: 8px 16px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.reset-btn {
+  background-color: #eee;
+}
+
+.error-msg {
+  color: red;
+  margin-bottom: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  font-size: 13px;
+}
+
+th {
+  background-color: #f5f5f5;
+}
