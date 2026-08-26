@@ -9,7 +9,7 @@ import { ActivatedRoute } from "@angular/router";
 import { ManagerService } from "../../../services/manager.service";
 import { BranchService } from "../../../services/branch.service";
 import { HeadService } from "../../../services/head.service";
-import { UserStateService } from "../../../../store/user-state.service";
+import { UserStateService } from "../../../services/store/user-state.service";
 import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
 import { COUNTRY_CODES } from "../../../../utils/constants";
 import { SocketConfigService } from "../../../services/socket/socket-config.service";

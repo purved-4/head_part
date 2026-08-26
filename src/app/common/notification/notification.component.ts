@@ -13,7 +13,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { NotificationChatService } from "../../pages/services/notification-chat.service";
 import { AuthService } from "../../pages/services/auth.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
 
 interface BackendThread {

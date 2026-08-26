@@ -4,7 +4,7 @@ import { Component, OnInit, OnDestroy } from "@angular/core";
 import { AuthService } from "../../pages/services/auth.service";
 import { BranchService } from "../../pages/services/branch.service";
 import { Subscription } from "rxjs";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { ComPartService } from "../../pages/services/com-part.service";
 import { forkJoin, of } from "rxjs";
@@ -214,7 +214,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
           // Timeout expired, clear and redirect
           this.clearPendingLogoutStateOnly();
           this.clearAllSessions();
-          this.router.navigateByUrl("/login");
+          this.router.navigateByUrl("/logins");
           return;
         }
 
@@ -321,7 +321,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
     if (ev.processed === true || ev.eventType === "LOGOUT_CONFIRMED") {
       this.completeLogout();
-      this.router.navigateByUrl("/login");
+      this.router.navigateByUrl("/logins");
     }
   }
 
@@ -385,7 +385,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     if (this.isDirectLogoutRole) {
       this.authService.logout().subscribe(() => {
         this.completeLogout();
-        window.location.href = "/login";
+        window.location.href = "/logins";
       });
       return;
     }
@@ -406,7 +406,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
         // If backend didn’t send valid time → logout directly
         if (Number.isNaN(futureTs)) {
           this.completeLogout();
-          window.location.href = "/login";
+          window.location.href = "/logins";
           return;
         }
 
@@ -508,7 +508,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
     if (this.isDirectLogoutRole) {
       this.authService.logout().subscribe(() => {
         this.completeLogout();
-        window.location.href = "/login";
+        window.location.href = "/logins";
       });
       return;
     }
@@ -530,7 +530,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
 
         if (Number.isNaN(futureTs)) {
           this.completeLogout();
-          window.location.href = "/login";
+          window.location.href = "/logins";
           return;
         }
 
@@ -588,7 +588,7 @@ export class WorkTimeComponent implements OnInit, OnDestroy {
         this.clearPendingLogoutStateOnly();
         this.clearAllSessions();
         this.logoutPendingEvent = null;
-        this.router.navigateByUrl("/login");
+        this.router.navigateByUrl("/logins");
         return;
       }
 

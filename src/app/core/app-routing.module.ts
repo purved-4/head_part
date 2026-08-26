@@ -1,36 +1,34 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { LoginComponent } from "../common/login/login.component";
-import { BranchAuthGuard } from "./branch.guard";
-import { WelcomeComponent } from "../common/welcome/welcome.component";
-import { OwnerAuthGuard } from "./owner.guard";
-import { ChiefAuthGuard } from "./chief.guard";
-import { ManagerAuthGuard } from "./manager.guard";
-import { HeadAuthGuard } from "./head.guard";
+import { RoleAuthGuard } from "./role-auth.guard";
+import { LoginRedirectGuard } from "./login-redirect.guard";
 import { BranchRegisterComponent } from "../common/branch-register/branch-register.component";
-import { ComPartAuthGuard } from "./compart.guard";
+import { WelcomeComponent } from "../common/welcome/welcome.component";
 
 const routes: Routes = [
-  { path: "", component: WelcomeComponent },
-
+  { path: "", component: LoginComponent, canActivate: [LoginRedirectGuard] },
   {
-    path: "register/code",
-    component: BranchRegisterComponent,
+    path: "login",
+    component: LoginComponent,
+    canActivate: [LoginRedirectGuard],
   },
 
-  { path: "login", component: LoginComponent },
+  { path: "register/code", component: BranchRegisterComponent },
+  { path: "register/affiliateLink", component: BranchRegisterComponent },
+  // { path: "open", component: AnonymousTransactionComponent },
 
   {
     path: "head",
-    canActivate: [HeadAuthGuard],
+    canActivate: [RoleAuthGuard],
+    data: { roles: ["head"] },
     loadChildren: () =>
       import("../pages/head/route/head-routing.module").then(
         (m) => m.HeadRoutingModule,
       ),
   },
 
-  // pehle "/login" tha — ab home pe bhejo, login pe bar-bar force nahi karna
-  { path: "**", redirectTo: "" },
+  { path: "**", redirectTo: "/login" },
 ];
 
 @NgModule({

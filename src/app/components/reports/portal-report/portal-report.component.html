@@ -915,7 +915,8 @@
                 class="flex flex-col leading-tight"
               >
                 <span class="font-semibold text-gray-900">
-                  {{ formatTransactionDate(row["transactionDate"]) | tz }}
+                     {{ row["transactionDate"] | tz | date:'dd MMM yyyy, hh:mm a' }}
+
                 </span>
               </span>
               <span

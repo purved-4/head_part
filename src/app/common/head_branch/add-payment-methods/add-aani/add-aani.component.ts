@@ -11,7 +11,7 @@ import {
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Subscription } from "rxjs";
 import { SnackbarService } from "../../../snackbar/snackbar.service";
-import { UserStateService } from "../../../../store/user-state.service";
+import { UserStateService } from "../../../../pages/services/store/user-state.service";
 import { UpiService } from "../../../../pages/services/upi.service";
 import { BankService } from "../../../../pages/services/bank.service";
 
@@ -259,7 +259,7 @@ export class AddAaniComponent implements OnInit, OnDestroy {
       fttAcceptance: this.addAaniForm.value.fttAcceptance,
       partialPayinEnabled: this.addAaniForm.getRawValue().partialPayinEnabled,
     };
-    console.log(payload);
+
 
     const validRanges = this.capacityRanges
       .filter(

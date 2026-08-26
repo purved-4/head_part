@@ -15,7 +15,7 @@ import { BankService } from "../../../pages/services/bank.service";
 import { UpiService } from "../../../pages/services/upi.service";
 import { CryptoService } from "../../../pages/services/crypto.service";
 import { PortalService } from "../../../pages/services/portal.service";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import { SnackbarService } from "../../snackbar/snackbar.service";
 import { MultimediaService } from "../../../pages/services/multimedia.service";
 

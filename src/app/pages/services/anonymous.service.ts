@@ -58,11 +58,13 @@ export class AnonymousService {
       },
     );
   }
-  getUpiDetailsByAmountAnonymous(
+  
+ getUpiDetailsByAmountAnonymous(
     portalId: any,
     amount?: any,
     currency?: any,
     userId?: string,
+    mode?: any,
     token?: any,
     sig?: any,
     isSkip?: any,
@@ -81,6 +83,9 @@ export class AnonymousService {
 
     if (userId != null) {
       params = params.set("userId", userId);
+    }
+    if (mode != null) {
+      params = params.set("mode", mode);
     }
 
     if (token != null) {
@@ -104,7 +109,7 @@ export class AnonymousService {
         params,
       })
       .pipe(
-        map((response: any) => response.data),
+        map((response: any) => response),
         catchError((error) => throwError(() => error)),
       );
   }
@@ -153,16 +158,18 @@ export class AnonymousService {
         params,
       })
       .pipe(
-        map((response: any) => response.data),
+        map((response: any) => response),
         catchError((error) => throwError(() => error)),
       );
   }
+  
+ 
 
-  verifyLinkWithTokenAndSignature(token: any, sig: any) {
+verifyLinkWithTokenAndSignature(token: any, sig: any) {
     return this.http
       .get<any>(`${baseUrl}/anonymous/verify?token=${token}&sig=${sig}`)
       .pipe(
-        map((response: any) => response.data),
+        map((response: any) => response),
         catchError((error) => throwError(error)),
       );
   }
@@ -235,35 +242,35 @@ export class AnonymousService {
 // ------
 addFavourite(
     token: string,
-  sig: any,
-  userId: string,
-  payinId: string,
-  payinType: string,
-   portalId: string
-): Observable<any> {
-
-  return this.http.post(
-    `${baseUrl}/anonymous/favourites/add`,
-    {
-      userId,
-      payinId,
-      payinType,
-       portalId
-    },
-    {
-      params: {
-        token,
-        sig,
+    sig: any,
+    userId: string,
+    payinId: string,
+    payinType: string,
+    portalId: string,
+    currency?: any,
+  ): Observable<any> {
+    return this.http.post(
+      `${baseUrl}/anonymous/favourites/add`,
+      {
         userId,
         payinId,
         payinType,
-          portalId
-      }
-    }
-  );
-
-}
-
+        portalId,
+        currency,
+      },
+      {
+        params: {
+          token,
+          sig,
+          userId,
+          payinId,
+          payinType,
+          portalId,
+          currency,
+        },
+      },
+    );
+  }
 getUserFavourites(
    token: string,
   sig: any,
@@ -369,6 +376,7 @@ selectFavBank(
     type: string,
     userId: string,
     tempAmount: number,
+    currency:any
   ): Observable<any> {
     let params = new HttpParams();
 
@@ -396,10 +404,14 @@ selectFavBank(
       params = params.set("tempAmount", tempAmount.toString());
     }
 
+     if (currency != null) {
+      params = params.set("currency", currency);
+    }
+
     return this.http.post(`${baseUrl}/anonymous/selectFavBank`, {}, { params });
   }
  
-  getCryptoDetailsByAmountAnonymous(
+ getCryptoDetailsByAmountAnonymous(
     portalId: any,
     amount?: any,
     currency?: any,
@@ -459,9 +471,69 @@ selectFavBank(
         params,
       })
       .pipe(
-        map((response: any) => response.data),
+        map((response: any) => response),
         catchError((error) => throwError(() => error)),
       );
   }
 
+
+ sendPayoutWebhook(
+    portalId: string,
+    payload: any,
+    snap: File | null,
+    currency: string,
+    userId: string,
+
+    token: string,
+    sig: string,
+  ): Observable<string> {
+    const formData = new FormData();
+
+    if (payload) {
+      formData.append(
+        "payload",
+        new Blob([JSON.stringify(payload)], { type: "application/json" }),
+      );
+    }
+
+    if (snap) {
+      formData.append("snap", snap);
+    }
+
+    let params = new HttpParams();
+
+    if (currency) {
+      params = params.set("currency", currency);
+    }
+
+    if (userId != null) {
+      params = params.set("userId", userId);
+    }
+
+    if (token) {
+      params = params.set("token", token);
+    }
+
+    if (sig) {
+      params = params.set("sig", sig);
+    }
+
+    return this.http
+      .post(`${baseUrl}/anonymous/webhook/post/${portalId}`, formData, {
+        responseType: "text",
+        params,
+      })
+      .pipe(
+        map((response: any) => {
+          try {
+            const parsed = JSON.parse(response);
+            return parsed?.data ?? parsed;
+          } catch {
+            return response;
+          }
+        }),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+  
 }

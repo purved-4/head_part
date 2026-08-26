@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
-import { UserStateService } from "../../../../store/user-state.service";
+import { UserStateService } from "../../../services/store/user-state.service";
 import { BranchService } from "../../../services/branch.service";
 import { ComPartService } from "../../../services/com-part.service";
 

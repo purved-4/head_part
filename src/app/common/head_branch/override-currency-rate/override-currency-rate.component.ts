@@ -1,7 +1,7 @@
 
 import { Component, OnInit, OnDestroy, Input } from "@angular/core";
 
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import { SnackbarService } from "../../snackbar/snackbar.service";
 import { CurrencyService } from "../../../pages/services/currency.service";
 

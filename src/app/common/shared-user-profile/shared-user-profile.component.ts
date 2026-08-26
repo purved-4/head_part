@@ -1,7 +1,7 @@
 
 import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { UserService } from "../../pages/services/user.service";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { uiUrl } from "../../pages/services/helper"; // <-- apne actual path se adjust karna
 import { HeadService } from "../../pages/services/head.service";
 import { SnackbarService } from "../snackbar/snackbar.service";

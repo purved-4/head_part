@@ -9,7 +9,7 @@ import {
 import { UtilsServiceService } from "../../../utils/utils-service.service";
 import { UserService } from "../../../pages/services/user.service";
 import { TransactionHistoryService } from "../../../pages/services/reports/transaction-history.service";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { SnackbarService } from "../../../common/snackbar/snackbar.service";

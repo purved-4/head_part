@@ -47,7 +47,7 @@ import { AddAaniComponent } from "./add-payment-methods/add-aani/add-aani.compon
     RecycleManagementComponent,
     AddCryptoComponent,
     InventoryManagementComponent,
-    AddAaniComponent,
+    AddAaniComponent
   ],
   exports: [
     InventoryConfigurationComponent,
@@ -68,7 +68,7 @@ import { AddAaniComponent } from "./add-payment-methods/add-aani/add-aani.compon
     RecycleManagementComponent,
     AddCryptoComponent,
     InventoryManagementComponent,
-    AddAaniComponent,
+    AddAaniComponent
   ],
   imports: [
     SharedModule,

@@ -10,7 +10,7 @@ import {
 } from "@angular/core";
 import { HierarchyManagementService } from "../../pages/services/hierarchy-management.service";
 import { HeartbeatService } from "../../pages/services/heartbeat.service";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { HeadService } from "../../pages/services/head.service";
 
 @Component({

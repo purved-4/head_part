@@ -1,6 +1,7 @@
+
 import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { CurrencyService } from "../../../pages/services/currency.service";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import { PortalService } from "../../../pages/services/portal.service";
 import { SnackbarService } from "../../snackbar/snackbar.service";
 import { CurrencyBehaviourService } from "../payments-methods/currency-behaviour.service";

@@ -10,7 +10,7 @@ import { SnackbarService } from "../../snackbar/snackbar.service";
 import { CryptoService } from "../../../pages/services/crypto.service";
 import { CurrencyBehaviourService } from "../payments-methods/currency-behaviour.service";
 import { Subscription } from "rxjs";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 
 @Component({
   selector: "app-add-erc20",

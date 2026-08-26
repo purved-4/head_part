@@ -8,7 +8,6 @@ import { CommonModule } from "@angular/common";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { RouterModule } from "@angular/router";
 import { QRCodeComponent } from "angularx-qrcode";
-
 import { ButtonLoaderDirective } from "../directives/button-loader.directive";
 import { CurrencyFormatPipe } from "../pipes/currency-format.pipe";
 

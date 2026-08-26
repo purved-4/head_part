@@ -8,7 +8,7 @@ import {
 import { TransactionHistoryService } from "../../../pages/services/reports/transaction-history.service";
 import { UserService } from "../../../pages/services/user.service";
 import { UtilsServiceService } from "../../../utils/utils-service.service";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import { fa } from "intl-tel-input/i18n";
 import { SnackbarService } from "../../../common/snackbar/snackbar.service";
 

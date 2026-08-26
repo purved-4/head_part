@@ -12,7 +12,7 @@ import { SnackbarService } from "../../snackbar/snackbar.service";
 import { CryptoService } from "../../../pages/services/crypto.service";
 import { CurrencyBehaviourService } from "../payments-methods/currency-behaviour.service";
 import { Subscription } from "rxjs";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 
 type CryptoNetwork = "OMNI" | "SPL" | "ERC20" | "TRC20" | "BEP20";
 
@@ -236,7 +236,7 @@ export class AddCryptoComponent implements OnInit, OnChanges, OnDestroy {
       ranges: validRanges.length ? validRanges : null,
       partialPayinEnabled: this.partialPayinEnabled,
     };
-    console.log(payload);
+
 
     const formData = new FormData();
     formData.append(

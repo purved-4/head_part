@@ -13,7 +13,7 @@ import { Subject } from "rxjs";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { UpiService } from "../../../pages/services/upi.service";
 import { BranchService } from "../../../pages/services/branch.service";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import { UserService } from "../../../pages/services/user.service";
 import { HeadService } from "../../../pages/services/head.service";
 import { SnackbarService } from "../../snackbar/snackbar.service";
@@ -1487,4 +1487,7 @@ export class UpisComponent implements OnInit {
     if (!validRanges.length) return null;
     return Math.min(...validRanges.map((r: any) => r.minRange));
   }
+
+
+  
 }

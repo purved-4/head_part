@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import { UtilsServiceService } from "../../../utils/utils-service.service";
 import { TransactionHistoryService } from "../../../pages/services/reports/transaction-history.service";
 import { UserService } from "../../../pages/services/user.service";

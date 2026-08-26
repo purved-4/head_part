@@ -2,7 +2,7 @@
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { finalize } from "rxjs/operators";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import autoTable from "jspdf-autotable";
 import jsPDF from "jspdf";
 import { TransactionHistoryService } from "../../../pages/services/reports/transaction-history.service";

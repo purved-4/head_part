@@ -12,7 +12,7 @@ import {
   OnChanges,
   SimpleChanges,
 } from "@angular/core";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { LimitsService } from "../../pages/services/reports/limits.service";
 import { UtilsServiceService } from "../../utils/utils-service.service";
 import { ComPartService } from "../../pages/services/com-part.service";

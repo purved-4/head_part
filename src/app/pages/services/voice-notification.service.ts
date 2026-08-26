@@ -72,7 +72,7 @@ export class VoiceNotificationService {
    */
   private speak(message: string): void {
     if (!("speechSynthesis" in window)) {
-      console.warn("Speech synthesis is not supported");
+
       return;
     }
 
@@ -164,7 +164,7 @@ export class VoiceNotificationService {
         this.spokenNotificationIds = new Set(ids.map((id) => String(id)));
       }
     } catch (error) {
-      console.error("Failed to load spoken notification IDs", error);
+
     }
   }
 
@@ -175,7 +175,7 @@ export class VoiceNotificationService {
         JSON.stringify(Array.from(this.spokenNotificationIds)),
       );
     } catch (error) {
-      console.error("Failed to save spoken notification IDs", error);
+
     }
   }
 }

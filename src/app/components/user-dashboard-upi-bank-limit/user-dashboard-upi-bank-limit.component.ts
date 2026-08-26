@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { BankService } from "../../pages/services/bank.service";
 import { UpiService } from "../../pages/services/upi.service";
 import { UserService } from "../../pages/services/user.service";

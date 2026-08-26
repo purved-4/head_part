@@ -1,3 +1,4 @@
+
 import {
   Component,
   NgZone,
@@ -15,8 +16,7 @@ import { Router } from "@angular/router";
 import { NotificationChatService } from "../../pages/services/notification-chat.service";
 import { AuthService } from "../../pages/services/auth.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
-import { UserStateService } from "../../store/user-state.service";
-import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
+ import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
 import { TimeZoneServiceService } from "../time-zone/time-zone-service.service";
 import { BulkUpdateService } from "../../pages/services/bulk-update.service";
 import { Observable } from "rxjs";
@@ -25,7 +25,9 @@ import {
   BulkHeadUpdatePayload,
   BulkBranchUpdatePayload,
 } from "../../pages/services/bulk-update.service";
+ import { UserStateService } from "../../pages/services/store/user-state.service";
 import { VoiceNotificationService } from "../../pages/services/voice-notification.service";
+
 interface BackendThread {
   bankFunds?: any;
   upiFunds?: any;
@@ -132,9 +134,10 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     private socketConfigService: SocketConfigService,
     private ngZone: NgZone,
     private bulkUpdateService: BulkUpdateService,
+        private voiceNotificationService : VoiceNotificationService,
+
     private cdr: ChangeDetectorRef,
     private tzService: TimeZoneServiceService,
-    private voiceNotificationService: VoiceNotificationService,
   ) {}
 
   // ngOnInit(): void {

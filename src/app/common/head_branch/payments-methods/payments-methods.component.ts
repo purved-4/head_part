@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { PortalService } from "../../../pages/services/portal.service";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import { CurrencyBehaviourService } from "./currency-behaviour.service";
 
 // modes jo bank/upi flow ke andar aate hain — baaki sab crypto maana jayega

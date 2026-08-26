@@ -48,9 +48,9 @@ import { PaymentsMethodsComponent } from "../common/head_branch/payments-methods
 import { SharedUserProfileComponent } from "../common/shared-user-profile/shared-user-profile.component";
 import { GlobalCompartPercentageComponent } from "../common/global-compart-percentage/global-compart-percentage.component";
 import { ResolvedNotificationComponent } from "../common/resolved-notification/resolved-notification.component";
+import { BalanceReportComponent } from "../components/reports/balance-report/balance-report.component";
 import { MaintenanceNoticeComponent } from "../common/maintenance-notice/maintenance-notice.component";
 import { PortalReportComponent } from "../components/reports/portal-report/portal-report.component";
-import { BalanceReportComponent } from "../components/reports/balance-report/balance-report.component";
 import { LoaderComponent } from "../common/loader/loader.component";
 
 @NgModule({
@@ -92,18 +92,19 @@ import { LoaderComponent } from "../common/loader/loader.component";
     EnterKeyDirective,
     CurrencyAllotmentComponent,
     BankDetailsComponent,
-
     PendingThreadsComponent,
     ChatpopupComponent,
-    ResolvedNotificationComponent,
+ResolvedNotificationComponent,
     OverrideCurrencyRateComponent,
     PaymentsMethodsComponent,
     SharedUserProfileComponent,
     GlobalCompartPercentageComponent,
-    MaintenanceNoticeComponent,
-    PortalReportComponent,
     BalanceReportComponent,
-    LoaderComponent,
+    MaintenanceNoticeComponent,
+            PortalReportComponent,
+                LoaderComponent
+
+
   ],
   exports: [
     WebhookDataComponent,
@@ -143,18 +144,17 @@ import { LoaderComponent } from "../common/loader/loader.component";
     EnterKeyDirective,
     CurrencyAllotmentComponent,
     BankDetailsComponent,
-
     PendingThreadsComponent,
     ChatpopupComponent,
-
     OverrideCurrencyRateComponent,
     PaymentsMethodsComponent,
     SharedUserProfileComponent,
     GlobalCompartPercentageComponent,
-    MaintenanceNoticeComponent,
-    PortalReportComponent,
-    BalanceReportComponent,
-    LoaderComponent,
+    ResolvedNotificationComponent,
+    MaintenanceNoticeComponent,     
+      PortalReportComponent,
+      LoaderComponent
+
   ],
   imports: [
     SharedModule,
@@ -162,7 +162,7 @@ import { LoaderComponent } from "../common/loader/loader.component";
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-    QRCodeComponent,
+    QRCodeComponent
   ],
 })
 export class ComponentSharedModule {}

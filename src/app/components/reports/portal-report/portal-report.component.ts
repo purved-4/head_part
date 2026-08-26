@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { Subscription } from "rxjs";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { UtilsServiceService } from "../../../utils/utils-service.service";
@@ -834,9 +834,13 @@ resetFilters(): void {
     if (!this.results.length) return;
 
     const headers = this.columns.map((c) => c.label);
-    const rows = this.results.map((row) =>
-      this.columns.map((c) => this.displayValue(row[c.key])),
-    );
+   const rows = this.results.map((row) =>
+  this.columns.map((c) =>
+    c.key === "transactionDate"
+      ? this.formatDateTimeWithTzForExport(row[c.key])
+      : this.displayValue(row[c.key]),
+  ),
+);
 
     const csvContent = [headers, ...rows]
       .map((row) =>
@@ -876,9 +880,13 @@ resetFilters(): void {
 
     const head = ["Sr No", ...this.columns.map((c) => c.label)];
     const body = this.results.map((row, index) => [
-      index + 1,
-      ...this.columns.map((c) => this.displayValue(row[c.key])),
-    ]);
+  index + 1,
+  ...this.columns.map((c) =>
+    c.key === "transactionDate"
+      ? this.formatDateTimeWithTzForExport(row[c.key])
+      : this.displayValue(row[c.key]),
+  ),
+]);
 
     autoTable(doc, {
       head: [head],
@@ -891,6 +899,38 @@ resetFilters(): void {
     doc.save(`portal-report-${this.fromDate}-to-${this.toDate}.pdf`);
   }
 
+  private getTimeZoneLabel(): string {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZoneName: "short",
+    }).formatToParts(new Date());
+    const tzPart = parts.find((p) => p.type === "timeZoneName");
+    return tzPart ? tzPart.value : "";
+  } catch {
+    return "";
+  }
+}
+
+// Export (CSV/PDF) ke liye: date + time + timezone name ek hi string me
+formatDateTimeWithTzForExport(value: any): string {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return "-";
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = d.toLocaleString("en-US", { month: "short" });
+  const year = d.getFullYear();
+
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+
+  const tzLabel = this.getTimeZoneLabel();
+
+  return `${day} ${month} ${year}, ${String(hours).padStart(2, "0")}:${minutes} ${ampm}${tzLabel ? " " + tzLabel : ""}`;
+}
+
   formatTransactionDate(value: any): string {
     if (!value) return "-";
     const d = new Date(value);
@@ -899,7 +939,7 @@ resetFilters(): void {
     const day = String(d.getDate()).padStart(2, "0");
     const month = d.toLocaleString("en-US", { month: "short" });
     const year = d.getFullYear();
-    return `${day} ${month} ${year}`;
+    return `${day} ${month} ${year} `;
   }
 
   formatTransactionTime(value: any): string {

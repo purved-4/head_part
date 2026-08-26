@@ -1,7 +1,7 @@
 
 import { Component, OnInit } from "@angular/core";
 import { BulkUpdateService } from "../../pages/services/bulk-update.service";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { Observable } from "rxjs";
 

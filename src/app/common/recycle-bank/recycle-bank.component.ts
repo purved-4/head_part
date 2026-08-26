@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { BankService } from "../../pages/services/bank.service";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
 
 @Component({

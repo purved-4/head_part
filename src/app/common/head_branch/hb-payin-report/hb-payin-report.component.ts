@@ -3,7 +3,7 @@ import { ActivatedRoute, Route, Router } from "@angular/router";
 import { of, Subscription } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { FundsService } from "../../../pages/services/funds.service";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import { HeadService } from "../../../pages/services/head.service";
 import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { DateTimeUtil } from "../../../utils/date-time.utils";

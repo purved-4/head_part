@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { map, Observable, throwError } from "rxjs";
 import { fileBaseUrl } from "./helper";
 import { HttpClient } from "@angular/common/http";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "./store/user-state.service";
 
 @Injectable({
   providedIn: "root",

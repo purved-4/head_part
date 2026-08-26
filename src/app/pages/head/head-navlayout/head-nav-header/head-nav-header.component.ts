@@ -11,7 +11,7 @@ import {
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { LimitsService } from "../../../services/reports/limits.service";
-import { UserStateService } from "../../../../store/user-state.service";
+import { UserStateService } from "../../../services/store/user-state.service";
 import { SocketConfigService } from "../../../services/socket/socket-config.service";
 import { FundsService } from "../../../services/funds.service";
 import { ChiefService } from "../../../services/chief.service";

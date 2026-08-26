@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { LimitsService } from "../../pages/services/reports/limits.service";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
 
 @Component({

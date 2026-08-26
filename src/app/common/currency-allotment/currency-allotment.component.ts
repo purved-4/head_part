@@ -10,7 +10,7 @@ import { ChiefService } from "../../pages/services/chief.service";
 import { ComPartService } from "../../pages/services/com-part.service";
 import { PortalService } from "../../pages/services/portal.service";
 import { DateTimeUtil } from "../../utils/date-time.utils";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { TimeZoneServiceService } from "../time-zone/time-zone-service.service";
 
 type RateStatus = "expired" | "active" | "upcoming";

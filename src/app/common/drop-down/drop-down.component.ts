@@ -343,19 +343,11 @@ export class SearchableDropdownComponent
         this.scrollToHighlighted();
         break;
       case "Enter":
-      case "Tab":
-        event.preventDefault();
-        if (this.highlightedIndex < 0 && this.filteredOptions.length > 0)
-          this.highlightedIndex = 0;
-        if (
-          this.highlightedIndex >= 0 &&
-          this.filteredOptions[this.highlightedIndex]
-        ) {
-          this.selectOption(this.filteredOptions[this.highlightedIndex]);
-        } else if (this.filteredOptions.length === 1) {
-          this.selectOption(this.filteredOptions[0]);
-        }
-        break;
+      // case "Tab":
+      //   // Let Tab behave natively (move focus to next field).
+      //   // Just close the dropdown, don't preventDefault and don't force-select.
+      //   this.closeDropdown();
+      //   break;
       case "Escape":
         this.closeDropdown();
         try {

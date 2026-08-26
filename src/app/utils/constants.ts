@@ -1181,6 +1181,15 @@ export const AVAILABLE_CURRENCIES: CurrencyConfig[] = [
     ],
   },
   {
+    currency: "AED",
+    display: "UAE Dirham",
+    icon: " ",
+    networks: [
+      { code: "BANK", icon: "account_balance", label: "BANK" },
+      { code: "AANI", icon: "qr_code_scanner", label: "AANI" },
+    ],
+  },
+  {
     currency: "USDT",
     display: "Tether",
     icon: "toll",

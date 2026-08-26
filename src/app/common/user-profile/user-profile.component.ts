@@ -9,7 +9,7 @@ import {
   HostListener,
 } from "@angular/core";
 import { UserService } from "../../pages/services/user.service";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { Subscription } from "rxjs";
 
 // ... (interfaces same rahengi) ...

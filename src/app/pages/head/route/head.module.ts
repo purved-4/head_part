@@ -16,7 +16,7 @@ import { HeadNavDashboardLayoutComponent } from "../head-navlayout/head-nav-dash
 import { HeadMobileFooterComponent } from "../head-navlayout/head-mobile-footer/head-mobile-footer.component";
 import { RecycleManagementComponent } from "../recycle-management/recycle-management.component";
 import { ComponentSharedModule } from "../../../core/components.share.module";
-
+ 
 @NgModule({
   declarations: [
     AddBranchComponent,
@@ -28,7 +28,8 @@ import { ComponentSharedModule } from "../../../core/components.share.module";
     HeadNavHeaderComponent,
     HeadNavDashboardLayoutComponent,
     HeadMobileFooterComponent,
-    RecycleManagementComponent,
+    RecycleManagementComponent
+    
   ],
   imports: [
     CommonModule,

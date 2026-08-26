@@ -94,7 +94,7 @@ export class UpiService {
       params = params.set("status", options.status);
     }
 
-    if (options.bankId) {
+     if (options.bankId) {
       params = params.set("bankId", options.bankId);
     }
 
@@ -171,7 +171,7 @@ export class UpiService {
   }
 
   // new
-  getPayinCapacity(
+getPayinCapacity(
     entityType: string,
     entityId: string,
 

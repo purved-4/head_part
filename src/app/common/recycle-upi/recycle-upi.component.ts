@@ -1,7 +1,7 @@
 
 import { Component, OnInit } from "@angular/core";
 import { UpiService } from "../../pages/services/upi.service";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { fileBaseUrl } from "../../pages/services/helper";
 import { MultimediaService } from "../../pages/services/multimedia.service";

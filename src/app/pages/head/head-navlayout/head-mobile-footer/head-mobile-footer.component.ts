@@ -4,7 +4,7 @@ import { ThemeService } from "../../../../theme/theme.service";
 import { Router } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
 import { BalanceService } from "../../../services/balance.service"; // adjust path if different
-import { UserStateService } from "../../../../store/user-state.service";
+import { UserStateService } from "../../../services/store/user-state.service";
 import { FundsService } from "../../../services/funds.service";
 import { ComPartService } from "../../../services/com-part.service";
 

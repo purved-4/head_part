@@ -8,9 +8,11 @@ import {
 } from "@angular/common/http";
 import { Observable, throwError, BehaviorSubject, from } from "rxjs";
 import { catchError, switchMap, filter, take, finalize } from "rxjs/operators";
+import { Router } from "@angular/router";
 import { AuthMemoryService } from "../pages/services/auth-memory.service";
 import { AuthService } from "../pages/services/auth.service";
 import { FingerprintService } from "../pages/services/fingerprint.service";
+import { UserStateService } from "../pages/services/store/user-state.service";
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -24,16 +26,20 @@ export class AuthInterceptor implements HttpInterceptor {
     "/api/anonymous/verify",
     "/api/anonymous/remove-assignment",
     "/api/ocr/anonymous",
+    "/api/anonymous/getFile",
     "/api/anonymous/favourites/add",
     "/api/anonymous/favourites/user",
     "/api/anonymous/favourites/delete",
     "/api/anonymous/selectFavBank",
+    "/api/anonymous/getCryptoDetailsByAmountRange",
   ];
 
   constructor(
     private memoryService: AuthMemoryService,
     private authService: AuthService,
     private fingerprintService: FingerprintService,
+    private userStateService: UserStateService,
+    private router: Router,
   ) {}
 
   intercept(
@@ -50,11 +56,10 @@ export class AuthInterceptor implements HttpInterceptor {
 
     if (isOpenLinkRequest) {
       return from(this.fingerprintService.getFingerprint()).pipe(
-        catchError(() => from(Promise.resolve(null))), // fingerprint fail ho toh bhi request jaane do
         switchMap((fp) => {
-          const withFp = fp
-            ? req.clone({ setHeaders: { "X-Device-FP": fp } })
-            : req;
+          const withFp = req.clone({
+            setHeaders: { "X-Device-FP": fp },
+          });
           return next.handle(withFp);
         }),
       );
@@ -88,25 +93,35 @@ export class AuthInterceptor implements HttpInterceptor {
     return this.authService.refreshToken().pipe(
       switchMap((res: any) => {
         const newToken = res?.data?.token;
-
         if (!newToken) {
-          this.memoryService.resetAccessToken();
+          this.handleAuthFailure();
           return throwError(() => new Error("Refresh failed"));
         }
-
-        this.memoryService.setAccessToken(newToken); // 👈 ye missing tha, ab fix
         this.refreshTokenSubject.next(newToken);
-
         return next.handle(this.addToken(req, newToken));
       }),
       catchError((err) => {
-        this.memoryService.resetAccessToken();
+        this.handleAuthFailure();
         return throwError(() => err);
       }),
       finalize(() => {
         this.isRefreshing = false;
       }),
     );
+  }
+
+  /** Single place that clears session + redirects — with a loop guard */
+  private handleAuthFailure(): void {
+    this.memoryService.resetAccessToken();
+    this.userStateService.setCurrentUser(null);
+
+    const currentUrl = this.router.url.split("?")[0];
+    const publicUrls = ["/login", "/", "/open"];
+
+    // agar already login/public page pe hain, dobara navigate mat karo -> loop rukta hai
+    if (!publicUrls.includes(currentUrl)) {
+      this.router.navigate(["/login"]);
+    }
   }
 
   private isAuthEndpoint(url: string): boolean {

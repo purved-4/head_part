@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable, catchError, map, throwError } from "rxjs";
+import { pluckData, pluckDataOrEmpty } from "./response.util";
 import baseUrl from "./helper";
 
 @Injectable({
@@ -14,40 +15,33 @@ export class ComPartService {
   }
 
   addComPart(data: any): Observable<void> {
-    return this.http.post<any>(`${baseUrl}/comPart/createComPart`, data).pipe(
-      map((res) => res.data),
-      catchError(this.handleError),
-    );
+    return this.http
+      .post<any>(`${baseUrl}/comPart/createComPart`, data)
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   addComPartUser(data: any): Observable<void> {
-    return this.http.post<any>(`${baseUrl}/comPart/createComPart`, data).pipe(
-      map((res) => res.data),
-      catchError(this.handleError),
-    );
+    return this.http
+      .post<any>(`${baseUrl}/comPart/createComPart`, data)
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   updateComPart(data: any): Observable<void> {
-    return this.http.patch<any>(`${baseUrl}/comPart/updateComPart`, data).pipe(
-      map((res) => res.data),
-      catchError(this.handleError),
-    );
+    return this.http
+      .patch<any>(`${baseUrl}/comPart/updateComPart`, data)
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   updateComPartUser(id: any, data: any): Observable<void> {
-    return this.http.patch<any>(`${baseUrl}/updateUser/${id}`, data).pipe(
-      map((res) => res.data),
-      catchError(this.handleError),
-    );
+    return this.http
+      .patch<any>(`${baseUrl}/updateUser/${id}`, data)
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   changeManualStatus(id: any, portalId: any): Observable<void> {
     return this.http
       .patch<any>(`${baseUrl}/comPart/changeManualStatus/${id}/${portalId}`, {})
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
+      .pipe(map(pluckData), catchError(this.handleError));
   }
   toggleComPartStatus(id: any): Observable<void> {
     return this.http
@@ -61,26 +55,19 @@ export class ComPartService {
   getUserByComPartId(id: any): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/comPart/getUsersByComPartId/${id}`)
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   getComPartById(id: any): Observable<any> {
-    return this.http.get<any>(`${baseUrl}/comPart/getComPartById/${id}`).pipe(
-      map((res) => res.data),
-      catchError(this.handleError),
-    );
+    return this.http
+      .get<any>(`${baseUrl}/comPart/getComPartById/${id}`)
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   getAllComPartByOwner(id: any): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/comPart/getComPartsListByUserId/${id}`)
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   getComPartsByEntityId(entityId: any, entityType: any): Observable<any> {
@@ -88,10 +75,7 @@ export class ComPartService {
       .get<any>(
         `${baseUrl}/comPart/getComPartsByEntityId/${entityId}/${entityType}`,
       )
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   getAllComPartByOwnerPaginated(
@@ -106,10 +90,7 @@ export class ComPartService {
       .get<any>(`${baseUrl}/comPart/getComPartsListByUserId/paginated/${id}`, {
         params: param,
       })
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   getPortalByComPartId(
@@ -119,17 +100,13 @@ export class ComPartService {
   ): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/comPart/portals/getAllByComPartId/${id}`)
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   getPercentageByComPartId(id: any): Observable<any> {
-    return this.http.get<any>(`${baseUrl}/comPart/getPercentages/${id}`).pipe(
-      map((res) => res.data),
-      catchError(this.handleError),
-    );
+    return this.http
+      .get<any>(`${baseUrl}/comPart/getPercentages/${id}`)
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   allotComPartToUser(comPartId: string, payload: any): Observable<any> {
@@ -194,20 +171,14 @@ export class ComPartService {
   ): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/messages/comPart/paginated/${comPartId}`)
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
+      .pipe(map(pluckData), catchError(this.handleError));
   }
   getAllQuestions(page = 0, size = 10): Observable<any> {
     return this.http
       .get<any>(
         `${baseUrl}/messages/getAll/paginated?page=${page}&size=${size}`,
       )
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   pinUpi(upiId: any, isPin: any) {
@@ -228,7 +199,7 @@ export class ComPartService {
     return this.http
       .post<any>(`${baseUrl}/comPart/${comPartId}/domains?domain=${domain}`, {})
       .pipe(
-        map((response) => response.data),
+        map(pluckData),
         catchError((error) => throwError(() => error)),
       );
   }
@@ -240,21 +211,21 @@ export class ComPartService {
         {},
       )
       .pipe(
-        map((response) => response.data),
+        map(pluckData),
         catchError((error) => throwError(() => error)),
       );
   }
 
   getComPartDomain(comPartId: string): Observable<any> {
     return this.http.get<any>(`${baseUrl}/comPart/${comPartId}/domains`).pipe(
-      map((response) => response.data),
+      map(pluckData),
       catchError((error) => throwError(() => error)),
     );
   }
 
   deleteComPartDomain(domainId: any): Observable<any> {
     return this.http.delete<any>(`${baseUrl}/comPart/domains/${domainId}`).pipe(
-      map((response) => response.data),
+      map(pluckData),
       catchError((error) => throwError(() => error)),
     );
   }
@@ -265,7 +236,7 @@ export class ComPartService {
         `${baseUrl}/comPart/getPercentageByEntityId/${entityId}/${entityType}`,
       )
       .pipe(
-        map((response) => response.data),
+        map(pluckData),
         catchError((error) => throwError(() => error)),
       );
   }
@@ -283,11 +254,11 @@ export class ComPartService {
         params,
       })
       .pipe(
-        map((res) => res.data),
+        map(pluckData),
         catchError((err) => throwError(() => err)),
       );
   }
- 
+
   assignPortal(bankId: any, portalId: any) {
     return this.http.patch<any>(
       `${baseUrl}/banks/${bankId}/assign-portal/${portalId}`,
@@ -301,7 +272,7 @@ export class ComPartService {
         `${baseUrl}/comPart/banks/getAllByComPartWithPortal/${compartId}`,
       )
       .pipe(
-        map((res) => res.data),
+        map(pluckData),
         catchError((err) => throwError(() => err)),
       );
   }
@@ -312,7 +283,7 @@ export class ComPartService {
         `${baseUrl}/comPart/banks/getAllByComPartWithoutPortal/${compartId}`,
       )
       .pipe(
-        map((res) => res.data),
+        map(pluckData),
         catchError((err) => throwError(() => err)),
       );
   }
@@ -321,7 +292,7 @@ export class ComPartService {
     return this.http
       .get<any>(`${baseUrl}/compart/currencies/${comPartId}`)
       .pipe(
-        map((response) => response.data),
+        map(pluckData),
         catchError((error) => throwError(() => error)),
       );
   }
@@ -372,7 +343,7 @@ export class ComPartService {
         `${baseUrl}/comPart/api/chat/findThreadCombined/paginated/${branchId}/${entityType}/${isResolved}/${type}?page=${page}&size=${size}&sort=updatedAt,desc`,
       )
       .pipe(
-        map((res: any) => res.data),
+        map(pluckData),
         catchError((err) => throwError(err)),
       );
   }
@@ -404,6 +375,9 @@ export class ComPartService {
     if (fundType !== null && fundType !== undefined) {
       params = params.set("fundType", fundType.toString());
     }
+    if (status !== null && status !== undefined) {
+      params = params.set("status", status.toString());
+    }
 
     return this.http
       .get<any>(
@@ -413,7 +387,7 @@ export class ComPartService {
         },
       )
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -441,7 +415,7 @@ export class ComPartService {
         },
       )
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -463,7 +437,7 @@ export class ComPartService {
     return this.http
       .patch<any>(`${baseUrl}/comPart/banks/${id}/remove-portal`, {})
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(() => error)),
       );
   }
@@ -479,7 +453,7 @@ export class ComPartService {
     return this.http
       .get(`${baseUrl}/comPart/entityBalance/latest/${entityId}/${type}`)
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -487,17 +461,14 @@ export class ComPartService {
   getPortalTokenAndId(portalId: string): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/comPart/getTokenKey/${portalId}`)
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   getLatestLimitsByEntityAndType(entityId: any, type: any): Observable<any> {
     return this.http
       .get(`${baseUrl}/comPart/entityBalance/latestBalance/${entityId}/${type}`)
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -508,7 +479,7 @@ export class ComPartService {
         any[]
       >(`${baseUrl}/comPart/processing-time/latest-before-today/${userId}`)
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -518,13 +489,13 @@ export class ComPartService {
       .get(`${baseUrl}/comPart/api/chat/thread/${threadId}`, {
         withCredentials: true,
       })
-      .pipe(map((res: any) => res.data));
+      .pipe(map(pluckData));
   }
 
   getChatMembersByThreadId(threadId: any): Observable<any> {
     return this.http
       .get(`${baseUrl}/comPart/api/chat/findMemberByThreadId/${threadId}`)
-      .pipe(map((res: any) => res.data));
+      .pipe(map(pluckData));
   }
 
   getMessageByThreadId(
@@ -537,7 +508,13 @@ export class ComPartService {
       .get(
         `${baseUrl}/comPart/api/chat/findMessageByThreadId/${threadId}/${branch}?page=${page}&size=${size}`,
       )
-      .pipe(map((res: any) => res.data.content));
+      .pipe(
+        map((res: any) => {
+          const content = res?.data?.content ?? [];
+          (content as any).message = res?.message;
+          return content;
+        }),
+      );
   }
 
   uploadAttachment(threadId: string, file: File): Observable<any> {
@@ -546,7 +523,7 @@ export class ComPartService {
 
     return this.http
       .post(`${baseUrl}/comPart/api/chat/upload/${threadId}`, formData)
-      .pipe(map((res: any) => res.data));
+      .pipe(map(pluckData));
   }
 
   acceptRejectThread(threadId: any, action: any, data?: any): Observable<any> {
@@ -556,7 +533,7 @@ export class ComPartService {
         {},
       )
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -564,7 +541,7 @@ export class ComPartService {
     return this.http
       .patch<any>(`${baseUrl}/comPart/funds/updatePayout/${threadId}`, data)
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -579,10 +556,7 @@ export class ComPartService {
       .get<any>(
         `${baseUrl}/comPart/portals/getAllByComPartIdAndCurrencyId/paginated/${id}/${currenyId}`,
       )
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   //new snashot
@@ -616,7 +590,7 @@ export class ComPartService {
     return this.http
       .get(`${baseUrl}/comPart/upi/getAllUpiByBankId/${bankId}`)
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -649,7 +623,7 @@ export class ComPartService {
         },
       )
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -667,7 +641,7 @@ export class ComPartService {
     }
 
     return this.http.get<any>(url).pipe(
-      map((res) => res.data),
+      map(pluckData),
       catchError((err) => throwError(() => err)),
     );
   }
@@ -714,7 +688,7 @@ export class ComPartService {
         `${baseUrl}/comPart/getFundWithThreadIdFundIdFundType/${threadId}/${fundId}/${fundType}`,
       )
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -787,7 +761,7 @@ export class ComPartService {
         },
       )
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -796,27 +770,27 @@ export class ComPartService {
     return this.http
       .get<any>(`${baseUrl}/comPart/fund-process-logs/${fundId}`)
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
 
-generateAnonymousLink(
+  generateAnonymousLink(
     portalId: any,
     expireMinute?: any,
     userType?: any,
-): Observable<any> {
+  ): Observable<any> {
     return this.http.post(
-     `${baseUrl}/api/v1/internal/links/generate/${portalId}`,
-     { expireMinute, userType },
+      `${baseUrl}/api/v1/internal/links/generate/${portalId}`,
+      { expireMinute, userType },
     );
-}
+  }
 
   getAnonymousLinks(portalId: any): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/api/v1/internal/links/${portalId}`)
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -825,7 +799,7 @@ generateAnonymousLink(
     return this.http
       .get<any>(`${baseUrl}/open/verify?token=${token}&sig=${signature}`)
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -918,11 +892,12 @@ generateAnonymousLink(
     );
   }
 
- getUpiByAmountManual(
+  getUpiByAmountManual(
     portalId: any,
     amount?: any,
     currency?: any,
     userId?: string,
+    mode?: any,
     isSkip?: boolean,
     isNew?: boolean,
     reason?: string,
@@ -957,19 +932,21 @@ generateAnonymousLink(
     if (currentPayinId != null) {
       params = params.set("currentPayinId", currentPayinId);
     }
+    if (mode != null) {
+      params = params.set("mode", mode);
+    }
 
     return this.http
       .get(`${baseUrl}/manual/getUpiDetailsByAmount/${portalId}`, {
         params,
       })
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(() => error)),
       );
   }
-  
 
- getBankByAmountManual(
+  getBankByAmountManual(
     portalId: any,
     amount: any,
     currency: any,
@@ -1011,7 +988,7 @@ generateAnonymousLink(
     return this.http
       .get(`${baseUrl}/manual/getBankDetailsByAmount/${portalId}`, { params })
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(() => error)),
       );
   }
@@ -1020,7 +997,7 @@ generateAnonymousLink(
     return this.http
       .get(`${baseUrl}/comPart/api/chat/findThreadByFundsId/${fundId}`)
       .pipe(
-        map((res: any) => res.data),
+        map(pluckData),
         catchError((err) => throwError(err)),
       );
   }
@@ -1029,7 +1006,7 @@ generateAnonymousLink(
     return this.http
       .get<any>(`${baseUrl}/comPart/getUserStatusByFund/${fundId}/${fundType}`)
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
@@ -1039,14 +1016,14 @@ generateAnonymousLink(
       `${baseUrl}/comPart/getPayoutsCountsByUserId?userId=${userId}&portalId=${portalId}`,
     );
   }
-  
+
   getPayinsCountsByUserId(userId: string, portalId: string): Observable<any> {
     return this.http.get(
       `${baseUrl}/comPart/getPayinsCountsByUserId?userId=${userId}&portalId=${portalId}`,
     );
   }
 
- markFundAsProcessed(id: string, type: string): Observable<any> {
+  markFundAsProcessed(id: string, type: string): Observable<any> {
     return this.http.patch(`${baseUrl}/comPart/mark-cp/${id}/${type}`, {}).pipe(
       map((response: any) => response),
       catchError((error) => throwError(() => error)),
@@ -1097,28 +1074,22 @@ generateAnonymousLink(
       );
   }
 
-restoreBankAndUpi(comPartId: any): Observable<any> {
-    return this.http.get<any>(`${baseUrl}/manual/restoreBankAndUpi/${comPartId}`).pipe(
-      map((res) => res.data),
-      catchError(this.handleError),
-    );
+  restoreBankAndUpi(comPartId: any): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/manual/restoreBankAndUpi/${comPartId}`)
+      .pipe(map(pluckData), catchError(this.handleError));
   }
-
 
   viewProflieDetails(comPartId: any): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/comPart/getDetails/${comPartId}`)
-      .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   getPayinRemainingFundsDetail(payinId: any, type: any): Observable<any> {
-    return this.http.get<any>(`${baseUrl}/comPart/capacity/${type}/${payinId}`).pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-      );;
+    return this.http
+      .get<any>(`${baseUrl}/comPart/capacity/${type}/${payinId}`)
+      .pipe(map(pluckData), catchError(this.handleError));
   }
 
   addFavourite(
@@ -1177,7 +1148,7 @@ restoreBankAndUpi(comPartId: any): Observable<any> {
     return this.http.get(`${baseUrl}/manual/favourites/user`, { params });
   }
 
- selectFavBank(
+  selectFavBank(
     portalId: string,
     payinId: string,
     currency: string,
@@ -1209,13 +1180,12 @@ restoreBankAndUpi(comPartId: any): Observable<any> {
       params = params.set("tempAmount", tempAmount.toString());
     }
 
-    return this.http.post(`${baseUrl}/manual/selectFavBank`, {}, { params }).pipe(
-        map((res:any) => res.data),
-        catchError(this.handleError),
-      );;
-    }
- 
-    getAllPayInAndPayoutCombine(
+    return this.http
+      .post(`${baseUrl}/manual/selectFavBank`, {}, { params })
+      .pipe(map(pluckData), catchError(this.handleError));
+  }
+
+  getAllPayInAndPayoutCombine(
     compartId: any,
     status: any,
     fundType: any,
@@ -1250,43 +1220,60 @@ restoreBankAndUpi(comPartId: any): Observable<any> {
         },
       )
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(error)),
       );
   }
- 
 
   getAnonymousLinksPaginated(
-    portalId: any,
-    pageNo?: number,
-    pageSize?: number,
+    portalId: string,
+    comPartId: string,
+    pageNo: number = 0,
+    pageSize: number = 10,
   ): Observable<any> {
     return this.http
       .get<any>(
-        `${baseUrl}/api/v1/internal/links/paginated/${portalId}?pageNo=${pageNo}&pageSize=${pageSize}`,
+        `${baseUrl}/api/v1/internal/links/paginated/${portalId}/${comPartId}?pageNo=${pageNo}&pageSize=${pageSize}`,
       )
       .pipe(
-        map((response: any) => response.data),
+        map(pluckData),
         catchError((error) => throwError(() => error)),
       );
   }
-  
-getSecretKeybyPortalId(portalId: string): Observable<any> {
-    return this.http
-     .get<any>(`${baseUrl}/comPart/getSecretKey/${portalId}`)
-     .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-     );
-}
 
-rotateKeyForAuto(portalId: string): Observable<any> {
+  getSecretKeybyPortalId(portalId: string): Observable<any> {
     return this.http
-     .patch<any>(`${baseUrl}/comPart/rotateKeyForAuto/${portalId}`, {})
-     .pipe(
-        map((res) => res.data),
-        catchError(this.handleError),
-     );
-}
-  
+      .get<any>(`${baseUrl}/comPart/getSecretKey/${portalId}`)
+      .pipe(map(pluckData), catchError(this.handleError));
+  }
+
+  rotateKeyForAuto(portalId: string): Observable<any> {
+    return this.http
+      .patch<any>(`${baseUrl}/comPart/rotateKeyForAuto/${portalId}`, {})
+      .pipe(map(pluckData), catchError(this.handleError));
+  }
+
+  generateAnonymousLinkWithType(
+    portalId: string,
+
+    expireMinute: number,
+    userType: boolean,
+    fundType: "PAYIN" | "PAYOUT",
+    currency?: string,
+    amount?: any,
+  ): Observable<any> {
+    const request = {
+      expireMinute,
+      userType,
+      fundType,
+
+      currency,
+      amount,
+    };
+
+    return this.http.post(
+      `${baseUrl}/api/v1/internal/links/generate/${portalId}`,
+      request,
+    );
+  }
 }

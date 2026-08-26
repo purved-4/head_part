@@ -5,7 +5,7 @@
 
 import { Component, Input, OnInit } from '@angular/core';
 import { ComPartService } from '../../pages/services/com-part.service';
-import { UserStateService } from '../../store/user-state.service';
+import { UserStateService } from '../../pages/services/store/user-state.service';
 import { SnackbarService } from '../snackbar/snackbar.service';
 
 @Component({

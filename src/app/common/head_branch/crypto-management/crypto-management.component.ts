@@ -11,7 +11,7 @@ import { catchError, debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { Subject } from "rxjs";
 
 import { CryptoService } from "../../../pages/services/crypto.service";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import { SnackbarService } from "../../snackbar/snackbar.service";
 import { CurrencyBehaviourService } from "../payments-methods/currency-behaviour.service";
 import { ActivatedRoute, Router } from "@angular/router";

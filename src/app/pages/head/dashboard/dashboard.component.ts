@@ -16,7 +16,7 @@ import { AuthService } from "../../services/auth.service";
 import { FundsService } from "../../services/funds.service";
 import { SocketConfigService } from "../../services/socket/socket-config.service";
 import { PoolingService } from "../../services/pooling.service";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../services/store/user-state.service";
 import { BankService } from "../../services/bank.service";
 import { LimitsService } from "../../services/reports/limits.service";
 import { UpiService } from "../../services/upi.service";

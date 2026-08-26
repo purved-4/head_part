@@ -237,3 +237,4 @@ export class PayinCapacityComponent implements OnChanges, OnInit {
     this.isEditing = false;
   }
 }
+

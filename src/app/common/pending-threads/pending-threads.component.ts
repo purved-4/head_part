@@ -9,7 +9,7 @@ import {
   SimpleChanges,
 } from "@angular/core";
 import { NotificationChatService } from "../../pages/services/notification-chat.service";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { Router } from "@angular/router";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { ComPartService } from "../../pages/services/com-part.service";

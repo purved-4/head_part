@@ -12,7 +12,7 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { forkJoin, of } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { ComPartService } from "../../pages/services/com-part.service";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 
 interface CompartPercentageRow {
   compartId: string;

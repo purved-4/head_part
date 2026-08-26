@@ -10,7 +10,7 @@ import { Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
 import { AuthService } from "../../pages/services/auth.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { SocketConfigService } from "../../pages/services/socket/socket-config.service";
 import { AuthMemoryService } from "../../pages/services/auth-memory.service";
 import { SubjectRegistryService } from "../../registery/subject-registry.service";
@@ -70,7 +70,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       bg: "bg-orange-50",
       title: "Instant Statements",
       description:
-        "Get settlements in T+1 business days, straight to your account.",
+        "Get Instant Settlement, straight to your account.",
     },
     {
       icon: "target",
@@ -121,7 +121,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       // page's scroll position was
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
 
-      this.initializeApp();
+      // this.initializeApp();
 
       this.userStateService.currentUser$.subscribe((user) => {
         const role = user?.role?.[0]?.name || null;

@@ -1,7 +1,7 @@
 import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { FundsService } from "../../../pages/services/funds.service";
-import { UserStateService } from "../../../store/user-state.service";
+import { UserStateService } from "../../../pages/services/store/user-state.service";
 import { MultimediaService } from "../../../pages/services/multimedia.service";
 import { catchError, of, Subscription } from "rxjs";
 import { DateTimeUtil } from "../../../utils/date-time.utils";

@@ -1,10 +1,10 @@
 
 import { Component, ElementRef, HostListener, OnDestroy } from "@angular/core";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { ChiefManualService } from "../../pages/services/chief-manual.service";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import { CurrentUser } from "../../store/current-user-model";
+import { CurrentUser } from "../../pages/services/store/current-user-model";
 
 interface DashboardConfig {
   label: string;

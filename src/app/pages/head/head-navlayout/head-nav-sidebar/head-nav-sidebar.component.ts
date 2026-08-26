@@ -14,7 +14,7 @@ import {
 import { Router, NavigationEnd } from "@angular/router";
 import { AuthService } from "../../../services/auth.service";
 import { filter } from "rxjs/operators";
-import { UserStateService } from "../../../../store/user-state.service";
+import { UserStateService } from "../../../services/store/user-state.service";
 import { BranchService } from "../../../services/branch.service";
 
 interface MenuItem {

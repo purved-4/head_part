@@ -1,7 +1,7 @@
 
 import { Component, OnInit } from "@angular/core";
 import { LimitsService } from "../../pages/services/reports/limits.service";
-import { UserStateService } from "../../store/user-state.service";
+import { UserStateService } from "../../pages/services/store/user-state.service";
 import { SnackbarService } from "../snackbar/snackbar.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../pages/services/auth.service";
