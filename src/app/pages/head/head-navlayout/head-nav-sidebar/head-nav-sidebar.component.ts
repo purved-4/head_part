@@ -13,7 +13,6 @@ import { Router, NavigationEnd } from "@angular/router";
 import { AuthService } from "../../../services/auth.service";
 import { filter } from "rxjs/operators";
 import { UserStateService } from "../../../services/store/user-state.service";
-import { BranchService } from "../../../services/branch.service";
 
 interface MenuItem {
   label: string;
@@ -66,7 +65,7 @@ export class HeadNavSidebarComponent implements OnInit {
       icon: "dashboard",
       children: [{ label: "Dashboard", route: "/head/dashboard" }],
     },
-    //new hai code ke sath mujhe bs yahi dena hai
+
     {
       label: "Inventory Management",
       route: "/head/inventory-management",
@@ -213,7 +212,6 @@ export class HeadNavSidebarComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private BranchService: BranchService,
     private userStateService: UserStateService,
     public theme: ThemeService,
   ) {}

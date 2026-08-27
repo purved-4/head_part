@@ -311,6 +311,7 @@
             [class.bg-white]="rangeMode === 'year'"
             [class.shadow-sm]="rangeMode === 'year'"
             [class.font-semibold]="rangeMode === 'year'"
+            [class.text-emerald-700]="rangeMode === 'year'"
             [class.text-gray-500]="rangeMode !== 'year'"
           >
             Year
@@ -504,6 +505,71 @@
       </div>
 
       <div class="flex items-center gap-2">
+        <!-- COLUMN CUSTOMIZER (show/hide + reorder columns; also drives export order) -->
+        <div class="relative" data-dropdown>
+          <button
+            type="button"
+            (click)="toggleDropdown('columns')"
+            class="h-10 px-3 flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white text-[12px] text-gray-600 hover:border-emerald-400 transition-all"
+          >
+            <span class="material-symbols-outlined text-[16px]"
+              >view_column</span
+            >
+            Columns
+            <span class="material-symbols-outlined text-[15px] text-gray-400"
+              >expand_more</span
+            >
+          </button>
+          <div
+            *ngIf="isDropdownOpen('columns')"
+            class="absolute right-0 z-30 mt-1.5 w-64 max-h-80 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg shadow-gray-900/10 py-1.5"
+          >
+            <div
+              class="px-3.5 py-2 text-[10.5px] font-semibold text-gray-400 uppercase tracking-wide"
+            >
+              Show &amp; reorder columns
+            </div>
+            <div
+              *ngFor="let col of customizableColumns"
+              class="flex items-center justify-between gap-2 px-3.5 py-2 hover:bg-emerald-50/60"
+            >
+              <label
+                class="flex items-center gap-2 text-[12.5px] text-gray-700 cursor-pointer flex-1 min-w-0"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="col.visible !== false"
+                  (change)="toggleColumnVisibility(col)"
+                  class="accent-emerald-600 shrink-0"
+                />
+                <span class="truncate">{{ col.label }}</span>
+              </label>
+              <div class="flex items-center gap-0.5 shrink-0">
+                <button
+                  type="button"
+                  (click)="moveColumnUp(col)"
+                  title="Move up"
+                  class="h-6 w-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700"
+                >
+                  <span class="material-symbols-outlined text-[15px]"
+                    >arrow_upward</span
+                  >
+                </button>
+                <button
+                  type="button"
+                  (click)="moveColumnDown(col)"
+                  title="Move down"
+                  class="h-6 w-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700"
+                >
+                  <span class="material-symbols-outlined text-[15px]"
+                    >arrow_downward</span
+                  >
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- PAGE SIZE -->
         <div class="relative" data-dropdown>
           <button
@@ -550,8 +616,20 @@
       </div>
     </div>
 
+    <!-- table-layout: fixed + colgroup makes the drag-to-resize handles actually stick -->
     <div class="overflow-x-auto">
-      <table class="w-full text-[12.5px] border-collapse">
+      <table
+        class="text-[12.5px] border-collapse"
+        style="table-layout: fixed; min-width: 100%"
+      >
+        <colgroup>
+          <col [style.width.px]="SR_NO_WIDTH" />
+          <col
+            *ngFor="let col of visibleColumns; trackBy: trackByColKey"
+            [style.width.px]="col.width"
+          />
+        </colgroup>
+
         <thead>
           <tr class="border-b border-gray-100 bg-gray-50/60">
             <th
@@ -560,17 +638,17 @@
               Sr No
             </th>
             <th
-              *ngFor="let col of columns; trackBy: trackByColKey"
-              class="text-left px-5 py-3.5 text-[10.5px] font-semibold tracking-wider uppercase text-gray-400 whitespace-nowrap select-none"
+              *ngFor="let col of visibleColumns; trackBy: trackByColKey"
+              class="relative text-left px-5 py-3.5 text-[10.5px] font-semibold tracking-wider uppercase text-gray-400 select-none overflow-hidden"
               [class.cursor-pointer]="col.sortable"
               [class.hover:text-gray-600]="col.sortable"
-              (click)="col.sortable && sortBy(col.key)"
+              (click)="onHeaderClick(col)"
             >
-              <span class="inline-flex items-center gap-1">
-                {{ col.label }}
+              <span class="inline-flex items-center gap-1 truncate">
+                <span class="truncate">{{ col.label }}</span>
                 <span
                   *ngIf="col.sortable"
-                  class="material-symbols-outlined text-[14px]"
+                  class="material-symbols-outlined text-[14px] shrink-0"
                   [class.text-emerald-700]="sortColumn === col.key"
                   [class.text-gray-300]="sortColumn !== col.key"
                 >
@@ -583,13 +661,25 @@
                   }}
                 </span>
               </span>
+
+              <!-- drag-to-resize handle -->
+              <span
+                data-resize-handle
+                (mousedown)="startResize($event, col)"
+                (click)="$event.stopPropagation()"
+                class="absolute top-0 right-0 h-full w-2 cursor-col-resize z-10 hover:bg-emerald-400/50 active:bg-emerald-500"
+                [class.bg-emerald-500]="resizingColKey === col.key"
+              ></span>
             </th>
           </tr>
         </thead>
 
         <tbody>
           <tr *ngIf="loading">
-            <td [attr.colspan]="columns.length + 1" class="py-16 text-center">
+            <td
+              [attr.colspan]="visibleColumns.length + 1"
+              class="py-16 text-center"
+            >
               <span
                 class="material-symbols-outlined animate-spin text-[32px] text-emerald-600"
               >
@@ -610,47 +700,33 @@
             </td>
 
             <td
-              *ngFor="let col of columns; trackBy: trackByColKey"
-              class="px-5 py-3.5 whitespace-nowrap text-gray-800"
+              *ngFor="let col of visibleColumns; trackBy: trackByColKey"
+              class="px-5 py-3.5 overflow-hidden text-ellipsis whitespace-nowrap text-gray-800"
             >
-              <!-- TRANSACTION ID -->
-              <span
-                *ngIf="col.key === 'displayId'"
-                class="font-semibold text-gray-900"
-              >
-                {{ displayValue(row.displayId) }}
-              </span>
-
               <!-- DATE & TIME -->
               <span
                 *ngIf="col.key === 'transactionDate'"
                 class="flex flex-col leading-tight"
               >
                 <span class="font-semibold text-gray-900">
-                  {{ row.createdAt | date: "dd MMM yyyy" }}
-                </span>
-                <span class="text-[10.5px] text-gray-400">
-                  {{ row.createdAt | date: "hh:mm a" }}
+                  {{ row.createdAt | tz }}
                 </span>
               </span>
 
-              <!-- TRANSACTION TYPE -->
+              <!-- TRANSACTION ID (with inline PAYIN/PAYOUT badge) -->
               <span
-                *ngIf="col.key === 'transactionType'"
-                class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold"
-                [ngClass]="transactionTypeClass(row.transactionType)"
+                *ngIf="col.key === 'displayId'"
+                class="flex items-center gap-1.5"
               >
-                {{ row.transactionType }}
-              </span>
-
-              <!-- ENTITY -->
-              <span
-                *ngIf="col.key === 'entity'"
-                class="flex flex-col leading-tight"
-              >
-                <span class="text-gray-800">{{
-                  displayValue(row.entityType)
+                <span class="font-semibold text-gray-900 truncate">{{
+                  displayValue(row.displayId)
                 }}</span>
+                <span
+                  class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-[9.5px] font-semibold"
+                  [ngClass]="transactionTypeClass(row.transactionType)"
+                >
+                  {{ row.transactionType }}
+                </span>
               </span>
 
               <!-- UTR / REF NO -->
@@ -661,12 +737,20 @@
                 {{ displayValue(row.transactionId) }}
               </span>
 
-              <!-- MODE -->
+              <!-- USER ID -->
               <span
-                *ngIf="col.key === 'mode'"
-                class="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 text-[11px] font-semibold text-gray-700"
+                *ngIf="col.key === 'userId'"
+                class="text-gray-700 font-mono text-[11.5px]"
               >
-                {{ displayValue(row.mode) }}
+                {{ displayValue(row.userId) }}
+              </span>
+
+              <!-- USERNAME -->
+              <span
+                *ngIf="col.key === 'userName'"
+                class="text-gray-800 font-medium"
+              >
+                {{ displayValue(row.userName) }}
               </span>
 
               <!-- CURRENCY -->
@@ -675,6 +759,30 @@
                 class="font-medium text-gray-700"
               >
                 {{ displayValue(row.currency) }}
+              </span>
+
+              <!-- MODE -->
+              <span
+                *ngIf="col.key === 'mode'"
+                class="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 text-[11px] font-semibold text-gray-700"
+              >
+                {{ displayValue(row.mode) }}
+              </span>
+
+              <!-- ACCOUNT NO / WALLET ADDRESS / VPA (priority: account -> wallet -> vpa) -->
+              <span
+                *ngIf="col.key === 'accountInfo'"
+                class="flex flex-col leading-tight"
+              >
+                <span class="text-[10px] text-gray-400 uppercase tracking-wide">
+                  {{ getAccountDisplay(row).label }}
+                </span>
+                <span
+                  class="font-mono text-[11.5px] text-gray-700 truncate block"
+                  [title]="getAccountDisplay(row).value"
+                >
+                  {{ getAccountDisplay(row).value }}
+                </span>
               </span>
 
               <!-- AMOUNT -->
@@ -712,11 +820,24 @@
               <!-- REMARKS / DISPUTE REASON -->
               <span
                 *ngIf="col.key === 'remarks'"
-                class="text-gray-500 max-w-[220px] truncate inline-block align-bottom"
+                class="text-gray-500 truncate inline-block align-bottom max-w-full"
                 [title]="displayValue(row.remarks)"
               >
                 {{ displayValue(row.remarks) }}
               </span>
+
+              <!-- ACTIONS (view details) -->
+              <button
+                *ngIf="col.key === 'actions'"
+                type="button"
+                (click)="openDetails(row)"
+                title="View details"
+                class="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
+              >
+                <span class="material-symbols-outlined text-[18px]"
+                  >visibility</span
+                >
+              </button>
             </td>
           </tr>
         </tbody>
@@ -807,6 +928,149 @@
         >
           Next ›
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TRANSACTION DETAILS MODAL ================= -->
+  <div
+    *ngIf="showModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4"
+    (click)="closeModal()"
+  >
+    <div
+      *ngIf="selectedRow as row"
+      class="bg-white rounded-[22px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Modal header -->
+      <div
+        class="sticky top-0 bg-white z-10 flex items-center justify-between px-6 py-4 border-b border-gray-100 rounded-t-[22px]"
+      >
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <span class="text-[15px] font-semibold text-gray-900">{{
+            row.displayId
+          }}</span>
+          <span
+            class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold"
+            [ngClass]="transactionTypeClass(row.transactionType)"
+          >
+            {{ row.transactionType }}
+          </span>
+          <span
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-semibold"
+            [ngClass]="statusClass(row.reviewStatus)"
+          >
+            <span class="h-1.5 w-1.5 rounded-full bg-current opacity-70"></span>
+            {{ displayValue(row.reviewStatus) }}
+          </span>
+          <span
+            *ngIf="row.userName && row.userName !== '-'"
+            class="text-[11.5px] text-gray-400"
+          >
+            {{ row.userName }}
+          </span>
+        </div>
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+        >
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- Amount summary strip -->
+        <div
+          class="flex items-center justify-between bg-gray-50/70 rounded-xl px-4 py-3"
+        >
+          <div class="flex flex-col">
+            <span class="text-[10.5px] text-gray-400 uppercase tracking-wide"
+              >Amount</span
+            >
+            <span
+              class="text-[18px] font-bold tabular-nums"
+              [ngClass]="
+                row.transactionType === 'PAYIN'
+                  ? 'text-emerald-700'
+                  : 'text-rose-600'
+              "
+            >
+              {{ displayValue(row.amount) }} {{ row.currency }}
+            </span>
+          </div>
+          <div class="flex flex-col text-right">
+            <span class="text-[10.5px] text-gray-400 uppercase tracking-wide"
+              >Created</span
+            >
+            <span class="text-[12.5px] font-medium text-gray-700">{{
+              row.createdAt | tz
+            }}</span>
+          </div>
+        </div>
+
+        <!-- Attachment / proof image (fetched only when modal opens) -->
+        <div *ngIf="row.raw?.filePath" class="space-y-2">
+          <div class="flex items-center justify-between">
+            <p
+              class="text-[11px] font-medium text-gray-500 uppercase tracking-wide"
+            >
+              Attachment
+            </p>
+            <button
+              *ngIf="!modalImageLoading && modalImageUrl"
+              type="button"
+              (click)="downloadAttachment()"
+              class="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800"
+            >
+              <span class="material-symbols-outlined text-[14px]"
+                >download</span
+              >
+              Download
+            </button>
+          </div>
+          <div
+            class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center min-h-[160px]"
+          >
+            <span
+              *ngIf="modalImageLoading"
+              class="material-symbols-outlined animate-spin text-[28px] text-emerald-600 py-8"
+              >progress_activity</span
+            >
+            <img
+              *ngIf="!modalImageLoading && modalImageUrl"
+              [src]="modalImageUrl"
+              class="max-h-72 object-contain"
+              alt="Attachment"
+            />
+            <p
+              *ngIf="!modalImageLoading && !modalImageUrl && modalImageError"
+              class="text-[12px] text-gray-400 py-8"
+            >
+              Unable to load attachment
+            </p>
+          </div>
+        </div>
+
+        <!-- Grouped details -->
+        <div *ngFor="let section of getDetailSections(row)" class="space-y-2.5">
+          <p
+            class="text-[11px] font-medium text-gray-500 uppercase tracking-wide"
+          >
+            {{ section.title }}
+          </p>
+          <div
+            class="grid grid-cols-2 gap-x-4 gap-y-3 bg-gray-50/60 rounded-xl p-4"
+          >
+            <div *ngFor="let item of section.rows" class="flex flex-col">
+              <span class="text-[10.5px] text-gray-400">{{ item.label }}</span>
+              <span class="text-[12.5px] font-medium text-gray-800 break-all">{{
+                item.value
+              }}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

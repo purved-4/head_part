@@ -21,6 +21,7 @@ import { SnackbarService } from "../../../../common/snackbar/snackbar.service";
 import { ThemeService } from "../../../../theme/theme.service";
 import { ComPartService } from "../../../services/com-part.service";
 import { BulkUpdateService } from "../../../services/bulk-update.service";
+import { VoiceNotificationService } from "../../../services/voice-notification.service";
 
 @Component({
   selector: "app-head-nav-header",
@@ -64,6 +65,7 @@ export class HeadNavHeaderComponent implements OnInit {
   showTooltip = false;
   loadingPercentages = false;
   hasLoaded = false;
+  private isPayinStatusLoading = false;
 
   percentages = {
     payinPercentage: 0,
@@ -233,6 +235,7 @@ export class HeadNavHeaderComponent implements OnInit {
     public theme: ThemeService,
     private router: Router,
     private bulkService: BulkUpdateService,
+    private voiceService: VoiceNotificationService, // 👈 add
   ) {}
 
   ngOnInit(): void {
@@ -584,7 +587,47 @@ export class HeadNavHeaderComponent implements OnInit {
   getUnreadCount(): number {
     return this.notificationUnreadCount;
   }
+  // getPayinStatus() {
+  //   this.headServices.getHeadById(this.headId).subscribe({
+  //     next: (res: any) => {
+  //       this.payinStatus = res?.payin ?? false;
+
+  //       const newPayinTime = res?.payinTime ?? null;
+
+  //       if (!this.payinStatus && newPayinTime) {
+  //         const target = new Date(newPayinTime).getTime();
+
+  //         if (target > Date.now()) {
+  //           this.payinTime = newPayinTime;
+  //           this.isCountdownFinished = false;
+  //           this.startCountdown(newPayinTime);
+  //         } else {
+  //           this.payinTime = null;
+  //           this.isCountdownFinished = true;
+  //           this.countdown = "";
+  //           this.clearCountdown();
+  //         }
+  //       } else {
+  //         this.payinTime = null;
+  //         this.countdown = "";
+  //         this.isCountdownFinished = false;
+  //         this.clearCountdown();
+  //       }
+  //     },
+  //     error: () => {
+  //       this.clearCountdown();
+  //     },
+  //   });
+  // }
+
   getPayinStatus() {
+    // agar pehle se API pending hai, dusri call skip karo
+    if (this.isPayinStatusLoading) {
+      return;
+    }
+
+    this.isPayinStatusLoading = true;
+
     this.headServices.getHeadById(this.headId).subscribe({
       next: (res: any) => {
         this.payinStatus = res?.payin ?? false;
@@ -610,9 +653,17 @@ export class HeadNavHeaderComponent implements OnInit {
           this.isCountdownFinished = false;
           this.clearCountdown();
         }
+
+        // 👇 payin OFF hai toh voice play karo
+        if (!this.payinStatus) {
+          this.voiceService.announcePayinOffStatus();
+        }
+
+        this.isPayinStatusLoading = false; // 👈 response aa gaya, guard release
       },
       error: () => {
         this.clearCountdown();
+        this.isPayinStatusLoading = false; // 👈 error pe bhi release karna zaroori hai
       },
     });
   }

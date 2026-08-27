@@ -5,6 +5,10 @@ import { TransactionHistoryService } from "../../../pages/services/reports/trans
 import { UserStateService } from "../../../pages/services/store/user-state.service";
 import { SnackbarService } from "../../../common/snackbar/snackbar.service";
 
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { MultimediaService } from "../../../pages/services/multimedia.service";
+
 // ==================== enums ====================
 export enum TransactionMode {
   UPI = "UPI",
@@ -25,6 +29,7 @@ export enum TransactionType {
 export enum FundReviewStatus {
   PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",
+  // PROCESSING = "PROCESSING",
   DISPUTE_ESCALATED = "DISPUTE_ESCALATED",
   CP_REJECTED = "CP_REJECTED",
   DISPUTE_PENDING = "DISPUTE_PENDING",
@@ -63,6 +68,8 @@ interface ColumnDef {
   key: string;
   label: string;
   sortable?: boolean;
+  width: number; // px — user-resizable, kept in component state
+  visible?: boolean; // user-toggleable via the "Columns" customizer (default true)
 }
 
 type DropdownKey =
@@ -71,7 +78,8 @@ type DropdownKey =
   | "currency"
   | "mode"
   | "pageSize"
-  | "download";
+  | "download"
+  | "columns";
 type RangeMode = "custom" | "month" | "year";
 type SortDirection = "asc" | "desc";
 
@@ -90,10 +98,25 @@ interface ReportRow {
   remarks: string;
   bankName: string;
   accountNo: string;
+  ifsc: string;
+  walletAddress: string;
+  vpa: string;
+  userId: string;
+  userName: string;
   holderName: string;
   createdAt: string | Date | null;
   settled: boolean;
   raw: any;
+}
+
+interface DetailRow {
+  label: string;
+  value: string;
+}
+
+interface DetailSection {
+  title: string;
+  rows: DetailRow[];
 }
 
 @Component({
@@ -108,17 +131,19 @@ export class PayinPayoutReportComponent implements OnInit {
   entityType: any;
 
   // ---------------- filter option groups (all multiselect, incl. currency) ----------------
+  // NOTE: all default to "checked = true" so the report opens with every
+  // filter pre-selected instead of empty (i.e. "show everything" by default).
   transactionTypeOptions: SelectOption[] = this.toOptions(
     Object.values(TransactionType),
     true,
   );
   reviewStatusOptions: SelectOption[] = this.toOptions(
     Object.values(FundReviewStatus),
-    false,
+    true,
   );
   currencyOptions: SelectOption[] = this.toOptions(
     Object.values(Currency),
-    false,
+    true,
     {
       INR: "currency_rupee",
       USDT: "toll",
@@ -128,6 +153,7 @@ export class PayinPayoutReportComponent implements OnInit {
   modeOptions: SelectOption[] = [];
 
   // ---------------- date range ----------------
+  // Defaults to "last 7 days" (from = today - 7, to = today) instead of blank.
   rangeMode: RangeMode = "custom";
   fromDate: string = "";
   toDate: string = "";
@@ -138,19 +164,89 @@ export class PayinPayoutReportComponent implements OnInit {
   yearOptions: number[] = this.buildYearOptions();
 
   // ---------------- table state ----------------
+  // Fixed base order: Date & Time -> Transaction ID -> UTR/Ref -> User ID -> Username ->
+  // Entity -> Currency -> Mode -> Account/VPA -> Amount -> Review Status -> Remarks -> Actions.
+  // Each column carries its own `width` (drag-resize) and `visible` flag (Columns customizer).
+  // The user can reorder/hide columns (except Actions, which stays pinned last) via
+  // toggleColumnVisibility()/moveColumnUp()/moveColumnDown() — this also drives CSV/PDF export order.
   columns: ColumnDef[] = [
-    { key: "displayId", label: "Transaction ID", sortable: true },
-    { key: "transactionDate", label: "Date & Time", sortable: true },
-    { key: "transactionType", label: "Type", sortable: true },
-    { key: "entity", label: "Entity", sortable: false },
+    {
+      key: "transactionDate",
+      label: "Date & Time",
+      sortable: true,
+      width: 170,
+      visible: true,
+    },
+    {
+      key: "displayId",
+      label: "Transaction ID",
+      sortable: true,
+      width: 170,
+      visible: true,
+    },
+    {
+      key: "utr",
+      label: "UTR / Ref No",
+      sortable: false,
+      width: 150,
+      visible: true,
+    },
+    {
+      key: "userId",
+      label: "User ID",
+      sortable: false,
+      width: 110,
+      visible: true,
+    },
+    {
+      key: "userName",
+      label: "Username",
+      sortable: false,
+      width: 140,
+      visible: true,
+    },
 
-    { key: "utr", label: "UTR / Ref No", sortable: false },
-    { key: "mode", label: "Mode", sortable: false },
-    { key: "currency", label: "Currency", sortable: false },
-    { key: "amount", label: "Amount", sortable: true },
-    { key: "reviewStatus", label: "Review Status", sortable: true },
-    { key: "remarks", label: "Remarks", sortable: false },
+    {
+      key: "currency",
+      label: "Currency",
+      sortable: false,
+      width: 100,
+      visible: true,
+    },
+    { key: "mode", label: "Mode", sortable: false, width: 110, visible: true },
+    {
+      key: "accountInfo",
+      label: "A/C / VPA",
+      sortable: false,
+      width: 170,
+      visible: true,
+    },
+    {
+      key: "amount",
+      label: "Amount",
+      sortable: true,
+      width: 140,
+      visible: true,
+    },
+    {
+      key: "reviewStatus",
+      label: "Review Status",
+      sortable: true,
+      width: 150,
+      visible: true,
+    },
+    {
+      key: "remarks",
+      label: "Remarks",
+      sortable: false,
+      width: 200,
+      visible: true,
+    },
+    { key: "actions", label: "", sortable: false, width: 56, visible: true },
   ];
+
+  readonly SR_NO_WIDTH = 64;
+  private readonly MIN_COL_WIDTH = 70;
 
   results: ReportRow[] = [];
   searchTerm: string = "";
@@ -169,10 +265,24 @@ export class PayinPayoutReportComponent implements OnInit {
   errorMessage: string = "";
   openDropdownKey: DropdownKey | null = null;
 
+  // ---------------- column resize state ----------------
+  resizingColKey: string | null = null;
+  private resizeStartX = 0;
+  private resizeStartWidth = 0;
+  private dragMoved = false;
+
+  // ---------------- details modal state ----------------
+  showModal: boolean = false;
+  selectedRow: ReportRow | null = null;
+  modalImageUrl: string | null = null;
+  modalImageLoading: boolean = false;
+  modalImageError: boolean = false;
+
   constructor(
     private elementRef: ElementRef,
     private userStateService: UserStateService,
     private transactionHistoryService: TransactionHistoryService,
+    private multiMedia: MultimediaService,
     private snacBar: SnackbarService,
   ) {}
 
@@ -180,6 +290,7 @@ export class PayinPayoutReportComponent implements OnInit {
     this.entityId = this.userStateService.getCurrentEntityId();
     this.entityType = this.userStateService.getRole();
     this.onCurrencyChange();
+    this.applyDefaultDateRange();
   }
 
   // close any open dropdown when clicking outside a [data-dropdown] wrapper
@@ -189,6 +300,80 @@ export class PayinPayoutReportComponent implements OnInit {
     if (!target.closest("[data-dropdown]")) {
       this.openDropdownKey = null;
     }
+  }
+
+  // ==================== column resize (drag the handle on a header's right edge) ====================
+  startResize(event: MouseEvent, col: ColumnDef): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.resizingColKey = col.key;
+    this.resizeStartX = event.clientX;
+    this.resizeStartWidth = col.width;
+    this.dragMoved = false;
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "col-resize";
+  }
+
+  @HostListener("document:mousemove", ["$event"])
+  onResizeMove(event: MouseEvent): void {
+    if (!this.resizingColKey) return;
+    const col = this.columns.find((c) => c.key === this.resizingColKey);
+    if (!col) return;
+    const delta = event.clientX - this.resizeStartX;
+    if (Math.abs(delta) > 3) this.dragMoved = true;
+    col.width = Math.max(this.MIN_COL_WIDTH, this.resizeStartWidth + delta);
+  }
+
+  @HostListener("document:mouseup")
+  onResizeEnd(): void {
+    if (!this.resizingColKey) return;
+    this.resizingColKey = null;
+    document.body.style.userSelect = "";
+    document.body.style.cursor = "";
+  }
+
+  // Header click sorts — but not right after a drag-resize on that same header.
+  onHeaderClick(col: ColumnDef): void {
+    if (this.dragMoved) {
+      this.dragMoved = false;
+      return;
+    }
+    if (col.sortable) this.sortBy(col.key);
+  }
+
+  // ==================== column customizer (show/hide + reorder, "Actions" stays pinned last) ====================
+  get visibleColumns(): ColumnDef[] {
+    return this.columns.filter((c) => c.visible !== false);
+  }
+
+  // Columns shown in the customizer dropdown — "Actions" is excluded, it's not user-toggleable.
+  get customizableColumns(): ColumnDef[] {
+    return this.columns.filter((c) => c.key !== "actions");
+  }
+
+  toggleColumnVisibility(col: ColumnDef): void {
+    if (col.key === "actions") return;
+    col.visible = col.visible === false ? true : false;
+  }
+
+  moveColumnUp(col: ColumnDef): void {
+    const idx = this.columns.indexOf(col);
+    if (idx <= 0) return;
+    [this.columns[idx - 1], this.columns[idx]] = [
+      this.columns[idx],
+      this.columns[idx - 1],
+    ];
+  }
+
+  moveColumnDown(col: ColumnDef): void {
+    const idx = this.columns.indexOf(col);
+    if (idx === -1 || idx >= this.columns.length - 1) return;
+    // keep "Actions" pinned as the last column
+    if (this.columns[idx + 1].key === "actions") return;
+    [this.columns[idx + 1], this.columns[idx]] = [
+      this.columns[idx],
+      this.columns[idx + 1],
+    ];
   }
 
   // ==================== small helpers ====================
@@ -221,6 +406,15 @@ export class PayinPayoutReportComponent implements OnInit {
     return years;
   }
 
+  // Sets the default custom date range to "last 7 days" (today - 7 -> today).
+  private applyDefaultDateRange(): void {
+    const today = new Date();
+    const weekAgo = new Date();
+    weekAgo.setDate(today.getDate() - 7);
+    this.fromDate = weekAgo.toISOString().split("T")[0];
+    this.toDate = today.toISOString().split("T")[0];
+  }
+
   displayValue(value: any): string {
     if (value === null || value === undefined || value === "") return "-";
     if (typeof value === "number") {
@@ -230,6 +424,16 @@ export class PayinPayoutReportComponent implements OnInit {
       });
     }
     return String(value);
+  }
+
+  private formatDateTime(value: any): string {
+    if (!value) return "-";
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return "-";
+    return d.toLocaleString("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "medium",
+    });
   }
 
   getTodayDate(): string {
@@ -280,7 +484,9 @@ export class PayinPayoutReportComponent implements OnInit {
     return count;
   }
 
-  // Transaction Mode depends on which currencies are selected
+  // Transaction Mode depends on which currencies are selected.
+  // First time round (modeOptions still empty) every relevant mode defaults to checked,
+  // so the dependent dropdown also opens fully pre-selected; afterwards user choices persist.
   private onCurrencyChange(): void {
     const selectedCurrencies = this.getSelectedValues(this.currencyOptions);
     const relevantModes = selectedCurrencies.length
@@ -292,10 +498,11 @@ export class PayinPayoutReportComponent implements OnInit {
       : Object.values(TransactionMode);
 
     const previouslyChecked = new Set(this.getSelectedValues(this.modeOptions));
+    const isFirstBuild = this.modeOptions.length === 0;
     this.modeOptions = relevantModes.map((m) => ({
       value: m,
       label: this.toLabel(m),
-      checked: previouslyChecked.has(m),
+      checked: isFirstBuild ? true : previouslyChecked.has(m),
     }));
   }
 
@@ -362,7 +569,12 @@ export class PayinPayoutReportComponent implements OnInit {
       remarks: item.queryText || item.remarks || item.message || "-",
       bankName: item.bankName || item.bank || "-",
       accountNo: item.accountNo || item.accountNumber || "-",
-      holderName: item.bankAccountHolderName || item.holder || "-",
+      ifsc: item.ifsc || "-",
+      walletAddress: item.walletAddress || "-",
+      vpa: item.vpa || "-",
+      userId: item.userId || "-",
+      userName: item.userName || item.username || "-",
+      holderName: item.holder || item.bankAccountHolderName || "-",
       createdAt: item.createdAt || item.dateTime || null,
       settled: !!item.settled,
       raw: item,
@@ -408,10 +620,6 @@ export class PayinPayoutReportComponent implements OnInit {
             ...payoutContent.map((item: any) => this.mapRow(item, "PAYOUT")),
           ];
 
-          // NOTE: PAYIN and PAYOUT are two independently paginated collections from the
-          // backend. We request `this.pageSize` rows from each per page and show them
-          // together, so a single page can render up to (2 × pageSize) rows when both
-          // transaction types are selected. Total record count is the sum of both totals.
           this.totalRecords =
             (payin.totalElements ?? 0) + (payout.totalElements ?? 0);
           this.currentPage = page + 1;
@@ -430,14 +638,16 @@ export class PayinPayoutReportComponent implements OnInit {
       });
   }
 
+  // Resets filters back to the default "everything pre-selected, last 7 days" state
+  // (same defaults as ngOnInit) rather than clearing them out.
   resetFilters(): void {
     this.transactionTypeOptions.forEach((o) => (o.checked = true));
-    this.reviewStatusOptions.forEach((o) => (o.checked = false));
-    this.currencyOptions.forEach((o) => (o.checked = false));
+    this.reviewStatusOptions.forEach((o) => (o.checked = true));
+    this.currencyOptions.forEach((o) => (o.checked = true));
+    this.modeOptions = [];
     this.onCurrencyChange();
     this.rangeMode = "custom";
-    this.fromDate = "";
-    this.toDate = "";
+    this.applyDefaultDateRange();
     this.fromMonth = "";
     this.toMonth = "";
     this.fromYear = null;
@@ -482,6 +692,11 @@ export class PayinPayoutReportComponent implements OnInit {
           r.mode,
           r.entityId,
           r.remarks,
+          r.userId,
+          r.userName,
+          r.accountNo,
+          r.walletAddress,
+          r.vpa,
         ]
           .filter(Boolean)
           .some((f) => String(f).toLowerCase().includes(term)),
@@ -558,6 +773,8 @@ export class PayinPayoutReportComponent implements OnInit {
       case "ACCEPTED":
       case "PROCESSED":
         return "bg-emerald-50 text-emerald-700";
+      case "PROCESSING":
+        return "bg-emerald-50 text-emerald-700";
       case "PENDING":
       case "DISPUTE_PENDING":
         return "bg-amber-50 text-amber-700";
@@ -570,36 +787,210 @@ export class PayinPayoutReportComponent implements OnInit {
     }
   }
 
-  // ==================== export (exports only the currently loaded page — see pagination note above) ====================
+  // Priority: bank account -> wallet address -> VPA. Falls back to '-' when none present.
+  getAccountDisplay(row: ReportRow): {
+    icon: string;
+    label: string;
+    value: string;
+  } {
+    const raw = row.raw || {};
+    if (raw.accountNo) {
+      return { icon: "account_balance", label: "A/C", value: raw.accountNo };
+    }
+    if (raw.walletAddress) {
+      return {
+        icon: "account_balance_wallet",
+        label: "Wallet",
+        value: raw.walletAddress,
+      };
+    }
+    if (raw.vpa) {
+      return { icon: "alternate_email", label: "VPA", value: raw.vpa };
+    }
+    return { icon: "help_outline", label: "-", value: "-" };
+  }
+
+  // ==================== details modal ====================
+  openDetails(row: ReportRow): void {
+    this.selectedRow = row;
+    this.showModal = true;
+    this.modalImageUrl = null;
+    this.modalImageError = false;
+    this.modalImageLoading = false;
+
+    const filePath = row.raw?.filePath;
+    if (filePath) {
+      this.modalImageLoading = true;
+      this.multiMedia.getPrivateImage(filePath).subscribe({
+        next: (url: string) => {
+          this.modalImageUrl = url;
+          this.modalImageLoading = false;
+        },
+        error: () => {
+          this.modalImageLoading = false;
+          this.modalImageError = true;
+        },
+      });
+    }
+  }
+
+  closeModal(): void {
+    if (this.modalImageUrl) {
+      URL.revokeObjectURL(this.modalImageUrl);
+    }
+    this.showModal = false;
+    this.selectedRow = null;
+    this.modalImageUrl = null;
+    this.modalImageError = false;
+    this.modalImageLoading = false;
+  }
+
+  // Downloads the currently displayed attachment image (blob URL from modalImageUrl)
+  // as a file, named after the transaction's displayId.
+  downloadAttachment(): void {
+    if (!this.modalImageUrl) return;
+    const ext = this.guessExtensionFromPath(this.selectedRow?.raw?.filePath);
+    const link = document.createElement("a");
+    link.href = this.modalImageUrl;
+    link.download = `attachment-${this.selectedRow?.displayId || "file"}${ext}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  private guessExtensionFromPath(filePath?: string): string {
+    if (!filePath) return "";
+    const match = filePath.match(/\.[a-zA-Z0-9]+($|\?)/);
+    return match ? match[0].replace("?", "") : "";
+  }
+
+  // Builds the grouped label/value sections shown in the details modal.
+  // Works off `row.raw` (the untouched API item) so PAYIN and PAYOUT both
+  // surface whichever fields they actually have; anything missing shows "-".
+  getDetailSections(row: ReportRow | null): DetailSection[] {
+    if (!row) return [];
+    const raw = row.raw || {};
+    const isPayin = row.transactionType === "PAYIN";
+
+    const sections: DetailSection[] = [];
+
+    sections.push({
+      title: "Transaction",
+      rows: [
+        { label: "Transaction ID", value: this.displayValue(row.displayId) },
+        { label: "UTR / Ref No", value: this.displayValue(row.transactionId) },
+        { label: "Type", value: row.transactionType },
+        { label: "Mode", value: this.toLabel(row.mode) },
+        { label: "Currency", value: this.displayValue(row.currency) },
+        { label: "Amount", value: this.displayValue(row.amount) },
+        { label: "Review Status", value: this.toLabel(row.reviewStatus) },
+        {
+          label: isPayin ? "Dispute Reason" : "Remarks",
+          value: this.displayValue(row.remarks),
+        },
+        { label: "Created At", value: this.formatDateTime(row.createdAt) },
+        { label: "Updated At", value: this.formatDateTime(raw.updatedAt) },
+      ],
+    });
+
+    sections.push({
+      title: "Payment Destination",
+      rows: [
+        { label: "User ID", value: this.displayValue(raw.userId) },
+        { label: "Username", value: this.displayValue(raw.userName) },
+        { label: "Account No", value: this.displayValue(raw.accountNo) },
+        { label: "IFSC", value: this.displayValue(raw.ifsc) },
+        {
+          label: "Wallet Address",
+          value: this.displayValue(raw.walletAddress),
+        },
+        { label: "VPA", value: this.displayValue(raw.vpa) },
+        {
+          label: "Account Holder",
+          value: this.displayValue(raw.holder || raw.bankAccountHolderName),
+        },
+      ],
+    });
+
+    const rateRows: DetailRow[] = [
+      {
+        label: "CC Wise Amount",
+        value: this.displayValue(raw.currencyCcWiseAmount),
+      },
+      {
+        label: "CP Wise Amount",
+        value: this.displayValue(raw.currencyCpWiseAmount),
+      },
+      { label: "Rate", value: this.displayValue(raw.rate) },
+      { label: "CC Rate", value: this.displayValue(raw.ccRate) },
+      { label: "CP Rate", value: this.displayValue(raw.cpRate) },
+    ];
+    if (isPayin) {
+      rateRows.push({
+        label: "Payin Type",
+        value: this.displayValue(raw.payinType),
+      });
+    }
+    sections.push({ title: "Rates & Amounts", rows: rateRows });
+
+    return sections;
+  }
+
+  // ==================== export (exports only the currently loaded page, in the same ====================
+  // ==================== column order/visibility the user has set via the Columns customizer) ====================
+  private getCellExportValue(row: ReportRow, key: string): string | number {
+    switch (key) {
+      case "transactionDate":
+        return row.createdAt
+          ? new Date(row.createdAt).toLocaleString("en-IN")
+          : "-";
+      case "displayId":
+        return row.displayId;
+      case "utr":
+        return row.transactionId;
+      case "userId":
+        return row.userId;
+      case "userName":
+        return row.userName;
+      case "entity":
+        return row.entityId;
+      case "currency":
+        return row.currency;
+      case "mode":
+        return this.toLabel(row.mode);
+      case "accountInfo":
+        return this.getAccountDisplay(row).value;
+      case "amount":
+        return row.amount;
+      case "reviewStatus":
+        return this.toLabel(row.reviewStatus);
+      case "remarks":
+        return row.remarks;
+      default:
+        return "-";
+    }
+  }
+
+  private exportColumns(): ColumnDef[] {
+    return this.columns.filter(
+      (c) => c.visible !== false && c.key !== "actions",
+    );
+  }
+
+  private exportHeaders(): string[] {
+    return this.exportColumns().map((c) => c.label);
+  }
+
+  private exportRows(): (string | number)[][] {
+    const cols = this.exportColumns();
+    return this.results.map((r) =>
+      cols.map((c) => this.getCellExportValue(r, c.key)),
+    );
+  }
+
   exportCsv(): void {
     if (!this.results.length) return;
-    const headers = [
-      "Transaction ID",
-      "Date & Time",
-      "Type",
-      "Entity",
-      "Portal",
-      "UTR / Ref No",
-      "Mode",
-      "Currency",
-      "Amount",
-      "Review Status",
-      "Remarks",
-    ];
-    const rows = this.results.map((r) => [
-      r.displayId,
-      r.createdAt ? new Date(r.createdAt).toLocaleString("en-IN") : "-",
-      r.transactionType,
-      r.entityId,
-      r.portal,
-      r.transactionId,
-      this.toLabel(r.mode),
-      r.currency,
-      r.amount,
-      this.toLabel(r.reviewStatus),
-      r.remarks,
-    ]);
-    const csvContent = [headers, ...rows]
+    const csvContent = [this.exportHeaders(), ...this.exportRows()]
       .map((row) =>
         row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
       )
@@ -613,8 +1004,51 @@ export class PayinPayoutReportComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 
+  // Generates an actual downloadable PDF (not a print dialog) with the
+  // currently loaded page's data, using jspdf + jspdf-autotable.
+  // npm install jspdf jspdf-autotable
   exportPdf(): void {
     if (!this.results.length) return;
-    window.print();
+
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "pt",
+      format: "a4",
+    });
+
+    doc.setFontSize(14);
+    doc.text("Payin / Payout Report", 40, 30);
+    doc.setFontSize(9);
+    doc.setTextColor(120);
+    doc.text(
+      `Generated on ${new Date().toLocaleString("en-IN")}  ·  Showing ${this.pageStart}-${this.pageEnd} of ${this.totalRecords}`,
+      40,
+      45,
+    );
+    doc.setTextColor(0);
+
+    autoTable(doc, {
+      head: [this.exportHeaders()],
+      body: this.exportRows(),
+      startY: 58,
+      styles: { fontSize: 7.5, cellPadding: 4, overflow: "linebreak" },
+      headStyles: { fillColor: [4, 120, 87], textColor: 255 }, // emerald-700
+      alternateRowStyles: { fillColor: [247, 248, 250] },
+      margin: { left: 30, right: 30 },
+      didDrawPage: (data) => {
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(
+          `Page ${data.pageNumber} of ${pageCount}`,
+          doc.internal.pageSize.getWidth() - 80,
+          doc.internal.pageSize.getHeight() - 15,
+        );
+      },
+    });
+
+    doc.save(
+      `payin-payout-report-page-${this.currentPage}-${this.getTodayDate()}.pdf`,
+    );
   }
 }

@@ -181,4 +181,27 @@ export class VoiceNotificationService {
       );
     } catch (error) {}
   }
+  private readonly payinStatusAudioMap: Record<VoiceLang, string> = {
+    en: "/payinstatuseng.mp3",
+    hi: "/payinstatushindi.mp3",
+  };
+  announcePayinOffStatus(): void {
+    if (!this.enabled) return;
+
+    const filePath = this.payinStatusAudioMap[this.language];
+    if (!filePath) return;
+
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio.currentTime = 0;
+    }
+
+    const audio = new Audio(filePath);
+    audio.volume = 1;
+    this.currentAudio = audio;
+
+    audio.play().catch((err) => {
+      console.error("Payin status audio play failed:", err);
+    });
+  }
 }
