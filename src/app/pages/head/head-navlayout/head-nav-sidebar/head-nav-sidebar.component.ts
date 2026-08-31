@@ -1,4 +1,6 @@
-import { ThemeService } from "./../../../../theme/theme.service";
+
+
+import { ThemeService } from './../../../../theme/theme.service';
 import {
   Component,
   Input,
@@ -13,6 +15,7 @@ import { Router, NavigationEnd } from "@angular/router";
 import { AuthService } from "../../../services/auth.service";
 import { filter } from "rxjs/operators";
 import { UserStateService } from "../../../services/store/user-state.service";
+import { BranchService } from "../../../services/branch.service";
 
 interface MenuItem {
   label: string;
@@ -65,8 +68,8 @@ export class HeadNavSidebarComponent implements OnInit {
       icon: "dashboard",
       children: [{ label: "Dashboard", route: "/head/dashboard" }],
     },
-
-    {
+    //new hai code ke sath mujhe bs yahi dena hai
+   {
       label: "Inventory Management",
       route: "/head/inventory-management",
       icon: "account_balance_wallet",
@@ -132,6 +135,7 @@ export class HeadNavSidebarComponent implements OnInit {
       route: "/head/reports/funds/approved",
       icon: "task_alt",
       children: [
+        
         {
           label: "Payin Reports",
           route: "/head/reports/funds/payin/bank",
@@ -144,6 +148,7 @@ export class HeadNavSidebarComponent implements OnInit {
         },
       ],
     },
+   
 
     {
       label: "Reports",
@@ -154,15 +159,16 @@ export class HeadNavSidebarComponent implements OnInit {
           label: "Transaction History",
           route: "/head/reports/transaction-history",
         },
-        {
-          label: "Balance Report",
-          route: "/head/reports/balance-report",
-          notifications: 1,
+          {
+         label: "Balance Report",
+         route: "/head/reports/balance-report",
+         notifications: 1,
         },
+
         {
-          label: "PayinPayout Report",
-          route: "/head/reports/payin-payout-report",
-          notifications: 1,
+         label: "Payin Payout Report",
+         route: "/head/reports/payin-payout-report",
+         notifications: 1,
         },
         // { label: "Entity Report", route: "/head/reports/entity-report" },
         // { label: "Funds Report", route: "/head/reports/funds-report" },
@@ -171,7 +177,7 @@ export class HeadNavSidebarComponent implements OnInit {
         // { label: "Rejected Funds", route: "/head/reports/funds/rejected" },
       ],
     },
-    {
+   {
       label: "Settings",
       route: "/head/override-currency-management",
       icon: "settings",
@@ -202,6 +208,7 @@ export class HeadNavSidebarComponent implements OnInit {
         // },
       ],
     },
+ 
   ];
 
   branchId: any;
@@ -212,8 +219,9 @@ export class HeadNavSidebarComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
+    private BranchService: BranchService,
     private userStateService: UserStateService,
-    public theme: ThemeService,
+    public theme : ThemeService
   ) {}
 
   ngOnInit() {
@@ -316,12 +324,16 @@ export class HeadNavSidebarComponent implements OnInit {
       if (this.recentItems.length > 3) {
         this.recentItems.pop();
       }
+
+      
     }
   }
 
   getRecentItems() {
     return this.recentItems;
   }
+
+
 
   getAllMenuItems(): MenuItem[] {
     const items: MenuItem[] = [];
@@ -511,7 +523,7 @@ export class HeadNavSidebarComponent implements OnInit {
     this.openSubmenu(item, true);
   }
 
-  getChildIcon(child: MenuItem): string {
+ getChildIcon(child: MenuItem): string {
     const route = child.route;
 
     const map: Record<string, string> = {

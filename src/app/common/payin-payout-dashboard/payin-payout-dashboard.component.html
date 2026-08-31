@@ -1,0 +1,486 @@
+<div class="font-sans text-gray-800">
+  <!-- ==================== error banner ==================== -->
+  <div
+    class="flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 rounded-lg px-3.5 py-2.5 mb-4 text-sm"
+    *ngIf="errorMessage"
+  >
+    <span class="material-symbols-outlined text-base">error</span>
+    {{ errorMessage }}
+    <button
+      type="button"
+      class="ml-auto bg-white border border-red-300 text-red-700 rounded-md px-2.5 py-1 text-xs cursor-pointer hover:bg-red-50"
+      (click)="refresh()"
+    >
+      Retry
+    </button>
+  </div>
+
+  <div
+    class="grid grid-cols-1 md:grid-cols-2 gap-5 bg-gray-100 rounded-2xl p-4"
+  >
+    <!-- ==================== PAY IN COLUMN ==================== -->
+    <section class="flex flex-col min-w-0">
+      <header class="mb-3">
+        <div class="flex items-center gap-2">
+          <span
+            class="inline-flex items-center justify-center w-6 h-6 rounded-full text-emerald-600"
+          >
+            <span class="material-symbols-outlined text-base">south</span>
+          </span>
+          <h3 class="m-0 text-base font-bold">Pay In</h3>
+          <span
+            class="bg-gray-200 text-gray-700 text-xs font-semibold rounded-full px-2.5 py-0.5"
+          >
+            {{ payinTotal }}
+          </span>
+        </div>
+        <div class="flex items-center justify-between mt-0.5">
+          <span class="text-xs font-medium text-emerald-600"
+            >Recent incoming transactions</span
+          >
+          <a
+            class="text-xs font-semibold text-blue-600 no-underline hover:underline cursor-pointer"
+            href="javascript:void(0)"
+          >
+            View All
+          </a>
+        </div>
+      </header>
+
+      <div
+        class="flex flex-col gap-2.5 max-h-[420px] overflow-y-auto pr-1 scroll-smooth"
+        (scroll)="onColumnScroll($event)"
+      >
+        <!-- initial skeletons -->
+        <ng-container *ngIf="loading">
+          <div
+            class="h-[66px] rounded-xl bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:400%_100%] animate-pulse"
+            *ngFor="let s of [1, 2, 3]"
+          ></div>
+        </ng-container>
+
+        <ng-container *ngIf="!loading">
+          <div
+            class="relative flex items-start gap-3 bg-white rounded-xl pl-4 pr-3.5 py-3 border border-gray-100 shadow-sm cursor-pointer transition hover:shadow-md hover:-translate-y-0.5"
+            *ngFor="let row of payinRows; trackBy: trackByRowId"
+            (click)="openDetails(row)"
+          >
+            <span
+              class="absolute left-0 top-2 bottom-2 w-1 rounded bg-emerald-500"
+            ></span>
+
+            <div
+              class="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-emerald-50 text-emerald-600"
+            >
+              <span class="material-symbols-outlined text-lg">{{
+                cardIcon(row)
+              }}</span>
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <!-- displayId shown first, prominently -->
+                <span
+                  class="text-[11px] font-bold text-gray-400 whitespace-nowrap"
+                  >#{{ row.displayId }}</span
+                >
+                <span class="text-sm font-bold text-gray-900">{{
+                  cardTitle(row)
+                }}</span>
+              </div>
+              <div
+                class="mt-0.5 text-xs text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap"
+              >
+                {{ cardSubline(row) }}
+              </div>
+            </div>
+
+            <div class="flex-shrink-0 flex flex-col items-end gap-1">
+              <span class="text-sm font-bold text-gray-900"
+                >{{ displayValue(row.amount) }} {{ row.currency }}</span
+              >
+              <span class="text-[11px] text-gray-400 flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-xs"
+                  >calendar_today</span
+                >
+                {{ formatDateShort(row.createdAt) }}
+              </span>
+              <span
+                class="text-[10.5px] font-semibold rounded-full px-2.5 py-0.5 whitespace-nowrap"
+                [ngClass]="{
+                  'bg-amber-100 text-amber-700':
+                    statusInfo(row).cssClass === 'badge-pending',
+                  'bg-blue-100 text-blue-700':
+                    statusInfo(row).cssClass === 'badge-processing',
+                  'bg-emerald-100 text-emerald-700':
+                    statusInfo(row).cssClass === 'badge-completed',
+                  'bg-rose-100 text-rose-700':
+                    statusInfo(row).cssClass === 'badge-failed',
+                }"
+              >
+                {{ statusInfo(row).label }}
+              </span>
+            </div>
+          </div>
+
+          <div
+            class="flex flex-col items-center gap-1.5 text-gray-400 text-sm py-8"
+            *ngIf="!payinRows.length"
+          >
+            <span class="material-symbols-outlined text-2xl">inbox</span>
+            No pay-in transactions found
+          </div>
+
+          <div
+            class="text-center text-xs text-gray-400 py-2"
+            *ngIf="loadingMore && payinRows.length < payinTotal"
+          >
+            Loading more…
+          </div>
+        </ng-container>
+      </div>
+    </section>
+
+    <!-- ==================== PAY OUT COLUMN ==================== -->
+    <section class="flex flex-col min-w-0">
+      <header class="mb-3">
+        <div class="flex items-center gap-2">
+          <span
+            class="inline-flex items-center justify-center w-6 h-6 rounded-full text-blue-600"
+          >
+            <span class="material-symbols-outlined text-base">north</span>
+          </span>
+          <h3 class="m-0 text-base font-bold">Pay Out</h3>
+          <span
+            class="bg-gray-200 text-gray-700 text-xs font-semibold rounded-full px-2.5 py-0.5"
+          >
+            {{ payoutTotal }}
+          </span>
+        </div>
+        <div class="flex items-center justify-between mt-0.5">
+          <span class="text-xs font-medium text-blue-600"
+            >Recent outgoing transactions</span
+          >
+          <a
+            class="text-xs font-semibold text-blue-600 no-underline hover:underline cursor-pointer"
+            href="javascript:void(0)"
+          >
+            View All
+          </a>
+        </div>
+      </header>
+
+      <div
+        class="flex flex-col gap-2.5 max-h-[420px] overflow-y-auto pr-1 scroll-smooth"
+        (scroll)="onColumnScroll($event)"
+      >
+        <ng-container *ngIf="loading">
+          <div
+            class="h-[66px] rounded-xl bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:400%_100%] animate-pulse"
+            *ngFor="let s of [1, 2, 3]"
+          ></div>
+        </ng-container>
+
+        <ng-container *ngIf="!loading">
+          <div
+            class="relative flex items-start gap-3 bg-white rounded-xl pl-4 pr-3.5 py-3 border border-gray-100 shadow-sm cursor-pointer transition hover:shadow-md hover:-translate-y-0.5"
+            *ngFor="let row of payoutRows; trackBy: trackByRowId"
+            (click)="openDetails(row)"
+          >
+            <span
+              class="absolute left-0 top-2 bottom-2 w-1 rounded bg-blue-500"
+            ></span>
+
+            <div
+              class="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-blue-50 text-blue-600"
+            >
+              <span class="material-symbols-outlined text-lg">{{
+                cardIcon(row)
+              }}</span>
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <!-- displayId shown first, prominently -->
+                <span
+                  class="text-[11px] font-bold text-gray-400 whitespace-nowrap"
+                  >#{{ row.displayId }}</span
+                >
+                <span class="text-sm font-bold text-gray-900">{{
+                  cardTitle(row)
+                }}</span>
+              </div>
+              <div
+                class="mt-0.5 text-xs text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap"
+              >
+                {{ cardSubline(row) }}
+              </div>
+            </div>
+
+            <div class="flex-shrink-0 flex flex-col items-end gap-1">
+              <span class="text-sm font-bold text-gray-900"
+                >{{ displayValue(row.amount) }} {{ row.currency }}</span
+              >
+              <span class="text-[11px] text-gray-400 flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-xs"
+                  >calendar_today</span
+                >
+                {{ formatDateShort(row.createdAt) }}
+              </span>
+              <span
+                class="text-[10.5px] font-semibold rounded-full px-2.5 py-0.5 whitespace-nowrap"
+                [ngClass]="{
+                  'bg-amber-100 text-amber-700':
+                    statusInfo(row).cssClass === 'badge-pending',
+                  'bg-blue-100 text-blue-700':
+                    statusInfo(row).cssClass === 'badge-processing',
+                  'bg-emerald-100 text-emerald-700':
+                    statusInfo(row).cssClass === 'badge-completed',
+                  'bg-rose-100 text-rose-700':
+                    statusInfo(row).cssClass === 'badge-failed',
+                }"
+              >
+                {{ statusInfo(row).label }}
+                <ng-container *ngIf="statusInfo(row).countdown as cd">
+                  · {{ cd }}
+                </ng-container>
+              </span>
+            </div>
+          </div>
+
+          <div
+            class="flex flex-col items-center gap-1.5 text-gray-400 text-sm py-8"
+            *ngIf="!payoutRows.length"
+          >
+            <span class="material-symbols-outlined text-2xl">inbox</span>
+            No pay-out transactions found
+          </div>
+
+          <div
+            class="text-center text-xs text-gray-400 py-2"
+            *ngIf="loadingMore && payoutRows.length < payoutTotal"
+          >
+            Loading more…
+          </div>
+        </ng-container>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== DETAILS MODAL ==================== -->
+  <div
+    class="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-[1000] p-5"
+    *ngIf="showModal"
+    (click)="closeModal()"
+  >
+    <div
+      class="bg-white rounded-2xl w-full max-w-[560px] max-h-[88vh] overflow-hidden flex flex-col shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- top bar: type badge + displayId + close -->
+      <div
+        class="flex items-center justify-between px-5 py-3.5 border-b border-gray-100"
+      >
+        <div class="flex items-center gap-2.5">
+          <span
+            class="text-[11px] font-bold rounded-md px-2 py-0.5 tracking-wide"
+            [ngClass]="
+              selectedRow?.transactionType === 'PAYIN'
+                ? 'bg-emerald-50 text-emerald-600'
+                : 'bg-blue-50 text-blue-600'
+            "
+          >
+            {{ selectedRow?.transactionType }}
+          </span>
+          <h3 class="m-0 text-sm font-semibold text-gray-500">
+            #{{ selectedRow?.displayId }}
+          </h3>
+        </div>
+        <button
+          type="button"
+          class="border-none bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer text-gray-600 hover:bg-gray-200"
+          (click)="closeModal()"
+        >
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- hero: icon + title + big amount + live status -->
+      <div
+        class="flex items-center gap-4 px-5 py-5 border-b border-gray-100"
+        *ngIf="selectedRow as sr"
+      >
+        <div
+          class="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center"
+          [ngClass]="
+            sr.transactionType === 'PAYIN'
+              ? 'bg-emerald-50 text-emerald-600'
+              : 'bg-blue-50 text-blue-600'
+          "
+        >
+          <span class="material-symbols-outlined text-3xl">{{
+            cardIcon(sr)
+          }}</span>
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <div class="text-base font-bold text-gray-900 truncate">
+            {{ cardTitle(sr) }}
+          </div>
+        </div>
+
+        <div class="flex-shrink-0 flex flex-col items-end gap-1.5">
+          <span class="text-xl font-extrabold text-gray-900"
+            >{{ displayValue(sr.amount) }} {{ sr.currency }}</span
+          >
+          <span
+            class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 whitespace-nowrap"
+            [ngClass]="{
+              'bg-amber-100 text-amber-700':
+                statusInfo(sr).cssClass === 'badge-pending',
+              'bg-blue-100 text-blue-700':
+                statusInfo(sr).cssClass === 'badge-processing',
+              'bg-emerald-100 text-emerald-700':
+                statusInfo(sr).cssClass === 'badge-completed',
+              'bg-rose-100 text-rose-700':
+                statusInfo(sr).cssClass === 'badge-failed',
+            }"
+          >
+            {{ statusInfo(sr).label }}
+            <ng-container *ngIf="statusInfo(sr).countdown as cd">
+              · {{ cd }}
+            </ng-container>
+          </span>
+        </div>
+      </div>
+
+      <div class="overflow-y-auto px-5 pt-4 pb-6">
+        <!-- ==================== attachment preview (enhanced) ==================== -->
+        <div class="mb-5" *ngIf="selectedRow?.raw?.filePath">
+          <div class="flex items-center justify-between mb-2">
+            <h4
+              class="m-0 text-xs font-bold uppercase tracking-wide text-gray-500"
+            >
+              Attachment
+            </h4>
+          </div>
+
+          <div
+            class="flex items-center gap-2 text-xs text-gray-400"
+            *ngIf="modalImageLoading"
+          >
+            <span class="material-symbols-outlined text-sm animate-spin"
+              >progress_activity</span
+            >
+            Loading attachment…
+          </div>
+
+          <div
+            class="flex items-center gap-2 text-xs text-rose-500"
+            *ngIf="modalImageError"
+          >
+            <span class="material-symbols-outlined text-sm">broken_image</span>
+            Could not load attachment
+            <button
+              type="button"
+              class="ml-2 text-xs font-semibold text-blue-600 underline cursor-pointer"
+              (click)="openDetails(selectedRow!)"
+            >
+              Retry
+            </button>
+          </div>
+
+          <div class="relative" *ngIf="modalImageUrl">
+            <div
+              class="relative group inline-block cursor-zoom-in"
+              (click)="toggleImageExpand()"
+            >
+              <img
+                [src]="modalImageUrl"
+                alt="Transaction proof"
+                class="max-w-full max-h-60 rounded-lg border border-gray-100 transition group-hover:brightness-90"
+              />
+              <span
+                class="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition pointer-events-none"
+              >
+                <span class="material-symbols-outlined text-sm">zoom_in</span>
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2 mt-2">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 border border-gray-300 bg-white rounded-lg px-3 py-1 text-xs cursor-pointer text-gray-700 hover:bg-gray-50"
+                (click)="downloadAttachment()"
+              >
+                <span class="material-symbols-outlined text-sm">download</span>
+                Download
+              </button>
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 border border-gray-300 bg-white rounded-lg px-3 py-1 text-xs cursor-pointer text-gray-700 hover:bg-gray-50"
+                (click)="toggleImageExpand()"
+              >
+                <span class="material-symbols-outlined text-sm"
+                  >open_in_full</span
+                >
+                View Full
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- detail sections -->
+        <div
+          class="mb-5"
+          *ngFor="let section of getDetailSections(selectedRow)"
+        >
+          <h4
+            class="m-0 mb-2 text-xs font-bold uppercase tracking-wide text-gray-500"
+          >
+            {{ section.title }}
+          </h4>
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 bg-gray-50 rounded-xl p-3.5"
+          >
+            <div class="flex flex-col gap-0.5" *ngFor="let r of section.rows">
+              <span class="text-[11px] text-gray-400">{{ r.label }}</span>
+              <span class="text-sm font-semibold text-gray-900 break-words">{{
+                r.value
+              }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FULLSCREEN IMAGE PREVIEW ==================== -->
+  <div
+    class="fixed inset-0 bg-black/85 flex items-center justify-center z-[1100] p-6"
+    *ngIf="modalImageExpanded"
+    (click)="toggleImageExpand()"
+  >
+    <img
+      [src]="modalImageUrl"
+      alt="Transaction proof - full size"
+      class="max-w-full max-h-full rounded-lg shadow-2xl"
+      (click)="$event.stopPropagation()"
+    />
+    <button
+      type="button"
+      class="absolute top-5 right-5 bg-white/90 rounded-full w-9 h-9 flex items-center justify-center cursor-pointer hover:bg-white"
+      (click)="toggleImageExpand()"
+    >
+      <span class="material-symbols-outlined text-lg">close</span>
+    </button>
+    <button
+      type="button"
+      class="absolute bottom-5 inline-flex items-center gap-1.5 bg-white/95 rounded-lg px-4 py-2 text-sm font-semibold cursor-pointer hover:bg-white"
+      (click)="downloadAttachment(); $event.stopPropagation()"
+    >
+      <span class="material-symbols-outlined text-base">download</span>
+      Download
+    </button>
+  </div>
+</div>

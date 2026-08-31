@@ -858,122 +858,28 @@ export class HbPayinReportComponent implements OnInit, OnDestroy {
     }
     return "bg-slate-100 text-slate-600";
   }
-  // loadCurrencies(): void {
-  //   if (!this.entityId) return;
-  //   this.loadingCurrencies = true;
-
-  //   this.chiefService
-  //     .getCurrenciesByEntity(this.entityId, this.role)
-  //     .pipe(catchError(() => of({ data: { currencies: [] } })))
-  //     .subscribe((res: any) => {
-  //       this.loadingCurrencies = false;
-  //       this.currencies = res?.data?.currencies || [];
-
-  //       if (this.currencies.length) {
-  //         // default: pehli currency select karo
-  //         this.selectedCurrency = this.currencies[0].currency;
-  //         this.updateAvailableModes();
-  //       }
-
-  //       // ab currency ready hai, tabhi payins fetch karo
-  //       this.fetchBankPayins();
-  //     });
-  // }
-
   loadCurrencies(): void {
     if (!this.entityId) return;
-
     this.loadingCurrencies = true;
 
-    const roleUpper = (this.role || "").toUpperCase();
-
-    // ==========================================
-    // 1. HEAD / BRANCH → GLOBAL CURRENCY CACHE
-    // ==========================================
-    if (roleUpper === "HEAD" || roleUpper === "BRANCH") {
-      const cached = this.userStateService.getStoredCurrencies();
-
-      if (cached && Array.isArray(cached) && cached.length > 0) {
-        this.loadingCurrencies = false;
-
-        this.currencies = cached;
-
-        // Default currency
-        this.selectedCurrency = this.currencies[0]?.currency || null;
-
-        this.updateAvailableModes();
-
-        // Currency ready → Payins fetch
-        this.fetchBankPayins();
-
-        return; // API CALL SKIP
-      }
-    }
-
-    // ==========================================
-    // 2. CACHE NAHI MILA → API CALL
-    // ==========================================
     this.chiefService
       .getCurrenciesByEntity(this.entityId, this.role)
-      .pipe(
-        catchError(() =>
-          of({
-            data: {
-              currencies: [],
-            },
-          }),
-        ),
-      )
+      .pipe(catchError(() => of({ data: { currencies: [] } })))
       .subscribe((res: any) => {
         this.loadingCurrencies = false;
+        this.currencies = res?.data?.currencies || [];
 
-        const rawCurrencies = res?.data?.currencies || [];
-
-        // ==========================================
-        // 3. ONLY TRUE MODES
-        // ==========================================
-        const filteredCurrencies = rawCurrencies
-          .map((c: any) => {
-            const trueModes: Record<string, boolean> = {};
-
-            Object.keys(c.modes || {}).forEach((mode) => {
-              if (c.modes[mode] === true) {
-                trueModes[mode] = true;
-              }
-            });
-
-            return {
-              ...c,
-              modes: trueModes,
-            };
-          })
-          .filter((c: any) => Object.keys(c.modes).length > 0);
-
-        this.currencies = filteredCurrencies;
-
-        // ==========================================
-        // 4. GLOBAL USERSTATE CACHE ME SAVE
-        // ==========================================
-        if (
-          (roleUpper === "HEAD" || roleUpper === "BRANCH") &&
-          filteredCurrencies.length > 0
-        ) {
-          this.userStateService.getStoredCurrencies();
-        }
-
-        // ==========================================
-        // 5. DEFAULT CURRENCY
-        // ==========================================
-        if (this.currencies.length > 0) {
-          this.selectedCurrency = this.currencies[0]?.currency || null;
-
+        if (this.currencies.length) {
+          // default: pehli currency select karo
+          this.selectedCurrency = this.currencies[0].currency;
           this.updateAvailableModes();
         }
 
-        // Currency ready → Payins fetch
+        // ab currency ready hai, tabhi payins fetch karo
         this.fetchBankPayins();
       });
   }
+
   updateAvailableModes(): void {
     const curr = this.currencies.find(
       (c) => c.currency === this.selectedCurrency,

@@ -12,42 +12,7 @@
   [class.translate-x-full]="!isOpen"
 >
   <!-- Header -->
-  <!-- <div
-    class="flex-shrink-0 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] text-white px-4 py-4"
-  >
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="relative">
-          <span class="material-icons text-2xl">notifications</span>
-          <span
-            *ngIf="getUnreadCount() > 0"
-            class="absolute -top-1 -right-2 text-xs font-bold px-1.5 py-0.5 rounded-full bg-red-500 text-white"
-          >
-            {{ getUnreadCount() }}
-          </span>
-        </div>
-        <div>
-          <h2 class="text-lg font-semibold">Notifications</h2>
-          <p class="text-xs text-[var(--color-primary-light)]">
-            {{ getTotalCount() }} total • {{ getUnreadCount() }} unread
-          </p>
-        </div>
-      </div>
-      <button
-        (click)="markAllAsRead()"
-        class="p-2 rounded-lg hover:bg-white/20 transition-colors flex items-center gap-1 text-xs"
-        title="Mark all as read"
-      >
-        <span class="material-icons text-sm">done_all</span>
-      </button>
-      <button
-        (click)="closeSidebar()"
-        class="p-2 rounded-lg hover:bg-white/20 transition-colors"
-      >
-        <span class="material-icons">close</span>
-      </button>
-    </div>
-  </div> -->
+
   <div
     class="flex-shrink-0 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] text-white px-2 py-1"
   >
@@ -145,15 +110,7 @@
       </div>
 
       <!-- Mark All Read Button -->
-      <!-- <button
-        *ngIf="getUnreadCount() > 0"
-        (click)="markAllAsRead()"
-        class="text-xs font-semibold px-2 py-1 rounded-md text-[var(--color-primary)] hover:bg-[var(--color-primary-light)]/10 transition-colors flex items-center gap-1"
-        title="Mark all as read"
-      >
-        <span class="material-icons text-sm">done_all</span>
-        <span class="hidden sm:inline">Mark all read</span>
-      </button> -->
+
       <!-- Right Side Actions -->
       <div class="flex items-center gap-2">
         <!--  ADD THIS (Refresh button) -->
@@ -746,3 +703,6 @@
     </div>
   </div>
 </div>
+
+
+

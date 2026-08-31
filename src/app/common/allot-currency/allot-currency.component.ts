@@ -366,16 +366,16 @@ export class AllotCurrencyComponent implements OnInit {
       }
 
       // Modes validation only for CHIEF & PORTAL — same rule as before, now per row.
-      if (
-        (this.entityType === "CHIEF" || this.entityType === "PORTAL") &&
-        row.selectedModes.length === 0
-      ) {
-        this.snackBar.show(
-          `Please select at least one payment mode for ${row.currency}`,
-          false,
-        );
-        return;
-      }
+      // if (
+      //   (this.entityType === "CHIEF" || this.entityType === "PORTAL") &&
+      //   row.selectedModes.length === 0
+      // ) {
+      //   this.snackBar.show(
+      //     `Please select at least one payment mode for ${row.currency}`,
+      //     false,
+      //   );
+      //   return;
+      // }
     }
 
     // ================= PAYLOAD (array — one entry per changed currency) =================

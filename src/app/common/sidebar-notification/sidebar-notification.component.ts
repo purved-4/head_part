@@ -141,37 +141,17 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     private tzService: TimeZoneServiceService,
   ) {}
 
-  // ngOnInit(): void {
-  //   this.currentUserId = this.userStateService.getUserId();
-  //   this.currentRoleName = this.userStateService.getRole();
-  //   this.currentRoleId = this.userStateService.getCurrentEntityId();
+ngOnInit(): void {
+  this.currentUserId = this.userStateService.getUserId();
+  this.currentRoleName = this.userStateService.getRole();
+  this.currentRoleId = this.userStateService.getCurrentEntityId();
+  this.isVoiceEnabled = this.voiceNotificationService.isEnabled();
+  this.currentLanguage = this.voiceNotificationService.getLanguage(); // add this
 
-  //   // this.getAllNotifications();
+  this.socketConfigService.subscribeNotifications(this.currentRoleId);
+  this.getAllNotifications(); //  ADDED: load unread count immediately, don't wait for sidebar to open
 
-  //   this.socketConfigService.subscribeNotifications(this.currentRoleId);
-
-  //   this.ws = this.socketConfigService.getNotifications().subscribe((data) => {
-  //     if (!data) return;
-  //     if (Array.isArray(data.threads)) {
-  //       this.processIncomingData(data.threads);
-  //     } else if (data.threads) {
-  //       this.processIncomingData([data.threads]);
-  //     } else {
-  //       this.handleSseUpdate(data);
-  //     }
-  //   });
-  // }
-
-  ngOnInit(): void {
-    this.currentUserId = this.userStateService.getUserId();
-    this.currentRoleName = this.userStateService.getRole();
-    this.currentRoleId = this.userStateService.getCurrentEntityId();
-    this.isVoiceEnabled = this.voiceNotificationService.isEnabled();
-    this.currentLanguage = this.voiceNotificationService.getLanguage(); // add this
-
-    this.socketConfigService.subscribeNotifications(this.currentRoleId);
-
-    this.ws = this.socketConfigService.getNotifications().subscribe((data) => {
+  this.ws = this.socketConfigService.getNotifications().subscribe((data) => {
       if (!data) return;
 
       if (Array.isArray(data.threads)) {
@@ -585,9 +565,12 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
       });
   }
 
+  // getUnreadCount(): number {
+  //   return this.notifications.reduce((acc, n) => acc + (n.unreadCount || 0), 0);
+  // }
   getUnreadCount(): number {
-    return this.notifications.reduce((acc, n) => acc + (n.unreadCount || 0), 0);
-  }
+  return this.notifications.filter((n) => !n.isRead).length;
+}
 
   getTotalCount(): number {
     let count = 0;

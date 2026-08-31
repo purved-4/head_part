@@ -81,5 +81,61 @@ getByParentCurrencyHistory(
     return this.http.put(url, payload, { params });
   }
 
+  getChiefAndCompartByParentCurrency(
+  currency: string,
+  entityType: string
+): Observable<any> {
+  return this.http
+    .get(
+      `${baseUrl}/global-currency/getChiefAndCompartByParentCurrency/${currency}/${entityType}`
+    )
+    .pipe(
+      map((response: any) => response),
+      catchError((error) => throwError(() => error))
+    );
+}
+// =====================================================
+  // CREATE CHIEF CURRENCIES
+  // =====================================================
+
+  createChiefCurrencies(
+    data: any
+  ): Observable<any> {
+
+    return this.http
+      .post<any>(
+        `${baseUrl}/chief/currencies/bulkCreate`,
+        data
+      )
+      .pipe(
+        map((response: any) => response),
+        catchError((error) =>
+          throwError(() => error)
+        )
+      );
+  }
+
+
+  // =====================================================
+  // CREATE COMMERCE PARTNER CURRENCIES
+  // =====================================================
+
+  createCompartCurrencies(
+    data: any
+  ): Observable<any> {
+
+    return this.http
+      .post<any>(
+        `${baseUrl}/compart/currencies/bulkCreate`,
+        data
+      )
+      .pipe(
+        map((response: any) => response),
+        catchError((error) =>
+          throwError(() => error)
+        )
+      );
+  }
+
 
 }

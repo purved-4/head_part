@@ -70,6 +70,13 @@ export class ComPartService {
       .pipe(map(pluckData), catchError(this.handleError));
   }
 
+
+   getComPartsListByUserIdAndAutoPayout(id: any): Observable<any> {
+    return this.http
+      .get<any>(`${baseUrl}/comPart/getComPartsListByUserIdAndAutoPayout/${id}`)
+      .pipe(map(pluckData), catchError(this.handleError));
+  }
+
   getComPartsByEntityId(entityId: any, entityType: any): Observable<any> {
     return this.http
       .get<any>(
@@ -95,8 +102,6 @@ export class ComPartService {
 
   getPortalByComPartId(
     id: any,
-    page: any = 0,
-    size: any = 10,
   ): Observable<any> {
     return this.http
       .get<any>(`${baseUrl}/comPart/portals/getAllByComPartId/${id}`)

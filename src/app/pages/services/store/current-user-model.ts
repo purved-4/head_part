@@ -1,5 +1,3 @@
-
-
 export interface Role {
   id: string;
   name: string;
@@ -15,5 +13,5 @@ export interface CurrentUser {
   username: string;
   role: Role[];
 
-comPartId?: string;
+  comPartId?: string;
 }

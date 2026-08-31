@@ -1,12 +1,9 @@
-import {
-  IS_LOGIN_KEY,
-  CURRENT_USER_KEY,
-} from "../../../registery/subject-registry.key";
 import { Inject, Injectable, PLATFORM_ID } from "@angular/core";
 import { isPlatformBrowser } from "@angular/common";
 import { BehaviorSubject, Observable } from "rxjs";
 import { CurrentUser } from "./current-user-model";
 import { SubjectRegistryService } from "../../../registery/subject-registry.service";
+import { CURRENT_USER_KEY, IS_LOGIN_KEY } from "../../../registery/subject-registry.key";
 
 @Injectable({
   providedIn: "root",

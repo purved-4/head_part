@@ -101,7 +101,7 @@ export class VoiceNotificationService {
     this.currentAudio = audio;
 
     audio.play().catch((err) => {
-      console.error("Voice notification audio play failed:", err);
+
     });
   }
 
@@ -201,7 +201,7 @@ export class VoiceNotificationService {
     this.currentAudio = audio;
 
     audio.play().catch((err) => {
-      console.error("Payin status audio play failed:", err);
+
     });
   }
 }
