@@ -9,6 +9,7 @@ import baseUrl from './helper';
 export interface CreatePayinRequest {
   amount: number;
   customerName: string;
+  comPartId: string;  // <-- naya field, backend me bhi add kiya hai
 }
  
 // Backend "Payin" entity jaisa hi response (create / local list / local one me yahi shape aata hai)
@@ -43,6 +44,7 @@ export interface PayinStatusApiResponse {
   paidAt: string | null;
   createdAt: string;
   expiresAt: string;
+  comPartId: string;
 }
 
 // Backend "Payin" entity jaisa hi response (create / local list / local one me yahi shape aata hai)
@@ -62,6 +64,10 @@ export interface PayinApiResponse {
   expiresAt: string | null;
   createdDate: string;
   updatedDate: string;
+    comPartId: string;
+    rate:number;
+    rewardAmount:number;
+
 }
 
 // Backend "GET /status/{merchantOrderId}" ka response (live gateway status)
@@ -82,6 +88,9 @@ export interface PayinStatusApiResponse {
 export interface PayinLocalFilters {
   orderId?: string;
   customerName?: string;
+  fromDate?: string;
+  toDate?: string;
+  comPartId: string;  // <-- naya field
   status?: 'ALL' | 'PENDING' | 'COMPLETED';
 }
  
@@ -140,7 +149,15 @@ export class PayinApiService {
     if (filters.status) {
       params = params.set('status', filters.status);
     }
- 
+  if (filters.comPartId) {
+      params = params.set('comPartId', filters.comPartId);
+    }
+    if (filters.fromDate) {
+  params = params.set('fromDate', filters.fromDate + 'T00:00:00');
+}
+if (filters.toDate) {
+  params = params.set('toDate', filters.toDate + 'T23:59:59');
+}
     return this.http.get<PageResponse<PayinApiResponse>>(`${baseUrl}/payin/local`, { params });
   }
  

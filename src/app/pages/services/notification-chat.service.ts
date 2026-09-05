@@ -124,14 +124,21 @@ getAllThreadCombinedPaginate(
   }
 
 
-  getAllNotifications(recipientId: any): Observable<any> {
+getAllNotifications(
+    recipientId: any,
+    page: number = 0,
+    size: number = 20,
+): Observable<any> {
     return this.http
-      .get(`${baseUrl}/notifications?recipientId=${recipientId}`)
-      .pipe(
+     .get(
+        `${baseUrl}/notifications?recipientId=${recipientId}&page=${page}&size=${size}`,
+     )
+     .pipe(
         map((res: any) => res.data),
         catchError((err) => throwError(err)),
-      );
-  }
+     );
+}
+
 
   sendChatMessage(threadId: any, payload: any): Observable<any> {
     return this.http

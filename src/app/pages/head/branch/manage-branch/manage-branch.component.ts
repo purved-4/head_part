@@ -197,6 +197,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
       next: (res: any) => {
         const list = res || [];
         this.agents = list.map((agent: any) => {
+          
           const email = this.extractEmail(agent);
           const mobile = this.extractMobile(agent);
           const info = agent.info || agent.additionalInfo || "";
@@ -1106,6 +1107,7 @@ export class ManageBranchComponent implements OnInit, OnDestroy {
   }
 
   initialLetter(agent: any): string {
+
     if (!agent?.username) return "";
     return agent.username.charAt(0).toUpperCase();
   }

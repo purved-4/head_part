@@ -100,6 +100,12 @@ export class PayoutService {
     );
   }
 
+   getCompletedPayins(comPartId: any): Observable<CompletedSummary> {
+    return this.http.get<CompletedSummary>(
+      `${baseUrl}/payin/completed-summary?comPartId=${comPartId}`
+    );
+  }
+
   /** POST /withdraw/{payoutId}/reward  body: { rate } */
   applyReward(payoutId: number, comPartId: any): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(

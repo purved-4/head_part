@@ -204,9 +204,22 @@ export class HeadNavHeaderComponent implements OnInit {
   rewards: any;
   exploser: any;
   bankBalance: any = 0;
-  upiBalance: any = 0;
+  upiBalance: any = 0
+  parentCurrencySymbol="";
   isCountdownFinished: boolean = false;
   role: any;
+formattedPayinPending = "";
+formattedPayinDispute = "";
+formattedPayinAccepted = "";
+formattedPayinTotal = "";
+
+formattedPayoutPending = "";
+formattedPayoutDispute = "";
+formattedPayoutAccepted = "";
+formattedPayoutTotal = "";
+
+formattedHeldAmount = "";
+userInitials = "BU";
   private retryTimeout: any;
   payinTime: string | null = null;
   // Popup state
@@ -219,6 +232,7 @@ export class HeadNavHeaderComponent implements OnInit {
   @Input() isMobileOpen = false;
   @Output() closeMobileMenu = new EventEmitter<void>();
   @Output() notificationClick = new EventEmitter<void>();
+  @Output() unreadCountLoaded = new EventEmitter<number>();
   @ViewChild("portalContainer") portalContainer!: ElementRef;
   isPortalOpen = false;
   private noDataSnackbarShown = false;
@@ -238,7 +252,16 @@ export class HeadNavHeaderComponent implements OnInit {
     private voiceService: VoiceNotificationService, // 👈 add
   ) {}
 
-  ngOnInit(): void {
+ngOnInit(): void {
+   this.userInitials = this.userName
+    ? this.userName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2)
+    : "BU";
+
     this.headId = this.userStateService.getCurrentEntityId();
     this.currentRoleId = this.userStateService.getCurrentEntityId();
     this.currentUserRole = this.userStateService.getRole();
@@ -248,40 +271,53 @@ export class HeadNavHeaderComponent implements OnInit {
     this.socketService.subscribeLatestBalance(
       this.currentUserRole,
       this.currentRoleId,
+      
     );
 
     //  SOCKET REAL-TIME
-    this.socketService.getLatestBalance().subscribe((res) => {
-      this.ngZone.run(() => {
-        this.limitRemainingAmount = res?.entityBalance ?? 0;
-        this.payinBalance = res?.totalPayin ?? 0;
-        this.payoutBalance = res?.totalPayout ?? 0;
-        this.rewards = res?.reward ?? 0;
-        this.exploser = res?.exploser ?? 0;
-        this.availableBalance = res?.availableBalance ?? 0;
-        this.entityBalance = res?.entityBalance ?? 0;
-        this.exploserBalance = res?.exploserBalance ?? 0;
+  
 
-        this.emitBalances();
-      });
-    });
+    this.socketService.getLatestBalance().subscribe((res) => {
+  this.ngZone.run(() => {
+    this.limitRemainingAmount = res?.entityBalance ?? 0;
+    this.payinBalance = res?.totalPayin ?? 0;
+    this.payoutBalance = res?.totalPayout ?? 0;
+    this.rewards = res?.reward ?? 0;
+    this.exploser = res?.exploser ?? 0;
+    this.availableBalance = res?.availableBalance ?? 0;
+    this.entityBalance = res?.entityBalance ?? 0;
+    this.exploserBalance = res?.exploserBalance ?? 0;
+
+    if (typeof res?.notiUnReadCount === "number") {
+      this.unreadCountLoaded.emit(res.notiUnReadCount);
+    }
+
+    this.emitBalances();
+  });
+});
 
     //  INITIAL API
+
     this.limitService
-      .getLatestLimitsByEntityAndType(this.currentRoleId, this.currentUserRole)
-      .subscribe((res) => {
-        this.ngZone.run(() => {
-          this.limitRemainingAmount = res?.entityBalance ?? 0;
-          this.payinBalance = res?.totalPayin ?? 0;
-          this.payoutBalance = res?.totalPayout ?? 0;
-          this.rewards = res?.reward ?? 0;
-          this.exploser = res?.exploser ?? 0;
-          this.availableBalance = res?.availableBalance ?? 0;
-          this.entityBalance = res?.entityBalance ?? 0;
-          this.exploserBalance = res?.exploserBalance ?? 0;
-          this.emitBalances();
-        });
-      });
+  .getLatestLimitsByEntityAndType(this.currentRoleId, this.currentUserRole)
+  .subscribe((res) => {
+    this.ngZone.run(() => {
+      this.limitRemainingAmount = res?.entityBalance ?? 0;
+      this.payinBalance = res?.totalPayin ?? 0;
+      this.payoutBalance = res?.totalPayout ?? 0;
+      this.rewards = res?.reward ?? 0;
+      this.exploser = res?.exploser ?? 0;
+      this.availableBalance = res?.availableBalance ?? 0;
+      this.entityBalance = res?.entityBalance ?? 0;
+      this.exploserBalance = res?.exploserBalance ?? 0;
+
+      if (typeof res?.notiUnReadCount === "number") {
+        this.unreadCountLoaded.emit(res.notiUnReadCount);
+      }
+
+      this.emitBalances();
+    });
+  });
     this.fetchExposureData();
   }
 
@@ -435,15 +471,6 @@ export class HeadNavHeaderComponent implements OnInit {
     this.showMobileSearch = false;
   }
 
-  getUserInitials(): string {
-    if (!this.userName) return "BU";
-    return this.userName
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
-  }
 
   formatIndianAmount(amount: number | string): string {
     if (amount === null || amount === undefined) return "0";
@@ -474,10 +501,7 @@ export class HeadNavHeaderComponent implements OnInit {
     return value.toString();
   }
 
-  formatFullAmount(amount: number | string): string {
-    if (amount === null || amount === undefined) return "₹0";
-    return "₹" + Number(amount).toLocaleString("en-IN");
-  }
+ 
 
   changePayinStatus() {
     this.headServices.toggleDashbaordPayin(this.headId).subscribe({
@@ -735,8 +759,34 @@ export class HeadNavHeaderComponent implements OnInit {
 
           heldAmount: data.heldAmount ?? 0,
         };
+this.formattedPayinPending =
+  Number(this.exposureData.payinPending || 0).toLocaleString("en-IN");
 
+this.formattedPayinDispute =
+  Number(this.exposureData.payinDispute || 0).toLocaleString("en-IN");
+
+this.formattedPayinAccepted =
+  Number(this.exposureData.payinAccepted || 0).toLocaleString("en-IN");
+
+this.formattedPayinTotal =
+  Number(this.exposureData.payinTotal || 0).toLocaleString("en-IN");
+
+this.formattedPayoutPending =
+  Number(this.exposureData.payoutPending || 0).toLocaleString("en-IN");
+
+this.formattedPayoutDispute =
+  Number(this.exposureData.payoutDispute || 0).toLocaleString("en-IN");
+
+this.formattedPayoutAccepted =
+  Number(this.exposureData.payoutAccepted || 0).toLocaleString("en-IN");
+
+this.formattedPayoutTotal =
+  Number(this.exposureData.payoutTotal || 0).toLocaleString("en-IN");
+
+this.formattedHeldAmount =
+  Number(this.exposureData.heldAmount || 0).toLocaleString("en-IN");
         this.exposureLoading = false;
+          this.parentCurrencySymbol = this.getCurrencySymbol(this.parentCurrency);
       },
       error: () => {
         this.exposureLoading = false;

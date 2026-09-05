@@ -1258,27 +1258,37 @@ export class ComPartService {
       .pipe(map(pluckData), catchError(this.handleError));
   }
 
-  generateAnonymousLinkWithType(
-    portalId: string,
+ generateAnonymousLinkWithType(
+  portalId: string,
+  expireMinute: number,
+  userType: boolean,
+  fundType: "PAYIN" | "PAYOUT",
+  currency?: string,
+  amount?: any,
+  mode?: string,
+  currencyEditAllowed?: boolean ,
+  modeEditedAllowed?: boolean,
+  userId ?:any,
+  userIdEditAllowed? : boolean ,
+): Observable<any> {
+  const request = {
+    expireMinute,
+    userType,
+    fundType,
+    currency,
+    amount,
+    mode,
+    currencyEditAllowed,
+    modeEditedAllowed,
+    userId,
+    userIdEditAllowed,
 
-    expireMinute: number,
-    userType: boolean,
-    fundType: "PAYIN" | "PAYOUT",
-    currency?: string,
-    amount?: any,
-  ): Observable<any> {
-    const request = {
-      expireMinute,
-      userType,
-      fundType,
+  };
 
-      currency,
-      amount,
-    };
+  return this.http.post(
+    `${baseUrl}/api/v1/internal/links/generate/${portalId}`,
+    request,
+  );
+}
 
-    return this.http.post(
-      `${baseUrl}/api/v1/internal/links/generate/${portalId}`,
-      request,
-    );
-  }
 }

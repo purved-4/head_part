@@ -116,7 +116,7 @@
               <span class="text-slate-600">Payin</span>
             </div>
             <span class="font-semibold text-slate-800">
-              {{ getCurrencySymbol(parentCurrency) }}{{ format(payin) }}
+                 {{parentCurrencySymbol}}{{ formattedPayin }}
             </span>
           </div>
 
@@ -127,7 +127,7 @@
               <span class="text-slate-600">Payout</span>
             </div>
             <span class="font-semibold text-slate-800">
-              {{ getCurrencySymbol(parentCurrency) }}{{ format(payout) }}
+                 {{parentCurrencySymbol}}{{ formattedPayout }}
             </span>
           </div>
 
@@ -138,7 +138,7 @@
               <span class="text-slate-600">Reward</span>
             </div>
             <span class="font-semibold text-slate-800">
-              {{ getCurrencySymbol(parentCurrency) }}{{ format(reward) }}
+               {{parentCurrencySymbol}}{{ formattedReward }}
             </span>
           </div>
 
@@ -149,7 +149,7 @@
               <span class="text-slate-600">Exposure</span>
             </div>
             <span class="font-semibold text-slate-800">
-              {{ getCurrencySymbol(parentCurrency) }}{{ format(exploser) }}
+                {{parentCurrencySymbol}}{{ formattedExploser }}
             </span>
           </div>
 
@@ -160,7 +160,7 @@
               <span class="text-slate-600">Balance</span>
             </div>
             <span class="font-semibold text-slate-800">
-              {{ getCurrencySymbol(parentCurrency) }}{{ format(limit) }}
+                 {{parentCurrencySymbol}}{{ formattedLimit }}
             </span>
           </div>
         </div>
@@ -222,28 +222,28 @@
                   <tr class="border-t border-[var(--color-border)]">
                     <td class="px-4 py-2.5 text-slate-600">Pending</td>
                     <td class="px-4 py-2.5 text-right text-slate-800">
-                      {{ getCurrencySymbol(parentCurrency) }}{{ format(exposure.pendingPayin) }}
+                     {{parentCurrencySymbol}}{{ formattedPendingPayin }}
                     </td>
                     <td class="px-4 py-2.5 text-right text-slate-800">
-                      {{ getCurrencySymbol(parentCurrency) }}{{ format(exposure.pendingPayout) }}
+                         {{parentCurrencySymbol}}{{ formattedPendingPayout }}
                     </td>
                   </tr>
                   <tr class="border-t border-[var(--color-border)]">
                     <td class="px-4 py-2.5 text-slate-600">Dispute</td>
                     <td class="px-4 py-2.5 text-right text-slate-800">
-                      {{ getCurrencySymbol(parentCurrency) }}{{ format(exposure.disputePayin) }}
+                       {{parentCurrencySymbol}}{{ formattedDisputePayin }}
                     </td>
                     <td class="px-4 py-2.5 text-right text-slate-800">
-                      {{ getCurrencySymbol(parentCurrency) }}{{ format(exposure.disputePayout) }}
+                     {{parentCurrencySymbol}}{{ formattedDisputePayout }}
                     </td>
                   </tr>
                   <tr class="border-t border-[var(--color-border)] bg-[var(--color-hover)]">
                     <td class="px-4 py-2.5 font-semibold text-[var(--color-primary)]">Total</td>
                     <td class="px-4 py-2.5 text-right font-semibold text-[var(--color-primary)]">
-                      {{ getCurrencySymbol(parentCurrency) }}{{ format(exposureTotalPayin) }}
+                      {{parentCurrencySymbol}}{{ formattedTotalPayin }}
                     </td>
                     <td class="px-4 py-2.5 text-right font-semibold text-[var(--color-primary)]">
-                      {{ getCurrencySymbol(parentCurrency) }}{{ format(exposureTotalPayout) }}
+                    {{parentCurrencySymbol}}{{ formattedTotalPayout }}
                     </td>
                   </tr>
                 </tbody>
@@ -253,7 +253,7 @@
             <div class="flex justify-between items-center bg-red-50 border border-red-100 rounded-xl px-4 py-3">
               <span class="font-semibold text-red-600 text-sm">Held Amount</span>
               <span class="font-semibold text-red-600 text-sm">
-                {{ getCurrencySymbol(parentCurrency) }}{{ format(exposure.heldAmount) }}
+                {{parentCurrencySymbol}}{{ formattedHeldAmount }}
               </span>
             </div>
           </ng-container>

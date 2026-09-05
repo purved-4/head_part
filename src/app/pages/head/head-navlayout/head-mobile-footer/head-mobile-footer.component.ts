@@ -32,12 +32,24 @@ export class HeadMobileFooterComponent implements OnInit,OnDestroy {
 
   loadingExposure = false;
   exposure: any = null;
-
+parentCurrencySymbol="";
   showPendingThreads = false;
   chatPanelOpen = false;
   entityId: any;
   entityType: any;
+formattedPayin = "";
+formattedPayout = "";
+formattedReward = "";
+formattedExploser = "";
+formattedLimit = "";
 
+formattedPendingPayin = "";
+formattedPendingPayout = "";
+formattedDisputePayin = "";
+formattedDisputePayout = "";
+formattedTotalPayin = "";
+formattedTotalPayout = "";
+formattedHeldAmount = "";
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -51,6 +63,8 @@ export class HeadMobileFooterComponent implements OnInit,OnDestroy {
   ngOnInit(): void {
     this.currentUserId = this.userStateService.getCurrentEntityId();
     this.currentUserRole = this.userStateService.getRole();
+    this.updateFormattedAmounts();
+    
   }
 
   goToChats() {
@@ -106,9 +120,12 @@ export class HeadMobileFooterComponent implements OnInit,OnDestroy {
       .getExposure(this.currentUserId, "ENTITY")
       .pipe(takeUntil(this.destroy$))
       .subscribe({
+        
         next: (res: any) => {
           this.exposure = res;
           this.loadingExposure = false;
+  this.parentCurrencySymbol = this.getCurrencySymbol(this.parentCurrency);
+  this.updateFormattedAmounts();
         },
         error: () => {
           this.exposure = null;
@@ -130,12 +147,40 @@ export class HeadMobileFooterComponent implements OnInit,OnDestroy {
     this.destroy$.complete();
   }
 
-  format(amount: number): string {
-    return Number(amount || 0).toLocaleString("en-IN");
+updateFormattedAmounts(): void {
+  this.formattedPayin = Number(this.payin || 0).toLocaleString("en-IN");
+  this.formattedPayout = Number(this.payout || 0).toLocaleString("en-IN");
+  this.formattedReward = Number(this.reward || 0).toLocaleString("en-IN");
+  this.formattedExploser = Number(this.exploser || 0).toLocaleString("en-IN");
+  this.formattedLimit = Number(this.limit || 0).toLocaleString("en-IN");
+
+  if (this.exposure) {
+    this.formattedPendingPayin =
+      Number(this.exposure.payinFunds.pending || 0).toLocaleString("en-IN");
+
+    this.formattedPendingPayout =
+      Number(this.exposure.payoutFunds.pending || 0).toLocaleString("en-IN");
+
+    this.formattedDisputePayin =
+      Number(this.exposure.payinFunds.disputeEscalated || 0).toLocaleString("en-IN");
+
+    this.formattedDisputePayout =
+      Number(this.exposure.payoutFunds.disputeEscalated || 0).toLocaleString("en-IN");
+
+    this.formattedTotalPayin =
+      Number(this.exposure.payinFunds.total || 0).toLocaleString("en-IN");
+
+    this.formattedTotalPayout =
+      Number(this.exposure.payoutFunds.total || 0).toLocaleString("en-IN");
+
+    this.formattedHeldAmount =
+      Number(this.exposure.heldAmount || 0).toLocaleString("en-IN");
   }
+}
 
   getCurrencySymbol(currency: string): string {
-    const map: any = {
+   
+    const symbols: any = {
       INR: "₹",
       USD: "$",
       EUR: "€",
@@ -144,6 +189,6 @@ export class HeadMobileFooterComponent implements OnInit,OnDestroy {
       AED: "د.إ",
     };
 
-    return map[currency?.toUpperCase()] || currency || "";
+    return symbols[currency?.toUpperCase()] || currency || "";
   }
 }

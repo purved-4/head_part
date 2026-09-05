@@ -32,8 +32,7 @@
           <div class="flex items-center space-x-2 cursor-pointer">
             <div class="w-2 h-2 rounded-full bg-[var(--color-warning)]"></div>
             <span class="text-sm font-medium">
-              Payin: {{ getCurrencySymbol(parentCurrency)
-              }}{{ payinBalance | crformat }}
+              Payin:  {{parentCurrencySymbol}}{{ payinBalance | crformat }}
             </span>
           </div>
         </div>
@@ -46,8 +45,7 @@
               Payout: ₹{{ formatIndianAmount(payoutBalance) }}
             </span> -->
             <span class="text-sm font-medium">
-              Payout: {{ getCurrencySymbol(parentCurrency)
-              }}{{ payoutBalance | crformat }}
+              Payout:  {{parentCurrencySymbol}}{{ payoutBalance | crformat }}
             </span>
           </div>
 
@@ -55,7 +53,7 @@
           <div
             class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs whitespace-nowrap z-45"
           >
-            {{ getCurrencySymbol(parentCurrency) }}
+           {{parentCurrencySymbol}}
             {{ payoutBalance | crformat }}
           </div>
         </div>
@@ -70,15 +68,14 @@
               Reward: ₹{{ formatIndianAmount(rewards) }}
             </span> -->
             <span class="text-sm font-medium">
-              Reward: {{ getCurrencySymbol(parentCurrency)
-              }}{{ rewards | crformat }}
+              Reward:{{parentCurrencySymbol}}{{ rewards | crformat }}
             </span>
           </div>
 
           <div
             class="absolute top-full mt-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-white border border-[var(--color-border)] shadow-lg rounded-lg px-3 py-2 text-xs z-45"
           >
-            {{ getCurrencySymbol(parentCurrency) }}{{ rewards | crformat }}
+           {{parentCurrencySymbol}}{{ rewards | crformat }}
           </div>
         </div>
 
@@ -91,7 +88,7 @@
             <div class="h-2 w-2 rounded-full bg-[var(--color-success)]"></div>
             <span class="text-sm font-medium">
               Exposure :
-              {{ getCurrencySymbol(parentCurrency) }}{{ exploser | crformat }}
+              {{parentCurrencySymbol}}{{ exploser | crformat }}
             </span>
           </div>
 
@@ -140,11 +137,11 @@
                       </td>
 
                       <td class="px-3 py-2 text-right">
-                        {{ formatFullAmount(exposureData.payinPending ?? 0) }}
+                        {{ formattedPayinPending }}
                       </td>
 
                       <td class="px-3 py-2 text-right">
-                        {{ formatFullAmount(exposureData.payoutPending ?? 0) }}
+                      {{ formattedPayoutPending }}
                       </td>
                     </tr>
 
@@ -155,11 +152,11 @@
                       </td>
 
                       <td class="px-3 py-2 text-right">
-                        {{ formatFullAmount(exposureData.payinDispute ?? 0) }}
+               {{ formattedPayinDispute }}
                       </td>
 
                       <td class="px-3 py-2 text-right">
-                        {{ formatFullAmount(exposureData.payoutDispute ?? 0) }}
+                        {{formattedPayoutDispute }}
                       </td>
                     </tr>
 
@@ -170,11 +167,11 @@
                       <td class="px-3 py-2 text-[#154474]">Total</td>
 
                       <td class="px-3 py-2 text-right text-[#154474]">
-                        {{ formatFullAmount(exposureData.payinTotal ?? 0) }}
+                       {{ formattedPayinTotal}}
                       </td>
 
                       <td class="px-3 py-2 text-right text-[#154474]">
-                        {{ formatFullAmount(exposureData.payoutTotal ?? 0) }}
+                      {{ formattedPayoutTotal }}
                       </td>
                     </tr>
                   </tbody>
@@ -189,7 +186,7 @@
                   </span>
 
                   <span class="text-sm font-bold text-red-600">
-                    {{ formatFullAmount(exposureData.heldAmount ?? 0) }}
+                   {{ formattedHeldAmount }}
                   </span>
                 </div>
               </ng-container>
@@ -211,8 +208,7 @@
               Balance: ₹{{ formatIndianAmount(limitRemainingAmount) }}
             </span> -->
             <span class="text-sm font-medium">
-              Balance: {{ getCurrencySymbol(parentCurrency)
-              }}{{ limitRemainingAmount | crformat }}
+              Balance: {{parentCurrencySymbol}}{{ limitRemainingAmount | crformat }}
             </span>
           </div>
 
@@ -222,7 +218,7 @@
             <div class="flex justify-between text-sm py-1">
               <span>Balance</span>
               <span>
-                {{ getCurrencySymbol(parentCurrency) }}
+                {{parentCurrencySymbol}}
                 {{ entityBalance | crformat }}</span
               >
             </div>
@@ -230,7 +226,7 @@
             <div class="flex justify-between text-sm py-1">
               <span>Exposure Balance</span>
               <span>
-                {{ getCurrencySymbol(parentCurrency) }}
+                {{parentCurrencySymbol}}
                 {{ exploserBalance | crformat }}</span
               >
             </div>
@@ -238,7 +234,7 @@
              <div class="flex justify-between text-sm py-1">
               <span>Available Balance</span>
               <span>
-                {{ getCurrencySymbol(parentCurrency) }}
+               {{parentCurrencySymbol}}
                 {{ availableBalance | crformat }}</span
               >
             </div>
@@ -404,7 +400,7 @@
             <div
               class="w-8 h-8 rounded-full bg-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold text-xs"
             >
-              {{ getUserInitials() }}
+             {{ userInitials }}
             </div>
 
             <span class="material-symbols-outlined"> keyboard_arrow_down </span>

@@ -49,6 +49,8 @@ interface BackendThread {
   role?: string | null;
   rejectionReason?: string | null;
   rejectedBy?: string | null;
+  amount?: number;
+  currency?: string;
   [key: string]: any;
   relatedEntityId?: string;
 }
@@ -74,6 +76,14 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     data: { upi: [], bank: [], payout: [], other: [] },
   };
 
+  @Input() notiUnReadCount = 0;
+
+  unreadCount = 0;
+
+  currentPage = 0;
+  pageSize = 20;
+  hasMore = true;
+  isLoadingMore = false;
   activeCategory: string = "all";
   activeTab: "branch" = "branch";
   currentUserId: any;
@@ -141,17 +151,17 @@ export class SidebarNotificationComponent implements OnInit, OnDestroy {
     private tzService: TimeZoneServiceService,
   ) {}
 
-ngOnInit(): void {
-  this.currentUserId = this.userStateService.getUserId();
-  this.currentRoleName = this.userStateService.getRole();
-  this.currentRoleId = this.userStateService.getCurrentEntityId();
-  this.isVoiceEnabled = this.voiceNotificationService.isEnabled();
-  this.currentLanguage = this.voiceNotificationService.getLanguage(); // add this
+  ngOnInit(): void {
+    this.currentUserId = this.userStateService.getUserId();
+    this.currentRoleName = this.userStateService.getRole();
+    this.currentRoleId = this.userStateService.getCurrentEntityId();
+    this.isVoiceEnabled = this.voiceNotificationService.isEnabled();
+    this.currentLanguage = this.voiceNotificationService.getLanguage(); // add this
 
-  this.socketConfigService.subscribeNotifications(this.currentRoleId);
-  this.getAllNotifications(); //  ADDED: load unread count immediately, don't wait for sidebar to open
+    this.socketConfigService.subscribeNotifications(this.currentRoleId);
+    this.getAllNotifications(); //  ADDED: load unread count immediately, don't wait for sidebar to open
 
-  this.ws = this.socketConfigService.getNotifications().subscribe((data) => {
+    this.ws = this.socketConfigService.getNotifications().subscribe((data) => {
       if (!data) return;
 
       if (Array.isArray(data.threads)) {
@@ -170,11 +180,21 @@ ngOnInit(): void {
         this.voiceNotificationService.announceNotification(data);
       }
     });
+
+    this.unreadCount = this.notiUnReadCount || 0;
   }
 
+  // ngOnChanges(changes: SimpleChanges): void {
+  //   if (changes["isOpen"] && this.isOpen) {
+  //     this.getAllNotifications();
+  //   }
+  // }
   ngOnChanges(changes: SimpleChanges): void {
     if (changes["isOpen"] && this.isOpen) {
-      this.getAllNotifications();
+      this.getAllNotifications(true);
+    }
+    if (changes["notiUnReadCount"] && !changes["notiUnReadCount"].firstChange) {
+      this.unreadCount = this.notiUnReadCount;
     }
   }
 
@@ -184,23 +204,79 @@ ngOnInit(): void {
     }
   }
 
-  getAllNotifications() {
-    this.isLoading = true;
+  // getAllNotifications() {
+  //   this.isLoading = true;
+  //   this.notificationChatService
+  //     .getAllNotifications(this.currentRoleId)
+  //     .subscribe({
+  //       next: (data: any) => {
+  //         const payload = Array.isArray(data) ? data : data ? [data] : [];
+  //         const payload2 = payload[0]?.content || [];
+  //         this.processIncomingData(payload2);
+  //         this.isLoading = false;
+  //         this.cdr.detectChanges();
+  //       },
+  //       error: () => {
+  //         this.isLoading = false;
+  //         this.cdr.detectChanges();
+  //       },
+  //     });
+  // }
+  getAllNotifications(reset: boolean = true) {
+    if (this.isLoading || this.isLoadingMore) return;
+
+    if (reset) {
+      this.isLoading = true;
+      this.currentPage = 0;
+      this.hasMore = true;
+    } else {
+      if (!this.hasMore) return;
+      this.isLoadingMore = true;
+    }
+
     this.notificationChatService
-      .getAllNotifications(this.currentRoleId)
+      .getAllNotifications(this.currentRoleId, this.currentPage, this.pageSize)
       .subscribe({
         next: (data: any) => {
           const payload = Array.isArray(data) ? data : data ? [data] : [];
-          const payload2 = payload[0]?.content || [];
-          this.processIncomingData(payload2);
+          const pageData = payload[0] || {};
+          const items = pageData?.content || [];
+
+          this.processIncomingData(items, !reset);
+
+          if (typeof pageData.hasNext === "boolean") {
+            this.hasMore = pageData.hasNext;
+          } else if (typeof pageData.last === "boolean") {
+            this.hasMore = !pageData.last;
+          } else if (typeof pageData.totalPages === "number") {
+            this.hasMore = this.currentPage + 1 < pageData.totalPages;
+          } else {
+            this.hasMore = items.length === this.pageSize;
+          }
+
+          if (this.hasMore) this.currentPage++;
+
           this.isLoading = false;
+          this.isLoadingMore = false;
           this.cdr.detectChanges();
         },
         error: () => {
           this.isLoading = false;
+          this.isLoadingMore = false;
           this.cdr.detectChanges();
         },
       });
+  }
+
+  loadMoreNotifications(): void {
+    if (this.isLoadingMore || this.isLoading || !this.hasMore) return;
+    this.getAllNotifications(false);
+  }
+
+  onNotificationScroll(event: Event): void {
+    const el = event.target as HTMLElement;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+    if (nearBottom) this.loadMoreNotifications();
   }
 
   private normalizeFundsType(title?: string | null) {
@@ -212,13 +288,15 @@ ngOnInit(): void {
     return "other";
   }
 
-  processIncomingData(data: any[]) {
+  processIncomingData(data: any[], append: boolean = false) {
     if (!Array.isArray(data)) return;
 
-    this.notifications = [];
-    this.groupedNotifications = {
-      data: { upi: [], bank: [], payout: [], other: [] },
-    };
+    if (!append) {
+      this.notifications = [];
+      this.groupedNotifications = {
+        data: { upi: [], bank: [], payout: [], other: [] },
+      };
+    }
 
     data.forEach((it: any) => {
       if (it.threadId && !it.fundsId) return;
@@ -251,15 +329,27 @@ ngOnInit(): void {
         isSelected: false,
       };
 
+      // toFront=false -> pushed to the end, in the exact order the API
+      // returned them. Do NOT sort after this — sorting would override the
+      // server's/paginated order.
       this.addOrUpdateThread(thread, false);
     });
 
-    this.sortNotificationsByDate();
-    this.unreadCountChange.emit(this.getUnreadCount());
+    // REMOVED: this.sortNotificationsByDate();
+    // Sorting here used to override the order returned by the API/pagination.
+    // Items are now shown in exactly the order they arrive in the response;
+    // real-time socket updates (toFront=true in addOrUpdateThread) are simply
+    // placed at the top as they come in.
+
+    // REMOVED: this.unreadCountChange.emit(this.getUnreadCount());
+    // Global unread count is no longer derived from the loaded list.
 
     this.cdr.detectChanges();
   }
 
+  // NOTE: kept for reference — no longer called anywhere, since sorting was
+  // overriding the API's/paginated response order. Re-enable only if you
+  // specifically want newest-first sorting instead of response order.
   private sortNotificationsByDate() {
     this.notifications.sort((a, b) => {
       const dateA = new Date(a.createdAt || a.updatedAt || 0).getTime();
@@ -297,9 +387,22 @@ ngOnInit(): void {
         k
       ].filter((t) => t.id !== thread.id && t.fundsId !== thread.fundsId);
     });
-    this.groupedNotifications["data"][fundsKey].unshift(thread);
 
-    this.sortNotificationsByDate();
+    // CHANGED: previously this always did `.unshift(thread)` regardless of
+    // `toFront`, which reversed the order of paginated/API data relative to
+    // the main `notifications` array. Now it respects the same `toFront`
+    // flag, so grouped (per-category) lists stay in sync with the order of
+    // the main list.
+    if (toFront) {
+      this.groupedNotifications["data"][fundsKey].unshift(thread);
+    } else {
+      this.groupedNotifications["data"][fundsKey].push(thread);
+    }
+
+    // REMOVED: this.sortNotificationsByDate();
+    // This used to re-sort by date on every single insert, which undid the
+    // API's/paginated response order. Real-time items are placed at the top
+    // via `toFront=true`; loaded pages keep server order via `toFront=false`.
   }
 
   closeSidebar() {
@@ -322,11 +425,11 @@ ngOnInit(): void {
     this.notifications.forEach((n) => (n.isSelected = false));
     notification.isSelected = true;
 
-    // Mark as read
-    if (!notification.isRead) {
+    const wasUnread = !notification.isRead;
+    if (wasUnread) {
       notification.isRead = true;
       notification.unreadCount = 0;
-      this.markAsRead(notification.id || notification.fundsId || "");
+      this.markAsRead(notification.id || notification.fundsId || "", wasUnread);
     }
     if (notification.type === "PERCENTAGE_ADJUSTMENT_REQUIRED") {
       this.openPercentageModal(notification);
@@ -503,16 +606,18 @@ ngOnInit(): void {
       },
     });
   }
-  private markAsRead(notificationId: string) {
+
+  private markAsRead(notificationId: string, wasUnread: boolean = false) {
     if (!notificationId) return;
 
     this.notificationChatService
       .SendNotificationAsRead(notificationId)
       .subscribe({
         next: () => {
-          // Update local state
-          this.unreadCountChange.emit(this.getUnreadCount());
-          this.getUnreadCount();
+          if (wasUnread) {
+            this.unreadCount = Math.max(0, this.unreadCount - 1);
+            this.unreadCountChange.emit(this.unreadCount);
+          }
           this.cdr.detectChanges();
         },
         error: (err) => console.error("Failed to mark notification read", err),
@@ -533,7 +638,7 @@ ngOnInit(): void {
     const entity = (notification.createdByEntityType || "BRANCH").toLowerCase();
     // const role = (this.currentRoleName || "branch").toLowerCase();
     const roleMap: any = {
-      COM_PART: "comPart",
+      COM_PART: "commerce-partner",
       BRANCH: "branch",
       HEAD: "head",
       OWNER: "owner",
@@ -559,18 +664,16 @@ ngOnInit(): void {
             n.isRead = true;
             n.unreadCount = 0;
           });
+          this.unreadCount = 0;
           this.unreadCountChange.emit(0);
           this.cdr.detectChanges();
         },
       });
   }
 
-  // getUnreadCount(): number {
-  //   return this.notifications.reduce((acc, n) => acc + (n.unreadCount || 0), 0);
-  // }
   getUnreadCount(): number {
-  return this.notifications.filter((n) => !n.isRead).length;
-}
+    return this.unreadCount;
+  }
 
   getTotalCount(): number {
     let count = 0;
@@ -623,44 +726,20 @@ ngOnInit(): void {
 
   getDisplayFields(obj: any): { key: string; value: any }[] {
     if (!obj || typeof obj !== "object") return [];
-    return (
-      Object.keys(obj)
-        // .filter((key) => {
-        //   const lower = key.toLowerCase();
-        //   return (
-        //     !lower.includes("id") &&
-        //     ![
-        //       "fundsid",
-        //       "createdbyid",
-        //       "createdbyentityid",
-        //       "updatedbyid",
-        //       "isread",
-        //       "read",
-        //       "unreadcount",
-        //       "rejectedby",
-        //       "rejectionreason",
-        //     ].includes(lower) &&
-        //     obj[key] !== null &&
-        //     obj[key] !== undefined &&
-        //     typeof obj[key] !== "object"
-        //   );
-        // })
-
-        .filter((key) => {
-          const lower = key.toLowerCase();
-          return (
-            !["isread", "title"].includes(lower) &&
-            obj[key] !== null &&
-            obj[key] !== undefined &&
-            typeof obj[key] !== "object"
-          );
-        })
-        .map((key) => ({
-          key: this.formatKey(key),
-          // value: this.formatValue(obj[key]),
-          value: obj[key],
-        }))
-    );
+    return Object.keys(obj)
+      .filter((key) => {
+        const lower = key.toLowerCase();
+        return (
+          !["isread", "title"].includes(lower) &&
+          obj[key] !== null &&
+          obj[key] !== undefined &&
+          typeof obj[key] !== "object"
+        );
+      })
+      .map((key) => ({
+        key: this.formatKey(key),
+        value: obj[key],
+      }));
   }
 
   private formatKey(key: string): string {
@@ -683,32 +762,6 @@ ngOnInit(): void {
     if (value instanceof Date) return value.toLocaleString();
     return String(value);
   }
-
-  //   private formatValue(value: any, key?: string): string {
-  //   if (value === null || value === undefined) return "—";
-
-  //   // Detect ISO date string
-  //   if (typeof value === "string" && value.includes("T") && value.includes("Z")) {
-  //     const date = new Date(value);
-  //     if (!isNaN(date.getTime())) {
-  //       const timeZone = this.tzService.getActiveTimeZone();
-
-  //       return new Intl.DateTimeFormat("en-GB", {
-  //         timeZone,
-  //         day: "2-digit",
-  //         month: "short",
-  //         year: "numeric",
-  //         hour: "2-digit",
-  //         minute: "2-digit",
-  //         hour12: true,
-  //       }).format(date);
-  //     }
-  //   }
-
-  //   if (typeof value === "boolean") return value ? "Yes" : "No";
-
-  //   return String(value);
-  // }
 
   getFieldIcon(fieldKey: string): string {
     const key = fieldKey.toLowerCase();
@@ -772,6 +825,9 @@ ngOnInit(): void {
       if (type) existing.fundsType = type;
       if (title) existing.title = title;
       if (message) existing.message = message;
+      if (eventData.amount !== undefined) existing.amount = eventData.amount;
+      if (eventData.currency !== undefined)
+        existing.currency = eventData.currency;
 
       if (eventData.read !== undefined) {
         existing.read = eventData.read === true;
@@ -780,6 +836,7 @@ ngOnInit(): void {
         existing.unreadCount = (existing.unreadCount || 0) + 1;
       }
 
+      // Real-time update -> bring to the top (toFront = true).
       this.addOrUpdateThread(existing, true);
     } else {
       const newItem: SidebarNotification = {
@@ -790,6 +847,8 @@ ngOnInit(): void {
         fundsType: title || type,
         message: message,
         type: type,
+        amount: eventData.amount,
+        currency: eventData.currency,
         createdByName: eventData.senderName || eventData.createdByName || "—",
         createdByEntityType: createdByEntityType || "BRANCH",
         read: false,
@@ -799,6 +858,7 @@ ngOnInit(): void {
         role: eventData.role || null,
         isSelected: false,
       };
+      // New real-time notification -> show it at the top of the list.
       this.addOrUpdateThread(newItem, true);
     }
 
@@ -897,11 +957,11 @@ ngOnInit(): void {
       event.stopPropagation();
     }
 
-    // Mark notification as read first
-    if (!notification.isRead) {
+    const wasUnread = !notification.isRead;
+    if (wasUnread) {
       notification.isRead = true;
       notification.unreadCount = 0;
-      this.markAsRead(notification.id || notification.fundsId || "");
+      this.markAsRead(notification.id || notification.fundsId || "", wasUnread);
     }
 
     // Then open the chat - pass event as optional

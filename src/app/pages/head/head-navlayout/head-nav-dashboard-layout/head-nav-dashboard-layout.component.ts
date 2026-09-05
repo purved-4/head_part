@@ -1,6 +1,3 @@
-
-
-
 import { Component, HostListener, OnInit } from "@angular/core";
 import { NavigationEnd, Router } from "@angular/router";
 import { filter } from "rxjs";
@@ -183,4 +180,9 @@ export class HeadNavDashboardLayoutComponent implements OnInit {
   closeNotification() {
     this.notificationOpen = false;
   }
+
+
+  onUnreadCountLoaded(count: number): void {
+  this.notificationUnreadCount = count;
+}
 }

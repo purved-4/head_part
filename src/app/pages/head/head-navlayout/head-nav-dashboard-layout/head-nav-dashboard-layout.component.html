@@ -16,27 +16,30 @@
   >
   </app-head-nav-sidebar>
 
-  <!-- Header -->
-  <app-head-nav-header
-    [pageTitle]="pageTitle"
-    [userName]="userName"
-    [marginLeft]="mainLeftMargin"
-    [isMobileMenuOpen]="mobileMenuOpen"
-    (toggleMobileMenu)="toggleMobileMenu()"
-    (balanceChange)="onBalanceChange($event)"
-    (openSettings)="openSettings()"
-    (search)="onSearch($event)"
-    (notificationClick)="openNotificationSidebar()"
-  >
-  </app-head-nav-header>
+<!-- Header -->
+<app-head-nav-header
+  [pageTitle]="pageTitle"
+  [userName]="userName"
+  [marginLeft]="mainLeftMargin"
+  [isMobileMenuOpen]="mobileMenuOpen"
+  [notificationUnreadCount]="notificationUnreadCount"
+  (toggleMobileMenu)="toggleMobileMenu()"
+  (balanceChange)="onBalanceChange($event)"
+  (openSettings)="openSettings()"
+  (search)="onSearch($event)"
+  (notificationClick)="openNotificationSidebar()"
+  (unreadCountLoaded)="onUnreadCountLoaded($event)"
+>
+</app-head-nav-header>
 
-  <!-- Notification Sidebar -->
-  <app-sidebar-notification
-    [isOpen]="isNotificationSidebarOpen"
-    (close)="closeNotificationSidebar()"
-    (unreadCountChange)="onUnreadCountChange($event)"
-  >
-  </app-sidebar-notification>
+<!-- Notification Sidebar -->
+<app-sidebar-notification
+  [isOpen]="isNotificationSidebarOpen"
+  [notiUnReadCount]="notificationUnreadCount"
+  (close)="closeNotificationSidebar()"
+  (unreadCountChange)="onUnreadCountChange($event)"
+>
+</app-sidebar-notification>
 
   <!-- Pending Threads -->
 

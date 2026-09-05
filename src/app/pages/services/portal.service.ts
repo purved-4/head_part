@@ -189,4 +189,11 @@ export class PortalService {
         catchError((error) => throwError(() => error)),
       );
   }
+
+  updateCallBack(payload: any): Observable<any> {
+  return this.http.patch<any>(
+    `${baseUrl}/portals/updateCallBack`,
+    payload
+  );
+}
 }

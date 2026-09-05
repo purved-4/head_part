@@ -80,33 +80,39 @@ export class AuthService {
 }
 
   public ensureUserLoaded(): Observable<any> {
-    if (this.userStateService.getIsLoggedIn()) {
-      return of(this.userStateService.currentUserValue);
-    }
-
-    // 🔑 circuit already open (pichli baar fail ho chuka hai) -> network mat maaro
-    if (this.authCheckFailed) {
-      return throwError(() => new Error("Not authenticated"));
-    }
-
-    if (!this.userLoad$) {
-      this.userLoad$ = this.getCurrentUser().pipe(
-        tap((user) => {
-          this.userStateService.setCurrentUser(user);
-          this.authCheckFailed = false;
-        }),
-        catchError((err) => {
-          this.userStateService.setCurrentUser(null);
-          this.authCheckFailed = true; //  circuit open — agli baar seedha reject
-          return throwError(() => err);
-        }),
-        shareReplay(1),
-        finalize(() => (this.userLoad$ = null))
-      );
-    }
-
-    return this.userLoad$;
+  if (this.userStateService.getIsLoggedIn()) {
+    return of(this.userStateService.currentUserValue);
   }
+
+  if (this.authCheckFailed) {
+    return throwError(() => new Error("Not authenticated"));
+  }
+
+  if (!this.userLoad$) {
+    // Reload ke baad memory me token nahi hai -> seedha refresh se shuru karo,
+    // current-user ko blind 401 khilwa ke phir retry karwana waste hai.
+    const hasToken = !!this.memoryService.getAccessToken();
+    const bootstrap$ = hasToken
+      ? this.getCurrentUser()
+      : this.refreshToken().pipe(switchMap(() => this.getCurrentUser()));
+
+    this.userLoad$ = bootstrap$.pipe(
+      tap((user) => {
+        this.userStateService.setCurrentUser(user);
+        this.authCheckFailed = false;
+      }),
+      catchError((err) => {
+        this.userStateService.setCurrentUser(null);
+        this.authCheckFailed = true;
+        return throwError(() => err);
+      }),
+      shareReplay(1),
+      finalize(() => (this.userLoad$ = null)),
+    );
+  }
+
+  return this.userLoad$;
+}
 
   loginAndLoadUser(loginData: any): Observable<any> {
     return this.login(loginData).pipe(

@@ -55,7 +55,7 @@ export class HeadNavSidebarComponent implements OnInit {
   closeTimer: any;
   isSecondaryPanelHovering = false;
   recentItems: { label: string; route: string }[] = [];
-
+userInitials="";
   mainMargin = 80;
   managerId!: any;
   readonly PRIMARY_WIDTH_PX = 80;
@@ -225,6 +225,14 @@ export class HeadNavSidebarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    const name = this.getCurrentUserName();
+
+this.userInitials = name
+  .split(" ")
+  .map((n) => n[0])
+  .join("")
+  .toUpperCase()
+  .substring(0, 2);
     this.checkMobileView();
     this.secondaryPanelStateChange.emit(false);
 
@@ -277,15 +285,6 @@ export class HeadNavSidebarComponent implements OnInit {
     return this.currentUser?.name || "Branch User";
   }
 
-  getUserInitials(): string {
-    const name = this.getCurrentUserName();
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
-  }
 
   hasNotifications(item: MenuItem): boolean {
     return (item.notifications || 0) > 0;
@@ -573,6 +572,8 @@ export class HeadNavSidebarComponent implements OnInit {
   getMenuIcon(icon?: string): string {
     return icon || "dashboard";
   }
+
+
 
   // Add this method
 
